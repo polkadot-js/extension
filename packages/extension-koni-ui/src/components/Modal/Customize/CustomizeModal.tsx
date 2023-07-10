@@ -36,7 +36,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       destroyOnClose={true}
       id={CUSTOMIZE_MODAL}
       onCancel={onCancel}
-      title={t('Customization')}
+      title={t('Customize asset display')}
     >
       <div className={'__group-label'}>{t('Balance')}</div>
       <div className={'__group-content'}>
@@ -62,7 +62,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
       </div>
 
-      <div className={'__group-label'}>{t('Chains')}</div>
+      <div className={'__group-label'}>{t('Networks')}</div>
 
       <CustomizeModalContent />
     </SwModal>

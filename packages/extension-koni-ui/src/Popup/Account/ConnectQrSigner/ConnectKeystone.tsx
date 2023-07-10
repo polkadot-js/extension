@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LogosMap } from '@subwallet/extension-koni-ui/assets';
+import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import ConnectQrSigner from '@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/index';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';
@@ -15,11 +15,11 @@ const Component: React.FC<ThemeProps> = () => {
 
   return (
     <ConnectQrSigner
-      description={t('Keystone will provide you QR code to scan')}
-      instructionUrl={t('Connect your QR wallet')}
-      logoUrl={LogosMap.keystone}
-      subTitle={t('Select the SubWallet option in the “Software Wallet” menu available in your Keystone')}
-      title={t('Connect your Keystone')}
+      deviceName={t('Keystone')}
+      instructionUrl={''}
+      logoUrl={DefaultLogosMap.keystone}
+      subTitle={t('Open "Software Wallet" section on your Keystone and choose SubWallet')}
+      title={t('Connect Keystone device')}
     />
   );
 };

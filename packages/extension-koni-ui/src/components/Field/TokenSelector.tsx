@@ -85,11 +85,14 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
   const searchFunction = useCallback((item: TokenItemType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
+    const chainName = chainInfoMap[item.originChain]?.name?.toLowerCase();
+    const symbol = item.symbol.toLowerCase();
 
     return (
-      item.symbol.toLowerCase().includes(searchTextLowerCase)
+      symbol.includes(searchTextLowerCase) ||
+      chainName.includes(searchTextLowerCase)
     );
-  }, []);
+  }, [chainInfoMap]);
 
   const renderItem = useCallback((item: TokenItemType, selected: boolean) => {
     return (
@@ -160,7 +163,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       renderWhenEmpty={renderEmpty}
       searchFunction={searchFunction}
       searchMinCharactersCount={2}
-      searchPlaceholder={t<string>('Search token')}
+      searchPlaceholder={t<string>('Enter token name or network name')}
       selected={value || ''}
       statusHelp={statusHelp}
       title={label || placeholder || t('Select token')}
@@ -171,8 +174,16 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
 export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return ({
+    '&.ant-select-modal-input-container .ant-select-modal-input-wrapper': {
+      paddingLeft: 12,
+      paddingRight: 12
+    },
+
     '&.chain-selector-input .__selected-item': {
-      color: token.colorText
+      color: token.colorText,
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      textWrap: 'nowrap'
     },
 
     // TODO: delete this when fix component in ui-base

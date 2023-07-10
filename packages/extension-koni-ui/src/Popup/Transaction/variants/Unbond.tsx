@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getValidatorLabel, isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector, AmountInput, NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, isAccountAll, noop, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -67,6 +67,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [form] = Form.useForm<UnstakeFormProps>();
   const [isBalanceReady, setIsBalanceReady] = useState(true);
+  const [amountChange, setAmountChange] = useState(false);
 
   const formDefault = useMemo((): UnstakeFormProps => ({
     from: from,
@@ -134,6 +135,18 @@ const Component: React.FC<Props> = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+
+  const onValuesChange: FormCallbacks<UnstakeFormProps>['onValuesChange'] = useCallback((changes: Partial<UnstakeFormProps>) => {
+    const { from, validator, value } = changes;
+
+    if ((from || validator) && amountChange) {
+      form.validateFields(['value']).finally(noop);
+    }
+
+    if (value !== undefined) {
+      setAmountChange(true);
+    }
+  }, [amountChange, form]);
 
   const onFieldsChange: FormCallbacks<UnstakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
@@ -212,7 +225,7 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [bondedValue, decimals, symbol]);
 
-  const onPreCheckReadOnly = usePreCheckReadOnly(from);
+  const onPreCheck = usePreCheckAction(from);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -228,6 +241,12 @@ const Component: React.FC<Props> = (props: Props) => {
     setChain(stakingChain || '');
   }, [setChain, stakingChain]);
 
+  useEffect(() => {
+    if (amountChange) {
+      form.validateFields(['value']).finally(noop);
+    }
+  }, [form, amountChange, minValue, bondedValue, decimals]);
+
   return (
     <>
       <TransactionContent>
@@ -239,6 +258,7 @@ const Component: React.FC<Props> = (props: Props) => {
             name='unstake-form'
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
+            onValuesChange={onValuesChange}
           >
             <Form.Item
               hidden={!isAll}
@@ -264,8 +284,9 @@ const Component: React.FC<Props> = (props: Props) => {
                     name={FormFieldName.VALIDATOR}
                   >
                     <NominationSelector
+                      chain={chain}
                       disabled={!from}
-                      label={t('Select collator')}
+                      label={t(`Select ${getValidatorLabel(chain)}`)}
                       nominators={ from ? nominatorMetadata?.nominations || [] : []}
                     />
                   </Form.Item>
@@ -286,6 +307,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <AmountInput
                 decimals={decimals}
                 maxValue={bondedValue}
+                showMaxButton={true}
               />
             </Form.Item>
 
@@ -294,7 +316,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <div className={CN('text-light-4', { mt: mustChooseValidator })}>
               {
                 t(
-                  'Once unbonded, your funds would be available after {{time}}.',
+                  'Once unbonded, your funds would be available for withdrawal after {{time}}.',
                   {
                     replace:
                       {
@@ -320,9 +342,9 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={onPreCheckReadOnly(form.submit)}
+          onClick={onPreCheck(form.submit, stakingType === StakingType.POOLED ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND)}
         >
-          {t('Submit')}
+          {t('Unbond')}
         </Button>
       </TransactionFooter>
     </>

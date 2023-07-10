@@ -1,18 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import LoginBg from '@subwallet/extension-koni-ui/assets/LoginBg.png';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
+import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
+import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
-import { Button, Form, Input } from '@subwallet/react-ui';
+import { Button, Form, Image, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -29,6 +28,7 @@ const passwordInputId = 'login-password';
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
+  const { activeModal } = useContext(ModalContext);
 
   const [form] = Form.useForm<LoginFormState>();
 
@@ -66,6 +66,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }, 500);
   }, [onError]);
 
+  const onReset = useCallback(() => {
+    activeModal(RESET_WALLET_MODAL);
+  }, [activeModal]);
+
   useFocusById(passwordInputId);
 
   return (
@@ -74,13 +78,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         <div className='bg-image' />
         <div className='body-container'>
           <div className='logo-container'>
-            <Logo3D />
+            <Image
+              src='./images/subwallet/gradient-logo.png'
+              width={80}
+            />
           </div>
           <div className='title'>
             {t('Welcome back!')}
           </div>
           <div className='sub-title'>
-            {t('Enter your password to unlock account')}
+            {t('Enter your password to unlock wallet')}
           </div>
           <Form
             form={form}
@@ -115,11 +122,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               </Button>
             </Form.Item>
             <Form.Item>
-              <div className='forgot-password'>
-                {t('Forgot password')}
+              <div
+                className='forgot-password'
+                onClick={onReset}
+              >
+                {t('Don’t remember your password?')}
               </div>
             </Form.Item>
           </Form>
+          <ResetWalletModal />
         </div>
       </Layout.Base>
     </PageWrapper>
@@ -133,7 +144,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
     position: 'relative',
 
     '.bg-image': {
-      backgroundImage: `url(${LoginBg})`,
+      backgroundImage: 'url("./images/subwallet/welcome-background.png")',
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'top',
       backgroundSize: 'contain',
@@ -150,7 +161,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       opacity: 0.999,
 
       '.logo-container': {
-        marginTop: token.paddingXL * 3.25 + 2,
+        marginTop: 100,
         color: token.colorTextBase
       },
 
@@ -170,14 +181,15 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       },
 
       '.password-input': {
-        marginTop: token.marginXS * 11
+        marginTop: 62
       },
 
       '.forgot-password': {
         cursor: 'pointer',
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
-        color: token.colorTextLight4
+        color: token.colorTextLight4,
+        marginTop: 27
       }
     }
   };

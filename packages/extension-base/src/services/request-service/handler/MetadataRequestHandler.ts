@@ -85,4 +85,12 @@ export default class MetadataRequestHandler {
       this.#requestService.popupOpen();
     });
   }
+
+  public resetWallet () {
+    for (const request of Object.values(this.#metaRequests)) {
+      request.reject(new Error('Reset wallet'));
+    }
+
+    this.metaSubject.next([]);
+  }
 }

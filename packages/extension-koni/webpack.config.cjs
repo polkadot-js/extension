@@ -7,6 +7,6 @@ module.exports = [createConfig({
   content: './src/content.ts',
   page: './src/page.ts'
 }), createConfig({
-  background: './src/background.ts',
+  background: ['./src/installation.ts', './src/background.ts'],
   extension: './src/extension.ts'
 }, [], true)];

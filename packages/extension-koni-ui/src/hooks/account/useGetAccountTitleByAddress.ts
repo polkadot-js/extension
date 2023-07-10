@@ -22,7 +22,7 @@ const useGetAccountTitleByAddress = (address?: string): string => {
       case AccountSignMode.QR:
         return t('QR signer account');
       case AccountSignMode.READ_ONLY:
-        return t('Read-only account');
+        return t('Watch-only account');
       case AccountSignMode.UNKNOWN:
       default:
         return t('Unknown account');

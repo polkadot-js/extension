@@ -6,21 +6,41 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AddressJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
 import { KeyringAddress, KeyringPairs$Json } from '@subwallet/ui-keyring/types';
+import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/session';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { SignerResult } from '@polkadot/types/types/extrinsic';
 import { BN } from '@polkadot/util';
+import { HexString } from '@polkadot/util/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
+
+export enum RuntimeEnvironment {
+  Web = 'Web',
+  Node = 'Node',
+  ExtensionChrome = 'Extension (Chrome)',
+  ExtensionFirefox = 'Extension (Firefox)',
+  WebWorker = 'Web Worker',
+  ServiceWorker = 'Service Worker',
+  Unknown = 'Unknown',
+}
+
+export interface RuntimeEnvironmentInfo {
+  environment: RuntimeEnvironment;
+  version: string;
+  host?: string;
+  protocol?: string;
+}
 
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
@@ -156,8 +176,7 @@ export interface StakingJson {
 
 export interface StakingRewardJson {
   ready: boolean;
-  slowInterval: Array<StakingRewardItem>;
-  fastInterval: Array<StakingRewardItem>;
+  data: Record<string, StakingRewardItem>;
 }
 
 export interface PriceJson {
@@ -227,10 +246,11 @@ export interface NftCollectionJson {
   nftCollectionList: Array<NftCollection>;
 }
 
-// export interface NftStoreJson {
-//   nftList: Array<NftItem>;
-//   nftCollectionList: Array<NftCollection>;
-// }
+export interface MetadataItem {
+  genesisHash: string;
+  specVersion: string;
+  hexValue: HexString;
+}
 
 export interface TokenBalanceRaw {
   reserved: BN,
@@ -400,11 +420,17 @@ export interface UiSettings {
   accountAllLogo: string;
   theme: ThemeNames;
   camera: boolean;
+  timeAutoLock: number;
+  enableChainPatrol: boolean;
 }
 
 export type RequestSettingsType = UiSettings;
 
 export type RequestCameraSettings = { camera: boolean };
+
+export type RequestChangeTimeAutoLock = { autoLockTime: number };
+
+export type RequestChangeEnableChainPatrol = { enable: boolean };
 
 export interface RandomTestRequest {
   start: number;
@@ -503,6 +529,7 @@ export interface AmountData extends BasicTokenInfo {
 
 export interface XCMTransactionAdditionalInfo {
   destinationChain: string,
+  originalChain: string,
   fee?: AmountData
 }
 
@@ -540,7 +567,9 @@ export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType
   tip?: AmountData,
   fee?: AmountData,
   explorerUrl?: string,
-  additionalInfo?: TransactionAdditionalInfo<ET>
+  additionalInfo?: TransactionAdditionalInfo<ET>,
+  startBlock?: number,
+  nonce?: number,
 }
 
 export interface SWError extends Error {
@@ -567,6 +596,7 @@ export enum BasicTxErrorType {
   SEND_TRANSACTION_FAILED = 'SEND_TRANSACTION_FAILED',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   UNSUPPORTED = 'UNSUPPORTED',
+  TIMEOUT = 'TIMEOUT',
   NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
 }
 
@@ -584,6 +614,7 @@ export enum TransferTxErrorType {
   NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
   INVALID_TOKEN = 'INVALID_TOKEN',
   TRANSFER_ERROR = 'TRANSFER_ERROR',
+  RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
 }
 
 export type TransactionErrorType = BasicTxErrorType | TransferTxErrorType | StakingTxErrorType
@@ -812,6 +843,7 @@ export interface CreateHardwareAccountItem {
   genesisHash: string;
   hardwareType: string;
   name: string;
+  isEthereum: boolean;
 }
 
 export interface RequestAccountCreateHardwareMultiple {
@@ -1160,11 +1192,16 @@ export interface EvmSendTransactionRequestExternal extends EvmSendTransactionReq
 export interface EvmSignatureRequestExternal extends EvmSignatureRequest, EvmRequestExternal {}
 
 export interface AddNetworkRequestExternal { // currently only support adding pure Evm network
-  chainId: string,
-  rpcUrls: string[],
-  chainName: string,
-  blockExplorerUrls?: string[],
-  requestId?: string
+  chainId: string;
+  rpcUrls: string[];
+  chainName: string;
+  blockExplorerUrls?: string[];
+  requestId?: string;
+  nativeCurrency: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
 }
 
 export interface AddNetworkExternalRequest { // currently only support adding pure Evm network
@@ -1183,6 +1220,8 @@ export interface AddTokenRequestExternal {
   name: string;
   symbol: string;
   decimals: number;
+  validated: boolean;
+  contractError: boolean;
 }
 
 export interface ConfirmationDefinitions {
@@ -1258,13 +1297,15 @@ export interface ResponseParseEvmContractInput {
 
 export interface LedgerNetwork {
   genesisHash: string;
-  displayName: string;
+  networkName: string;
+  accountName: string;
+  appName: string;
   network: string; // network is predefined in ledger lib
   slug: string; // slug in chain list
   icon: 'substrate' | 'ethereum';
   isDevMode: boolean;
+  isEthereum: boolean;
 }
-
 /// On-ramp
 
 export interface TransakNetwork {
@@ -1395,17 +1436,19 @@ export interface ChainStakingMetadata {
   chain: string;
   type: StakingType;
 
+  // essential
   era: number, // also round for parachains
-  expectedReturn?: number; // in %, annually
-  inflation?: number; // in %, annually
   minJoinNominationPool?: string; // for relaychain supports nomination pool
   minStake: string;
-  nominatorCount?: number;
-  minPoolBonding?: string;
   maxValidatorPerNominator: number;
   maxWithdrawalRequestPerValidator: number;
   allowCancelUnstaking: boolean;
   unstakingPeriod: number; // in hours
+
+  // supplemental
+  expectedReturn?: number; // in %, annually
+  inflation?: number; // in %, annually
+  nominatorCount?: number;
 }
 
 export interface NominationInfo {
@@ -1455,7 +1498,8 @@ export enum StakingStatus {
   EARNING_REWARD = 'EARNING_REWARD',
   PARTIALLY_EARNING = 'PARTIALLY_EARNING',
   NOT_EARNING = 'NOT_EARNING',
-  WAITING = 'WAITING'
+  WAITING = 'WAITING',
+  NOT_STAKING = 'NOT_STAKING'
 }
 
 export interface NominatorMetadata {
@@ -1648,26 +1692,6 @@ export type RequestCreateCompoundStakeExternal = InternalRequestSign<TuringStake
 
 export type RequestCancelCompoundStakeExternal = InternalRequestSign<TuringCancelStakeCompoundParams>;
 
-/// Keyring state
-
-export interface KeyringState {
-  isReady: boolean;
-  hasMasterPassword: boolean;
-  isLocked: boolean;
-}
-
-export interface AddressBookState {
-  contacts: AddressJson[];
-  recent: AddressJson[];
-}
-
-export interface RequestChangeMasterPassword {
-  oldPassword?: string;
-  newPassword: string;
-
-  createNew: boolean;
-}
-
 export enum ChainEditStandard {
   EVM = 'EVM',
   SUBSTRATE = 'SUBSTRATE',
@@ -1703,10 +1727,33 @@ export interface ChainSpecInfo {
   decimals: number
 }
 
+/// Keyring state
+
+export interface KeyringState {
+  isReady: boolean;
+  hasMasterPassword: boolean;
+  isLocked: boolean;
+}
+
+export interface AddressBookState {
+  contacts: AddressJson[];
+  recent: AddressJson[];
+}
+
+// Change master password
+export interface RequestChangeMasterPassword {
+  oldPassword?: string;
+  newPassword: string;
+
+  createNew: boolean;
+}
+
 export interface ResponseChangeMasterPassword {
   status: boolean;
   errors: string[];
 }
+
+// Migrate password
 
 export interface RequestMigratePassword {
   address: string;
@@ -1718,6 +1765,8 @@ export interface ResponseMigratePassword {
   errors: string[];
 }
 
+// Unlock
+
 export interface RequestUnlockKeyring {
   password: string;
 }
@@ -1726,6 +1775,8 @@ export interface ResponseUnlockKeyring {
   status: boolean;
   errors: string[];
 }
+
+// Export mnemonic
 
 export interface RequestKeyringExportMnemonic {
   address: string;
@@ -1736,14 +1787,26 @@ export interface ResponseKeyringExportMnemonic {
   result: string;
 }
 
+// Reset wallet
+
+export interface RequestResetWallet {
+  resetAll: boolean;
+}
+
+export interface ResponseResetWallet {
+  status: boolean;
+  errors: string[];
+}
+
 /// Signing
 export interface RequestSigningApprovePasswordV2 {
   id: string;
 }
 
 export interface AssetSettingUpdateReq {
-  tokenSlug: string,
-  assetSetting: AssetSetting
+  tokenSlug: string;
+  assetSetting: AssetSetting;
+  autoEnableNativeToken?: boolean;
 }
 
 export interface RequestGetTransaction {
@@ -1811,6 +1874,90 @@ export interface AllLogoMap {
   assetLogoMap: Record<string, string>
 }
 
+// Phishing detect
+
+export interface PassPhishing {
+  pass: boolean;
+}
+
+export interface RequestPassPhishingPage {
+  url: string;
+}
+
+// Psp token
+
+export interface RequestAddPspToken {
+  genesisHash: string;
+  tokenInfo: {
+    type: string;
+    address: string;
+    symbol: string;
+    name: string;
+    decimals?: number;
+    logo?: string;
+  };
+}
+
+// Wallet Connect
+
+export interface RequestConnectWalletConnect {
+  uri: string;
+}
+
+export interface RequestRejectConnectWalletSession {
+  id: string;
+}
+
+export interface RequestApproveConnectWalletSession {
+  id: string;
+  accounts: string[];
+}
+
+export interface RequestReconnectConnectWalletSession {
+  id: string;
+}
+
+export interface RequestDisconnectWalletConnectSession {
+  topic: string
+}
+
+export interface MantaPayConfig {
+  address: string;
+  zkAddress: string;
+  enabled: boolean;
+  chain: string;
+  isInitialSync: boolean;
+}
+
+export interface MantaAuthorizationContext {
+  address: string;
+  chain: string;
+  data: unknown;
+}
+
+export interface MantaPaySyncState {
+  isSyncing: boolean,
+  progress: number,
+  needManualSync?: boolean
+}
+
+export interface MantaPayEnableParams {
+  password: string,
+  address: string
+}
+
+export enum MantaPayEnableMessage {
+  WRONG_PASSWORD = 'WRONG_PASSWORD',
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+  SUCCESS = 'SUCCESS'
+}
+
+export interface MantaPayEnableResponse {
+  success: boolean;
+  message: MantaPayEnableMessage
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1835,9 +1982,9 @@ export interface KoniRequestSignatures {
   'pri(chainService.subscribeMultiChainAssetMap)': [null, Record<string, _MultiChainAsset>, Record<string, _MultiChainAsset>];
   'pri(chainService.subscribeXcmRefMap)': [null, Record<string, _AssetRef>, Record<string, _AssetRef>];
   'pri(chainService.upsertChain)': [_NetworkUpsertParams, boolean];
-  'pri(chainService.enableChains)': [string[], boolean];
+  'pri(chainService.enableChains)': [EnableMultiChainParams, boolean];
+  'pri(chainService.enableChain)': [EnableChainParams, boolean];
   'pri(chainService.disableChains)': [string[], boolean];
-  'pri(chainService.enableChain)': [string, boolean];
   'pri(chainService.disableChain)': [string, boolean];
   'pri(chainService.removeChain)': [string, boolean];
   'pri(chainService.deleteCustomAsset)': [string, boolean];
@@ -1874,6 +2021,17 @@ export interface KoniRequestSignatures {
   'pri(balance.getSubscription)': [RequestSubscribeBalance, BalanceJson, BalanceJson];
   'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson];
   'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson];
+
+  // Phishing page
+  'pri(phishing.pass)': [RequestPassPhishingPage, boolean];
+
+  // Manta pay
+  'pri(mantaPay.enable)': [MantaPayEnableParams, MantaPayEnableResponse];
+  'pri(mantaPay.disable)': [string, boolean];
+  'pri(mantaPay.getZkBalance)': [null, null];
+  'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];
+  'pri(mantaPay.subscribeSyncingState)': [null, MantaPaySyncState, MantaPaySyncState];
+  'pri(mantaPay.initSyncMantaPay)': [string, null];
 
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];
@@ -1914,12 +2072,14 @@ export interface KoniRequestSignatures {
   'pri(accounts.deleteContact)': [RequestDeleteContactAccount, boolean];
 
   // Settings
-  'pri(settings.changeBalancesVisibility)': [null, boolean, UiSettings];
+  'pri(settings.changeBalancesVisibility)': [null, boolean];
   'pri(settings.subscribe)': [null, UiSettings, UiSettings];
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
+  'pri(settings.saveAutoLockTime)': [RequestChangeTimeAutoLock, boolean];
+  'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.getLogoMaps)': [null, AllLogoMap];
 
   // Subscription
@@ -1977,6 +2137,7 @@ export interface KoniRequestSignatures {
   'pri(keyring.unlock)': [RequestUnlockKeyring, ResponseUnlockKeyring];
   'pri(keyring.lock)': [null, void];
   'pri(keyring.export.mnemonic)': [RequestKeyringExportMnemonic, ResponseKeyringExportMnemonic];
+  'pri(keyring.reset)': [RequestResetWallet, ResponseResetWallet];
 
   // Signing
   'pri(signing.approve.passwordV2)': [RequestSigningApprovePasswordV2, boolean];
@@ -2011,6 +2172,18 @@ export interface KoniRequestSignatures {
   'mobile(subscription.start)': [SubscriptionServiceType[], void];
   'mobile(subscription.stop)': [SubscriptionServiceType[], void];
   'mobile(subscription.restart)': [SubscriptionServiceType[], void];
+
+  // Psp token
+  'pub(token.add)': [RequestAddPspToken, boolean];
+
+  /// Wallet connect
+  'pri(walletConnect.connect)': [RequestConnectWalletConnect, boolean];
+  'pri(walletConnect.requests.subscribe)': [null, WalletConnectSessionRequest[], WalletConnectSessionRequest[]];
+  'pri(walletConnect.session.approve)': [RequestApproveConnectWalletSession, boolean];
+  'pri(walletConnect.session.reject)': [RequestRejectConnectWalletSession, boolean];
+  'pri(walletConnect.session.reconnect)': [RequestReconnectConnectWalletSession, boolean];
+  'pri(walletConnect.session.subscribe)': [null, SessionTypes.Struct[], SessionTypes.Struct[]];
+  'pri(walletConnect.session.disconnect)': [RequestDisconnectWalletConnectSession, boolean];
 }
 
 export interface ApplicationMetadataType {

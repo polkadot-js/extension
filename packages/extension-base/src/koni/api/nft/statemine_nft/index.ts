@@ -171,7 +171,7 @@ export default class StatemineNftApi extends BaseNftApi {
 
       params.cleanUpNfts(this.chain, address, collectionIds, nftIds);
     } catch (e) {
-      console.error('Failed to fetch statemine nft', e);
+      console.error(`${this.chain}`, e);
     }
   }
 

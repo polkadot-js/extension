@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_REFRESH_HISTORY_INTERVAL } from '@subwallet/extension-base/constants';
+import { ExtrinsicStatus, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { CRON_RECOVER_HISTORY_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL } from '@subwallet/extension-base/constants';
 import { CronServiceInterface, PersistDataServiceInterface, ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
+import { historyRecover, HistoryRecoverStatus } from '@subwallet/extension-base/services/history-service/helpers/recoverHistoryStatus';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
@@ -16,6 +17,7 @@ import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
 
 export class HistoryService implements StoppableServiceInterface, PersistDataServiceInterface, CronServiceInterface {
   private historySubject: BehaviorSubject<TransactionHistoryItem[]> = new BehaviorSubject([] as TransactionHistoryItem[]);
+  #needRecoveryHistories: Record<string, TransactionHistoryItem> = {};
 
   constructor (private dbService: DatabaseService, private chainService: ChainService, private eventService: EventService, private keyringService: KeyringService) {
     this.init().catch(console.error);
@@ -23,6 +25,8 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
 
   private fetchPromise: Promise<void> | null = null;
   private interval: NodeJS.Timer | undefined = undefined;
+  private recoverInterval: NodeJS.Timer | undefined = undefined;
+
   private async fetchAndLoadHistories (addresses: string[]): Promise<TransactionHistoryItem[]> {
     if (!addresses || addresses.length === 0) {
       return [];
@@ -81,7 +85,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
   }
 
   async updateHistoryByExtrinsicHash (extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
-    await this.dbService.updateHistoryByNewExtrinsicHash(extrinsicHash, updateData);
+    await this.dbService.updateHistoryByExtrinsicHash(extrinsicHash, updateData);
     this.historySubject.next(await this.dbService.getHistories());
   }
 
@@ -101,8 +105,6 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
 
     const updateRecords = historyItems.filter((item) => {
       const key = `${item.chain}-${item.extrinsicHash}`;
-
-      // !excludeKeys.includes(key) && console.log('Cancel update', key);
 
       return item.origin === 'app' || !excludeKeys.includes(key);
     });
@@ -143,6 +145,67 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     return Promise.resolve();
   }
 
+  async startRecoverHistories (): Promise<void> {
+    await this.recoverHistories();
+
+    this.recoverInterval = setInterval(() => {
+      this.recoverHistories().catch(console.error);
+    }, CRON_RECOVER_HISTORY_INTERVAL);
+  }
+
+  stopRecoverHistories (): Promise<void> {
+    clearInterval(this.recoverInterval);
+
+    return Promise.resolve();
+  }
+
+  async recoverHistories (): Promise<void> {
+    const list: TransactionHistoryItem[] = [];
+
+    for (const processingHistory of Object.values(this.#needRecoveryHistories)) {
+      const chainState = this.chainService.getChainStateByKey(processingHistory.chain);
+
+      if (chainState.active) {
+        list.push(processingHistory);
+      }
+
+      if (list.length >= 10) {
+        break;
+      }
+    }
+
+    const promises = list.map((history) => historyRecover(history, this.chainService));
+
+    const results = await Promise.all(promises);
+
+    results.forEach((recoverResult, index) => {
+      const currentExtrinsicHash = list[index].extrinsicHash;
+
+      const updateData: Partial<TransactionHistoryItem> = {
+        ...recoverResult,
+        status: ExtrinsicStatus.UNKNOWN
+      };
+
+      switch (recoverResult.status) {
+        case HistoryRecoverStatus.API_INACTIVE:
+          break;
+        case HistoryRecoverStatus.FAILED:
+        case HistoryRecoverStatus.SUCCESS:
+          updateData.status = recoverResult.status === HistoryRecoverStatus.SUCCESS ? ExtrinsicStatus.SUCCESS : ExtrinsicStatus.FAIL;
+          this.updateHistoryByExtrinsicHash(currentExtrinsicHash, updateData).catch(console.error);
+          delete this.#needRecoveryHistories[currentExtrinsicHash];
+          break;
+        default:
+          this.updateHistoryByExtrinsicHash(currentExtrinsicHash, updateData).catch(console.error);
+          delete this.#needRecoveryHistories[currentExtrinsicHash];
+      }
+    });
+
+    if (!Object.keys(this.#needRecoveryHistories).length) {
+      await this.stopRecoverHistories();
+    }
+  }
+
   startPromiseHandler = createPromiseHandler<void>();
 
   async init (): Promise<void> {
@@ -150,6 +213,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     await this.loadData();
     Promise.all([this.eventService.waitKeyringReady, this.eventService.waitChainReady]).then(() => {
       this.getHistories().catch(console.log);
+      this.recoverProcessingHistory().catch(console.error);
 
       this.eventService.on('account.add', () => {
         (async () => {
@@ -164,9 +228,33 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     this.status = ServiceStatus.INITIALIZED;
   }
 
+  async recoverProcessingHistory () {
+    const histories = await this.dbService.getHistories();
+
+    this.#needRecoveryHistories = {};
+
+    histories.filter((history) => {
+      return [ExtrinsicStatus.PROCESSING, ExtrinsicStatus.SUBMITTING].includes(history.status);
+    }).forEach((history) => {
+      this.#needRecoveryHistories[history.extrinsicHash] = history;
+    });
+
+    const recoverNumber = Object.keys(this.#needRecoveryHistories).length;
+
+    if (recoverNumber > 0) {
+      console.log(`Recover ${recoverNumber} processing history`);
+    }
+
+    this.startRecoverHistories().catch(console.error);
+  }
+
   async start (): Promise<void> {
+    if (this.status === ServiceStatus.STARTED) {
+      return;
+    }
+
     try {
-      console.debug('Start history service');
+      await Promise.all([this.eventService.waitKeyringReady, this.eventService.waitChainReady]);
       this.startPromiseHandler = createPromiseHandler<void>();
       this.status = ServiceStatus.STARTING;
       await this.startCron();
@@ -182,14 +270,14 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
   }
 
   stopPromiseHandler = createPromiseHandler<void>();
-  async stop (): Promise<void> {
-    console.debug('Stop history service');
 
+  async stop (): Promise<void> {
     try {
       this.stopPromiseHandler = createPromiseHandler<void>();
       this.status = ServiceStatus.STOPPING;
       await this.persistData();
       await this.stopCron();
+      await this.stopRecoverHistories();
       this.stopPromiseHandler.resolve();
       this.status = ServiceStatus.STOPPED;
     } catch (e) {

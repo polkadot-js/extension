@@ -3,3 +3,4 @@
 
 export { default as CommonTransactionInfo } from './CommonTransactionInfo';
 export { default as ConfirmationGeneralInfo } from './ConfirmationGeneralInfo';
+export { default as ZkModeFooter } from './ZkModeFooter';

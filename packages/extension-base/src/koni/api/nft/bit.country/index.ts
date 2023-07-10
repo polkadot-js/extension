@@ -219,7 +219,7 @@ export class BitCountryNftApi extends BaseNftApi {
 
       params.cleanUpNfts(this.chain, address, collectionIds, nftIds);
     } catch (e) {
-      console.error('Failed to fetch bit.country nft', e);
+      console.error(`${this.chain}`, e);
     }
   }
 

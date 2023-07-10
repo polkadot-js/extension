@@ -17,8 +17,9 @@ const useFormatAddress = (addressPrefix?: number) => {
       addPrefix = addressPrefix;
     }
 
-    if (item.originGenesisHash) {
-      const network = findNetworkJsonByGenesisHash(chainInfoMap, item.originGenesisHash);
+    if ('originGenesisHash' in item) {
+      const originGenesisHash = item.originGenesisHash as string;
+      const network = findNetworkJsonByGenesisHash(chainInfoMap, originGenesisHash);
 
       if (network) {
         addPrefix = network.substrateInfo?.addressPrefix ?? addPrefix;

@@ -29,7 +29,7 @@ export default function useAssetChecker () {
     }
   }, [enablingAsset, chainInfoMap, chainStateMap, notify, t, assetSettingMap, assetRegistry]);
 
-  const ensureAssetEnable = useCallback((assetSlug: string) => {
+  return useCallback((assetSlug: string) => {
     if (asset.current === assetSlug) {
       return;
     }
@@ -41,10 +41,19 @@ export default function useAssetChecker () {
     const chainInfo = chainInfoMap[assetInfo.originChain];
 
     if ((assetInfo && !assetSetting) || !assetSetting.visible) {
-      const message = t('{{name}} on {{chainName}} is not ready to use, do you want to turn it on?', { replace: { name: assetInfo?.symbol, chainName: chainInfo?.name } });
+      const message = t('{{name}} on {{chainName}} is not ready to use, do you want to turn it on?', {
+        replace: {
+          name: assetInfo?.symbol,
+          chainName: chainInfo?.name
+        }
+      });
 
       const _onEnabled = () => {
-        updateAssetSetting({ tokenSlug: assetSlug, assetSetting: { visible: true } }).then(() => {
+        updateAssetSetting({
+          tokenSlug: assetSlug,
+          assetSetting: { visible: true },
+          autoEnableNativeToken: true
+        }).then(() => {
           setEnablingAsset(assetSlug);
           notify({ message: t('{{name}} is turning on.', { replace: { name: assetInfo?.symbol } }), duration: 1.5 });
         }).catch(console.error);
@@ -75,6 +84,4 @@ export default function useAssetChecker () {
       });
     }
   }, [assetRegistry, assetSettingMap, chainInfoMap, chainStateMap, notify, t]);
-
-  return ensureAssetEnable;
 }

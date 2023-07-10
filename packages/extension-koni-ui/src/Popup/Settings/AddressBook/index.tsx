@@ -98,7 +98,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const filterOptions: FilterOption[] = useMemo(() => ([
     {
-      label: t('My contacts'),
+      label: t('Saved contacts'),
       value: AccountGroup.CONTACT
     },
     {
@@ -136,7 +136,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     switch (_group) {
       case AccountGroup.CONTACT:
-        groupLabel = t('My contacts');
+        groupLabel = t('Saved contacts');
         break;
       case AccountGroup.RECENT:
         groupLabel = t('Recent');
@@ -232,7 +232,7 @@ const Component: React.FC<Props> = (props: Props) => {
           onChangeOption={onChangeFilterOption}
           optionSelectionMap={filterSelectionMap}
           options={filterOptions}
-          title={t('Filter address')}
+          title={t('Filter')}
         />
         <AddContactModal />
         {selectedItem && <EditContactModal addressJson={selectedItem} />}

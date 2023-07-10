@@ -33,7 +33,7 @@ const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
 };
 
 function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
-  if (item.status === ExtrinsicStatus.PROCESSING) {
+  if (item.status === ExtrinsicStatus.PROCESSING || item.status === ExtrinsicStatus.SUBMITTING) {
     return IconMap.processing;
   }
 
@@ -92,11 +92,14 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
     };
   }
 
-  const isProcessing = item.status === ExtrinsicStatus.PROCESSING;
-
-  if (isProcessing) {
+  if (item.status === ExtrinsicStatus.PROCESSING) {
     displayData.className = '-processing';
     displayData.typeName = nameMap.processing;
+  }
+
+  if (item.status === ExtrinsicStatus.SUBMITTING) {
+    displayData.className = '-processing';
+    displayData.typeName = nameMap.submitting;
   }
 
   return displayData;
@@ -127,6 +130,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount } = useSelector((root) => root.accountState);
   const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
+  const { chainInfoMap } = useSelector((root) => root.chainStore);
 
   const isActive = checkActive(modalId);
 
@@ -180,14 +184,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const filterOptions = useMemo(() => {
     return [
-      { label: t('Send token transaction'), value: FilterValue.SEND },
-      { label: t('Receive token transaction'), value: FilterValue.RECEIVED },
+      { label: t('Send token'), value: FilterValue.SEND },
+      { label: t('Receive token'), value: FilterValue.RECEIVED },
       { label: t('NFT transaction'), value: FilterValue.NFT },
       { label: t('Stake transaction'), value: FilterValue.STAKE },
-      { label: t('Claim reward transaction'), value: FilterValue.CLAIM },
+      { label: t('Claim staking reward'), value: FilterValue.CLAIM },
       // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
-      { label: t('Successful transaction'), value: FilterValue.SUCCESSFUL },
-      { label: t('Failed transaction'), value: FilterValue.FAILED }
+      { label: t('Successful'), value: FilterValue.SUCCESSFUL },
+      { label: t('Failed'), value: FilterValue.FAILED }
     ];
   }, [t]);
 
@@ -201,6 +205,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const typeNameMap: Record<string, string> = useMemo(() => ({
     default: t('Transaction'),
+    submitting: t('Submitting...'),
     processing: t('Processing...'),
     send: t('Send'),
     received: t('Receive'),
@@ -218,8 +223,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const typeTitleMap: Record<string, string> = useMemo(() => ({
     default: t('Transaction'),
-    send: t('Send transaction'),
-    received: t('Receive transaction'),
+    send: t('Send token'),
+    received: t('Receive token'),
     [ExtrinsicType.SEND_NFT]: t('NFT transaction'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan transaction'),
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake transaction'),
@@ -263,9 +268,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [curAdr] = useState(currentAccount?.address);
 
   // Handle detail modal
-  const { chain, extrinsicHash } = useParams();
+  const { chain, extrinsicHashOrId } = useParams();
   const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
-  const [openDetailLink, setOpenDetailLink] = useState<boolean>(!!chain && !!extrinsicHash);
+  const [openDetailLink, setOpenDetailLink] = useState<boolean>(!!chain && !!extrinsicHashOrId);
 
   const onOpenDetail = useCallback((item: TransactionHistoryDisplayItem) => {
     return () => {
@@ -285,15 +290,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   useEffect(() => {
-    if (extrinsicHash && chain && openDetailLink) {
-      const existed = historyList.find((item) => item.chain === chain && item.extrinsicHash === extrinsicHash);
+    if (extrinsicHashOrId && chain && openDetailLink) {
+      const existed = historyList.find((item) => item.chain === chain && (item.transactionId === extrinsicHashOrId || item.extrinsicHash === extrinsicHashOrId));
 
       if (existed) {
         setSelectedItem(existed);
         activeModal(modalId);
       }
     }
-  }, [activeModal, chain, extrinsicHash, openDetailLink, historyList]);
+  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyList]);
 
   useEffect(() => {
     if (isActive) {
@@ -319,8 +324,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const emptyList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Your transactions history will appear here!')}
-        emptyTitle={t('No transactions yet')}
+        emptyMessage={t('Your transaction history will appear here!')}
+        emptyTitle={t('No transaction found')}
         phosphorIcon={Clock}
       />
     );
@@ -331,7 +336,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return (
         <HistoryItem
           item={item}
-          key={`${item.extrinsicHash}-${item.address}`}
+          key={`${item.extrinsicHash}-${item.address}-${item.direction}`}
           onClick={onOpenDetail(item)}
         />
       );
@@ -341,11 +346,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const searchFunc = useCallback((item: TransactionHistoryItem, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
+    const fromName = item.fromName?.toLowerCase();
+    const toName = item.toName?.toLowerCase();
+    const symbol = (item.amount?.symbol || item.fee?.symbol || item.tip?.symbol)?.toLowerCase();
+    const network = chainInfoMap[item.chain]?.name?.toLowerCase();
 
     return (
-      (!!item.fromName && item.fromName.toLowerCase().includes(searchTextLowerCase))
+      fromName?.includes(searchTextLowerCase) ||
+      toName?.includes(searchTextLowerCase) ||
+      symbol?.includes(searchTextLowerCase) ||
+      network?.includes(searchTextLowerCase)
     );
-  }, []);
+  }, [chainInfoMap]);
 
   const groupBy = useCallback((item: TransactionHistoryItem) => {
     return customFormatDate(item.time, '#MMM# #DD#, #YYYY#');

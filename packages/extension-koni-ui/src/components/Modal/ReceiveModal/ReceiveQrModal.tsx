@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _getBlockExplorerFromChain, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -10,7 +11,7 @@ import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getScanExplorerAddressInfoUrl } from '@subwallet/extension-koni-ui/utils';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
-import { Button, Icon, Logo, ModalContext, QRCode, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, Logo, ModalContext, SwModal, SwQRCode } from '@subwallet/react-ui';
 import AccountItem from '@subwallet/react-ui/es/web3-block/account-item';
 import CN from 'classnames';
 import { CaretLeft, CopySimple, GlobeHemisphereWest } from 'phosphor-react';
@@ -30,7 +31,16 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
   const { inactiveModal } = useContext(ModalContext);
   const notify = useNotification();
   const chainInfo = useFetchChainInfo(selectedNetwork || '');
-  const formattedAddress = useMemo(() => {
+
+  const isEvmChain = useMemo(() => {
+    if (chainInfo) {
+      return !!chainInfo.evmInfo;
+    } else {
+      return false;
+    }
+  }, [chainInfo]);
+
+  const formattedAddress = useMemo(() => { // TODO: add zkAddress here
     if (chainInfo) {
       const isEvmChain = !!chainInfo.evmInfo;
       const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
@@ -40,21 +50,9 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
       return address || '';
     }
   }, [address, chainInfo]);
+
   const scanExplorerAddressUrl = useMemo(() => {
-    let route = '';
-    const blockExplorer = selectedNetwork && _getBlockExplorerFromChain(chainInfo);
-
-    if (blockExplorer && blockExplorer.includes('subscan.io')) {
-      route = 'account';
-    } else {
-      route = 'address';
-    }
-
-    if (blockExplorer) {
-      return `${blockExplorer}${route}/${formattedAddress}`;
-    } else {
-      return getScanExplorerAddressInfoUrl(selectedNetwork || '', formattedAddress);
-    }
+    return getExplorerLink(chainInfo, formattedAddress, 'account') || getScanExplorerAddressInfoUrl(selectedNetwork || '', formattedAddress);
   }, [selectedNetwork, formattedAddress, chainInfo]);
 
   const handleClickViewOnExplorer = useCallback(() => {
@@ -88,12 +86,14 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
       rightIconProps={{
         icon: <InfoIcon />
       }}
-      title={t<string>('Your QR code')}
+      title={t<string>('Your address')}
     >
       <>
         <div className='receive-qr-code-wrapper'>
-          <QRCode
+          <SwQRCode
+            color='#000'
             errorLevel='H'
+            logoPadding={isEvmChain ? 6 : 7 }
             size={264}
             value={formattedAddress}
           />
@@ -124,6 +124,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
                   }
                   onClick={onClickCopyBtn}
                   size='xs'
+                  tooltip={t('Copy address')}
                   type='ghost'
                 />
               </CopyToClipboard>
@@ -144,7 +145,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
             />
           }
           onClick={handleClickViewOnExplorer}
-        >{t('View on explorer')}</Button>
+        >{t('View account on explorer')}</Button>
       </>
     </SwModal>
   );

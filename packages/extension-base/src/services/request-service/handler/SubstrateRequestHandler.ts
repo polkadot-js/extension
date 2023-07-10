@@ -63,8 +63,8 @@ export default class SubstrateRequestHandler {
     return Object.keys(this.#substrateRequests).length;
   }
 
-  public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
-    const id = getId();
+  public sign (url: string, request: RequestSign, account: AccountJson, _id?: string): Promise<ResponseSigning> {
+    const id = _id || getId();
 
     return new Promise((resolve, reject): void => {
       this.#substrateRequests[id] = {
@@ -99,5 +99,13 @@ export default class SubstrateRequestHandler {
         this.#requestService.popupOpen();
       }
     });
+  }
+
+  public resetWallet () {
+    for (const request of Object.values(this.#substrateRequests)) {
+      request.reject(new Error('Reset wallet'));
+    }
+
+    this.signSubject.next([]);
   }
 }

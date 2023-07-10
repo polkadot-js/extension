@@ -55,7 +55,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const onClickJson = useCallback(() => {
     if (isPopup) {
-      windowOpen('/accounts/restore-json').catch(console.error);
+      windowOpen({ allowedPath: '/accounts/restore-json' }).catch(console.error);
     } else {
       inactiveModal(modalId);
       navigate('/accounts/restore-json');
@@ -67,31 +67,31 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       backgroundColor: token['green-7'],
       icon: Leaf,
       key: 'import-seed-phrase',
-      label: 'Import from Seed Phrase',
+      label: t('Import from seed phrase'),
       onClick: onClickItem('/accounts/import-seed-phrase')
     },
     {
       backgroundColor: token['orange-7'],
       icon: FileJs,
       key: 'restore-json',
-      label: 'Restore from Polkadot {js}',
+      label: t('Import from Polkadot.{js}'),
       onClick: onClickJson
     },
     {
       backgroundColor: token['gray-3'],
       icon: Wallet,
       key: 'import-private-key',
-      label: 'Import from MetaMask',
+      label: t('Import by MetaMask private key'),
       onClick: onClickItem('/accounts/import-private-key')
     },
     {
       backgroundColor: token['blue-7'],
       icon: QrCode,
       key: 'import-by-qr',
-      label: 'Import by QR Code',
+      label: t('Import by QR code'),
       onClick: onClickItem('/accounts/import-by-qr')
     }
-  ], [onClickItem, token, onClickJson]);
+  ], [token, t, onClickItem, onClickJson]);
 
   const renderIcon = useCallback((item: ImportAccountItem) => {
     return (
@@ -126,7 +126,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               onClick={item.onClick}
             >
               <SettingItemSelection
-                label={t<string>(item.label)}
+                label={item.label}
                 leftItemIcon={renderIcon(item)}
               />
             </div>

@@ -3,6 +3,7 @@
 
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset, _SubstrateChainType } from '@subwallet/chain-list/types';
 import { BasicTokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -68,7 +69,15 @@ export function _isPureSubstrateChain (chainInfo: _ChainInfo) {
 
 export function _getOriginChainOfAsset (assetSlug: string) {
   if (assetSlug.startsWith(_CUSTOM_PREFIX)) {
-    return assetSlug.split('-')[1];
+    const arr = assetSlug.split('-').slice(1);
+
+    if (arr[0] === 'custom') {
+      const end = arr.findIndex((str) => Object.values(_AssetType).includes(str as _AssetType));
+
+      return arr.slice(0, end).join('-');
+    }
+
+    return arr[0];
   }
 
   return assetSlug.split('-')[0];
@@ -76,6 +85,10 @@ export function _getOriginChainOfAsset (assetSlug: string) {
 
 export function _getContractAddressOfToken (tokenInfo: _ChainAsset) {
   return tokenInfo.metadata?.contractAddress as string || '';
+}
+
+export function _isTokenTransferredByEvm (tokenInfo: _ChainAsset) {
+  return !!tokenInfo.metadata?.contractAddress || _isNativeToken(tokenInfo);
 }
 
 export function _checkSmartContractSupportByChain (chainInfo: _ChainInfo, contractType: _AssetType) {
@@ -142,10 +155,6 @@ export function _isChainSupportSubstrateStaking (chainInfo: _ChainInfo) {
 
 export function _isChainEnabled (chainState: _ChainState) {
   return chainState.active;
-}
-
-export function _isSubstrateParachain (chainInfo: _ChainInfo) {
-  return chainInfo.substrateInfo !== null && chainInfo.substrateInfo.paraId !== null;
 }
 
 export function _getChainSubstrateAddressPrefix (chainInfo: _ChainInfo) {
@@ -293,7 +302,7 @@ export function _isSubstrateRelayChain (chainInfo: _ChainInfo) {
 }
 
 export function _isSubstrateParaChain (chainInfo: _ChainInfo) {
-  return chainInfo.substrateInfo?.chainType === _SubstrateChainType.PARACHAIN;
+  return chainInfo.substrateInfo !== null && chainInfo.substrateInfo.paraId !== null && chainInfo.substrateInfo?.chainType === _SubstrateChainType.PARACHAIN;
 }
 
 export function _getEvmAbiExplorer (chainInfo: _ChainInfo) {
@@ -339,6 +348,10 @@ export function _getAssetDecimals (assetInfo: _ChainAsset): number {
 export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string | undefined {
   let blockExplorer;
 
+  if (!chainInfo) {
+    return;
+  }
+
   if (_isPureEvmChain(chainInfo)) {
     blockExplorer = chainInfo?.evmInfo?.blockExplorer;
   } else {
@@ -380,4 +393,36 @@ export function _isCustomProvider (providerKey: string) {
 
 export function _generateCustomProviderKey (index: number) {
   return `${_CUSTOM_PREFIX}provider-${index}`;
+}
+
+export const findChainInfoByHalfGenesisHash = (chainMap: Record<string, _ChainInfo>, halfGenesisHash?: string): _ChainInfo | null => {
+  if (!halfGenesisHash) {
+    return null;
+  }
+
+  for (const chainInfo of Object.values(chainMap)) {
+    if (_getSubstrateGenesisHash(chainInfo)?.toLowerCase().substring(2, 2 + 32) === halfGenesisHash.toLowerCase()) {
+      return chainInfo;
+    }
+  }
+
+  return null;
+};
+
+export const findChainInfoByChainId = (chainMap: Record<string, _ChainInfo>, chainId?: number): _ChainInfo | null => {
+  if (!chainId) {
+    return null;
+  }
+
+  for (const chainInfo of Object.values(chainMap)) {
+    if (chainInfo.evmInfo?.evmChainId === chainId) {
+      return chainInfo;
+    }
+  }
+
+  return null;
+};
+
+export function _isMantaZkAsset (chainAsset: _ChainAsset) {
+  return _MANTA_ZK_CHAIN_GROUP.includes(chainAsset.originChain) && chainAsset.symbol.startsWith(_ZK_ASSET_PREFIX);
 }

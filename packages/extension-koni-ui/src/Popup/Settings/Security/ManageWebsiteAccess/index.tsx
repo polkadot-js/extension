@@ -97,12 +97,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const filterOptions = useMemo(() => {
     return [
-      { label: 'Substrate DApp', value: FilterValue.SUBSTRATE },
-      { label: 'Ethereum DApp', value: FilterValue.ETHEREUM },
-      { label: 'Blocked DApp', value: FilterValue.BLOCKED },
-      { label: 'Connected DApp', value: FilterValue.Connected }
+      { label: t('Substrate dApp'), value: FilterValue.SUBSTRATE },
+      { label: t('Ethereum dApp'), value: FilterValue.ETHEREUM },
+      { label: t('Blocked dApp'), value: FilterValue.BLOCKED },
+      { label: t('Connected dApp'), value: FilterValue.Connected }
     ];
-  }, []);
+  }, [t]);
 
   const websiteAccessItems = useMemo<AuthUrlInfo[]>(() => {
     return getWebsiteItems(authUrlMap);
@@ -230,7 +230,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         renderWhenEmpty={renderEmptyList}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}
-        searchPlaceholder={t<string>('Search website')}
+        searchPlaceholder={t<string>('Search or enter a website')}
         showActionBtn
       />
 
@@ -238,7 +238,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         actions={actions}
         id={ACTION_MODAL_ID}
         onCancel={onCloseActionModal}
-        title={t('Website access config')}
+        title={t('Access configuration')}
       />
 
       <FilterModal
@@ -248,6 +248,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
         options={filterOptions}
+        title={t('Filter')}
       />
     </PageWrapper>
   );

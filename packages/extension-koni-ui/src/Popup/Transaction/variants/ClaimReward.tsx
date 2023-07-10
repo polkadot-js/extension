@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -120,7 +120,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }, 300);
   }, [chain, from, onError, onSuccess, reward?.unclaimedReward, stakingType]);
 
-  const onPreCheckReadOnly = usePreCheckReadOnly(from);
+  const checkAction = usePreCheckAction(from);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const _stakingChain = stakingChain || '';
@@ -160,7 +160,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(_stakingChain);
     const bnUnclaimedReward = new BN(reward?.unclaimedReward || '0');
 
-    return ((stakingType === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) || isAstarNetwork;
+    return ((stakingType === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) || (isAstarNetwork && !!nominatorMetadata.nominations.length);
   }, [allNominatorInfo, chainInfoMap, rewardList, stakingChain, stakingType]);
 
   useEffect(() => {
@@ -271,7 +271,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={onPreCheckReadOnly(form.submit)}
+          onClick={checkAction(form.submit, ExtrinsicType.STAKING_CLAIM_REWARD)}
         >
           {t('Continue')}
         </Button>

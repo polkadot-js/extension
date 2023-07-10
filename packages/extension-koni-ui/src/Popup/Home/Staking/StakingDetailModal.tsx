@@ -1,21 +1,22 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, ExtrinsicType, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getValidatorLabel, isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
-import { useGetAccountByAddress, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetAccountByAddress, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
@@ -37,7 +38,7 @@ export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) =
 };
 
 const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominatorMetadata, rewardItem, staking }: Props) => {
-  const { expectedReturn, minPoolBonding, minStake, unstakingPeriod } = chainStakingMetadata;
+  const { expectedReturn, minJoinNominationPool, minStake, unstakingPeriod } = chainStakingMetadata;
   const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
   const showingOption = isShowNominationByValidator(chain);
   const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
@@ -50,7 +51,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { currentAccount } = useSelector((state) => state.accountState);
-  const onClickFooterButton = usePreCheckReadOnly(currentAccount?.address);
+  const onClickFooterButton = usePreCheckAction(currentAccount?.address, false);
 
   const chainInfo = useFetchChainInfo(staking.chain);
   const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
@@ -89,12 +90,19 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         />
         <Button
           className='__action-btn'
-          onClick={onClickFooterButton(onClickUnstakeBtn)}
+          disabled={new BigN(activeStake || '0').lte(0) }
+          onClick={onClickFooterButton(
+            onClickUnstakeBtn,
+            staking.type === StakingType.POOLED ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND
+          )}
           schema='secondary'
         >{t('Unstake')}</Button>
         <Button
           className='__action-btn'
-          onClick={onClickFooterButton(onClickStakeMoreBtn)}
+          onClick={onClickFooterButton(
+            onClickStakeMoreBtn,
+            staking.type === StakingType.POOLED ? ExtrinsicType.STAKING_BOND : ExtrinsicType.STAKING_JOIN_POOL
+          )}
         >{t('Stake more')}</Button>
       </div>
     );
@@ -137,7 +145,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
       >
         <MetaInfo.Account
           address={item.validatorAddress}
-          label={t('Validator')}
+          label={t(getValidatorLabel(item.chain))}
           name={item.validatorIdentity || toShort(item.validatorAddress)}
           networkPrefix={networkPrefix}
         />
@@ -154,7 +162,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         <MetaInfo.Number
           decimals={decimals}
           key={item.validatorAddress}
-          label={t('Min stake')}
+          label={t('Minimum staked')}
           suffix={staking.nativeToken}
           value={item.validatorMinStake || '0'}
           valueColorSchema={'gray'}
@@ -216,7 +224,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           typeName={stakingTypeNameMap[staking.type]}
         />
         <MetaInfo.Status
-          label={type === StakingType.NOMINATED ? t('Nomination status') : t('Pooled status')}
+          label={t('Staking status')}
           statusIcon={getStakingStatus(nominatorMetadata.status).icon}
           statusName={getStakingStatus(nominatorMetadata.status).name}
           valueColorSchema={getStakingStatus(nominatorMetadata.status).schema}
@@ -231,10 +239,10 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           />
         )}
 
-        {!!rewardItem?.unclaimedReward && parseFloat(rewardItem?.unclaimedReward) > 0 && (
+        {!!rewardItem?.unclaimedReward && (
           <MetaInfo.Number
             decimals={decimals}
-            label={t('Unclaimed reward')}
+            label={t('Unclaimed rewards')}
             suffix={staking.nativeToken}
             value={rewardItem?.unclaimedReward || '0'}
           />
@@ -290,7 +298,8 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         >
           {!!expectedReturn &&
             <MetaInfo.Number
-              label={t('Estimated earning')}
+              className={'expected-return'}
+              label={t('Estimated annual earnings')}
               suffix={'%'}
               value={expectedReturn}
               valueColorSchema={'even-odd'}
@@ -301,7 +310,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
             decimals={decimals}
             label={t('Minimum active')}
             suffix={staking.nativeToken}
-            value={nominatorMetadata.type === StakingType.NOMINATED ? minStake : (minPoolBonding || '0')}
+            value={nominatorMetadata.type === StakingType.NOMINATED ? minStake : (minJoinNominationPool || '0')}
             valueColorSchema={'gray'}
           />
 
@@ -413,6 +422,10 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
 const StakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.expected-return div:first-child': {
+      flex: 2
+    },
+
     '.staking-detail-modal-footer': {
       display: 'flex',
       alignItems: 'center'

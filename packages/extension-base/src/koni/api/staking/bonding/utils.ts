@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { getCompoundWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
@@ -123,6 +124,11 @@ export interface Unlocking {
   value: BN;
 }
 
+export interface TernoaStakingRewardsStakingRewardsData {
+  sessionEraPayout: string,
+  sessionExtraRewardPayout: string
+}
+
 export function parsePoolStashAddress (api: ApiPromise, index: number, poolId: number, poolsPalletId: string) {
   const ModPrefix = stringToU8a('modl');
   const U32Opts = { bitLength: 32, isLe: true };
@@ -149,7 +155,7 @@ export function transformPoolName (input: string): string {
 export function parseIdentity (identityInfo: PalletIdentityRegistration | null): string | undefined {
   let identity;
 
-  if (identityInfo !== null) {
+  if (identityInfo) {
     const displayName = identityInfo?.info?.display?.Raw;
     const web = identityInfo?.info?.web?.Raw;
     const riot = identityInfo?.info?.riot?.Raw;
@@ -220,6 +226,15 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
 
 export function calculateAlephZeroValidatorReturn (chainStakedReturn: number, commission: number) {
   return chainStakedReturn * (100 - commission) / 100;
+}
+
+export function calculateTernoaValidatorReturn (rewardPerValidator: number, validatorStake: number, commission: number) {
+  const percentRewardForNominators = (100 - commission) / 100;
+  const rewardForNominators = rewardPerValidator * percentRewardForNominators;
+
+  const stakeRatio = rewardForNominators / validatorStake;
+
+  return stakeRatio * 365 * 100;
 }
 
 export function calculateValidatorStakedReturn (chainStakedReturn: number, totalValidatorStake: BN, avgStake: BN, commission: number) {
@@ -408,6 +423,10 @@ export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
 
   let result: UnstakingInfo | undefined;
 
+  if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain) || _STAKING_CHAIN_GROUP.relay.includes(nominatorMetadata.chain)) {
+    return getCompoundWithdrawable(nominatorMetadata);
+  }
+
   for (const unstaking of unstakings) {
     if (unstaking.status === UnstakingStatus.CLAIMABLE) {
       result = unstaking; // only get the first withdrawal
@@ -440,4 +459,14 @@ export function getStakingStatusByNominations (bnTotalActiveStake: BN, nominatio
   }
 
   return stakingStatus;
+}
+
+export function getValidatorLabel (chain: string) {
+  if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+    return 'dApp';
+  } else if (_STAKING_CHAIN_GROUP.relay.includes(chain)) {
+    return 'Validator';
+  }
+
+  return 'Collator';
 }

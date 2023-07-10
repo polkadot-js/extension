@@ -1,19 +1,221 @@
 # CHANGELOG
 
+## 1.1.1
+Build date: Jul 06, 2023.
+
+Features & Update:
+- Integrate WalletConnect (#1497)
+- Support viewing ZK tokens on Manta (#1525)
+- Update XCM for Astar, Interlay, HydraDX (#1579)
+- Support add PSP token from dApp (#1529)
+- Improved connection experience with Ledger (#1573)
+
+Bugs fixed:
+- Fixed bugs related to address book (#1559)
+- Fixed NFT Gateway problems with non-extension environment (#1602)
+- Fixed bugs on the Staking screens (#1475)
+- Fixed bug show transaction fee on the History detail screen (#1580)
+
+Update `@subwallet/chain-list@0.2.4` (#1590):
+- Supported LP Tokens on Kintsugi (LP kBTC-USDT, LP KSM-kBTC, LP KSM-KINT)
+
+## 1.0.12
+Build date: Jun 29, 2023.
+
+Features & Update:
+- Add support Ledger with Aleph Zero network (#1565)
+
+Bugs fixed:
+- Fixed UI bugs on the Expand view (#1569)
+
+Update `@subwallet/chain-list@0.2.3` (#1576):
+- Add support for vFIL (Bifrost Polkadot), vETH (Ethereum)
+
+## 1.0.11
+Build date: Jun 24, 2023.
+
+Features & Update:
+- Improve connection stability (#1469)
+- Allow user download seed phrase file (#1560)
+- Update UI for expand view (#1229)
+
+Bugs fixed:
+- Fix bug detecting on-chain attributes for WASM NFTs (#1511)
+
+Update `@subwallet/chain-list@0.2.2` (#1556):
+- Integrate Polkadot Bridge Hub, Kusama Bridge Hub, Polkadot Collectives Parachain
+- Add logo for $CP token on Moonbeam
+
+## 1.0.10
+Build date: Jun 17, 2023.
+
+Features & Update:
+- Update Receive icon to Copy icon on Homepage screen (#1531)
+- Support display 3D NFT (#1516)
+- Re-check and update XCM feature for some chains: Polkadot, Statemint, Statemine, Bifrost Polkadot (#1546)
+
+Bugs fixed:
+- Fixed bug Show incorrect address book type (#1524)
+- Fixed bug Error fetching nominator data for Calamari (#1538)
+- Fixed bug Show incorrect Destination Chain fee on XCM history detail (#1550)
+
+Update `@subwallet/chain-list@0.2.1` (#1541):
+- Add INW (Aleph Zero) token
+- Add support for Avail testnet (Kate)
+- Re-name Statemint & Statemint Parachain to Polkadot Asset Hub & Kusama Asset Hub
+
+
+## 1.0.9
+Build date: Jun 13, 2023.
+
+Features & Update:
+- Integration Ledger EVM account (#538)
+- Allow DApp access to read-only account (#1225)
+- Review and support send fund for more token (#1449)
+- Optimize decode contract in transaction (#1474)
+- Update the new send fund screen (#1509)
+- Update chain-list (#1519)
+- Update uninstall URL (#1530)
+
+Bugs fixed:
+- Fixed bug Do not get transaction history in case the wallet have multi-account (#1411)
+- Fixed bug Show duplicate token on receive list when search custom token (#1514)
+- Fixed bug Do not transfer BNC token on the Bifrost Polkadot (#1522)
+- Fixed bug "Bad signature" when personal sign with EVM Ledger account (#1533)
+
+Update `@subwallet/chain-list@0.1.11`:
+- Add vsTokens and vTokens
+- Add VERSE token
+- Support WASM NFT Collection on the Astar network
+- Support USAGII NFT collection from Paras on the Astar network
+- Hide the channel xcm USDT: Equilibrium —> Statemint
+- Update provider for Calamari
+
+## 1.0.8
+Build date: Jun 8, 2023.
+
+Features & Update:
+- Add validate for case: the transaction amount is too small to keep the destination account alive (#1479)
+- Update notification in case transaction time out (#1385)
+- Add support for USDT on more chains and update param for XCM on Astar (#1352)
+- Update some screens follow by design (#1419)
+
+Fixed bugs:
+- Fixed bug Don’t show send history in case xcm on same account (#1499)
+- Fixed bug error page when perform XCM on Firefox browser (#1505)
+- Fixed bug Do not Apply master password in case import multi account but file json have information "IsMasterPassword" (#1490)
+- Fixed bug send fund ERC20 token on Polygon (#1492)
+
+## 1.0.7
+Build date: Jun 1, 2023.
+
+Features & Update:
+- Implemented immediate display of the "Add network" screen upon pressing "Add to network" from dApp (#1398)
+- Optimized staking performance (#1461)
+- Excluded Ledger account from the "My Wallet" list when sending tokens that are not supported by the Ledger account (#1454)
+- Added support for "Unstake Max" functionality (#1311)
+- Added validation for the scenario "Transfer Max local token. (#1458)
+- Optimized the requirement to enable tokens in the Transaction Screen (#1482)
+
+Updated chain list
+- Reviewed and updated PriceID.
+
+Fixed bugs:
+- Resolved bugs related to sending funds on some tokens after running script tests (#1460)
+- Fixed the bug causing an error page when sending tokens on a custom network (#1451)
+- Fixed the bug in calculating Ternoa Staking APR (#1108)
+- Resolved the bug causing failure to stake for certain dApps (#1445)
+- Fixed the bug causing failure to stake more for a pool in cases where an unstake request was present (#1470)
+- Updated web runner to fix ABI block explorer on mobile (#1472)
+
+## 1.0.6
+Build date: May 26, 2023.
+
+Features & Update:
+- Add “I trust this site” option on the phishing page screen (#1380)
+- Temporarily hide XCM channels from Moonbeam (#1440)
+- Update login & welcome screen (#1450)
+
+Update chain list:
+- Update logo for some chains and some tokens
+- Add USDT, USDC on EVM chain
+- Add Support For AI Serpenator NFT Collection
+
+Fixed bugs:
+- Fix bug show unclaim reward (#1432)
+- Update APR for some chain (#1429)
+- Fix bug show Moonfit’s NFT (#1404)
+- Fix bug when stake (#1392)
+- Update RMRK API (#1414)
+- Fix bug get balance when send token (#1428)
+
+## 1.0.5
+Build date: May 20, 2023.
+
+Features & Update:
+- Detect phishing page with ChainPatrol (#1226)
+- Add policy for a master password (#1369)
+- Improve auto-lock wallet (#1731)
+- Add more search criteria (#1361)
+- Handler transaction last status when stop extension and transaction in submitting phase (#1362, #1370)
+- Update Parity Signer logo & name (#1351)
+- Spelling update (#1384)
+- Update the style of the QR code (#1389)
+- Remove some logs (#1373)
+- Update URL explorer for Subspace networks (#1348)
+- Handle case access camera setting when have no account on the wallet (#1401)
+
+Update chain list:
+- Update Tinkernet (#1)
+- Add URL and update logo for Subspace network (#10)
+- Integrate Vara network (#11)
+- Integrate Snow EVM network (#12)
+- Integrate Darwinia 2 (#19)
+- Update RPC endpoint for Mangata (#27)
+- Update Zeitgeist and Subsocial integration (#29)
+
+Bug fixed:
+- Fixed bug get balance when import multi-account (#1353)
+- UI bug when scrolling (#1336)
+- Fixed bug get balance (#1360)
+- Fixed bug get transaction’s fee (#1361)
+- Fixed bug show the WND balance (#1355)
+- Re-check staking data on Shibuya network (#1310)
+- Fixed bug the address validator auto detect to Substrate address (#1346)
+- Add support view on browser for some chain (#1381)
+- Fixed bug on Firefox browser (#1394, #1393)
+- Fixed bug import private key (#1395)
+- Fixed bug showing min pooled amount (#1396)
+
+
+## 1.0.4
+Build date: May 12, 2023.
+
+Fixed bugs:
+- Still allows importing tokens without Decimal, Symbol (#1314)
+- Can't pool after withdraw all (#1323)
+- Do not automatically switch the network according to the dApp in case of version upgrade (#1301)
+- Show the alternate title name of Dapp in the Manage website access screen (#1234)
+- Bug related to address book (#1279)
+- Handling the case of importing multiple accounts using a JSON file when an account already exists (#1329)
+
+Update, Features:
+- Add support for $NEER on Transak (#1317)
+- Enable native token automatically when enabling local token from the transfer screen (#1289)
+- Reset Wallet Feature (#1224)
+
+
 ## 1.0.3
 Build date: May 06, 2023.
 
 Update:
-- Improve transaction UX (1254)
+- Improve transaction UX (#1254)
 - Update wake up / sleep with history and price service (#1239)
 - Update get chain, assets logo direct from @subwallet/chain-list package (#1273)
 - Update fetching staking info with middleware service (#1263)
 
 Bugs:
 - Update out date libs (#1306)
-
-Bug fixes:
-- Fix many bugs from version 1.0.1
 
 ## 1.0.2
 Build date: Apr 28, 2023.
@@ -558,7 +760,7 @@ Update:
   - Bifrost
 
 Bug Fixed:
-- Fix network list is incorrect in case importing an account from seed phase when there is no account yet (issue #120)
+- Fix network list is incorrect in case importing an account from seed phrase when there is no account yet (issue #120)
 - Fix grammar error and type issue of button (issue #156,#166)
 - Fix some network in wrong group (issue #180)
 

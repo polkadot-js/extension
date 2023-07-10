@@ -18,11 +18,10 @@ export default class MigrationService {
   }
 
   public async run (): Promise<void> {
-    this.logger.log('Migrating...');
     const keys = Object.keys(MigrationScripts).sort((a, b) => a.localeCompare(b));
 
-    try {
-      for (let i = 0; i < keys.length; i++) {
+    for (let i = 0; i < keys.length; i++) {
+      try {
         const JobClass = MigrationScripts[keys[i]];
         const key = keys[i];
         const name = JobClass.name;
@@ -33,7 +32,6 @@ export default class MigrationService {
         }).first();
 
         if (!check || key.startsWith(EVERYTIME)) {
-          this.logger.log('Running script: ', JobClass.name);
           const job = new JobClass(this.state);
 
           await job.run();
@@ -43,11 +41,9 @@ export default class MigrationService {
             timestamp: new Date().getTime()
           });
         }
+      } catch (error) {
+        this.logger.error('Migration error: ', MigrationScripts[keys[i]].name, error);
       }
-    } catch (error) {
-      this.logger.error('Migration error: ', error);
     }
-
-    this.logger.log('Migration done.');
   }
 }

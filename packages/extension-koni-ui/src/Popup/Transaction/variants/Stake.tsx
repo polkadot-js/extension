@@ -1,18 +1,19 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationPoolInfo, NominatorMetadata, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominationPoolInfo, NominatorMetadata, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainAssetInfo';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
@@ -146,8 +147,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [defaultSlug, from, defaultStakingType, chain]);
 
   const minStake = useMemo(() =>
-    stakingType === StakingType.POOLED ? chainStakingMetadata?.minPoolBonding || '0' : chainStakingMetadata?.minStake || '0'
-  , [chainStakingMetadata?.minPoolBonding, chainStakingMetadata?.minStake, stakingType]
+    stakingType === StakingType.POOLED ? chainStakingMetadata?.minJoinNominationPool || '0' : chainStakingMetadata?.minStake || '0'
+  , [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, stakingType]
   );
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
@@ -202,7 +203,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const result: ValidatorInfo[] = [];
 
     validatorList.forEach((validator) => {
-      if (nominations.includes(reformatAddress(validator.address, 42))) { // remember the format of the address
+      if (nominations.some((nomination) => isSameAddress(nomination, validator.address))) { // remember the format of the address
         result.push(validator);
       }
     });
@@ -303,7 +304,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return null;
   }, [chainStakingMetadata, decimals, symbol, t, minStake]);
 
-  const onPreCheckReadOnly = usePreCheckReadOnly(from);
+  const checkAction = usePreCheckAction(from);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -526,7 +527,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={onPreCheckReadOnly(form.submit)}
+          onClick={checkAction(form.submit, stakingType === StakingType.POOLED ? ExtrinsicType.STAKING_JOIN_POOL : ExtrinsicType.STAKING_BOND)}
         >
           {t('Stake')}
         </Button>

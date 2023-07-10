@@ -14,6 +14,9 @@ export const CRON_REFRESH_HISTORY_INTERVAL = 900000;
 export const CRON_GET_API_MAP_STATUS = 10000;
 export const CRON_REFRESH_CHAIN_STAKING_METADATA = 900000;
 export const CRON_REFRESH_CHAIN_NOMINATOR_METADATA = 1800000;
+export const CRON_RECOVER_HISTORY_INTERVAL = 30000;
+export const CRON_SYNC_MANTA_PAY = 300000;
+export const MANTA_PAY_BALANCE_INTERVAL = 30000;
 
 export const ALL_ACCOUNT_KEY = 'ALL';
 export const ALL_NETWORK_KEY = 'all';
@@ -21,6 +24,6 @@ export const ALL_GENESIS_HASH = null;
 export const IGNORE_GET_SUBSTRATE_FEATURES_LIST: string[] = ['astarEvm', 'ethereum', 'ethereum_goerli', 'binance', 'binance_test', 'boba_rinkeby', 'boba', 'bobabase', 'bobabeam'];
 export const IGNORE_QR_SIGNER: string[] = [];
 
-export const DEFAULT_TIME_AUTO_LOCK = 15 * 60 * 1000;
+export const XCM_MIN_AMOUNT_RATIO = 1.2;
 
 export * from './staking';

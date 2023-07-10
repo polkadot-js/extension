@@ -16,14 +16,14 @@ import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging'
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
 import { qrSignerScan } from '@subwallet/extension-koni-ui/utils/scanner/attach';
-import { Form, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
+import { Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { QrCode } from 'phosphor-react';
+import { QrCode, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import ChainLogoMap from '../../../assets/logo';
+import DefaultLogosMap from '../../../assets/logo';
 
 const FooterIcon = (
   <Icon
@@ -35,7 +35,7 @@ const FooterIcon = (
 interface Props extends ThemeProps {
   title: string;
   subTitle: string;
-  description: string;
+  deviceName: string;
   instructionUrl: string;
   logoUrl: string;
 }
@@ -45,7 +45,7 @@ const modalId = 'attach-qr-signer-scanner-modal';
 const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
 
-  const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
+  const { className, deviceName, instructionUrl, logoUrl, subTitle, title } = props;
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
 
@@ -105,7 +105,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         rightFooterButton={{
-          children: loading ? t('Creating') : t('Scan the QR code'),
+          children: loading ? t('Creating') : t('Scan QR code'),
           icon: FooterIcon,
           onClick: openCamera,
           loading: loading
@@ -128,7 +128,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 <Image
                   height={56}
                   shape='squircle'
-                  src={ChainLogoMap.subwallet}
+                  src={DefaultLogosMap.subwallet}
                   width={56}
                 />
               )}
@@ -143,20 +143,29 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
           <div className='instruction'>
-            <span>{t('Follow')}&nbsp;</span>
+            <span>{deviceName}</span>
+            <span>&nbsp;{t('will provide you with a QR code to scan. Read')}&nbsp;</span>
             <a
               className='link'
               href={instructionUrl}
             >
-              {t('this instructions')}
+              {t('this instruction')}
             </a>
             <span>,&nbsp;</span>
-            <span>{description}</span>
+            <span>{t('for more details.')}</span>
           </div>
-          <Form.Item
-            help={validateState.message}
-            validateStatus={validateState.status}
-          />
+          {
+            validateState.message && (
+              <div className='error-container'>
+                <Icon
+                  customSize='28px'
+                  phosphorIcon={XCircle}
+                  weight='fill'
+                />
+                <span className='error-content'>{validateState.message}</span>
+              </div>
+            )
+          }
           <SwQrScanner
             className={className}
             id={modalId}
@@ -205,6 +214,21 @@ const ConnectQrSigner = styled(Component)<Props>(({ theme: { token } }: Props) =
       lineHeight: token.lineHeightHeading6,
       color: token.colorLink,
       textDecoration: 'underline'
+    },
+
+    '.error-container': {
+      color: token.colorError,
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: token.marginXXL - 2,
+      justifyContent: 'center'
+    },
+
+    '.error-content': {
+      marginLeft: token.marginXS,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6
     }
   };
 });

@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ChainLogoMap } from '@subwallet/chain-list';
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { Recoded } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils/account/accountAll';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
@@ -215,6 +215,9 @@ export { openInNewTab } from '@subwallet/extension-koni-ui/utils/common/browser'
 export * from './account';
 export * from './chain';
 export * from './confirmation';
+export * from './connector';
 export * from './common';
 export * from './form';
+export * from './scanner';
 export * from './transaction';
+export * from './walletConnect';

@@ -34,11 +34,11 @@ export default function useChainChecker () {
         const message = t('{{name}} is not ready to use, do you want to turn it on?', { replace: { name: chainInfo?.name } });
 
         const _onEnabled = () => {
-          enableChain(chain).then(() => {
+          enableChain(chain, false).then(() => {
             const chainInfo = chainInfoMap[chain];
 
             setConnectingChain(chain);
-            notify({ message: t('Chain {{name}} is connecting', { replace: { name: chainInfo?.name } }), duration: 1.5 });
+            notify({ message: t('Chain {{name}} is connecting', { replace: { name: chainInfo?.name } }), duration: 1.5, type: 'warning' });
           }).catch(console.error);
         };
 

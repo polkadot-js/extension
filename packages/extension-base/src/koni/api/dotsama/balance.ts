@@ -11,10 +11,11 @@ import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
-import { _BALANCE_CHAIN_GROUP, _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
+import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _PURE_EVM_CHAINS, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isPureEvmChain, _isSmartContractToken, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isPureEvmChain, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses, sumBN } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';
@@ -150,7 +151,9 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
     balances.forEach((balance: AccountInfo) => {
       total = total.add(balance.data?.free?.toBn() || new BN(0)); // reserved is seperated
       reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
-      miscFrozen = miscFrozen.add(balance.data?.miscFrozen?.toBn() || new BN(0));
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      miscFrozen = miscFrozen.add(balance.data?.miscFrozen?.toBn() || balance?.data?.frozen?.toBn() || new BN(0)); // TODO: update frozen
       feeFrozen = feeFrozen.add(balance.data?.feeFrozen?.toBn() || new BN(0));
     });
 
@@ -207,7 +210,7 @@ function subscribeERC20Interval (addresses: string[], chain: string, evmApiMap: 
           state: APIItemState.READY
         } as BalanceItem);
       } catch (err) {
-        console.log('There is a problem fetching ' + tokenInfo.slug + ' token balance', err);
+        console.log(tokenInfo.slug, err);
       }
     });
   };
@@ -253,7 +256,7 @@ function subscribePSP22Balance (addresses: string[], chain: string, api: ApiProm
           state: APIItemState.READY
         } as BalanceItem);
       } catch (err) {
-        console.warn('Problem fetching ' + tokenInfo.slug + ' PSP-22 token balance', err); // TODO: error createType
+        console.warn(tokenInfo.slug, err); // TODO: error createType
       }
     });
   };
@@ -288,7 +291,7 @@ async function subscribeEquilibriumTokenBalance (addresses: string[], chain: str
 
         // @ts-ignore
         const freeTokenBalance = balanceList.find((data: EqBalanceItem) => data[0] === parseInt(assetId));
-        const bnFreeTokenBalance = freeTokenBalance ? new BN(freeTokenBalance[1].positive.toString()) : BN_ZERO;
+        const bnFreeTokenBalance = freeTokenBalance ? new BN(new BigN(freeTokenBalance[1].positive).toString()) : BN_ZERO;
 
         tokenFreeBalance = tokenFreeBalance.add(bnFreeTokenBalance);
       }
@@ -352,10 +355,11 @@ async function subscribeTokensAccountsPallet (addresses: string[], chain: string
   const unsubList = await Promise.all(Object.values(tokenMap).map(async (tokenInfo) => {
     try {
       const onChainInfo = _getTokenOnChainInfo(tokenInfo);
+      const assetId = _getTokenOnChainAssetId(tokenInfo);
 
       // Get Token Balance
       // @ts-ignore
-      return await api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo]), (balances: TokenBalanceRaw[]) => {
+      return await api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo || assetId]), (balances: TokenBalanceRaw[]) => {
         const tokenBalance = {
           reserved: sumBN(balances.map((b) => (b.reserved || new BN(0)))),
           frozen: sumBN(balances.map((b) => (b.frozen || new BN(0)))),
@@ -394,6 +398,12 @@ async function subscribeTokensAccountsPallet (addresses: string[], chain: string
 
 async function subscribeAssetsAccountPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem) => void) {
   const tokenMap = state.getAssetByChainAndAsset(chain, [_AssetType.LOCAL]);
+
+  Object.values(tokenMap).forEach((token) => {
+    if (_MANTA_ZK_CHAIN_GROUP.includes(token.originChain) && token.symbol.startsWith(_ZK_ASSET_PREFIX)) {
+      delete tokenMap[token.slug];
+    }
+  });
 
   const unsubList = await Promise.all(Object.values(tokenMap).map(async (tokenInfo) => {
     try {

@@ -7,7 +7,7 @@ import { APIItemState, CrowdloanItem, CrowdloanParaState } from '@subwallet/exte
 import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@subwallet/extension-base/constants';
 import registry from '@subwallet/extension-base/koni/api/dotsama/typeRegistry';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainSubstrateAddressPrefix, _getSubstrateParaId, _getSubstrateRelayParent, _isChainEvmCompatible, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainSubstrateAddressPrefix, _getSubstrateParaId, _getSubstrateRelayParent, _isChainEvmCompatible, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses, reformatAddress } from '@subwallet/extension-base/utils';
 import axios from 'axios';
 
@@ -53,10 +53,6 @@ export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], pa
       let contribute = new BN(0);
 
       resList.forEach((res) => {
-        if (res.status !== 200) {
-          console.warn('Failed to get Acala, Karura crowdloan contribute');
-        }
-
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
         contribute = contribute.add(new BN(res.data.data?.acala?.[0]?.totalDOTLocked || '0'));
       });
@@ -126,7 +122,7 @@ export async function subscribeCrowdloan (addresses: string[], substrateApiMap: 
     });
 
     Object.entries(chainInfoMap).forEach(([networkKey, chainInfo]) => {
-      if (_isSubstrateParachain(chainInfo)) {
+      if (_isSubstrateParaChain(chainInfo)) {
         const parentChain = _getSubstrateRelayParent(chainInfo);
 
         const crowdloanCb = (rs: CrowdloanItem) => {

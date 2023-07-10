@@ -136,7 +136,7 @@ function Component (): React.ReactElement {
           topBlockRef.current.style.position = 'fixed';
           topBlockRef.current.style.opacity = '0';
           topBlockRef.current.style.paddingTop = '0';
-          topBlockRef.current.style.top = `${containerProps.top}px`;
+          topBlockRef.current.style.top = `${Math.floor(containerProps.top)}px`;
           topBlockRef.current.style.left = `${containerProps.left}px`;
           topBlockRef.current.style.right = `${containerProps.right}px`;
           topBlockRef.current.style.width = `${containerProps.width}px`;
@@ -180,7 +180,7 @@ function Component (): React.ReactElement {
       if (topBlockRef.current && containerRef.current) {
         const containerProps = containerRef.current.getBoundingClientRect();
 
-        topBlockRef.current.style.top = `${containerProps.top}px`;
+        topBlockRef.current.style.top = `${Math.floor(containerProps.top)}px`;
         topBlockRef.current.style.left = `${containerProps.left}px`;
         topBlockRef.current.style.right = `${containerProps.right}px`;
         topBlockRef.current.style.width = `${containerProps.width}px`;
@@ -211,7 +211,7 @@ function Component (): React.ReactElement {
   const onOpenSendFund = useCallback(() => {
     if (currentAccount && currentAccount.isReadOnly) {
       notify({
-        message: t('The account you are using is read-only, you cannot send assets with it'),
+        message: t('The account you are using is watch-only, you cannot send assets with it'),
         type: 'info',
         duration: 3
       });

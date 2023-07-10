@@ -69,7 +69,7 @@ const ImportPrivateKey = new LazyLoader(() => import('@subwallet/extension-koni-
 const RestoreJson = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/RestoreJson'));
 const ImportQrCode = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportQrCode'));
 const AttachReadOnly = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/AttachReadOnly'));
-const ConnectParitySigner = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectParitySigner'));
+const ConnectPolkadotVault = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectPolkadotVault'));
 const ConnectKeystone = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
 const ConnectLedger = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectLedger'));
 
@@ -90,6 +90,11 @@ const Unstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/
 const CancelUnstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/CancelUnstake'));
 const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/ClaimReward'));
 const Withdraw = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Withdraw'));
+
+// Wallet Connect
+const ConnectWalletConnect = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
+const ConnectionList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
+const ConnectionDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
 const ErrorFallback = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/ErrorFallback'));
 
@@ -130,7 +135,7 @@ export const router = createHashRouter([
           Crowdloans.generateRouterObject('crowdloans'),
           Staking.generateRouterObject('staking'),
           History.generateRouterObject('history'),
-          History.generateRouterObject('history/:chain/:extrinsicHash')
+          History.generateRouterObject('history/:chain/:extrinsicHashOrId')
         ]
       },
       {
@@ -150,7 +155,7 @@ export const router = createHashRouter([
         ]
       },
       {
-        ...TransactionDone.generateRouterObject('transaction-done/:chainType/:chain/:extrinsicHash')
+        ...TransactionDone.generateRouterObject('transaction-done/:chainType/:chain/:transactionId')
       },
       {
         path: '/keyring',
@@ -204,11 +209,20 @@ export const router = createHashRouter([
           RestoreJson.generateRouterObject('restore-json'),
           ImportQrCode.generateRouterObject('import-by-qr'),
           AttachReadOnly.generateRouterObject('attach-read-only'),
-          ConnectParitySigner.generateRouterObject('connect-parity-signer'),
+          ConnectPolkadotVault.generateRouterObject('connect-polkadot-vault'),
           ConnectKeystone.generateRouterObject('connect-keystone'),
           ConnectLedger.generateRouterObject('connect-ledger'),
           AccountDetail.generateRouterObject('detail/:accountAddress'),
           AccountExport.generateRouterObject('export/:accountAddress')
+        ]
+      },
+      {
+        path: 'wallet-connect',
+        element: <Outlet />,
+        children: [
+          ConnectWalletConnect.generateRouterObject('connect'),
+          ConnectionList.generateRouterObject('list'),
+          ConnectionDetail.generateRouterObject('detail/:topic')
         ]
       }
     ]

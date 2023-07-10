@@ -11,7 +11,7 @@ import RequestService from '@subwallet/extension-base/services/request-service';
 import { PREDEFINED_CHAIN_DAPP_CHAIN_MAP } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
-import { getDomainFromUrl } from '@subwallet/extension-base/utils';
+import { getDomainFromUrl, stripUrl } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -33,14 +33,6 @@ export default class AuthRequestHandler {
   constructor (requestService: RequestService, chainService: ChainService, private keyringService: KeyringService) {
     this.#requestService = requestService;
     this.#chainService = chainService;
-  }
-
-  private stripUrl (url: string): string {
-    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
-
-    const parts = url.split('/');
-
-    return parts[2];
   }
 
   private getAddressList (value = false): Record<string, boolean> {
@@ -79,7 +71,7 @@ export default class AuthRequestHandler {
       update(this.authorizeCached);
     } else {
       this.authorizeStore.get('authUrls', (data) => {
-        this.authorizeCached = data;
+        this.authorizeCached = data || {};
         update(this.authorizeCached);
       });
     }
@@ -174,7 +166,7 @@ export default class AuthRequestHandler {
           authorizeList = value;
         }
 
-        const existed = authorizeList[this.stripUrl(url)];
+        const existed = authorizeList[stripUrl(url)];
 
         // On cancel don't save anything
         if (isCancelled) {
@@ -185,7 +177,7 @@ export default class AuthRequestHandler {
           return;
         }
 
-        authorizeList[this.stripUrl(url)] = {
+        authorizeList[stripUrl(url)] = {
           count: 0,
           id: idStr,
           isAllowed,
@@ -228,7 +220,7 @@ export default class AuthRequestHandler {
       authList = {};
     }
 
-    const idStr = this.stripUrl(url);
+    const idStr = stripUrl(url);
     // Do not enqueue duplicate authorization requests.
     const isDuplicate = Object.values(this.#authRequestsV2)
       .some((request) => request.idStr === idStr);
@@ -302,7 +294,7 @@ export default class AuthRequestHandler {
   }
 
   public ensureUrlAuthorizedV2 (url: string): Promise<boolean> {
-    const idStr = this.stripUrl(url);
+    const idStr = stripUrl(url);
 
     return new Promise((resolve, reject) => {
       this.getAuthorize((value) => {
@@ -326,5 +318,14 @@ export default class AuthRequestHandler {
         resolve(true);
       });
     });
+  }
+
+  public resetWallet () {
+    for (const request of Object.values(this.#authRequestsV2)) {
+      request.reject(new Error('Reset wallet'));
+    }
+
+    this.authSubjectV2.next([]);
+    this.setAuthorize({});
   }
 }

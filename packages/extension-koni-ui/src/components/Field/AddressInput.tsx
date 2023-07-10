@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AbstractAddressJson } from '@subwallet/extension-base/background/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { AddressBookModal } from '@subwallet/extension-koni-ui/components';
 import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -24,6 +25,8 @@ interface Props extends BasicInputWrapper, ThemeProps {
   showAddressBook?: boolean;
   showScanner?: boolean;
   addressPrefix?: number;
+  saveAddress?: boolean;
+  networkGenesisHash?: string;
 }
 
 const defaultScannerModalId = 'input-account-address-scanner-modal';
@@ -31,8 +34,8 @@ const defaultAddressBookModalId = 'input-account-address-book-modal';
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { addressPrefix,
-    className = '', disabled, id, label, onBlur, onChange, onFocus,
-    placeholder, readOnly, showAddressBook, showScanner, statusHelp, value } = props;
+    className = '', disabled, id, label, networkGenesisHash, onBlur, onChange, onFocus,
+    placeholder, readOnly, saveAddress, showAddressBook, showScanner, status, statusHelp, value } = props;
   const { t } = useTranslation();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -45,7 +48,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const inputRef = useForwardInputRef(ref);
   const [scanError, setScanError] = useState('');
 
-  const _contacts = useMemo(() => [...accounts, ...contacts], [accounts, contacts]);
+  const _contacts = useMemo((): AbstractAddressJson[] => [...accounts, ...(showAddressBook ? contacts : [])], [accounts, contacts, showAddressBook]);
 
   const accountName = useMemo(() => {
     const account = findContactByAddress(_contacts, value);
@@ -72,10 +75,10 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
     onChange && onChange({ target: { value: val } });
 
-    if (isAddress(val)) {
+    if (isAddress(val) && saveAddress) {
       saveRecentAccount(val).catch(console.error);
     }
-  }, [onChange]);
+  }, [onChange, saveAddress]);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     parseAndChangeValue(event.target.value);
@@ -158,6 +161,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         }
         readOnly={readOnly}
         ref={inputRef}
+        status={status}
         statusHelp={statusHelp}
         suffix={(
           <>
@@ -219,6 +223,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
           <AddressBookModal
             addressPrefix={addressPrefix}
             id={addressBookId}
+            networkGenesisHash={networkGenesisHash}
             onSelect={onSelectAddressBook}
             value={value}
           />

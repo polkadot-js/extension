@@ -37,7 +37,6 @@ export interface AbstractAddressJson extends KeyringPair$Meta {
   type?: KeypairType;
   whenCreated?: number;
   name?: string;
-  originGenesisHash?: string | null;
 }
 
 export interface AccountJson extends AbstractAddressJson {
@@ -52,6 +51,8 @@ export interface AccountJson extends AbstractAddressJson {
   isReadOnly?: boolean;
   parentAddress?: string;
   suri?: string;
+  originGenesisHash?: string | null;
+  availableGenesisHashes?: string[];
 }
 
 export interface AddressJson extends AbstractAddressJson {
@@ -150,7 +151,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
   'pri(signing.isLocked)': [RequestSigningIsLocked, ResponseSigningIsLocked];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
-  'pri(window.open)': [AllowedPath, boolean];
+  'pri(window.open)': [WindowOpenParams, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
@@ -162,9 +163,9 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pub(metadata.provide)': [MetadataDef, boolean];
   'pub(phishing.redirectIfDenied)': [null, boolean];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
-  'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
+  'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse<unknown>];
   'pub(rpc.startProvider)': [string, ProviderMeta];
-  'pub(rpc.subscribe)': [RequestRpcSubscribe, number, JsonRpcResponse];
+  'pub(rpc.subscribe)': [RequestRpcSubscribe, number, JsonRpcResponse<unknown>];
   'pub(rpc.subscribeConnected)': [null, boolean, boolean];
   'pub(rpc.unsubscribe)': [RequestRpcUnsubscribe, boolean];
 }
@@ -457,6 +458,12 @@ export interface ResponseJsonRestore {
 }
 
 export type AllowedPath = typeof ALLOWED_PATH[number];
+
+export type WindowOpenParams = {
+  allowedPath: AllowedPath;
+  subPath?: string;
+  params?: Record<string, string>;
+}
 
 export interface ResponseJsonGetAccountInfo {
   address: string;

@@ -4,8 +4,10 @@
 import { ApolloClient, createHttpLink, gql, InMemoryCache } from '@apollo/client';
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainType, ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { MAX_FETCH_PAGE_PER_SESSION, MIN__NUM_HISTORY_PER_ACCOUNT } from '@subwallet/extension-base/services/history-service/constants';
 import fetch from 'cross-fetch';
 
+import { isArray } from '@polkadot/util';
 import { decodeAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 const MULTI_CHAIN_URL = 'https://squid.subsquid.io/multi-chain-tx/v/v1/graphql';
@@ -194,6 +196,18 @@ function generateSignature (input: { r: string, s: string, v: string }): string 
   return `0x${rHex}${sHex}${vHex}`;
 }
 
+const parseArgs = (args: unknown): TransferArgs => {
+  if (isArray(args)) {
+    return {
+      from: args[0] as string,
+      to: args[1] as string,
+      amount: args[2] as string
+    };
+  } else {
+    return args as TransferArgs;
+  }
+};
+
 export function parseSubsquidTransactionData (address: string, type: SubsquidTransactionType, historyItem: MultiHistoryData, chainInfo: _ChainInfo, args: any, data: any): TransactionHistoryItem {
   const chainType = chainInfo.substrateInfo ? ChainType.SUBSTRATE : ChainType.EVM;
   const nativeDecimals = chainInfo.substrateInfo?.decimals || chainInfo.evmInfo?.decimals || 18;
@@ -213,7 +227,7 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
     case SubsquidTransactionType.BalanceTransfer: {
       transactionType = ExtrinsicType.TRANSFER_BALANCE;
       const extrinsic = (data as TransferTransactionData).extrinsic;
-      const parsedArgs = args as TransferArgs;
+      const parsedArgs = parseArgs(args);
 
       to = autoFormatAddress(parsedArgs.to);
       from = autoFormatAddress(parsedArgs.from);
@@ -235,7 +249,7 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
       const transaction = (data as EthereumTransactionData).call.data.args.transaction.value;
 
       to = autoFormatAddress(parsedArgs.to);
-      from = autoFormatAddress(parsedArgs.from);
+      from = autoFormatAddress(parsedArgs.from || address);
       extrinsicHash = parsedArgs.transactionHash || extrinsic.hash;
       amount = transaction.value || '0';
       fee = (parseInt(transaction.gasPrice) * parseInt(transaction.gasLimit)).toString();
@@ -328,11 +342,11 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
   };
 }
 
-export async function fetchMultiChainHistories (addresses: string[], chainMap: Record<string, _ChainInfo>, maxPage = 25) {
+export async function fetchMultiChainHistories (addresses: string[], chainMap: Record<string, _ChainInfo>, maxPage = MAX_FETCH_PAGE_PER_SESSION, countMap: Record<string, number> = {}, _lastId?: string) {
   const responseData: MultiHistoryData[] = [];
 
   let currentPage = 0;
-  let lastId: string | undefined;
+  let lastId: string | undefined = _lastId;
 
   while (true) {
     try {
@@ -364,6 +378,10 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
   const histories = [] as TransactionHistoryItem[];
   const lowerAddresses = addresses.map((a) => a.toLowerCase());
 
+  for (const lowerAddress of lowerAddresses) {
+    countMap[lowerAddress] = countMap[lowerAddress] || 0;
+  }
+
   responseData.forEach((historyItem) => {
     const { _data, args, chainId, name, relatedAddresses } = historyItem;
 
@@ -377,10 +395,16 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
     const chainInfo = chainMap[chainId];
 
     if (chainInfo === undefined) {
-      console.warn(`Not found chain info for chain id: ${chainId}`);
+      console.debug(`Not found chain info for chain id: ${chainId}`); // TODO: resolve conflicting chainId
 
       return;
     }
+
+    usedAddresses.forEach((address) => {
+      const adr = address.toLowerCase();
+
+      countMap[adr] = (countMap[adr] || 0) + 1;
+    });
 
     usedAddresses.forEach((address) => {
       try {
@@ -388,10 +412,28 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
 
         histories.push(transactionData);
       } catch (e) {
-        console.warn('Parse transaction data failed', address, e);
+        console.debug('Parse transaction data failed', address, e);
       }
     });
   });
+
+  if (currentPage > 1) {
+    const retryAddresses: string[] = [];
+
+    for (const [address, number] of Object.entries(countMap)) {
+      if (number < MIN__NUM_HISTORY_PER_ACCOUNT) {
+        retryAddresses.push(address);
+      }
+    }
+
+    const _addresses = addresses.filter((add) => retryAddresses.includes(add.toLowerCase()));
+
+    if (_addresses.length > 0) {
+      const retryHistories = await fetchMultiChainHistories(_addresses, chainMap, maxPage, countMap, lastId);
+
+      histories.push(...retryHistories);
+    }
+  }
 
   return histories;
 }

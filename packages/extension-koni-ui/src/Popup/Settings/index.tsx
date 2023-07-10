@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -19,7 +20,7 @@ type Props = ThemeProps
 
 type SettingItemType = {
   key: string,
-  leftIcon: SwIconProps['phosphorIcon'],
+  leftIcon: SwIconProps['phosphorIcon'] | React.ReactNode,
   leftIconBgColor: string,
   rightIcon: SwIconProps['phosphorIcon'],
   title: string,
@@ -33,13 +34,20 @@ type SettingGroupItemType = {
   items: SettingItemType[],
 };
 
-function generateLeftIcon (backgroundColor: string, icon: SwIconProps['phosphorIcon']): React.ReactNode {
+const isReactNode = (element: unknown): element is React.ReactNode => {
+  return React.isValidElement(element);
+};
+
+function generateLeftIcon (backgroundColor: string, icon: SwIconProps['phosphorIcon'] | React.ReactNode): React.ReactNode {
+  const isNode = isReactNode(icon);
+
   return (
     <BackgroundIcon
       backgroundColor={backgroundColor}
-      phosphorIcon={icon}
+      customIcon={isNode ? icon : undefined}
+      phosphorIcon={isNode ? undefined : icon}
       size='sm'
-      type='phosphor'
+      type={isNode ? 'customIcon' : 'phosphor'}
       weight='fill'
     />
   );
@@ -62,6 +70,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
   const notify = useNotification();
   const { goHome } = useDefaultNavigate();
+  const { t } = useTranslation();
 
   const [locking, setLocking] = useState(false);
 
@@ -97,7 +106,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightIcon: ArrowsOut,
           title: 'Expand view',
           onClick: () => {
-            windowOpen('/').catch(console.error);
+            windowOpen({ allowedPath: '/' }).catch(console.error);
           },
           isHidden: !isPopup
         },
@@ -130,19 +139,34 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: () => {
             navigate('/settings/address-book');
           }
+        },
+        {
+          key: 'wallet-connect',
+          leftIcon: (
+            <WalletConnect
+              height='1em'
+              width='1em'
+            />
+          ),
+          leftIconBgColor: token['geekblue-6'],
+          rightIcon: CaretRight,
+          title: 'WalletConnect',
+          onClick: () => {
+            navigate('/wallet-connect/list');
+          }
         }
       ]
     },
     {
       key: 'networks-&-tokens',
-      label: 'Chains & tokens',
+      label: 'Networks & tokens',
       items: [
         {
           key: 'manage-networks',
           leftIcon: ShareNetwork,
           leftIconBgColor: token['purple-7'],
           rightIcon: CaretRight,
-          title: 'Manage chains',
+          title: 'Manage networks',
           onClick: () => {
             navigate('/settings/chains/manage');
           }
@@ -206,7 +230,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: Book,
           leftIconBgColor: token['green-6'],
           rightIcon: ArrowSquareOut,
-          title: 'User manual',
+          title: 'User guide',
           onClick: openInNewTab(WIKI_URL)
         },
         {
@@ -214,7 +238,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: BookOpen,
           leftIconBgColor: token['volcano-7'],
           rightIcon: ArrowSquareOut,
-          title: 'Term of service',
+          title: 'Terms of service',
           onClick: openInNewTab(TERMS_OF_SERVICE_URL)
         },
         {
@@ -254,8 +278,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightButtons={headerIcons}
           showLeftButton={true}
         >
-          {/*  // todo: i18n Settings */}
-        Settings
+          {t('Settings')}
         </SwHeader>
 
         <div className={'__scroll-container'}>
@@ -276,7 +299,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                           className={'__setting-item'}
                           key={item.key}
                           leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
-                          name={item.title}
+                          name={t(item.title)}
                           onPressItem={item.onClick}
                           rightItem={generateRightIcon(item.rightIcon)}
                         />
@@ -300,7 +323,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             onClick={onLock}
             schema={'secondary'}
           >
-            Lock
+            {t('Lock')}
           </Button>
 
           <div className={'__version'}>

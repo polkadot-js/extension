@@ -6,7 +6,7 @@ import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/
 import { isUrl, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
-import { getRandomIpfsGateway, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT } from '../config';
+import { getRandomIpfsGateway, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT } from '../config';
 
 enum RMRK_SOURCE {
   BIRD_KANARIA = 'bird_kanaria',
@@ -83,7 +83,6 @@ export class RmrkNftApi extends BaseNftApi {
 
   private async getAllByAccount (account: string) {
     const fetchUrls = [
-      { url: SINGULAR_V1_ENDPOINT + account, source: RMRK_SOURCE.SINGULAR_V1 },
       { url: SINGULAR_V2_ENDPOINT + account, source: RMRK_SOURCE.SINGULAR_V2 }
     ];
 
@@ -245,8 +244,6 @@ export class RmrkNftApi extends BaseNftApi {
             return {};
           }
         } catch (e) {
-          console.error('error fetching collection info', url);
-
           return {};
         }
       }));
@@ -272,7 +269,7 @@ export class RmrkNftApi extends BaseNftApi {
             allCollectionMeta[item?.id as string] = { ...data };
           }
         } catch (e) {
-          console.error('error parsing JSON for RMRK ', item.url, e);
+          console.error(item.url, e);
         }
       }));
 
@@ -304,7 +301,7 @@ export class RmrkNftApi extends BaseNftApi {
 
       params.cleanUpNfts(this.chain, address, allCollectionIds, allNftIds);
     } catch (e) {
-      console.error('Failed to fetch rmrk nft', e);
+      console.error(`${this.chain}`, e);
     }
   }
 

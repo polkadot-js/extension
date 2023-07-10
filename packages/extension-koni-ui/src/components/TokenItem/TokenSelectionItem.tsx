@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -23,7 +24,7 @@ type Props = TokenItemProps & ThemeProps & {
 };
 
 function Component (
-  { address, chain, className, name, onClickCopyBtn, onClickQrBtn, symbol, ...restProps }: Props) {
+  { address, chain, className, name, onClickCopyBtn, onClickQrBtn, onPressItem, symbol, ...restProps }: Props) {
   const chainInfo = useFetchChainInfo(chain || '');
   const notify = useNotification();
   const { t } = useTranslation();
@@ -32,8 +33,12 @@ function Component (
     const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
     const isEvmChain = !!chainInfo.evmInfo;
 
+    if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && symbol?.startsWith(_ZK_ASSET_PREFIX)) { // TODO: improve this
+      return address || '';
+    }
+
     return reformatAddress(address || '', networkPrefix, isEvmChain);
-  }, [address, chainInfo]);
+  }, [address, chainInfo, symbol]);
 
   const _onCLickCopyBtn = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
@@ -61,6 +66,7 @@ function Component (
         name={name}
         networkMainLogoShape='squircle'
         networkMainLogoSize={40}
+        onPressItem={_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && symbol?.startsWith(_ZK_ASSET_PREFIX) ? undefined : onPressItem }
         rightItem={
           (
             <>
@@ -74,10 +80,12 @@ function Component (
                   }
                   onClick={_onCLickCopyBtn}
                   size='xs'
+                  tooltip={t('Copy address')}
                   type='ghost'
                 />
               </CopyToClipboard>
               <Button
+                disabled={_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && symbol?.startsWith(_ZK_ASSET_PREFIX)}
                 icon={
                   <Icon
                     phosphorIcon={QrCode}
@@ -86,6 +94,7 @@ function Component (
                 }
                 onClick={onClickQrBtn}
                 size='xs'
+                tooltip={t('Show QR code')}
                 type='ghost'
               />
             </>

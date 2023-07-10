@@ -10,7 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "1.0.3",
+  "version": "1.1.1",
   "workspaces": [
     "packages/*"
   ],
@@ -21,7 +21,7 @@
   },
   "scripts": {
     "build": "koni-dev-build-ts && yarn build:zip && yarn build:rollup",
-    "build:extra": "yarn build:i18n && yarn build:ui && yarn web-runner:build",
+    "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
     "build:koni-dev": "koni-ci-build-dev",
     "build:release": "koni-ci-ghact-build",
@@ -33,13 +33,16 @@
     "clean": "polkadot-dev-clean-build",
     "dev": "yarn watch-dev",
     "lint": "polkadot-dev-run-lint",
+    "lint:changes": "git diff --name-only | grep -E '.(js|ts|tsx)$' | xargs eslint --fix",
     "postinstall": "polkadot-dev-yarn-only && patch-package",
     "start": "yarn watch",
     "test": "polkadot-dev-run-test --detectOpenHandles --testPathIgnorePatterns='/node_modules/|.*/ignore-.*\\.(test|spec)\\..*'",
     "test:one": "polkadot-dev-run-test --detectOpenHandles",
+    "update:polkadot-libs": "yarn up @polkadot/api @polkadot/rpc-provider @polkadot/api-contract @polkadot/networks @polkadot/types @polkadot/types-augment @polkadot/util @polkadot/util-crypto @polkadot/api-derive @polkadot/apps-config @polkadot/ui-settings @polkadot/hw-ledger @polkadot/phishing @polkadot/util @polkadot/util-crypto",
+    "update:subwallet-libs": "yarn up @subwallet/chain-list @subwallet/keyring @subwallet/ui-keyring",
     "watch": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch",
     "watch-dev": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch -d inline-source-map",
-    "web-runner:build": "cd packages/web-runner && yarn webpack --config webpack.config.cjs --mode production",
+    "web-runner:build": "cd packages/web-runner && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
     "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development"
   },
@@ -64,18 +67,16 @@
   },
   "resolutions": {
     "@ethereumjs/common": "^2.6.5",
-    "@polkadot/api": "^9.10.3",
-    "@polkadot/api-contract": "^9.10.3",
-    "@polkadot/networks": "^10.2.1",
-    "@polkadot/types": "^9.10.3",
-    "@polkadot/util": "^10.2.1",
-    "@polkadot/util-crypto": "^10.2.1",
-    "@polkadot/x-fetch": "^10.2.1",
-    "@subwallet/chain-list": "^0.1.2",
-    "@subwallet/keyring": "^0.0.5",
-    "@subwallet/ui-keyring": "^0.0.3",
+    "@polkadot/api": "^10.9.1",
+    "@polkadot/api-contract": "^10.9.1",
+    "@polkadot/networks": "^12.3.2",
+    "@polkadot/types": "^10.9.1",
+    "@polkadot/util": "^12.3.2",
+    "@polkadot/util-crypto": "^12.3.2",
+    "@subwallet/keyring": "^0.0.10",
+    "@subwallet/ui-keyring": "^0.0.10",
     "babel-core": "^7.0.0-bridge.0",
-    "rxjs": "^7.8.0",
+    "rxjs": "^7.8.1",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.8.4"
   }

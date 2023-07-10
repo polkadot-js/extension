@@ -3,6 +3,7 @@
 
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
 import { useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
@@ -13,19 +14,20 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { ConfirmationHeader } from './parts';
-import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
+import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
 
 type Props = ThemeProps
 
 const titleMap: Record<ConfirmationType, string> = {
-  addNetworkRequest: 'Add Network Request',
-  addTokenRequest: 'Add Token Request',
-  authorizeRequest: 'Connect to SubWallet',
-  evmSendTransactionRequest: 'Transaction Request',
+  addNetworkRequest: 'Add network request',
+  addTokenRequest: 'Add token request',
+  authorizeRequest: 'Connect with SubWallet',
+  evmSendTransactionRequest: 'Transaction request',
   evmSignatureRequest: 'Signature request',
-  metadataRequest: 'Update Metadata',
+  metadataRequest: 'Update metadata',
   signingRequest: 'Signature request',
-  switchNetworkRequest: 'Add Network Request'
+  switchNetworkRequest: 'Add network request',
+  connectWCRequest: 'WalletConnect'
 } as Record<ConfirmationType, string>;
 
 const Component = function ({ className }: Props) {
@@ -116,6 +118,10 @@ const Component = function ({ className }: Props) {
         return (
           <SignConfirmation request={confirmation.item as SigningRequest} />
         );
+      case 'connectWCRequest':
+        return (
+          <ConnectWalletConnectConfirmation request={confirmation.item as WalletConnectSessionRequest} />
+        );
     }
 
     return null;
@@ -137,19 +143,18 @@ const Component = function ({ className }: Props) {
         case ExtrinsicType.TRANSFER_BALANCE:
         case ExtrinsicType.TRANSFER_TOKEN:
         case ExtrinsicType.TRANSFER_XCM:
-          return t('Transfer confirmation');
         case ExtrinsicType.SEND_NFT:
-          return t('NFT Transfer confirmation');
+          return t('Transfer confirmation');
         case ExtrinsicType.STAKING_JOIN_POOL:
         case ExtrinsicType.STAKING_BOND:
           return t('Add to bond confirm');
         case ExtrinsicType.STAKING_LEAVE_POOL:
         case ExtrinsicType.STAKING_UNBOND:
-          return t('Unbond confirmation');
+          return t('Unbond confirm');
         case ExtrinsicType.STAKING_WITHDRAW:
-          return t('Withdraw confirm');
+          return t('Withdrawal confirm');
         case ExtrinsicType.STAKING_CLAIM_REWARD:
-          return t('Claim reward confirm');
+          return t('Claim rewards confirm');
         case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
           return t('Cancel unstake confirm');
         default:

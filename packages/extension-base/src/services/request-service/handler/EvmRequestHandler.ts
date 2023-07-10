@@ -4,7 +4,7 @@
 import Common from '@ethereumjs/common';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, EvmProviderErrorType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
-import { Resolver } from '@subwallet/extension-base/background/types';
+import { ConfirmationRequestBase, Resolver } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { isInternalRequest } from '@subwallet/extension-base/utils/request';
@@ -98,6 +98,39 @@ export default class EvmRequestHandler {
     this.#requestService.updateIconV2();
 
     return promise;
+  }
+
+  public updateConfirmation<CT extends ConfirmationType> (
+    id: string,
+    type: CT,
+    payload: ConfirmationDefinitions[CT][0]['payload'],
+    options: ConfirmationsQueueItemOptions = {},
+    validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined
+  ) {
+    const confirmations = this.confirmationsQueueSubject.getValue();
+    const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
+
+    // Check duplicate request
+    const exists = confirmationType[id];
+
+    if (!exists) {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Request does not exist');
+    }
+
+    const payloadJson = JSON.stringify(payload);
+
+    confirmationType[id] = {
+      ...exists,
+      payload,
+      payloadJson,
+      ...options
+    } as ConfirmationDefinitions[CT][0];
+
+    if (validator) {
+      this.confirmationsPromiseMap[id].validator = validator;
+    }
+
+    this.confirmationsQueueSubject.next(confirmations);
   }
 
   private async signMessage (confirmation: ConfirmationDefinitions['evmSignatureRequest'][0]): Promise<string> {
@@ -223,5 +256,27 @@ export default class EvmRequestHandler {
     }
 
     return true;
+  }
+
+  public resetWallet () {
+    const confirmations = this.confirmationsQueueSubject.getValue();
+
+    for (const [type, requests] of Object.entries(confirmations)) {
+      for (const confirmation of Object.values(requests)) {
+        const { id } = confirmation as ConfirmationRequestBase;
+        const { resolver } = this.confirmationsPromiseMap[id];
+
+        if (!resolver || !confirmation) {
+          console.error('Not found confirmation', type, id);
+        } else {
+          resolver.reject(new Error('Reset wallet'));
+        }
+
+        delete this.confirmationsPromiseMap[id];
+        delete confirmations[type as ConfirmationType][id];
+      }
+    }
+
+    this.confirmationsQueueSubject.next(confirmations);
   }
 }

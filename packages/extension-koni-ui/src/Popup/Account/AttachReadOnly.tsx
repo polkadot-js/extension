@@ -115,7 +115,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         address: reformatAddress,
         genesisHash: '',
         isEthereum: isEthereum,
-        isAllowed: false,
+        isAllowed: true,
         isReadOnly: true
       })
         .then((errors) => {
@@ -143,7 +143,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         rightFooterButton={{
-          children: t('Attach read-only account'),
+          children: t('Attach watch-only account'),
           icon: FooterIcon,
           disabled: isDisable,
           onClick: onSubmit,
@@ -159,7 +159,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       >
         <div className={CN('container')}>
           <div className='description'>
-            {t('Track the activity of any wallet without injecting your private key to SubWallet')}
+            {t('Track the activity of any wallet without a private key')}
           </div>
           <div className='page-icon'>
             <PageIcon

@@ -73,16 +73,22 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
 
   const accounts = useMemo((): AccountJson[] => {
-    return [..._accounts].sort(funcSortByName);
+    const result = [..._accounts].sort(funcSortByName);
+    const all = result.find((acc) => isAccountAll(acc.address));
+
+    if (all) {
+      const index = result.indexOf(all);
+
+      result.splice(index, 1);
+      result.unshift(all);
+    }
+
+    return result;
   }, [_accounts]);
 
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));
   }, [accounts]);
-
-  const noReadOnlyAccounts = useMemo(() => {
-    return noAllAccounts.filter(({ isReadOnly }) => !isReadOnly);
-  }, [noAllAccounts]);
 
   const _onSelect = useCallback((address: string) => {
     if (address) {
@@ -211,7 +217,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             setConnectionState(isAllowed ? ConnectionStatement.CONNECTED : ConnectionStatement.DISCONNECTED);
           }
         } else {
-          const numberAccounts = noReadOnlyAccounts.filter(({ address }) => filterType(address)).length;
+          const numberAccounts = noAllAccounts.filter(({ address }) => filterType(address)).length;
           const numberAllowedAccounts = Object.entries(allowedMap)
             .filter(([address]) => filterType(address))
             .filter(([, value]) => value)
@@ -236,7 +242,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       setConnected(0);
       setConnectionState(ConnectionStatement.NOT_CONNECTED);
     }
-  }, [currentAccount?.address, currentAuth, isAllAccount, noReadOnlyAccounts]);
+  }, [currentAccount?.address, currentAuth, isAllAccount, noAllAccounts]);
 
   const visibleText = useMemo((): string => {
     switch (connectionState) {

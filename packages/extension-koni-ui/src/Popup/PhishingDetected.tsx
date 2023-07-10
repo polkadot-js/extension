@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { passPhishingPage } from '@subwallet/extension-koni-ui/messaging';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
+import { noop } from '@subwallet/extension-koni-ui/utils';
 import { ButtonProps, Icon, PageIcon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ShieldSlash, XCircle } from 'phosphor-react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useParams } from 'react-router';
 import styled, { useTheme } from 'styled-components';
 
@@ -33,6 +35,14 @@ function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
     onClick: goHome
   };
 
+  const onTrustSite = useCallback(() => {
+    passPhishingPage(decodedWebsite)
+      .then(() => {
+        location.replace(decodedWebsite);
+      })
+      .catch(noop);
+  }, [decodedWebsite]);
+
   return (
     <Layout.WithSubHeaderOnly
       className={CN(className)}
@@ -47,12 +57,21 @@ function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
         iconProps={{ phosphorIcon: ShieldSlash, weight: 'fill' }}
       />
       <div className='title h3-text text-danger'>{t('Phishing detection')}</div>
-      <div className='h4-text text-danger'>{decodedWebsite}</div>
+      <div className='h4-text text-danger website-url'>{decodedWebsite}</div>
       <div className='phishing-detection-message'>
         <span>{t('This domain has been reported as a known phishing site on a community maintained list: ')}</span>
-        <Typography.Link size='lg'>
-          <a href='https://polkadot.js.org/phishing/#'>{t('view full list')}</a>
+        <Typography.Link
+          href='https://polkadot.js.org/phishing/#'
+          size='lg'
+        >
+          {t('view full list')}
         </Typography.Link>
+      </div>
+      <div
+        className='trust-site'
+        onClick={onTrustSite}
+      >
+        {t('I trust this site')}
       </div>
     </Layout.WithSubHeaderOnly>
   );
@@ -87,7 +106,19 @@ const PhishingDetected = styled(_PhishingDetected)<Props>(({ theme }) => {
       textAlign: 'center',
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG,
-      color: token.colorTextLight3
+      color: token.colorTextLight3,
+      marginBottom: token.margin
+    },
+
+    '.trust-site': {
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: token.colorTextLight5,
+      cursor: 'pointer',
+
+      '&:hover': {
+        color: token.colorTextLight2
+      }
     },
 
     '.__upper-block-wrapper': {
@@ -100,6 +131,13 @@ const PhishingDetected = styled(_PhishingDetected)<Props>(({ theme }) => {
       alignItems: 'center',
       transaction: '0.1s height',
       backgroundImage: extendToken.tokensScreenDangerBackgroundColor
+    },
+
+    '.website-url': {
+      textAlign: 'center',
+      paddingLeft: token.paddingXL,
+      paddingRight: token.paddingXL,
+      wordBreak: 'break-all'
     }
   });
 });

@@ -30,11 +30,11 @@ enum FilterValue {
 }
 
 const FILTER_OPTIONS = [
-  { label: 'EVM chains', value: FilterValue.EVM },
-  { label: 'Substrate chains', value: FilterValue.SUBSTRATE },
-  { label: 'Custom chains', value: FilterValue.CUSTOM },
-  { label: 'Enabled chains', value: FilterValue.ENABLED },
-  { label: 'Disabled chains', value: FilterValue.DISABLED }
+  { label: 'EVM networks', value: FilterValue.EVM },
+  { label: 'Substrate networks', value: FilterValue.SUBSTRATE },
+  { label: 'Custom networks', value: FilterValue.CUSTOM },
+  { label: 'Enabled networks', value: FilterValue.ENABLED },
+  { label: 'Disabled networks', value: FilterValue.DISABLED }
 ];
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
@@ -97,8 +97,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const emptyTokenList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t<string>('Your chain will appear here.')}
-        emptyTitle={t<string>('No chain found')}
+        emptyMessage={t<string>('Your network will appear here.')}
+        emptyTitle={t<string>('No network found')}
         phosphorIcon={ListChecks}
       />
     );
@@ -143,7 +143,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderCenter={true}
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
-        title={t<string>('Manage chains')}
+        title={t<string>('Manage networks')}
       >
         <SwList.Section
           actionBtnIcon={<Icon
@@ -161,7 +161,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchToken}
           searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search chain')}
+          searchPlaceholder={t<string>('Search network')}
           showActionBtn
         />
 

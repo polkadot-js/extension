@@ -3,10 +3,11 @@
 
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, AddressBookInfo, AllLogoMap, AssetSetting, BalanceJson, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, NominatorMetadata, PriceJson, StakingJson, StakingRewardJson, ThemeNames, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, AddressBookInfo, AllLogoMap, AssetSetting, BalanceJson, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, MantaPayConfig, MantaPaySyncState, NftCollection, NftJson, NominatorMetadata, PriceJson, StakingJson, StakingRewardJson, ThemeNames, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
@@ -14,6 +15,7 @@ import { store } from '@subwallet/extension-koni-ui/stores';
 import { AppSettings } from '@subwallet/extension-koni-ui/stores/types';
 import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
+import { SessionTypes } from '@walletconnect/types';
 
 // Setup redux stores
 
@@ -235,8 +237,8 @@ export const updateStaking = (data: StakingJson) => {
 
 export const subscribeStaking = lazySubscribeMessage('pri(staking.getSubscription)', null, updateStaking, updateStaking);
 
-export const updateStakingReward = (data: StakingRewardJson) => {
-  store.dispatch({ type: 'staking/updateStakingReward', payload: [...data.fastInterval, ...data.slowInterval] });
+export const updateStakingReward = (stakingRewardJson: StakingRewardJson) => {
+  store.dispatch({ type: 'staking/updateStakingReward', payload: Object.values(stakingRewardJson.data) });
 };
 
 export const subscribeStakingReward = lazySubscribeMessage('pri(stakingReward.getSubscription)', null, updateStakingReward, updateStakingReward);
@@ -259,8 +261,41 @@ export const updateTxHistory = (data: TransactionHistoryItem[]) => {
 
 export const subscribeTxHistory = lazySubscribeMessage('pri(transaction.history.getSubscription)', null, updateTxHistory, updateTxHistory);
 
+export const updateMantaPayConfig = (data: MantaPayConfig[]) => {
+  store.dispatch({ type: 'mantaPay/updateConfig', payload: data });
+};
+
+export const subscribeMantaPayConfig = lazySubscribeMessage('pri(mantaPay.subscribeConfig)', null, updateMantaPayConfig, updateMantaPayConfig);
+
+export const updateMantaPaySyncing = (data: MantaPaySyncState) => {
+  store.dispatch({ type: 'mantaPay/updateIsSyncing', payload: data });
+};
+
+export const subscribeMantaPaySyncingState = lazySubscribeMessage('pri(mantaPay.subscribeSyncingState)', null, updateMantaPaySyncing, updateMantaPaySyncing);
+
 // export const updateChainValidators = (data: ChainValidatorParams) => {
 //   store.dispatch({ type: 'bonding/updateChainValidators', payload: data });
 // };
 //
 // export const subscribeChainValidators = lazySubscribeMessage('pri(bonding.getBondingOptions)', null, updateChainValidators, updateChainValidators);
+
+// Wallet connect
+export const updateConnectWCRequests = (data: WalletConnectSessionRequest[]) => {
+  // Convert data to object with key as id
+  const requests = convertConfirmationToMap(data);
+
+  store.dispatch({ type: 'requestState/updateConnectWCRequests', payload: requests });
+};
+
+export const subscribeConnectWCRequests = lazySubscribeMessage('pri(walletConnect.requests.subscribe)', null, updateConnectWCRequests, updateConnectWCRequests);
+
+export const updateWalletConnectSessions = (data: SessionTypes.Struct[]) => {
+  const payload: Record<string, SessionTypes.Struct> = {};
+
+  data.forEach((session) => {
+    payload[session.topic] = session;
+  });
+  store.dispatch({ type: 'walletConnect/updateSessions', payload: payload });
+};
+
+export const subscribeWalletConnectSessions = lazySubscribeMessage('pri(walletConnect.session.subscribe)', null, updateWalletConnectSessions, updateWalletConnectSessions);

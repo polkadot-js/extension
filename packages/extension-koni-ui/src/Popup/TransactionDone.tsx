@@ -16,21 +16,21 @@ type Props = ThemeProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
-  const { chain, extrinsicHash } = useParams<{chain: string, extrinsicHash: string}>();
+  const { chain, transactionId } = useParams<{chain: string, transactionId: string}>();
 
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
 
-  const viewInExplorer = useCallback(
+  const viewInHistory = useCallback(
     () => {
-      if (chain && extrinsicHash) {
-        navigate(`/home/history/${chain}/${extrinsicHash}`);
+      if (chain && transactionId) {
+        navigate(`/home/history/${chain}/${transactionId}`);
       } else {
         navigate('/home/history');
       }
     },
-    [chain, extrinsicHash, navigate]
+    [chain, transactionId, navigate]
   );
 
   return (
@@ -38,7 +38,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <Layout.WithSubHeaderOnly
         leftFooterButton={{
           block: true,
-          onClick: viewInExplorer,
+          onClick: viewInHistory,
           children: t('View transaction')
         }}
         rightFooterButton={{
@@ -63,7 +63,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {t('All done!')}
           </div>
           <div className='description'>
-            {t('Your request has been sent. You can track its progress on the Transaction History page.')}
+            {t('Your request has been sent. You can track its progress in History tab.')}
           </div>
         </div>
       </Layout.WithSubHeaderOnly>

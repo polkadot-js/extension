@@ -163,7 +163,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const collectionNameValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      if (value.length >= 3) {
+      const parsedValue = value.replaceAll(' ', '');
+
+      if (parsedValue.length >= 3) {
         resolve();
       } else {
         reject(new Error(t('Collection name must have at least 3 characters')));
@@ -271,7 +273,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 className={className}
                 disabled={!selectedChain}
                 items={nftTypeOptions}
-                label={t<string>('NFT type')}
+                label={t<string>('Type')}
                 placeholder={t('Select NFT type')}
                 title={t('Select NFT type')}
               />
@@ -284,7 +286,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             >
               <AddressInput
                 disabled={!selectedNftType}
-                label={t<string>('NFT contract address')}
+                label={t<string>('Contract address')}
+                placeholder={t('Enter or paste an address')}
                 showScanner={true}
               />
             </Form.Item>

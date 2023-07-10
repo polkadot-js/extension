@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import LogosMap from '../../assets/logo';
+import DefaultLogosMap from '../../assets/logo';
 
 type Props = ThemeProps;
 
@@ -53,8 +53,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [firstStep, setFirstStep] = useState(true);
 
   const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
-    name: network.displayName,
-    slug: network.network
+    name: network.networkName,
+    slug: network.slug
   })), [supportedLedger]);
 
   const [chain, setChain] = useState(supportedLedger[0].slug);
@@ -68,7 +68,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return supportedLedger.find((n) => n.slug === chain);
   }, [chain, supportedLedger]);
 
-  const networkName = useMemo(() => selectedChain?.displayName.replaceAll(' network', '') || 'Unknown network', [selectedChain]);
+  const accountName = useMemo(() => selectedChain?.accountName || 'Unknown', [selectedChain]);
 
   const { error, getAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
 
@@ -105,7 +105,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
               rs[i - start] = {
                 accountIndex: i,
-                name: `Ledger ${networkName} ${i + 1}`,
+                name: `Ledger ${accountName} ${i + 1}`,
                 address: address
               };
             } catch (e) {
@@ -129,7 +129,7 @@ const Component: React.FC<Props> = (props: Props) => {
         handler().then().catch().finally(() => setIsLoadMore(false));
       }
     };
-  }, [getAddress, networkName, refresh]);
+  }, [getAddress, accountName, refresh]);
 
   const onNextStep = useCallback(() => {
     setFirstStep(false);
@@ -202,7 +202,8 @@ const Component: React.FC<Props> = (props: Props) => {
           addressOffset: 0, // don't change
           genesisHash: selectedChain.genesisHash,
           hardwareType: 'ledger',
-          name: item.name
+          name: item.name,
+          isEthereum: selectedChain.isEthereum
         }))
       })
         .then(() => {
@@ -246,7 +247,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <div className={CN('container')}>
           <div className='sub-title'>
-            {t('Connect and unlock your Ledger, then open the DApps on your Ledger.')}
+            {t('Connect and unlock your Ledger, then open the selected network on your Ledger.')}
           </div>
           {
             firstStep && (
@@ -257,7 +258,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       <Image
                         height={56}
                         shape='squircle'
-                        src={LogosMap.subwallet}
+                        src={DefaultLogosMap.subwallet}
                         width={56}
                       />
                     )}
@@ -265,7 +266,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       <Image
                         height={56}
                         shape='squircle'
-                        src={LogosMap.ledger}
+                        src={DefaultLogosMap.ledger}
                         width={56}
                       />
                     )}
@@ -275,6 +276,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   items={networks}
                   label={t('Select network')}
                   onChange={onChainChange}
+                  placeholder={t('Select network')}
                   value={chain}
                 />
                 <Button
@@ -295,14 +297,12 @@ const Component: React.FC<Props> = (props: Props) => {
                   <div className='ledger-button-content'>
                     <span className='ledger-info-text'>
                       {t(isConnected
-                        ? 'Connected ledger'
-                        : warning
-                          ? 'Please unlock your Ledger'
-                          : error || (
-                            ledger
-                              ? 'Waiting'
-                              : 'Searching Ledger device'
-                          )
+                        ? 'Device found'
+                        : warning || error || (
+                          ledger
+                            ? 'Loading'
+                            : 'Searching Ledger device'
+                        )
                       )}
                     </span>
                     {

@@ -10,6 +10,7 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isSameAddress, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
+import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -66,7 +67,7 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
   const bnCollatorMinStake = new BN(selectedCollator.minBond || '0');
   const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
 
-  if (!nominatorMetadata) {
+  if (!nominatorMetadata || nominatorMetadata.status === StakingStatus.NOT_STAKING) {
     if (!bnTotalStake.gte(bnMinStake)) {
       errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
     }
@@ -112,6 +113,27 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
   }
 
   return errors;
+}
+
+export function subscribeParaChainStakingMetadata (chain: string, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
+  return substrateApi.api.query.parachainStaking.round((_round: Codec) => {
+    const roundObj = _round.toHuman() as Record<string, string>;
+    const round = parseRawNumber(roundObj.current);
+    const maxDelegations = substrateApi.api.consts.parachainStaking.maxDelegationsPerDelegator.toString();
+    const unstakingDelay = substrateApi.api.consts.parachainStaking.delegationBondLessDelay.toString();
+    const unstakingPeriod = parseInt(unstakingDelay) * (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default);
+
+    callback(chain, {
+      chain,
+      type: StakingType.NOMINATED,
+      era: round,
+      minStake: '0',
+      maxValidatorPerNominator: parseInt(maxDelegations),
+      maxWithdrawalRequestPerValidator: 1, // by default
+      allowCancelUnstaking: true,
+      unstakingPeriod
+    });
+  });
 }
 
 export async function getParaChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
@@ -166,6 +188,98 @@ export async function getParaChainStakingMetadata (chain: string, substrateApi: 
   } as ChainStakingMetadata;
 }
 
+export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, delegatorState: PalletParachainStakingDelegator) {
+  const nominationList: NominationInfo[] = [];
+  const unstakingMap: Record<string, UnstakingInfo> = {};
+
+  let bnTotalActiveStake = BN_ZERO;
+
+  const _roundInfo = await substrateApi.api.query.parachainStaking.round();
+  const roundInfo = _roundInfo.toPrimitive() as Record<string, number>;
+  const currentRound = roundInfo.current;
+
+  await Promise.all(delegatorState.delegations.map(async (delegation) => {
+    const [_delegationScheduledRequests, _identity, _collatorInfo] = await Promise.all([
+      substrateApi.api.query.parachainStaking.delegationScheduledRequests(delegation.owner),
+      substrateApi.api.query.identity?.identityOf(delegation.owner),
+      substrateApi.api.query.parachainStaking.candidateInfo(delegation.owner)
+    ]);
+
+    const collatorInfo = _collatorInfo.toPrimitive() as unknown as ParachainStakingCandidateMetadata;
+    const minDelegation = collatorInfo?.lowestTopDelegationAmount.toString();
+    const identityInfo = _identity?.toHuman() as unknown as PalletIdentityRegistration;
+    const delegationScheduledRequests = _delegationScheduledRequests.toPrimitive() as unknown as PalletParachainStakingDelegationRequestsScheduledRequest[];
+
+    const identity = parseIdentity(identityInfo);
+    let hasUnstaking = false;
+    let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
+
+    // parse unstaking info
+    if (delegationScheduledRequests) {
+      for (const scheduledRequest of delegationScheduledRequests) {
+        if (reformatAddress(scheduledRequest.delegator, 0) === reformatAddress(address, 0)) { // add network prefix
+          const isClaimable = scheduledRequest.whenExecutable - currentRound <= 0;
+          const remainingEra = scheduledRequest.whenExecutable - (currentRound + 1);
+          const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
+          const claimable = Object.values(scheduledRequest.action)[0];
+
+          unstakingMap[delegation.owner] = {
+            chain: chainInfo.slug,
+            status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+            validatorAddress: delegation.owner,
+            claimable: claimable.toString(),
+            waitingTime: waitingTime > 0 ? waitingTime : 0
+          } as UnstakingInfo;
+
+          hasUnstaking = true;
+          break; // only handle 1 scheduledRequest per collator
+        }
+      }
+    }
+
+    const bnStake = new BN(delegation.amount);
+    const bnUnstakeBalance = unstakingMap[delegation.owner] ? new BN(unstakingMap[delegation.owner].claimable) : BN_ZERO;
+
+    const bnActiveStake = bnStake.sub(bnUnstakeBalance);
+
+    if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegation))) {
+      delegationStatus = StakingStatus.EARNING_REWARD;
+    }
+
+    bnTotalActiveStake = bnTotalActiveStake.add(bnActiveStake);
+
+    nominationList.push({
+      chain: chainInfo.slug,
+      status: delegationStatus,
+      validatorAddress: delegation.owner,
+      validatorIdentity: identity,
+      activeStake: bnActiveStake.toString(),
+      hasUnstaking,
+      validatorMinStake: collatorInfo.lowestTopDelegationAmount.toString()
+    });
+  }));
+
+  // await Promise.all(nominationList.map(async (nomination) => {
+  //   const _collatorInfo = await substrateApi.api.query.parachainStaking.candidateInfo(nomination.validatorAddress);
+  //   const collatorInfo = _collatorInfo.toPrimitive() as unknown as ParachainStakingCandidateMetadata;
+  //
+  //   nomination.validatorMinStake = collatorInfo.lowestTopDelegationAmount.toString();
+  // }));
+
+  const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
+
+  return {
+    chain: chainInfo.slug,
+    type: StakingType.NOMINATED,
+    status: stakingStatus,
+    address: address,
+    activeStake: bnTotalActiveStake.toString(),
+
+    nominations: nominationList,
+    unstakings: Object.values(unstakingMap)
+  } as NominatorMetadata;
+}
+
 export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (_isChainEvmCompatible(chainInfo) && !isEthereumAddress(address)) {
     return;
@@ -181,7 +295,15 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
   const delegatorState = _delegatorState.toPrimitive() as unknown as PalletParachainStakingDelegator;
 
   if (!delegatorState) {
-    return;
+    return {
+      chain: chainInfo.slug,
+      type: StakingType.NOMINATED,
+      address,
+      status: StakingStatus.NOT_STAKING,
+      activeStake: '0',
+      nominations: [],
+      unstakings: []
+    } as NominatorMetadata;
   }
 
   let bnTotalActiveStake = BN_ZERO;

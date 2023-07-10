@@ -3,9 +3,10 @@
 
 import { TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { fetchMultiChainHistories } from '@subwallet/extension-base/services/history-service/subsquid-multi-chain-history';
-import { TEST_CHAIN_MAP } from '@subwallet/extension-base/test/chainMap';
+import { TEST_CHAIN_MAP } from '@subwallet/extension-base/services/history-service/testChainMap';
 
 jest.setTimeout(50000);
+
 describe('TestFetchMultiChainHistories', () => {
   let fetchingRs: TransactionHistoryItem[];
 

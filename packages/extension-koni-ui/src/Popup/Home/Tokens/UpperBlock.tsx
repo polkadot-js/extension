@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
-import { ArrowFatLinesDown, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import { CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -28,6 +29,8 @@ function Component (
     totalChangePercent,
     totalChangeValue,
     totalValue }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
       <Number
@@ -66,13 +69,14 @@ function Component (
       <div className={'__action-button-container'}>
         <Button
           icon={<Icon
-            phosphorIcon={ArrowFatLinesDown}
+            phosphorIcon={CopySimple}
             size={isShrink ? 'sm' : 'md' }
             weight={'duotone'}
           />}
           onClick={onOpenReceive}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
+          tooltip={t('Get address')}
         />
         <div className={'__button-space'} />
         <Button
@@ -84,6 +88,7 @@ function Component (
           onClick={onOpenSendFund}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
+          tooltip={t('Send tokens')}
         />
         <div className={'__button-space'} />
         <Button
@@ -97,6 +102,7 @@ function Component (
           onClick={onOpenBuyTokens}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
+          tooltip={t('Buy token')}
         />
       </div>
     </div>

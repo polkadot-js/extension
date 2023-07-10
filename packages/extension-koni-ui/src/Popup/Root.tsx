@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { BackgroundExpandView, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -32,9 +32,10 @@ const tokenUrl = '/home/tokens';
 const loginUrl = '/keyring/login';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
+const sercurityUrl = '/settings/security';
 
 const baseAccountPath = '/accounts';
-const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-parity-signer', 'connect-keystone', 'connect-ledger'];
+const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
 
@@ -43,9 +44,10 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const navigate = useNavigate();
   const { goBack, goHome } = useDefaultNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
+  const notify = useNotification();
+
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
-  const notify = useNotification();
 
   const needMigrate = useMemo(
     () => !!accounts
@@ -106,14 +108,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       }
     } else if (!hasMasterPassword) {
       if (isNoAccount(accounts)) {
-        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl].includes(pathName)) {
+        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
           navigate(welcomeUrl);
         }
       } else {
         navigate(createPasswordUrl);
       }
     } else if (isNoAccount(accounts)) {
-      if (![...allowImportAccountUrls, welcomeUrl].includes(pathName)) {
+      if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
         navigate(welcomeUrl);
       }
     } else if (pathName === DEFAULT_ROUTER_PATH) {
@@ -133,7 +135,9 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     }
   }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
 
-  return <>{children}</>;
+  return <>
+    {children}
+  </>;
 }
 
 const Main = styled.main`
@@ -151,7 +155,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
       <PageWrapper
         animateOnce={true}
         className={'main-page-container'}
-        resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings'])}
+        resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay'])}
       >
         <DefaultRoute>
           <Main className={className}>
@@ -159,6 +163,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
           </Main>
         </DefaultRoute>
       </PageWrapper>
+      <BackgroundExpandView />
     </WalletModalContext>
   );
 }

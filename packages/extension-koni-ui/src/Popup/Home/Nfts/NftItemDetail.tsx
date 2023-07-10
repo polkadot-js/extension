@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { CAMERA_CONTROLS_MODEL_VIEWER_PROPS, DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -9,12 +11,11 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetAccountInfoByAddress from '@subwallet/extension-koni-ui/hooks/screen/common/useGetAccountInfoByAddress';
-import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
-import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, Logo, ModalContext, SwModal } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
@@ -25,8 +26,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
-
-import ChainLogoMap from '../../../assets/logo';
 
 type Props = ThemeProps
 
@@ -57,7 +56,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const originChainInfo = useGetChainInfo(nftItem.chain);
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
-  const accountExternalUrl = useScanExplorerAddressUrl(nftItem.chain, nftItem.owner);
+  const accountExternalUrl = getExplorerLink(originChainInfo, nftItem.owner, 'account');
 
   useNavigateOnChangeAccount('/home/nfts/collections');
 
@@ -68,7 +67,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       if (owner?.isReadOnly) {
         notify({
-          message: t('The NFT owner is a read-only account, you cannot send the NFT with it'),
+          message: t('The NFT owner is a watch-only account, you cannot send the NFT with it'),
           type: 'info',
           duration: 3
         });
@@ -106,14 +105,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const originChainLogo = useCallback(() => {
     return (
-      <Image
-        height={token.fontSizeXL}
+      <Logo
+        network={originChainInfo.slug}
         shape={'circle'}
-        src={ChainLogoMap[nftItem.chain]}
-        width={token.fontSizeXL}
+        size={token.fontSizeXL}
       />
     );
-  }, [nftItem.chain, token.fontSizeXL]);
+  }, [originChainInfo.slug, token.fontSizeXL]);
 
   const ownerInfo = useCallback(() => {
     return (
@@ -175,6 +173,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [nftItem.externalUrl]);
 
+  const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
+
   return (
     <PageWrapper
       className={`${className}`}
@@ -195,13 +195,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Image
               className={CN({ clickable: nftItem.externalUrl })}
               height={358}
+              modelViewerProps={show3DModel ? { ...DEFAULT_MODEL_VIEWER_PROPS, ...CAMERA_CONTROLS_MODEL_VIEWER_PROPS } : undefined}
               onClick={onImageClick}
               src={nftItem.image}
+              width={ show3DModel ? 358 : undefined}
             />
           </div>
 
           <div className={'nft_item_detail__info_container'}>
-            <div className={'nft_item_detail__section_title'}>{t<string>('NFT information')}</div>
+            <div className={'nft_item_detail__section_title'}>{t<string>('NFT details')}</div>
             {
               nftItem.description && (
                 <div
@@ -240,7 +242,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
             <Field
               content={originChainInfo.name}
-              label={t<string>('Chain')}
+              label={t<string>('Network')}
               prefix={originChainLogo()}
             />
           </div>
@@ -278,7 +280,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             />}
             onClick={onClickSend}
           >
-            <span className={'nft_item_detail__send_text'}>Send</span>
+            <span className={'nft_item_detail__send_text'}>{t('Send')}</span>
           </Button>
         </div>
 
@@ -429,7 +431,12 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
     '.nft_item_detail__nft_image': {
       display: 'flex',
       justifyContent: 'center',
-      width: '100%'
+      width: '100%',
+
+      '.ant-image-img': {
+        maxWidth: '100%',
+        objectFit: 'cover'
+      }
     }
   });
 });

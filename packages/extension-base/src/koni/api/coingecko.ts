@@ -18,10 +18,6 @@ export const getTokenPrice = async (priceIds: Array<string>, currency = 'usd'): 
     const idStr = priceIds.join(',');
     const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=1000&ids=${idStr}`);
 
-    if (res.status !== 200) {
-      console.warn('Failed to get token price');
-    }
-
     const responseData = res.data as Array<GeckoItem>;
     const priceMap: Record<string, number> = {};
     const price24hMap: Record<string, number> = {};
@@ -45,7 +41,7 @@ export const getTokenPrice = async (priceIds: Array<string>, currency = 'usd'): 
       price24hMap
     } as PriceJson;
   } catch (err) {
-    console.error('Failed to get token price', err);
+    console.error(err);
     throw err;
   }
 };

@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { EventService } from '@subwallet/extension-base/services/event-service';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
-import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
+import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MetadataStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
+import BaseStore from '@subwallet/extension-base/services/storage-service/db-stores/BaseStore';
 import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
+import MantaPayStore from '@subwallet/extension-base/services/storage-service/db-stores/MantaPay';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
 import { reformatAddress } from '@subwallet/extension-base/utils';
@@ -22,9 +25,12 @@ export default class DatabaseService {
   private nftSubscription: Subscription | undefined;
   private stakingSubscription: Subscription | undefined;
 
-  constructor () {
+  constructor (private eventService: EventService) {
     this.logger = createLogger('DB-Service');
     this._db = new KoniDatabase();
+    this._db.on('ready', () => {
+      this.eventService.emit('database.ready', true);
+    });
     this.stores = {
       price: new PriceStore(this._db.price),
       balance: new BalanceStore(this._db.balances),
@@ -35,12 +41,15 @@ export default class DatabaseService {
       transaction: new TransactionStore(this._db.transactions),
       migration: new MigrationStore(this._db.migrations),
 
+      metadata: new MetadataStore(this._db.metadata),
       chain: new ChainStore(this._db.chain),
       asset: new AssetStore(this._db.asset),
 
       // staking
       chainStakingMetadata: new ChainStakingMetadataStore(this._db.chainStakingMetadata),
-      nominatorMetadata: new NominatorMetadataStore(this._db.nominatorMetadata)
+      nominatorMetadata: new NominatorMetadataStore(this._db.nominatorMetadata),
+
+      mantaPay: new MantaPayStore(this._db.mantaPay)
     };
   }
 
@@ -54,6 +63,8 @@ export default class DatabaseService {
 
       return rs;
     } catch (e) {
+      this.logger.error(e);
+
       return undefined;
     }
   }
@@ -65,27 +76,19 @@ export default class DatabaseService {
 
   async updateBalanceStore (address: string, item: BalanceItem) {
     if (item.state === APIItemState.READY) {
-      // this.logger.log(`Updating balance for [${item.tokenSlug}]`);
-
       return this.stores.balance.upsert({ address, ...item } as IBalance);
     }
   }
 
   async removeFromBalanceStore (assets: string[]) {
-    this.logger.log('Bulk removing AssetStore');
-
     return this.stores.balance.removeBySlugs(assets);
   }
 
   // Crowdloan
   async updateCrowdloanStore (chain: string, address: string, item: CrowdloanItem) {
     if (item.state === APIItemState.READY && item.contribute !== '0') {
-      // this.logger.log(`Updating crowdloan for [${chain}]`);
-
       return this.stores.crowdloan.upsert({ chain, address, ...item } as ICrowdloanItem);
     } else {
-      // this.logger.debug(`Removing crowdloan for [${chain}]`);
-
       return this.stores.crowdloan.deleteByChainAndAddress(chain, address);
     }
   }
@@ -93,15 +96,11 @@ export default class DatabaseService {
   // Staking
   async updateStaking (chain: string, address: string, item: StakingItem) {
     if (item.state === APIItemState.READY) {
-      // this.logger.log(`Updating staking for [${chain}]`);
-
       return this.stores.staking.upsert(item);
     }
   }
 
   async getStakings (addresses: string[], chains?: string[]) {
-    // this.logger.log('Get Stakings: ', stakings);
-
     return this.stores.staking.getStakings(addresses, chains);
   }
 
@@ -110,8 +109,6 @@ export default class DatabaseService {
   }
 
   async getPooledStakings (addresses: string[], chainHashes?: string[]) {
-    // this.logger.log('Get Pooled Stakings: ', stakings);
-
     return this.stores.staking.getPooledStakings(addresses, chainHashes);
   }
 
@@ -131,8 +128,8 @@ export default class DatabaseService {
     }));
   }
 
-  subscribeNominatorMetadata (callback: (data: NominatorMetadata[]) => void) {
-    this.stores.nominatorMetadata.subscribeAll().subscribe(({
+  subscribeNominatorMetadata (addresses: string[], callback: (data: NominatorMetadata[]) => void) {
+    return this.stores.nominatorMetadata.subscribeByAddresses(addresses).subscribe(({
       next: (data) => callback && callback(data)
     }));
   }
@@ -143,14 +140,12 @@ export default class DatabaseService {
   }
 
   async upsertHistory (histories: TransactionHistoryItem[]) {
-    // this.logger.log('Updating transaction histories');
     const cleanedHistory = histories.filter((x) => x && x.address && x.chain && x.extrinsicHash);
 
     return this.stores.transaction.bulkUpsert(cleanedHistory);
   }
 
-  async updateHistoryByNewExtrinsicHash (extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
-    // this.logger.log('Updating transaction histories');
+  async updateHistoryByExtrinsicHash (extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
     const canUpdate = updateData && extrinsicHash;
 
     if (!canUpdate) {
@@ -162,8 +157,6 @@ export default class DatabaseService {
 
   // NFT Collection
   async addNftCollection (collection: NftCollection) {
-    // this.logger.log(`Updating NFT collection for [${collection.chain}]`);
-
     return this.stores.nftCollection.upsert(collection);
   }
 
@@ -189,25 +182,17 @@ export default class DatabaseService {
 
   async cleanUpNft (chain: string, owner: string, collectionIds: string[], nftIds: string[], ownNothing?: boolean) {
     if (ownNothing) {
-      return this.stores.nft.deleteNftsByChainAndOwner(chain, reformatAddress(owner, 42));
+      return this.stores.nft.deleteNftsByChainAndOwner(chain, reformatAddress(owner, 42), collectionIds);
     }
 
-    const result = await this.stores.nft.cleanUpNfts(chain, reformatAddress(owner, 42), collectionIds, nftIds);
-
-    result > 0 && console.debug(`Cleaned up ${result} NFTs on chain ${chain} for owner ${reformatAddress(owner, 42)}`, collectionIds, nftIds);
-
-    return result;
+    return this.stores.nft.cleanUpNfts(chain, reformatAddress(owner, 42), collectionIds, nftIds);
   }
 
   async getNft (addresses: string[], chainHashes?: string[]) {
-    // this.logger.log('Get NFTs: ', nfts);
-
     return this.stores.nft.getNft(addresses, chainHashes);
   }
 
   async addNft (address: string, nft: NftItem) {
-    // this.logger.log(`Updating NFT for [${nft.chain}]`);
-
     return this.stores.nft.upsert({ ...nft, address } as INft);
   }
 
@@ -216,58 +201,46 @@ export default class DatabaseService {
   }
 
   removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
-    // this.logger.log(`Remove NFTs [${nftIds.join(', ')}]`);
-
     return this.stores.nft.removeNfts(chain, address, collectionId, nftIds);
   }
 
   // Chain
   async updateChainStore (item: IChain) {
-    // this.logger.log(`Updating storageInfo for chain [${item.slug}]`);
-
     return this.stores.chain.upsert(item);
   }
 
   async bulkUpdateChainStore (data: IChain[]) {
-    // this.logger.log('Bulk updating ChainStore');
-
     return this.stores.chain.bulkUpsert(data);
   }
 
   async removeFromChainStore (chains: string[]) {
-    // this.logger.log('Bulk removing ChainStore');
-
     return this.stores.chain.removeChains(chains);
   }
 
   async getAllChainStore () {
-    // this.logger.log('Get all chains: ', allChains);
-
     return this.stores.chain.getAll();
   }
 
   // Asset
   async updateAssetStore (item: _ChainAsset) {
-    // this.logger.log(`Updating storageInfo for chainAsset [${item.originChain}]`);
-
     return this.stores.asset.upsert(item);
   }
 
   async getAllAssetStore () {
-    // this.logger.log('Get all stored assets: ', allAssets);
-
     return this.stores.asset.getAll();
   }
 
   async removeFromAssetStore (items: string[]) {
-    // this.logger.log('Bulk removing AssetStore');
-
     return this.stores.asset.removeAssets(items);
   }
 
   // Staking
-  async updateChainStakingMetadata (item: ChainStakingMetadata) {
-    // this.logger.log('Update ChainStakingMetadata: ', item.chain);
+  async updateChainStakingMetadata (item: ChainStakingMetadata, changes?: Record<string, unknown>) {
+    const existingRecord = await this.stores.chainStakingMetadata.getByChainAndType(item.chain, item.type);
+
+    if (existingRecord && changes) {
+      return this.stores.chainStakingMetadata.updateByChainAndType(item.chain, item.type, changes);
+    }
 
     return this.stores.chainStakingMetadata.upsert(item);
   }
@@ -281,12 +254,69 @@ export default class DatabaseService {
   }
 
   async updateNominatorMetadata (item: NominatorMetadata) {
-    // this.logger.log('Update NominatorMetadata: ', item.address, item.chain);
-
     return this.stores.nominatorMetadata.upsert(item);
   }
 
   async getNominatorMetadata () {
     return this.stores.nominatorMetadata.getAll();
+  }
+
+  async resetWallet (resetAll: boolean): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const stores: BaseStore<unknown>[] = [
+        this.stores.balance,
+        this.stores.nft,
+        this.stores.nftCollection,
+        this.stores.crowdloan,
+        this.stores.staking,
+        this.stores.transaction,
+        this.stores.nominatorMetadata
+      ];
+
+      if (resetAll) {
+        stores.push(this.stores.chain, this.stores.asset);
+      }
+
+      const promises = stores.map((store) => store.clear());
+
+      Promise.all(promises)
+        .then(() => {
+          resolve();
+        })
+        .catch((e) => {
+          reject(e);
+        });
+    });
+  }
+
+  async setMantaPayData (data: any) {
+    await this._db.mantaPay.put(data); // just override if exist
+  }
+
+  async updateMantaPayData (key: string, data: Record<string, any>) {
+    await this._db.mantaPay.update(key, data); // just override if exist
+  }
+
+  async getMantaPayData (key: string) {
+    return this._db.mantaPay.get({ key });
+  }
+
+  async deleteMantaPayConfig (key: string) {
+    return this.stores.mantaPay.deleteRecord(key);
+  }
+
+  subscribeMantaPayConfig (chain: string, callback: (data: MantaPayConfig[]) => void) {
+    this.stores.mantaPay.subscribeMantaPayConfig(chain).subscribe(({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      next: (data) => callback && callback(data)
+    }));
+  }
+
+  async getMantaPayConfig (chain: string) {
+    return this.stores.mantaPay.getConfig(chain);
+  }
+
+  async getMantaPayFirstConfig (chain: string) {
+    return this.stores.mantaPay.getFirstConfig(chain);
   }
 }

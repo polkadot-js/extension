@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getTransactionLink } from '@subwallet/extension-base/services/transaction-service/utils';
+import { ExtrinsicType, TransactionAdditionalInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { InfoItemBase } from '@subwallet/extension-koni-ui/components';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -44,8 +45,17 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
       return null;
     }
 
+    const extrinsicType = data.type;
     const chainInfo = chainInfoMap[data.chain];
-    const link = (data.extrinsicHash && data.extrinsicHash !== '') && getTransactionLink(chainInfo, data.extrinsicHash);
+    let originChainInfo = chainInfo;
+
+    if (extrinsicType === ExtrinsicType.TRANSFER_XCM && data.additionalInfo) {
+      const additionalInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.TRANSFER_XCM>;
+
+      originChainInfo = chainInfoMap[additionalInfo.originalChain] || chainInfo;
+    }
+
+    const link = (data.extrinsicHash && data.extrinsicHash !== '') && getExplorerLink(originChainInfo, data.extrinsicHash, 'tx');
 
     return (
       <Button

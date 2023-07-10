@@ -98,5 +98,7 @@ export * from './chain';
 export * from './confirmation';
 export * from './form';
 export * from './history';
+export * from './ledger';
 export * from './navigation';
 export * from './staking';
+export * from './walletConnect';

@@ -4,26 +4,27 @@
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { DEFAULT_ACCOUNT_TYPES, SELECTED_CREATE_ACCOUNT_TYPE_KEY } from '@subwallet/extension-koni-ui/constants/account';
 import { NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import { useIsPopup } from '@subwallet/extension-koni-ui/hooks';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { createAccountSuriV2, createSeedV2 } from '@subwallet/extension-koni-ui/messaging';
+import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { NewSeedPhraseState } from '@subwallet/extension-koni-ui/types/account';
+import { isFirefox } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -40,7 +41,6 @@ const FooterIcon = (
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
   const { t } = useTranslation();
-  const location = useLocation();
   const notify = useNotification();
   const navigate = useNavigate();
 
@@ -49,9 +49,19 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
+  const isPopup = useIsPopup();
 
-  const { accounts } = useSelector((state: RootState) => state.accountState);
-  const [accountTypes] = useState<KeypairType[]>((location.state as NewSeedPhraseState)?.accountTypes || []);
+  const { accounts, hasMasterPassword } = useSelector((state: RootState) => state.accountState);
+
+  const isOpenWindowRef = useRef(false);
+
+  const [accountTypes] = useState<KeypairType[]>(() => {
+    const storage = localStorage.getItem(SELECTED_CREATE_ACCOUNT_TYPE_KEY);
+
+    const types = storage ? JSON.parse(storage) as KeypairType[] : DEFAULT_ACCOUNT_TYPES;
+
+    return types.length ? types : DEFAULT_ACCOUNT_TYPES;
+  });
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);
@@ -96,7 +106,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [seedPhrase, accountName, accountTypes, onComplete, notify]);
 
   useEffect(() => {
-    createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
+    createSeedV2(undefined, undefined, DEFAULT_ACCOUNT_TYPES)
       .then((response): void => {
         const phrase = response.seed;
 
@@ -107,6 +117,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       });
   }, []);
 
+  useEffect(() => {
+    if (isPopup && isFirefox() && hasMasterPassword && !isOpenWindowRef.current) {
+      isOpenWindowRef.current = true;
+      windowOpen({ allowedPath: '/accounts/new-seed-phrase' }).then(window.close).catch(console.log);
+    }
+  }, [isPopup, hasMasterPassword]);
+
   return (
     <PageWrapper
       className={CN(className)}
@@ -115,7 +132,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         rightFooterButton={{
-          children: t('I have saved it somewhere safe'),
+          children: t('I have kept it somewhere safe'),
           icon: FooterIcon,
           onClick: _onCreate,
           disabled: !seedPhrase,
@@ -127,13 +144,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onClick: goHome
           }
         ]}
-        title={t<string>('Your recovery phrase')}
+        title={t('Your seed phrase')}
       >
         <div className={'container'}>
           <div className='description'>
-            {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
+            {t('Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.')}
           </div>
-          <WordPhrase seedPhrase={seedPhrase} />
+          <WordPhrase
+            enableDownload={true}
+            seedPhrase={seedPhrase}
+          />
         </div>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>

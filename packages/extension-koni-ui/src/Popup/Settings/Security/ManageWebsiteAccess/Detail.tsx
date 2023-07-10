@@ -3,9 +3,7 @@
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
-import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
+import { AccountItemWithName, EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ActionItemType, ActionModal } from '@subwallet/extension-koni-ui/components/Modal/ActionModal';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { changeAuthorization, changeAuthorizationPerAccount, forgetSite, toggleAuthorization } from '@subwallet/extension-koni-ui/messaging';
@@ -13,7 +11,6 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateAuthUrls } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ManageWebsiteAccessDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { filterNotReadOnlyAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Icon, ModalContext, Switch, SwList } from '@subwallet/react-ui';
 import { GearSix, MagnifyingGlass, Plugs, PlugsConnected, ShieldCheck, ShieldSlash, X } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -41,7 +38,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const accountItems = useMemo(() => {
-    const accountListWithoutAll = filterNotReadOnlyAccount(accounts.filter((opt) => opt.address !== 'ALL'));
+    const accountListWithoutAll = accounts.filter((opt) => opt.address !== 'ALL');
 
     if (accountAuthType === 'substrate') {
       return accountListWithoutAll.filter((acc) => !isEthereumAddress(acc.address));
@@ -82,7 +79,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
         key: 'forget-site',
         icon: X,
         iconBackgroundColor: token.colorWarning,
-        title: t('Forget site'),
+        title: t('Forget this site'),
         onClick: () => {
           forgetSite(origin, updateAuthUrls).catch(console.error);
           onCloseActionModal();
@@ -96,7 +93,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
           key: 'disconnect-all',
           icon: Plugs,
           iconBackgroundColor: token['gray-3'],
-          title: t('Disconnect all'),
+          title: t('Disconnect all accounts'),
           onClick: () => {
             changeAuthorization(false, origin, updateAuthUrls).catch(console.error);
             onCloseActionModal();
@@ -106,7 +103,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
           key: 'connect-all',
           icon: PlugsConnected,
           iconBackgroundColor: token['green-6'],
-          title: t('Connect all'),
+          title: t('Connect all accounts'),
           onClick: () => {
             changeAuthorization(true, origin, updateAuthUrls).catch(console.error);
             onCloseActionModal();
@@ -207,7 +204,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
             onClick: onOpenActionModal
           }
         ]}
-        title={siteName}
+        title={siteName || authInfo.id}
       >
         <SwList.Section
           displayRow
@@ -226,7 +223,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
           className={`${className} action-modal`}
           id={ActionModalId}
           onCancel={onCloseActionModal}
-          title={t('Website access config')}
+          title={t('dApp configuration')}
         />
       </Layout.WithSubHeaderOnly>
     </PageWrapper>

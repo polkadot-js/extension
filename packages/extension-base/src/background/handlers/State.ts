@@ -6,14 +6,16 @@ import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } fr
 import type { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
 
 import { RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
-import { DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from '@subwallet/extension-base/services/setting-service/constants';
+import { DEFAULT_SETTING } from '@subwallet/extension-base/services/setting-service/constants';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
+import { stripUrl } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@subwallet/extension-chains';
 import { BehaviorSubject } from 'rxjs';
 
 import { knownGenesis } from '@polkadot/networks/defaults';
 import { assert } from '@polkadot/util';
+import { HexString } from '@polkadot/util/types';
 
 import { MetadataStore } from '../../stores';
 import { withErrorLog } from './helpers';
@@ -98,11 +100,11 @@ function extractMetadata (store: MetadataStore): void {
     Object
       .entries(map)
       .forEach(([key, def]): void => {
-        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash));
+        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash as HexString));
 
         if (entry) {
           const [name, hashes] = entry;
-          const index = hashes.indexOf(def.genesisHash);
+          const index = hashes.indexOf(def.genesisHash as HexString);
 
           // flatten the known metadata based on the genesis index
           // (lower is better/newer)
@@ -218,13 +220,7 @@ export default class State {
       if (!value) {
         update(
           {
-          // language: 'en',
-            browserConfirmationType: DEFAULT_NOTIFICATION_TYPE,
-            // isShowZeroBalance: true,
-            isShowBalance: false,
-            accountAllLogo: '',
-            theme: DEFAULT_THEME,
-            camera: false
+            ...DEFAULT_SETTING
           }
         );
       } else {
@@ -274,7 +270,7 @@ export default class State {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
       const isAllowedMap = {};
 
-      this.#authUrls[this.stripUrl(url)] = {
+      this.#authUrls[stripUrl(url)] = {
         count: 0,
         id: idStr,
         isAllowed,
@@ -340,14 +336,6 @@ export default class State {
     };
   };
 
-  public stripUrl (url: string): string {
-    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
-
-    const parts = url.split('/');
-
-    return parts[2];
-  }
-
   private updateIcon (shouldClose?: boolean): void {
     const authCount = this.numAuthRequests;
     const metaCount = this.numMetaRequests;
@@ -394,7 +382,7 @@ export default class State {
   }
 
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
-    const idStr = this.stripUrl(url);
+    const idStr = stripUrl(url);
 
     // Do not enqueue duplicate authorization requests.
     const isDuplicate = Object.values(this.#authRequests)
@@ -426,7 +414,7 @@ export default class State {
   }
 
   public ensureUrlAuthorized (url: string): boolean {
-    const entry = this.#authUrls[this.stripUrl(url)];
+    const entry = this.#authUrls[stripUrl(url)];
 
     assert(entry, `The source ${url} has not been enabled yet`);
     assert(entry.isAllowed, `The source ${url} is not allowed to interact with this extension`);
@@ -471,7 +459,7 @@ export default class State {
     }, {} as ResponseRpcListProviders));
   }
 
-  public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+  public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse<unknown>> {
     const provider = this.#injectedProviders.get(port);
 
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');

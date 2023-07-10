@@ -72,7 +72,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     inactiveModal(modalId);
 
     if (isPopup) {
-      windowOpen('/accounts/connect-ledger').catch(console.error);
+      windowOpen({ allowedPath: '/accounts/connect-ledger' }).catch(console.error);
     } else {
       navigate('accounts/connect-ledger');
     }
@@ -83,31 +83,31 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       backgroundColor: token['orange-7'],
       icon: Swatches,
       key: 'connect-ledger',
-      label: 'Connect Ledger device',
+      label: t('Connect a Ledger device'),
       onClick: onClickLedger
     },
     {
       backgroundColor: token['magenta-7'],
       icon: QrCode,
-      key: 'connect-parity-signer',
-      label: 'Connect Parity signer account',
-      onClick: onClickItem('accounts/connect-parity-signer')
+      key: 'connect-polkadot-vault',
+      label: t('Connect a Polkadot Vault account'),
+      onClick: onClickItem('accounts/connect-polkadot-vault')
     },
     {
       backgroundColor: token['blue-7'],
       icon: DeviceTabletCamera,
       key: 'connect-keystone',
-      label: 'Connect Keystone device',
+      label: t('Connect a Keystone device'),
       onClick: onClickItem('accounts/connect-keystone')
     },
     {
       backgroundColor: token['green-7'],
       icon: Eye,
       key: 'attach-read-only',
-      label: 'Attach watch-only account',
+      label: t('Attach a watch-only account'),
       onClick: onClickItem('accounts/attach-read-only')
     }
-  ]), [token, onClickItem, onClickLedger]);
+  ]), [t, token, onClickItem, onClickLedger]);
 
   return (
     <SwModal
@@ -120,7 +120,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         icon: <CloseIcon />,
         onClick: onCancel
       }}
-      title={t<string>('Attach account')}
+      title={t<string>('Attach an account')}
     >
       <div className='items-container'>
         {items.map((item) => {
@@ -130,7 +130,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               onClick={item.onClick}
             >
               <SettingItemSelection
-                label={t<string>(item.label)}
+                label={item.label}
                 leftItemIcon={renderIcon(item)}
               />
             </div>

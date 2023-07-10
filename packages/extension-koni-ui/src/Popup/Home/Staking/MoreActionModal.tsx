@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, ExtrinsicType, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
-import { useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -156,7 +156,7 @@ const Component: React.FC<Props> = (props: Props) => {
           action: StakingAction.UNSTAKE,
           backgroundIconColor: 'magenta-6',
           icon: MinusCircle,
-          label: 'Unstake funds',
+          label: 'Unstake',
           onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
         };
       } else if (action === StakingAction.WITHDRAW) {
@@ -164,7 +164,7 @@ const Component: React.FC<Props> = (props: Props) => {
           action: StakingAction.WITHDRAW,
           backgroundIconColor: 'geekblue-6',
           icon: ArrowCircleDown,
-          label: 'Withdraw',
+          label: 'Withdraw unstaked funds',
           onClick: handleWithdrawalAction
         };
       } else if (action === StakingAction.CLAIM_REWARD) {
@@ -180,7 +180,7 @@ const Component: React.FC<Props> = (props: Props) => {
           action: StakingAction.CANCEL_UNSTAKE,
           backgroundIconColor: 'purple-8',
           icon: ArrowArcLeft,
-          label: 'Cancel unstake',
+          label: 'Cancel unstaking',
           onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
         };
       }
@@ -195,7 +195,27 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
 
-  const onPreCheck = usePreCheckReadOnly(currentAccount?.address);
+  const onPreCheck = usePreCheckAction(currentAccount?.address, false);
+
+  const convertStakingActionToExtrinsicType = useCallback((action: StakingAction): ExtrinsicType => {
+    const isPool = nominatorMetadata.type === StakingType.POOLED;
+
+    switch (action) {
+      case StakingAction.STAKE:
+        return isPool ? ExtrinsicType.STAKING_BOND : ExtrinsicType.STAKING_JOIN_POOL;
+      case StakingAction.UNSTAKE:
+        return isPool ? ExtrinsicType.STAKING_UNBOND : ExtrinsicType.STAKING_LEAVE_POOL;
+      case StakingAction.WITHDRAW:
+        return isPool ? ExtrinsicType.STAKING_WITHDRAW : ExtrinsicType.STAKING_POOL_WITHDRAW;
+      case StakingAction.CLAIM_REWARD:
+        return ExtrinsicType.STAKING_CLAIM_REWARD;
+      case StakingAction.CANCEL_UNSTAKE:
+        return ExtrinsicType.STAKING_CANCEL_UNSTAKE;
+      default:
+        return ExtrinsicType.UNKNOWN;
+    }
+  }, [nominatorMetadata.type]);
+
   const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
     const _onClick = () => {
       setSelected(action);
@@ -203,9 +223,9 @@ const Component: React.FC<Props> = (props: Props) => {
     };
 
     return () => {
-      onPreCheck(_onClick)();
+      onPreCheck(_onClick, convertStakingActionToExtrinsicType(action))();
     };
-  }, [onPreCheck]);
+  }, [convertStakingActionToExtrinsicType, onPreCheck]);
 
   return (
     <SwModal

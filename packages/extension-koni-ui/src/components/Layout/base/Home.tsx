@@ -6,6 +6,7 @@ import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
 import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
 
 const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, showSearchIcon, showTabBar }: Props) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { activeModal } = useContext(ModalContext);
 
   const onOpenCustomizeModal = useCallback(() => {
@@ -36,7 +38,9 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
             size='md'
           />
         ),
-        onClick: onClickFilterIcon || onOpenCustomizeModal
+        onClick: onClickFilterIcon || onOpenCustomizeModal,
+        tooltip: t('Customize your asset display'),
+        tooltipPlacement: 'bottomRight'
       });
     }
 
@@ -48,12 +52,14 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
             size='md'
           />
         ),
-        onClick: onClickSearchIcon
+        onClick: onClickSearchIcon,
+        tooltip: t('Search a token'),
+        tooltipPlacement: 'bottomRight'
       });
     }
 
     return icons;
-  }, [onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon]);
+  }, [onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon, t]);
 
   const onClickListIcon = useCallback(() => {
     navigate('/settings/list');

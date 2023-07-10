@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AbstractAddressJson } from '@subwallet/extension-base/background/types';
+import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BackIcon } from '@subwallet/extension-koni-ui/components';
 import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -15,7 +15,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'reac
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { isAddress } from '@polkadot/util-crypto';
+import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { AccountItemWithName } from '../../Account';
 import GeneralEmptyList from '../../GeneralEmptyList';
@@ -26,6 +26,7 @@ interface Props extends ThemeProps {
   id: string;
   addressPrefix?: number;
   onSelect: (val: string) => void;
+  networkGenesisHash?: string;
 }
 
 enum AccountGroup {
@@ -57,8 +58,14 @@ const getGroupPriority = (item: AccountItem): number => {
   }
 };
 
+const checkLedger = (account: AccountJson, networkGenesisHash?: string): boolean => {
+  const isEvmAddress = isEthereumAddress(account.address);
+
+  return !networkGenesisHash || !account.isHardware || isEvmAddress || (account.availableGenesisHashes || []).includes(networkGenesisHash);
+};
+
 const Component: React.FC<Props> = (props: Props) => {
-  const { addressPrefix, className, id, onSelect, value = '' } = props;
+  const { addressPrefix, className, id, networkGenesisHash, onSelect, value = '' } = props;
 
   const { t } = useTranslation();
 
@@ -78,11 +85,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const filterOptions: FilterOption[] = useMemo(() => ([
     {
-      label: t('My wallet'),
+      label: t('Your wallet'),
       value: AccountGroup.WALLET
     },
     {
-      label: t('My contacts'),
+      label: t('Saved contacts'),
       value: AccountGroup.CONTACT
     },
     {
@@ -109,11 +116,15 @@ const Component: React.FC<Props> = (props: Props) => {
     (!selectedFilters.length || selectedFilters.includes(AccountGroup.WALLET)) && accounts.filter((acc) => !isAccountAll(acc.address)).forEach((acc) => {
       const address = isAddress(acc.address) ? reformatAddress(acc.address) : acc.address;
 
-      result.push({ ...acc, address: address, group: AccountGroup.WALLET });
+      if (checkLedger(acc, networkGenesisHash)) {
+        result.push({ ...acc, address: address, group: AccountGroup.WALLET });
+      }
     });
 
-    return result.sort(funcSortByName).sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
-  }, [accounts, contacts, recent, selectedFilters]);
+    return result
+      .sort(funcSortByName)
+      .sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
+  }, [accounts, contacts, networkGenesisHash, recent, selectedFilters]);
 
   const searchFunction = useCallback((item: AccountItem, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -128,14 +139,16 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClose = useCallback(() => {
     inactiveModal(id);
-  }, [id, inactiveModal]);
+    onResetFilter();
+  }, [id, inactiveModal, onResetFilter]);
 
   const onSelectItem = useCallback((item: AccountItem) => {
     return () => {
       inactiveModal(id);
       onSelect(item.address);
+      onResetFilter();
     };
-  }, [id, inactiveModal, onSelect]);
+  }, [id, inactiveModal, onResetFilter, onSelect]);
 
   const renderItem = useCallback((item: AccountItem) => {
     const address = formatAddress(item);
@@ -160,10 +173,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
     switch (_group) {
       case AccountGroup.WALLET:
-        groupLabel = t('My wallets');
+        groupLabel = t('Your wallet');
         break;
       case AccountGroup.CONTACT:
-        groupLabel = t('My contacts');
+        groupLabel = t('Saved contacts');
         break;
       case AccountGroup.RECENT:
         groupLabel = t('Recent');
@@ -199,12 +212,6 @@ const Component: React.FC<Props> = (props: Props) => {
       }, 100);
     }
   }, [isActive, sectionRef]);
-
-  useEffect(() => {
-    if (!isActive) {
-      onResetFilter();
-    }
-  }, [isActive, onResetFilter]);
 
   return (
     <>

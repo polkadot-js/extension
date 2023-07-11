@@ -54,7 +54,6 @@
   "devDependencies": {
     "@babel/cli": "^7.19.3",
     "@babel/core": "^7.19.3",
-    "@babel/plugin-syntax-import-assertions": "^7.22.5",
     "@polkadot/dev": "^0.65.23",
     "@types/jest": "^29.5.0",
     "axios": "^1.2.1",

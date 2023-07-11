@@ -21,10 +21,10 @@
     "@polkadot/extension-base": "0.46.6-1-x",
     "@polkadot/extension-inject": "0.46.6-1-x",
     "@polkadot/extension-ui": "0.46.6-1-x",
-    "tslib": "^2.5.3"
+    "tslib": "^2.6.0"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.75.19",
+    "@polkadot/dev": "^0.75.27",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",
@@ -35,7 +35,7 @@
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
-    "ts-loader": "^9.4.3",
+    "ts-loader": "^9.4.4",
     "url-loader": "^4.1.1",
     "webpack-extension-manifest-plugin": "^0.8.0"
   },

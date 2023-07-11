@@ -2,25 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
-import { getChainStakingMetadata, getNominatorMetadata, subscribeEssentialChainStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
-import { getRelayChainPoolMemberMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
+import { subscribeEssentialChainStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
 import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-base/koni/api/staking/paraChain';
 import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEnabled, _isChainEvmCompatible, _isChainSupportSubstrateStaking, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import { COMMON_RELOAD_EVENTS, EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import axios from 'axios';
+import { waitTimeout } from '@subwallet/extension-base/utils';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
-import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import KoniState from './handlers/State';
 
@@ -251,8 +247,7 @@ export class KoniSubscription {
     nftHandler.handleNfts(
       smartContractNfts,
       (...args) => this.state.updateNftData(...args),
-      (...args) => this.state.setNftCollection(...args),
-      (...args) => this.state.cleanUpNfts(...args)
+      (...args) => this.state.setNftCollection(...args)
     ).catch(this.logger.log);
   }
 
@@ -323,109 +318,11 @@ export class KoniSubscription {
     ]);
   }
 
-  async fetchingStakingFromApi (): Promise<Record<string, ChainStakingMetadata>> {
-    try {
-      const response = await axios.get('https://staking-data.subwallet.app/api/staking/get');
+  async reloadStaking () {
+    const currentAddress = this.state.keyringService.currentAccount?.address;
 
-      if (response.status === 200) {
-        return response.data as Record<string, ChainStakingMetadata>;
-      }
-    } catch (e) {
-      this.logger.error(e);
-    }
+    this.subscribeStakingOnChain(currentAddress, this.state.getSubstrateApiMap());
 
-    return {};
-  }
-
-  async fetchChainStakingMetadata (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
-    const filteredChainInfoMap: Record<string, _ChainInfo> = {};
-
-    Object.values(chainInfoMap).forEach((chainInfo) => {
-      const chainState = chainStateMap[chainInfo.slug];
-
-      if (chainState?.active && _isChainSupportSubstrateStaking(chainInfo)) {
-        filteredChainInfoMap[chainInfo.slug] = chainInfo;
-      }
-    });
-
-    if (Object.values(filteredChainInfoMap).length === 0) {
-      return;
-    }
-
-    const timeout = new Promise((resolve) => {
-      const id = setTimeout(() => {
-        clearTimeout(id);
-        resolve(null);
-      }, 3000);
-    });
-
-    // Fetch data from helper API
-    const _dataFromApi = await Promise.race([
-      this.fetchingStakingFromApi(),
-      timeout
-    ]);
-
-    const dataFromApi = _dataFromApi as Record<string, ChainStakingMetadata> | null;
-
-    await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
-      // Use fetch API data if available
-      if (dataFromApi && dataFromApi[chainInfo.slug]) {
-        this.state.updateChainStakingMetadata(dataFromApi[chainInfo.slug], {
-          expectedReturn: dataFromApi[chainInfo.slug].expectedReturn,
-          inflation: dataFromApi[chainInfo.slug].inflation,
-          nominatorCount: dataFromApi[chainInfo.slug].nominatorCount
-        });
-      } else {
-        const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
-
-        this.state.updateChainStakingMetadata(chainStakingMetadata, {
-          expectedReturn: chainStakingMetadata.expectedReturn,
-          inflation: chainStakingMetadata.inflation,
-          nominatorCount: chainStakingMetadata.nominatorCount
-        });
-      }
-    }));
-  }
-
-  async fetchNominatorMetadata (currentAddress: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
-    const filteredChainInfoMap: Record<string, _ChainInfo> = {};
-
-    Object.values(chainInfoMap).forEach((chainInfo) => {
-      const chainState = chainStateMap[chainInfo.slug];
-
-      if (chainState?.active && _isChainSupportSubstrateStaking(chainInfo)) {
-        filteredChainInfoMap[chainInfo.slug] = chainInfo;
-      }
-    });
-
-    let addresses = [currentAddress];
-
-    if (currentAddress === ALL_ACCOUNT_KEY) {
-      addresses = await this.state.getStakingOwnersByChains(Object.keys(filteredChainInfoMap));
-    }
-
-    await Promise.all(addresses.map(async (address) => {
-      const isEvmAddress = isEthereumAddress(address);
-
-      await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
-        if (isEvmAddress && !_isChainEvmCompatible(chainInfo)) {
-          return;
-        }
-
-        if (_isSubstrateRelayChain(chainInfo) && _STAKING_CHAIN_GROUP.nominationPool.includes(chainInfo.slug)) {
-          const poolMemberMetadata = await getRelayChainPoolMemberMetadata(chainInfo, address, substrateApiMap[chainInfo.slug]);
-
-          if (poolMemberMetadata) {
-            this.state.updateStakingNominatorMetadata(poolMemberMetadata);
-          }
-        }
-
-        const nominatorMetadata = await getNominatorMetadata(chainInfo, address, substrateApiMap[chainInfo.slug]);
-
-        if (nominatorMetadata) {
-          this.state.updateStakingNominatorMetadata(nominatorMetadata);
-        }
-      }));
-    }));
+    await waitTimeout(1800);
   }
 }

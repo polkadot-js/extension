@@ -376,8 +376,6 @@ export class WasmNftApi extends BaseNftApi {
       const balance = _balance.output ? ((balanceJson.ok || balanceJson.Ok) as string) : '0';
 
       if (parseInt(balance) === 0) {
-        nftParams.cleanUpNfts(this.chain, address, [smartContract], []);
-
         return;
       }
 
@@ -474,10 +472,6 @@ export class WasmNftApi extends BaseNftApi {
       } as NftCollection;
 
       nftParams.updateCollection(this.chain, nftCollection);
-
-      Object.entries(nftOwnerMap).forEach(([owner, nftIds]) => {
-        nftParams.cleanUpNfts(this.chain, owner, [smartContract], nftIds);
-      });
     }
   }
 

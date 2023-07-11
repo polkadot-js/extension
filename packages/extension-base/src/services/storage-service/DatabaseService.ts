@@ -204,6 +204,10 @@ export default class DatabaseService {
     return this.stores.nft.removeNfts(chain, address, collectionId, nftIds);
   }
 
+  removeNftsByAddress (address: string) {
+    return this.stores.nft.removeNftsByAddress([address]);
+  }
+
   // Chain
   async updateChainStore (item: IChain) {
     return this.stores.chain.upsert(item);

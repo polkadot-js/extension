@@ -104,8 +104,6 @@ export class EvmNftApi extends BaseNftApi {
       const balance = (await contract.methods.balanceOf(address).call()) as unknown as number;
 
       if (Number(balance) === 0) {
-        nftParams.cleanUpNfts(this.chain, address, [smartContract], []);
-
         return;
       }
 
@@ -175,9 +173,6 @@ export class EvmNftApi extends BaseNftApi {
       } as NftCollection;
 
       nftParams.updateCollection(this.chain, nftCollection);
-      Object.entries(nftOwnerMap).forEach(([owner, nftIds]) => {
-        nftParams.cleanUpNfts(this.chain, owner, [smartContract], nftIds);
-      });
     }
   }
 

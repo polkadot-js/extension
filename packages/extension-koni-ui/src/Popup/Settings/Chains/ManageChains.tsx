@@ -222,6 +222,17 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
       'button + button': {
         marginLeft: token.marginXS
       }
+    },
+
+    '.ant-web3-block .ant-web3-block-middle-item': {
+      width: 190
+    },
+
+    '.ant-network-item-name': {
+      overflow: 'hidden',
+      textWrap: 'nowrap',
+      textOverflow: 'ellipsis',
+      paddingRight: token.paddingXS
     }
   });
 });

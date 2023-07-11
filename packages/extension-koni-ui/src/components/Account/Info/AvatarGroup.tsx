@@ -59,7 +59,6 @@ const Component: React.FC<Props> = ({ accounts: _accounts, className }: Props) =
                 <SwAvatar
                   identPrefix={42}
                   size={showCount === 3 ? sizeAva.default : sizeAva.large}
-                  theme={account.type === 'ethereum' ? 'ethereum' : 'polkadot'}
                   value={account.address}
                 />
               </div>

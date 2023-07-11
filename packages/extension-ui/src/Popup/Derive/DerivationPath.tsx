@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { Button, InputWithLabel } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
 interface Props extends ThemeProps{
@@ -47,13 +47,13 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
             isError={isError || !path}
             label={
               isDisabled
-                ? t<string>('Derivation Path (unlock to edit)')
-                : t<string>('Derivation Path')
+                ? t('Derivation Path (unlock to edit)')
+                : t('Derivation Path')
             }
             onChange={_onChange}
             placeholder={withSoftPath
-              ? t<string>('//hard/soft')
-              : t<string>('//hard')
+              ? t('//hard/soft')
+              : t('//hard')
             }
             value={path}
           />

@@ -10,7 +10,7 @@ import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 import { u8aWrapBytes } from '@polkadot/util';
 
 import { Button } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 import { CMD_MORTAL, CMD_SIGN_MESSAGE } from './Request/index.js';
 
@@ -78,7 +78,7 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
           className='scanButton'
           onClick={_onShowQr}
         >
-          {t<string>('Scan signature via camera')}
+          {t('Scan signature via camera')}
         </Button>
       )}
     </div>

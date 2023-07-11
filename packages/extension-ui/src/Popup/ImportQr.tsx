@@ -9,7 +9,7 @@ import { QrScanAddress } from '@polkadot/react-qr';
 
 import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation.js';
 import { ActionContext, Address, ButtonArea, NextStepButton, VerticalSpace } from '../components/index.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import { createAccountExternal, createAccountSuri, createSeed } from '../messaging.js';
 import { Header, Name } from '../partials/index.js';
 
@@ -65,7 +65,7 @@ export default function ImportQr (): React.ReactElement {
     <>
       <Header
         showBackArrow
-        text={t<string>('Scan Address Qr')}
+        text={t('Scan Address Qr')}
       />
       {!account && (
         <div>
@@ -105,7 +105,7 @@ export default function ImportQr (): React.ReactElement {
               isDisabled={!name || (!account.isAddress && !password)}
               onClick={_onCreate}
             >
-              {t<string>('Add the account with identified address')}
+              {t('Add the account with identified address')}
             </NextStepButton>
           </ButtonArea>
         </>

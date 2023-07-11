@@ -6,7 +6,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
 
 import { ActionBar, ActionContext, Button, ButtonArea, Checkbox, Link } from '../../../components/index.js';
-import useTranslation from '../../../hooks/useTranslation.js';
+import { useTranslation } from '../../../hooks/index.js';
 import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging.js';
 import { styled } from '../../../styled.js';
 import Unlock from '../Unlock.js';
@@ -81,11 +81,11 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
     <Checkbox
       checked={savePass}
       label={ isLocked
-        ? t<string>(
+        ? t(
           'Remember my password for the next {{expiration}} minutes',
           { replace: { expiration: PASSWORD_EXPIRY_MIN } }
         )
-        : t<string>(
+        : t(
           'Extend the period without password by {{expiration}} minutes',
           { replace: { expiration: PASSWORD_EXPIRY_MIN } }
         )
@@ -123,7 +123,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
           isDanger
           onClick={_onCancel}
         >
-          {t<string>('Cancel')}
+          {t('Cancel')}
         </Link>
       </ActionBar>
     </ButtonArea>

@@ -8,7 +8,7 @@ import { faCopy } from '@fortawesome/free-regular-svg-icons';
 import React from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import { styled } from '../styled.js';
 import ActionText from './ActionText.js';
 import BoxWithLabel from './BoxWithLabel.js';
@@ -26,7 +26,7 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
     <div className={className}>
       <BoxWithLabel
         className='mnemonicDisplay'
-        label={t<string>('Generated 12-word mnemonic seed:')}
+        label={t('Generated 12-word mnemonic seed:')}
         value={seed}
       />
       <div className='buttonsRow'>
@@ -36,7 +36,7 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
             data-seed-action='copy'
             icon={faCopy}
             onClick={onCopy}
-            text={t<string>('Copy to clipboard')}
+            text={t('Copy to clipboard')}
           />
         </CopyToClipboard>
       </div>

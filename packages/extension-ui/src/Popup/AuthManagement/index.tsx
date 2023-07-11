@@ -7,7 +7,7 @@ import type { ThemeProps } from '../../types.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import InputFilter from '../../components/InputFilter.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { getAuthList, removeAuthorization } from '../../messaging.js';
 import { Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
@@ -48,19 +48,19 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
       <Header
         showBackArrow
         smallMargin
-        text={t<string>('Manage Website Access')}
+        text={t('Manage Website Access')}
       />
       <div className={className}>
         <InputFilter
           className='inputFilter'
           onChange={_onChangeFilter}
-          placeholder={t<string>('example.com')}
+          placeholder={t('example.com')}
           value={filter}
           withReset
         />
         {
           !authList || !hasAuthList
-            ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
+            ? <div className='empty-list'>{t('No website request yet!')}</div>
             : (
               <>
                 <div className='website-list'>

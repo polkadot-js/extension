@@ -6,7 +6,7 @@ import type { ThemeProps } from '../../types.js';
 import React, { useCallback, useContext } from 'react';
 
 import { ActionContext } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import Header from '../../partials/Header.js';
 import { styled } from '../../styled.js';
 import AddAccountImage from './AddAccountImage.js';
@@ -28,14 +28,14 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
       <Header
         showAdd
         showSettings
-        text={t<string>('Add Account')}
+        text={t('Add Account')}
       />
       <div className={className}>
         <div className='image'>
           <AddAccountImage onClick={_onClick} />
         </div>
         <div className='no-accounts'>
-          <p>{t<string>("You currently don't have any accounts. Create your first account to get started.")}</p>
+          <p>{t("You currently don't have any accounts. Create your first account to get started.")}</p>
         </div>
       </div>
     </>

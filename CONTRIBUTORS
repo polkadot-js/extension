@@ -1,4 +1,4 @@
-     622	Jaco                          	Use bytes wrapping from @polkadot/util (#1266)
+     623	Jaco                          	Adjust hooks for index import (#1271)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

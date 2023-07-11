@@ -7,9 +7,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation.js';
 import { ActionContext, Address, Dropdown, Loading } from '../../components/index.js';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions.js';
-import useMetadata from '../../hooks/useMetadata.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useGenesisHashOptions, useMetadata, useTranslation } from '../../hooks/index.js';
 import { createAccountSuri, createSeed, validateSeed } from '../../messaging.js';
 import { HeaderWithSteps } from '../../partials/index.js';
 import { styled } from '../../styled.js';
@@ -92,7 +90,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
     <>
       <HeaderWithSteps
         step={step}
-        text={t<string>('Create an account')}
+        text={t('Create an account')}
       />
       <Loading>
         <div>
@@ -114,13 +112,13 @@ function CreateAccount ({ className }: Props): React.ReactElement {
               <>
                 <Dropdown
                   className={className}
-                  label={t<string>('Network')}
+                  label={t('Network')}
                   onChange={_onChangeNetwork}
                   options={options}
                   value={genesisHash}
                 />
                 <AccountNamePasswordCreation
-                  buttonLabel={t<string>('Add the account with the generated seed')}
+                  buttonLabel={t('Add the account with the generated seed')}
                   isBusy={isBusy}
                   onBackClick={_onPreviousStep}
                   onCreate={_onCreate}

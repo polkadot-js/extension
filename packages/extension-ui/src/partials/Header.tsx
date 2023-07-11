@@ -11,8 +11,7 @@ import logo from '../assets/pjs.svg';
 import { ActionContext } from '../components/index.js';
 import InputFilter from '../components/InputFilter.js';
 import Link from '../components/Link.js';
-import useOutsideClick from '../hooks/useOutsideClick.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useOutsideClick, useTranslation } from '../hooks/index.js';
 import { getConnectedTabsUrl } from '../messaging.js';
 import { styled } from '../styled.js';
 import MenuAdd from './MenuAdd.js';
@@ -134,7 +133,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
               <InputFilter
                 className='inputFilter'
                 onChange={_onChangeFilter}
-                placeholder={t<string>('Search by name or network...')}
+                placeholder={t('Search by name or network...')}
                 value={filter}
                 withReset
               />

@@ -9,8 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { Button, Warning } from '../../components/index.js';
-import { useLedger } from '../../hooks/useLedger.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useLedger, useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
 interface Props {
@@ -78,7 +77,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
             onClick={_onRefresh}
           >
             <FontAwesomeIcon icon={faSync} />
-            {t<string>('Refresh')}
+            {t('Refresh')}
           </Button>
         )
         : (
@@ -86,7 +85,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
             isBusy={isBusy || ledgerLoading}
             onClick={_onSignLedger}
           >
-            {t<string>('Sign on Ledger')}
+            {t('Sign on Ledger')}
           </Button>
         )
       }

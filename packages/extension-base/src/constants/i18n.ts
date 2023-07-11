@@ -1,12 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LanguageOptionType } from '@subwallet/extension-base/background/KoniTypes';
+import { LanguageOptionType, LanguageType } from '@subwallet/extension-base/background/KoniTypes';
 
 export const languageOptions: LanguageOptionType[] = [
   {
     text: 'English',
     value: 'en'
+  },
+  {
+    text: 'Tiếng Việt',
+    value: 'vi'
   },
   {
     text: '汉语',
@@ -33,3 +37,5 @@ export const languageOptions: LanguageOptionType[] = [
     value: 'ur'
   }
 ];
+
+export const ENABLE_LANGUAGES: LanguageType[] = ['en', 'vi'];

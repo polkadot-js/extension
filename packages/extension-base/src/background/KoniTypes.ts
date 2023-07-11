@@ -403,7 +403,8 @@ export type LanguageType = 'en'
 |'tr'
 |'pl'
 |'th'
-|'ur';
+|'ur'
+|'vi';
 
 export type LanguageOptionType = {
   text: string;

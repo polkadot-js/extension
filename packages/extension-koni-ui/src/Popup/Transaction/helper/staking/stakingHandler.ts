@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingType, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
 import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-koni-ui/messaging';
@@ -22,17 +22,17 @@ export function getUnstakingPeriod (unstakingPeriod?: number) {
   return '';
 }
 
-export function getWaitingTime (waitingTime: number) {
-  if (waitingTime < 1) {
-    if (waitingTime >= 0) {
-      return 'Withdrawable within a day';
-    } else {
-      return 'Available for withdrawal';
-    }
+export function getWaitingTime (waitingTime: number, status: UnstakingStatus) {
+  if (status === UnstakingStatus.CLAIMABLE) {
+    return 'Available for withdrawal';
   } else {
-    const days = moment.duration(waitingTime, 'hours').humanize();
+    if (waitingTime >= 1) {
+      const days = moment.duration(waitingTime, 'hours').humanize();
 
-    return `Withdraw in ${days}`;
+      return `Withdraw in ${days}`;
+    } else {
+      return 'Withdrawable in a day';
+    }
   }
 }
 

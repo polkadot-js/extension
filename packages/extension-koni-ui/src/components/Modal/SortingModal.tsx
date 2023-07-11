@@ -66,7 +66,7 @@ function Component (props: Props): React.ReactElement<Props> {
               label={option.label}
               leftItemIcon={
                 <BackgroundIcon
-                  phosphorIcon={ option.desc ? SortDescending : SortAscending}
+                  phosphorIcon={ !option.desc ? SortDescending : SortAscending}
                   size='sm'
                   weight='bold'
                 />

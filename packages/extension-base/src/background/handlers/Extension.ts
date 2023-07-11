@@ -18,7 +18,7 @@ import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
 import { withErrorLog } from './helpers';
-import State, { AuthorizedAccountsDiff } from './State';
+import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 type CachedUnlocks = Record<string, number>;
@@ -55,11 +55,13 @@ export default class Extension {
     this.#state = state;
   }
 
-  private transformAccounts (accounts: SubjectInfo): AccountJson[] {
+  private async transformAccounts (accounts: SubjectInfo): Promise<AccountJson[]> {
+    const defaultAuthAccountSelection = await this.#state.getDefaultAuthAccountSelection();
+
     return Object.values(accounts).map(
       ({ json: { address, meta }, type }): AccountJson => ({
         address,
-        isDefaultAuthSelected: this.#state.defaultAuthAccountSelection.includes(address),
+        isDefaultAuthSelected: defaultAuthAccountSelection.includes(address),
         ...meta,
         type
       })
@@ -117,24 +119,24 @@ export default class Extension {
     };
   }
 
-  private accountsForget ({ address }: RequestAccountForget): boolean {
-    const authorizedAccountsDiff: AuthorizedAccountsDiff = [];
+  private async accountsForget ({ address }: RequestAccountForget): Promise<boolean> {
+    const authUrls = await this.#state.getAuthUrls();
 
-    // cycle through authUrls and prepare the array of diff
-    Object.entries(this.#state.authUrls).forEach(([url, urlInfo]) => {
+    // cycle through authUrls and prepare the diff
+    const authorizedAccountsDiff = Object.fromEntries(Object.entries(authUrls).flatMap(([url, urlInfo]) => {
       if (!urlInfo.authorizedAccounts.includes(address)) {
-        return;
+        return [];
       }
 
-      authorizedAccountsDiff.push([url, urlInfo.authorizedAccounts.filter((previousAddress) => previousAddress !== address)]);
-    });
+      return [[url, urlInfo.authorizedAccounts.filter((previousAddress) => previousAddress !== address)] as const];
+    }));
 
-    this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
+    await this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
 
     // cycle through default account selection for auth and remove any occurence of the account
-    const newDefaultAuthAccounts = this.#state.defaultAuthAccountSelection.filter((defaultSelectionAddress) => defaultSelectionAddress !== address);
+    const newDefaultAuthAccounts = (await this.#state.getDefaultAuthAccountSelection()).filter((defaultSelectionAddress) => defaultSelectionAddress !== address);
 
-    this.#state.updateDefaultAuthAccounts(newDefaultAuthAccounts);
+    await this.#state.updateDefaultAuthAccounts(newDefaultAuthAccounts);
 
     keyring.forgetAccount(address);
 
@@ -189,7 +191,13 @@ export default class Extension {
 
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
-    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => cb(this.transformAccounts(accounts)));
+    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
+      this.transformAccounts(accounts).then(cb).catch((e) => {
+        console.error('Error subscribing for accounts:', e);
+
+        cb([]); // eslint-disable-line n/no-callback-literal
+      });
+    });
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
@@ -223,16 +231,16 @@ export default class Extension {
     return true;
   }
 
-  private authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): void {
-    return this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
+  private async authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): Promise<void> {
+    return this.#state.updateAuthorizedAccounts({ [url]: authorizedAccounts });
   }
 
-  private authorizeDateUpdate (url: string): void {
+  private authorizeDateUpdate (url: string): Promise<void> {
     return this.#state.updateAuthorizedDate(url);
   }
 
-  private getAuthList (): ResponseAuthorizeList {
-    return { list: this.#state.authUrls };
+  private async getAuthList (): Promise<ResponseAuthorizeList> {
+    return { list: await this.#state.getAuthUrls() };
   }
 
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
@@ -247,26 +255,26 @@ export default class Extension {
     return true;
   }
 
-  private metadataApprove ({ id }: RequestMetadataApprove): boolean {
+  private async metadataApprove ({ id }: RequestMetadataApprove): Promise<boolean> {
     const queued = this.#state.getMetaRequest(id);
 
     assert(queued, 'Unable to find request');
 
     const { request, resolve } = queued;
 
-    this.#state.saveMetadata(request);
+    await this.#state.saveMetadata(request);
 
     resolve(true);
 
     return true;
   }
 
-  private metadataGet (genesisHash: string | null): MetadataDef | null {
-    return this.#state.knownMetadata.find((result) => result.genesisHash === genesisHash) || null;
+  private async metadataGet (genesisHash: string | null): Promise<MetadataDef | null> {
+    return (await this.#state.getKnownMetadata()).find((result) => result.genesisHash === genesisHash) || null;
   }
 
-  private metadataList (): MetadataDef[] {
-    return this.#state.knownMetadata;
+  private metadataList (): Promise<MetadataDef[]> {
+    return this.#state.getKnownMetadata();
   }
 
   private metadataReject ({ id }: RequestMetadataReject): boolean {
@@ -361,7 +369,7 @@ export default class Extension {
     };
   }
 
-  private signingApprovePassword ({ id, password, savePass }: RequestSigningApprovePassword): boolean {
+  private async signingApprovePassword ({ id, password, savePass }: RequestSigningApprovePassword): Promise<boolean> {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -396,7 +404,9 @@ export default class Extension {
 
     if (isJsonPayload(payload)) {
       // Get the metadata for the genesisHash
-      const metadata = this.#state.knownMetadata.find(({ genesisHash }) => genesisHash === payload.genesisHash);
+      const metadata = (await this.#state.getKnownMetadata()).find(
+        ({ genesisHash }) => genesisHash === payload.genesisHash
+      );
 
       if (metadata) {
         // we have metadata, expand it and extract the info/registry
@@ -489,7 +499,7 @@ export default class Extension {
 
   // this method is called when we want to open up the popup from the ui
   private windowOpen (path: AllowedPath): boolean {
-    const url = `${chrome.extension.getURL('external.html')}#${path}`;
+    const url = `${chrome.runtime.getURL('external.html')}#${path}`;
 
     if (!ALLOWED_PATH.includes(path)) {
       console.error('Not allowed to open the url:', url);
@@ -547,16 +557,16 @@ export default class Extension {
     return true;
   }
 
-  private removeAuthorization (url: string): ResponseAuthorizeList {
-    return { list: this.#state.removeAuthorization(url) };
+  private async removeAuthorization (url: string): Promise<ResponseAuthorizeList> {
+    return { list: await this.#state.removeAuthorization(url) };
   }
 
   private deleteAuthRequest (requestId: string): void {
     return this.#state.deleteAuthRequest(requestId);
   }
 
-  private updateCurrentTabs ({ urls }: RequestActiveTabsUrlUpdate) {
-    this.#state.updateCurrentTabsUrl(urls);
+  private async updateCurrentTabs ({ urls }: RequestActiveTabsUrlUpdate) {
+    await this.#state.updateCurrentTabsUrl(urls);
   }
 
   private getConnectedTabsUrl () {
@@ -656,9 +666,6 @@ export default class Extension {
 
       case 'pri(json.account.info)':
         return this.jsonGetAccountInfo(request as KeyringPair$Json);
-
-      case 'pri(ping)':
-        return Promise.resolve(true);
 
       case 'pri(seed.create)':
         return this.seedCreate(request as RequestSeedCreate);

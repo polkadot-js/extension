@@ -20,6 +20,7 @@
     "packages/*"
   ],
   "scripts": {
+    "adapt-build-to-ff": "jq '.background.scripts = [.background.service_worker] | del(.background.service_worker)' packages/extension/build/manifest.json > tmp.$$.json && mv tmp.$$.json packages/extension/build/manifest.json",
     "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
     "build-storybook": "storybook build",
     "build:extra": "yarn build:i18n && yarn build:ui",

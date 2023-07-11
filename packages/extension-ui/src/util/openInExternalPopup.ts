@@ -11,7 +11,7 @@ export default (path: string) => {
     height: 625,
     state: 'normal',
     type: 'popup',
-    url: chrome.extension.getURL(`${EXTERNAL_POPUP_PATH}#/${path}`),
+    url: chrome.runtime.getURL(`${EXTERNAL_POPUP_PATH}#/${path}`),
     width: 360
   }, (window) => {
     if (window) {

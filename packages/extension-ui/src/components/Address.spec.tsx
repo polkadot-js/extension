@@ -14,8 +14,6 @@ import React, { ReactNode } from 'react';
 import { act } from 'react-dom/test-utils';
 import { BrowserRouter as Router } from 'react-router-dom';
 
-import { noop } from '@polkadot/util';
-
 import * as MetadataCache from '../MetadataCache';
 import { westendMetadata } from '../Popup/Signing/metadataMock';
 import { flushAllPromises } from '../testHelpers';
@@ -142,7 +140,7 @@ const accountsWithGenesisHash = [
 const mountComponent = async (
   addressComponentProps: AddressComponentProps,
   contextAccounts: AccountJson[],
-  onActionMock: (to?: string) => void = noop
+  onActionMock: (to?: string) => Promise<void> = () => Promise.resolve()
 ): Promise<{
   wrapper: ReactWrapper;
 }> => {
@@ -179,7 +177,7 @@ const getWrapper = async (
   },
   contextAccounts: AccountJson[],
   withAccountsInContext: boolean,
-  onActionMock?: (to: string | undefined) => void
+  onActionMock?: (to: string | undefined) => Promise<void>
 ) => {
   // the address component can query info about the account from the account context
   // in this case, the account's address (any encoding) should suffice

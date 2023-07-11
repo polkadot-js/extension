@@ -17,7 +17,7 @@ import settings from '@polkadot/ui-settings';
 const noop = (): void => undefined;
 
 const AccountContext = React.createContext<AccountsContext>({ accounts: [], hierarchy: [], master: undefined });
-const ActionContext = React.createContext<(to?: string) => void>(noop);
+const ActionContext = React.createContext<(to?: string) => Promise<void>>(() => Promise.resolve());
 const AuthorizeReqContext = React.createContext<AuthorizeRequest[]>([]);
 const MediaContext = React.createContext<boolean>(false);
 const MetadataReqContext = React.createContext<MetadataRequest[]>([]);

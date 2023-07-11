@@ -3,8 +3,9 @@
 
 import type { MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, RequestTypes, ResponseTypes, SubscriptionMessageTypes, TransportRequestMessage, TransportResponseMessage } from '../background/types';
 
+import { v4 as uuid } from 'uuid';
+
 import { MESSAGE_ORIGIN_PAGE } from '../defaults';
-import { getId } from '../utils/getId';
 import Injected from './Injected';
 
 // when sending a message from the injector to the extension, we
@@ -34,7 +35,7 @@ export function sendMessage<TMessageType extends MessageTypesWithSubscriptions>(
 
 export function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: unknown) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
-    const id = getId();
+    const id = uuid();
 
     handlers[id] = { reject, resolve, subscriber };
 

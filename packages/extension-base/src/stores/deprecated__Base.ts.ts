@@ -11,6 +11,9 @@ const lastError = (type: string): void => {
   }
 };
 
+/**
+ * @deprecated Use the utils/localStorageStores utility for local storage management.
+ */
 export default abstract class BaseStore <T> {
   #prefix: string;
 

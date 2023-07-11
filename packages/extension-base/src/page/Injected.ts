@@ -23,11 +23,5 @@ export default class implements Injected {
     this.metadata = new Metadata(sendRequest);
     this.provider = new PostMessageProvider(sendRequest);
     this.signer = new Signer(sendRequest);
-
-    setInterval((): void => {
-      sendRequest('pub(ping)', null).catch((): void => {
-        console.error('Extension unavailable, ping failed');
-      });
-    }, 5_000 + Math.floor(Math.random() * 5_000));
   }
 }

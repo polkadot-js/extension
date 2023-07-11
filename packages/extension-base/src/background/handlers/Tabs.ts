@@ -50,8 +50,8 @@ export default class Tabs {
     this.#state = state;
   }
 
-  private filterForAuthorizedAccounts (accounts: InjectedAccount[], url: string): InjectedAccount[] {
-    const auth = this.#state.authUrls[new URL(url).origin];
+  private async filterForAuthorizedAccounts (accounts: InjectedAccount[], url: string): Promise<InjectedAccount[]> {
+    const auth = (await this.#state.getAuthUrls())[new URL(url).origin];
 
     return accounts.filter(
       (allAcc) =>
@@ -67,7 +67,7 @@ export default class Tabs {
     return this.#state.authorizeUrl(url, request);
   }
 
-  private accountsListAuthorized (url: string, { anyType }: RequestAccountList): InjectedAccount[] {
+  private accountsListAuthorized (url: string, { anyType }: RequestAccountList): Promise<InjectedAccount[]> {
     const transformedAccounts = transformAccounts(accountsObservable.subject.getValue(), anyType);
 
     return this.filterForAuthorizedAccounts(transformedAccounts, url);
@@ -80,7 +80,11 @@ export default class Tabs {
       subscription: accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
         const transformedAccounts = transformAccounts(accounts);
 
-        cb(this.filterForAuthorizedAccounts(transformedAccounts, url));
+        this.filterForAuthorizedAccounts(transformedAccounts, url).then(cb).catch((e) => {
+          console.error('Error filtering for authorized accounts:', e);
+
+          cb([]); // eslint-disable-line n/no-callback-literal
+        });
       }),
       url
     };
@@ -134,8 +138,8 @@ export default class Tabs {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private metadataList (url: string): InjectedMetadataKnown[] {
-    return this.#state.knownMetadata.map(({ genesisHash, specVersion }) => ({
+  private async metadataList (url: string): Promise<InjectedMetadataKnown[]> {
+    return (await this.#state.getKnownMetadata()).map(({ genesisHash, specVersion }) => ({
       genesisHash,
       specVersion
     }));
@@ -186,7 +190,7 @@ export default class Tabs {
   private redirectPhishingLanding (phishingWebsite: string): void {
     const nonFragment = phishingWebsite.split('#')[0];
     const encodedWebsite = encodeURIComponent(nonFragment);
-    const url = `${chrome.extension.getURL('external.html')}#${PHISHING_PAGE_REDIRECT}/${encodedWebsite}`;
+    const url = `${chrome.runtime.getURL('external.html')}#${PHISHING_PAGE_REDIRECT}/${encodedWebsite}`;
 
     chrome.tabs.query({ url: nonFragment }, (tabs) => {
       tabs
@@ -216,7 +220,7 @@ export default class Tabs {
     }
 
     if (type !== 'pub(authorize.tab)') {
-      this.#state.ensureUrlAuthorized(url);
+      await this.#state.ensureUrlAuthorized(url);
     }
 
     switch (type) {
@@ -243,9 +247,6 @@ export default class Tabs {
 
       case 'pub(metadata.provide)':
         return this.metadataProvide(url, request as MetadataDef);
-
-      case 'pub(ping)':
-        return Promise.resolve(true);
 
       case 'pub(rpc.listProviders)':
         return this.rpcListProviders();

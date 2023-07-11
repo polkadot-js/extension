@@ -4,8 +4,9 @@
 import type { KeyringJson, KeyringStore } from '@polkadot/ui-keyring/types';
 
 import { EXTENSION_PREFIX } from '../defaults';
-import BaseStore from './Base';
+import BaseStore from './deprecated__Base.ts';
 
+// eslint-disable-next-line deprecation/deprecation
 export default class AccountsStore extends BaseStore<KeyringJson> implements KeyringStore {
   constructor () {
     super(

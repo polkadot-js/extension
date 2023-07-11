@@ -10,22 +10,7 @@ import { base64Decode } from '@polkadot/util-crypto';
 
 export { packageInfo } from './packageInfo';
 
-// imports chain details, generally metadata. For the generation of these,
-// inside the api, run `yarn chain:info --ws <url>`
-
-const definitions = new Map<string, MetadataDef>(
-  // [kusama].map((def) => [def.genesisHash, def])
-);
-
-const expanded = new Map<string, Chain>();
-
 export function metadataExpand (definition: MetadataDef, isPartial = false): Chain {
-  const cached = expanded.get(definition.genesisHash);
-
-  if (cached && cached.specVersion === definition.specVersion) {
-    return cached;
-  }
-
   const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types, userExtensions } = definition;
   const registry = new TypeRegistry();
 
@@ -47,7 +32,7 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
 
   const isUnknown = genesisHash === '0x';
 
-  const result = {
+  return {
     definition,
     genesisHash: isUnknown
       ? undefined
@@ -62,12 +47,6 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     tokenDecimals,
     tokenSymbol
   };
-
-  if (result.genesisHash && !isPartial) {
-    expanded.set(result.genesisHash, result);
-  }
-
-  return result;
 }
 
 export function findChain (definitions: MetadataDef[], genesisHash?: string | null): Chain | null {
@@ -76,12 +55,4 @@ export function findChain (definitions: MetadataDef[], genesisHash?: string | nu
   return def
     ? metadataExpand(def)
     : null;
-}
-
-export function addMetadata (def: MetadataDef): void {
-  definitions.set(def.genesisHash, def);
-}
-
-export function knownMetadata (): MetadataDef[] {
-  return [...definitions.values()];
 }

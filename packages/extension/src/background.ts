@@ -16,16 +16,30 @@ import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 // setup the notification (same a FF default background, white text)
-withErrorLog(() => chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' }));
+withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));
 
 // listen to all messages and handle appropriately
 chrome.runtime.onConnect.addListener((port): void => {
   // shouldn't happen, however... only listen to what we know about
   assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
 
+  /**
+   * Trigger reconnection every < 5 minutes to maintain the communication with
+   * the volatile service worker.
+   * The "connecting ends" are adjusted to reconnect upon disconnection.
+   */
+  const timer = setTimeout(() => {
+    console.info('Performing a planned port reconnection.');
+    port.disconnect();
+  }, 250e3);
+
   // message and disconnect handlers
   port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => handlers(data, port));
-  port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
+  port.onDisconnect.addListener(() => {
+    clearTimeout(timer);
+
+    console.log(`Disconnected from ${port.name}`);
+  });
 });
 
 function getActiveTabs () {

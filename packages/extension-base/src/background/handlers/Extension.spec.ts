@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import '@polkadot/extension-mocks/chrome';
-
 import type { ResponseSigning } from '@polkadot/extension-base/background/types';
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair } from '@polkadot/keyring/types';
@@ -10,13 +8,14 @@ import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import chromeStub from '@polkadot/extension-mocks/chrome';
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { AccountsStore } from '../../stores';
 import Extension from './Extension';
-import State, { AuthUrls } from './State';
+import State from './State';
 import Tabs from './Tabs';
 
 describe('Extension', () => {
@@ -26,22 +25,23 @@ describe('Extension', () => {
   const suri = 'seed sock milk update focus rotate barely fade car face mechanic mercy';
   const password = 'passw0rd';
   const address = '5FbSap4BsWfjyRhCchoVdZHkDnmDm3NEgLZ25mesq4aw2WvX';
-
-  async function createExtension (): Promise<Extension> {
-    await cryptoWaitReady();
-
-    keyring.loadAll({ store: new AccountsStore() });
-    const authUrls: AuthUrls = {};
-
-    authUrls['http://localhost:3000'] = {
+  const authUrls = {
+    'http://localhost:3000': {
       authorizedAccounts: [address],
       count: 0,
       id: '11',
       lastAuth: Date.now(),
       origin: 'example.com',
       url: 'http://localhost:3000'
-    };
-    localStorage.setItem('authUrls', JSON.stringify(authUrls));
+    }
+  };
+
+  async function createExtension (): Promise<Extension> {
+    await cryptoWaitReady();
+
+    keyring.loadAll({ store: new AccountsStore() });
+
+    chromeStub.storage.local.get.resolves({ authUrls });
     state = new State();
     tabs = new Tabs(state);
 
@@ -74,6 +74,15 @@ describe('Extension', () => {
   };
 
   beforeAll(async () => {
+    // The "sinon-chrome" mocking library does not provide stubs for ".action", so we have to append them ourselves
+    global.chrome = {
+      ...chrome,
+      // @ts-ignore
+      action: {
+        setBadgeText: jest.fn(() => Promise.resolve())
+      }
+    };
+
     extension = await createExtension();
   });
 
@@ -211,16 +220,22 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
-      tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
+      const signRequestPromise = tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
+
+      // Waiting for the "state.allSignRequests" variable to get populated in the previous promise, we cannot await yet
+      await new Promise((resolve) => setTimeout(resolve));
 
       await expect(extension.handle('1615192072290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
         password,
         savePass: false
       }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+
+      // This promise consists some expectations, but couldn't have been awaited earlier, because the previous expectation resolves it
+      await signRequestPromise;
     });
 
     test('signs with default signed extensions - ethereum', async () => {
@@ -257,16 +272,22 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', ethPayload, { version: ethPayload.version }).sign(ethPair);
 
-      tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', ethPayload, 'http://localhost:3000', {} as chrome.runtime.Port)
+      const signRequestPromise = tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', ethPayload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
+
+      // Waiting for the "state.allSignRequests" variable to get populated in the previous promise, we cannot await yet
+      await new Promise((resolve) => setTimeout(resolve));
 
       await expect(extension.handle('1615192072290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
         password,
         savePass: false
       }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+
+      // This promise consists some expectations, but couldn't have been awaited earlier, because the previous expectation resolves it
+      await signRequestPromise;
     });
 
     test('signs with user extensions, known types', async () => {
@@ -294,7 +315,12 @@ describe('Extension', () => {
         userExtensions
       };
 
-      state.saveMetadata(meta);
+      chromeStub.storage.local.get.resolves({
+        authUrls,
+        chainMetadata: {
+          [meta.genesisHash]: meta
+        }
+      });
 
       const payload: SignerPayloadJSON = {
         address,
@@ -319,16 +345,22 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
-      tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
+      const signRequestPromise = tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
-        }).catch((err) => console.log(err));
+        });
+
+      // Waiting for the "state.allSignRequests" variable to get populated in the previous promise, we cannot await yet
+      await new Promise((resolve) => setTimeout(resolve));
 
       await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
         password,
         savePass: false
       }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+
+      // This promise consists some expectations, but couldn't have been awaited earlier, because the previous expectation resolves it
+      await signRequestPromise;
     });
 
     test('override default signed extension', async () => {
@@ -365,7 +397,12 @@ describe('Extension', () => {
         userExtensions
       };
 
-      state.saveMetadata(meta);
+      chromeStub.storage.local.get.resolves({
+        authUrls,
+        chainMetadata: {
+          [meta.genesisHash]: meta
+        }
+      });
 
       const registry = new TypeRegistry();
 
@@ -375,16 +412,22 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
-      tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
+      const signRequestPromise = tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
-        }).catch((err) => console.log(err));
+        });
+
+      // Waiting for the "state.allSignRequests" variable to get populated in the previous promise, we cannot await yet
+      await new Promise((resolve) => setTimeout(resolve));
 
       await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
         password,
         savePass: false
       }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+
+      // This promise consists some expectations, but couldn't have been awaited earlier, because the previous expectation resolves it
+      await signRequestPromise;
     });
 
     test('signs with user extensions, additional types', async () => {
@@ -417,7 +460,12 @@ describe('Extension', () => {
         userExtensions
       };
 
-      state.saveMetadata(meta);
+      chromeStub.storage.local.get.resolves({
+        authUrls,
+        chainMetadata: {
+          [meta.genesisHash]: meta
+        }
+      });
 
       const payload = {
         address,
@@ -442,16 +490,22 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
-      tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
+      const signRequestPromise = tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
-        }).catch((err) => console.log(err));
+        });
+
+      // Waiting for the "state.allSignRequests" variable to get populated in the previous promise (we cannot await yet)
+      await new Promise((resolve) => setTimeout(resolve));
 
       await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
         password,
         savePass: false
       }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+
+      // This promise consists some expectations, but couldn't have been awaited earlier, because the previous expectation resolves it
+      await signRequestPromise;
     });
   });
 });

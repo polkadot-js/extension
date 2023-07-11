@@ -28,8 +28,9 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import { v4 as uuid } from 'uuid';
+
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
-import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 
@@ -46,32 +47,43 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-const port = chrome.runtime.connect({ name: PORT_EXTENSION });
+let port: chrome.runtime.Port;
+
+const connect = (): chrome.runtime.Port => {
+  port = chrome.runtime.connect({ name: PORT_EXTENSION });
+  port.onDisconnect.addListener(connect);
+
+  // setup a listener for messages, any incoming resolves the promise
+  port.onMessage.addListener((data: Message['data']): void => {
+    const handler = handlers[data.id];
+
+    if (!handler) {
+      console.error(`Unknown response: ${JSON.stringify(data)}`);
+
+      return;
+    }
+
+    if (!handler.subscriber) {
+      delete handlers[data.id];
+    }
+
+    if (data.subscription) {
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      (handler.subscriber as Function)(data.subscription);
+    } else if (data.error) {
+      handler.reject(new Error(data.error));
+    } else {
+      handler.resolve(data.response);
+    }
+  });
+
+  return port;
+};
+
+port = connect();
+
 const handlers: Handlers = {};
 
-// setup a listener for messages, any incoming resolves the promise
-port.onMessage.addListener((data: Message['data']): void => {
-  const handler = handlers[data.id];
-
-  if (!handler) {
-    console.error(`Unknown response: ${JSON.stringify(data)}`);
-
-    return;
-  }
-
-  if (!handler.subscriber) {
-    delete handlers[data.id];
-  }
-
-  if (data.subscription) {
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    (handler.subscriber as Function)(data.subscription);
-  } else if (data.error) {
-    handler.reject(new Error(data.error));
-  } else {
-    handler.resolve(data.response);
-  }
-});
 
 function sendMessage<TMessageType extends MessageTypesWithNullRequest>(
   message: TMessageType
@@ -91,7 +103,7 @@ function sendMessage<TMessageType extends MessageTypes>(
   subscriber?: (data: unknown) => void
 ): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
-    const id = getId();
+    const id = uuid();
 
     handlers[id] = { reject, resolve, subscriber };
 
@@ -324,8 +336,4 @@ export async function batchRestore(
 
 export async function setNotification(notification: string): Promise<boolean> {
   return sendMessage('pri(settings.notification)', notification);
-}
-
-export async function ping(): Promise<boolean> {
-  return sendMessage('pri(ping)', null);
 }

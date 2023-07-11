@@ -6,13 +6,22 @@ import type { Message } from '@polkadot/extension-base/types';
 import { MESSAGE_ORIGIN_CONTENT, MESSAGE_ORIGIN_PAGE, PORT_CONTENT } from '@polkadot/extension-base/defaults';
 import { chrome } from '@polkadot/extension-inject/chrome';
 
-// connect to the extension
-const port = chrome.runtime.connect({ name: PORT_CONTENT });
+let port: chrome.runtime.Port;
 
-// send any messages from the extension back to the page
-port.onMessage.addListener((data): void => {
-  window.postMessage({ ...data, origin: MESSAGE_ORIGIN_CONTENT }, '*');
-});
+// connect to the extension
+const connect = (): chrome.runtime.Port => {
+  port = chrome.runtime.connect({ name: PORT_CONTENT });
+  port.onDisconnect.addListener(connect);
+
+  // send any messages from the extension back to the page
+  port.onMessage.addListener((data): void => {
+    window.postMessage({ ...data, origin: MESSAGE_ORIGIN_CONTENT }, '*');
+  });
+
+  return port;
+};
+
+port = connect();
 
 // all messages from the page, pass them to the extension
 window.addEventListener('message', ({ data, source }: Message): void => {
@@ -27,7 +36,7 @@ window.addEventListener('message', ({ data, source }: Message): void => {
 // inject our data injector
 const script = document.createElement('script');
 
-script.src = chrome.extension.getURL('page.js');
+script.src = chrome.runtime.getURL('page.js');
 
 script.onload = (): void => {
   // remove the injecting tag when loaded

@@ -15,6 +15,7 @@ import { Route, Switch, useHistory } from 'react-router';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
+import localStorageStores from '@polkadot/extension-base/utils/localStorageStores';
 import uiSettings from '@polkadot/ui-settings';
 
 import { GlobalErrorBoundary, Loading, SplashHandler } from '../components';
@@ -111,8 +112,10 @@ export default function Popup(): React.ReactElement {
   const history = useHistory();
 
   const _onAction = useCallback(
-    (to?: string): void => {
-      setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
+    async (to?: string): Promise<void> => {
+      const welcomeReadStatus = await localStorageStores.welcomeRead.get();
+
+      setWelcomeDone(welcomeReadStatus === 'ok');
 
       if (!to) {
         return;

@@ -6,6 +6,8 @@ import type { ThemeProps } from '../types';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
+import localStorageStores from '@polkadot/extension-base/utils/localStorageStores';
+
 import partnerLogo from '../assets/partnerLogo.svg';
 import { ActionContext, Button, ButtonArea, Hero, LearnMore, List, VerticalSpace } from '../components';
 import useTranslation from '../hooks/useTranslation';
@@ -19,9 +21,10 @@ const Welcome = function ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
-  const _onClick = useCallback((): void => {
-    window.localStorage.setItem('welcome_read', 'ok');
-    onAction();
+  const _onClick = useCallback(async (): Promise<void> => {
+    await localStorageStores.welcomeRead.set('ok');
+
+    await onAction();
   }, [onAction]);
 
   return (

@@ -392,5 +392,9 @@
   "Wrong password.": "",
   "Derivation path is required.": "",
   "Invalid secret phrase or path.": "",
-  "Invalid secret phrase.": ""
+  "Invalid secret phrase.": "",
+  "metadata updates": "",
+  "metadata update": "",
+  "transactions": "",
+  "transaction": ""
 }

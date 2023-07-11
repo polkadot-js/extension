@@ -172,5 +172,8 @@
   "all accounts": "",
   "Message signing is not supported for hardware wallets.": "",
   "\"Allow use on any network\" is not supported to show a QR code. You must associate this account with a network.": "",
-  "An error occurred": ""
+  "An error occurred": "",
+  "Is your ledger locked?": "",
+  "App \"{{network}}\" does not seem to be open": "",
+  "Ledger error: {{errorMessage}}": ""
 }

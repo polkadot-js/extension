@@ -31,7 +31,7 @@ function NoAccount ({ authId, className }: Props): React.ReactElement<Props> {
         className='acceptButton'
         onClick={_onClick}
       >
-        {t<string>('Understood')}
+        {t('Understood')}
       </Button>
     </div>
   );

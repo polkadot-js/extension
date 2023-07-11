@@ -5,7 +5,7 @@ import type { ResultType, Validator } from '../util/validators.js';
 
 import React, { useEffect, useState } from 'react';
 
-import useIsMounted from '../hooks/useIsMounted.js';
+import { useIsMounted } from '../hooks/index.js';
 import { Result } from '../util/validators.js';
 import Warning from './Warning.js';
 

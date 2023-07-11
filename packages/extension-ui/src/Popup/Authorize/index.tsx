@@ -6,7 +6,7 @@ import type { ThemeProps } from '../../types.js';
 import React, { useContext } from 'react';
 
 import { AuthorizeReqContext } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 import Request from './Request.js';
@@ -24,7 +24,7 @@ function Authorize ({ className = '' }: Props): React.ReactElement {
       <div className={`${className} ${requests.length === 1 ? 'lastRequest' : ''}`}>
         <Header
           smallMargin={true}
-          text={t<string>('Account connection request')}
+          text={t('Account connection request')}
         />
         {requests.map(({ id, request, url }, index): React.ReactNode => (
           <Request

@@ -7,7 +7,7 @@ import React, { useCallback, useRef, useState } from 'react';
 
 import arrow from '../../assets/arrow-down.svg';
 import { Address } from '../../components/index.js';
-import useOutsideClick from '../../hooks/useOutsideClick.js';
+import { useOutsideClick } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
 interface Props {

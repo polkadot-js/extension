@@ -7,7 +7,7 @@ import type { ThemeProps } from '../../types.js';
 import React, { useCallback, useContext, useEffect } from 'react';
 
 import { AccountContext, ActionBar, ActionContext, Button, Link } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { approveAuthRequest, deleteAuthRequest } from '../../messaging.js';
 import { AccountSelection } from '../../partials/index.js';
 import { styled } from '../../styled.js';
@@ -67,7 +67,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
           className='acceptButton'
           onClick={_onApprove}
         >
-          {t<string>('Connect {{total}} account(s)', { replace: {
+          {t('Connect {{total}} account(s)', { replace: {
             total: selectedAccounts.length
           } })}
         </Button>
@@ -78,7 +78,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
           isDanger
           onClick={_onClose}
         >
-          {t<string>('Ask again later')}
+          {t('Ask again later')}
         </Link>
       </ActionBar>
     </div>

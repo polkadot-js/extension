@@ -18,10 +18,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import details from '../assets/details.svg';
-import useMetadata from '../hooks/useMetadata.js';
-import useOutsideClick from '../hooks/useOutsideClick.js';
-import useToast from '../hooks/useToast.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useMetadata, useOutsideClick, useToast, useTranslation } from '../hooks/index.js';
 import { showAccount } from '../messaging.js';
 import { styled } from '../styled.js';
 import { DEFAULT_TYPE } from '../util/defaultType.js';
@@ -157,7 +154,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   );
 
   const _onCopy = useCallback(
-    () => show(t<string>('Copied')),
+    () => show(t('Copied')),
     [show, t]
   );
 
@@ -170,7 +167,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
   const Name = () => {
     const accountName = name || account?.name;
-    const displayName = accountName || t<string>('<unknown>');
+    const displayName = accountName || t('<unknown>');
 
     return (
       <>
@@ -181,14 +178,14 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 className='hardwareIcon'
                 icon={faUsb}
                 rotation={270}
-                title={t<string>('hardware wallet account')}
+                title={t('hardware wallet account')}
               />
             )
             : (
               <FontAwesomeIcon
                 className='externalIcon'
                 icon={faQrcode}
-                title={t<string>('external account')}
+                title={t('external account')}
               />
             )
         )}
@@ -258,7 +255,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
               className='fullAddress'
               data-field='address'
             >
-              {formatted || address || t<string>('<unknown>')}
+              {formatted || address || t('<unknown>')}
             </div>
             <CopyToClipboard text={(formatted && formatted) || ''}>
               <FontAwesomeIcon
@@ -266,7 +263,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 icon={faCopy}
                 onClick={_onCopy}
                 size='sm'
-                title={t<string>('copy address')}
+                title={t('copy address')}
               />
             </CopyToClipboard>
             {(actions || showVisibilityAction) && (
@@ -275,7 +272,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 icon={isHidden ? faEyeSlash : faEye}
                 onClick={_toggleVisibility}
                 size='sm'
-                title={t<string>('account visibility')}
+                title={t('account visibility')}
               />
             )}
           </div>

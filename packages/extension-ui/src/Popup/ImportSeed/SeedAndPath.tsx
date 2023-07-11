@@ -13,8 +13,7 @@ import { validateSeed } from '@polkadot/extension-ui/messaging';
 import { objectSpread } from '@polkadot/util';
 
 import { ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components/index.js';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useGenesisHashOptions, useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
 interface Props {
@@ -57,8 +56,8 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
         setAddress('');
         onAccountChange(null);
         setError(path
-          ? t<string>('Invalid mnemonic seed or derivation path')
-          : t<string>('Invalid mnemonic seed')
+          ? t('Invalid mnemonic seed or derivation path')
+          : t('Invalid mnemonic seed')
         );
       });
   }, [t, genesis, seed, path, onAccountChange, type]);
@@ -74,7 +73,7 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
           className='seedInput'
           isError={!!error}
           isFocused
-          label={t<string>('existing 12 or 24-word mnemonic seed')}
+          label={t('existing 12 or 24-word mnemonic seed')}
           onChange={setSeed}
           rowsCount={2}
           value={seed || ''}
@@ -85,12 +84,12 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
             isBelowInput
             isDanger
           >
-            {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
+            {t('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
           </Warning>
         )}
         <Dropdown
           className='genesisSelection'
-          label={t<string>('Network')}
+          label={t('Network')}
           onChange={setGenesis}
           options={genesisOptions}
           value={genesis}
@@ -100,13 +99,13 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
           onClick={_onToggleAdvanced}
         >
           <FontAwesomeIcon icon={advanced ? faCaretDown : faCaretRight} />
-          <span>{t<string>('advanced')}</span>
+          <span>{t('advanced')}</span>
         </div>
         { advanced && (
           <InputWithLabel
             className='derivationPath'
             isError={!!path && !!error}
-            label={t<string>('derivation path')}
+            label={t('derivation path')}
             onChange={setPath}
             value={path || ''}
           />
@@ -125,7 +124,7 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
           isDisabled={!address || !!error}
           onClick={onNextStep}
         >
-          {t<string>('Next')}
+          {t('Next')}
         </NextStepButton>
       </ButtonArea>
     </>

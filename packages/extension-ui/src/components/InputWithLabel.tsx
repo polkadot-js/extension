@@ -3,7 +3,7 @@
 
 import React, { useCallback, useState } from 'react';
 
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import { styled } from '../styled.js';
 import Label from './Label.js';
 import { Input } from './TextInputs.js';
@@ -74,7 +74,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
         withError={isError}
       />
       { isCapsLock && (
-        <Warning isBelowInput>{t<string>('Warning: Caps lock is on')}</Warning>
+        <Warning isBelowInput>{t('Warning: Caps lock is on')}</Warning>
       )}
     </Label>
   );

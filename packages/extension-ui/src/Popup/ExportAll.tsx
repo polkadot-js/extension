@@ -9,7 +9,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import { withRouter } from 'react-router';
 
 import { AccountContext, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Warning } from '../components/index.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import { exportAccounts } from '../messaging.js';
 import { Header } from '../partials/index.js';
 import { styled } from '../styled.js';
@@ -66,7 +66,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
     <>
       <Header
         showBackArrow
-        text={t<string>('All account')}
+        text={t('All account')}
       />
       <div className={className}>
         <div className='actionArea'>
@@ -74,7 +74,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
             data-export-all-password
             disabled={isBusy}
             isError={pass.length < MIN_LENGTH || !!error}
-            label={t<string>('password for encrypting all accounts')}
+            label={t('password for encrypting all accounts')}
             onChange={onPassChange}
             type='password'
           />
@@ -94,13 +94,13 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
             isDisabled={pass.length === 0 || !!error}
             onClick={_onExportAllButtonClick}
           >
-            {t<string>('I want to export all my accounts')}
+            {t('I want to export all my accounts')}
           </Button>
           <ActionBar className='withMarginTop'>
             <ActionText
               className='center'
               onClick={_goHome}
-              text={t<string>('Cancel')}
+              text={t('Cancel')}
             />
           </ActionBar>
         </div>

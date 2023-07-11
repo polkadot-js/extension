@@ -4,9 +4,9 @@
 import type { WithTranslation } from 'react-i18next';
 
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 
 import Header from '../partials/Header.js';
-import translate from '../translate.js';
 import Button from './Button.js';
 import ButtonArea from './ButtonArea.js';
 import VerticalSpace from './VerticalSpace.js';
@@ -21,6 +21,8 @@ interface Props extends WithTranslation {
 interface State {
   error: Error | null;
 }
+
+const translate = withTranslation();
 
 // NOTE: This is the only way to do an error boundary, via extend
 class ErrorBoundary extends React.Component<Props> {
@@ -51,9 +53,9 @@ class ErrorBoundary extends React.Component<Props> {
     return error
       ? (
         <>
-          <Header text={t<string>('An error occurred')} />
+          <Header text={t<string, string, Record<string, string>>('An error occurred')} />
           <div>
-            {t<string>('Something went wrong with the query and rendering of this component. {{message}}', {
+            {t('Something went wrong with the query and rendering of this component. {{message}}', {
               replace: { message: error.message }
             })}
           </div>
@@ -62,7 +64,7 @@ class ErrorBoundary extends React.Component<Props> {
             <Button
               onClick={this.#goHome}
             >
-              {t<string>('Back to home')}
+              {t('Back to home')}
             </Button>
           </ButtonArea>
         </>

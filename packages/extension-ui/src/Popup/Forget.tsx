@@ -8,7 +8,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import { withRouter } from 'react-router';
 
 import { ActionBar, ActionContext, ActionText, Address, Button, Warning } from '../components/index.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import { forgetAccount } from '../messaging.js';
 import { Header } from '../partials/index.js';
 import { styled } from '../styled.js';
@@ -47,12 +47,12 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
     <>
       <Header
         showBackArrow
-        text={t<string>('Forget account')}
+        text={t('Forget account')}
       />
       <div className={className}>
         <Address address={address}>
           <Warning className='movedWarning'>
-            {t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}
+            {t('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}
           </Warning>
           <div className='actionArea'>
             <Button
@@ -60,13 +60,13 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
               isDanger
               onClick={_onClick}
             >
-              {t<string>('I want to forget this account')}
+              {t('I want to forget this account')}
             </Button>
             <ActionBar className='withMarginTop'>
               <ActionText
                 className='center'
                 onClick={_goHome}
-                text={t<string>('Cancel')}
+                text={t('Cancel')}
               />
             </ActionBar>
           </div>

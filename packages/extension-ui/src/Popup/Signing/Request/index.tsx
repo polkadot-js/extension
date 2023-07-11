@@ -11,8 +11,8 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ActionContext, Address, VerticalSpace, Warning } from '../../../components/index.js';
+import { useTranslation } from '../../../hooks/index.js';
 import { approveSignSignature } from '../../../messaging.js';
-import { useTranslation } from '../../../translate.js';
 import Bytes from '../Bytes.js';
 import Extrinsic from '../Extrinsic.js';
 import LedgerSign from '../LedgerSign.js';
@@ -162,12 +162,12 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
         <VerticalSpace />
         {isExternal && !isHardware && !genesisHash && (
           <>
-            <Warning isDanger>{t<string>('"Allow use on any network" is not supported to show a QR code. You must associate this account with a network.')}</Warning>
+            <Warning isDanger>{t('"Allow use on any network" is not supported to show a QR code. You must associate this account with a network.')}</Warning>
             <VerticalSpace />
           </>
         )}
         {isHardware && <>
-          <Warning>{t<string>('Message signing is not supported for hardware wallets.')}</Warning>
+          <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
           <VerticalSpace />
         </>}
         <SignArea

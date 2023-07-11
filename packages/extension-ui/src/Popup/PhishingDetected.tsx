@@ -7,7 +7,7 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { useParams } from 'react-router';
 
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import { Header } from '../partials/index.js';
 import { styled } from '../styled.js';
 
@@ -26,10 +26,10 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
 
   return (
     <>
-      <Header text={t<string>('Phishing detected')} />
+      <Header text={t('Phishing detected')} />
       <div className={className}>
         <p>
-          {t<string>('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.')}
+          {t('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.')}
         </p>
         <p className='websiteAddress'>
           {decodedWebsite}

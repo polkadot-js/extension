@@ -7,7 +7,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { Trans } from 'react-i18next';
 
 import { AccountContext, Checkbox, Warning } from '../components/index.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import AccountsTree from '../Popup/Accounts/AccountsTree.js';
 import { styled } from '../styled.js';
 
@@ -72,7 +72,7 @@ function AccounSelection ({ className, origin, showHidden = false, url, withWarn
         checked={areAllAccountsSelected}
         className='accountTree-checkbox'
         indeterminate={isIndeterminate}
-        label={t<string>('Select all')}
+        label={t('Select all')}
         onChange={_onSelectAllToggle}
       />
       <div className='accountList'>

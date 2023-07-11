@@ -7,9 +7,8 @@ import type { ThemeProps } from '../../types.js';
 import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
-import { useTranslation } from '@polkadot/extension-ui/translate';
-
 import RemoveAuth from '../../components/RemoveAuth.js';
+import { useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
 interface Props extends ThemeProps {
@@ -38,14 +37,14 @@ function WebsiteEntry ({ className = '', info: { authorizedAccounts, isAllowed }
         to={`/url/manage/${url}`}
       >{
           authorizedAccounts && authorizedAccounts.length
-            ? t<string>('{{total}} accounts', {
+            ? t('{{total}} accounts', {
               replace: {
                 total: authorizedAccounts.length
               }
             })
             : isAllowed
-              ? t<string>('all accounts')
-              : t<string>('no accounts')
+              ? t('all accounts')
+              : t('no accounts')
         }</Link>
     </div>
   );

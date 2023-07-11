@@ -181,6 +181,12 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       '.ant-notification-notice': {
         marginInlineEnd: 'auto'
       }
+    },
+
+    '.ant-input-affix-wrapper': {
+      '.ant-input': {
+        overflow: 'hidden'
+      }
     }
   });
 });

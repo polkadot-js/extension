@@ -124,8 +124,6 @@ export default class StatemineNftApi extends BaseNftApi {
 
     try {
       if (!assetIds || assetIds.length === 0) {
-        params.cleanUpNfts(this.chain, address, [], [], true);
-
         return;
       }
 
@@ -168,8 +166,6 @@ export default class StatemineNftApi extends BaseNftApi {
 
         params.updateCollection(this.chain, parsedCollection);
       }));
-
-      params.cleanUpNfts(this.chain, address, collectionIds, nftIds);
     } catch (e) {
       console.error(`${this.chain}`, e);
     }

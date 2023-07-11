@@ -54,7 +54,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const accountName = useGetDefaultAccountName();
 
-  // Auto focus field
+  // Auto-focus field
   useFocusFormItem(form, fieldName);
 
   const privateKey = Form.useWatch(fieldName, form);
@@ -62,11 +62,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onSubmit: FormCallbacks<FormState>['onFinish'] = useCallback((values: FormState) => {
     const { [fieldName]: privateKey } = values;
 
-    if (privateKey) {
+    if (privateKey?.trim()) {
       setLoading(true);
       createAccountSuriV2({
         name: accountName,
-        suri: privateKey,
+        suri: privateKey.trim(),
         isAllowed: true,
         types: [EVM_ACCOUNT_TYPE]
       })
@@ -93,7 +93,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
 
     if (amount) {
-      if (privateKey) {
+      if (privateKey?.trim()) {
         setValidating(true);
         setValidateState({
           status: 'validating',
@@ -101,7 +101,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         });
 
         timeOutRef.current = setTimeout(() => {
-          validateMetamaskPrivateKeyV2(privateKey, [EVM_ACCOUNT_TYPE])
+          validateMetamaskPrivateKeyV2(privateKey.trim(), [EVM_ACCOUNT_TYPE])
             .then(({ autoAddPrefix }) => {
               if (amount) {
                 if (autoAddPrefix) {

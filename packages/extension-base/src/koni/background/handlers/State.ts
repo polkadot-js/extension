@@ -1846,6 +1846,10 @@ export default class KoniState {
   }
 
   public async reloadNft () {
+    const currentAddress = this.keyringService.currentAccount.address;
+
+    await this.dbService.removeNftsByAddress(currentAddress);
+
     return await this.cron.reloadNft();
   }
 

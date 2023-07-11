@@ -67,25 +67,12 @@ function Component ({ className, request }: Props) {
   const visibleAccounts = useMemo(() => (filterAuthorizeAccounts(accounts, accountAuthType || 'both')),
     [accountAuthType, accounts]);
 
-  // Selected map with default values is map of all acounts
+  // Selected map with default values is map of all accounts
   const [selectedMap, setSelectedMap] = useState<Record<string, boolean>>({});
 
-  // Create selected map by default
-  useEffect(() => {
-    setSelectedMap((map) => {
-      const existedKey = Object.keys(map);
-
-      accounts.forEach((item) => {
-        if (!existedKey.includes(item.address)) {
-          map[item.address] = (allowedAccounts || []).includes(item.address);
-        }
-      });
-
-      map[ALL_ACCOUNT_KEY] = visibleAccounts.every((item) => map[item.address]);
-
-      return { ...map };
-    });
-  }, [accounts, allowedAccounts, visibleAccounts]);
+  const isDisableConnect = useMemo(() => {
+    return !visibleAccounts.filter(({ address }) => !!selectedMap[address]).length;
+  }, [selectedMap, visibleAccounts]);
 
   // Handle buttons actions
   const onBlock = useCallback(() => {
@@ -156,6 +143,23 @@ function Component ({ className, request }: Props) {
       });
     };
   }, [visibleAccounts]);
+
+  // Create selected map by default
+  useEffect(() => {
+    setSelectedMap((map) => {
+      const existedKey = Object.keys(map);
+
+      accounts.forEach((item) => {
+        if (!existedKey.includes(item.address)) {
+          map[item.address] = (allowedAccounts || []).includes(item.address);
+        }
+      });
+
+      map[ALL_ACCOUNT_KEY] = visibleAccounts.every((item) => map[item.address]);
+
+      return { ...map };
+    });
+  }, [accounts, allowedAccounts, visibleAccounts]);
 
   return (
     <>
@@ -235,7 +239,7 @@ function Component ({ className, request }: Props) {
                 {t('Cancel')}
               </Button>
               <Button
-                disabled={Object.values(selectedMap).every((value) => !value)}
+                disabled={isDisableConnect}
                 loading={loading}
                 onClick={onConfirm}
               >

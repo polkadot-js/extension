@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AssetRefMap, ChainAssetMap, ChainInfoMap } from '@subwallet/chain-list';
+import { _AssetRef } from '@subwallet/chain-list/types';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 jest.setTimeout(1000 * 60 * 10);
 
@@ -79,11 +80,36 @@ describe('test token transfer', () => {
 
   it('xcm check', async () => {
     const rawSrcChains = Object.values(AssetRefMap).map((value) => value.srcChain);
+    const errorList: _AssetRef[] = [];
 
     await Promise.all(rawSrcChains.map(async (srcChain) => {
       const chainInfo = ChainInfoMap[srcChain];
-      const api = await substrateChainHandler.initApi(srcChain, chainInfo.providers[Object.keys(chainInfo.providers)[0]]);
+
+      substrateApiMap[chainInfo.slug] = await substrateChainHandler.initApi(srcChain, chainInfo.providers[Object.keys(chainInfo.providers)[0]]);
     }));
 
+    for (const assetRef of Object.values(AssetRefMap)) {
+      const substrateApi = await substrateApiMap[assetRef.srcChain].isReady;
+      const destinationTokenInfo = ChainAssetMap[assetRef.destAsset];
+      const originTokenInfo = ChainAssetMap[assetRef.srcAsset];
+      const isDestChainEvm = _isChainEvmCompatible(ChainInfoMap[assetRef.destChain]);
+      const destAddress = isDestChainEvm ? destAddress2 : destAddress1;
+
+      try {
+        await createXcmExtrinsic({
+          destinationTokenInfo,
+          originTokenInfo,
+          sendingValue: '0',
+          recipient: destAddress,
+          chainInfoMap: ChainInfoMap,
+          substrateApi
+        });
+      } catch (e) {
+        console.log('error', e);
+        errorList.push(assetRef);
+      }
+    }
+
+    console.log('errorList', errorList);
   });
 });

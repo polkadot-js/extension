@@ -36,9 +36,25 @@ export default class WalletConnectService {
     this.#initClient().catch(console.error);
   }
 
-  async #initClient () {
+  get #haveData (): boolean {
+    const sessionStorage = localStorage.getItem('wc@2:client:0.3//session');
+    const pairingStorage = localStorage.getItem('wc@2:core:0.3//pairing');
+    const subscriptionStorage = localStorage.getItem('wc@2:core:0.3//subscription');
+
+    const sessions: Array<unknown> = sessionStorage ? JSON.parse(sessionStorage) as Array<unknown> : [];
+    const pairings: Array<unknown> = pairingStorage ? JSON.parse(pairingStorage) as Array<unknown> : [];
+    const subscriptions: Array<unknown> = subscriptionStorage ? JSON.parse(subscriptionStorage) as Array<unknown> : [];
+
+    return !!sessions.length || !!pairings.length || !!subscriptions.length;
+  }
+
+  async #initClient (force?: boolean) {
     this.#removeListener();
-    this.#client = await SignClient.init(this.#option);
+
+    if (force || this.#haveData) {
+      this.#client = await SignClient.init(this.#option);
+    }
+
     this.#updateSessions();
     this.#createListener();
   }
@@ -157,13 +173,11 @@ export default class WalletConnectService {
     await this.#initClient();
   }
 
-  public getSessions () {
-    this.#checkClient();
-
-    console.log(this.#client?.session.values);
-  }
-
   public async connect (uri: string) {
+    if (!this.#haveData) {
+      await this.#initClient(true);
+    }
+
     this.#checkClient();
 
     await this.#client?.pair({ uri });

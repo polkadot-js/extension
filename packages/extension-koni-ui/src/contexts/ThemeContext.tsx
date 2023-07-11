@@ -184,6 +184,8 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
     },
 
     '.ant-input-affix-wrapper': {
+      overflow: 'hidden',
+
       '.ant-input': {
         overflow: 'hidden'
       }

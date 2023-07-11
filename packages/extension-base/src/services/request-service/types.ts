@@ -29,4 +29,3 @@ export interface AuthUrlInfo {
 }
 
 export type AuthUrls = Record<string, AuthUrlInfo>;
-

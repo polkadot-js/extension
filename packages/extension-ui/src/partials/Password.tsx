@@ -6,7 +6,7 @@ import type { Validator } from '../util/validators.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { InputWithLabel, ValidatedInput } from '../components/index.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import { allOf, isNotShorterThan, isSameAs } from '../util/validators.js';
 
 interface Props {
@@ -20,10 +20,10 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   const { t } = useTranslation();
   const [pass1, setPass1] = useState<string | null>(null);
   const [pass2, setPass2] = useState<string | null>(null);
-  const isFirstPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')), [t]);
+  const isFirstPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t('Password is too short')), [t]);
   const isSecondPasswordValid = useCallback((firstPassword: string): Validator<string> => allOf(
-    isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')),
-    isSameAs(firstPassword, t<string>('Passwords do not match'))
+    isNotShorterThan(MIN_LENGTH, t('Password is too short')),
+    isSameAs(firstPassword, t('Passwords do not match'))
   ), [t]);
 
   useEffect((): void => {
@@ -36,7 +36,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
         component={InputWithLabel}
         data-input-password
         isFocused={isFocussed}
-        label={t<string>('A new password for this account')}
+        label={t('A new password for this account')}
         onValidatedChange={setPass1}
         type='password'
         validator={isFirstPasswordValid}
@@ -45,7 +45,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
         <ValidatedInput
           component={InputWithLabel}
           data-input-repeat-password
-          label={t<string>('Repeat password for verification')}
+          label={t('Repeat password for verification')}
           onValidatedChange={setPass2}
           type='password'
           validator={isSecondPasswordValid(pass1)}

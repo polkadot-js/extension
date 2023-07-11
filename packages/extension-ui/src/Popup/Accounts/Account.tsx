@@ -10,8 +10,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { canDerive } from '@polkadot/extension-base/utils';
 
 import { AccountContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components/index.js';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useGenesisHashOptions, useTranslation } from '../../hooks/index.js';
 import { editAccount, tieAccount } from '../../messaging.js';
 import { Name } from '../../partials/index.js';
 import { styled } from '../../styled.js';
@@ -80,14 +79,14 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
         className='menuItem'
         onClick={_toggleEdit}
       >
-        {t<string>('Rename')}
+        {t('Rename')}
       </Link>
       {!isExternal && canDerive(type) && (
         <Link
           className='menuItem'
           to={`/account/derive/${address}/locked`}
         >
-          {t<string>('Derive New Account')}
+          {t('Derive New Account')}
         </Link>
       )}
       <MenuDivider />
@@ -97,7 +96,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
           isDanger
           to={`/account/export/${address}`}
         >
-          {t<string>('Export Account')}
+          {t('Export Account')}
         </Link>
       )}
       <Link
@@ -105,7 +104,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
         isDanger
         to={`/account/forget/${address}`}
       >
-        {t<string>('Forget Account')}
+        {t('Forget Account')}
       </Link>
       {!isHardware && (
         <>

@@ -9,7 +9,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 
 import { AccountContext } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 import AccountsTree from './AccountsTree.js';
@@ -54,7 +54,7 @@ function Accounts ({ className }: Props): React.ReactElement {
               showConnectedAccounts
               showSearch
               showSettings
-              text={t<string>('Accounts')}
+              text={t('Accounts')}
             />
             <div className={className}>
               {filteredAccount.map((json, index): React.ReactNode => (

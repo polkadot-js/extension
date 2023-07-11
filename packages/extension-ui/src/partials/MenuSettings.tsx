@@ -10,8 +10,7 @@ import { ThemeContext } from 'styled-components';
 import settings from '@polkadot/ui-settings';
 
 import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components/index.js';
-import useIsPopup from '../hooks/useIsPopup.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useIsPopup, useTranslation } from '../hooks/index.js';
 import { setNotification, windowOpen } from '../messaging.js';
 import { styled } from '../styled.js';
 import getLanguageOptions from '../util/getLanguageOptions.js';
@@ -98,14 +97,14 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       >
         <Switch
           checked={themeContext.id === themes.dark.id}
-          checkedLabel={t<string>('Dark')}
+          checkedLabel={t('Dark')}
           onChange={_onChangeTheme}
-          uncheckedLabel={t<string>('Light')}
+          uncheckedLabel={t('Light')}
         />
       </MenuItem>
       <MenuItem
         className='setting'
-        title={t<string>('Display address format for')}
+        title={t('Display address format for')}
       >
         <Dropdown
           className='dropdown'
@@ -117,7 +116,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       </MenuItem>
       <MenuItem
         className='setting'
-        title={t<string>('Language')}
+        title={t('Language')}
       >
         <Dropdown
           className='dropdown'
@@ -129,7 +128,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       </MenuItem>
       <MenuItem
         className='setting'
-        title={t<string>('Notifications')}
+        title={t('Notifications')}
       >
         <Dropdown
           className='dropdown'
@@ -141,12 +140,12 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       </MenuItem>
       <MenuItem
         className='setting'
-        title={t<string>('External accounts and Access')}
+        title={t('External accounts and Access')}
       >
         <Checkbox
           checked={camera}
           className='checkbox camera'
-          label={t<string>('Allow QR Camera Access')}
+          label={t('Allow QR Camera Access')}
           onChange={setCamera}
         />
       </MenuItem>
@@ -156,7 +155,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           className='manageWebsiteAccess'
           icon={faTasks}
           onClick={_goToAuthList}
-          text={t<string>('Manage Website Access')}
+          text={t('Manage Website Access')}
         />
       </MenuItem>
       {isPopup && (
@@ -165,7 +164,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
             className='openWindow'
             icon={faExpand}
             onClick={_onWindowOpen}
-            text={t<string>('Open extension in new window')}
+            text={t('Open extension in new window')}
           />
         </MenuItem>
       )}

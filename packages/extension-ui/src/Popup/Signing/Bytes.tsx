@@ -7,7 +7,7 @@ import React, { useMemo } from 'react';
 
 import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
 interface Props {
@@ -30,11 +30,11 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
     <table className={className}>
       <tbody>
         <tr>
-          <td className='label'>{t<string>('from')}</td>
+          <td className='label'>{t('from')}</td>
           <td className='data'>{url}</td>
         </tr>
         <tr>
-          <td className='label'>{t<string>('bytes')}</td>
+          <td className='label'>{t('bytes')}</td>
           <td className='data pre'><div>{text}</div></td>
         </tr>
       </tbody>

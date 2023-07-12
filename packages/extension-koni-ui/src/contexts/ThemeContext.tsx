@@ -175,6 +175,20 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
 
     '.ant-checkbox': {
       top: 0
+    },
+
+    '.ant-notification-top': {
+      '.ant-notification-notice': {
+        marginInlineEnd: 'auto'
+      }
+    },
+
+    '.ant-input-affix-wrapper': {
+      overflow: 'hidden',
+
+      '.ant-input': {
+        overflow: 'hidden'
+      }
     }
   });
 });

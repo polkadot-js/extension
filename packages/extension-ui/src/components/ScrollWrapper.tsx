@@ -28,6 +28,8 @@ const ScrollbarContainer = styled.div`
   width: 100vw;
   overflow-x: hidden;
 
+  outline-offset: -3px;
+
   ::-webkit-scrollbar-thumb {
     background: ${({ theme }) => theme.boxBorderColor};
     border-radius: 50px;

@@ -109,7 +109,7 @@ const IconButton = styled.button`
     right: 20px;
     cursor: pointer;
 
-    &:focus {
+    &:focus-visible {
       outline-style: auto;
     }
 `;

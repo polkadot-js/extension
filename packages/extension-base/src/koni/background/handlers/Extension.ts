@@ -3511,7 +3511,7 @@ export default class KoniExtension {
 
       this.#skipAutoLock = true;
       await this.saveCurrentAccountAddress({ address });
-      const unsubSyncProgress = await this.#koniState.chainService.mantaPay.subscribeSyncProgress();
+      const unsubSyncProgress = await this.#koniState.chainService?.mantaPay?.subscribeSyncProgress();
 
       console.debug('Start initial sync for MantaPay');
 
@@ -3520,13 +3520,13 @@ export default class KoniExtension {
           console.debug('Finished initial sync for MantaPay');
 
           this.#skipAutoLock = false;
-          unsubSyncProgress();
+          unsubSyncProgress && unsubSyncProgress();
         })
         .catch((e) => {
           console.error('Error syncing MantaPay', e);
 
           this.#skipAutoLock = false;
-          unsubSyncProgress();
+          unsubSyncProgress && unsubSyncProgress();
         });
 
       return {
@@ -3551,13 +3551,13 @@ export default class KoniExtension {
   }
 
   private async initSyncMantaPay (address: string) {
-    if (this.#koniState.chainService.mantaPay.getSyncState().isSyncing) {
+    if (this.#koniState.chainService?.mantaPay?.getSyncState().isSyncing) {
       return;
     }
 
     this.#skipAutoLock = true;
     await this.saveCurrentAccountAddress({ address });
-    const unsubSyncProgress = await this.#koniState.chainService.mantaPay.subscribeSyncProgress();
+    const unsubSyncProgress = await this.#koniState.chainService?.mantaPay?.subscribeSyncProgress();
 
     console.debug('Start initial sync for MantaPay');
 
@@ -3566,9 +3566,9 @@ export default class KoniExtension {
         console.debug('Finished initial sync for MantaPay');
 
         this.#skipAutoLock = false;
-        unsubSyncProgress();
+        unsubSyncProgress && unsubSyncProgress();
         // make sure the sync state is set, just in case it gets unsubscribed
-        this.#koniState.chainService.mantaPay.setSyncState({
+        this.#koniState.chainService?.mantaPay?.setSyncState({
           progress: 100,
           isSyncing: false
         });
@@ -3577,8 +3577,8 @@ export default class KoniExtension {
         console.error('Error syncing MantaPay', e);
 
         this.#skipAutoLock = false;
-        unsubSyncProgress();
-        this.#koniState.chainService.mantaPay.setSyncState({
+        unsubSyncProgress && unsubSyncProgress();
+        this.#koniState.chainService?.mantaPay?.setSyncState({
           progress: 0,
           isSyncing: false
         });
@@ -3609,7 +3609,7 @@ export default class KoniExtension {
   private subscribeMantaPaySyncState (id: string, port: chrome.runtime.Port): MantaPaySyncState {
     const cb = createSubscription<'pri(mantaPay.subscribeSyncingState)'>(id, port);
 
-    const syncingStateSubscription = this.#koniState.subscribeMantaPaySyncState().subscribe({
+    const syncingStateSubscription = this.#koniState.subscribeMantaPaySyncState()?.subscribe({
       next: (rs) => {
         cb(rs);
       }
@@ -3621,7 +3621,11 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return this.#koniState.chainService.mantaPay.getSyncState();
+    return this.#koniState.chainService?.mantaPay?.getSyncState() || {
+      isSyncing: false,
+      progress: 0,
+      needManualSync: false
+    };
   }
 
   // --------------------------------------------------------------

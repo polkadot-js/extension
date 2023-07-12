@@ -73,8 +73,8 @@ const Component: React.FC<ComponentProps> = (props) => {
         />
       )
     },
-    content: t('If someone has your secret phrase, they will have full control of your account'),
-    subTitle: t('Disconnect confirmation message'),
+    content: t('Once you disconnect, you will no longer see this connection on SubWallet and on your DApp.\n'),
+    subTitle: t('Are you sure you want to disconnect?'),
     title: t('Disconnect'),
     type: 'error',
     closable: true

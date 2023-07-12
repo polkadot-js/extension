@@ -10,7 +10,6 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { u8aToString } from '@polkadot/util';
 
 import { AccountContext, ActionContext, Success } from '../../components';
-import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { batchRestore, jsonGetAccountInfo, jsonRestore } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
@@ -22,7 +21,7 @@ function Upload(): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
-  const { show } = useToast();
+
   const [isBusy, setIsBusy] = useState(false);
   const [accountsInfo, setAccountsInfo] = useState<ResponseJsonGetAccountInfo[]>([]);
   const [password, setPassword] = useState<string>('');
@@ -58,6 +57,7 @@ function Upload(): React.ReactElement {
         json = JSON.parse(u8aToString(file)) as KeyringPair$Json | KeyringPairs$Json;
 
         setFile(json);
+        setFileError(false);
         _onNextStep();
       } catch (e) {
         console.error(e);
@@ -131,6 +131,7 @@ function Upload(): React.ReactElement {
           step={step}
           text={t<string>('Import from JSON file')}
           total={2}
+          withBackArrow={step === 1}
         />
       )}
       {step === 1 && (

@@ -8,17 +8,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
 import copyIcon from '../../assets/copy.svg';
-import {
-  BackButton,
-  Button,
-  ButtonArea,
-  Checkbox,
-  Header,
-  HelperFooter,
-  MnemonicPill,
-  Svg,
-  VerticalSpace
-} from '../../components';
+import { BackButton, Button, ButtonArea, Checkbox, Header, HelperFooter, MnemonicPill, Svg } from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 

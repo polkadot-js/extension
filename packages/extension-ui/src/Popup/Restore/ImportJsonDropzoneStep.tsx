@@ -35,7 +35,14 @@ function ImportJsonDropzoneStep({ className, isFileError, onChangeFile, setFileN
 }
 
 const StyledWarning = styled(Warning)`
-  margin-top: 8px;;
+  margin-top: 8px;
+
+  font-family: Karla;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 130%;
+  letter-spacing: 0.78px;
 `;
 
 export default styled(ImportJsonDropzoneStep)`

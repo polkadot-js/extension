@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import type { ThemeProps } from '@polkadot/extension-ui/types';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Transition, TransitionStatus } from 'react-transition-group';
 import styled, { CSSProperties } from 'styled-components';
 
@@ -21,9 +21,10 @@ interface SplashHandlerProps extends ThemeProps {
 
 function SplashHandler({ children, className }: SplashHandlerProps): React.ReactElement<SplashHandlerProps> {
   // Needs this graduality to avoid flashes on rendering contents between video and app
-  const [splashOn, setSplashState] = useState<boolean>(true);
-  const [contentVisible, setContentVisible] = useState<boolean>(false);
+  const [isSplashOn, setIsSplashOn] = useState<boolean>(true);
+  const [isContentVisible, setIsContentVisible] = useState<boolean>(false);
   const nodeRef = useRef(null);
+
   const duration = 250;
 
   const defaultStyle: Partial<CSSProperties> = {
@@ -40,10 +41,28 @@ function SplashHandler({ children, className }: SplashHandlerProps): React.React
     exiting: { opacity: 0 }
   };
 
+  useEffect(() => {
+    if (!isContentVisible) {
+      return;
+    }
+
+    const updateWithErrorLog = (prevIsSplashOn: boolean) => {
+      if (prevIsSplashOn) {
+        console.error('Fallback timeout needed to turn off splash video.');
+      }
+
+      return false;
+    };
+
+    const timeoutId = setTimeout(setIsSplashOn, 2000, updateWithErrorLog);
+
+    return () => clearTimeout(timeoutId);
+  }, [isContentVisible]);
+
   return (
     <div className={className}>
       <Transition
-        in={splashOn}
+        in={isSplashOn}
         nodeRef={nodeRef}
         timeout={duration}
       >
@@ -57,15 +76,15 @@ function SplashHandler({ children, className }: SplashHandlerProps): React.React
             }}
           >
             <Video
-              onEnded={setSplashState}
-              onStarted={setContentVisible}
+              onEnded={() => setIsSplashOn(false)}
+              onStarted={() => setIsContentVisible(true)}
               source='videos/splash.mp4'
               type='video/mp4'
             />
           </div>
         )}
       </Transition>
-      {contentVisible && children}
+      {isContentVisible && children}
     </div>
   );
 }

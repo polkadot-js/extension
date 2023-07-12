@@ -37,12 +37,12 @@ function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is S
 
 const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
-  height: 600,
+  height: 640,
   left: 150,
   state: 'normal',
   top: 150,
   type: 'popup',
-  width: 360
+  width: 376
 };
 
 export default class Extension {

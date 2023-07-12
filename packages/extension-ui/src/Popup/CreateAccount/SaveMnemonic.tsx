@@ -108,7 +108,7 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
 const ContentContainer = styled.div`
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  margin-block: auto;
 `;
 
 const StyledHeader = styled(Header)`

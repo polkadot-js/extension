@@ -277,7 +277,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Layout.WithSubHeaderOnly
         leftFooterButton={{
           onClick: onBack,
-          children: 'Cancel'
+          children: t('Cancel')
         }}
         onBack={onBack}
         rightFooterButton={{
@@ -292,7 +292,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           ),
           loading: loading,
           onClick: onSubmit,
-          children: 'Save'
+          children: t('Save')
         }}
         subHeaderIcons={[
           {

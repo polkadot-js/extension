@@ -6,7 +6,7 @@ import { AssetSetting, ExtrinsicType } from '@subwallet/extension-base/backgroun
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { isSameAddress } from '@subwallet/extension-base/utils';
+import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
@@ -228,7 +228,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
-  const checkAction = usePreCheckAction(from, true, 'The account you are using is {{accountTitle}}, you cannot send assets with it');
+  const checkAction = usePreCheckAction(from, true, detectTranslate('The account you are using is {{accountTitle}}, you cannot send assets with it'));
   const isZKModeEnabled = useIsMantaPayEnabled(from);
 
   const [loading, setLoading] = useState(false);

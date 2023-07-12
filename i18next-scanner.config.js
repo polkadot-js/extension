@@ -37,7 +37,7 @@ module.exports = {
     defaultLng: 'en',
     func: {
       extensions: ['.tsx', '.ts'],
-      list: ['t', 'i18next.t', 'i18n.t']
+      list: ['t', 'i18next.t', 'i18n.t', 'detectTranslate']
     },
     keySeparator: false, // key separator
     lngs: ['en'],

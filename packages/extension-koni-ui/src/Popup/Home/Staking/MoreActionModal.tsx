@@ -156,7 +156,7 @@ const Component: React.FC<Props> = (props: Props) => {
           action: StakingAction.UNSTAKE,
           backgroundIconColor: 'magenta-6',
           icon: MinusCircle,
-          label: 'Unstake',
+          label: t('Unstake'),
           onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
         };
       } else if (action === StakingAction.WITHDRAW) {
@@ -164,7 +164,7 @@ const Component: React.FC<Props> = (props: Props) => {
           action: StakingAction.WITHDRAW,
           backgroundIconColor: 'geekblue-6',
           icon: ArrowCircleDown,
-          label: 'Withdraw unstaked funds',
+          label: t('Withdraw unstaked funds'),
           onClick: handleWithdrawalAction
         };
       } else if (action === StakingAction.CLAIM_REWARD) {
@@ -172,7 +172,7 @@ const Component: React.FC<Props> = (props: Props) => {
           action: StakingAction.CLAIM_REWARD,
           backgroundIconColor: 'green-7',
           icon: Wallet,
-          label: 'Claim rewards',
+          label: t('Claim rewards'),
           onClick: handleClaimRewardAction
         };
       } else if (action === StakingAction.CANCEL_UNSTAKE) {
@@ -180,7 +180,7 @@ const Component: React.FC<Props> = (props: Props) => {
           action: StakingAction.CANCEL_UNSTAKE,
           backgroundIconColor: 'purple-8',
           icon: ArrowArcLeft,
-          label: 'Cancel unstaking',
+          label: t('Cancel unstaking'),
           onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
         };
       }
@@ -189,11 +189,11 @@ const Component: React.FC<Props> = (props: Props) => {
         action: StakingAction.STAKE,
         backgroundIconColor: 'green-6',
         icon: PlusCircle,
-        label: 'Stake more',
+        label: t('Stake more'),
         onClick: onNavigate(`/transaction/stake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
       };
     });
-  }, [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
+  }, [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, onNavigate, t]);
 
   const onPreCheck = usePreCheckAction(currentAccount?.address, false);
 

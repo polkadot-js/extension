@@ -310,7 +310,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                         <SettingItem
                           className='account-list-item'
                           leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
-                          name={t(`Import ${String(accountsInfo.length).padStart(2, '0')} accounts`)}
+                          name={t('Import {{number}} accounts', { replace: { number: String(accountsInfo.length).padStart(2, '0') } })}
                           onPressItem={openModal}
                           rightItem={(
                             <Icon

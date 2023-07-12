@@ -267,9 +267,9 @@ const Component: React.FC<Props> = (props: Props) => {
   const onCopyAddress = useCallback(() => {
     copyToClipboard(account?.address || '');
     notify({
-      message: 'Copied'
+      message: t('Copied to clipboard')
     });
-  }, [account?.address, notify]);
+  }, [account?.address, notify, t]);
 
   const onUpdate: FormCallbacks<DetailFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const changeMap = convertFieldToObject<DetailFormState>(changedFields);
@@ -442,7 +442,7 @@ const Component: React.FC<Props> = (props: Props) => {
               name={FormFieldName.NAME}
               rules={[
                 {
-                  message: 'Wallet name is required',
+                  message: t('Wallet name is required'),
                   transform: (value: string) => value.trim(),
                   required: true
                 }

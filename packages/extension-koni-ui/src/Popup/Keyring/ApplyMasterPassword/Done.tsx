@@ -51,9 +51,9 @@ const Component: React.FC<Props> = (props: Props) => {
         {accounts.length > 2 &&
           (
             <div className='and-more'>
-              <span>And other&nbsp;</span>
+              <span>{t('And other')}&nbsp;</span>
               <span className='highlight'>{String(accounts.length - 2).padStart(2, '0')}</span>
-              <span>&nbsp;accounts</span>
+              <span>&nbsp;{t('accounts')}</span>
             </div>
           )
         }

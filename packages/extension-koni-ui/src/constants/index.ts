@@ -7,6 +7,7 @@ export * from './history';
 export * from './modal';
 export * from './nft';
 export * from './number';
+export * from './qr';
 export * from './signing';
 export * from './stakingStatusUi';
 export * from './transaction';

@@ -1,11 +1,31 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { encodeNumber } from '@polkadot/react-qr/util';
-import { u8aConcat } from '@polkadot/util';
+import { MULTIPART, STANDARD_FRAME_SIZE } from '@subwallet/extension-koni-ui/constants';
 
-const MULTIPART = new Uint8Array([0]);
-const STANDARD_FRAME_SIZE = 2 ** 9;
+import { isString, u8aConcat } from '@polkadot/util';
+
+export const encodeNumber = (value: number): Uint8Array => {
+  return new Uint8Array([value >> 8, value & 0xff]);
+};
+
+export const createImgSize = (size?: string | number): Record<string, string> => {
+  if (!size) {
+    return {
+      height: 'auto',
+      width: '100%'
+    };
+  }
+
+  const _size = isString(size)
+    ? size
+    : `${size}px`;
+
+  return {
+    height: _size,
+    width: _size
+  };
+};
 
 export const createFrames = (input: Uint8Array): Uint8Array[] => {
   const frames = [];

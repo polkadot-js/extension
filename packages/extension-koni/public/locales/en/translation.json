@@ -223,7 +223,6 @@
   "ZK mode is syncing": "",
   "Account details": "",
   "Account name is required": "",
-  "Account name": "",
   "Wallet address": "",
   "All done, you can go back home": "",
   "This may take a few minutes. Please keep the app open": "",
@@ -700,5 +699,8 @@
   "Execute": "",
   "Earning reward": "",
   "Not earning": "",
-  "{{number}} selected validators": ""
+  "{{number}} selected validators": "",
+  "Once you disconnect, you will no longer see this connection on SubWallet and on your DApp.": "",
+  "Are you sure you want to disconnect?": "",
+  "Please type or paste or scan URI": ""
 }

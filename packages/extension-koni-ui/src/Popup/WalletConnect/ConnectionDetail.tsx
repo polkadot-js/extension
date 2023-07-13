@@ -73,7 +73,7 @@ const Component: React.FC<ComponentProps> = (props) => {
         />
       )
     },
-    content: t('Once you disconnect, you will no longer see this connection on SubWallet and on your DApp.\n'),
+    content: t('Once you disconnect, you will no longer see this connection on SubWallet and on your DApp.'),
     subTitle: t('Are you sure you want to disconnect?'),
     title: t('Disconnect'),
     type: 'error',

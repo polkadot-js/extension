@@ -183,7 +183,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
             {unstakingData.status === UnstakingStatus.UNLOCKING.valueOf() &&
               <div className={'sm-text text-light-4'}>
-                {getWaitingTime(unstakingData.waitingTime)}
+                {getWaitingTime(unstakingData.waitingTime, unstakingData.status)}
               </div>
             }
           </div>
@@ -397,7 +397,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                   <MetaInfo.Number
                     decimals={decimals}
                     key={`${item.validatorAddress || item.chain}-${item.status}-${item.claimable}`}
-                    label={getWaitingTime(item.waitingTime) ? t(getWaitingTime(item.waitingTime)) : t('Withdraw')}
+                    label={getWaitingTime(item.waitingTime, item.status) ? t(getWaitingTime(item.waitingTime, item.status)) : t('Withdraw')}
                     suffix={staking.nativeToken}
                     value={item.claimable || ''}
                     valueColorSchema={'gray'}

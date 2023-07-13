@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -51,9 +52,11 @@ const Component: React.FC<Props> = (props: Props) => {
         {accounts.length > 2 &&
           (
             <div className='and-more'>
-              <span>{t('And other')}&nbsp;</span>
-              <span className='highlight'>{String(accounts.length - 2).padStart(2, '0')}</span>
-              <span>&nbsp;{t('accounts')}</span>
+              <Trans
+                components={{ highlight: <span className='highlight' /> }}
+                i18nKey={detectTranslate('And other <highlight>{{number}}</highlight> accounts')}
+                values={{ number: String(accounts.length - 2).padStart(2, '0') }}
+              />
             </div>
           )
         }

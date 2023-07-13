@@ -78,7 +78,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onSuccess = useCallback((result: ScannerResult) => {
     const uri = result.text;
-    const error = validWalletConnectUri(uri);
+    const error = validWalletConnectUri(uri, t);
 
     if (!error && !loading) {
       setScanError('');
@@ -89,7 +89,7 @@ const Component: React.FC<Props> = (props: Props) => {
         setScanError(error);
       }
     }
-  }, [loading, inactiveModal, form]);
+  }, [loading, inactiveModal, form, t]);
 
   const openScanner = useOpenQrScanner(scannerId);
 
@@ -113,7 +113,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const uriValidator = useCallback((rule: RuleObject, uri: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      const error = validWalletConnectUri(uri);
+      const error = validWalletConnectUri(uri, t);
 
       if (!error) {
         resolve();
@@ -121,7 +121,7 @@ const Component: React.FC<Props> = (props: Props) => {
         reject(new Error(error));
       }
     });
-  }, []);
+  }, [t]);
 
   return (
     <Layout.WithSubHeaderOnly

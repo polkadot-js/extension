@@ -442,7 +442,7 @@ const Component: React.FC<Props> = (props: Props) => {
               name={FormFieldName.NAME}
               rules={[
                 {
-                  message: t('Wallet name is required'),
+                  message: t('Account name is required'),
                   transform: (value: string) => value.trim(),
                   required: true
                 }
@@ -452,9 +452,9 @@ const Component: React.FC<Props> = (props: Props) => {
               <Input
                 className='account-name-input'
                 disabled={deriving || zkModeSyncState.isSyncing}
-                label={t('Wallet name')}
+                label={t('Account name')}
                 onBlur={form.submit}
-                placeholder={t('Wallet name')}
+                placeholder={t('Account name')}
                 prefix={(
                   <BackgroundIcon
                     backgroundColor='var(--wallet-name-icon-bg-color)'

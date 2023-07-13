@@ -222,8 +222,8 @@
   "Something went wrong": "",
   "ZK mode is syncing": "",
   "Account details": "",
-  "Wallet name is required": "",
-  "Wallet name": "",
+  "Account name is required": "",
+  "Account name": "",
   "Wallet address": "",
   "All done, you can go back home": "",
   "This may take a few minutes. Please keep the app open": "",
@@ -697,5 +697,8 @@
   "Add to bond": "",
   "Compound": "",
   "Cancel compound": "",
-  "Execute": ""
+  "Execute": "",
+  "Earning reward": "",
+  "Not earning": "",
+  "{{number}} selected validators": ""
 }

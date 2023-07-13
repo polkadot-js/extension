@@ -384,7 +384,6 @@ export function getStakingAvailableActionsByNominator (nominatorMetadata: Nomina
   }
 
   if (nominatorMetadata.unstakings.length > 0) {
-    console.log('ok', nominatorMetadata.unstakings);
     result.push(StakingAction.CANCEL_UNSTAKE);
     const hasClaimable = nominatorMetadata.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
 

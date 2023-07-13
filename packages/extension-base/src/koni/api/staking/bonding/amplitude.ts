@@ -137,8 +137,6 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
     const remainingBlock = parseInt(nearestUnstakingBlock) - currentBlockNumber;
     const waitingTime = remainingBlock * blockDuration;
 
-    console.log(`chain: ${chainInfo.slug}, address: ${address}, currentEra: ${currentBlockNumber}, waiting until: ${nearestUnstakingBlock}, isClaimable: ${isClaimable ? 'true' : 'false'}`);
-
     unstakingList.push({
       chain: chainInfo.slug,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,

@@ -149,8 +149,6 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
       const remainingEra = unlockingChunk.unlockEra - parseInt(currentEra);
       const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
 
-      console.log(`chain: ${chainInfo.slug}, address: ${address}, currentEra: ${currentEra}, waiting until: ${unlockingChunk.unlockEra}, isClaimable: ${isClaimable ? 'true' : 'false'}`);
-
       unstakingList.push({
         chain: chainInfo.slug,
         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,

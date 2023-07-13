@@ -223,8 +223,6 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
           const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
           const claimable = Object.values(scheduledRequest.action)[0];
 
-          console.log(`chain: ${chainInfo.slug}, address: ${address}, currentEra: ${currentRound}, waiting until: ${scheduledRequest.whenExecutable}, isClaimable: ${isClaimable ? 'true' : 'false'}`);
-
           unstakingMap[delegation.owner] = {
             chain: chainInfo.slug,
             status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,

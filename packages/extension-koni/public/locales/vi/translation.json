@@ -223,7 +223,6 @@
   "ZK mode is syncing": "",
   "Account details": "Chi tiết tài khoản",
   "Account name is required": "",
-  "Account name": "Tên tài khoản",
   "Wallet address": "Địa chỉ",
   "All done, you can go back home": "",
   "This may take a few minutes. Please keep the app open": "",
@@ -697,5 +696,8 @@
   "Add to bond": "Stake thêm",
   "Compound": "",
   "Cancel compound": "",
-  "Execute": ""
+  "Execute": "",
+  "Earning reward": "",
+  "Not earning": "",
+  "{{number}} selected validators": ""
 }

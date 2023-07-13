@@ -34,7 +34,7 @@ module.exports = {
   ],
   options: {
     debug: true,
-    removeUnusedKeys: true,
+    // removeUnusedKeys: true,
     defaultLng: 'en',
     func: {
       extensions: ['.tsx', '.ts'],

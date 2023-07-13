@@ -27,7 +27,7 @@ const DEFAULT_FORM_VALUES: AddConnectionFormState = {
 };
 
 const scannerId = 'connect-connection-scanner-modal';
-const showScanner = false;
+const showScanner = true;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -188,7 +188,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <Input
               disabled={loading}
               label={t('URI')}
-              placeholder={t('Please type or paste URI')}
+              placeholder={t('Please type or paste or scan URI')}
               suffix={(
                 <>
                   {

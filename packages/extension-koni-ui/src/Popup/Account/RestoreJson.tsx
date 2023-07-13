@@ -243,7 +243,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
     if (!value) {
       setSubmitValidateState({
-        message: 'Password is required',
+        message: t('Password is required'),
         status: 'error'
       });
     } else {
@@ -251,7 +251,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
 
     setPassword(value);
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (requirePassword) {

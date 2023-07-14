@@ -710,5 +710,9 @@
   "You can only choose {{number}} collator": "",
   "You can only choose {{number}} validator": "",
   "You can only choose {{number}} dApps": "",
-  "You can only choose {{number}} collators": ""
+  "You can only choose {{number}} collators": "",
+  "Zk mode is syncing: {{percent}}%": "",
+  "DApp details": "",
+  "Collator details": "",
+  "Validator details": ""
 }

@@ -220,7 +220,7 @@
   "Something went wrong": "Có lỗi xảy ra",
   "ZK mode is syncing": "Đang đồng bộ chế độ ZK",
   "Account details": "Chi tiết tài khoản",
-  "Account name is required": "",
+  "Account name is required": "Tên tài khoản là bắt buộc",
   "Wallet address": "Địa chỉ",
   "All done, you can go back home": "Hoàn thành! Bạn có thể quay về trang chủ",
   "This may take a few minutes. Please keep the app open": "Quá trình sẽ kéo dài vài phút. Vui lòng không đóng ứng dụng",
@@ -710,5 +710,9 @@
   "You can only choose {{number}} collator": "Bạn chỉ được chọn {{number}} collator",
   "You can only choose {{number}} validator": "Bạn chỉ được chọn {{number}} validator",
   "You can only choose {{number}} dApps": "Bạn chỉ được chọn {{number}} dApp",
-  "You can only choose {{number}} collators": "Bạn chỉ được chọn {{number}} collator"
+  "You can only choose {{number}} collators": "Bạn chỉ được chọn {{number}} collator",
+  "Zk mode is syncing: {{percent}}%": "Đang đồng bộ chế độ ZK: {{percent}}%",
+  "DApp details": "Chi tiết dApp",
+  "Collator details": "Chi tiết collator",
+  "Validator details": "Chi tiết validator"
 }

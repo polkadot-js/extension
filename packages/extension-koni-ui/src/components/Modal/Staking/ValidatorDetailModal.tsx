@@ -9,7 +9,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwModal } from '@subwallet/react-ui';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -36,6 +36,19 @@ function Component (props: Props): React.ReactElement<Props> {
 
   const networkPrefix = useGetChainPrefixBySlug(chain);
 
+  const title = useMemo(() => {
+    const label = getValidatorLabel(chain);
+
+    switch (label) {
+      case 'dApp':
+        return t('DApp details');
+      case 'Collator':
+        return t('Collator details');
+      case 'Validator':
+        return t('Validator details');
+    }
+  }, [t, chain]);
+
   const _onCancel = useCallback(() => {
     inactiveModal(VALIDATOR_DETAIL_MODAL);
 
@@ -47,7 +60,7 @@ function Component (props: Props): React.ReactElement<Props> {
       className={className}
       id={VALIDATOR_DETAIL_MODAL}
       onCancel={_onCancel}
-      title={t(`${getValidatorLabel(chain)} details`)}
+      title={title}
     >
       <MetaInfo
         hasBackgroundWrapper

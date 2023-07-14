@@ -227,7 +227,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         <MetaInfo.Status
           label={t('Staking status')}
           statusIcon={getStakingStatus(nominatorMetadata.status).icon}
-          statusName={getStakingStatus(nominatorMetadata.status).name}
+          statusName={t(getStakingStatus(nominatorMetadata.status).name)}
           valueColorSchema={getStakingStatus(nominatorMetadata.status).schema}
         />
 

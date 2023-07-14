@@ -505,7 +505,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <SwAlert
                 className={CN('zk-alert-area')}
                 description={zkModeSyncState.progress === 100 ? t('All done, you can go back home') : t('This may take a few minutes. Please keep the app open')}
-                title={zkModeSyncState.progress === 100 ? t('Zk mode is ready') : t(`Zk mode is syncing: ${zkModeSyncState.progress}%`)}
+                title={zkModeSyncState.progress === 100 ? t('Zk mode is ready') : t('Zk mode is syncing: {{percent}}%', { replace: { percent: zkModeSyncState.progress || '0' } })}
                 type={zkModeSyncState.progress === 100 ? 'success' : 'warning'}
               />
             )

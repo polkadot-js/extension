@@ -388,12 +388,12 @@ const Component: React.FC<Props> = (props: Props) => {
                 optionType='button'
                 options={[
                   {
-                    label: 'Pools',
+                    label: t('Pools'),
                     value: StakingType.POOLED,
                     disabled: isEthAdr
                   },
                   {
-                    label: 'Nominate',
+                    label: t('Nominate'),
                     value: StakingType.NOMINATED
                   }
                 ]}

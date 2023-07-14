@@ -698,7 +698,7 @@
   "Please type or paste or scan URI": "",
   "You can only choose {{number}} validators": "",
   "Failed to connect. Please use Wallet Connect v2 on dApp": "",
-  "Invalid uri": "",
+  "Invalid URI": "",
   "And other <highlight>{{number}}</highlight> accounts": "",
   "Apply {{number}} dApp": "",
   "Apply {{number}} collator": "",
@@ -714,5 +714,12 @@
   "Zk mode is syncing: {{percent}}%": "",
   "DApp details": "",
   "Collator details": "",
-  "Validator details": ""
+  "Validator details": "",
+  "{{time}} hours": "",
+  "{{time}} days": "",
+  "Available for withdrawal": "",
+  "Withdraw in {{time}}": "",
+  "Withdrawable in a day": "",
+  "Pools": "",
+  "Nominate": ""
 }

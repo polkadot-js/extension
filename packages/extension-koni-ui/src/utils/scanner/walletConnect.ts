@@ -13,7 +13,7 @@ export const validWalletConnectUri = (data: string, t: TFunction): string | null
     }
 
     if (protocol !== 'wc' || !topic) {
-      return t('Invalid uri');
+      return t('Invalid URI');
     }
   } catch (e) {
     console.error({ error: e });

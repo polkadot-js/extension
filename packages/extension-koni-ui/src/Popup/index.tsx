@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DataContextProvider } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { InternalRequestContextProvider } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
-import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
 import { ScannerContextProvider } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
-import { SigningContextProvider } from '@subwallet/extension-koni-ui/contexts/SigningContext';
 import { ThemeProvider } from '@subwallet/extension-koni-ui/contexts/ThemeContext';
 import { ModalContextProvider } from '@subwallet/react-ui';
 import NotificationProvider from '@subwallet/react-ui/es/notification/NotificationProvider';
@@ -20,20 +17,14 @@ export default function Popup (): React.ReactElement {
     <DataContextProvider>
       <ThemeProvider>
         <ModalContextProvider>
-          <SigningContextProvider>
-            <InternalRequestContextProvider>
-              <ScannerContextProvider>
-                <QRContextProvider>
-                  <NotificationProvider>
-                    <RouterProvider
-                      fallbackElement={<LoadingScreen className='root-loading' />}
-                      router={router}
-                    />
-                  </NotificationProvider>
-                </QRContextProvider>
-              </ScannerContextProvider>
-            </InternalRequestContextProvider>
-          </SigningContextProvider>
+          <ScannerContextProvider>
+            <NotificationProvider>
+              <RouterProvider
+                fallbackElement={<LoadingScreen className='root-loading' />}
+                router={router}
+              />
+            </NotificationProvider>
+          </ScannerContextProvider>
         </ModalContextProvider>
       </ThemeProvider>
     </DataContextProvider>

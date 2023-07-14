@@ -305,15 +305,15 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
   }
 
   ledger.unlocking.forEach((unlockingChunk) => {
-    const isClaimable = unlockingChunk.era - parseInt(currentEra) <= 0;
-    const remainingEra = unlockingChunk.era - (parseInt(currentEra) + 1);
+    const isClaimable = unlockingChunk.era - parseInt(currentEra) < 0;
+    const remainingEra = unlockingChunk.era - parseInt(currentEra);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
 
     unstakingList.push({
       chain,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: unlockingChunk.value.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0
+      waitingTime: waitingTime
     } as UnstakingInfo);
   });
 
@@ -430,15 +430,15 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
   }
 
   ledger.unlocking.forEach((unlockingChunk) => {
-    const isClaimable = unlockingChunk.era - parseInt(currentEra) <= 0;
-    const remainingEra = unlockingChunk.era - (parseInt(currentEra) + 1);
+    const isClaimable = unlockingChunk.era - parseInt(currentEra) < 0;
+    const remainingEra = unlockingChunk.era - parseInt(currentEra);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
 
     unstakingList.push({
       chain,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: unlockingChunk.value.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0
+      waitingTime: waitingTime
     } as UnstakingInfo);
   });
 
@@ -503,15 +503,15 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
   const unstakings: UnstakingInfo[] = [];
 
   Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
-    const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) <= 0;
-    const remainingEra = parseInt(unlockingEra) - (parseInt(currentEra) + 1);
+    const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) < 0;
+    const remainingEra = parseInt(unlockingEra) - parseInt(currentEra);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
 
     unstakings.push({
       chain: chainInfo.slug,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: amount.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0
+      waitingTime: waitingTime
     } as UnstakingInfo);
   });
 
@@ -597,15 +597,15 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
   const unstakings: UnstakingInfo[] = [];
 
   Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
-    const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) <= 0;
-    const remainingEra = parseInt(unlockingEra) - (parseInt(currentEra) + 1);
+    const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) < 0;
+    const remainingEra = parseInt(unlockingEra) - parseInt(currentEra);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
 
     unstakings.push({
       chain: chainInfo.slug,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: amount.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0
+      waitingTime: waitingTime
     } as UnstakingInfo);
   });
 
@@ -791,19 +791,32 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
   let bondTx;
   let nominateTx;
 
+  const _params = chainApi.api.tx.staking.bond.toJSON() as Record<string, any>;
+  const paramsCount = (_params.args as any[]).length;
+
   const validatorParamList = targetValidators.map((validator) => {
     return validator.address;
   });
 
   if (!nominatorMetadata) {
-    bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
+    if (paramsCount === 2) {
+      bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
+    } else {
+      bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
+    }
+
     nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
 
     return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
   }
 
   if (!nominatorMetadata.isBondedBefore) { // first time
-    bondTx = chainApi.api.tx.staking.bond(nominatorMetadata.address, binaryAmount, bondDest);
+    if (paramsCount === 2) {
+      bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
+    } else {
+      bondTx = chainApi.api.tx.staking.bond(nominatorMetadata.address, binaryAmount, bondDest);
+    }
+
     nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
 
     return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);

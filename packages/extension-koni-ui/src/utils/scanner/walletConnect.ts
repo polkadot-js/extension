@@ -2,17 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { parseUri } from '@walletconnect/utils';
+import { TFunction } from 'i18next';
 
-export const validWalletConnectUri = (data: string): string | null => {
+export const validWalletConnectUri = (data: string, t: TFunction): string | null => {
   try {
     const { protocol, topic, version } = parseUri(data);
 
     if (version === 1) {
-      return 'Failed to connect. Please use Wallet Connect v2 on dApp';
+      return t('Failed to connect. Please use Wallet Connect v2 on dApp');
     }
 
     if (protocol !== 'wc' || !topic) {
-      return 'Invalid uri';
+      return t('Invalid uri');
     }
   } catch (e) {
     console.error({ error: e });

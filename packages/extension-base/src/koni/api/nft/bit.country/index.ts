@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { BIT_COUNTRY_SERVER } from '@subwallet/extension-base/koni/api/nft/config';
+import { BIT_COUNTRY_IPFS_SERVER, BIT_COUNTRY_LAND_ESTATE_METADATA_API } from '@subwallet/extension-base/koni/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { isUrl } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
+
+import { BN_ZERO, hexToBn } from '@polkadot/util';
 
 interface AssetId {
   classId: string | number,
@@ -14,17 +16,30 @@ interface AssetId {
   owner: string
 }
 
-interface Token {
-  metadata: string,
-  owner?: string,
-  data?: Record<string, any>
+interface OrmlNftTokenInfo {
+  metadata: unknown,
+  owner: string,
+  data: {
+    deposit: string,
+    attributes: Record<string, unknown>,
+    isLocked: boolean
+  }
 }
 
-interface Collection {
-  metadata: string,
-  totalIssuance: string,
+interface OrmlNftClassInfo {
+  metadata: unknown,
+  totalIssuance: number,
   owner: string,
-  data: Record<string, any>
+  data: {
+    deposit: string,
+    attributes: Record<string, unknown>,
+    tokenType: string,
+    collectionType: string,
+    isLocked: boolean,
+    totalMintedTokens: number,
+    mintLimit: unknown,
+    royaltyFee: string
+  }
 }
 
 export class BitCountryNftApi extends BaseNftApi {
@@ -42,10 +57,10 @@ export class BitCountryNftApi extends BaseNftApi {
     }
 
     if (!input.includes('ipfs://')) {
-      return BIT_COUNTRY_SERVER + input;
+      return BIT_COUNTRY_IPFS_SERVER + input;
     }
 
-    return BIT_COUNTRY_SERVER + input.split('ipfs://')[1];
+    return BIT_COUNTRY_IPFS_SERVER + input.split('ipfs://')[1];
   }
 
   private async getNfts (addresses: string[]): Promise<AssetId[]> {
@@ -74,14 +89,20 @@ export class BitCountryNftApi extends BaseNftApi {
       return null;
     }
 
-    const onChainMeta = (await this.substrateApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
+    const onChainMeta = (await this.substrateApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as OrmlNftTokenInfo;
 
     if (!onChainMeta.metadata) {
       return null;
     }
 
-    return await fetch(BIT_COUNTRY_SERVER + onChainMeta.metadata)
-      .then((resp) => resp.json()) as Record<string, any>;
+    // check if NFT is Land/Estate
+    if (onChainMeta.data.attributes['MetaverseId:']) {
+      return await fetch(`${BIT_COUNTRY_LAND_ESTATE_METADATA_API}/${assetId.classId}/${assetId.tokenId}/metadata.json`)
+        .then((resp) => resp.json()) as Record<string, any>;
+    } else {
+      return await fetch(BIT_COUNTRY_IPFS_SERVER + (onChainMeta.metadata as string))
+        .then((resp) => resp.json()) as Record<string, any>;
+    }
   }
 
   private async getCollectionDetails (collectionId: string | number): Promise<Record<string, any> | null> {
@@ -89,14 +110,53 @@ export class BitCountryNftApi extends BaseNftApi {
       return null;
     }
 
-    const metadataCollection = (await this.substrateApi.api.query.ormlNFT.classes(collectionId)).toHuman() as unknown as Collection;
+    const metadataCollection = (await this.substrateApi.api.query.ormlNFT.classes(collectionId)).toHuman() as unknown as OrmlNftClassInfo;
 
     if (!metadataCollection.metadata) {
       return null;
     }
 
-    return await fetch(BIT_COUNTRY_SERVER + metadataCollection.metadata)
-      .then((resp) => resp.json()) as Record<string, any>;
+    if (metadataCollection.data.attributes['MetaverseId:']) {
+      const category = metadataCollection.data.attributes['Category:'] as string;
+      const hexMetaverseId = metadataCollection.data.attributes['MetaverseId:'] as string;
+      let metaverseId = BN_ZERO;
+
+      try {
+        metaverseId = hexToBn(hexMetaverseId);
+      } catch (e) {
+        console.warn('Error parsing metaverse id', e);
+      }
+
+      return {
+        name: `${category} #${collectionId}`,
+        metaverseId: metaverseId.toString()
+      };
+    } else {
+      return await fetch(BIT_COUNTRY_IPFS_SERVER + (metadataCollection.metadata as string))
+        .then((resp) => resp.json()) as Record<string, any>;
+    }
+  }
+
+  private parseMetadata (data: Record<string, unknown> | null): NftItem {
+    const traitList = data?.traits ? data.traits as Record<string, unknown>[] : data?.attributes as Record<string, unknown>[];
+    const propertiesMap: Record<string, unknown> = {};
+
+    if (traitList) {
+      traitList.forEach((traitMap) => {
+        propertiesMap[traitMap.trait_type as string] = {
+          value: traitMap.value as string
+        };
+      });
+    }
+
+    return {
+      name: data?.name,
+      image: data?.image_url ? this.parseUrl(data.image_url as string) : this.parseUrl(data?.image as string),
+      description: data?.description as string | undefined,
+      properties: propertiesMap,
+      externalUrl: data?.external_url as string | undefined,
+      chain: this.chain
+    } as NftItem;
   }
 
   async fetchNfts (params: HandleNftParams): Promise<number> {
@@ -115,8 +175,6 @@ export class BitCountryNftApi extends BaseNftApi {
 
     try {
       if (!assetIds || assetIds.length === 0) {
-        params.cleanUpNfts(this.chain, address, [], [], true);
-
         return;
       }
 
@@ -138,18 +196,11 @@ export class BitCountryNftApi extends BaseNftApi {
           this.getCollectionDetails(parsedClassId)
         ]);
 
-        const parsedNft = {
-          id: parsedTokenId,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          name: tokenInfo?.name,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-          description: tokenInfo && tokenInfo.description ? tokenInfo.description : collectionMeta?.description,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-          image: tokenInfo && tokenInfo.image_url ? this.parseUrl(tokenInfo?.image_url as string) : this.parseUrl(collectionMeta?.image_url as string),
-          collectionId: parsedClassId,
-          chain: this.chain,
-          owner: address
-        } as NftItem;
+        const parsedNft = this.parseMetadata(tokenInfo);
+
+        parsedNft.collectionId = parsedClassId;
+        parsedNft.id = parsedTokenId;
+        parsedNft.owner = address;
 
         const parsedCollection = {
           collectionId: parsedClassId,
@@ -163,8 +214,6 @@ export class BitCountryNftApi extends BaseNftApi {
         params.updateItem(this.chain, parsedNft, address);
         params.updateCollection(this.chain, parsedCollection);
       }));
-
-      params.cleanUpNfts(this.chain, address, collectionIds, nftIds);
     } catch (e) {
       console.error(`${this.chain}`, e);
     }

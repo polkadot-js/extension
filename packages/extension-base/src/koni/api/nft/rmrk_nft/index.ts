@@ -176,8 +176,6 @@ export class RmrkNftApi extends BaseNftApi {
       allNfts = await this.getAllByAccount(kusamaAddress);
 
       if (allNfts.length <= 0) {
-        params.cleanUpNfts(this.chain, address, [], [], true);
-
         return;
       }
 
@@ -295,11 +293,6 @@ export class RmrkNftApi extends BaseNftApi {
 
         params.updateCollection(this.chain, parsedCollection);
       });
-
-      const allCollectionIds = allCollections.map((item) => item.collectionId);
-      const allNftIds = allNfts.map((nft) => nft?.id as string);
-
-      params.cleanUpNfts(this.chain, address, allCollectionIds, allNftIds);
     } catch (e) {
       console.error(`${this.chain}`, e);
     }

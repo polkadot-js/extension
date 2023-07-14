@@ -59,7 +59,7 @@
   "Create a new account": "Tạo tài khoản mới",
   "Import account": "Nhập tài khoản",
   "Attach account": "Kết nối tài khoản",
-  "Connected {{connected}}/{{canConnect}}": "",
+  "Connected {{connected}}/{{canConnect}}": "Đã kết nối {{connected}}/{{canConnect}}",
   "Connected": "Đã kết nối",
   "Disconnected": "Mất kết nối",
   "Blocked": "Đã chặn",

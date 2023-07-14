@@ -41,7 +41,7 @@ module.exports = {
       list: ['t', 'i18next.t', 'i18n.t', 'detectTranslate']
     },
     keySeparator: false, // key separator
-    lngs: ['en', 'vi', 'zh'],
+    lngs: ['en', 'vi', 'zh', 'ja'],
     nsSeparator: false, // namespace separator
     resource: {
       jsonIndent: 2,

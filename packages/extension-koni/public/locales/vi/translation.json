@@ -645,7 +645,7 @@
   "Once unbonded, your funds would be available for withdrawal after {{time}}.": "Token của bạn có thể rút sau {{time}} kể từ khi unstake.",
   "View transaction": "Xem giao dịch",
   "Your request has been sent. You can track its progress in History tab.": "Yêu cầu của bạn đã được gửi đi. Bạn có thể theo dõi tiến trình trên trang Lịch sử.",
-  "Disconnect": "Ngắt kêt nối",
+  "Disconnect": "Ngắt kết nối",
   "Fail to disconnect": "Ngắt kết nối thất bại",
   "Unknown network ({{slug}})": "Mạng không xác định ({{slug}})",
   "DApp": "dApp",

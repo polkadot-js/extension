@@ -247,30 +247,25 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const visibleText = useMemo((): string => {
     switch (connectionState) {
       case ConnectionStatement.CONNECTED:
-        if (isAllAccount) {
-          return `Connected ${connected}/${canConnect}`;
-        } else {
-          return 'Connected';
-        }
-
+      // eslint-disable-next-line padding-line-between-statements, no-fallthrough
       case ConnectionStatement.PARTIAL_CONNECTED:
         if (isAllAccount) {
-          return `Connected ${connected}/${canConnect}`;
+          return t('Connected {{connected}}/{{canConnect}}', { replace: { connected, canConnect } });
         } else {
-          return 'Connected';
+          return t('Connected');
         }
 
       case ConnectionStatement.DISCONNECTED:
-        return 'Disconnected';
+        return t('Disconnected');
 
       case ConnectionStatement.BLOCKED:
-        return 'Blocked';
+        return t('Blocked');
 
       case ConnectionStatement.NOT_CONNECTED:
       default:
-        return 'Not connected';
+        return t('Not connected');
     }
-  }, [canConnect, connected, connectionState, isAllAccount]);
+  }, [canConnect, connected, connectionState, isAllAccount, t]);
 
   const onOpenConnectWebsiteModal = useCallback(() => {
     if (isCurrentTabFetched) {

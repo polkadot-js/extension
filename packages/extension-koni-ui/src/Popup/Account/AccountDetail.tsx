@@ -267,9 +267,9 @@ const Component: React.FC<Props> = (props: Props) => {
   const onCopyAddress = useCallback(() => {
     copyToClipboard(account?.address || '');
     notify({
-      message: 'Copied'
+      message: t('Copied to clipboard')
     });
-  }, [account?.address, notify]);
+  }, [account?.address, notify, t]);
 
   const onUpdate: FormCallbacks<DetailFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const changeMap = convertFieldToObject<DetailFormState>(changedFields);
@@ -442,7 +442,7 @@ const Component: React.FC<Props> = (props: Props) => {
               name={FormFieldName.NAME}
               rules={[
                 {
-                  message: 'Wallet name is required',
+                  message: t('Account name is required'),
                   transform: (value: string) => value.trim(),
                   required: true
                 }
@@ -452,9 +452,9 @@ const Component: React.FC<Props> = (props: Props) => {
               <Input
                 className='account-name-input'
                 disabled={deriving || zkModeSyncState.isSyncing}
-                label={t('Wallet name')}
+                label={t('Account name')}
                 onBlur={form.submit}
-                placeholder={t('Wallet name')}
+                placeholder={t('Account name')}
                 prefix={(
                   <BackgroundIcon
                     backgroundColor='var(--wallet-name-icon-bg-color)'
@@ -505,7 +505,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <SwAlert
                 className={CN('zk-alert-area')}
                 description={zkModeSyncState.progress === 100 ? t('All done, you can go back home') : t('This may take a few minutes. Please keep the app open')}
-                title={zkModeSyncState.progress === 100 ? t('Zk mode is ready') : t(`Zk mode is syncing: ${zkModeSyncState.progress}%`)}
+                title={zkModeSyncState.progress === 100 ? t('Zk mode is ready') : t('Zk mode is syncing: {{percent}}%', { replace: { percent: zkModeSyncState.progress || '0' } })}
                 type={zkModeSyncState.progress === 100 ? 'success' : 'warning'}
               />
             )

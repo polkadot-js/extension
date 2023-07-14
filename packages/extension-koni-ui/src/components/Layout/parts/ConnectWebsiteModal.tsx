@@ -229,7 +229,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
         <>
           <div className={'__content-heading'}>{t('Not connected to this site')}</div>
           <div className={'text-tertiary __content-text'}>
-            {t('SubWallet is not connected to this site. Please find and click in the website the "Connect Wallet" button to connect. ')}
+            {t('SubWallet is not connected to this site. Please find and click in the website the "Connect Wallet" button to connect.')}
           </div>
         </>
       );

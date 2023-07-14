@@ -40,7 +40,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
         <MetaInfo.AccountGroup
           accounts={data.selectedValidators}
-          content={t(`${data.selectedValidators.length} selected validators`)}
+          content={t('{{number}} selected validators', { replace: { number: data.selectedValidators.length } })}
           label={t(data.type === StakingType.POOLED ? 'Pool' : 'Validators')}
         />
 

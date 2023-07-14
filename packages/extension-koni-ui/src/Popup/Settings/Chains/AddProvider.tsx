@@ -250,7 +250,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Layout.Base
         leftFooterButton={{
           onClick: onCancel,
-          children: 'Cancel'
+          children: t('Cancel')
         }}
         onBack={onBack}
         rightFooterButton={{
@@ -258,7 +258,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           disabled: isSubmitDisabled(),
           loading: loading,
           onClick: onSubmit,
-          children: 'Save'
+          children: t('Save')
         }}
         showBackButton={true}
         showSubHeader={true}

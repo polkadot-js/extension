@@ -3,13 +3,11 @@
 
 import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
 import i18next from 'i18next';
-import ICU from 'i18next-icu';
 import { initReactI18next } from 'react-i18next';
 
 import Backend from './Backend';
 
 i18next
-  .use(ICU)
   .use(initReactI18next)
   .use(Backend)
   .init({

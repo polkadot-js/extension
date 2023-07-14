@@ -20,18 +20,31 @@ export function useSelectValidators (modalId: string, chain: string, maxCount: n
   const [changeValidators, setChangeValidators] = useState<string[]>([]);
   const { inactiveModal } = useContext(ModalContext);
 
+  const fewValidators = maxCount > 1;
+
   const notiMessage = useMemo(() => {
     const label = getValidatorLabel(chain);
 
-    switch (label) {
-      case 'dApp':
-        return detectTranslate('You can only choose {number, plural, =0 {# dApp} =1 {# dApp} other {# dApps}}');
-      case 'Collator':
-        return detectTranslate('You can only choose {number, plural, =0 {# collator} =1 {# collator} other {# collators}}');
-      case 'Validator':
-        return detectTranslate('You can only choose {number, plural, =0 {# validator} =1 {# validator} other {# validators}}');
+    if (!fewValidators) {
+      switch (label) {
+        case 'dApp':
+          return detectTranslate('You can only choose {{number}} dApp');
+        case 'Collator':
+          return detectTranslate('You can only choose {{number}} collator');
+        case 'Validator':
+          return detectTranslate('You can only choose {{number}} validator');
+      }
+    } else {
+      switch (label) {
+        case 'dApp':
+          return detectTranslate('You can only choose {{number}} dApps');
+        case 'Collator':
+          return detectTranslate('You can only choose {{number}} collators');
+        case 'Validator':
+          return detectTranslate('You can only choose {{number}} validators');
+      }
     }
-  }, [chain]);
+  }, [chain, fewValidators]);
 
   const onChangeSelectedValidator = useCallback((changeVal: string) => {
     setChangeValidators((changeValidators) => {

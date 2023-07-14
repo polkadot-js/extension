@@ -160,18 +160,31 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator, onInitValidators } = useSelectValidators(id, chain, maxCount, onChange, isSingleSelect);
 
+  const fewValidators = changeValidators.length > 1;
+
   const applyLabel = useMemo(() => {
     const label = getValidatorLabel(chain);
 
-    switch (label) {
-      case 'dApp':
-        return detectTranslate('Apply {number, plural, =0 {# dApp} =1 {# dApp} other {# dApps}}');
-      case 'Collator':
-        return detectTranslate('Apply {number, plural, =0 {# collator} =1 {# collator} other {# collators}}');
-      case 'Validator':
-        return detectTranslate('Apply {number, plural, =0 {# validator} =1 {# validator} other {# validators}}');
+    if (!fewValidators) {
+      switch (label) {
+        case 'dApp':
+          return detectTranslate('Apply {{number}} dApp');
+        case 'Collator':
+          return detectTranslate('Apply {{number}} collator');
+        case 'Validator':
+          return detectTranslate('Apply {{number}} validator');
+      }
+    } else {
+      switch (label) {
+        case 'dApp':
+          return detectTranslate('Apply {{number}} dApps');
+        case 'Collator':
+          return detectTranslate('Apply {{number}} collators');
+        case 'Validator':
+          return detectTranslate('Apply {{number}} validators');
+      }
     }
-  }, [chain]);
+  }, [chain, fewValidators]);
 
   const onResetSort = useCallback(() => {
     setSortSelection(SortKey.DEFAULT);

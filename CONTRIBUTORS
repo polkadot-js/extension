@@ -1,6 +1,6 @@
-    1768	Nam Phạm                      	[Issue 1557] update logic calculating withdrawable amount
-    1448	AnhMTV                        	
-    1017	S2kael                        	
+    1805	Nam Phạm                      	[Issue 1620] fix bug transfer PEN
+    1467	AnhMTV                        	Update yarn.lock after merge
+    1059	S2kael                        	[Issue-1630] Update translation
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	
@@ -11,7 +11,7 @@
       69	dominhquang                   	Fix bug UI for Staking feature
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
-      20	S2kael                        	
+      21	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

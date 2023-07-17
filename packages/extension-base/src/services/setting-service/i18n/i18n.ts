@@ -3,12 +3,10 @@
 
 import { LANGUAGE } from '@subwallet/extension-base/constants';
 import i18next from 'i18next';
-import { initReactI18next } from 'react-i18next';
 
 import Backend from './Backend';
 
 i18next
-  .use(initReactI18next)
   .use(Backend)
   .init({
     backend: {},

@@ -2,4 +2,3 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export const THEME_BACKGROUND_COLOR = 'theme-background-color';
-export const LANGUAGE = 'current-language';

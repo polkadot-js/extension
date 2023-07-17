@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
-import { languageOptions } from '@subwallet/extension-base/constants/i18n';
+import { ENABLE_LANGUAGES, languageOptions } from '@subwallet/extension-base/constants/i18n';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveBrowserConfirmationType, saveLanguage, saveTheme } from '@subwallet/extension-koni-ui/messaging';
@@ -11,7 +11,6 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
-import i18next from 'i18next';
 import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -128,7 +127,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       leftIcon: GlobeHemisphereEast,
       leftIconBgColor: token['green-6'],
       title: item.text,
-      disabled: item.value !== 'en'
+      disabled: !ENABLE_LANGUAGES.includes(item.value)
     }));
   }, [token]);
 
@@ -161,12 +160,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       language: true
     }));
     saveLanguage(value as LanguageType)
-      .then(async () => {
-        return i18next.changeLanguage(value);
-      })
-      .catch((e) => {
-        console.log('i18next.changeLanguage error', e);
-      })
       .finally(() => {
         setLoadingMap((prev) => ({
           ...prev,

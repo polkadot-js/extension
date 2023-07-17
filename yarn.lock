@@ -4602,27 +4602,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/react-qr@npm:^3.4.1":
-  version: 3.4.1
-  resolution: "@polkadot/react-qr@npm:3.4.1"
-  dependencies:
-    "@polkadot/ui-settings": 3.4.1
-    "@polkadot/util": ^12.2.1
-    "@polkadot/util-crypto": ^12.2.1
-    qrcode-generator: ^1.4.4
-    react-qr-reader: ^2.2.1
-    styled-components: ^5.3.10
-    tslib: ^2.5.0
-  peerDependencies:
-    "@polkadot/util": "*"
-    "@polkadot/util-crypto": "*"
-    react: "*"
-    react-dom: "*"
-    react-is: "*"
-  checksum: aeee71cd52052d209bf6e31369c978d25abe96047056445fbc5f4530daf1e71fe6684d2336dd05c6495f3910fceacdfc997583bdde7d355009eb37d86af97e58
-  languageName: node
-  linkType: hard
-
 "@polkadot/rpc-augment@npm:10.9.1":
   version: 10.9.1
   resolution: "@polkadot/rpc-augment@npm:10.9.1"
@@ -4795,22 +4774,6 @@ __metadata:
     "@polkadot/networks": "*"
     "@polkadot/util": "*"
   checksum: 5877dfdda7b2a3fc6274520f9d3ea7c4836dd2b4a58fc75f55fd2b2311f9dafb24882e3e9ae6bf003f0e90dd426e5dce87c4d313b2bf6cde2cc52c47e153af5a
-  languageName: node
-  linkType: hard
-
-"@polkadot/ui-settings@npm:3.4.1":
-  version: 3.4.1
-  resolution: "@polkadot/ui-settings@npm:3.4.1"
-  dependencies:
-    "@polkadot/networks": ^12.2.1
-    "@polkadot/util": ^12.2.1
-    eventemitter3: ^5.0.1
-    store: ^2.0.12
-    tslib: ^2.5.0
-  peerDependencies:
-    "@polkadot/networks": "*"
-    "@polkadot/util": "*"
-  checksum: 8d0c299b4059b349d26f65fddce06e3ea643178e4e5fc0a5abd5c75c4665b7fd4d49ba1df3c67137d9851d473cdccb53ad3d7fea99cfd47673d8816a3fa6d333
   languageName: node
   linkType: hard
 
@@ -5863,18 +5826,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.5-beta.0":
-  version: 0.2.5-beta.0
-  resolution: "@subwallet/chain-list@npm:0.2.5-beta.0"
+"@subwallet/chain-list@npm:^0.2.5":
+  version: 0.2.5
+  resolution: "@subwallet/chain-list@npm:0.2.5"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: 563d09575c20f22b3cecc88cc421ef0d5942766a410c89610c36409f680430901d606d249d794f7bde54a449b526e44934ab908b095d521a5e9bfc97c08bb66a
+  checksum: f2f4f5ffb335f1de3a8d5cba4e44a33fce6904b4d9fe24071473caa30c9d70d2b6450a7c0a8e9fec3c399a589a3b9d7c190517ad95b9824aeadb22c4dc36be6a
   languageName: node
   linkType: hard
 
-"@subwallet/extension-base@^1.1.1, @subwallet/extension-base@workspace:packages/extension-base":
+"@subwallet/extension-base@^1.1.2-1, @subwallet/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-base@workspace:packages/extension-base"
   dependencies:
@@ -5904,12 +5867,12 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.2.5-beta.0
-    "@subwallet/extension-base": ^1.1.1
-    "@subwallet/extension-chains": ^1.1.1
-    "@subwallet/extension-dapp": ^1.1.1
-    "@subwallet/extension-inject": ^1.1.1
-    "@subwallet/extension-mocks": ^1.1.1
+    "@subwallet/chain-list": ^0.2.5
+    "@subwallet/extension-base": ^1.1.2-1
+    "@subwallet/extension-chains": ^1.1.2-1
+    "@subwallet/extension-dapp": ^1.1.2-1
+    "@subwallet/extension-inject": ^1.1.2-1
+    "@subwallet/extension-mocks": ^1.1.2-1
     "@subwallet/keyring": ^0.0.10
     "@subwallet/ui-keyring": ^0.0.10
     "@walletconnect/sign-client": ^2.8.4
@@ -5943,7 +5906,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-chains@^1.1.1, @subwallet/extension-chains@workspace:packages/extension-chains":
+"@subwallet/extension-chains@^1.1.2-1, @subwallet/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-chains@workspace:packages/extension-chains"
   dependencies:
@@ -5951,7 +5914,7 @@ __metadata:
     "@polkadot/networks": ^12.3.2
     "@polkadot/util": ^12.3.2
     "@polkadot/util-crypto": ^12.3.2
-    "@subwallet/extension-inject": ^1.1.1
+    "@subwallet/extension-inject": ^1.1.2-1
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/types": "*"
@@ -5966,21 +5929,21 @@ __metadata:
     "@metamask/detect-provider": ^1.2.0
     "@polkadot/types": ^10.9.1
     "@polkadot/util": ^12.3.2
-    "@subwallet/extension-inject": ^1.1.1
+    "@subwallet/extension-inject": ^1.1.2-1
     web3: ^1.10.0
   peerDependencies:
     "@polkadot/util": "*"
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-dapp@^1.1.1, @subwallet/extension-dapp@workspace:packages/extension-dapp":
+"@subwallet/extension-dapp@^1.1.2-1, @subwallet/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/util": ^12.3.2
     "@polkadot/util-crypto": ^12.3.2
-    "@subwallet/extension-inject": ^1.1.1
+    "@subwallet/extension-inject": ^1.1.2-1
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/util": "*"
@@ -5988,7 +5951,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-inject@^1.1.1, @subwallet/extension-inject@workspace:packages/extension-inject":
+"@subwallet/extension-inject@^1.1.2-1, @subwallet/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -6006,7 +5969,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-koni-ui@^1.1.1, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
+"@subwallet/extension-koni-ui@^1.1.2-1, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
@@ -6020,7 +5983,6 @@ __metadata:
     "@polkadot/api-contract": ^10.9.1
     "@polkadot/hw-ledger": ^12.3.2
     "@polkadot/networks": ^12.3.2
-    "@polkadot/react-qr": ^3.4.1
     "@polkadot/types": ^10.9.1
     "@polkadot/types-augment": ^10.9.1
     "@polkadot/ui-settings": ^3.5.1
@@ -6028,14 +5990,14 @@ __metadata:
     "@polkadot/util-crypto": ^12.3.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.5-beta.0
-    "@subwallet/extension-base": ^1.1.1
-    "@subwallet/extension-chains": ^1.1.1
-    "@subwallet/extension-dapp": ^1.1.1
-    "@subwallet/extension-inject": ^1.1.1
-    "@subwallet/extension-mocks": ^1.1.1
+    "@subwallet/chain-list": ^0.2.5
+    "@subwallet/extension-base": ^1.1.2-1
+    "@subwallet/extension-chains": ^1.1.2-1
+    "@subwallet/extension-dapp": ^1.1.2-1
+    "@subwallet/extension-inject": ^1.1.2-1
+    "@subwallet/extension-mocks": ^1.1.2-1
     "@subwallet/keyring": ^0.0.10
-    "@subwallet/react-ui": 5.1.2-b62
+    "@subwallet/react-ui": 5.1.2-b64
     "@subwallet/ui-keyring": ^0.0.10
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6095,9 +6057,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.1
-    "@subwallet/extension-inject": ^1.1.1
-    "@subwallet/extension-koni-ui": ^1.1.1
+    "@subwallet/extension-base": ^1.1.2-1
+    "@subwallet/extension-inject": ^1.1.2-1
+    "@subwallet/extension-koni-ui": ^1.1.2-1
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -6122,7 +6084,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-mocks@^1.1.1, @subwallet/extension-mocks@workspace:packages/extension-mocks":
+"@subwallet/extension-mocks@^1.1.2-1, @subwallet/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
@@ -6146,9 +6108,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b62":
-  version: 5.1.2-b62
-  resolution: "@subwallet/react-ui@npm:5.1.2-b62"
+"@subwallet/react-ui@npm:5.1.2-b64":
+  version: 5.1.2-b64
+  resolution: "@subwallet/react-ui@npm:5.1.2-b64"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6172,6 +6134,7 @@ __metadata:
     copy-to-clipboard: ^3.2.0
     dayjs: ^1.11.1
     flatlist-react: ^1.5.14
+    jsqr: ^1.4.0
     patch-package: ^6.5.1
     phosphor-react: ^1.4.1
     qrcode.react: ^3.1.0
@@ -6219,7 +6182,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: 0dcabc5b4648a9be81b21c1b5916729f5f889dc565fe696ff00aad42385bd6e1d2201478f141272309c13693aa80f0f3ace8ba2829fa9040aac6bb9136576880
+  checksum: 0f7913249fe9f0ecd520aa936a7852df5fca9deac4622eba87db4729b68575e0327b13ea39af98195c8c4c6fba927ba94f26f9b84ec7a2f42e6ac7094bb6ed78
   languageName: node
   linkType: hard
 
@@ -6245,9 +6208,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.1
-    "@subwallet/extension-inject": ^1.1.1
-    "@subwallet/extension-koni-ui": ^1.1.1
+    "@subwallet/extension-base": ^1.1.2-1
+    "@subwallet/extension-inject": ^1.1.2-1
+    "@subwallet/extension-koni-ui": ^1.1.2-1
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -17497,7 +17460,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsqr@npm:^1.2.0":
+"jsqr@npm:^1.4.0":
   version: 1.4.0
   resolution: "jsqr@npm:1.4.0"
   checksum: 7c572971f90c42772e30d152bde63b84edf1164bde80c53942e6b2068ea31caf00ad704aa46cacc9e71645f52dbeddebc6e84ba15e883c678ee93cde690de339
@@ -20260,7 +20223,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qrcode-generator@npm:^1.4.1, qrcode-generator@npm:^1.4.4":
+"qrcode-generator@npm:^1.4.1":
   version: 1.4.4
   resolution: "qrcode-generator@npm:1.4.4"
   checksum: 860cfdd2a7a608d34e92cab99774cc08182e1911432f30ed36d16f8a5cdabd7fdf40239caed91fa2691cfe66c8d95c1340a2fc9cc439eed07a9f2eb328c6f527
@@ -21197,20 +21160,6 @@ __metadata:
     react-native-svg:
       optional: true
   checksum: 680f7be35078892a29999013b24e36aae10c3529e4cdd2c1436573603864c45010445d6069969d7f76e4642c54584a3b941b8c944189273c3ac5b705156ad23b
-  languageName: node
-  linkType: hard
-
-"react-qr-reader@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "react-qr-reader@npm:2.2.1"
-  dependencies:
-    jsqr: ^1.2.0
-    prop-types: ^15.7.2
-    webrtc-adapter: ^7.2.1
-  peerDependencies:
-    react: ~16
-    react-dom: ~16
-  checksum: a6e997fdd9106dc06efd5df979c49174cf5da97ced9dd1212ebe084fc6c346d2b8a636c6e710668bde32ced28a54e0a4a99e843101062fc3ca99cb90287473cb
   languageName: node
   linkType: hard
 
@@ -22189,15 +22138,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rtcpeerconnection-shim@npm:^1.2.15":
-  version: 1.2.15
-  resolution: "rtcpeerconnection-shim@npm:1.2.15"
-  dependencies:
-    sdp: ^2.6.0
-  checksum: 42a733d8e3846b7e7e3c33b6d5cddec95659ceb39d3f990f0a4437e6d719ed717237fea02352d4a18d86c825a1493eaeb481cc835267d2288b0ce43582b97f46
-  languageName: node
-  linkType: hard
-
 "run-async@npm:^2.4.0":
   version: 2.4.1
   resolution: "run-async@npm:2.4.1"
@@ -22367,13 +22307,6 @@ __metadata:
   version: 3.0.1
   resolution: "scrypt-js@npm:3.0.1"
   checksum: b7c7d1a68d6ca946f2fbb0778e0c4ec63c65501b54023b2af7d7e9f48fdb6c6580d6f7675cd53bda5944c5ebc057560d5a6365079752546865defb3b79dea454
-  languageName: node
-  linkType: hard
-
-"sdp@npm:^2.12.0, sdp@npm:^2.6.0":
-  version: 2.12.0
-  resolution: "sdp@npm:2.12.0"
-  checksum: 5deb20ac50a1aeb4dd5ff2e506c22d1674222c21f08ae97105c9552ae979e90ddc42b8526f2c3dcacfeebc45c7b2e6b6b4254ae2cf335263bf3ddf2ad9b8ec76
   languageName: node
   linkType: hard
 
@@ -23216,28 +23149,6 @@ __metadata:
   dependencies:
     escape-string-regexp: ^1.0.2
   checksum: f8d65d33ca2b49aabc66bb41d689dda7b8b9959d320e3a40a2ef4d7079ff2f67ffb72db43f179f48dbf9495c2e33742863feab7a584d180fa62505439162c191
-  languageName: node
-  linkType: hard
-
-"styled-components@npm:^5.3.10":
-  version: 5.3.10
-  resolution: "styled-components@npm:5.3.10"
-  dependencies:
-    "@babel/helper-module-imports": ^7.0.0
-    "@babel/traverse": ^7.4.5
-    "@emotion/is-prop-valid": ^1.1.0
-    "@emotion/stylis": ^0.8.4
-    "@emotion/unitless": ^0.7.4
-    babel-plugin-styled-components: ">= 1.12.0"
-    css-to-react-native: ^3.0.0
-    hoist-non-react-statics: ^3.0.0
-    shallowequal: ^1.1.0
-    supports-color: ^5.5.0
-  peerDependencies:
-    react: ">= 16.8.0"
-    react-dom: ">= 16.8.0"
-    react-is: ">= 16.8.0"
-  checksum: 46dfea6c435516b22aae25798cf01f9b08423cfb517cfea9db760a18c941bddf79abaad9bedb9b3cca6faad24bd7eb4ef4dd21ae84b356ae29d279b2d571f7b7
   languageName: node
   linkType: hard
 
@@ -25067,16 +24978,6 @@ __metadata:
   bin:
     webpack: bin/webpack.js
   checksum: 2bcc5f3c195f375944e8af2f00bf2feea39cb9fda5f763b0d1b00077f1c51783db25c94d3fae96a07dead9fa085e6ae7474417e5ab31719c9776ea5969ceb83a
-  languageName: node
-  linkType: hard
-
-"webrtc-adapter@npm:^7.2.1":
-  version: 7.7.1
-  resolution: "webrtc-adapter@npm:7.7.1"
-  dependencies:
-    rtcpeerconnection-shim: ^1.2.15
-    sdp: ^2.12.0
-  checksum: 16534a721794bf375753b031e538f5c1ce84df3a272085069bbce7fa1b085e5a2d33b92096256a6fdacdf6f9e30f8543e2478a293ccf5a3849bc7143b10b38d3
   languageName: node
   linkType: hard
 

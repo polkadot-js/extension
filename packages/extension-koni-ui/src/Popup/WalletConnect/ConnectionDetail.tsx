@@ -73,8 +73,8 @@ const Component: React.FC<ComponentProps> = (props) => {
         />
       )
     },
-    content: t('If someone has your secret phrase, they will have full control of your account'),
-    subTitle: t('Disconnect confirmation message'),
+    content: t('Once you disconnect, you will no longer see this connection on SubWallet and on your DApp.'),
+    subTitle: t('Are you sure you want to disconnect?'),
     title: t('Disconnect'),
     type: 'error',
     closable: true
@@ -316,7 +316,8 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
         '.dapp-info-domain': {
           overflow: 'hidden',
           textWrap: 'nowrap',
-          textOverflow: 'ellipsis'
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
         }
       }
     },

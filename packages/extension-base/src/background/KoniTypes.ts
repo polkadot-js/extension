@@ -403,7 +403,9 @@ export type LanguageType = 'en'
 |'tr'
 |'pl'
 |'th'
-|'ur';
+|'ur'
+|'vi'
+|'ja';
 
 export type LanguageOptionType = {
   text: string;

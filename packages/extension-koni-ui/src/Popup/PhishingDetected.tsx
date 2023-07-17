@@ -59,7 +59,7 @@ function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
       <div className='title h3-text text-danger'>{t('Phishing detection')}</div>
       <div className='h4-text text-danger website-url'>{decodedWebsite}</div>
       <div className='phishing-detection-message'>
-        <span>{t('This domain has been reported as a known phishing site on a community maintained list: ')}</span>
+        <span>{t('This domain has been reported as a known phishing site on a community maintained list:')}&nbsp;</span>
         <Typography.Link
           href='https://polkadot.js.org/phishing/#'
           size='lg'

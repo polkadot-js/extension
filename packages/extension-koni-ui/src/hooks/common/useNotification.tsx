@@ -2,8 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NotificationContext, NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
-import { useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 
 export default function useNotification (): (props: NotificationProps) => void {
-  return useContext(NotificationContext).showNotification;
+  const { showNotification } = useContext(NotificationContext);
+
+  const key = useMemo((): React.Key => {
+    return Date.now();
+  }, []);
+
+  return useCallback((props: NotificationProps) => {
+    showNotification({
+      key,
+      ...props
+    });
+  }, [key, showNotification]);
 }

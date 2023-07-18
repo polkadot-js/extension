@@ -163,7 +163,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         } catch (e) {
           setFileValidateState({
             status: 'error',
-            message: t<string>('Invalid Json file')
+            message: t<string>('Invalid JSON file')
           });
           setValidating(false);
           setRequirePassword(false);

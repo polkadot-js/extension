@@ -311,7 +311,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
 
     if (!isAddress(_recipientAddress)) {
-      return Promise.reject(t('Invalid Recipient address'));
+      return Promise.reject(t('Invalid recipient address'));
     }
 
     const { chain, destChain, from, to } = form.getFieldsValue();

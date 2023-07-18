@@ -305,7 +305,7 @@ export default class AuthRequestHandler {
         const entry = Object.keys(value).includes(idStr);
 
         if (!entry) {
-          reject(new Error(`The source ${url} has not been enabled yet`));
+          reject(new Error(`The source ${url} has not been authorized yet`));
         }
 
         const isConnected = value[idStr] && Object.keys(value[idStr].isAllowedMap)

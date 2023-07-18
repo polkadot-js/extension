@@ -8,23 +8,23 @@ import { detectTranslate } from '@subwallet/extension-base/utils';
 // Todo: finish this map in the future
 const defaultErrorMap = {
   NOT_ENOUGH_BALANCE: {
-    message: detectTranslate('Not enough balance'),
+    message: detectTranslate('Insufficient balance'),
     code: undefined
   },
   CHAIN_DISCONNECTED: {
-    message: detectTranslate('Chain is disconnected'),
+    message: detectTranslate('Network is disconnected'),
     code: undefined
   },
   INVALID_PARAMS: {
-    message: detectTranslate('Invalid params'),
+    message: detectTranslate('Undefined error. Please contact SubWallet support'),
     code: undefined
   },
   INTERNAL_ERROR: {
-    message: detectTranslate('Internal error'),
+    message: detectTranslate('Undefined error. Please contact SubWallet support'),
     code: undefined
   },
   DUPLICATE_TRANSACTION: {
-    message: detectTranslate('Duplicate transaction'),
+    message: detectTranslate('Another transaction is in queue. Please try again later'),
     code: undefined
   },
   UNABLE_TO_SIGN: {
@@ -32,7 +32,7 @@ const defaultErrorMap = {
     code: undefined
   },
   USER_REJECT_REQUEST: {
-    message: detectTranslate('User reject request'),
+    message: detectTranslate('Rejected by user'),
     code: undefined
   },
   UNABLE_TO_SEND: {
@@ -64,11 +64,11 @@ const defaultErrorMap = {
     code: undefined
   },
   [StakingTxErrorType.EXIST_UNSTAKING_REQUEST]: {
-    message: detectTranslate('Exist unstaking request'),
+    message: detectTranslate('You can unstake from a collator once'),
     code: undefined
   },
   [StakingTxErrorType.INVALID_ACTIVE_STAKE]: {
-    message: detectTranslate('Invalid active stake'),
+    message: detectTranslate('Invalid. If you unstake this amount your active stake would fall below minimum active threshold'),
     code: undefined
   },
   [StakingTxErrorType.EXCEED_MAX_UNSTAKING]: {
@@ -76,7 +76,7 @@ const defaultErrorMap = {
     code: undefined
   },
   [StakingTxErrorType.INACTIVE_NOMINATION_POOL]: {
-    message: detectTranslate('This nomination pool is not active'),
+    message: detectTranslate('Invalid. Inactive nomination pool'),
     code: undefined
   },
   [TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT]: {

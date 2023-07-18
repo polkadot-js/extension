@@ -30,7 +30,7 @@ export const validateUnStakeValue = (min: number | string | BigN, max: number | 
       }
 
       if (val.gt(middleValue) && val.lt(maxValue)) {
-        return Promise.reject(new Error('Invalid. If you unstake this amount your staking would fall below minimum stake required'));
+        return Promise.reject(new Error('If you unstake this amount your staking would fall below minimum stake required. Unstake all instead?'));
       }
 
       return Promise.resolve();

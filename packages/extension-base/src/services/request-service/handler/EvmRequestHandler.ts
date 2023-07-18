@@ -67,7 +67,7 @@ export default class EvmRequestHandler {
     const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
 
     if (duplicated) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Duplicate request information');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Duplicate request');
     }
 
     confirmationType[id] = {
@@ -151,7 +151,7 @@ export default class EvmRequestHandler {
       case 'eth_signTypedData_v4':
         return await pair.evmSigner.signMessage(payload, type);
       default:
-        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found sign method');
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Unsupported action');
     }
   }
 
@@ -231,8 +231,8 @@ export default class EvmRequestHandler {
       const confirmation = confirmations[t][id];
 
       if (!resolver || !confirmation) {
-        this.#logger.error('Not found confirmation', t, id);
-        throw new Error('Not found promise for confirmation');
+        this.#logger.error('Unable to proceed. Please try again', t, id);
+        throw new Error('Unable to proceed. Please try again');
       }
 
       // Fill signature for some special type

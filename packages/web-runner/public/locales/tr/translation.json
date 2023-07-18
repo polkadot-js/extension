@@ -115,7 +115,7 @@
   "Incorrect derivation path": "Yanlış türev yolu",
   "lifetime": "ömür",
   "Warning: Caps lock is on": "Uyarı: Caps lock açık",
-  "Invalid Json file": "Geçersiz Json dosyası",
+  "Invalid JSON file": "Geçersiz Json dosyası",
   "Unable to decode using the supplied passphrase": "Sağlanan parola kullanılarak kod çözülemiyor",
   "Manage Website Access": "Web Sitesi Erişimini Yönetin",
   "example.com": "example.com",

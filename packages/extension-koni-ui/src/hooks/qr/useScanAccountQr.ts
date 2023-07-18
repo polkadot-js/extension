@@ -21,7 +21,7 @@ const useScanAccountQr = (
       return result;
     } else {
       setValidateState({
-        message: 'Invalid QR',
+        message: 'Invalid QR code',
         status: 'error'
       });
 

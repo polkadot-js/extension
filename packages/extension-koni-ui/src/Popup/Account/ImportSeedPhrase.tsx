@@ -120,7 +120,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               if (amount) {
                 setValidateState({
                   status: 'error',
-                  message: t('Invalid mnemonic seed')
+                  message: t('Invalid seed phrase')
                 });
               }
             })

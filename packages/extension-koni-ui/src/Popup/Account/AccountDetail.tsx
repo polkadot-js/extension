@@ -122,7 +122,7 @@ function getZkErrorMessage (error: MantaPayEnableMessage) {
   if (error === MantaPayEnableMessage.WRONG_PASSWORD) {
     return 'Wrong password';
   } else if (error === MantaPayEnableMessage.CHAIN_DISCONNECTED) {
-    return 'Chain disconnected';
+    return 'Network is disconnected';
   }
 
   return 'Some errors occurred. Please try again later';

@@ -113,7 +113,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     // concatenate all the parts into one binary blob
     let concatMultipartData = multipartData.reduce((acc: Uint8Array, part: Uint8Array | null): Uint8Array => {
       if (part === null) {
-        throw new Error('part data is not completed');
+        throw new Error('Incomplete. Please continue scanning');
       }
 
       const c = new Uint8Array(acc.length + part.length);
@@ -150,7 +150,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
     if (currentFrame === 0 && (partDataAsBytes[0] === new Uint8Array([0x00])[0] || partDataAsBytes[0] === new Uint8Array([0x7b])[0])) {
       // part_data for frame 0 MUST NOT begin with byte 00 or byte 7B.
-      throw new Error('Error decoding invalid part data.');
+      throw new Error('Failed to decrypt data');
     }
 
     if (completedFramesCount < totalFrameCount) {
@@ -303,7 +303,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const sender = findAccountByAddress(accounts, address);
 
     if (!sender) {
-      throw new Error(`No account found in Subwallet for: ${address}.`);
+      throw new Error('Unable to find account');
     }
 
     const qrInfo: MessageQRInfo = {
@@ -332,10 +332,10 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         case 'signData':
           return _setDataToSign(unsignedData);
         default:
-          throw new Error('Scanned QR should contain either extrinsic or a message to sign');
+          throw new Error('Invalid QR code');
       }
     } else {
-      throw new Error('Scanned QR should contain either extrinsic or a message to sign');
+      throw new Error('Invalid QR code');
     }
   }, [_setDataToSign, _setTXRequest]);
 
@@ -348,19 +348,19 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const senderNetworkState = chainStateMap[senderNetwork?.slug || ''];
 
     if (!senderNetwork) {
-      throw new Error('Signing Error: network could not be found.');
+      throw new Error('Failed to sign. Network not found');
     }
 
     if (!_isChainEnabled(senderNetworkState)) {
-      throw new Error(`Inactive network. Please activate ${senderNetwork.name?.replace(' Relay Chain', '')} on this device and try again.`);
+      throw new Error('Inactive network. Please enable {{networkName}} on this device and try again'.replace('{{networkName}}', senderNetwork.name?.replace(' Relay Chain', '')));
     }
 
     if (!sender) {
-      throw new Error('Signing Error: sender could not be found.');
+      throw new Error('Failed to sign. Sender account not found');
     }
 
     if (!type) {
-      throw new Error('Signing Error: type could not be found.');
+      throw new Error('Failed to sign. Unable to detect type');
     }
 
     const signData = async (): Promise<string> => {
@@ -376,7 +376,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         } else if (isHash) {
           signable = dataToSign;
         } else {
-          throw new Error('Signing Error: cannot signing message');
+          throw new Error('Failed to sign. Invalid message type');
         }
 
         const { signature } = await qrSignEvm({
@@ -397,7 +397,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         } else if (isAscii(dataToSign) || isHash) {
           signable = dataToSign;
         } else {
-          throw new Error('Signing Error: cannot signing message');
+          throw new Error('Failed to sign. Invalid message type');
         }
 
         try {

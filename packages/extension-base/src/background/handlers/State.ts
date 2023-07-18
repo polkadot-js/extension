@@ -416,7 +416,7 @@ export default class State {
   public ensureUrlAuthorized (url: string): boolean {
     const entry = this.#authUrls[stripUrl(url)];
 
-    assert(entry, `The source ${url} has not been enabled yet`);
+    assert(entry, `The source ${url} has not been authorized yet`);
     assert(entry.isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
     return true;
@@ -469,7 +469,7 @@ export default class State {
 
   // Start a provider, return its meta
   public rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
-    assert(Object.keys(this.#providers).includes(key), `Provider ${key} is not exposed by extension`);
+    assert(Object.keys(this.#providers).includes(key), 'Provider cannot be found.');
 
     if (this.#injectedProviders.get(port)) {
       return Promise.resolve(this.#providers[key].meta);

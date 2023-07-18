@@ -115,7 +115,7 @@
   "Incorrect derivation path": "derivation path ไม่ถูกต้อง",
   "lifetime": "ตลอดชีวิต",
   "Warning: Caps lock is on": "คำเตือน ปุ่ม Caps lock กำลังเปิดใช้งาน",
-  "Invalid Json file": "ไฟล์JSONไม่ถูกต้อง",
+  "Invalid JSON file": "ไฟล์JSONไม่ถูกต้อง",
   "Unable to decode using the supplied passphrase": "ไม่สามารถถอดรหัสด้วยการใช้ passphraseดังกล่าวได้",
   "Manage Website Access": "จัดการเว็บไซต์ที่เข้าใช้งาน",
   "example.com": "example.com",

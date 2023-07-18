@@ -147,7 +147,7 @@ export function useLedger (slug?: string, active = true): Result {
       return ledger.getAddress(false, accountIndex, 0);
     } else {
       return new Promise((resolve, reject) => {
-        reject(new Error("Can't find ledger"));
+        reject(new Error("Can't find Ledger device"));
       });
     }
   }, [ledger]);
@@ -168,7 +168,7 @@ export function useLedger (slug?: string, active = true): Result {
       });
     } else {
       return new Promise((resolve, reject) => {
-        reject(new Error("Can't find ledger device"));
+        reject(new Error("Can't find Ledger device"));
       });
     }
   }, [handleError, ledger]);
@@ -189,7 +189,7 @@ export function useLedger (slug?: string, active = true): Result {
       });
     } else {
       return new Promise((resolve, reject) => {
-        reject(new Error("Can't find ledger device"));
+        reject(new Error("Can't find Ledger device"));
       });
     }
   }, [handleError, ledger]);

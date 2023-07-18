@@ -115,7 +115,7 @@
   "Incorrect derivation path": "Chemin de dérivation incorrecte",
   "lifetime": "validité",
   "Warning: Caps lock is on": "Attention: touche Maj active",
-  "Invalid Json file": "Fichier JSON invalide",
+  "Invalid JSON file": "Fichier JSON invalide",
   "Unable to decode using the supplied passphrase": "Impossible de débloquer le compte avec ce mot de passe",
   "Manage Website Access": "Gérer les autorisations d'accès",
   "example.com": "exemple.com",

@@ -54,7 +54,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       })
         .then((data) => {
           if (!data.status) {
-            onError(data.errors[0]);
+            onError(t(data.errors[0]));
           }
         })
         .catch((e: Error) => {
@@ -64,7 +64,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }, 500);
-  }, [onError]);
+  }, [onError, t]);
 
   const onReset = useCallback(() => {
     activeModal(RESET_WALLET_MODAL);

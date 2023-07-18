@@ -40,7 +40,7 @@ const checkAccount = (qrAccount: QrAccount): Promise<boolean> => {
         if (isValid) {
           resolve(isEthereum);
         } else {
-          reject(new Error('Invalid qr'));
+          reject(new Error('Invalid QR code'));
         }
       })
       .catch((e: Error) => {

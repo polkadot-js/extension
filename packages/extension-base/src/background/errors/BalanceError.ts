@@ -8,7 +8,7 @@ import { detectTranslate } from '@subwallet/extension-base/utils';
 // Todo: finish this map in the future
 const defaultErrorMap: Record<BalanceErrorType, { message: string, code?: number }> = {
   [BalanceErrorType.NETWORK_ERROR]: {
-    message: detectTranslate('Chain is inactive or disconnected'),
+    message: detectTranslate('Network is inactive. Please enable network'),
     code: undefined
   },
   [BalanceErrorType.TOKEN_ERROR]: {
@@ -16,11 +16,11 @@ const defaultErrorMap: Record<BalanceErrorType, { message: string, code?: number
     code: undefined
   },
   [BalanceErrorType.TIMEOUT]: {
-    message: detectTranslate('Get balance timeout'),
+    message: detectTranslate('Unable to get balance. Please re-enable the network'),
     code: undefined
   },
   [BalanceErrorType.GET_BALANCE_ERROR]: {
-    message: detectTranslate('Get balance error'),
+    message: detectTranslate('Unable to get balance. Please re-enable the network'),
     code: undefined
   }
 };

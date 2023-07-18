@@ -137,11 +137,11 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
           const senderNetwork = getNetworkJsonByInfo(networkMap, isEthereumAddress(address), true, evmChainId);
 
           if (!senderNetwork) {
-            throw new Error('Signing Error: network could not be found.');
+            throw new Error('Failed to sign. Network not found');
           }
 
           if (!_isChainEnabled(networkStateMap[senderNetwork.slug])) {
-            throw new Error(`Inactive network. Please activate ${senderNetwork.name?.replace(' Relay Chain', '')} on this device and try again.`);
+            throw new Error('Inactive network. Please enable {{networkName}} on this device and try again'.replace('{{networkName}}', senderNetwork.name?.replace(' Relay Chain', '')));
           }
 
           if (!sender) {
@@ -154,7 +154,7 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
 
           data.data.data = uosAfterFrames.slice(44);
         } else {
-          console.error('Could not determine action type.');
+          console.error('Failed to identify action type.');
           throw new Error();
         }
 
@@ -254,7 +254,7 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
           if (e instanceof Error) {
             throw new Error(e.message);
           } else {
-            throw new Error('Something went wrong decoding the Substrate UOS payload: ' + uosAfterFrames);
+            throw new Error('Failed to decode the Substrate UOS payload: ' + uosAfterFrames);
           }
         }
 
@@ -262,13 +262,13 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
       }
 
       default:
-        throw new Error('Payload is not formated correctly: ' + bytes.toString());
+        throw new Error('Failed to decode: ' + bytes.toString());
     }
   } catch (e: unknown) {
     if (e instanceof Error) {
       throw new Error(e.message);
     } else {
-      throw new Error('unknown error :(');
+      throw new Error('Error');
     }
   }
 };

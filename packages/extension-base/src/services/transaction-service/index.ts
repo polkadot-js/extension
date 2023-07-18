@@ -120,7 +120,7 @@ export default class TransactionService {
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
     if (!chainInfo) {
-      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, "Can't find network"));
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'Cannot find network'));
     } else {
       const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
@@ -161,10 +161,10 @@ export default class TransactionService {
     const pair = keyring.getPair(address);
 
     if (!pair) {
-      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'Can\'t find account'));
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'Unable to find account'));
     } else {
       if (pair.meta?.isReadOnly) {
-        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'This is watch-only account'));
+        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'This account is watch-only'));
       }
     }
 
@@ -756,7 +756,7 @@ export default class TransactionService {
           let signedTransaction: string | undefined;
 
           if (!payload) {
-            throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
+            throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Failed to sign');
           }
 
           const web3Api = this.chainService.getEvmApi(chain).api;
@@ -769,7 +769,7 @@ export default class TransactionService {
             const recover = web3Api.eth.accounts.recoverTransaction(signed);
 
             if (recover.toLowerCase() !== account.address.toLowerCase()) {
-              throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
+              throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Wrong signature. Please sign with the account you use in dApp');
             }
 
             signedTransaction = signed;

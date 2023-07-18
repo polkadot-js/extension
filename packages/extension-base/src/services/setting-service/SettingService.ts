@@ -5,6 +5,7 @@ import { LanguageType, PassPhishing, RequestSettingsType } from '@subwallet/exte
 import { LANGUAGE } from '@subwallet/extension-base/constants';
 import PassPhishingStore from '@subwallet/extension-base/stores/PassPhishingStore';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
+import { t } from 'i18next';
 import { Subject } from 'rxjs';
 
 import i18n from './i18n/i18n';
@@ -20,7 +21,7 @@ export default class SettingService {
     this.settingsStore.getSubject().subscribe(({ language }) => {
       if (language !== old) {
         old = language;
-        i18n.changeLanguage(language).catch(console.error);
+        i18n.changeLanguage(language).catch(console.error).finally(() => console.log(t('Lock')));
       }
     });
   }

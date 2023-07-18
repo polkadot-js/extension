@@ -55,6 +55,7 @@ import { TypeRegistry } from '@polkadot/types';
 import { assert, BN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { addressToEvm, base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+import { t } from 'i18next';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -130,7 +131,7 @@ export default class KoniExtension {
   private accountsChangePassword ({ address, newPass, oldPass }: RequestAccountChangePassword): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find pair'));
 
     try {
       if (!pair.isLocked) {
@@ -200,7 +201,7 @@ export default class KoniExtension {
   private metadataApprove ({ id }: RequestMetadataApprove): boolean {
     const queued = this.#koniState.getMetaRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to find request'));
 
     const { request, resolve } = queued;
 

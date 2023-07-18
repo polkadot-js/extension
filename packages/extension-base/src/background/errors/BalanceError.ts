@@ -3,23 +3,24 @@
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { BalanceErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 
 // Todo: finish this map in the future
 const defaultErrorMap: Record<BalanceErrorType, { message: string, code?: number }> = {
   [BalanceErrorType.NETWORK_ERROR]: {
-    message: 'Chain is inactive or disconnected',
+    message: detectTranslate('Chain is inactive or disconnected'),
     code: undefined
   },
   [BalanceErrorType.TOKEN_ERROR]: {
-    message: 'Token is not supported',
+    message: detectTranslate('Token is not supported'),
     code: undefined
   },
   [BalanceErrorType.TIMEOUT]: {
-    message: 'Get balance timeout',
+    message: detectTranslate('Get balance timeout'),
     code: undefined
   },
   [BalanceErrorType.GET_BALANCE_ERROR]: {
-    message: 'Get balance error',
+    message: detectTranslate('Get balance error'),
     code: undefined
   }
 };

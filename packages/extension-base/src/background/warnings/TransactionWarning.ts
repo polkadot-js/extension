@@ -3,10 +3,11 @@
 
 import { BasicTxWarningCode, TransactionWarningType } from '@subwallet/extension-base/background/KoniTypes';
 import { SWWarning } from '@subwallet/extension-base/background/warnings/SWWarning';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 
 const defaultWarningMap: Record<TransactionWarningType, { message: string, code?: number }> = {
   [BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT]: {
-    message: 'Not enough existential deposit',
+    message: detectTranslate('Insufficient balance to cover existential deposit. Please decrease the transaction amount or increase your current balance'),
     code: undefined
   }
 };

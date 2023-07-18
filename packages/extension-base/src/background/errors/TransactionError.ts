@@ -3,83 +3,84 @@
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { BasicTxErrorType, StakingTxErrorType, TransactionErrorType, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 
 // Todo: finish this map in the future
 const defaultErrorMap = {
   NOT_ENOUGH_BALANCE: {
-    message: 'Not enough balance',
+    message: detectTranslate('Not enough balance'),
     code: undefined
   },
   CHAIN_DISCONNECTED: {
-    message: 'Chain is disconnected',
+    message: detectTranslate('Chain is disconnected'),
     code: undefined
   },
   INVALID_PARAMS: {
-    message: 'Invalid params',
+    message: detectTranslate('Invalid params'),
     code: undefined
   },
   INTERNAL_ERROR: {
-    message: 'Internal error',
+    message: detectTranslate('Internal error'),
     code: undefined
   },
   DUPLICATE_TRANSACTION: {
-    message: 'Duplicate transaction',
+    message: detectTranslate('Duplicate transaction'),
     code: undefined
   },
   UNABLE_TO_SIGN: {
-    message: 'Unable to sign',
+    message: detectTranslate('Unable to sign'),
     code: undefined
   },
   USER_REJECT_REQUEST: {
-    message: 'User reject request',
+    message: detectTranslate('User reject request'),
     code: undefined
   },
   UNABLE_TO_SEND: {
-    message: 'Unable to send',
+    message: detectTranslate('Unable to send'),
     code: undefined
   },
   SEND_TRANSACTION_FAILED: {
-    message: 'Send transaction failed',
+    message: detectTranslate('Send transaction failed'),
     code: undefined
   },
   NOT_ENOUGH_EXISTENTIAL_DEPOSIT: {
-    message: 'Not enough existential deposit',
+    message: detectTranslate('Insufficient balance to cover existential deposit. Please decrease the transaction amount or increase your current balance'),
     code: undefined
   },
   [BasicTxErrorType.UNSUPPORTED]: {
-    message: 'This transaction is not supported',
+    message: detectTranslate('This transaction is not supported'),
     code: undefined
   },
   [BasicTxErrorType.TIMEOUT]: {
-    message: 'Transaction timeout',
+    message: detectTranslate('Transaction timeout'),
     code: undefined
   },
   [StakingTxErrorType.NOT_ENOUGH_MIN_STAKE]: {
-    message: 'Not enough min stake',
+    message: detectTranslate('Not enough min stake'),
     code: undefined
   },
   [StakingTxErrorType.EXCEED_MAX_NOMINATIONS]: {
-    message: 'Exceed max nominations',
+    message: detectTranslate('Exceed max nominations'),
     code: undefined
   },
   [StakingTxErrorType.EXIST_UNSTAKING_REQUEST]: {
-    message: 'Exist unstaking request',
+    message: detectTranslate('Exist unstaking request'),
     code: undefined
   },
   [StakingTxErrorType.INVALID_ACTIVE_STAKE]: {
-    message: 'Invalid active stake',
+    message: detectTranslate('Invalid active stake'),
     code: undefined
   },
   [StakingTxErrorType.EXCEED_MAX_UNSTAKING]: {
-    message: 'Exceed max unstaking',
+    message: detectTranslate('Exceed max unstaking'),
     code: undefined
   },
   [StakingTxErrorType.INACTIVE_NOMINATION_POOL]: {
-    message: 'This nomination pool is not active',
+    message: detectTranslate('This nomination pool is not active'),
     code: undefined
   },
   [TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT]: {
-    message: 'Receiver is not enough existential deposit',
+    message: detectTranslate('Receiver is not enough existential deposit'),
     code: undefined
   }
 } as Record<TransactionErrorType, { message: string, code?: number }>;

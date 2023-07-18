@@ -5,6 +5,7 @@ export { default as useGetNativeTokenSlug } from './useGetNativeTokenSlug';
 export { default as useGetNativeTokenBasicInfo } from './useGetNativeTokenBasicInfo';
 export { default as useCopy } from './useCopy';
 export { default as useNotification } from './useNotification';
+export { default as useSubscribeLanguage } from './useSubscribeLanguage';
 export { default as useTranslation } from './useTranslation';
 
 export * from './useSelector';

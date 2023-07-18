@@ -3,6 +3,7 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { ALL_STAKING_ACTIONS } from '@subwallet/extension-koni-ui/constants';
 import { BLOCK_ACTION_LEDGER_NETWORKS, PredefinedLedgerNetwork } from '@subwallet/extension-koni-ui/constants/ledger';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types';
@@ -52,7 +53,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
         const mode = getSignMode(account);
         let block = false;
         let accountTitle = getAccountTypeTitle(account);
-        let defaultMessage = 'The account you are using is {{accountTitle}}, you cannot use this feature with it';
+        let defaultMessage = detectTranslate('The account you are using is {{accountTitle}}, you cannot use this feature with it');
 
         switch (mode) {
           case AccountSignMode.READ_ONLY:
@@ -68,7 +69,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
         }
 
         if (ALL_STAKING_ACTIONS.includes(action)) {
-          defaultMessage = 'You are using a {{accountTitle}}. Staking is not supported with this account type';
+          defaultMessage = detectTranslate('You are using a {{accountTitle}}. Staking is not supported with this account type');
         }
 
         if (mode === AccountSignMode.LEDGER) {

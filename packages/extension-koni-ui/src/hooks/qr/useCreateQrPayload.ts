@@ -1,38 +1,31 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { createFrames } from '@subwallet/extension-koni-ui/utils/account/qr';
+import { createFrames } from '@subwallet/extension-koni-ui/utils';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { qrcode } from '@polkadot/react-qr/qrcode';
 import { objectSpread } from '@polkadot/util';
 import { xxhashAsHex } from '@polkadot/util-crypto';
 
 const FRAME_DELAY = 1000;
 const TIMER_INC = 100;
 
-const getDataUrl = (value: Uint8Array): string => {
-  const qr = qrcode(0, 'M'); // HACK See our qrcode stringToBytes override as used internally. This
-  // will only work for the case where we actually pass `Bytes` in here
-
-  qr.addData(value as unknown as string, 'Byte');
-  qr.make();
-
-  return qr.createDataURL(16, 0);
+const getDataString = (value: Uint8Array): string => {
+  return Buffer.from(value).toString('binary');
 };
 
 interface FrameState {
   index: number;
   frames: Uint8Array[];
-  images: string[];
+  data: string[];
   valueHash: null | string;
 }
 
-const useCreateQrPayload = (value: Uint8Array, skipEncoding?: boolean): { images: string[]; index: number } => {
-  const [{ images, index }, setFrameState] = useState<FrameState>({
+const useCreateQrPayload = (value: Uint8Array, skipEncoding?: boolean): { data: string[]; index: number } => {
+  const [{ data, index }, setFrameState] = useState<FrameState>({
     index: 0,
     frames: [],
-    images: [],
+    data: [],
     valueHash: null
   });
 
@@ -48,12 +41,12 @@ const useCreateQrPayload = (value: Uint8Array, skipEncoding?: boolean): { images
       }
 
       const frames = skipEncoding ? [value] : createFrames(value); // encode on demand
-      const _images = frames.map((frame) => getDataUrl(frame));
+      const _images = frames.map((frame) => getDataString(frame));
 
       return {
         index: 0,
         frames,
-        images: _images,
+        data: _images,
         valueHash
       };
     });
@@ -118,9 +111,9 @@ const useCreateQrPayload = (value: Uint8Array, skipEncoding?: boolean): { images
   }, []);
 
   return useMemo(() => ({
-    images: images,
+    data: data,
     index: index
-  }), [images, index]);
+  }), [data, index]);
 };
 
 export default useCreateQrPayload;

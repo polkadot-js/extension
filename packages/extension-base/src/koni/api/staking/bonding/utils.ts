@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
-import { getCompoundWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
+import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
@@ -385,14 +385,7 @@ export function getStakingAvailableActionsByNominator (nominatorMetadata: Nomina
 
   if (nominatorMetadata.unstakings.length > 0) {
     result.push(StakingAction.CANCEL_UNSTAKE);
-    let hasClaimable = false;
-
-    for (const unstaking of nominatorMetadata.unstakings) {
-      if (unstaking.status === UnstakingStatus.CLAIMABLE) {
-        hasClaimable = true;
-        break;
-      }
-    }
+    const hasClaimable = nominatorMetadata.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
 
     if (hasClaimable) {
       result.push(StakingAction.WITHDRAW);
@@ -423,8 +416,8 @@ export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
 
   let result: UnstakingInfo | undefined;
 
-  if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain) || _STAKING_CHAIN_GROUP.relay.includes(nominatorMetadata.chain)) {
-    return getCompoundWithdrawable(nominatorMetadata);
+  if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain)) {
+    return getAstarWithdrawable(nominatorMetadata);
   }
 
   for (const unstaking of unstakings) {

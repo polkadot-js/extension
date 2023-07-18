@@ -204,7 +204,7 @@ const Component = (): React.ReactElement => {
             <SwAlert
               className={classNames('zk-mode-alert-area')}
               description={t('This may take a few minutes. Please keep the app open')}
-              title={t(`Zk mode is syncing: ${zkModeSyncProgress || '0'}%`)}
+              title={t('Zk mode is syncing: {{percent}}%', { replace: { percent: zkModeSyncProgress || '0' } })}
               type={'warning'}
             />
           )

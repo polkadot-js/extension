@@ -3,12 +3,11 @@
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BackgroundExpandView, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
+import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
-import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { useDefaultNavigate, useNotification, useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -45,6 +44,8 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const { goBack, goHome } = useDefaultNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
   const notify = useNotification();
+
+  useSubscribeLanguage();
 
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);

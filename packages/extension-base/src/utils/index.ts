@@ -356,3 +356,4 @@ export * from './array';
 export * from './environment';
 export * from './lazy';
 export * from './registry';
+export * from './translate';

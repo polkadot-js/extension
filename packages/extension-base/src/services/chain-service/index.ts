@@ -1550,4 +1550,8 @@ export class ChainService {
   upsertMetadata (chain: string, metadata: IMetadataItem) {
     return this.dbService.stores.metadata.upsertMetadata(chain, metadata);
   }
+
+  getMetadataByHash (hash: string) {
+    return this.dbService.stores.metadata.getMetadataByGenesisHash(hash);
+  }
 }

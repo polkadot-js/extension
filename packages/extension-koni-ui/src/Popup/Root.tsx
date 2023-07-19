@@ -113,7 +113,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
         if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
           navigate(welcomeUrl);
         }
-      } else {
+      } else if (pathName !== createPasswordUrl) {
         navigate(createPasswordUrl);
       }
     } else if (isNoAccount(accounts)) {
@@ -128,8 +128,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
         navigate(tokenUrl);
       }
     } else if (pathName === loginUrl && !isLocked) {
-      goHome();
-    } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {
       goHome();
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');

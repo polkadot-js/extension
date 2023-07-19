@@ -5,20 +5,30 @@ import { Layout } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ACCOUNT_TYPES, DOWNLOAD_EXTENSION } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Divider, Icon, Image, Input, ModalContext } from '@subwallet/react-ui';
+import { Button, ButtonProps, Divider, Form, Icon, Image, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
+import React, { useCallback, useContext, useLayoutEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import SocialGroup from '../components/SocialGroup';
 import { EXTENSION_URL } from '../constants';
 import { ScreenContext } from '../contexts/ScreenContext';
-import { openInNewTab, setSelectedAccountTypes } from '../utils';
+import useGetDefaultAccountName from '../hooks/account/useGetDefaultAccountName';
+import useDefaultNavigate from '../hooks/router/useDefaultNavigate';
+import { convertFieldToObject, isNoAccount, openInNewTab, readOnlyScan, setSelectedAccountTypes, simpleCheckForm } from '../utils';
 
 type Props = ThemeProps;
+
+interface ReadOnlyAccountInput {
+  address?: string;
+}
 
 interface WelcomeButtonItem {
   id: string;
@@ -33,6 +43,103 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
+
+  const [form] = Form.useForm<ReadOnlyAccountInput>();
+  const autoGenAttachReadonlyAccountName = useGetDefaultAccountName();
+  const [reformatAttachAddress, setReformatAttachAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isAttachAddressEthereum, setAttachAddressEthereum] = useState(false);
+  const [isAttachReadonlyAccountButtonDisable, setIsAttachReadonlyAccountButtonDisable] = useState(true);
+  const accounts = useSelector((root: RootState) => root.accountState.accounts);
+  const [isAccountsEmpty] = useState(isNoAccount(accounts));
+  const { goHome } = useDefaultNavigate();
+
+  const formDefault: ReadOnlyAccountInput = {
+    address: ''
+  };
+
+  const handleResult = useCallback((val: string) => {
+    const result = readOnlyScan(val);
+
+    if (result) {
+      setReformatAttachAddress(result.content);
+      setAttachAddressEthereum(result.isEthereum);
+    }
+  }, []);
+
+  const onFieldsChange: Callbacks<ReadOnlyAccountInput>['onFieldsChange'] =
+    useCallback(
+      (changes: FieldData[], allFields: FieldData[]) => {
+        const { empty, error } = simpleCheckForm(allFields);
+
+        setIsAttachReadonlyAccountButtonDisable(error || empty);
+
+        const changeMap = convertFieldToObject<ReadOnlyAccountInput>(changes);
+
+        if (changeMap.address) {
+          handleResult(changeMap.address);
+        }
+      },
+      [handleResult]
+    );
+
+  const accountAddressValidator = useCallback(
+    (rule: RuleObject, value: string) => {
+      const result = readOnlyScan(value);
+
+      if (result) {
+        // For each account, check if the address already exists return promise reject
+        for (const account of accounts) {
+          if (account.address === result.content) {
+            setReformatAttachAddress('');
+
+            return Promise.reject(t('Account already exists'));
+          }
+        }
+      } else {
+        setReformatAttachAddress('');
+
+        if (value !== '') {
+          return Promise.reject(t('Invalid address'));
+        }
+      }
+
+      return Promise.resolve();
+    },
+    [accounts, t]
+  );
+
+  const onSubmitAttachReadonlyAccount = useCallback(() => {
+    setLoading(true);
+
+    if (reformatAttachAddress) {
+      createAccountExternalV2({
+        name: autoGenAttachReadonlyAccountName,
+        address: reformatAttachAddress,
+        genesisHash: '',
+        isEthereum: isAttachAddressEthereum,
+        isAllowed: true,
+        isReadOnly: true
+      })
+        .then((errors) => {
+          if (errors.length) {
+            form.setFields([
+              { name: 'address', errors: errors.map((e) => e.message) }
+            ]);
+          } else {
+            navigate('/create-done');
+          }
+        })
+        .catch((error: Error) => {
+          form.setFields([{ name: 'address', errors: [error.message] }]);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, [reformatAttachAddress, autoGenAttachReadonlyAccountName, isAttachAddressEthereum, form, navigate]);
 
   const items = useMemo((): WelcomeButtonItem[] => [
     {
@@ -61,7 +168,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       icon: PuzzlePiece,
       id: DOWNLOAD_EXTENSION,
       schema: 'secondary',
-      title: 'Download SubWallet extension'
+      title: t('Download SubWallet extension')
     }
   ], [t]);
 
@@ -85,6 +192,12 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     };
   }, [activeModal, inactiveModal, navigate]
   );
+
+  useLayoutEffect(() => {
+    if (!isAccountsEmpty) {
+      goHome();
+    }
+  }, [goHome, isAccountsEmpty]);
 
   return (
     <Layout.Base
@@ -148,22 +261,44 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
         {isWebUI && (
           <>
-            <div className={CN('add-wallet-container', 'flex-column')}>
-              <div className='sub-title'>{t('Watch any wallet')}</div>
-              <Input
-                className='address-input'
-                placeholder={t('Enter address')}
-                prefix={<Wallet size={24} />}
-                type={'text'}
-              />
+            <Form
+              className={CN('add-wallet-container', 'flex-column')}
+              form={form}
+              initialValues={formDefault}
+              onFieldsChange={onFieldsChange}
+              onFinish={onSubmitAttachReadonlyAccount}
+            >
+              <div className='form-title lg-text'>{t('Watch any wallet')}?</div>
+              <Form.Item
+                name={'address'}
+                rules={[
+                  {
+                    message: t('Account address is required'),
+                    required: true
+                  },
+                  {
+                    validator: accountAddressValidator
+                  }
+                ]}
+                statusHelpAsTooltip={true}
+              >
+                <Input
+                  placeholder={t('Enter address')}
+                  prefix={<Wallet size={24} />}
+                  type={'text'}
+                />
+              </Form.Item>
               <Button
                 block
                 className='add-wallet-button'
+                disabled={isAttachReadonlyAccountButtonDisable}
+                loading={loading}
+                onClick={form.submit}
                 schema='primary'
               >
                 {t('Add watch-only wallet')}
               </Button>
-            </div>
+            </Form>
 
             <SocialGroup />
           </>
@@ -239,23 +374,23 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
         color: token.colorTextLight3
       },
 
+      '.form-title': {
+        color: token.colorTextLight3,
+        marginBottom: token.margin
+      },
+
+      '.add-wallet-container': {
+        maxWidth: 384,
+        width: '100%',
+        alignItems: 'stretch',
+        marginBottom: token.margin
+      },
+
       '&.__web-ui': {
         textAlign: 'center',
         height: '100%',
         width: 'fit-content',
         margin: '0 auto',
-
-        '.add-wallet-container': {
-          width: '60%',
-          alignItems: 'stretch',
-
-          '.address-input': {
-            margin: `${token.marginSM + 4}px 0`
-          },
-          '.add-wallet-button': {
-            marginBottom: token.marginSM
-          }
-        },
 
         '.title': {
           marginTop: token.marginSM + 4,

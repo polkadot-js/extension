@@ -12,10 +12,12 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { Layout, SocialButtonGroup } from '../components';
+import useAutoNavigateToCreatePassword from '../hooks/router/useAutoNavigateToCreatePassword';
 
 type Props = ThemeProps;
 
 const Component: React.FC<Props> = (props: Props) => {
+  useAutoNavigateToCreatePassword();
   const { className } = props;
 
   const { goHome } = useDefaultNavigate();

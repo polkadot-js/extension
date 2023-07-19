@@ -17,7 +17,7 @@ const ScreenBreakpoint: Record<Screens, [number, number?]> = {
   [Screens.MOBILE]: [0, 768]
 };
 
-interface ScreenContexProviderProps {
+interface ScreenContextProviderProps {
   children?: React.ReactElement
 }
 
@@ -28,7 +28,7 @@ type ScreenContextType = {
 
 export const ScreenContext = React.createContext({} as ScreenContextType);
 
-export const ScreenContextProvider = ({ children }: ScreenContexProviderProps) => {
+export const ScreenContextProvider = ({ children }: ScreenContextProviderProps) => {
   const [screenType, setScreenType] = React.useState<`${Screens}`>(
     Screens.DESKTOP
   );

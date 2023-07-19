@@ -14,34 +14,6 @@ export type Props = ThemeProps & {
   onBack?: () => void;
 }
 
-const StyledHeader = styled.div(function () {
-  return {
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '31px 24px 50px',
-
-    '.logo-container': {
-      width: 67,
-      textAlign: 'left'
-    },
-
-    '.title-wrapper': {
-      display: 'flex',
-      justifyContent: 'center',
-      flex: 1,
-      position: 'relative',
-
-      '.back-button': {
-        position: 'absolute',
-        top: 0,
-        left: 20
-      }
-    }
-  };
-});
-
 const StyledTitle = styled(Typography.Title)`
   margin: 0 !important;
   font-size: 30px !important;
@@ -58,7 +30,7 @@ function Component (props: Props): React.ReactElement<Props> {
   }, [goHome]);
 
   return (
-    <StyledHeader>
+    <div className={props.className}>
       <div className='logo-container'>
         <Logo2D
           height={24}
@@ -81,10 +53,12 @@ function Component (props: Props): React.ReactElement<Props> {
         </div>
       )}
       <Button
-        icon={<Icon
-          phosphorIcon={Question}
-          size='sm'
-        />}
+        icon={
+          <Icon
+            customSize='28px'
+            phosphorIcon={Question}
+          />
+        }
         size='xs'
         style={{
           padding: 0
@@ -93,12 +67,35 @@ function Component (props: Props): React.ReactElement<Props> {
       >
         {t<string>('Help')}
       </Button>
-    </StyledHeader>
+    </div>
   );
 }
 
 const Simple = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '31px 24px 50px',
 
+  '.logo-container': {
+    width: 67,
+    textAlign: 'left',
+    color: token.colorWhite
+  },
+
+  '.title-wrapper': {
+    display: 'flex',
+    justifyContent: 'center',
+    flex: 1,
+    position: 'relative',
+
+    '.back-button': {
+      position: 'absolute',
+      top: 0,
+      left: 20
+    }
+  }
 }));
 
 export default Simple;

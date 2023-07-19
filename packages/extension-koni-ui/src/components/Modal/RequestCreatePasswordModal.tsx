@@ -8,14 +8,16 @@ import CN from 'classnames';
 import { ShieldPlus, ShieldStar } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
 
 const modalId = REQUEST_CREATE_PASSWORD_MODAL;
+const createPasswordUrl = '/keyring/create-password';
 
 const Component: React.FC<Props> = (props: Props) => {
+  const location = useLocation();
   const { className } = props;
 
   const { t } = useTranslation();
@@ -24,8 +26,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClick = useCallback(() => {
     inactiveModal(modalId);
-    navigate('/keyring/create-password');
-  }, [navigate, inactiveModal]);
+
+    if (location.pathname !== createPasswordUrl) {
+      navigate(createPasswordUrl);
+    }
+  }, [inactiveModal, location.pathname, navigate]);
 
   return (
     <SwModal

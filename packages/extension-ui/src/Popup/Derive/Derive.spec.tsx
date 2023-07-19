@@ -156,7 +156,9 @@ describe('Derive', () => {
       const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(false);
-      expect(wrapper.find('.warning-message')).toHaveLength(0);
+      expect(
+        wrapper.findWhere((node) => node.prop('messageType') === 'critical' && node.prop('in') === true)
+      ).toHaveLength(0);
     });
 
     it('Button is enabled when password is set', async () => {
@@ -165,7 +167,9 @@ describe('Derive', () => {
       const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(false);
-      expect(wrapper.find('.warning-message')).toHaveLength(0);
+      expect(
+        wrapper.findWhere((node) => node.prop('messageType') === 'critical' && node.prop('in') === true)
+      ).toHaveLength(0);
     });
 
     it('Derivation path gets visible, is set and locked', async () => {
@@ -202,8 +206,7 @@ describe('Derive', () => {
       const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(true);
-      expect(wrapper.find('.warning-message')).toHaveLength(1);
-      expect(wrapper.find('.warning-message').first().text()).toEqual('Invalid derivation path.');
+      expect(wrapper.find({ children: 'Invalid derivation path.' }).length).toBeGreaterThan(0);
     });
 
     it('An error is visible and the button is disabled when suri contains `///`', async () => {
@@ -213,9 +216,7 @@ describe('Derive', () => {
       const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(true);
-      expect(wrapper.find('.warning-message')).toHaveLength(1);
-      // eslint-disable-next-line quotes
-      expect(wrapper.find('.warning-message').first().text()).toEqual('`///password` not supported for derivation.');
+      expect(wrapper.find({ children: '`///password` not supported for derivation.' }).length).toBeGreaterThan(0);
     });
 
     it('No error is shown when suri contains soft derivation `/` with sr25519', async () => {
@@ -225,7 +226,9 @@ describe('Derive', () => {
       const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(false);
-      expect(wrapper.find('.warning-message')).toHaveLength(0);
+      expect(
+        wrapper.findWhere((node) => node.prop('messageType') === 'critical' && node.prop('in') === true)
+      ).toHaveLength(0);
     });
 
     it('The error disappears and "Create derived account" is enabled when typing a new suri', async () => {
@@ -332,10 +335,9 @@ describe('Derive', () => {
 
       expect(button.prop('disabled')).toBe(true);
       expect(wrapper.find('[data-input-suri]').first().prop('isError')).toBe(true);
-      expect(wrapper.find('.warning-message')).toHaveLength(1);
-      expect(wrapper.find('.warning-message').first().text()).toEqual(
-        'Soft derivation is only allowed for sr25519 accounts'
-      );
+      expect(
+        wrapper.find({ children: 'Soft derivation is only allowed for sr25519 accounts.' }).length
+      ).toBeGreaterThan(0);
     });
   });
 });

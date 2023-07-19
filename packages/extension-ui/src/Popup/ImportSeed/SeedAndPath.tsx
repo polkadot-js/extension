@@ -15,6 +15,7 @@ import helpIcon from '../../assets/help.svg';
 import infoIcon from '../../assets/information.svg';
 import {
   ActionContext,
+  AnimatedMessage,
   Button,
   ButtonArea,
   Header,
@@ -24,8 +25,7 @@ import {
   LearnMore,
   MnemonicInput,
   Svg,
-  VerticalSpace,
-  Warning
+  VerticalSpace
 } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';
@@ -212,15 +212,11 @@ function SeedAndPath({ className, genesis, onAccountChange, onNextStep, type }: 
             seedWords={seedWords}
             showError={!!error}
           />
-          {!!error && (
-            <Warning
-              className='centered'
-              isBelowInput
-              isDanger
-            >
-              {error}
-            </Warning>
-          )}
+          <StyledAnimatedMessage
+            in={!!error}
+            messageType='critical'
+            text={error}
+          />
         </MnemonicWrapper>
         <div className='input-with-lock'>
           <StyledInputWithLabel
@@ -275,17 +271,14 @@ const MnemonicWrapper = styled.div`
   }
 `;
 
+const StyledAnimatedMessage = styled(AnimatedMessage)`
+  margin-inline: auto;
+`;
+
 export default styled(SeedAndPath)(
   ({ theme }: ThemeProps) => `
   display: flex;
   flex-direction: column;
-
-
-  .centered {
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-  }
 
   .advancedToggle {
     color: ${theme.textColor};

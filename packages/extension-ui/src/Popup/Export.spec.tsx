@@ -71,14 +71,14 @@ describe('Export component', () => {
     console.error = jest.fn();
     // eslint-disable-next-line @typescript-eslint/require-await
     jest.spyOn(messaging, 'exportAccount').mockImplementation(async () => {
-      throw new Error('Unable to decode using the supplied passphrase');
+      throw new Error('Error');
     });
     enterPassword();
     wrapper.find('form').simulate('submit');
     await act(flushAllPromises);
     wrapper.update();
 
-    expect(wrapper.find('.warning-message').text()).toBe('Unable to decode using the supplied passphrase.');
+    expect(wrapper.find({ children: 'Unable to decode using the supplied passphrase.' }).length).toBeGreaterThan(0);
     expect(wrapper.find(Button).last().prop('isDisabled')).toBe(true);
     expect(wrapper.find('InputWithLabel').first().prop('isError')).toBe(true);
   });

@@ -4,7 +4,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { InputFileWithLabel, Warning } from '../../components';
+import { AnimatedMessage, InputFileWithLabel } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
 const acceptedFormats = ['application/json', 'text/plain'].join(', ');
@@ -28,21 +28,19 @@ function ImportJsonDropzoneStep({ className, isFileError, onChangeFile, setFileN
           onChange={onChangeFile}
           setFileName={setFileName}
         />
-        {isFileError && <StyledWarning isDanger>{t<string>('Invalid Json file')}</StyledWarning>}
+        <StyledAnimatedMessage
+          in={isFileError}
+          messageType='critical'
+          text={t<string>('Invalid Json file')}
+        />
       </div>
     </>
   );
 }
 
-const StyledWarning = styled(Warning)`
+const StyledAnimatedMessage = styled(AnimatedMessage)`
   margin-top: 8px;
-
-  font-family: Karla;
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 300;
-  line-height: 130%;
-  letter-spacing: 0.78px;
+  margin-inline: 16px;
 `;
 
 export default styled(ImportJsonDropzoneStep)`

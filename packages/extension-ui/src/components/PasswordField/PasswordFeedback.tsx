@@ -6,33 +6,36 @@ import { TransitionGroup } from 'react-transition-group';
 import styled, { useTheme } from 'styled-components';
 
 import useTranslation from '../../hooks/useTranslation';
+import AnimatedMessage from '../AnimatedMessage';
 import { isPasswordTooWeak, ValidationResult } from './getFeedback';
 import ProgressBar from './ProgressBar';
-import TransitionMessage from './TransitionMessage';
 
 type Props = {
-  className?: string,
-  feedback: ValidationResult,
+  className?: string;
+  feedback: ValidationResult;
   isCapsLockOn?: boolean;
-}
+};
 
 function PasswordFeedback({
   className,
-  feedback: {score, suggestions, warning},
+  feedback: { score, suggestions, warning },
   feedback,
-  isCapsLockOn = false,
+  isCapsLockOn = false
 }: Props): React.ReactElement {
   const { t } = useTranslation();
   const theme = useTheme();
   const scoreToColor = {
-    0: theme.errorColor, 1: theme.errorColor, 2: theme.errorColor, 3: theme.warningColor, 4: theme.primaryColor
+    0: theme.errorColor,
+    1: theme.errorColor,
+    2: theme.errorColor,
+    3: theme.warningColor,
+    4: theme.primaryColor
   };
 
   const isTooWeak = isPasswordTooWeak(feedback);
 
   const defaultCriticalMessage = isTooWeak ? t('Password is too weak.') : '';
   const criticalMessage = warning || defaultCriticalMessage;
-  const duration = 500;
 
   return (
     <div className={className}>
@@ -42,34 +45,29 @@ function PasswordFeedback({
         inactiveColor={theme.progressBarInactive}
         stepCount={5}
       />
-      <StyledTransitionMessage
-        duration={duration}
+      <StyledAnimatedMessage
         in={score === 4}
         messageType='success'
         text={t('Awesome! Your password is really strong.')}
       />
-      <StyledTransitionMessage
-        duration={duration}
+      <StyledAnimatedMessage
         in={isTooWeak}
         messageType='critical'
         text={t(criticalMessage)}
       />
-      <StyledTransitionMessage
-        duration={duration}
+      <StyledAnimatedMessage
         in={score === 3}
         messageType='warning'
-        text={t("Your password could be stronger!")}
+        text={t('Your password could be stronger!')}
       />
-      <StyledTransitionMessage
-        duration={duration}
+      <StyledAnimatedMessage
         in={!!isCapsLockOn}
         messageType='warning'
         text={t('CapsLock is ON')}
       />
       <TransitionGroup component={null}>
         {suggestions.map((suggestion, index) => (
-          <StyledTransitionMessage
-            duration={duration}
+          <StyledAnimatedMessage
             in={!!suggestion}
             key={index}
             messageType='info'
@@ -81,12 +79,12 @@ function PasswordFeedback({
   );
 }
 
-const StyledTransitionMessage = styled(TransitionMessage)`
-  margin-inline: 15px;
+const StyledAnimatedMessage = styled(AnimatedMessage)`
+  margin-inline: 16px;
 `;
 
 export default styled(PasswordFeedback)`
-  & > :not(:last-child) {
-    margin-bottom: 8px;
+  & > * + * {
+    margin-top: 8px;
   }
 `;

@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 import { Result } from '@polkadot/extension-ui/util/validators';
 
-import { InputWithLabel, ValidatedInput, Warning } from '../../components';
+import { AnimatedMessage, InputWithLabel, ValidatedInput } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props {
@@ -38,26 +38,28 @@ function Unlock({ className, error, isBusy, password, setError, setPassword }: P
         isFocused
         label={t<string>('Password for this account')}
         onValidatedChange={_onChangePassword}
+        shouldCheckCapsLock
         type='password'
         validator={Result.ok}
         value={password}
       />
-      {error && (
-        <Warning
-          isBelowInput
-          isDanger
-        >
-          {error}
-        </Warning>
-      )}
+      <StyledAnimatedMessage
+        in={!!error}
+        messageType='critical'
+        text={error || ''}
+      />
     </Container>
   );
 }
 
 const Container = styled.div`
-  & > :not(:last-child) {
-    margin-bottom: 8px;
+  & > * + * {
+    margin-top: 8px;
   }
+`;
+
+const StyledAnimatedMessage = styled(AnimatedMessage)`
+  margin-inline: 16px;
 `;
 
 export default React.memo(Unlock);

@@ -5,8 +5,8 @@ import React, { FormEvent, useCallback, useContext, useId, useState } from 'reac
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
+import { AnimatedMessage } from '@polkadot/extension-ui/components';
 import { getUserInputs } from '@polkadot/extension-ui/components/PasswordField/getFeedback';
-import Message from '@polkadot/extension-ui/components/PasswordField/Message';
 import useAccountName from '@polkadot/extension-ui/hooks/useAccountName';
 
 import {
@@ -102,9 +102,11 @@ const EditPassword = () => {
               type='password'
               validator={Result.ok}
             />
-            {isProvidedPassWrong && (
-              <StyleMessage messageType='critical'>{t('Unable to decode using the supplied passphrase.')}</StyleMessage>
-            )}
+            <StyleAnimatedMessage
+              in={isProvidedPassWrong}
+              messageType='critical'
+              text={t('Unable to decode using the supplied passphrase.')}
+            />
           </InputWrapper>
           <Password
             label={t('New password')}
@@ -143,8 +145,8 @@ const Form = styled.form`
 `;
 
 const InputWrapper = styled.div`
-  & > :not(:last-child) {
-    margin-bottom: 8px;
+  & > * + * {
+    margin-top: 8px;
   }
 `;
 
@@ -152,8 +154,8 @@ const StyledInputWithLabel = styled(InputWithLabel)`
   margin-bottom: 0;
 `;
 
-const StyleMessage = styled(Message)`
-  margin-inline: 15px;
+const StyleAnimatedMessage = styled(AnimatedMessage)`
+  margin-inline: 16px;
 `;
 
 export default EditPassword;

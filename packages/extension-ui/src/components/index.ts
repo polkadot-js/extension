@@ -5,6 +5,7 @@ export { default as AccountNamePasswordCreation } from './AccountNamePasswordCre
 export { default as ActionBar } from './ActionBar';
 export { default as ActionText } from './ActionText';
 export { default as Address } from './Address';
+export { default as AnimatedMessage } from './AnimatedMessage';
 export { default as BackButton } from './BackButton';
 export { default as Box } from './Box';
 export { default as Button } from './Button';
@@ -29,6 +30,7 @@ export { default as Main } from './Main';
 export { default as Menu } from './Menu';
 export { default as MenuDivider } from './MenuDivider';
 export { default as MenuItem } from './MenuItem';
+export { default as Message } from './Message';
 export { default as MnemonicSeed } from './MnemonicSeed';
 export { default as NextStepButton } from './NextStepButton';
 export { default as RemoveAuth } from './RemoveAuth';

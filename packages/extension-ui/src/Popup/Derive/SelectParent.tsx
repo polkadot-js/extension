@@ -11,6 +11,7 @@ import {
   AccountContext,
   ActionContext,
   Address,
+  AnimatedMessage,
   Button,
   ButtonArea,
   Header,
@@ -20,8 +21,7 @@ import {
   LearnMore,
   Svg,
   ValidatedInput,
-  VerticalSpace,
-  Warning
+  VerticalSpace
 } from '../../components';
 import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
@@ -84,7 +84,7 @@ function SelectParent({
     }
 
     if (!allowSoftDerivation && suriPath && singleSlashRegex.test(suriPath)) {
-      setPathError(t('Soft derivation is only allowed for sr25519 accounts'));
+      setPathError(t('Soft derivation is only allowed for sr25519 accounts.'));
     }
   }, [allowSoftDerivation, suriPath, t]);
 
@@ -199,17 +199,15 @@ function SelectParent({
             data-input-password
             label={t<string>('Main account password')}
             onValidatedChange={_onParentPasswordEnter}
+            shouldCheckCapsLock
             type='password'
             validator={Result.ok}
           />
-          {!!parentPassword && !isProperParentPassword && (
-            <Warning
-              isBelowInput
-              isDanger
-            >
-              {t('Wrong password.')}
-            </Warning>
-          )}
+          <StyledAnimatedMessage
+            in={!!parentPassword && !isProperParentPassword}
+            messageType='critical'
+            text={t('Wrong password.')}
+          />
         </InputWrapper>
         <InputWrapper>
           <DerivationPath
@@ -220,22 +218,16 @@ function SelectParent({
             parentPassword={parentPassword}
             withSoftPath={allowSoftDerivation}
           />
-          {!suriPath && (
-            <Warning
-              isBelowInput
-              isDanger
-            >
-              {t('Derivation path is required.')}
-            </Warning>
-          )}
-          {!!pathError && (
-            <Warning
-              isBelowInput
-              isDanger
-            >
-              {pathError}
-            </Warning>
-          )}
+          <StyledAnimatedMessage
+            in={!suriPath}
+            messageType='critical'
+            text={t('Derivation path is required.')}
+          />
+          <StyledAnimatedMessage
+            in={!!pathError}
+            messageType='critical'
+            text={pathError}
+          />
         </InputWrapper>
       </form>
       <VerticalSpace />
@@ -261,6 +253,10 @@ function SelectParent({
   );
 }
 
+const StyledAnimatedMessage = styled(AnimatedMessage)`
+  margin-inline: 16px;
+`;
+
 const StyledFooter = styled(HelperFooter)`
   .icon {
     margin-bottom: 12px;
@@ -281,8 +277,8 @@ const InputWrapper = styled.div`
     margin-bottom: 16px;
   }
 
-  & > :not(:last-child) {
-    margin-bottom: 8px;
+  & > * + * {
+    margin-top: 8px;
   }
 `;
 

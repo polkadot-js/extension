@@ -248,15 +248,6 @@ export default styled(NewAccountSelection)(
     white-space: nowrap;
   }
 
-  .warningMargin {
-    margin: 0 24px 0 1.45rem;
-
-    .warning-message {
-      display: block;
-      width: 100%
-    }
-  }
-
   .heading {
     font-family: ${theme.secondaryFontFamily};
     font-style: normal;

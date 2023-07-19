@@ -102,7 +102,7 @@ describe.skip('ImportSeed', () => {
       });
       await typeSeed(wrapper, 'this is an invalid mnemonic seed');
 
-      expect(wrapper.find(Warning).find('.warning-message').text()).toEqual('Invalid mnemonic seed');
+      expect(wrapper.find({ children: 'Invalid mnemonic seed.' }).length).toBeGreaterThan(0);
       expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
       expect(wrapper.find('Name span').text()).toEqual('<unknown>');
       expect(wrapper.find('[data-field="address"]').text()).toEqual('<unknown>');
@@ -112,8 +112,8 @@ describe.skip('ImportSeed', () => {
       await typeSeed(wrapper, 'asdf');
       await typeSeed(wrapper, '');
 
-      expect(wrapper.find(Warning).find('.warning-message').text()).toEqual(
-        'Mnemonic needs to contain 12, 15, 18, 21, 24 words'
+      expect(wrapper.find({ children: 'Mnemonic needs to contain 12, 15, 18, 21, 24 words.' }).length).toBeGreaterThan(
+        0
       );
       expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
     });
@@ -151,7 +151,7 @@ describe.skip('ImportSeed', () => {
       await typeDerivationPath(wrapper, wrongPath);
 
       expect(validateCall).toHaveBeenLastCalledWith(suri);
-      expect(wrapper.find(Warning).find('.warning-message').text()).toEqual('Invalid mnemonic seed or derivation path');
+      expect(wrapper.find({ children: 'Invalid mnemonic seed or derivation path.' })).toBeGreaterThan(0);
       expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
       expect(wrapper.find('Name span').text()).toEqual('<unknown>');
       expect(wrapper.find('[data-field="address"]').text()).toEqual('<unknown>');

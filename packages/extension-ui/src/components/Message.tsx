@@ -4,13 +4,16 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import critical from '../../assets/message-icons/critical.svg';
-import info from '../../assets/message-icons/info.svg';
-import success from '../../assets/message-icons/success.svg';
-import warning from '../../assets/message-icons/warning.svg';
+import critical from '../assets/message-icons/critical.svg';
+import info from '../assets/message-icons/info.svg';
+import success from '../assets/message-icons/success.svg';
+import warning from '../assets/message-icons/warning.svg';
 
 const MESSAGE_TYPE_TO_ICON_URL = {
-  critical, warning, info, success
+  critical,
+  warning,
+  info,
+  success
 };
 
 export type MessageType = keyof typeof MESSAGE_TYPE_TO_ICON_URL;
@@ -19,7 +22,7 @@ type Props = {
   children: React.ReactNode;
   className?: string;
   messageType: MessageType;
-}
+};
 
 const Message = ({ children, className = '', messageType }: Props) => {
   return (
@@ -40,17 +43,16 @@ const Container = styled.div`
   display: flex;
   align-items: start;
   line-height: 16px;
-  font-size: ${({theme}) => theme.labelFontSize};
+  font-size: ${({ theme }) => theme.labelFontSize};
   letter-spacing: 0.035em;
 `;
 
 export default styled(Message)<Props>`
-  color: ${(
-    {messageType, theme}) => ({
-        critical: theme.errorColor,
-        warning: theme.warningColor,
-        info: theme.textColorSuggestion,
-        success: theme.primaryColor
-    })[messageType]
-  };
+  color: ${({ messageType, theme }) =>
+    ({
+      critical: theme.errorColor,
+      warning: theme.warningColor,
+      info: theme.textColorSuggestion,
+      success: theme.primaryColor
+    }[messageType])};
 `;

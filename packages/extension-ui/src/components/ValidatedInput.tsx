@@ -7,9 +7,8 @@ import styled from 'styled-components';
 import { useIsCapsLockOn } from '../hooks/useIsCapsLockOn';
 import useIsMounted from '../hooks/useIsMounted';
 import { Result, Validator } from '../util/validators';
-import Message from './PasswordField/Message';
+import AnimatedMessage from './AnimatedMessage';
 import { useTranslation } from './translate';
-import Warning from './Warning';
 
 interface BasicProps {
   isError?: boolean;
@@ -35,10 +34,10 @@ function ValidatedInput<T extends Record<string, unknown>>({
   validator,
   ...props
 }: Props<T>): React.ReactElement<Props<T>> {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const [value, setValue] = useState(defaultValue || '');
-  const {handleKeyDown, isCapsLockOn} = useIsCapsLockOn();
+  const { handleKeyDown, isCapsLockOn } = useIsCapsLockOn();
 
   const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));
   const isMounted = useIsMounted();
@@ -74,31 +73,28 @@ function ValidatedInput<T extends Record<string, unknown>>({
         onKeyDown={handleKeyDown}
         value={value}
       />
-      {Result.isError(validationResult) && (
-        <Warning
-          isBelowInput
-          isDanger
-        >
-          {validationResult.error.errorDescription}
-        </Warning>
-      )}
-      {shouldCheckCapsLock && isCapsLockOn && (
-        <StyledMessage messageType='warning'>
-          {t('CapsLock is ON')}
-        </StyledMessage>
-      )}
+      <StyledAnimatedMessage
+        in={Result.isError(validationResult)}
+        messageType='critical'
+        text={Result.isError(validationResult) ? validationResult.error.errorDescription : ''}
+      />
+      <StyledAnimatedMessage
+        in={Boolean(shouldCheckCapsLock && isCapsLockOn)}
+        messageType='warning'
+        text={t('CapsLock is ON')}
+      />
     </Container>
   );
 }
 
 const Container = styled.div`
-  & > :not(:last-child) {
-    margin-bottom: 8px;
+  & > * + * {
+    margin-top: 8px;
   }
 `;
 
-const StyledMessage = styled(Message)`
-  margin-left: 16px;
+const StyledAnimatedMessage = styled(AnimatedMessage)`
+  margin-inline: 16px;
 `;
 
 export default styled(ValidatedInput)``;

@@ -9,6 +9,7 @@ import styled from 'styled-components';
 
 import {
   Address,
+  AnimatedMessage,
   BackButton,
   Button,
   ButtonArea,
@@ -19,8 +20,7 @@ import {
   Label,
   ScrollWrapper,
   ValidatedInput,
-  VerticalSpace,
-  Warning
+  VerticalSpace
 } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { DEFAULT_TYPE } from '../../util/defaultType';
@@ -109,17 +109,15 @@ function ImportJsonConfirmStep({
                   isError={isPasswordError}
                   label={t<string>('Password')}
                   onValidatedChange={_onChangePass}
+                  shouldCheckCapsLock
                   type='password'
                   validator={isPasswordValid}
                 />
-                {isPasswordError && (
-                  <StyledWarning
-                    isBelowInput
-                    isDanger
-                  >
-                    {t<string>('Unable to decode using the supplied passphrase.')}
-                  </StyledWarning>
-                )}
+                <StyledAnimatedMessage
+                  in={isPasswordError}
+                  messageType='critical'
+                  text={t<string>('Unable to decode using the supplied passphrase.')}
+                />
               </PasswordContainer>
               <div>
                 <Checkbox
@@ -172,8 +170,9 @@ const PasswordContainer = styled.div`
   margin-bottom: 24px;
 `;
 
-const StyledWarning = styled(Warning)`
+const StyledAnimatedMessage = styled(AnimatedMessage)`
   margin-top: 8px;
+  margin-inline: 16px;
 `;
 
 const Hint = styled.span`

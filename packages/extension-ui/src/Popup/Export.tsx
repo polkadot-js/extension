@@ -11,11 +11,11 @@ import styled from 'styled-components';
 import {
   ActionContext,
   Address,
+  AnimatedMessage,
   Button,
   ButtonArea,
   InputWithLabel,
   VerticalSpace,
-  Warning,
   WarningBox
 } from '../components';
 import useToast from '../hooks/useToast';
@@ -104,14 +104,11 @@ function Export({
             type='password'
             value={pass}
           />
-          {isProvidedPassWrong && (
-            <Warning
-              isBelowInput
-              isDanger
-            >
-              {t('Unable to decode using the supplied passphrase.')}
-            </Warning>
-          )}
+          <StyledAnimatedMessage
+            in={isProvidedPassWrong}
+            messageType='critical'
+            text={t('Unable to decode using the supplied passphrase.')}
+          />
         </form>
       </div>
       <VerticalSpace />
@@ -137,6 +134,10 @@ function Export({
     </>
   );
 }
+
+const StyledAnimatedMessage = styled(AnimatedMessage)`
+  margin-inline: 16px;
+`;
 
 export default withRouter(styled(Export)`
   display: flex;

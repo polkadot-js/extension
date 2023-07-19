@@ -12,7 +12,8 @@ import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import localStorageStores from '../../utils/localStorageStores';
-import { withErrorLog } from './helpers';
+import { NORMAL_CREATE_WINDOW_DATA, POPUP_CREATE_WINDOW_DATA } from './consts';
+import { openCenteredWindow, withErrorLog } from './helpers';
 
 interface Resolver<T> {
   reject: (error: Error) => void;
@@ -72,24 +73,6 @@ interface SignRequest extends Resolver<ResponseSigning> {
 
 const NOTIFICATION_URL = chrome.runtime.getURL('notification.html');
 
-const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
-  focused: true,
-  height: 640,
-  state: 'normal',
-  type: 'popup',
-  url: NOTIFICATION_URL,
-  width: 376
-};
-
-const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
-  focused: true,
-  height: 640,
-  state: 'normal',
-  type: 'normal',
-  url: NOTIFICATION_URL,
-  width: 376
-};
-
 export enum NotificationOptions {
   None,
   Normal,
@@ -110,8 +93,6 @@ export default class State {
   readonly #providers: Providers;
 
   readonly #signRequests: Record<string, SignRequest> = {};
-
-  #windows: number[] = [];
 
   #connectedTabsUrl: string[] = [];
 
@@ -168,20 +149,18 @@ export default class State {
   }
 
   private popupOpen (): void {
-    this.#notification !== 'extension' &&
-      chrome.windows.create(
-        this.#notification === 'window'
-          ? NORMAL_WINDOW_OPTS
-          : POPUP_WINDOW_OPTS,
-        (window): void => {
-          if (window) {
-            this.#windows.push(window.id || 0);
+    if (this.#notification === 'extension') {
+      return;
+    }
 
-            // We're adding chrome.windows.update to make sure that the extension popup is not fullscreened
-            // There is a bug in Chrome that causes the extension popup to be fullscreened when user has any fullscreened browser window opened on the main screen
-            chrome.windows.update(window.id || 0, { state: 'normal' }).catch(console.error);
-          }
-        });
+    const createData = this.#notification === 'window'
+      ? NORMAL_CREATE_WINDOW_DATA
+      : POPUP_CREATE_WINDOW_DATA;
+
+    openCenteredWindow({
+      ...createData,
+      url: NOTIFICATION_URL
+    }).catch(console.error);
   }
 
   private authComplete = (id: string, resolve: (resValue: AuthResponse) => void, reject: (error: Error) => void): Resolver<AuthResponse> => {

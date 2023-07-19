@@ -17,7 +17,8 @@ import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
-import { withErrorLog } from './helpers';
+import { POPUP_CREATE_WINDOW_DATA } from './consts';
+import { openCenteredWindow } from './helpers';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
@@ -34,16 +35,6 @@ function getSuri (seed: string, type?: KeypairType): string {
 function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is SignerPayloadJSON {
   return (value as SignerPayloadJSON).genesisHash !== undefined;
 }
-
-const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
-  focused: true,
-  height: 640,
-  left: 150,
-  state: 'normal',
-  top: 150,
-  type: 'popup',
-  width: 376
-};
 
 export default class Extension {
   readonly #cachedUnlocks: CachedUnlocks;
@@ -498,7 +489,7 @@ export default class Extension {
   }
 
   // this method is called when we want to open up the popup from the ui
-  private windowOpen (path: AllowedPath): boolean {
+  private async windowOpen (path: AllowedPath): Promise<boolean> {
     const url = `${chrome.runtime.getURL('external.html')}#${path}`;
 
     if (!ALLOWED_PATH.includes(path)) {
@@ -507,14 +498,7 @@ export default class Extension {
       return false;
     }
 
-    // We're adding chrome.windows.update to make sure that the extension popup is not fullscreened
-    // There is a bug in Chrome that causes the extension popup to be fullscreened when user has any fullscreened browser window opened on the main screen
-    withErrorLog(() => chrome.windows.create({ ...POPUP_WINDOW_OPTS, url },
-      (window): void => {
-        if (window) {
-          chrome.windows.update(window.id || 0, { state: 'normal' }).catch(console.error);
-        }
-      }));
+    await openCenteredWindow({ ...POPUP_CREATE_WINDOW_DATA, url });
 
     return true;
   }

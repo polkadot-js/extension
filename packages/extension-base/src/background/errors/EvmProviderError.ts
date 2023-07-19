@@ -4,6 +4,7 @@
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { EvmProviderErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { detectTranslate } from '@subwallet/extension-base/utils';
+import { t } from 'i18next';
 
 const defaultErrorMap: Record<EvmProviderErrorType, { message: string, code?: number }> = {
   USER_REJECTED_REQUEST: {
@@ -41,7 +42,7 @@ export class EvmProviderError extends SWError {
 
   constructor (errorType: EvmProviderErrorType, errMessage?: string, data?: unknown) {
     const { code, message } = defaultErrorMap[errorType];
-    const finalMessage = errMessage ? `${message}: ${errMessage}` : message;
+    const finalMessage = errMessage || t(message || '') || errorType;
 
     super(errorType, finalMessage, code, data);
     this.errorType = errorType;

@@ -4,6 +4,7 @@
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { BalanceErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { detectTranslate } from '@subwallet/extension-base/utils';
+import { t } from 'i18next';
 
 // Todo: finish this map in the future
 const defaultErrorMap: Record<BalanceErrorType, { message: string, code?: number }> = {
@@ -30,7 +31,7 @@ export class BalanceError extends SWError {
 
   constructor (errorType: BalanceErrorType, errMessage?: string, data?: unknown) {
     const defaultErr = defaultErrorMap[errorType];
-    const message = errMessage || defaultErr?.message || errorType;
+    const message = errMessage || t(defaultErr?.message || '') || errorType;
 
     super(errorType, message, defaultErr?.code, data);
     this.errorType = errorType;

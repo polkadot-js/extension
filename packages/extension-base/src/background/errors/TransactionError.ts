@@ -4,6 +4,7 @@
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { BasicTxErrorType, StakingTxErrorType, TransactionErrorType, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { detectTranslate } from '@subwallet/extension-base/utils';
+import { t } from 'i18next';
 
 // Todo: finish this map in the future
 const defaultErrorMap = {
@@ -56,15 +57,15 @@ const defaultErrorMap = {
     code: undefined
   },
   [StakingTxErrorType.NOT_ENOUGH_MIN_STAKE]: {
-    message: detectTranslate('Not enough min stake'),
+    message: 'Not enough min stake', // Message specific to each case
     code: undefined
   },
   [StakingTxErrorType.EXCEED_MAX_NOMINATIONS]: {
-    message: detectTranslate('Exceed max nominations'),
+    message: 'Exceed max nominations', // Message specific to each case
     code: undefined
   },
   [StakingTxErrorType.EXIST_UNSTAKING_REQUEST]: {
-    message: detectTranslate('You can unstake from a collator once'),
+    message: 'Exist unstaking request', // Message specific to each case
     code: undefined
   },
   [StakingTxErrorType.INVALID_ACTIVE_STAKE]: {
@@ -72,7 +73,7 @@ const defaultErrorMap = {
     code: undefined
   },
   [StakingTxErrorType.EXCEED_MAX_UNSTAKING]: {
-    message: detectTranslate('Exceed max unstaking'),
+    message: detectTranslate('You reached the maximum number of unstake requests'),
     code: undefined
   },
   [StakingTxErrorType.INACTIVE_NOMINATION_POOL]: {
@@ -90,7 +91,7 @@ export class TransactionError extends SWError {
 
   constructor (errorType: TransactionErrorType, errMessage?: string, data?: unknown) {
     const defaultErr = defaultErrorMap[errorType];
-    const message = errMessage || defaultErr?.message || errorType;
+    const message = errMessage || t(defaultErr?.message || '') || errorType;
 
     super(errorType, message, defaultErr?.code, data);
     this.errorType = errorType;

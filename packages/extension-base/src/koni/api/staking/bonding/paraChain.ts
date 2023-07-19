@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getBondedValidators, getParaCurrentInflation, getStakingStatusByNominations, InflationConfig, isUnstakeAll, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getBondedValidators, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getParaCurrentInflation, getStakingStatusByNominations, getExistUnstakeErrorMessage, InflationConfig, isUnstakeAll, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -47,9 +47,10 @@ export function validateParaChainUnbondingCondition (amount: string, nominatorMe
   const bnChainMinStake = new BN(chainStakingMetadata.minStake || '0');
   const bnCollatorMinStake = new BN(targetNomination.validatorMinStake || '0');
   const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
+  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainStakingMetadata.chain);
 
   if (targetNomination.hasUnstaking) {
-    errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
+    errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST, existUnstakeErrorMessage));
   }
 
   if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(bnMinStake))) {
@@ -66,10 +67,13 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
   const bnChainMinStake = new BN(chainStakingMetadata.minStake || '0');
   const bnCollatorMinStake = new BN(selectedCollator.minBond || '0');
   const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
+  const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
+  const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, chainStakingMetadata.maxValidatorPerNominator);
+  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug);
 
   if (!nominatorMetadata || nominatorMetadata.status === StakingStatus.NOT_STAKING) {
     if (!bnTotalStake.gte(bnMinStake)) {
-      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
     }
 
     return errors;
@@ -80,13 +84,13 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
 
   if (!bondedValidators.includes(parsedSelectedCollatorAddress)) { // new delegation
     if (!bnTotalStake.gte(bnMinStake)) {
-      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
     }
 
     const delegationCount = nominatorMetadata.nominations.length + 1;
 
     if (delegationCount > chainStakingMetadata.maxValidatorPerNominator) {
-      errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS));
+      errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS, maxValidatorErrorMessage));
     }
   } else {
     let currentDelegationAmount = '0';
@@ -104,11 +108,11 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
     bnTotalStake = bnTotalStake.add(new BN(currentDelegationAmount));
 
     if (!bnTotalStake.gte(bnMinStake)) {
-      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
     }
 
     if (hasUnstaking) {
-      errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
+      errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST, existUnstakeErrorMessage));
     }
   }
 

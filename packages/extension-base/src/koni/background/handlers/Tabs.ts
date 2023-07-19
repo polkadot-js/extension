@@ -24,6 +24,7 @@ import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/ext
 import { KeyringPair } from '@subwallet/keyring/types';
 import keyring from '@subwallet/ui-keyring';
 import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
+import { t } from 'i18next';
 import Web3 from 'web3';
 import { HttpProvider, RequestArguments, WebsocketProvider } from 'web3-core';
 import { JsonRpcPayload } from 'web3-core-helpers';
@@ -124,7 +125,7 @@ export default class KoniTabs {
   private getSigningPair (address: string): KeyringPair {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find account');
+    assert(pair, t('Unable to find account'));
 
     return pair;
   }
@@ -438,7 +439,7 @@ export default class KoniTabs {
     }
 
     if (!input?.options?.address || !input?.options?.symbol) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Assets params require address and symbol');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Unable to get contract address and token symbol');
     }
 
     const evmState = await this.getEvmState(url);
@@ -823,7 +824,7 @@ export default class KoniTabs {
     const networkKey = evmState.networkKey;
 
     if (!canUseAccount) {
-      throw new Error('You have rescinded allowance for this account in wallet');
+      throw new Error(t('You have rescinded allowance for this account in wallet'));
     }
 
     if (!networkKey) {
@@ -929,7 +930,7 @@ export default class KoniTabs {
     }
 
     if (!input.address || !input.symbol) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Assets params require address and symbol');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Unable to get contract address and token symbol');
     }
 
     const [chain] = this.#koniState.findNetworkKeyByGenesisHash(genesisHash);

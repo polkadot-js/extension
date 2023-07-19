@@ -14,9 +14,9 @@ const useHandleSubmitTransaction = (onDone: (extrinsicHash: string) => void, set
     const { errors, id, warnings } = rs;
 
     if (errors.length || warnings.length) {
-      if (errors[0]?.message !== 'Rejected by user') {
+      if (![t('Rejected by user'), 'Rejected by user'].includes(errors[0]?.message)) {
         notify({
-          message: t(errors[0]?.message || warnings[0]?.message),
+          message: errors[0]?.message || warnings[0]?.message,
           type: errors.length ? 'error' : 'warning'
         });
       }

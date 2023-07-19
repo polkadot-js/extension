@@ -32,8 +32,7 @@ export class BalanceService {
     const chainState = this.chainService.getChainStateByKey(chain);
 
     if (!chainInfo || !chainState || !chainState.active) {
-      // TODO: Change message
-      return Promise.reject(new BalanceError(BalanceErrorType.NETWORK_ERROR, t('Chain {{chain}} is not active', { replace: { chain: chain } })));
+      return Promise.reject(new BalanceError(BalanceErrorType.NETWORK_ERROR, t('{{chain}} is inactive. Please enable network', { replace: { chain } })));
     }
 
     const tSlug = tokenSlug || _getChainNativeTokenSlug(chainInfo);
@@ -69,7 +68,7 @@ export class BalanceService {
       setTimeout(() => {
         if (hasError) {
           unsub();
-          reject(new Error('Failed to get balance. Please check your internet connection or change your network endpoint'));
+          reject(new Error(t('Failed to get balance. Please check your internet connection or change your network endpoint')));
         }
       }, 9999);
     });

@@ -7,6 +7,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 
 import { assert, BN, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
+import { t } from 'i18next';
 
 export { canDerive } from './canDerive';
 
@@ -345,7 +346,7 @@ export async function waitTimeout (ms: number) {
 }
 
 export const stripUrl = (url: string): string => {
-  assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), 'Invalid URL for provider');
+  assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), t('Invalid URL for provider'));
 
   const parts = url.split('/');
 

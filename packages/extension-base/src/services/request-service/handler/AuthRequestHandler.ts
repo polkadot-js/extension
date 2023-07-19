@@ -225,7 +225,7 @@ export default class AuthRequestHandler {
     const isDuplicate = Object.values(this.#authRequestsV2)
       .some((request) => request.idStr === idStr);
 
-    assert(!isDuplicate, `The source ${url} has a pending authorization request`);
+    assert(!isDuplicate, 'The source {{url}} has a pending authorization request'.replace('{{url}}', url));
 
     const existedAuth = authList[idStr];
     const existedAccountAuthType = existedAuth?.accountAuthType;
@@ -240,7 +240,7 @@ export default class AuthRequestHandler {
       const inBlackList = existedAuth && !existedAuth.isAllowed;
 
       if (inBlackList) {
-        throw new Error(`The source ${url} is not allowed to interact with this extension`);
+        throw new Error('The source {{url}} is not allowed to interact with this extension'.replace('{{url}}', url));
       }
 
       request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
@@ -305,14 +305,14 @@ export default class AuthRequestHandler {
         const entry = Object.keys(value).includes(idStr);
 
         if (!entry) {
-          reject(new Error(`The source ${url} has not been authorized yet`));
+          reject(new Error('The source {{url}} has not been authorized yet'.replace('{{url}}', url)));
         }
 
         const isConnected = value[idStr] && Object.keys(value[idStr].isAllowedMap)
           .some((address) => value[idStr].isAllowedMap[address]);
 
         if (!isConnected) {
-          reject(new Error(`The source ${url} is not allowed to interact with this extension`));
+          reject(new Error('The source {{url}} is not allowed to interact with this extension'.replace('{{url}}', url)));
         }
 
         resolve(true);

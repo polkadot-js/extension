@@ -106,13 +106,13 @@ const Component: React.FC<Props> = (props: Props) => {
         })
         .catch((error: Error) => {
           setValidateState({
-            message: error.message,
+            message: t(error.message),
             status: 'error'
           });
           setLoading(false);
         });
     }, 300);
-  }, [accountName, onComplete, inactiveModal]);
+  }, [accountName, onComplete, inactiveModal, t]);
 
   const { onClose, onError, onSuccess, openCamera } = useScanAccountQr(modalId, importQrScan, setValidateState, onSubmit);
 

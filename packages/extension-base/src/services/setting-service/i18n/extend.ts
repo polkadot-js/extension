@@ -3,11 +3,10 @@
 
 import { detectTranslate } from '@subwallet/extension-base/utils';
 
-export const ExternalTranslation = [
+export const ExternalTranslation: string[] = [
   detectTranslate('Invalid master password')
 ];
 
-export const InternalTranslation = [
-  detectTranslate('Unable to proceed. Please try again'),
-  detectTranslate('Rejected')
+export const InternalTranslation: string[] = [
+
 ];

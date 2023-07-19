@@ -14,6 +14,7 @@ export default function useNotification (): (props: NotificationProps) => void {
   return useCallback((props: NotificationProps) => {
     showNotification({
       key,
+      closable: true,
       ...props
     });
   }, [key, showNotification]);

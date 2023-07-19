@@ -15,10 +15,13 @@ import { AccountExternalError, AccountsWithCurrentAddress, AllLogoMap, AmountDat
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { createRegistry } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
+import { findChainInfoByGenesisHash } from '@subwallet/extension-koni-ui/utils';
 
 import { _getKnownHashes, _getKnownNetworks } from './utils/chain/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -327,6 +330,42 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   }
 
   return null;
+}
+
+export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, genesisHash?: string | null): Promise<Chain | null> {
+  if (!genesisHash) {
+    return null;
+  }
+
+  const { rawMetadata, specVersion } = await sendMessage('pri(metadata.find)', { genesisHash });
+
+  if (!rawMetadata) {
+    return null;
+  }
+
+  const chainInfo = findChainInfoByGenesisHash(chainInfoMap, genesisHash);
+
+  if (!chainInfo) {
+    return null;
+  }
+
+  const registry = createRegistry(chainInfo, rawMetadata as HexString);
+
+  const tokenInfo = _getChainNativeTokenBasicInfo(chainInfo);
+
+  return {
+    specVersion,
+    genesisHash,
+    name: chainInfo.name,
+    hasMetadata: true,
+    definition: {} as MetadataDef,
+    icon: chainInfo.icon,
+    registry: registry,
+    isUnknown: false,
+    ss58Format: chainInfo.substrateInfo?.addressPrefix || 42,
+    tokenDecimals: tokenInfo.decimals,
+    tokenSymbol: tokenInfo.symbol
+  };
 }
 
 export async function getChainMetadata (genesisHash?: string | null): Promise<Chain | null> {

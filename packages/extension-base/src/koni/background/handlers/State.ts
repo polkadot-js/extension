@@ -2016,4 +2016,14 @@ export default class KoniState {
   public subscribeMantaPaySyncState () {
     return this.chainService.mantaPay.subscribeSyncState();
   }
+
+  // Metadata
+  public async findMetadata (hash: string) {
+    const metadata = await this.chainService.getMetadataByHash(hash);
+
+    return {
+      metadata: metadata?.hexValue || '',
+      specVersion: parseInt(metadata?.specVersion || '0')
+    };
+  }
 }

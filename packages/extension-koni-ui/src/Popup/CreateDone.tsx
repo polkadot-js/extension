@@ -4,9 +4,9 @@
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, PageIcon } from '@subwallet/react-ui';
+import { Button, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowCircleRight, CheckCircle, X } from 'phosphor-react';
+import { ArrowCircleRight, CheckCircle, Wallet, X } from 'phosphor-react';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -84,6 +84,23 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Follow along with product updates or reach out if you have any questions.')}
         </div>
         <SocialButtonGroup />
+
+        <div className={'__button-wrapper'}>
+          <Button
+            block={true}
+            className={'__button'}
+            icon={(
+              <Icon
+                phosphorIcon={Wallet}
+                weight='fill'
+              />
+            )}
+            onClick={goHome}
+            schema={'primary'}
+          >
+            {t('Go to portfolio')}
+          </Button>
+        </div>
       </div>
     </Layout.Base>
   );
@@ -126,6 +143,10 @@ const CreateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '&.__web-ui': {
         padding: `0 ${token.controlHeightLG}px`
       }
+    },
+
+    '.__button-wrapper': {
+      paddingTop: 64
     }
   };
 });

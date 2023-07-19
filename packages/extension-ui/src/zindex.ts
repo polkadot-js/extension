@@ -7,10 +7,13 @@ export const Z_INDEX = {
   ADD_ACCOUNT_FOREGROUND: 100,
   BOTTOM_WRAPPER: 100,
   DROPDOWN: 100,
-  HEADER: 100,
+  // Header have to have higher z-index than HEADER_STEPS.
+  // Otherwise help / settings tooltip hides under steps.
+  HEADER: 101,
+  HEADER_STEPS: 100,
   MENU: 2,
   SPLASH_HEADER: 105,
-  TOAST: 100,
+  TOAST: 102,
   TOOLTIP: 99,
   NEW_ACCOUNT_RIBBON: 99
 };

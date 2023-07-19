@@ -37,7 +37,7 @@ export const Steps = styled.div`
   justify-content: center;
   gap: 8px;
   position: sticky;
-  z-index: ${Z_INDEX.HEADER};
+  z-index: ${Z_INDEX.HEADER_STEPS};
   top: 56px;
 
   :first-child {
@@ -49,12 +49,7 @@ export const Steps = styled.div`
   }
 `;
 
-function HeaderWithSteps({
-  step,
-  text,
-  total,
-  withBackArrow = false,
-}: Props): React.ReactElement<Props> {
+function HeaderWithSteps({ step, text, total, withBackArrow = false }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header

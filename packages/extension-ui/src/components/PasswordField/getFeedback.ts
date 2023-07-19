@@ -9,6 +9,8 @@ export type ValidationResult = {
   suggestions: Array<string>;
 };
 
+const INAPPROPRIATE_SUGGESTION = 'No need for symbols, digits, or uppercase letters.';
+
 const LOWEST_ACCEPTED_PASSWORD_SCORE = 3;
 
 const APP_RELATED_INPUTS = ['aleph', 'zero', 'aleph zero', 'signer'];
@@ -48,7 +50,9 @@ const zxcvbnResultAdapter = (password: string, userInputs?: string[]): Validatio
   return {
     score,
     warning: addPunctuationIfMissing(warning),
-    suggestions: suggestions.map(addPunctuationIfMissing)
+    suggestions: suggestions
+      .map(addPunctuationIfMissing)
+      .filter((suggestion) => suggestion !== INAPPROPRIATE_SUGGESTION)
   };
 };
 

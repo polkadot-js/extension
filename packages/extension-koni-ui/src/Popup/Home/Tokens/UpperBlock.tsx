@@ -39,15 +39,23 @@ function Component (
 
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
-      <Number
-        className={'__total-balance-value'}
-        decimal={0}
-        decimalOpacity={0.45}
-        prefix='$'
-        size={38}
-        subFloatNumber
-        value={totalValue}
-      />
+      <div className='__total-balance-value-container'>
+        <div
+          className='__total-balance-value-content'
+          onClick={isShrink ? onChangeShowBalance : undefined}
+        >
+          <Number
+            className={'__total-balance-value'}
+            decimal={0}
+            decimalOpacity={0.45}
+            hide={!isShowBalance}
+            prefix='$'
+            size={38}
+            subFloatNumber
+            value={totalValue}
+          />
+        </div>
+      </div>
       {!isShrink && (
         <div className={'__balance-change-container'}>
           <Button
@@ -65,6 +73,7 @@ function Component (
             className={'__balance-change-value'}
             decimal={0}
             decimalOpacity={1}
+            hide={!isShowBalance}
             prefix={isPriceDecrease ? '- $' : '+ $'}
             value={totalChangeValue}
           />
@@ -99,11 +108,13 @@ function Component (
         />
         <div className={'__button-space'} />
         <Button
-          icon={<Icon
-            phosphorIcon={PaperPlaneTilt}
-            size={isShrink ? 'sm' : 'md' }
-            weight={'duotone'}
-          />}
+          icon={(
+            <Icon
+              phosphorIcon={PaperPlaneTilt}
+              size={isShrink ? 'sm' : 'md' }
+              weight={'duotone'}
+            />
+          )}
           onClick={onOpenSendFund}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
@@ -207,13 +218,21 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
       paddingBottom: 32,
       flexDirection: 'row',
 
+      '.__total-balance-value-container': {
+        flex: 1
+      },
+
+      '.__total-balance-value-content': {
+        cursor: 'pointer',
+        width: 'fit-content'
+      },
+
       '.__total-balance-value': {
         textAlign: 'left',
         lineHeight: token.lineHeightHeading2,
         fontSize: token.fontSizeHeading2,
-        flex: 1,
 
-        '.ant-number-prefix, .ant-number-integer': {
+        '.ant-number-prefix, .ant-number-integer, .ant-number-hide-content': {
           fontSize: 'inherit !important'
         }
       },

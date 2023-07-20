@@ -11,14 +11,17 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountExternalError, AccountsWithCurrentAddress, AllLogoMap, AmountData, AssetSettingUpdateReq, BalanceJson, BrowserConfirmationType, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, KeyringState, MantaPayConfig, MantaPayEnableParams, MantaPaySyncState, NftCollection, NftJson, NftTransactionRequest, NominationPoolInfo, NominatorMetadata, Notification, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestApproveConnectWalletSession, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestChangeMasterPassword, RequestConnectWalletConnect, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectConnectWalletSession, RequestResetWallet, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseResetWallet, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, UiSettings, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountsWithCurrentAddress, AllLogoMap, AmountData, AssetSettingUpdateReq, BalanceJson, BrowserConfirmationType, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, KeyringState, LanguageType, MantaPayConfig, MantaPayEnableParams, MantaPaySyncState, NftCollection, NftJson, NftTransactionRequest, NominationPoolInfo, NominatorMetadata, Notification, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestApproveConnectWalletSession, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestChangeMasterPassword, RequestConnectWalletConnect, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectConnectWalletSession, RequestResetWallet, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseResetWallet, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, UiSettings, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { createRegistry } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
+import { findChainInfoByGenesisHash } from '@subwallet/extension-koni-ui/utils';
 
 import { _getKnownHashes, _getKnownNetworks } from './utils/chain/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -157,16 +160,16 @@ export async function saveAccountAllLogo (accountAllLogo: string, callback: (dat
   return sendMessage('pri(settings.saveAccountAllLogo)', accountAllLogo, callback);
 }
 
-export async function saveBrowserConfirmationType (type: BrowserConfirmationType, callback: (data: RequestSettingsType) => void): Promise<boolean> {
-  return sendMessage('pri(settings.saveBrowserConfirmationType)', type, callback);
+export async function saveBrowserConfirmationType (type: BrowserConfirmationType): Promise<boolean> {
+  return sendMessage('pri(settings.saveBrowserConfirmationType)', type);
 }
 
 export async function saveCameraSetting (value: boolean): Promise<boolean> {
   return sendMessage('pri(settings.saveCamera)', { camera: value });
 }
 
-export async function saveTheme (theme: ThemeNames, callback: (data: RequestSettingsType) => void): Promise<boolean> {
-  return sendMessage('pri(settings.saveTheme)', theme, callback);
+export async function saveTheme (theme: ThemeNames): Promise<boolean> {
+  return sendMessage('pri(settings.saveTheme)', theme);
 }
 
 export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: UiSettings) => void): Promise<UiSettings> {
@@ -179,6 +182,14 @@ export async function saveAutoLockTime (value: number): Promise<boolean> {
 
 export async function saveEnableChainPatrol (value: boolean): Promise<boolean> {
   return sendMessage('pri(settings.saveEnableChainPatrol)', { enable: value });
+}
+
+export async function saveLanguage (lang: LanguageType): Promise<boolean> {
+  return sendMessage('pri(settings.saveLanguage)', { language: lang });
+}
+
+export async function saveShowZeroBalance (show: boolean): Promise<boolean> {
+  return sendMessage('pri(settings.saveShowZeroBalance)', { show });
 }
 
 export async function saveShowBalance (value: boolean): Promise<boolean> {
@@ -323,6 +334,42 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   }
 
   return null;
+}
+
+export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, genesisHash?: string | null): Promise<Chain | null> {
+  if (!genesisHash) {
+    return null;
+  }
+
+  const { rawMetadata, specVersion } = await sendMessage('pri(metadata.find)', { genesisHash });
+
+  if (!rawMetadata) {
+    return null;
+  }
+
+  const chainInfo = findChainInfoByGenesisHash(chainInfoMap, genesisHash);
+
+  if (!chainInfo) {
+    return null;
+  }
+
+  const registry = createRegistry(chainInfo, rawMetadata as HexString);
+
+  const tokenInfo = _getChainNativeTokenBasicInfo(chainInfo);
+
+  return {
+    specVersion,
+    genesisHash,
+    name: chainInfo.name,
+    hasMetadata: true,
+    definition: {} as MetadataDef,
+    icon: chainInfo.icon,
+    registry: registry,
+    isUnknown: false,
+    ss58Format: chainInfo.substrateInfo?.addressPrefix || 42,
+    tokenDecimals: tokenInfo.decimals,
+    tokenSymbol: tokenInfo.symbol
+  };
 }
 
 export async function getChainMetadata (genesisHash?: string | null): Promise<Chain | null> {

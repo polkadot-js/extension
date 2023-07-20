@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## 1.1.2
+Build date: Jul 14, 2023.
+
+Features & Update:
+- Integrate Land/Estate NFT on Pioneer's metaverses (#1335)
+- Add Staking Support For Pendulum (#1595)
+- Support language: Vietnamese, Chinese (#1630)
+- Update QR code style for transaction with QR-signer account (#1418)
+- Support camera for WalletConnect (#1627)
+- Implement reload button on the Staking screen (#1545)
+- Improve calculation of withdrawal time (#1585)
+- Updated the criteria's icon on the Sorting pool/validator/collator/dApp screen (#1634)
+
+Bugs fixed:
+- Fixed bug Show incorrect earning reward status on All accounts mode (#1456)
+- Fixed bug Show incorrect withdrawal amount in case have multiple withdrawal requests (#1557)
+- Fixed Deprecate nominator controller accounts on some chains (#1350)
+- Fixed bug Still showing NFTs that have been sent (#1615)
+- Fixed sync configuration between expand view and popup view (#1243)
+- Fixed bug QR scanner not found (#1253)
+- Fixed UI bugs (#1548, #1507)
+
+Update chainlist (#1620)
+- Add support for Gemini 3e
+- Update price ID for JOY
+- Integrate Fantom network
+- Add support for USDT, DOT on Pendulum
+- Update XCM for Acala
+
 ## 1.1.1
 Build date: Jul 06, 2023.
 

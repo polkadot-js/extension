@@ -3,8 +3,9 @@
 
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { HistoryStatusMap, TxTypeNameMap } from '@subwallet/extension-koni-ui/constants';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate, toShort } from '@subwallet/extension-koni-ui/utils';
+import { formatHistoryDate, toShort } from '@subwallet/extension-koni-ui/utils';
 import CN from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
 
+  const { language } = useSelector((state) => state.settings);
+
   return (
     <MetaInfo className={CN(className)}>
       <MetaInfo.DisplayType
@@ -37,7 +40,7 @@ const Component: React.FC<Props> = (props: Props) => {
         valueColorSchema={HistoryStatusMap[data.status].schema}
       />
       <MetaInfo.Default label={t('Extrinsic hash')}>{(data.extrinsicHash || '').startsWith('0x') ? toShort(data.extrinsicHash, 8, 9) : '...'}</MetaInfo.Default>
-      <MetaInfo.Default label={t('Transaction time')}>{customFormatDate(data.time, '#hhhh#:#mm# - #MMM# #DD#, #YYYY#')}</MetaInfo.Default>
+      <MetaInfo.Default label={t('Transaction time')}>{formatHistoryDate(data.time, language, 'detail')}</MetaInfo.Default>
       <HistoryDetailAmount data={data} />
       <HistoryDetailFee data={data} />
     </MetaInfo>

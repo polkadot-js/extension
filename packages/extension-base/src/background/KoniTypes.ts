@@ -403,7 +403,9 @@ export type LanguageType = 'en'
 |'tr'
 |'pl'
 |'th'
-|'ur';
+|'ur'
+|'vi'
+|'ja';
 
 export type LanguageOptionType = {
   text: string;
@@ -413,9 +415,9 @@ export type LanguageOptionType = {
 export type BrowserConfirmationType = 'extension'|'popup'|'window';
 
 export interface UiSettings {
-  // language: LanguageType,
+  language: LanguageType,
   browserConfirmationType: BrowserConfirmationType;
-  // isShowZeroBalance: boolean,
+  isShowZeroBalance: boolean;
   isShowBalance: boolean;
   accountAllLogo: string;
   theme: ThemeNames;
@@ -431,6 +433,10 @@ export type RequestCameraSettings = { camera: boolean };
 export type RequestChangeTimeAutoLock = { autoLockTime: number };
 
 export type RequestChangeEnableChainPatrol = { enable: boolean };
+
+export type RequestChangeShowZeroBalance = { show: boolean };
+
+export type RequestChangeLanguage = { language: LanguageType };
 
 export type RequestChangeShowBalance = { enable: boolean };
 
@@ -1960,6 +1966,16 @@ export interface MantaPayEnableResponse {
   message: MantaPayEnableMessage
 }
 
+/// Metadata
+export interface RequestFindRawMetadata {
+  genesisHash: string;
+}
+
+export interface ResponseFindRawMetadata {
+  rawMetadata: string;
+  specVersion: number;
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -2076,13 +2092,15 @@ export interface KoniRequestSignatures {
   // Settings
   'pri(settings.changeBalancesVisibility)': [null, boolean];
   'pri(settings.subscribe)': [null, UiSettings, UiSettings];
+  'pri(settings.getLogoMaps)': [null, AllLogoMap];
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
-  'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
-  'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
+  'pri(settings.saveTheme)': [ThemeNames, boolean];
+  'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
   'pri(settings.saveAutoLockTime)': [RequestChangeTimeAutoLock, boolean];
   'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
-  'pri(settings.getLogoMaps)': [null, AllLogoMap];
+  'pri(settings.saveLanguage)': [RequestChangeLanguage, boolean];
+  'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
   'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
 
   // Subscription
@@ -2187,6 +2205,9 @@ export interface KoniRequestSignatures {
   'pri(walletConnect.session.reconnect)': [RequestReconnectConnectWalletSession, boolean];
   'pri(walletConnect.session.subscribe)': [null, SessionTypes.Struct[], SessionTypes.Struct[]];
   'pri(walletConnect.session.disconnect)': [RequestDisconnectWalletConnectSession, boolean];
+
+  /// Metadata
+  'pri(metadata.find)': [RequestFindRawMetadata, ResponseFindRawMetadata];
 }
 
 export interface ApplicationMetadataType {

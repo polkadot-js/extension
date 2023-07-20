@@ -355,3 +355,5 @@ export const stripUrl = (url: string): string => {
 export * from './array';
 export * from './environment';
 export * from './lazy';
+export * from './registry';
+export * from './translate';

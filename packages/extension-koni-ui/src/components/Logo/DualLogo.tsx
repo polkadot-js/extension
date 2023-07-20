@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
-import LogoWithSquircleBorder from '@subwallet/extension-koni-ui/components/Logo/LogoWithSquircleBorder';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowsLeftRight } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
+
+import Logo2D from './Logo2D';
+import LogoWithSquircleBorder from './LogoWithSquircleBorder';
 
 interface Props extends ThemeProps {
   leftLogo?: React.ReactNode;

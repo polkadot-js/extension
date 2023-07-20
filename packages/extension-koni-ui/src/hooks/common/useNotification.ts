@@ -2,25 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NotificationContext, NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
-import React, { useCallback, useContext, useMemo, useRef } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 
 export default function useNotification (): (props: NotificationProps) => void {
   const { showNotification } = useContext(NotificationContext);
-
-  const timeoutRef = useRef<NodeJS.Timer>();
 
   const key = useMemo((): React.Key => {
     return Date.now();
   }, []);
 
   return useCallback((props: NotificationProps) => {
-    clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      showNotification({
-        key,
-        closable: true,
-        ...props
-      });
-    }, 100);
+    showNotification({
+      key,
+      closable: true,
+      duration: 3,
+      ...props
+    });
   }, [key, showNotification]);
 }

@@ -2626,7 +2626,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google/model-viewer@npm:^3.1.1":
+"@google/model-viewer@npm:3.1.1":
   version: 3.1.1
   resolution: "@google/model-viewer@npm:3.1.1"
   dependencies:
@@ -5997,7 +5997,7 @@ __metadata:
     "@subwallet/extension-inject": ^1.1.2-1
     "@subwallet/extension-mocks": ^1.1.2-1
     "@subwallet/keyring": ^0.0.10
-    "@subwallet/react-ui": 5.1.2-b66
+    "@subwallet/react-ui": 5.1.2-b67
     "@subwallet/ui-keyring": ^0.0.10
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6108,9 +6108,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b66":
-  version: 5.1.2-b66
-  resolution: "@subwallet/react-ui@npm:5.1.2-b66"
+"@subwallet/react-ui@npm:5.1.2-b67":
+  version: 5.1.2-b67
+  resolution: "@subwallet/react-ui@npm:5.1.2-b67"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6122,12 +6122,12 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^6.2.1
     "@fortawesome/free-solid-svg-icons": ^6.2.1
     "@fortawesome/react-fontawesome": ^0.2.0
-    "@google/model-viewer": ^3.1.1
+    "@google/model-viewer": 3.1.1
     "@polkadot/react-identicon": ^2.9.14
     "@polkadot/util-crypto": ^11.1.1
     "@rc-component/tour": ~1.1.0
-    "@zxing/browser": ^0.1.1
-    "@zxing/library": ^0.19.1
+    "@zxing/browser": 0.1.1
+    "@zxing/library": 0.19.1
     bignumber.js: ^9.1.1
     boring-avatars: ^1.7.0
     classnames: ^2.2.6
@@ -6177,12 +6177,12 @@ __metadata:
     react-superellipse: ^0.0.6
     react-toastify: ^9.1.1
     scroll-into-view-if-needed: ^3.0.3
-    three: 0.152.2
+    three: ^0.151.2
     throttle-debounce: ^5.0.0
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: c35d93c074a7cf662882316029e51f145b26fefdf4e8fa6f39a15fa4e135e45418badd592c6d51b166b80004d86e1a611e7d8ff483699d548d91954cb5d5ece3
+  checksum: 26c6df70dce6e8d7b6a778a66730482b8afb1630fb8b5598493a0c3a1a18612214b632546d55aaff5ab74196af9039a3634dd5b0160cf6e43bc9d65bb0db3ae2
   languageName: node
   linkType: hard
 
@@ -7919,7 +7919,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zxing/browser@npm:^0.1.1":
+"@zxing/browser@npm:0.1.1":
   version: 0.1.1
   resolution: "@zxing/browser@npm:0.1.1"
   dependencies:
@@ -7933,6 +7933,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@zxing/library@npm:0.19.1":
+  version: 0.19.1
+  resolution: "@zxing/library@npm:0.19.1"
+  dependencies:
+    "@zxing/text-encoding": ~0.9.0
+    ts-custom-error: ^3.0.0
+  dependenciesMeta:
+    "@zxing/text-encoding":
+      optional: true
+  checksum: ed650e4afc74560950efad3d1479f4bcd9878b6baadd4ac9280cec45bdbeba957bb1185cde7858e49493b3f0052d25bd0be3a1c277433e4e09e1f29018aec2f3
+  languageName: node
+  linkType: hard
+
 "@zxing/library@npm:^0.18.3":
   version: 0.18.6
   resolution: "@zxing/library@npm:0.18.6"
@@ -7943,19 +7956,6 @@ __metadata:
     "@zxing/text-encoding":
       optional: true
   checksum: 564a25f6245b4fd81b4ce686116bf1fe577daa2aaee4263b4dea3776676482fd3e063ad43783c6378713a4a3dcefd311b6154b6cd43e7be24bb7e7c3e5fec98a
-  languageName: node
-  linkType: hard
-
-"@zxing/library@npm:^0.19.1":
-  version: 0.19.2
-  resolution: "@zxing/library@npm:0.19.2"
-  dependencies:
-    "@zxing/text-encoding": ~0.9.0
-    ts-custom-error: ^3.0.0
-  dependenciesMeta:
-    "@zxing/text-encoding":
-      optional: true
-  checksum: 080e4780135d1b424f7fe6fe5d6c168c16f0dfa165ba546e66de738947421aba13ff62de105b721198cb58db77a0a9c377774baf75a169f4f412360f1c3898bf
   languageName: node
   linkType: hard
 
@@ -23462,10 +23462,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:0.152.2":
-  version: 0.152.2
-  resolution: "three@npm:0.152.2"
-  checksum: 6d2d990dbff60b99c7e58b7f1446bb4bd235c7db5dd848a671385e01ae5c72bec865265be7f5a82907ecc96186acc13177d7de1252bc9592f5c9ebaffd1da1e7
+"three@npm:^0.151.2":
+  version: 0.151.3
+  resolution: "three@npm:0.151.3"
+  checksum: cb6f10e4e409bbc4677d2128470c4e0bdb29f7879a77bc800180e30bda3527816c45b47ac10228f346cfc7501234457f63a87c1bdd5c3b6e2841d523e5d6eb79
   languageName: node
   linkType: hard
 

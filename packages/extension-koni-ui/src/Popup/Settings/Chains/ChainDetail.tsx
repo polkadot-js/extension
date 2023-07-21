@@ -280,7 +280,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           ),
           loading: loading,
           onClick: onSubmit,
-          children: 'Save'
+          children: t('Save')
         }}
         showBackButton={true}
         showSubHeader={true}

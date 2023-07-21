@@ -129,7 +129,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (changed) {
           setValidateState({
             status: 'error',
-            message: 'Private key is required'
+            message: t('Private key is required')
           });
         }
       }
@@ -138,7 +138,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     return () => {
       amount = false;
     };
-  }, [privateKey, form, changed]);
+  }, [privateKey, form, changed, t]);
 
   const onValuesChange: FormCallbacks<FormState>['onValuesChange'] = useCallback((changedValues: Partial<FormState>) => {
     if (fieldName in changedValues) {

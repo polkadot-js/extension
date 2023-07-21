@@ -1,13 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { useNotification } from '@subwallet/extension-koni-ui/hooks';
+import { useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks/common';
 import { ModalContext } from '@subwallet/react-ui';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 
-export function useSelectValidators (modalId: string, maxCount: number, onChange?: BasicOnChangeFunction, isSingleSelect?: boolean) {
+export function useSelectValidators (modalId: string, chain: string, maxCount: number, onChange?: BasicOnChangeFunction, isSingleSelect?: boolean) {
   const notify = useNotification();
+  const { t } = useTranslation();
 
   // Current nominated at init
   const [defaultSelected, setDefaultSelected] = useState<string[]>([]);
@@ -16,6 +19,32 @@ export function useSelectValidators (modalId: string, maxCount: number, onChange
   // Current chosen in modal
   const [changeValidators, setChangeValidators] = useState<string[]>([]);
   const { inactiveModal } = useContext(ModalContext);
+
+  const fewValidators = maxCount > 1;
+
+  const notiMessage = useMemo(() => {
+    const label = getValidatorLabel(chain);
+
+    if (!fewValidators) {
+      switch (label) {
+        case 'dApp':
+          return detectTranslate('You can only choose {{number}} dApp');
+        case 'Collator':
+          return detectTranslate('You can only choose {{number}} collator');
+        case 'Validator':
+          return detectTranslate('You can only choose {{number}} validator');
+      }
+    } else {
+      switch (label) {
+        case 'dApp':
+          return detectTranslate('You can only choose {{number}} dApps');
+        case 'Collator':
+          return detectTranslate('You can only choose {{number}} collators');
+        case 'Validator':
+          return detectTranslate('You can only choose {{number}} validators');
+      }
+    }
+  }, [chain, fewValidators]);
 
   const onChangeSelectedValidator = useCallback((changeVal: string) => {
     setChangeValidators((changeValidators) => {
@@ -26,7 +55,7 @@ export function useSelectValidators (modalId: string, maxCount: number, onChange
           if (defaultSelected.length >= maxCount) {
             if (!defaultSelected.includes(changeVal)) {
               notify({
-                message: `You can only choose ${maxCount} validators`,
+                message: t(notiMessage, { replace: { number: maxCount } }),
                 type: 'info'
               });
 
@@ -38,7 +67,7 @@ export function useSelectValidators (modalId: string, maxCount: number, onChange
         } else {
           if (changeValidators.length >= maxCount) {
             notify({
-              message: `You can only choose ${maxCount} validators`,
+              message: t(notiMessage, { replace: { number: maxCount } }),
               type: 'info'
             });
 
@@ -57,7 +86,7 @@ export function useSelectValidators (modalId: string, maxCount: number, onChange
 
       return result;
     });
-  }, [defaultSelected, isSingleSelect, maxCount, notify]);
+  }, [notiMessage, defaultSelected, isSingleSelect, maxCount, notify, t]);
 
   const onApplyChangeValidators = useCallback(() => {
     onChange && onChange({ target: { value: changeValidators.join(',') } });

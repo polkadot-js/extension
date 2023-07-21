@@ -76,7 +76,7 @@ const Component: React.FC<Props> = (props: Props) => {
           name={'password'}
           rules={[
             {
-              message: 'Password is required',
+              message: t('Password is required'),
               required: true
             }
           ]}

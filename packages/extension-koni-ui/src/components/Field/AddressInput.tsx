@@ -269,7 +269,23 @@ export const AddressInput = styled(forwardRef(Component))<Props>(({ theme: { tok
       pointerEvents: 'none'
     },
 
-    '&:has(input:focus), &.-status-error': {
+    '&.-status-error': {
+      '.__overlay': {
+        pointerEvents: 'none',
+        opacity: 0
+      }
+    },
+
+    // Not support firefox
+    '&:has(input:focus)': {
+      '.__overlay': {
+        pointerEvents: 'none',
+        opacity: 0
+      }
+    },
+
+    // Support firefox
+    '.ant-input-affix-wrapper-focused': {
       '.__overlay': {
         pointerEvents: 'none',
         opacity: 0

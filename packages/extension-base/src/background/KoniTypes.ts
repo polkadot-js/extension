@@ -42,6 +42,13 @@ export interface RuntimeEnvironmentInfo {
   protocol?: string;
 }
 
+export type TargetEnvironment = 'extension' | 'webapp' | 'web-runner';
+
+export interface EnvironmentSupport {
+  MANTA_ZK: boolean;
+  CORS: boolean;
+}
+
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
   chainStateMap: Record<string, _ChainState>;
@@ -403,7 +410,9 @@ export type LanguageType = 'en'
 |'tr'
 |'pl'
 |'th'
-|'ur';
+|'ur'
+|'vi'
+|'ja';
 
 export type LanguageOptionType = {
   text: string;
@@ -1962,6 +1971,16 @@ export interface MantaPayEnableResponse {
   message: MantaPayEnableMessage
 }
 
+/// Metadata
+export interface RequestFindRawMetadata {
+  genesisHash: string;
+}
+
+export interface ResponseFindRawMetadata {
+  rawMetadata: string;
+  specVersion: number;
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -2190,6 +2209,9 @@ export interface KoniRequestSignatures {
   'pri(walletConnect.session.reconnect)': [RequestReconnectConnectWalletSession, boolean];
   'pri(walletConnect.session.subscribe)': [null, SessionTypes.Struct[], SessionTypes.Struct[]];
   'pri(walletConnect.session.disconnect)': [RequestDisconnectWalletConnectSession, boolean];
+
+  /// Metadata
+  'pri(metadata.find)': [RequestFindRawMetadata, ResponseFindRawMetadata];
 }
 
 export interface ApplicationMetadataType {

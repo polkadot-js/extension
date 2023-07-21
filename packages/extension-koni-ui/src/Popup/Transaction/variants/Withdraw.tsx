@@ -3,7 +3,7 @@
 
 import { ExtrinsicType, RequestStakeWithdrawal, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { getCompoundWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
+import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
@@ -52,7 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const unstakingInfo = useMemo((): UnstakingInfo | undefined => {
     if (from && !isAccountAll(from)) {
       if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain)) {
-        return getCompoundWithdrawable(nominatorMetadata);
+        return getAstarWithdrawable(nominatorMetadata);
       }
 
       return nominatorMetadata.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE)[0];

@@ -69,7 +69,7 @@ function Component (props: Props): React.ReactElement<Props> {
 
 const Simple = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   width: '100%',
-  padding: '24px 24px 50px',
+  padding: '24px 24px 48px',
 
   '.__box': {
     position: 'relative',

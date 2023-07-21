@@ -118,7 +118,6 @@ const CreateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.page-icon': {
       display: 'flex',
       justifyContent: 'center',
-      marginTop: token.controlHeightLG,
       marginBottom: token.margin,
       '--page-icon-color': token.colorSecondary
     },

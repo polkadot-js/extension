@@ -13,7 +13,6 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { AccountExternalError, AccountsWithCurrentAddress, AllLogoMap, AmountData, AssetSettingUpdateReq, BalanceJson, BrowserConfirmationType, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, KeyringState, NftCollection, NftJson, NftTransactionRequest, NominationPoolInfo, NominatorMetadata, Notification, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestApproveConnectWalletSession, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestChangeMasterPassword, RequestConnectWalletConnect, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectConnectWalletSession, RequestResetWallet, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseResetWallet, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, UiSettings, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
-import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -74,6 +73,7 @@ port.addEventListener('message', (event: Message) => {
   }
 
   // delete handlers if handler don't include subscriber with event from BACKGROUND
+  // @ts-ignore
   if (!handler.subscriber && data.sender === 'BACKGROUND') {
     delete handlers[data.id];
   }
@@ -82,6 +82,7 @@ port.addEventListener('message', (event: Message) => {
     // eslint-disable-next-line @typescript-eslint/ban-types
     (handler.subscriber as Function)(data.subscription);
   } else {
+    // @ts-ignore
     if (data.sender === 'BACKGROUND') {
       // if (!handler.subscriber) {
       //   delete handlers[data.id]

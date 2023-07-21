@@ -50,10 +50,11 @@ const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
   const { slug: tokenGroupSlug } = useParams();
-  const outletContext: {
-    searchInput: string,
+  const OutletContext: {
     setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
   } = useOutletContext();
+
+  const setDetailTitle = OutletContext?.setDetailTitle;
 
   const notify = useNotification();
   const { t } = useTranslation();
@@ -263,9 +264,13 @@ function Component (): React.ReactElement {
     };
   }, [handleResize]);
 
+  const detailTitle = useMemo(() => {
+    return <div className='header-content'>{t('Token')}: {symbol}</div>;
+  }, [symbol, t]);
+
   useEffect(() => {
-    outletContext?.setDetailTitle(<div className='header-content'>{t('Token')}: {symbol}</div>);
-  }, [outletContext, symbol, t]);
+    setDetailTitle?.(detailTitle);
+  }, [detailTitle, setDetailTitle]);
 
   const itemClickAction = useCallback((item: TokenBalanceItemType) => {
     return () => {
@@ -388,21 +393,27 @@ function Component (): React.ReactElement {
         tokenBalanceMap={tokenBalanceMap}
       />
 
-      <AccountSelectorModal
-        items={accountSelectorItems}
-        onSelectItem={openSelectAccount}
-      />
+      {
+        !isWebUI && (
+          <>
+            <AccountSelectorModal
+              items={accountSelectorItems}
+              onSelectItem={openSelectAccount}
+            />
 
-      <TokensSelectorModal
-        address={selectedAccount}
-        items={tokenSelectorItems}
-        onSelectItem={openSelectToken}
-      />
+            <TokensSelectorModal
+              address={selectedAccount}
+              items={tokenSelectorItems}
+              onSelectItem={openSelectToken}
+            />
 
-      <ReceiveQrModal
-        address={selectedAccount}
-        selectedNetwork={selectedNetwork}
-      />
+            <ReceiveQrModal
+              address={selectedAccount}
+              selectedNetwork={selectedNetwork}
+            />
+          </>
+        )
+      }
     </div>
   );
 }

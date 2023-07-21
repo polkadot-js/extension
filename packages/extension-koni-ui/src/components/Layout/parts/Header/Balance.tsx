@@ -13,8 +13,9 @@ import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Divider, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowFatLinesDown, Eye, EyeClosed, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 const TRANSFER_FUND_MODAL = 'transfer-fund-modal';
@@ -48,6 +49,19 @@ const actions: Action[] = [
 ];
 
 function Component ({ className }: Props): React.ReactElement<Props> {
+  const locationPathname = useLocation().pathname;
+  const tokenGroupSlug = useParams()?.slug;
+
+  const _tokenGroupSlug = useMemo(() => {
+    if (locationPathname && tokenGroupSlug) {
+      if (locationPathname.includes('/home/tokens/detail/')) {
+        return tokenGroupSlug;
+      }
+    }
+
+    return undefined;
+  }, [locationPathname, tokenGroupSlug]);
+
   const [displayBalance, setDisplayBalance] = useState<boolean>(true);
 
   const handleDisplayBalance = useCallback(() => setDisplayBalance(!displayBalance), [displayBalance]);
@@ -61,7 +75,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     openSelectToken,
     selectedAccount,
     selectedNetwork,
-    tokenSelectorItems } = useReceiveQR();
+    tokenSelectorItems } = useReceiveQR(_tokenGroupSlug);
 
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const notify = useNotification();

@@ -15,7 +15,7 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
-import { isMobile } from '@subwallet/extension-base/utils';
+import { MODULE_SUPPORT } from '@subwallet/extension-base/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
@@ -65,7 +65,7 @@ export class ChainService {
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
     this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
 
-    if (!isMobile) {
+    if (MODULE_SUPPORT.MANTA_ZK) {
       console.log('Init Manta ZK');
       this.mantaChainHandler = new MantaPrivateHandler(dbService);
     }
@@ -543,7 +543,7 @@ export class ChainService {
     };
 
     if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
-      if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && !isMobile && this.mantaChainHandler) {
+      if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && MODULE_SUPPORT.MANTA_ZK && this.mantaChainHandler) {
         const apiPromise = await this.mantaChainHandler?.initMantaPay(endpoint, chainInfo.slug);
         const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, externalApiPromise: apiPromise, onUpdateStatus });
 

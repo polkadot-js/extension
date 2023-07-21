@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { OSType, EnvironmentSupport, RuntimeEnvironment, RuntimeEnvironmentInfo, TargetEnvironment } from '../background/KoniTypes';
+import { EnvironmentSupport, OSType, RuntimeEnvironment, RuntimeEnvironmentInfo, TargetEnvironment } from '../background/KoniTypes';
 
 function detectRuntimeEnvironment (): RuntimeEnvironmentInfo {
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {
@@ -88,6 +88,5 @@ export const getOS = (): OSType => {
 export const TARGET_ENV = (process.env.TARGET_ENV || 'extension') as TargetEnvironment;
 
 export const MODULE_SUPPORT: EnvironmentSupport = {
-  MANTA_ZK: TARGET_ENV === 'extension',
-  CORS: TARGET_ENV !== 'extension'
+  MANTA_ZK: TARGET_ENV === 'extension'
 };

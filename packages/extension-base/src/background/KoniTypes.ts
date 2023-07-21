@@ -46,7 +46,6 @@ export type TargetEnvironment = 'extension' | 'webapp' | 'web-runner';
 
 export interface EnvironmentSupport {
   MANTA_ZK: boolean;
-  CORS: boolean;
 }
 
 export interface ServiceInfo {

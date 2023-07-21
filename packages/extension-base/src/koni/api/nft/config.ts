@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MODULE_SUPPORT } from '@subwallet/extension-base/utils';
+import { RuntimeInfo } from '@subwallet/extension-base/utils';
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account-rmrk1/';
 
@@ -140,7 +140,7 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
   }
 ];
 
-if (!MODULE_SUPPORT.CORS) {
+if (!RuntimeInfo.protocol || (RuntimeInfo.protocol && !RuntimeInfo.protocol.startsWith('http'))) {
   RANDOM_IPFS_GATEWAY_SETTING.push({
     provider: NFT_STORAGE_GATEWAY,
     weight: 50

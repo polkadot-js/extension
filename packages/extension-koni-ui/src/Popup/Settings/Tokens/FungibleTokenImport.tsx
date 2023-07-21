@@ -378,7 +378,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 renderWhenEmpty={renderEmpty}
                 searchFunction={searchChain}
                 searchMinCharactersCount={2}
-                searchPlaceholder={'Search network'}
+                searchPlaceholder={t('Search network')}
                 selected={selectedChain}
                 title={t('Select network')}
               />

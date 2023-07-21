@@ -1,13 +1,13 @@
 // Copyright 2017-2022 @polkadot/react-qr authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useCreateQrPayload from '@subwallet/extension-koni-ui/hooks/qr/useCreateQrPayload';
+import { useCreateQrPayload } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { createImgSize } from '@subwallet/extension-koni-ui/utils';
+import { SwQRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-
-import { createImgSize } from '@polkadot/react-qr/util';
 
 interface Props extends ThemeProps {
   size?: string | number;
@@ -21,11 +21,11 @@ const Component = ({ className,
   skipEncoding,
   style,
   value }: Props) => {
-  const { images, index: imageIndex } = useCreateQrPayload(value, skipEncoding);
+  const { data, index: dataIndex } = useCreateQrPayload(value, skipEncoding);
 
   const containerStyle = useMemo(() => createImgSize(size), [size]); // run on initial load to setup the global timer and provide and unsubscribe
 
-  if (!images.length) {
+  if (!data.length) {
     return null;
   }
 
@@ -38,13 +38,17 @@ const Component = ({ className,
         className={'ui--qr-Display'}
         style={style}
       >
-        {images.map((image, _index) => {
+        {data.map((datum, _index) => {
           return (
-            <img
-              alt={`qr-code_${_index}`}
-              className={CN({ hidden: imageIndex !== _index })}
+            <SwQRCode
+              className={CN({ hidden: dataIndex !== _index })}
+              color='#000'
+              errorLevel='Q'
+              icon=''
+              ignoreEncode={true}
               key={_index}
-              src={image}
+              size={264}
+              value={datum}
             />
           );
         })}
@@ -55,11 +59,6 @@ const Component = ({ className,
 
 const BytesQr = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    borderStyle: token.lineType,
-    borderWidth: token.sizeXS,
-    borderColor: token.colorTextBase,
-    borderRadius: token.borderRadiusLG,
-
     '.ui--qr-Display': {
       height: '100%',
       width: '100%',

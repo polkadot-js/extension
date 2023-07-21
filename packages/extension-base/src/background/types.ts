@@ -151,7 +151,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
   'pri(signing.isLocked)': [RequestSigningIsLocked, ResponseSigningIsLocked];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
-  'pri(window.open)': [AllowedPath, boolean];
+  'pri(window.open)': [WindowOpenParams, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
@@ -458,6 +458,12 @@ export interface ResponseJsonRestore {
 }
 
 export type AllowedPath = typeof ALLOWED_PATH[number];
+
+export type WindowOpenParams = {
+  allowedPath: AllowedPath;
+  subPath?: string;
+  params?: Record<string, string>;
+}
 
 export interface ResponseJsonGetAccountInfo {
   address: string;

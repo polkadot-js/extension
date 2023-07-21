@@ -4,6 +4,7 @@
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -21,15 +22,15 @@ import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, Co
 type Props = ThemeProps
 
 const titleMap: Record<ConfirmationType, string> = {
-  addNetworkRequest: 'Add network request',
-  addTokenRequest: 'Add token request',
-  authorizeRequest: 'Connect with SubWallet',
-  evmSendTransactionRequest: 'Transaction request',
-  evmSignatureRequest: 'Signature request',
-  metadataRequest: 'Update metadata',
-  signingRequest: 'Signature request',
-  switchNetworkRequest: 'Add network request',
-  connectWCRequest: 'WalletConnect'
+  addNetworkRequest: detectTranslate('Add network request'),
+  addTokenRequest: detectTranslate('Add token request'),
+  authorizeRequest: detectTranslate('Connect with SubWallet'),
+  evmSendTransactionRequest: detectTranslate('Transaction request'),
+  evmSignatureRequest: detectTranslate('Signature request'),
+  metadataRequest: detectTranslate('Update metadata'),
+  signingRequest: detectTranslate('Signature request'),
+  switchNetworkRequest: detectTranslate('Add network request'),
+  connectWCRequest: detectTranslate('WalletConnect')
 } as Record<ConfirmationType, string>;
 
 const Component = function ({ className }: Props) {

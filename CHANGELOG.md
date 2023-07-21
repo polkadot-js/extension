@@ -1,5 +1,53 @@
 # CHANGELOG
 
+## 1.1.2
+Build date: Jul 14, 2023.
+
+Features & Update:
+- Integrate Land/Estate NFT on Pioneer's metaverses (#1335)
+- Add Staking Support For Pendulum (#1595)
+- Support language: Vietnamese, Chinese (#1630)
+- Update QR code style for transaction with QR-signer account (#1418)
+- Support camera for WalletConnect (#1627)
+- Implement reload button on the Staking screen (#1545)
+- Improve calculation of withdrawal time (#1585)
+- Updated the criteria's icon on the Sorting pool/validator/collator/dApp screen (#1634)
+
+Bugs fixed:
+- Fixed bug Show incorrect earning reward status on All accounts mode (#1456)
+- Fixed bug Show incorrect withdrawal amount in case have multiple withdrawal requests (#1557)
+- Fixed Deprecate nominator controller accounts on some chains (#1350)
+- Fixed bug Still showing NFTs that have been sent (#1615)
+- Fixed sync configuration between expand view and popup view (#1243)
+- Fixed bug QR scanner not found (#1253)
+- Fixed UI bugs (#1548, #1507)
+
+Update chainlist (#1620)
+- Add support for Gemini 3e
+- Update price ID for JOY
+- Integrate Fantom network
+- Add support for USDT, DOT on Pendulum
+- Update XCM for Acala
+
+## 1.1.1
+Build date: Jul 06, 2023.
+
+Features & Update:
+- Integrate WalletConnect (#1497)
+- Support viewing ZK tokens on Manta (#1525)
+- Update XCM for Astar, Interlay, HydraDX (#1579)
+- Support add PSP token from dApp (#1529)
+- Improved connection experience with Ledger (#1573)
+
+Bugs fixed:
+- Fixed bugs related to address book (#1559)
+- Fixed NFT Gateway problems with non-extension environment (#1602)
+- Fixed bugs on the Staking screens (#1475)
+- Fixed bug show transaction fee on the History detail screen (#1580)
+
+Update `@subwallet/chain-list@0.2.4` (#1590):
+- Supported LP Tokens on Kintsugi (LP kBTC-USDT, LP KSM-kBTC, LP KSM-KINT)
+
 ## 1.0.12
 Build date: Jun 29, 2023.
 

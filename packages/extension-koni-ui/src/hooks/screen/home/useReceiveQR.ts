@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { MantaPayConfig } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getMultiChainAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelectorModalId } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
@@ -67,6 +69,16 @@ function getAccountTypeByTokenGroup (
   return typesCheck[0];
 }
 
+function isMantaPayEnabled (account: AccountJson | null, configs: MantaPayConfig[]) {
+  for (const config of configs) {
+    if (config.address === account?.address) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export default function useReceiveQR (tokenGroupSlug?: string) {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
@@ -76,6 +88,7 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
   const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
     { selectedAccount: isAllAccount ? undefined : currentAccount?.address }
   );
+  const mantaPayConfigs = useSelector((state: RootState) => state.mantaPay.configs);
 
   const accountSelectorItems = useMemo<AccountJson[]>(() => {
     if (!isAllAccount) {
@@ -116,6 +129,10 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
         return false;
       }
 
+      if (_MANTA_ZK_CHAIN_GROUP.includes(asset.originChain) && asset.symbol.startsWith(_ZK_ASSET_PREFIX)) {
+        return isMantaPayEnabled(acc, mantaPayConfigs);
+      }
+
       if (_isAssetFungibleToken(asset)) {
         if (_isChainEvmCompatible(chainInfoMap[asset.originChain]) === isEvmAddress) {
           if (tokenGroupSlug) {
@@ -128,7 +145,7 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
 
       return false;
     });
-  }, [tokenGroupSlug, assetRegistryMap, chainInfoMap, accounts]);
+  }, [tokenGroupSlug, assetRegistryMap, accounts, chainInfoMap, mantaPayConfigs]);
 
   const onOpenReceive = useCallback(() => {
     if (!currentAccount) {

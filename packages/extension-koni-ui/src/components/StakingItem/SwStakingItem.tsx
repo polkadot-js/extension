@@ -3,6 +3,7 @@
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,6 +14,7 @@ import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import CN from 'classnames';
 import { DotsThree, User, Users } from 'phosphor-react';
 import React, { Context, SyntheticEvent, useCallback, useContext, useMemo } from 'react';
+import { TFunction } from 'react-i18next';
 import styled, { ThemeContext } from 'styled-components';
 
 import { TokenItem } from '../TokenItem';
@@ -25,7 +27,7 @@ interface Props extends ThemeProps {
   onClickItem: (item: StakingDataType) => void,
 }
 
-const getStakingTypeTag = (stakingType: StakingType) => {
+const getStakingTypeTag = (stakingType: StakingType, t: TFunction) => {
   const tagColor = stakingType === StakingType.POOLED ? 'success' : 'warning';
   const tagIcon: PhosphorIcon = stakingType === StakingType.POOLED ? Users : User;
 
@@ -35,7 +37,7 @@ const getStakingTypeTag = (stakingType: StakingType) => {
       color={tagColor}
       icon={<Icon phosphorIcon={tagIcon} />}
     >
-      {capitalize(stakingType)}
+      {t(capitalize(stakingType))}
     </Tag>
   );
 };
@@ -44,6 +46,8 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
   const { staking } = stakingData;
   const { isWebUI } = useContext(ScreenContext);
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
+
+  const { t } = useTranslation();
 
   const balanceValue = getBalanceValue(staking.balance || '0', decimals);
 
@@ -126,7 +130,7 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
         onClickRightIcon={_onClickRightIcon}
         onPressItem={_onPressItem}
         stakingNetwork={staking.nativeToken}
-        stakingType={getStakingTypeTag(staking.type)}
+        stakingType={getStakingTypeTag(staking.type, t)}
         stakingValue={balanceValue}
       />
     );
@@ -145,7 +149,7 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
       />
 
       <div className='type-wrapper'>
-        {getStakingTypeTag(staking.type)}
+        {getStakingTypeTag(staking.type, t)}
       </div>
 
       <div className={CN('price-wrapper', className)}>

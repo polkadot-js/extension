@@ -113,7 +113,8 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         'process.env': {
           NODE_ENV: JSON.stringify(mode),
           PKG_NAME: JSON.stringify(pkgJson.name),
-          PKG_VERSION: JSON.stringify(pkgJson.version)
+          PKG_VERSION: JSON.stringify(pkgJson.version),
+          TARGET_ENV: JSON.stringify('webapp')
         }
       }),
       new CopyPlugin({
@@ -172,4 +173,6 @@ module.exports = createConfig({
   fallback: './src/fallback.ts',
   webapp: './src/webRunner.ts',
   main: './src/index.tsx'
-}, {}, false);
+}, {
+  'manta-extension-sdk': './manta-extension-sdk-empty.ts'
+}, false);

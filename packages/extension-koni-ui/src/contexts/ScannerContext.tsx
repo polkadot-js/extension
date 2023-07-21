@@ -4,14 +4,11 @@
 import { ResponseParseTransactionSubstrate, ResponseQrParseRLP, SignerDataType } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEnabled } from '@subwallet/extension-base/services/chain-service/utils';
 import { createTransactionFromRLP, Transaction } from '@subwallet/extension-base/utils/eth';
-import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/qr';
+import { MULTIPART, SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants';
 import { parseEVMTransaction, parseSubstrateTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, MessageQRInfo, MultiFramesInfo, QrInfo, SubstrateCompletedParsedData, SubstrateMessageParsedData, SubstrateTransactionParsedData, TxQRInfo } from '@subwallet/extension-koni-ui/types/scanner';
-import { findAccountByAddress } from '@subwallet/extension-koni-ui/utils/account/account';
-import { getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
-import { constructDataFromBytes, encodeNumber } from '@subwallet/extension-koni-ui/utils/scanner/decoders';
-import { isEthereumCompletedParsedData, isSubstrateMessageParsedData } from '@subwallet/extension-koni-ui/utils/scanner/sign';
+import { constructDataFromBytes, encodeNumber, findAccountByAddress, getNetworkJsonByInfo, isEthereumCompletedParsedData, isSubstrateMessageParsedData } from '@subwallet/extension-koni-ui/utils';
 import BigN from 'bignumber.js';
 import React, { useCallback, useReducer } from 'react';
 import { useSelector } from 'react-redux';
@@ -81,8 +78,6 @@ const DEFAULT_STATE: ScannerStoreState = {
 };
 
 export const ScannerContext = React.createContext({} as ScannerContextType);
-
-const MULTIPART = new Uint8Array([0]); // always mark as multipart for simplicity's sake. Consistent with @polkadot/react-qr
 
 // const SIG_TYPE_NONE = new Uint8Array();
 // const SIG_TYPE_ED25519 = new Uint8Array([0]);

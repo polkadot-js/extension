@@ -14,7 +14,7 @@ export default class MetadataStore extends BaseStoreWithChain<IMetadataItem> {
   }
 
   getMetadataByGenesisHash (genesisHash: string) {
-    return this.table.where('[genesisHash]').equals([genesisHash]).first();
+    return this.table.get(genesisHash);
   }
 
   updateMetadataByGenesisHash (genesisHash: string, metadata: IMetadataItem) {

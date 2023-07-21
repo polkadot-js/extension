@@ -11,8 +11,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
 import AccountItem from './AccountItem';
 import { InfoItemBase } from './types';
 
@@ -47,7 +45,6 @@ const Component: React.FC<TransferInfoItem> = (props: TransferInfoItem) => {
         <Avatar
           className={'__account-avatar'}
           size={24}
-          theme={address ? isEthereumAddress(address) ? 'ethereum' : 'polkadot' : undefined}
           value={address}
         />
         <div className={'__account-name ml-xs'}>
@@ -92,7 +89,7 @@ const Component: React.FC<TransferInfoItem> = (props: TransferInfoItem) => {
         {!!destinationChain && (
           <ChainItem
             chain={destinationChain.slug}
-            label={t('DestinationChain Chain')}
+            label={t('Destination Chain')}
           />
         )}
       </>

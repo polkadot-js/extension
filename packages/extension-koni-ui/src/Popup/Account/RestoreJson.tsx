@@ -265,7 +265,7 @@ function Component ({ className }: Props): JSX.Element {
 
     if (!value) {
       setSubmitValidateState({
-        message: 'Password is required',
+        message: t('Password is required'),
         status: 'error'
       });
     } else {
@@ -273,7 +273,7 @@ function Component ({ className }: Props): JSX.Element {
     }
 
     setPassword(value);
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (requirePassword) {
@@ -291,7 +291,7 @@ function Component ({ className }: Props): JSX.Element {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={onBack}
         {...(!isWebUI
           ? {
@@ -348,7 +348,7 @@ function Component ({ className }: Props): JSX.Element {
                       <SettingItem
                         className='account-list-item'
                         leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
-                        name={t(`Import ${String(accountsInfo.length).padStart(2, '0')} accounts`)}
+                        name={t('Import {{number}} accounts', { replace: { number: String(accountsInfo.length).padStart(2, '0') } })}
                         onPressItem={openModal}
                         rightItem={(
                           <Icon
@@ -377,7 +377,7 @@ function Component ({ className }: Props): JSX.Element {
                   <Input
                     id={`${formName}_${passwordField}`}
                     onChange={onChangePassword}
-                    placeholder={t('Current password')}
+                    placeholder={t('Password')}
                     statusHelp={submitValidateState.message}
                     type='password'
                     value={password}
@@ -411,7 +411,7 @@ function Component ({ className }: Props): JSX.Element {
             <InstructionContainer contents={instructionContent} />
           )}
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }

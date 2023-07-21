@@ -273,10 +273,6 @@ export const constructDataFromBytes = (bytes: Uint8Array, multipartComplete = fa
   }
 };
 
-export const encodeNumber = (value: number): Uint8Array => {
-  return new Uint8Array([value >> 8, value & 0xff]);
-};
-
 export const isJsonString = (str: any): boolean => {
   if (!str) {
     return false;

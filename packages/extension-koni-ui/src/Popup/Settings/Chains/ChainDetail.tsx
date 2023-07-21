@@ -316,7 +316,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             ),
             loading: loading,
             onClick: onSubmit,
-            children: 'Save'
+            children: t('Save')
           }
         })}
         // showBackButton={true}
@@ -325,7 +325,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         // subHeaderCenter={true}
         // subHeaderIcons={subHeaderButton}
         // subHeaderPaddingVertical={true}
-        // title={t<string>('Network detail')}
+        title={t<string>('Network detail')}
         withSideMenu
       >
         <SwSubHeader

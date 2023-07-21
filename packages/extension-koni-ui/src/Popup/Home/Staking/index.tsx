@@ -37,11 +37,6 @@ enum FilterValue {
   POOLED = 'pooled'
 }
 
-const FILTER_OPTIONS = [
-  { label: 'Nominated', value: StakingType.NOMINATED },
-  { label: 'Pooled', value: StakingType.POOLED }
-];
-
 const rightIcon = (
   <Icon
     phosphorIcon={Plus}
@@ -82,6 +77,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
+
+  const FILTER_OPTIONS = useMemo(() => ([
+    { label: t('Nominated'), value: StakingType.NOMINATED },
+    { label: t('Pooled'), value: StakingType.POOLED }
+  ]), [t]);
 
   const filterFunction = useMemo<(item: StakingDataType) => boolean>(() => {
     return (item) => {

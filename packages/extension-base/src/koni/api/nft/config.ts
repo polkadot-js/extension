@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { RuntimeInfo } from '@subwallet/extension-base/utils';
+
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account-rmrk1/';
 
 export const SINGULAR_V2_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account/';
@@ -17,7 +19,9 @@ export const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
 
 export const CLOUDFLARE_PINATA_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 
-export const BIT_COUNTRY_SERVER = 'https://ipfs-cdn.bit.country/';
+export const BIT_COUNTRY_IPFS_SERVER = 'https://ipfs-cdn.bit.country/';
+
+export const BIT_COUNTRY_LAND_ESTATE_METADATA_API = 'https://pioneer-api.bit.country/metadata/landTokenUriPioneer';
 
 export const BIT_COUNTRY_THUMBNAIL_RESOLVER = 'https://res.cloudinary.com/ddftctzph/image/upload/c_scale,q_100,w_250/production-ipfs/asset/';
 
@@ -107,10 +111,6 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
     weight: 0 // Not stable
   },
   {
-    provider: NFT_STORAGE_GATEWAY,
-    weight: 50
-  },
-  {
     provider: CF_IPFS_GATEWAY,
     weight: 4
   },
@@ -135,14 +135,21 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
     weight: 0 // Deceptive site warning
   },
   {
-    provider: IPFS_FLEEK,
-    weight: 4
-  },
-  {
     provider: IPFS_TELOS_MIAMI,
     weight: 0
   }
 ];
+
+if (!RuntimeInfo.protocol || (RuntimeInfo.protocol && !RuntimeInfo.protocol.startsWith('http'))) {
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: NFT_STORAGE_GATEWAY,
+    weight: 50
+  });
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: IPFS_FLEEK,
+    weight: 4
+  });
+}
 
 const RANDOM_IPFS_GATEWAY_TOTAL_WEIGHT = RANDOM_IPFS_GATEWAY_SETTING.reduce((value, item) => value + item.weight, 0);
 

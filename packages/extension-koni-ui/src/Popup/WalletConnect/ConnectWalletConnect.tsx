@@ -27,7 +27,7 @@ const DEFAULT_FORM_VALUES: AddConnectionFormState = {
 };
 
 const scannerId = 'connect-connection-scanner-modal';
-const showScanner = false;
+const showScanner = true;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -78,7 +78,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onSuccess = useCallback((result: ScannerResult) => {
     const uri = result.text;
-    const error = validWalletConnectUri(uri);
+    const error = validWalletConnectUri(uri, t);
 
     if (!error && !loading) {
       setScanError('');
@@ -89,7 +89,7 @@ const Component: React.FC<Props> = (props: Props) => {
         setScanError(error);
       }
     }
-  }, [loading, inactiveModal, form]);
+  }, [loading, inactiveModal, form, t]);
 
   const openScanner = useOpenQrScanner(scannerId);
 
@@ -113,7 +113,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const uriValidator = useCallback((rule: RuleObject, uri: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      const error = validWalletConnectUri(uri);
+      const error = validWalletConnectUri(uri, t);
 
       if (!error) {
         resolve();
@@ -121,7 +121,7 @@ const Component: React.FC<Props> = (props: Props) => {
         reject(new Error(error));
       }
     });
-  }, []);
+  }, [t]);
 
   return (
     <Layout.WithSubHeaderOnly
@@ -188,7 +188,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <Input
               disabled={loading}
               label={t('URI')}
-              placeholder={t('Please type or paste URI')}
+              placeholder={t('Please type or paste or scan URI')}
               suffix={(
                 <>
                   {

@@ -3,23 +3,23 @@
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BackgroundExpandView, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
+import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
+import { useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isNoAccount } from '@subwallet/extension-koni-ui/utils';
 import { changeHeaderLogo } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import React, { useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-import { DEFAULT_ROUTER_PATH } from '../constants/router';
-import { isNoAccount } from '../utils';
 
 changeHeaderLogo(<Logo2D />);
 
@@ -30,7 +30,6 @@ export const RouteState = {
 
 const welcomeUrl = '/welcome';
 const tokenUrl = '/home/tokens';
-// const porfolioUrl = '/home/porfolio';
 const loginUrl = '/keyring/login';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
@@ -47,6 +46,8 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const { goBack, goHome } = useDefaultNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
   const notify = useNotification();
+
+  useSubscribeLanguage();
 
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
@@ -122,7 +123,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       }
     } else if (pathName === DEFAULT_ROUTER_PATH) {
       if (hasConfirmations) {
-        console.log('hasConfirmations');
         openPModal('confirmations');
       } else {
         navigate(tokenUrl);
@@ -150,7 +150,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
       <PageWrapper
         animateOnce={true}
         className={'main-page-container'}
-        resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings'])}
+        resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay'])}
       >
         <DefaultRoute>
           <main className={className}>

@@ -212,7 +212,7 @@ const Component = (): React.ReactElement => {
             <DetailTable
               columns={[
                 {
-                  title: 'Token name',
+                  title: t<string>('Token name'),
                   dataIndex: 'name',
                   key: 'name',
                   render: (_, row) => {
@@ -228,13 +228,13 @@ const Component = (): React.ReactElement => {
                   }
                 },
                 {
-                  title: 'Portfolio %',
+                  title: t<string>('Portfolio %'),
                   dataIndex: 'percentage',
                   key: 'percentage',
                   render: () => <p>85%</p>
                 },
                 {
-                  title: 'Price',
+                  title: t<string>('Price'),
                   dataIndex: 'price',
                   key: 'price',
                   render: (_, row) => {

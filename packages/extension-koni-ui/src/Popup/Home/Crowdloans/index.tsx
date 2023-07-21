@@ -73,7 +73,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   } = useContext(ThemeContext);
   const items: CrowdloanItemType[] = useGetCrowdloanList();
 
-  console.log('====>', items);
   const [searchInput, setSearchInput] = useState<string>('');
   const { activeModal } = useContext(ModalContext);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);

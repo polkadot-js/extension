@@ -218,8 +218,8 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
     if (delegationScheduledRequests) {
       for (const scheduledRequest of delegationScheduledRequests) {
         if (reformatAddress(scheduledRequest.delegator, 0) === reformatAddress(address, 0)) { // add network prefix
-          const isClaimable = scheduledRequest.whenExecutable - currentRound <= 0;
-          const remainingEra = scheduledRequest.whenExecutable - (currentRound + 1);
+          const isClaimable = scheduledRequest.whenExecutable - currentRound < 0;
+          const remainingEra = scheduledRequest.whenExecutable - currentRound;
           const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
           const claimable = Object.values(scheduledRequest.action)[0];
 
@@ -228,7 +228,7 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
             status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
             validatorAddress: delegation.owner,
             claimable: claimable.toString(),
-            waitingTime: waitingTime > 0 ? waitingTime : 0
+            waitingTime
           } as UnstakingInfo;
 
           hasUnstaking = true;
@@ -331,7 +331,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
     if (delegationScheduledRequests) {
       for (const scheduledRequest of delegationScheduledRequests) {
         if (reformatAddress(scheduledRequest.delegator, 0) === reformatAddress(address, 0)) { // add network prefix
-          const isClaimable = scheduledRequest.whenExecutable - currentRound <= 0;
+          const isClaimable = scheduledRequest.whenExecutable - currentRound < 0;
           const remainingEra = scheduledRequest.whenExecutable - (currentRound + 1);
           const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
           const claimable = Object.values(scheduledRequest.action)[0];
@@ -341,7 +341,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
             status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
             validatorAddress: delegation.owner,
             claimable: claimable.toString(),
-            waitingTime: waitingTime > 0 ? waitingTime : 0
+            waitingTime: waitingTime
           } as UnstakingInfo;
 
           hasUnstaking = true;

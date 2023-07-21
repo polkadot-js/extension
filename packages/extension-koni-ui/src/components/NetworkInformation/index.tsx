@@ -113,7 +113,7 @@ function Component (props: Props): React.ReactElement<Props> {
         )}
         {getMetaInfo()}
         {chainStakingMetadata?.unstakingPeriod && <MetaInfo.Default label={t('Unstaking period')}>
-          <span>{getUnstakingPeriod(chainStakingMetadata.unstakingPeriod)}</span>
+          <span>{getUnstakingPeriod(t, chainStakingMetadata?.unstakingPeriod)}</span>
         </MetaInfo.Default>}
         <MetaInfo.Default label={t('Total chainstake')}>
           <span>Total chainstake</span>

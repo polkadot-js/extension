@@ -15,6 +15,7 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, SwAlert } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import { Coins, FadersHorizontal } from 'phosphor-react';
@@ -161,7 +162,7 @@ const Component = (): React.ReactElement => {
       }
     });
 
-    return result;
+    return result.sort(sortTokenByValue);
   }, [sortedTokenGroups, tokenGroupBalanceMap]);
 
   useEffect(() => {

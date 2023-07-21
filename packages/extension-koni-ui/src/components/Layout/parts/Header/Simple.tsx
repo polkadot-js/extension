@@ -4,7 +4,7 @@
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
 import { useDefaultNavigate, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, Typography } from '@subwallet/react-ui';
+import { Button, Icon } from '@subwallet/react-ui';
 import { CaretLeft, Question } from 'phosphor-react';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
@@ -13,13 +13,6 @@ export type Props = ThemeProps & {
   title?: string | React.ReactNode;
   onBack?: () => void;
 }
-
-const StyledTitle = styled(Typography.Title)`
-  margin: 0 !important;
-  font-size: 30px !important;
-  height: 40px;
-  line-height: unset !important;
-`;
 
 function Component (props: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -31,70 +24,98 @@ function Component (props: Props): React.ReactElement<Props> {
 
   return (
     <div className={props.className}>
-      <div className='logo-container'>
-        <Logo2D
-          height={24}
-          width={24}
-        />
-      </div>
-      {props.title && (
-        <div className='title-wrapper'>
+      <div className='__box'>
+        <div className={'__left-part'}>
+          <Logo2D
+            height={24}
+            width={24}
+          />
           <Button
-            className='back-button'
-            icon={<Icon
-              phosphorIcon={CaretLeft}
-              size='sm'
-            />}
+            className='__back-button'
+            icon={
+              <Icon
+                customSize='28px'
+                phosphorIcon={CaretLeft}
+              />
+            }
             onClick={props.onBack || defaultOnBack}
             size='xs'
             type='ghost'
           />
-          <StyledTitle>{props.title}</StyledTitle>
         </div>
-      )}
-      <Button
-        icon={
-          <Icon
-            customSize='28px'
-            phosphorIcon={Question}
-          />
-        }
-        size='xs'
-        style={{
-          padding: 0
-        }}
-        type='ghost'
-      >
-        {t<string>('Help')}
-      </Button>
+        {props.title && (
+          <div className='__title-wrapper'>
+            <div className={'__title'}>{props.title}</div>
+          </div>
+        )}
+        <Button
+          className={'__help-button'}
+          icon={
+            <Icon
+              customSize='28px'
+              phosphorIcon={Question}
+              weight={'duotone'}
+            />
+          }
+          size='xs'
+          type='ghost'
+        >
+          {t<string>('Help')}
+        </Button>
+      </div>
     </div>
   );
 }
 
 const Simple = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   width: '100%',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '31px 24px 50px',
+  padding: '24px 24px 50px',
 
-  '.logo-container': {
-    width: 67,
-    textAlign: 'left',
-    color: token.colorWhite
+  '.__box': {
+    position: 'relative',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
 
-  '.title-wrapper': {
+  '.__left-part': {
+    position: 'relative',
+    zIndex: 5,
+    maxWidth: 180,
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+
+  '.__back-button.__back-button': {
+    color: token.colorTextLight1
+  },
+
+  '.__title-wrapper': {
     display: 'flex',
     justifyContent: 'center',
     flex: 1,
-    position: 'relative',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    zIndex: 2
+  },
 
-    '.back-button': {
-      position: 'absolute',
-      top: 0,
-      left: 20
-    }
+  '.__title': {
+    fontSize: token.fontSizeHeading2,
+    lineHeight: token.lineHeightHeading2,
+    color: token.colorTextLight1,
+    fontWeight: token.headingFontWeight
+  },
+
+  '.__help-button': {
+    position: 'relative',
+    zIndex: 5,
+    right: -16
   }
 }));
 

@@ -42,10 +42,13 @@ const Component: React.FC<PropsType> = ({ className, contents }: PropsType) => {
   );
 };
 
-const InstructionContainer = styled(Component)<PropsType>(() => ({
+const InstructionContainer = styled(Component)<PropsType>(({ theme: { token } }: PropsType) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: 10
+  gap: 10,
+  '.alert-title.alert-title': {
+    color: token.colorTextLight1
+  }
 }));
 
 export default InstructionContainer;

@@ -80,6 +80,8 @@
     "style-loader": "^3.3.2"
   },
   "resolutions": {
+    "@google/model-viewer": "3.1.1",
+    "@ledgerhq/hw-app-eth": "6.33.4",
     "@ethereumjs/common": "^2.6.5",
     "@polkadot/api": "^10.9.1",
     "@polkadot/api-contract": "^10.9.1",

@@ -240,7 +240,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   loading={loading}
                   onClick={form.submit}
                 >
-                  {t('Import Account')}
+                  {t('Continue')}
                 </Button>
               )}
             </Form>

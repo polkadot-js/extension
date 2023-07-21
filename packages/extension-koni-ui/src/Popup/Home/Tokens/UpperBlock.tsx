@@ -67,6 +67,7 @@ function Component (
             )}
             onClick={onChangeShowBalance}
             size='xs'
+            tooltip={isShowBalance ? t('Hide balance') : t('Show balance')}
             type='ghost'
           />
           <Number

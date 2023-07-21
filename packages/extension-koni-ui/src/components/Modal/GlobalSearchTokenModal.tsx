@@ -8,6 +8,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { AccountBalanceHookType, TokenGroupHookType } from '@subwallet/extension-koni-ui/types/hook';
+import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { SwList, SwModal } from '@subwallet/react-ui';
 import { Coins } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
@@ -42,7 +43,7 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
   const tokenBalances = useMemo<TokenBalanceItemType[]>(() => {
-    return getTokenBalances(tokenBalanceMap, sortedTokenSlugs);
+    return getTokenBalances(tokenBalanceMap, sortedTokenSlugs).sort(sortTokenByValue);
   }, [tokenBalanceMap, sortedTokenSlugs]);
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {

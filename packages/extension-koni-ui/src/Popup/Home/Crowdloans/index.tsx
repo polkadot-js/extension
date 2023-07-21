@@ -10,6 +10,7 @@ import Search from '@subwallet/extension-koni-ui/components/Search';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
@@ -21,7 +22,6 @@ import { CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan'
 import { CrowdloanItem, Icon, Logo, ModalContext, Number, SwList, Table, Tag } from '@subwallet/react-ui';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
 type Props = ThemeProps;
@@ -75,6 +75,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const [searchInput, setSearchInput] = useState<string>('');
   const { activeModal } = useContext(ModalContext);
+
+  const { isShowBalance } = useSelector((state) => state.settings);
+
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const { accountBalance: { tokenGroupBalanceMap } } = useContext(HomeContext);
@@ -173,6 +176,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           decimal={0}
           displayNetwork={item.chainDisplayName}
           displayToken={item.symbol}
+          hideBalance={!isShowBalance}
           isShowSubLogo={true}
           key={`${item.symbol}_${item.slug}`}
           networkKey={item.slug}
@@ -181,7 +185,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
       );
     },
-    [getParaStateLabel]
+    [getParaStateLabel, isShowBalance]
   );
 
   // empty list

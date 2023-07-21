@@ -36,6 +36,7 @@ function Component (
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
+  const { isShowBalance } = useSelector((state: RootState) => state.settings);
 
   const isSupportBuyTokens = useMemo(() => {
     if (PREDEFINED_TRANSAK_TOKEN[symbol]) {
@@ -79,6 +80,7 @@ function Component (
           className={'__balance-value'}
           decimal={0}
           decimalOpacity={0.45}
+          hide={!isShowBalance}
           prefix='$'
           size={38}
           subFloatNumber

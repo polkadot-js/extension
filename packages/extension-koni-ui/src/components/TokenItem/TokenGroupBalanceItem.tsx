@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { ActivityIndicator, BalanceItem, BalanceItemProps, Icon, Number } from '@subwallet/react-ui';
@@ -27,6 +28,8 @@ function Component (
   // - auto detect logo, only use logoKey
   // - price change status
 
+  const { isShowBalance } = useSelector((state) => state.settings);
+
   return (
     <div className={classNames('token-group-balance-item', className, {
       '-price-decrease': priceChangeStatus === 'decrease'
@@ -49,12 +52,14 @@ function Component (
                   className={'__value'}
                   decimal={0}
                   decimalOpacity={0.45}
+                  hide={!isShowBalance}
                   value={total.value}
                 />
                 <Number
                   className={'__converted-value'}
                   decimal={0}
                   decimalOpacity={0.45}
+                  hide={!isShowBalance}
                   intOpacity={0.45}
                   prefix='$'
                   size={12}

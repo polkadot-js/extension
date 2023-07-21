@@ -3,7 +3,7 @@
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -48,6 +48,8 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
 
   const { t } = useTranslation();
+
+  const { isShowBalance } = useSelector((state) => state.settings);
 
   const balanceValue = getBalanceValue(staking.balance || '0', decimals);
 
@@ -178,6 +180,7 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
             className={'__value'}
             decimal={0}
             decimalOpacity={0.45}
+            hide={isShowBalance}
             suffix={staking.unit}
             value={11}
           />
@@ -185,6 +188,7 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
             className={'__converted-value'}
             decimal={0}
             decimalOpacity={0.45}
+            hide={isShowBalance}
             intOpacity={0.45}
             prefix='$'
             size={12}

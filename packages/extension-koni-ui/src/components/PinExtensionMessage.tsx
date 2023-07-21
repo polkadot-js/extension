@@ -1,15 +1,36 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, Image } from '@subwallet/react-ui';
+import { Icon as SwIcon, Image, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { PushPinSimple, PuzzlePiece } from 'phosphor-react';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
+
+interface IconProps extends Pick<SwIconProps, 'phosphorIcon'> {
+  last?: boolean;
+}
+
+const Icon: React.FC<IconProps> = (props: IconProps) => {
+  const { last, phosphorIcon } = props;
+
+  return (
+    <span>
+      &nbsp;
+      <SwIcon
+        phosphorIcon={phosphorIcon}
+        size='sm'
+        weight='fill'
+      />
+      {!last && <span>&nbsp;</span>}
+    </span>
+  );
+};
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -31,17 +52,17 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
       </div>
       <div className='message-sub-content'>
-        <span>Click&nbsp;</span>
-        <Icon
-          phosphorIcon={PuzzlePiece}
-          size='sm'
-          weight='fill'
-        />
-        <span>&nbsp;select SubWallet and then&nbsp;</span>
-        <Icon
-          phosphorIcon={PushPinSimple}
-          size='sm'
-          weight='fill'
+        <Trans
+          components={{
+            extension: <Icon phosphorIcon={PuzzlePiece} />,
+            pin: (
+              <Icon
+                last={true}
+                phosphorIcon={PushPinSimple}
+              />
+            )
+          }}
+          i18nKey={detectTranslate('Click <extension/> select SubWallet and then <pin/>')}
         />
       </div>
     </div>

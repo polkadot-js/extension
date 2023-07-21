@@ -721,5 +721,8 @@
   "Withdraw in {{time}}": "",
   "Withdrawable in a day": "",
   "Pools": "集合",
-  "Nominate": "提名"
+  "Nominate": "提名",
+  "Click <extension/> select SubWallet and then <pin/>": "",
+  "Hide balance": "隐藏余额",
+  "Show balance": "显示余额"
 }

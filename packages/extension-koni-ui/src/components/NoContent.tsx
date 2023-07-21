@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Button, Icon, Typography } from '@subwallet/react-ui';
+import { Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Coin, Image, ListBullets, MagnifyingGlass, PlusCircle, RocketLaunch, SlidersHorizontal, Trophy } from 'phosphor-react';
+import { Coin, Image, ListBullets, MagnifyingGlass, RocketLaunch, SlidersHorizontal, Trophy } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
 

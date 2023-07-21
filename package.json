@@ -45,15 +45,15 @@
     "watch": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch",
     "watch-dev": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch -d inline-source-map",
     "web-runner:build": "cd packages/web-runner && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
-    "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
-    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
     "web-runner:deploy": "yarn web-runner:build && gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'",
+    "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "web-runner:publish": "gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'",
+    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
     "webapp:build": "cd packages/webapp && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
-    "webapp:dev": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
-    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development",
     "webapp:deploy": "yarn webapp:build && gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
-    "webapp:publish": "gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'"
+    "webapp:dev": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
+    "webapp:publish": "gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
+    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development"
   },
   "dependencies": {
     "@types/node": "^17.0.10",

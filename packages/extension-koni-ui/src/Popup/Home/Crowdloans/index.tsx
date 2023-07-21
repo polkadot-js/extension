@@ -218,7 +218,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title: 'Project name',
         dataIndex: 'name',
         key: 'name',
-        render: (_, row: CrowdloanItemType) => {
+        render: (_: any, row: CrowdloanItemType) => {
           return <div className='project-container'>
             <Logo
               isShowSubLogo={true}
@@ -247,7 +247,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         ),
         dataIndex: 'status',
         key: 'status',
-        render: (_, item: CrowdloanItemType) => {
+        render: (_: any, item: CrowdloanItemType) => {
           return <Tag color={getTagColor(item.paraState)}>{getParaStateLabel(item.paraState)}</Tag>;
         }
       },
@@ -255,7 +255,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title: 'Price',
         dataIndex: 'price',
         key: 'price',
-        render: (_, row: CrowdloanItemType) => {
+        render: (_: any, row: CrowdloanItemType) => {
           // TODO: update priceChangeStatus
           const currentChainInfo = currentChainBalance(row);
 
@@ -295,7 +295,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title: 'Contribute',
         dataIndex: 'contribute',
         key: 'contribute',
-        render: (_, row: CrowdloanItemType) => {
+        render: (_: any, row: CrowdloanItemType) => {
           return (
             <div className={''}>
               <Number

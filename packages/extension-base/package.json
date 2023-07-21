@@ -56,6 +56,7 @@
     "@walletconnect/sign-client": "^2.8.4",
     "@walletconnect/types": "^2.8.4",
     "@walletconnect/utils": "^2.8.4",
+    "avail-js-sdk": "^0.0.10",
     "axios": "^1.2.1",
     "bignumber.js": "^9.1.1",
     "bn.js": "^5.2.1",

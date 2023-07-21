@@ -5878,6 +5878,7 @@ __metadata:
     "@walletconnect/sign-client": ^2.8.4
     "@walletconnect/types": ^2.8.4
     "@walletconnect/utils": ^2.8.4
+    avail-js-sdk: ^0.0.10
     axios: ^1.2.1
     bignumber.js: ^9.1.1
     bn.js: ^5.2.1
@@ -8653,6 +8654,15 @@ __metadata:
   version: 2.2.2
   resolution: "attr-accept@npm:2.2.2"
   checksum: 496f7249354ab53e522510c1dc8f67a1887382187adde4dc205507d2f014836a247073b05e9d9ea51e2e9c7f71b0d2aa21730af80efa9af2d68303e5f0565c4d
+  languageName: node
+  linkType: hard
+
+"avail-js-sdk@npm:^0.0.10":
+  version: 0.0.10
+  resolution: "avail-js-sdk@npm:0.0.10"
+  dependencies:
+    "@polkadot/api": ^10.9.1
+  checksum: 580cb3bb7876b1dc9edc6742abff2132b09fee30811f12447ec3eb0f6a5ced9b2971d4c8138b9089921c697ffea56523457ed0780994f81d855860f6d2e927eb
   languageName: node
   linkType: hard
 

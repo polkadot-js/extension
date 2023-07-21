@@ -12,6 +12,7 @@ import { DEFAULT_AUX } from '@subwallet/extension-base/services/chain-service/ha
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SubstrateApi, _SubstrateDefaultFormatBalance } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
+import { rpc as availRpc, signedExtensions as availSignedExtensions, types as availTypes } from 'avail-js-sdk/spec';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
@@ -93,6 +94,13 @@ export class SubstrateApi implements _SubstrateApi {
         provider,
         rpc: oakRpc,
         types: oakTypes
+      });
+    } else if (_API_OPTIONS_CHAIN_GROUP.avail.includes(this.chainSlug)) {
+      return new ApiPromise({
+        provider,
+        rpc: availRpc,
+        types: availTypes,
+        signedExtensions: availSignedExtensions
       });
     } else {
       return new ApiPromise(apiOption);

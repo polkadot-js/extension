@@ -4,5 +4,11 @@
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types';
 
 export const sortTokenByValue = (a: TokenBalanceItemType, b: TokenBalanceItemType): number => {
-  return b.total.convertedValue.minus(a.total.convertedValue).toNumber();
+  const convertValue = b.total.convertedValue.minus(a.total.convertedValue).toNumber();
+
+  if (convertValue) {
+    return convertValue;
+  } else {
+    return b.total.value.minus(a.total.value).toNumber();
+  }
 };

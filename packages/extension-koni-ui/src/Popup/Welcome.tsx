@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, Logo2DWithBorder } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ACCOUNT_TYPES, DOWNLOAD_EXTENSION } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Divider, Form, Icon, Image, Input, ModalContext } from '@subwallet/react-ui';
+import { Button, ButtonProps, Form, Icon, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
@@ -214,12 +214,12 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       >
         <div className={CN('brand-container', 'flex-column')}>
           <div className='logo-container'>
-            <Image
-              src={'/images/subwallet/welcome-logo.png'}
-              width={139}
+            <Logo2DWithBorder
+              height={'100%'}
+              width={'100%'}
             />
           </div>
-          {/* <div className='title'>{t(isWebUI ? 'Welcome to SubWallet!' : 'SubWallet')}</div> */}
+          <div className='title'>{t('Welcome to SubWallet!')}</div>
           <div className='sub-title'>
             {t(isWebUI ? "Choose how you'd like to set up your wallet" : 'Polkadot, Substrate & Ethereum wallet')}
           </div>
@@ -256,7 +256,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             ))}
           </div>
 
-          <Divider className='divider' />
+          <div className='divider' />
         </div>
 
         {isWebUI && (
@@ -334,6 +334,10 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
       top: 0
     },
 
+    '.logo-container': {
+      height: 120
+    },
+
     '.bg-image': {
       backgroundImage: 'url("/images/subwallet/welcome-background.png")',
       backgroundRepeat: 'no-repeat',
@@ -344,7 +348,19 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
       width: '100%',
       left: 0,
       top: 0,
-      opacity: 0.1
+      opacity: 0.1,
+      zIndex: -1
+    },
+
+    '.brand-container': {
+      paddingTop: 6
+    },
+
+    '.divider': {
+      height: 2,
+      backgroundColor: token.colorBgDivider,
+      opacity: 0.8,
+      width: '100%'
     },
 
     '.body-container': {
@@ -352,17 +368,11 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
       textAlign: 'center',
       opacity: 0.999, // Hot fix show wrong opacity in browser
 
-      '.logo-container': {
-        marginTop: token.sizeLG * 3,
-        marginBottom: token.sizeLG,
-        color: token.colorTextBase
-      },
-
       '.title': {
-        marginTop: token.marginXS,
+        marginTop: token.margin,
         fontWeight: token.fontWeightStrong,
-        fontSize: token.fontSizeHeading1,
-        lineHeight: token.lineHeightHeading1,
+        fontSize: token.fontSizeHeading3,
+        lineHeight: token.lineHeightHeading3,
         color: token.colorTextBase
       },
 
@@ -389,7 +399,8 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '&.__web-ui': {
         textAlign: 'center',
         height: '100%',
-        width: 'fit-content',
+        width: '100%',
+        maxWidth: 816,
         margin: '0 auto',
 
         '.title': {
@@ -409,9 +420,10 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
         '.buttons-container': {
           marginBottom: token.marginXL,
           marginTop: token.marginXL * 2,
+          width: '100%',
 
           '.divider': {
-            marginTop: token.marginLG + 2
+            marginTop: token.marginLG
           },
 
           '.buttons': {
@@ -438,7 +450,7 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
             '.welcome-import-button': {
               width: '100%',
-              paddingRight: token.sizeXL
+              paddingRight: 14
             }
           }
         }

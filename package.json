@@ -75,7 +75,7 @@
     "@polkadot/util-crypto": "^12.3.2",
     "@subwallet/keyring": "^0.0.10",
     "@subwallet/ui-keyring": "^0.0.10",
-    "@subwallet/chain-list": "^0.2.6-beta.1",
+    "@subwallet/chain-list": "^0.2.7",
     "babel-core": "^7.0.0-bridge.0",
     "rxjs": "^7.8.1",
     "safe-buffer": "^5.2.1",

@@ -111,7 +111,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 name={FormFieldName.PASSWORD}
                 rules={[
                   {
-                    message: 'Password is required',
+                    message: t('Password is required'),
                     required: true
                   }
                 ]}
@@ -138,7 +138,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   className='forgot-password'
                   onClick={onReset}
                 >
-                  {t('Forgot password?')}
+                  {t('Don’t remember your password?')}
                 </div>
               </Form.Item>
             </Form>

@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Runs in the extension background, handling all keyring access
-
 import '@subwallet/extension-inject/crossenv';
 
 import type { RequestSignatures, TransportRequestMessage } from '@subwallet/extension-base/background/types';
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
-import { onExtensionInstall } from '@subwallet/extension-base/koni/background/events';
 import handlers, { state as koniState } from '@subwallet/extension-base/koni/background/handlers';
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import KeyringStore from '@subwallet/extension-base/stores/Keyring';
@@ -72,11 +70,11 @@ chrome.runtime.onConnect.addListener((port): void => {
 });
 
 // Trigger single mode
-chrome.runtime.onInstalled.addListener(function (details) {
-  if (details.reason === 'install') {
-    onExtensionInstall();
-  }
-});
+// chrome.runtime.onInstalled.addListener(function (details) {
+//   if (details.reason === 'install') {
+//     onExtensionInstall();
+//   }
+// });
 
 // Setup uninstall URL every background start
 chrome.runtime.setUninstallURL('https://forms.gle/mAxcUCumXfnEaQHm7');

@@ -339,7 +339,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 name={FormFieldName.PASSWORD}
                 rules={[
                   {
-                    message: 'Current password is required',
+                    message: t('Current password is required'),
                     required: true
                   }
                 ]}

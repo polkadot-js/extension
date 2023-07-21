@@ -183,7 +183,8 @@ export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { to
       color: token.colorText,
       textOverflow: 'ellipsis',
       overflow: 'hidden',
-      textWrap: 'nowrap'
+      textWrap: 'nowrap',
+      whiteSpace: 'nowrap'
     },
 
     // TODO: delete this when fix component in ui-base

@@ -12,7 +12,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
+import { customFormatDate, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -136,6 +136,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
   const [searchInput, setSearchInput] = useState<string>('');
   const { chainInfoMap } = useSelector((root) => root.chainStore);
+  const { language } = useSelector((root) => root.settings);
 
   const isActive = checkActive(modalId);
 
@@ -369,8 +370,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [chainInfoMap]);
 
   const groupBy = useCallback((item: TransactionHistoryItem) => {
-    return customFormatDate(item.time, '#MMM# #DD#, #YYYY#');
-  }, []);
+    return formatHistoryDate(item.time, language, 'list');
+  }, [language]);
 
   const groupSeparator = useCallback((group: TransactionHistoryItem[], idx: number, groupLabel: string) => {
     return (

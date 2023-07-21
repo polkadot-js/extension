@@ -186,10 +186,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return _isCustomAsset(tokenInfo.slug)
       ? {
         onClick: goBack,
-        children: 'Cancel'
+        children: t('Cancel')
       }
       : undefined;
-  }, [goBack, tokenInfo.slug]);
+  }, [goBack, tokenInfo.slug, t]);
 
   const rightFooterButtonProps = useCallback(() => {
     return _isCustomAsset(tokenInfo.slug)

@@ -99,14 +99,14 @@ export class SubstrateApi implements _SubstrateApi {
     }
   }
 
-  constructor (chainSlug: string, apiUrl: string, { metadata, providerName }: _ApiOptions = {}) {
+  constructor (chainSlug: string, apiUrl: string, { externalApiPromise, metadata, providerName }: _ApiOptions = {}) {
     this.chainSlug = chainSlug;
     this.apiUrl = apiUrl;
     this.providerName = providerName;
     this.registry = new TypeRegistry();
     this.metadata = metadata;
     this.provider = this.createProvider(apiUrl);
-    this.api = this.createApi(this.provider);
+    this.api = externalApiPromise || this.createApi(this.provider);
 
     this.handleApiReady = createPromiseHandler<_SubstrateApi>();
     this.api.on('ready', this.onReady.bind(this));

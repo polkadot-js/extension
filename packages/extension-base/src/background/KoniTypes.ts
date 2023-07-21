@@ -25,6 +25,29 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
 
+export enum RuntimeEnvironment {
+  Web = 'Web',
+  Node = 'Node',
+  ExtensionChrome = 'Extension (Chrome)',
+  ExtensionFirefox = 'Extension (Firefox)',
+  WebWorker = 'Web Worker',
+  ServiceWorker = 'Service Worker',
+  Unknown = 'Unknown',
+}
+
+export interface RuntimeEnvironmentInfo {
+  environment: RuntimeEnvironment;
+  version: string;
+  host?: string;
+  protocol?: string;
+}
+
+export type TargetEnvironment = 'extension' | 'webapp' | 'web-runner';
+
+export interface EnvironmentSupport {
+  MANTA_ZK: boolean;
+}
+
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
   chainStateMap: Record<string, _ChainState>;
@@ -386,7 +409,9 @@ export type LanguageType = 'en'
 |'tr'
 |'pl'
 |'th'
-|'ur';
+|'ur'
+|'vi'
+|'ja';
 
 export type LanguageOptionType = {
   text: string;
@@ -396,9 +421,9 @@ export type LanguageOptionType = {
 export type BrowserConfirmationType = 'extension'|'popup'|'window';
 
 export interface UiSettings {
-  // language: LanguageType,
+  language: LanguageType,
   browserConfirmationType: BrowserConfirmationType;
-  // isShowZeroBalance: boolean,
+  isShowZeroBalance: boolean;
   isShowBalance: boolean;
   accountAllLogo: string;
   theme: ThemeNames;
@@ -414,6 +439,10 @@ export type RequestCameraSettings = { camera: boolean };
 export type RequestChangeTimeAutoLock = { autoLockTime: number };
 
 export type RequestChangeEnableChainPatrol = { enable: boolean };
+
+export type RequestChangeShowZeroBalance = { show: boolean };
+
+export type RequestChangeLanguage = { language: LanguageType };
 
 export interface RandomTestRequest {
   start: number;
@@ -1867,6 +1896,20 @@ export interface RequestPassPhishingPage {
   url: string;
 }
 
+// Psp token
+
+export interface RequestAddPspToken {
+  genesisHash: string;
+  tokenInfo: {
+    type: string;
+    address: string;
+    symbol: string;
+    name: string;
+    decimals?: number;
+    logo?: string;
+  };
+}
+
 // Wallet Connect
 
 export interface RequestConnectWalletConnect {
@@ -1888,6 +1931,53 @@ export interface RequestReconnectConnectWalletSession {
 
 export interface RequestDisconnectWalletConnectSession {
   topic: string
+}
+
+export interface MantaPayConfig {
+  address: string;
+  zkAddress: string;
+  enabled: boolean;
+  chain: string;
+  isInitialSync: boolean;
+}
+
+export interface MantaAuthorizationContext {
+  address: string;
+  chain: string;
+  data: unknown;
+}
+
+export interface MantaPaySyncState {
+  isSyncing: boolean,
+  progress: number,
+  needManualSync?: boolean
+}
+
+export interface MantaPayEnableParams {
+  password: string,
+  address: string
+}
+
+export enum MantaPayEnableMessage {
+  WRONG_PASSWORD = 'WRONG_PASSWORD',
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+  SUCCESS = 'SUCCESS'
+}
+
+export interface MantaPayEnableResponse {
+  success: boolean;
+  message: MantaPayEnableMessage
+}
+
+/// Metadata
+export interface RequestFindRawMetadata {
+  genesisHash: string;
+}
+
+export interface ResponseFindRawMetadata {
+  rawMetadata: string;
+  specVersion: number;
 }
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value
@@ -1957,6 +2047,14 @@ export interface KoniRequestSignatures {
   // Phishing page
   'pri(phishing.pass)': [RequestPassPhishingPage, boolean];
 
+  // Manta pay
+  'pri(mantaPay.enable)': [MantaPayEnableParams, MantaPayEnableResponse];
+  'pri(mantaPay.disable)': [string, boolean];
+  'pri(mantaPay.getZkBalance)': [null, null];
+  'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];
+  'pri(mantaPay.subscribeSyncingState)': [null, MantaPaySyncState, MantaPaySyncState];
+  'pri(mantaPay.initSyncMantaPay)': [string, null];
+
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];
   'pri(authorize.requestsV2)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
@@ -1998,13 +2096,15 @@ export interface KoniRequestSignatures {
   // Settings
   'pri(settings.changeBalancesVisibility)': [null, boolean];
   'pri(settings.subscribe)': [null, UiSettings, UiSettings];
+  'pri(settings.getLogoMaps)': [null, AllLogoMap];
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
-  'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
-  'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
+  'pri(settings.saveTheme)': [ThemeNames, boolean];
+  'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
   'pri(settings.saveAutoLockTime)': [RequestChangeTimeAutoLock, boolean];
   'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
-  'pri(settings.getLogoMaps)': [null, AllLogoMap];
+  'pri(settings.saveLanguage)': [RequestChangeLanguage, boolean];
+  'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];
@@ -2097,6 +2197,9 @@ export interface KoniRequestSignatures {
   'mobile(subscription.stop)': [SubscriptionServiceType[], void];
   'mobile(subscription.restart)': [SubscriptionServiceType[], void];
 
+  // Psp token
+  'pub(token.add)': [RequestAddPspToken, boolean];
+
   /// Wallet connect
   'pri(walletConnect.connect)': [RequestConnectWalletConnect, boolean];
   'pri(walletConnect.requests.subscribe)': [null, WalletConnectSessionRequest[], WalletConnectSessionRequest[]];
@@ -2105,8 +2208,14 @@ export interface KoniRequestSignatures {
   'pri(walletConnect.session.reconnect)': [RequestReconnectConnectWalletSession, boolean];
   'pri(walletConnect.session.subscribe)': [null, SessionTypes.Struct[], SessionTypes.Struct[]];
   'pri(walletConnect.session.disconnect)': [RequestDisconnectWalletConnectSession, boolean];
+
+  /// Metadata
+  'pri(metadata.find)': [RequestFindRawMetadata, ResponseFindRawMetadata];
 }
 
 export interface ApplicationMetadataType {
   version: string;
 }
+
+export type OSType = 'Mac OS' | 'iOS' | 'Windows' | 'Android' | 'Linux' | 'Unknown';
+export const MobileOS: OSType[] = ['iOS', 'Android'];

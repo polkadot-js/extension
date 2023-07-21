@@ -4,26 +4,19 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
-import { DEFAULT_AUTO_LOCK_TIME, DEFAULT_CHAIN_PATROL_ENABLE, DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from '@subwallet/extension-base/services/setting-service/constants';
+import { DEFAULT_SETTING } from '@subwallet/extension-base/services/setting-service/constants';
+import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
 import { AppSettings, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 import settings from '@polkadot/ui-settings';
-import { SettingsStruct } from '@polkadot/ui-settings/types';
 
 const initialState: AppSettings = {
   // Polkadot settings
   ...settings.get(),
 
   // UI settings
-  isShowBalance: false,
-  isShowZeroBalance: true,
-  accountAllLogo: '',
-  theme: DEFAULT_THEME,
-  language: 'en',
-  browserConfirmationType: DEFAULT_NOTIFICATION_TYPE,
-  camera: false,
-  timeAutoLock: DEFAULT_AUTO_LOCK_TIME,
-  enableChainPatrol: DEFAULT_CHAIN_PATROL_ENABLE,
+
+  ...DEFAULT_SETTING,
 
   // AuthUrls
   authUrls: {},
@@ -31,11 +24,11 @@ const initialState: AppSettings = {
   // Media settings
   mediaAllowed: false,
 
-  reduxStatus: ReduxStatus.INIT,
   logoMaps: {
     chainLogoMap: {},
     assetLogoMap: {}
-  }
+  },
+  reduxStatus: ReduxStatus.INIT
 };
 
 const settingsSlice = createSlice({
@@ -44,16 +37,10 @@ const settingsSlice = createSlice({
   reducers: {
     updateUiSettings (state, action: PayloadAction<UiSettings>) {
       const payload = action.payload;
-      const { theme, ...newState } = payload;
 
-      return {
-        ...state,
-        ...newState,
-        reduxStatus: ReduxStatus.READY
-      };
-    },
-    updateAppSettings (state, action: PayloadAction<SettingsStruct>) {
-      const { camera, notification, ...payload } = action.payload;
+      if (payload.language !== state.language) {
+        localStorage.setItem(LANGUAGE, payload.language); // cache language;
+      }
 
       return {
         ...state,
@@ -120,5 +107,5 @@ const settingsSlice = createSlice({
   }
 });
 
-export const { updateAppSettings, updateAuthUrls, updateUiSettings } = settingsSlice.actions;
+export const { updateAuthUrls, updateUiSettings } = settingsSlice.actions;
 export default settingsSlice.reducer;

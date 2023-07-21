@@ -2,17 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
-import { languageOptions } from '@subwallet/extension-base/constants/i18n';
+import { ENABLE_LANGUAGES, languageOptions } from '@subwallet/extension-base/constants/i18n';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { saveBrowserConfirmationType } from '@subwallet/extension-koni-ui/messaging';
+import { saveBrowserConfirmationType, saveLanguage, saveTheme } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { updateBrowserConfirmationType, updateLanguage, updateTheme } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { noop } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import i18next from 'i18next';
 import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -97,8 +96,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
-  const [language, setLanguage] = useState<LanguageType>(_language);
-  const [browserConfirmationType, setBrowserConfirmationType] = useState<BrowserConfirmationType>(_browserConfirmationType);
   const [loadingMap, setLoadingMap] = useState<LoadingMap>({
     browserConfirmationType: false,
     language: false
@@ -131,7 +128,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       leftIcon: GlobeHemisphereEast,
       leftIconBgColor: token['green-6'],
       title: item.text,
-      disabled: item.value !== 'en'
+      disabled: !ENABLE_LANGUAGES.includes(item.value)
     }));
   }, [token]);
 
@@ -159,49 +156,38 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [t, token]);
 
   const onSelectLanguage = useCallback((value: string) => {
-    setLanguage(value as LanguageType);
     setLoadingMap((prev) => ({
       ...prev,
       language: true
     }));
-    i18next.changeLanguage(value).then(() => {
-      updateLanguage(value as LanguageType);
-
-      setLoadingMap((prev) => ({
-        ...prev,
-        language: false
-      }));
-      setLanguage(value as LanguageType);
-    }).catch((e) => {
-      setLoadingMap((prev) => ({
-        ...prev,
-        language: false
-      }));
-      console.log('i18next.changeLanguage error', e);
-    });
+    saveLanguage(value as LanguageType)
+      .finally(() => {
+        setLoadingMap((prev) => ({
+          ...prev,
+          language: false
+        }));
+      });
   }, []);
 
   const onSelectBrowserConfirmationType = useCallback((value: string) => {
-    setBrowserConfirmationType(value as BrowserConfirmationType);
     setLoadingMap((prev) => ({
       ...prev,
       browserConfirmationType: true
     }));
-    saveBrowserConfirmationType(value as BrowserConfirmationType, (data) => {
-      updateBrowserConfirmationType(data.browserConfirmationType);
+    saveBrowserConfirmationType(value as BrowserConfirmationType)
+      .catch((e) => {
+        console.log('saveBrowserConfirmationType error', e);
+      })
+      .finally(() => {
+        setLoadingMap((prev) => ({
+          ...prev,
+          browserConfirmationType: false
+        }));
+      });
+  }, []);
 
-      setLoadingMap((prev) => ({
-        ...prev,
-        browserConfirmationType: false
-      }));
-      setBrowserConfirmationType(data.browserConfirmationType);
-    }).catch((e) => {
-      setLoadingMap((prev) => ({
-        ...prev,
-        browserConfirmationType: false
-      }));
-      console.log('saveBrowserConfirmationType error', e);
-    });
+  const onSelectTheme = useCallback((value: string) => {
+    saveTheme(value as ThemeNames).finally(noop);
   }, []);
 
   return (
@@ -241,7 +227,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             inputWidth={'100%'}
             itemKey='key'
             items={themeItems}
-            onSelect={updateTheme as unknown as (value: string) => void}
+            onSelect={onSelectTheme}
             renderItem={renderSelectionItem}
             selected={theme}
             shape='round'
@@ -266,7 +252,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             items={languageItems}
             onSelect={onSelectLanguage}
             renderItem={renderSelectionItem}
-            selected={language}
+            selected={_language}
             shape='round'
             size='small'
             title={t('Language')}
@@ -281,7 +267,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               key: 'browser-confirmation-type-trigger',
               leftIcon: BellSimpleRinging,
               leftIconBgColor: token['volcano-6'],
-              title: !isWebUI ? t('Browser notification type') : t('Browser notification type')
+              title: t('Browser notification type')
             })}
             disabled={loadingMap.browserConfirmationType}
             id='browser-confirmation-type-select-modal'
@@ -290,7 +276,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             items={browserConfirmationItems}
             onSelect={onSelectBrowserConfirmationType}
             renderItem={renderSelectionItem}
-            selected={browserConfirmationType}
+            selected={_browserConfirmationType}
             shape='round'
             size='small'
             title={!isWebUI ? t('Browser notification type') : t('Browser notification type')}

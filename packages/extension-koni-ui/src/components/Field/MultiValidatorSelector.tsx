@@ -4,6 +4,7 @@
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
@@ -159,8 +160,33 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     };
   }, [selectedFilters]);
 
-  const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator, onInitValidators } = useSelectValidators(id, maxCount, onChange, isSingleSelect);
-  const validatorLabel = useMemo(() => `${getValidatorLabel(chain).charAt(0).toLowerCase() + getValidatorLabel(chain).substr(1)}${changeValidators.length > 1 ? 's' : ''}`, [chain, changeValidators]);
+  const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator, onInitValidators } = useSelectValidators(id, chain, maxCount, onChange, isSingleSelect);
+
+  const fewValidators = changeValidators.length > 1;
+
+  const applyLabel = useMemo(() => {
+    const label = getValidatorLabel(chain);
+
+    if (!fewValidators) {
+      switch (label) {
+        case 'dApp':
+          return detectTranslate('Apply {{number}} dApp');
+        case 'Collator':
+          return detectTranslate('Apply {{number}} collator');
+        case 'Validator':
+          return detectTranslate('Apply {{number}} validator');
+      }
+    } else {
+      switch (label) {
+        case 'dApp':
+          return detectTranslate('Apply {{number}} dApps');
+        case 'Collator':
+          return detectTranslate('Apply {{number}} collators');
+        case 'Validator':
+          return detectTranslate('Apply {{number}} validators');
+      }
+    }
+  }, [chain, fewValidators]);
 
   const onResetSort = useCallback(() => {
     setSortSelection(SortKey.DEFAULT);
@@ -275,7 +301,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             )}
             onClick={onApplyChangeValidators}
           >
-            {t('Apply')}&nbsp;{changeValidators.length}&nbsp;{t(validatorLabel)}
+            {t(applyLabel, { number: changeValidators.length })}
           </Button>
         )}
         id={id}

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { Layout, OptionType, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
@@ -40,14 +40,6 @@ const TAB_LIST = [{
   value: FilterValue.EVM
 }];
 
-const FILTER_OPTIONS = [
-  { label: 'EVM networks', value: FilterValue.EVM },
-  { label: 'Substrate networks', value: FilterValue.SUBSTRATE },
-  { label: 'Custom networks', value: FilterValue.CUSTOM },
-  { label: 'Enabled networks', value: FilterValue.ENABLED },
-  { label: 'Disabled networks', value: FilterValue.DISABLED }
-];
-
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -57,8 +49,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { isWebUI } = useContext(ScreenContext);
   const { activeModal } = useContext(ModalContext);
   const chainInfoList = useChainInfoWithState();
-
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const FILTER_OPTIONS = useMemo((): OptionType[] => ([
+    { label: t('EVM networks'), value: FilterValue.EVM },
+    { label: t('Substrate networks'), value: FilterValue.SUBSTRATE },
+    { label: t('Custom networks'), value: FilterValue.CUSTOM },
+    { label: t('Enabled networks'), value: FilterValue.ENABLED },
+    { label: t('Disabled networks'), value: FilterValue.DISABLED }
+  ]), [t]);
 
   const filterOptions = useMemo(() => {
     if (isWebUI) {
@@ -66,7 +65,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     return FILTER_OPTIONS;
-  }, [isWebUI]);
+  }, [FILTER_OPTIONS, isWebUI]);
 
   const networkList = useMemo(() => {
     if (!isWebUI) {
@@ -323,10 +322,6 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flex: 1
     },
 
-    '.ant-network-item-name': {
-      zIndex: 1
-    },
-
     '.ant-network-item-content .__toggle-area': {
       marginRight: -token.marginXXS,
 
@@ -334,6 +329,7 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
         marginLeft: token.marginXS
       }
     },
+
     '.tab-header': {
       display: 'flex',
       justifyContent: 'space-between',
@@ -376,6 +372,18 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
           opacity: 1
         }
       }
+    },
+
+    '.ant-web3-block .ant-web3-block-middle-item': {
+      width: 190
+    },
+
+    '.ant-network-item-name': {
+      zIndex: 1,
+      overflow: 'hidden',
+      textWrap: 'nowrap',
+      textOverflow: 'ellipsis',
+      paddingRight: token.paddingXS
     }
   });
 });

@@ -1,9 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
-import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
+import { CloseIcon, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ACCOUNT_TYPES, SELECTED_CREATE_ACCOUNT_TYPE_KEY } from '@subwallet/extension-koni-ui/constants/account';
 import { NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
@@ -145,7 +143,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   useEffect(() => {
     if (isPopup && isFirefox() && hasMasterPassword && !isOpenWindowRef.current) {
       isOpenWindowRef.current = true;
-      windowOpen('/accounts/new-seed-phrase').then(window.close).catch(console.log);
+      windowOpen({ allowedPath: '/accounts/new-seed-phrase' }).then(window.close).catch(console.log);
     }
   }, [isPopup, hasMasterPassword]);
 

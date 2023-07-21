@@ -1,6 +1,6 @@
-    1718	Nam Phạm                      	[Issue 1546] update chain-list and xcm logic for Bifrost Polkadot
-    1424	AnhMTV                        	Release version 1.0.12
-     968	S2kael                        	[Issue-1576] Update default provider for 'ethereum' network
+    1805	Nam Phạm                      	[Issue 1620] fix bug transfer PEN
+    1468	AnhMTV                        	Release version 1.1.2
+    1061	S2kael                        	
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	
@@ -11,7 +11,7 @@
       69	dominhquang                   	Fix bug UI for Staking feature
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
-      20	S2kael                        	
+      21	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

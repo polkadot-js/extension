@@ -15,11 +15,11 @@ import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFo
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
-import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
-import { Button, Form, Icon, Input } from '@subwallet/react-ui';
+import { FormCallbacks, ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
+import { Form, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown } from 'phosphor-react';
-import React, { ChangeEventHandler, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -33,6 +33,10 @@ const FooterIcon = (
 
 const formName = 'import-private-key-form';
 const fieldName = 'private-key';
+
+interface FormState {
+  [fieldName]: string;
+}
 
 const instructionContents: InstructionContentType[] = [
   {
@@ -60,29 +64,23 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [validating, setValidating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [changed, setChanged] = useState(false);
-  const [privateKey, setPrivateKey] = useState('');
-  const [autoCorrect, setAutoCorrect] = useState('');
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<FormState>();
 
   const accountName = useGetDefaultAccountName();
 
-  // Auto focus field
+  // Auto-focus field
   useFocusFormItem(form, fieldName);
 
-  const onChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback((event) => {
-    setChanged(true);
-    setAutoCorrect('');
-    const val = event.target.value;
+  const privateKey = Form.useWatch(fieldName, form);
 
-    setPrivateKey(val);
-  }, []);
+  const onSubmit: FormCallbacks<FormState>['onFinish'] = useCallback((values: FormState) => {
+    const { [fieldName]: privateKey } = values;
 
-  const onSubmit = useCallback(() => {
-    if (privateKey) {
+    if (privateKey?.trim()) {
       setLoading(true);
       createAccountSuriV2({
         name: accountName,
-        suri: privateKey,
+        suri: privateKey.trim(),
         isAllowed: true,
         types: [EVM_ACCOUNT_TYPE]
       })
@@ -99,7 +97,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }
-  }, [privateKey, accountName, onComplete]);
+  }, [accountName, onComplete]);
 
   useEffect(() => {
     let amount = true;
@@ -109,7 +107,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
 
     if (amount) {
-      if (privateKey) {
+      if (privateKey?.trim()) {
         setValidating(true);
         setValidateState({
           status: 'validating',
@@ -117,11 +115,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         });
 
         timeOutRef.current = setTimeout(() => {
-          validateMetamaskPrivateKeyV2(privateKey, [EVM_ACCOUNT_TYPE])
-            .then(({ addressMap, autoAddPrefix }) => {
+          validateMetamaskPrivateKeyV2(privateKey.trim(), [EVM_ACCOUNT_TYPE])
+            .then(({ autoAddPrefix }) => {
               if (amount) {
                 if (autoAddPrefix) {
-                  setAutoCorrect(`0x${privateKey}`);
+                  form.setFieldValue(fieldName, `0x${privateKey}`);
                 }
 
                 setValidateState({});
@@ -145,7 +143,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (changed) {
           setValidateState({
             status: 'error',
-            message: 'Seed phrase is required'
+            message: t('Private key is required')
           });
         }
       }
@@ -154,40 +152,32 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     return () => {
       amount = false;
     };
-  }, [privateKey, changed]);
+  }, [privateKey, form, changed, t]);
 
-  const buttonProps = {
-    children: validating ? t('Validating') : t('Import account'),
-    icon: FooterIcon,
-    onClick: onSubmit,
-    disabled: !privateKey || !!validateState.status,
-    loading: validating || loading
-  };
+  const onValuesChange: FormCallbacks<FormState>['onValuesChange'] = useCallback((changedValues: Partial<FormState>) => {
+    if (fieldName in changedValues) {
+      setChanged(true);
+    }
+  }, []);
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={onBack}
-        {...(!isWebUI
-          ? {
-            rightFooterButton: buttonProps,
-            showBackButton: true,
-            subHeaderPaddingVertical: true,
-            showSubHeader: true,
-            subHeaderCenter: true,
-            subHeaderBackground: 'transparent'
-          }
-          : {
-            headerList: ['Simple'],
-            showWebHeader: true
-          })}
+        rightFooterButton={{
+          children: validating ? t('Validating') : t('Import account'),
+          icon: FooterIcon,
+          onClick: form.submit,
+          disabled: !privateKey || !!validateState.status,
+          loading: validating || loading
+        }}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
             onClick: goHome
           }
         ]}
-        title={t<string>('Import via Private Key')}
+        title={t<string>('Import by private key')}
       >
         <div className={CN('container', {
           '__web-ui': isWebUI
@@ -201,6 +191,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               className='form-container'
               form={form}
               name={formName}
+              onFinish={onSubmit}
+              onValuesChange={onValuesChange}
             >
               <Form.Item
                 name={fieldName}
@@ -208,19 +200,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               >
                 <Input.TextArea
                   className='private-key-input'
-                  onChange={onChange}
                   placeholder={t('Enter or paste private key')}
                   statusHelp={validateState.message}
-                  value={autoCorrect || privateKey || ''}
                 />
               </Form.Item>
-
-              {isWebUI && (
-                <Button
-                  {...buttonProps}
-                  className='action'
-                />
-              )}
             </Form>
           </div>
 
@@ -228,7 +211,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             <InstructionContainer contents={instructionContents} />
           )}
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 };

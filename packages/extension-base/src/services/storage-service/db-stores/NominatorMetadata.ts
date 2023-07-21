@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, StakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import BaseStoreWithAddressAndChain from '@subwallet/extension-base/services/storage-service/db-stores/BaseStoreWithAddressAndChain';
 import { liveQuery } from 'dexie';
 
 export default class NominatorMetadataStore extends BaseStoreWithAddressAndChain<NominatorMetadata> {
   async getAll () {
-    return this.table.toArray();
+    return this.table.filter((item) => item.status !== StakingStatus.NOT_STAKING).toArray();
   }
 
   subscribeByAddresses (addresses: string[]) {
@@ -23,7 +23,7 @@ export default class NominatorMetadataStore extends BaseStoreWithAddressAndChain
   }
 
   getByAddress (addresses: string[]) {
-    return this.table.where('address').anyOfIgnoreCase(addresses).toArray();
+    return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => item.status !== StakingStatus.NOT_STAKING).toArray();
   }
 
   async removeByAddress (address: string) {

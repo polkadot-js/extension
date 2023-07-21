@@ -398,12 +398,12 @@ const Component: React.FC<Props> = (props: Props) => {
                 optionType='button'
                 options={[
                   {
-                    label: 'Pools',
+                    label: t('Pools'),
                     value: StakingType.POOLED,
                     disabled: isEthAdr
                   },
                   {
-                    label: 'Nominate',
+                    label: t('Nominate'),
                     value: StakingType.NOMINATED
                   }
                 ]}
@@ -454,7 +454,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <Form.Item
                 name={FormFieldName.VALUE}
                 rules={[
-                  { required: true },
+                  { required: true, message: t('Amount is required') },
                   ({ getFieldValue }) => ({
                     validator: (_, value: string) => {
                       const type = getFieldValue(FormFieldName.TYPE) as StakingType;
@@ -462,12 +462,12 @@ const Component: React.FC<Props> = (props: Props) => {
 
                       if (type === StakingType.POOLED) {
                         if (val.lte(0)) {
-                          return Promise.reject(new Error('Amount must be greater than 0'));
+                          return Promise.reject(new Error(t('Amount must be greater than 0')));
                         }
                       } else {
                         if (!nominatorMetadata?.isBondedBefore || !isRelayChain) {
                           if (val.lte(0)) {
-                            return Promise.reject(new Error('Amount must be greater than 0'));
+                            return Promise.reject(new Error(t('Amount must be greater than 0')));
                           }
                         }
                       }

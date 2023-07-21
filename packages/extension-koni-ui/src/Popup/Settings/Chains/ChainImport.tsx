@@ -276,8 +276,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const backBtnProps = useMemo(() => ({
     onClick: onBack,
-    children: 'Cancel'
-  }), [onBack]);
+    children: t('Cancel')
+  }), [onBack, t]);
 
   const submitBtnProps = useMemo(() => ({
     block: true,
@@ -300,7 +300,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       center: false
     }
     : {
-      title: t<string>('Import chain'),
+      title: t<string>('Import network'),
       center: true,
       rightButtons: [
         {

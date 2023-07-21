@@ -25,7 +25,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
-// import NftImport from '../Home/Nfts/NftImport';
 import AccountExport from './AccountExport';
 
 type Props = ThemeProps;
@@ -180,9 +179,9 @@ const Component: React.FC<Props> = (props: Props) => {
   const onCopyAddress = useCallback(() => {
     copyToClipboard(account?.address || '');
     notify({
-      message: 'Copied'
+      message: t('Copied to clipboard')
     });
-  }, [account?.address, notify]);
+  }, [account?.address, notify, t]);
 
   const onUpdate: FormCallbacks<DetailFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], _allFields: FormFieldData[]) => {
     const changeMap = convertFieldToObject<DetailFormState>(changedFields);
@@ -288,7 +287,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 name={FormFieldName.NAME}
                 rules={[
                   {
-                    message: 'Wallet name is required',
+                    message: t('Account name is required'),
                     transform: (value: string) => value.trim(),
                     required: true
                   }
@@ -298,9 +297,9 @@ const Component: React.FC<Props> = (props: Props) => {
                 <Input
                   className='account-name-input'
                   disabled={deriving}
-                  label={t('Wallet name')}
+                  label={t('Account name')}
                   onBlur={form.submit}
-                  placeholder={t('Wallet name')}
+                  placeholder={t('Account name')}
                   prefix={(
                     <BackgroundIcon
                       backgroundColor='var(--wallet-name-icon-bg-color)'
@@ -458,9 +457,11 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
         width: token.sizeMD,
         height: token.sizeMD,
 
-        '.anticon': {
-          height: token.sizeSM,
-          width: token.sizeSM
+        '.user-name-icon': {
+          span: {
+            height: token.sizeSM,
+            width: token.sizeSM
+          }
         }
       },
 

@@ -721,5 +721,8 @@
   "Withdraw in {{time}}": "",
   "Withdrawable in a day": "",
   "Pools": "",
-  "Nominate": ""
+  "Nominate": "",
+  "Click <extension/> select SubWallet and then <pin/>": "",
+  "Hide balance": "",
+  "Show balance": ""
 }

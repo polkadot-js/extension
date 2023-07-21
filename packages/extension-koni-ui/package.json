@@ -72,7 +72,7 @@
     "react-transition-group": "^4.4.5",
     "redux": "^4.2.0",
     "redux-persist": "^6.0.0",
-    "redux-toolkit": "^1.1.2",
+    "redux-toolkit": "^1.1.2-1",
     "semantic-ui-react": "^2.1.4",
     "styled-components": "^5.3.6"
   },

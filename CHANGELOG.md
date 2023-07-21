@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 1.1.3
+Build date: Jul 21, 2023.
+
+Features & Update:
+- Support show/hide balance (#1582)
+- Support sort token by value (#1444)
+- Update UI for notification (#1639)
+- Auto update metadata (#588)
+- Update chainlist (0.2.7) (#1661)
+  - Integrate aSEED token for Acala
+  - Add support for LPtokens and qTokens on Interlay
+
+Bugs fixed:
+- Fixed bug video NFT size (#1651)
+- Fixed bug Show incorrect transaction time on the history screen (#1654)
+- Fixed bug Do not validate amount of the recipient address in case send token (#1657)
+- Fix bug signing transaction on Avail (#1670)
+
 ## 1.1.2
 Build date: Jul 14, 2023.
 

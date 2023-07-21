@@ -141,12 +141,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   </>;
 }
 
-const Main = styled.main`
-  display: flex;
-  height: 100vh;
-  flex-direction: column;
-`;
-
 function _Root ({ className }: ThemeProps): React.ReactElement {
   const dataContext = useContext(DataContext);
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
@@ -159,9 +153,9 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
         resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings'])}
       >
         <DefaultRoute>
-          <Main className={className}>
+          <main className={className}>
             <Outlet />
-          </Main>
+          </main>
         </DefaultRoute>
       </PageWrapper>
       <BackgroundExpandView />
@@ -169,4 +163,8 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   );
 }
 
-export const Root = styled(_Root)(() => ({}));
+export const Root = styled(_Root)<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
+  display: 'flex',
+  height: '100%',
+  flexDirection: 'column'
+}));

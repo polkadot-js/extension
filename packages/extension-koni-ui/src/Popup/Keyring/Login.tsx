@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
+import { Layout, Logo2DWithBorder, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
 import SocialGroup from '@subwallet/extension-koni-ui/components/SocialGroup';
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -11,7 +11,7 @@ import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
-import { Button, Form, Image, Input, ModalContext } from '@subwallet/react-ui';
+import { Button, Form, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -90,9 +90,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         >
           <div className='main-wrapper'>
             <div className='logo-container'>
-              <Image
-                src='/images/subwallet/gradient-logo.png'
-                width={80}
+              <Logo2DWithBorder
+                height={'100%'}
+                width={'100%'}
               />
             </div>
             <div className='title'>
@@ -102,6 +102,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               {t('Enter your password to unlock account')}
             </div>
             <Form
+              className={'__form'}
               form={form}
               initialValues={{ [FormFieldName.PASSWORD]: '' }}
               onFieldsChange={onUpdate}
@@ -162,33 +163,6 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       flexDirection: 'column'
     },
 
-    '.__web-ui': {
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-
-      '.main-wrapper': {
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        width: '400px',
-        margin: '0 auto',
-
-        '.logo-container': {
-          margin: 0
-        }
-      },
-
-      '.password-input': {
-        marginTop: '36px !important'
-      },
-
-      '.forgot-password': {
-        marginTop: '0 !important'
-      }
-    },
-
     '.bg-gradient': {
       backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
       height: 290,
@@ -210,15 +184,14 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       top: 0
     },
 
+    '.logo-container': {
+      height: 120
+    },
+
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
       opacity: 0.999,
-
-      '.logo-container': {
-        marginTop: 100,
-        color: token.colorTextBase
-      },
 
       '.title': {
         marginTop: token.margin,
@@ -232,11 +205,8 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         marginTop: token.marginXS,
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
-        color: token.colorTextLight3
-      },
-
-      '.password-input': {
-        marginTop: 62
+        color: token.colorTextLight3,
+        marginBottom: 36
       },
 
       '.forgot-password': {
@@ -245,6 +215,25 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         lineHeight: token.lineHeightHeading5,
         color: token.colorTextLight4,
         marginTop: 27
+      }
+    },
+
+    '.__web-ui': {
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+
+      '.main-wrapper': {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        width: '400px',
+        margin: '0 auto'
+      },
+
+      '.forgot-password': {
+        marginTop: '0 !important'
       }
     }
   };

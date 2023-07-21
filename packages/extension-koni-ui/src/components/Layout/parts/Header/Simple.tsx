@@ -30,20 +30,22 @@ function Component (props: Props): React.ReactElement<Props> {
             height={24}
             width={24}
           />
-          <Button
-            className='__back-button'
-            icon={
-              <Icon
-                customSize='28px'
-                phosphorIcon={CaretLeft}
-              />
-            }
-            onClick={props.onBack || defaultOnBack}
-            size='xs'
-            type='ghost'
-          />
+          {!!props.title && (
+            <Button
+              className='__back-button'
+              icon={
+                <Icon
+                  customSize='28px'
+                  phosphorIcon={CaretLeft}
+                />
+              }
+              onClick={props.onBack || defaultOnBack}
+              size='xs'
+              type='ghost'
+            />
+          )}
         </div>
-        {props.title && (
+        {!!props.title && (
           <div className='__title-wrapper'>
             <div className={'__title'}>{props.title}</div>
           </div>

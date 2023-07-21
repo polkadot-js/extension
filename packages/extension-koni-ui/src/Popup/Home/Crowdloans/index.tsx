@@ -5,6 +5,7 @@ import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTyp
 import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
@@ -58,7 +59,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const items: CrowdloanItemType[] = useGetCrowdloanList();
+
   const { activeModal } = useContext(ModalContext);
+
+  const { isShowBalance } = useSelector((state) => state.settings);
+
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const filterOptions = useMemo(() => [
@@ -149,6 +154,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           decimal={0}
           displayNetwork={item.chainDisplayName}
           displayToken={item.symbol}
+          hideBalance={!isShowBalance}
           isShowSubLogo={true}
           key={`${item.symbol}_${item.slug}`}
           networkKey={item.slug}
@@ -157,7 +163,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
       );
     },
-    [getParaStateLabel]
+    [getParaStateLabel, isShowBalance]
   );
 
   // empty list

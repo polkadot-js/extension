@@ -783,6 +783,17 @@ export default class KoniState {
     });
   }
 
+  public setShowBalance (value: boolean): void {
+    this.settingService.getSettings((settings) => {
+      const newSettings = {
+        ...settings,
+        isShowBalance: value
+      };
+
+      this.settingService.setSettings(newSettings);
+    });
+  }
+
   public subscribeSettingsSubject (): Subject<RequestSettingsType> {
     return this.settingService.getSubject();
   }

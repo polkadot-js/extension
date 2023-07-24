@@ -6,7 +6,7 @@ import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/
 import { isUrl, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
-import { getRandomIpfsGateway, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT } from '../config';
+import { SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT } from '../config';
 
 enum RMRK_SOURCE {
   BIRD_KANARIA = 'bird_kanaria',
@@ -48,21 +48,21 @@ export class RmrkNftApi extends BaseNftApi {
     super(chain, null, addresses);
   }
 
-  override parseUrl (input: string): string | undefined {
-    if (!input || input.length === 0) {
-      return undefined;
-    }
-
-    if (isUrl(input) || input.includes('https://') || input.includes('http')) {
-      return input;
-    }
-
-    if (!input.includes('ipfs://ipfs/')) {
-      return getRandomIpfsGateway() + input;
-    }
-
-    return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1];
-  }
+  // override parseUrl (input: string): string | undefined {
+  //   if (!input || input.length === 0) {
+  //     return undefined;
+  //   }
+  //
+  //   if (isUrl(input) || input.includes('https://') || input.includes('http')) {
+  //     return input;
+  //   }
+  //
+  //   if (!input.includes('ipfs://ipfs/')) {
+  //     return getRandomIpfsGateway() + input;
+  //   }
+  //
+  //   return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1];
+  // }
 
   private async getMetadata (metadataUrl: string): Promise<NFTMetadata | undefined> {
     let url: string | undefined = metadataUrl;
@@ -110,54 +110,58 @@ export class RmrkNftApi extends BaseNftApi {
     const nfts: Record<string | number, any>[] = [];
 
     await Promise.all(data.map(async (item) => {
-      const primaryResource = item.primaryResource ? item.primaryResource : null;
-      const metadataUri = primaryResource && primaryResource.metadata ? primaryResource.metadata : item.metadata;
-      const nftMetadata = await this.getMetadata(metadataUri);
+      try {
+        const primaryResource = item.primaryResource ? item.primaryResource : null;
+        const metadataUri = primaryResource && primaryResource.metadata ? primaryResource.metadata : item.metadata;
+        const nftMetadata = await this.getMetadata(metadataUri);
 
-      if (item.source === RMRK_SOURCE.BIRD_KANARIA) {
-        nfts.push({
-          ...item,
-          metadata: nftMetadata,
-          owner: account
-        });
-      } else if (item.source === RMRK_SOURCE.KANARIA) {
-        nfts.push({
-          ...item,
-          metadata: {
-            ...nftMetadata,
-            image: this.parseUrl(nftMetadata?.image as string)
-          },
-          owner: account
-        });
-      } else if (item.source === RMRK_SOURCE.SINGULAR_V1) {
-        nfts.push({
-          ...item,
-          metadata: {
-            description: nftMetadata?.description,
-            name: nftMetadata?.name,
-            attributes: nftMetadata?.attributes,
-            animation_url: this.parseUrl(nftMetadata?.animation_url as string),
-            image: this.parseUrl(nftMetadata?.image as string)
-          },
-          owner: account
-        });
-      } else if (item.source === RMRK_SOURCE.SINGULAR_V2) {
-        const id = item.id;
-
-        if (!id.toLowerCase().includes(KANBIRD_KEYWORD)) { // excludes kanaria bird, already handled above
+        if (item.source === RMRK_SOURCE.BIRD_KANARIA) {
+          nfts.push({
+            ...item,
+            metadata: nftMetadata,
+            owner: account
+          });
+        } else if (item.source === RMRK_SOURCE.KANARIA) {
+          nfts.push({
+            ...item,
+            metadata: {
+              ...nftMetadata,
+              image: this.parseUrl(nftMetadata?.image as string)
+            },
+            owner: account
+          });
+        } else if (item.source === RMRK_SOURCE.SINGULAR_V1) {
           nfts.push({
             ...item,
             metadata: {
               description: nftMetadata?.description,
               name: nftMetadata?.name,
               attributes: nftMetadata?.attributes,
-              properties: nftMetadata?.properties,
               animation_url: this.parseUrl(nftMetadata?.animation_url as string),
-              image: this.parseUrl(nftMetadata?.mediaUri as string)
+              image: this.parseUrl(nftMetadata?.image as string)
             },
             owner: account
           });
+        } else if (item.source === RMRK_SOURCE.SINGULAR_V2) {
+          const id = item.id;
+
+          if (!id.toLowerCase().includes(KANBIRD_KEYWORD)) { // excludes kanaria bird, already handled above
+            nfts.push({
+              ...item,
+              metadata: {
+                description: nftMetadata?.description,
+                name: nftMetadata?.name,
+                attributes: nftMetadata?.attributes,
+                properties: nftMetadata?.properties,
+                animation_url: this.parseUrl(nftMetadata?.animation_url as string),
+                image: this.parseUrl(nftMetadata?.mediaUri as string)
+              },
+              owner: account
+            });
+          }
         }
+      } catch (e) {
+        console.log('error fetching RMRK NFT', e);
       }
     }));
 

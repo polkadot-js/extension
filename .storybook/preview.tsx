@@ -6,7 +6,7 @@ import { themes } from '../packages/extension-ui/src/components/themes'
 import { BodyTheme } from '../packages/extension-ui/src/components/View'
 
 import type { Preview } from '@storybook/react';
-import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from './__mocks__/messaging';
+import { subscribeAccounts } from './__mocks__/messaging';
 import Main from "../packages/extension-ui/src/components/Main";
 
 /** @type { import('@storybook/react').Preview } */
@@ -73,9 +73,6 @@ export const decorators = [
   },
   (Story) => {
     subscribeAccounts.setMockImpl((cb: Function) => cb([]));
-    subscribeAuthorizeRequests.setMockImpl((cb: Function) => cb([]));
-    subscribeMetadataRequests.setMockImpl((cb: Function) => cb([]));
-    subscribeSigningRequests.setMockImpl((cb: Function) => cb([]));
 
     return <Story />;
   },
@@ -88,8 +85,19 @@ window.chrome = {
         onMessage: {
           addListener() {}
         },
+        onDisconnect: {
+          addListener() {}
+        },
         postMessage() {}
       };
     }
   },
+  storage: {
+    local: {},
+    onChanged: {
+      hasListener: () => false,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+    }
+  }
 } as unknown as typeof window.chrome;

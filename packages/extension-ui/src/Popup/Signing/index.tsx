@@ -22,7 +22,7 @@ function Signing({ className }: Props): React.ReactElement<Props> {
   const requests = useContext(SigningReqContext);
   const { index: requestIndex, next, previous, request } = useRequestsPagination(requests);
 
-  const isTransaction = !!(request?.request?.payload as SignerPayloadJSON)?.blockNumber;
+  const isTransaction = !!(request?.payload as SignerPayloadJSON)?.blockNumber;
 
   return request ? (
     <>
@@ -45,7 +45,8 @@ function Signing({ className }: Props): React.ReactElement<Props> {
           buttonText={isTransaction ? t('Sign') : t('Sign the message')}
           isFirst={requestIndex === 0}
           isLast={requests.length === 1}
-          request={request.request}
+          key={request.id}
+          requestPayload={request.payload}
           signId={request.id}
           url={request.url}
         />

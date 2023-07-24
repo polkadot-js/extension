@@ -20,9 +20,9 @@ import Authorize from '.';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
-const oneRequest = [{ id: '1', request: { origin: '???' }, url: 'http://polkadot.org' }];
+const oneRequest = [{ id: '1', payload: { origin: '???' }, url: 'http://polkadot.org' }];
 
-const twoRequests = [...oneRequest, { id: '2', request: { origin: 'abc' }, url: 'http://polkadot.pl' }];
+const twoRequests = [...oneRequest, { id: '2', payload: { origin: 'abc' }, url: 'http://polkadot.pl' }];
 
 const oneAccount = [
   { address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA', name: 'A', type: 'sr25519' }

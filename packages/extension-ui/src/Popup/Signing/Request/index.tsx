@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
+import type { AccountJson, RequestPayload } from '@polkadot/extension-base/background/types';
 import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
@@ -24,7 +24,7 @@ interface Props {
   account: AccountJson;
   buttonText: string;
   isFirst: boolean;
-  request: RequestSign;
+  requestPayload: RequestPayload;
   signId: string;
   url: string;
   isLast: boolean;
@@ -50,7 +50,7 @@ export default function Request({
   buttonText,
   isFirst,
   isLast,
-  request,
+  requestPayload,
   signId,
   url
 }: Props): React.ReactElement<Props> | null {
@@ -60,22 +60,20 @@ export default function Request({
   const { t } = useTranslation();
 
   useEffect((): void => {
-    const payload = request.payload;
-
-    if (isRawPayload(payload)) {
+    if (isRawPayload(requestPayload)) {
       setData({
-        hexBytes: payload.data,
+        hexBytes: requestPayload.data,
         payload: null
       });
     } else {
-      registry.setSignedExtensions(payload.signedExtensions);
+      registry.setSignedExtensions(requestPayload.signedExtensions);
 
       setData({
         hexBytes: null,
-        payload: registry.createType('ExtrinsicPayload', payload, { version: payload.version })
+        payload: registry.createType('ExtrinsicPayload', requestPayload, { version: requestPayload.version })
       });
     }
-  }, [request]);
+  }, [requestPayload]);
 
   const _onSignature = useCallback(
     ({ signature }: { signature: HexString }): void => {
@@ -90,12 +88,12 @@ export default function Request({
   );
 
   if (payload !== null) {
-    const requestPayload = request.payload as SignerPayloadJSON;
+    const jsonRequestPayload = requestPayload as SignerPayloadJSON;
 
     return (
       <>
         <FullHeightExtrinsic
-          requestPayload={requestPayload}
+          requestPayload={jsonRequestPayload}
           url={url}
         />
         {isHardware && (
@@ -103,15 +101,15 @@ export default function Request({
             accountIndex={(accountIndex as number) || 0}
             addressOffset={(addressOffset as number) || 0}
             error={error}
-            genesisHash={requestPayload.genesisHash}
+            genesisHash={jsonRequestPayload.genesisHash}
             onSignature={_onSignature}
             payload={payload}
             setError={setError}
           />
         )}
         <Address
-          address={requestPayload.address}
-          genesisHash={requestPayload.genesisHash}
+          address={jsonRequestPayload.address}
+          genesisHash={jsonRequestPayload.genesisHash}
           isExternal={isExternal}
           isHardware={isHardware}
         />
@@ -127,7 +125,7 @@ export default function Request({
       </>
     );
   } else if (hexBytes !== null) {
-    const { address, data } = request.payload as SignerPayloadRaw;
+    const { address, data } = requestPayload as SignerPayloadRaw;
 
     return (
       <>

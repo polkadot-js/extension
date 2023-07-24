@@ -62,8 +62,8 @@ describe('Signing requests', () => {
   const check = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: true } });
 
   beforeEach(async () => {
-    jest.spyOn(messaging, 'cancelSignRequest').mockResolvedValue(true);
-    jest.spyOn(messaging, 'approveSignPassword').mockResolvedValue(true);
+    jest.spyOn(messaging, 'cancelSignRequest').mockResolvedValue();
+    jest.spyOn(messaging, 'approveSignPassword').mockResolvedValue();
     jest.spyOn(messaging, 'isSignLocked').mockResolvedValue({ isLocked: true, remainingTime: 0 });
     jest.spyOn(MetadataCache, 'getSavedMeta').mockResolvedValue(westendMetadata);
 
@@ -79,30 +79,29 @@ describe('Signing requests', () => {
           whenCreated: 1602001346486
         },
         id: '1607347015530.2',
-        request: {
-          payload: {
-            address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
-            blockHash: '0x661f57d206d4fecda0408943427d4d25436518acbff543735e7569da9db6bdd7',
-            blockNumber: '0x0033fa6b',
-            era: '0xb502',
-            genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
-            method: '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
-            nonce: '0x00000003',
-            signedExtensions: [
-              'CheckSpecVersion',
-              'CheckTxVersion',
-              'CheckGenesis',
-              'CheckMortality',
-              'CheckNonce',
-              'CheckWeight',
-              'ChargeTransactionPayment'
-            ],
-            specVersion: '0x0000002d',
-            tip: '0x00000000000000000000000000000000',
-            transactionVersion: '0x00000003',
-            version: 4
-          },
-          sign: jest.fn()
+        requestingTabId: 1,
+        payload: {
+          signType: 'extrinsic',
+          address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
+          blockHash: '0x661f57d206d4fecda0408943427d4d25436518acbff543735e7569da9db6bdd7',
+          blockNumber: '0x0033fa6b',
+          era: '0xb502',
+          genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+          method: '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
+          nonce: '0x00000003',
+          signedExtensions: [
+            'CheckSpecVersion',
+            'CheckTxVersion',
+            'CheckGenesis',
+            'CheckMortality',
+            'CheckNonce',
+            'CheckWeight',
+            'ChargeTransactionPayment'
+          ],
+          specVersion: '0x0000002d',
+          tip: '0x00000000000000000000000000000000',
+          transactionVersion: '0x00000003',
+          version: 4
         },
         url: 'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts'
       },
@@ -116,30 +115,29 @@ describe('Signing requests', () => {
           whenCreated: 1602001346486
         },
         id: '1607356155395.3',
-        request: {
-          payload: {
-            address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
-            blockHash: '0xcf69b7935b785f90b22d2b36f2227132ef9c5dd33db1dbac9ecdafac05bf9476',
-            blockNumber: '0x0036269a',
-            era: '0xa501',
-            genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
-            method: '0x0400cc4e0e2848c488896dd0a24f153070e85e3c83f6199cfc942ab6de29c56c2d7b0700d0ed902e',
-            nonce: '0x00000003',
-            signedExtensions: [
-              'CheckSpecVersion',
-              'CheckTxVersion',
-              'CheckGenesis',
-              'CheckMortality',
-              'CheckNonce',
-              'CheckWeight',
-              'ChargeTransactionPayment'
-            ],
-            specVersion: '0x0000002d',
-            tip: '0x00000000000000000000000000000000',
-            transactionVersion: '0x00000003',
-            version: 4
-          },
-          sign: jest.fn()
+        requestingTabId: 1,
+        payload: {
+          signType: 'extrinsic',
+          address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
+          blockHash: '0xcf69b7935b785f90b22d2b36f2227132ef9c5dd33db1dbac9ecdafac05bf9476',
+          blockNumber: '0x0036269a',
+          era: '0xa501',
+          genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+          method: '0x0400cc4e0e2848c488896dd0a24f153070e85e3c83f6199cfc942ab6de29c56c2d7b0700d0ed902e',
+          nonce: '0x00000003',
+          signedExtensions: [
+            'CheckSpecVersion',
+            'CheckTxVersion',
+            'CheckGenesis',
+            'CheckMortality',
+            'CheckNonce',
+            'CheckWeight',
+            'ChargeTransactionPayment'
+          ],
+          specVersion: '0x0000002d',
+          tip: '0x00000000000000000000000000000000',
+          transactionVersion: '0x00000003',
+          version: 4
         },
         url: 'https://polkadot.js.org/apps'
       }
@@ -202,7 +200,7 @@ describe('Signing requests', () => {
           .map((el): string => el.text())
       ).toEqual([
         // @ts-ignore
-        Number(signRequests[0].request.payload.nonce).toString(),
+        Number(signRequests[0].payload.nonce).toString(),
         'balances',
         'transferKeepAlive',
         '5GYQRJj3NUznYDzCduENRcocMsyxmb6tjb5xW87ZMErBe9R7',
@@ -220,6 +218,7 @@ describe('Signing requests', () => {
     it('correctly displays request 2', async () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
       await act(flushAllPromises);
+      wrapper.update();
 
       expect(
         wrapper
@@ -228,7 +227,7 @@ describe('Signing requests', () => {
           .map((el): string => el.text())
       ).toEqual([
         // @ts-ignore
-        Number(signRequests[0].request.payload.nonce).toString(),
+        Number(signRequests[0].payload.nonce).toString(),
         'balances',
         'transfer',
         '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',

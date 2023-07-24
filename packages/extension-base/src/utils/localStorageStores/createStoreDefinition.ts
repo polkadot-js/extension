@@ -1,9 +1,43 @@
 // Copyright 2019-2023 @polkadot/extension-bg authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import deepEquals from 'fast-deep-equal';
 import { z } from 'zod';
 
+import { SigningRequest } from '@polkadot/extension-base/background/types';
+
 export default <Content>(schema: z.ZodType<Content>, defaultValue?: Content) => (namespace: string) => {
+  type ChangeListener = (content: Content) => void
+  const changeListeners = new Set<ChangeListener>();
+
+  const invokeChangeListeners = (changes: { [namespace: string]: { newValue?: SigningRequest[], oldValue?: SigningRequest[] }}, storageArea: string) => {
+    if (storageArea !== 'local') {
+      return;
+    }
+
+    const { [namespace]: changesFromNamespace } = changes;
+
+    if (!changesFromNamespace) {
+      return;
+    }
+
+    const newValueParsingResult = schema.safeParse(changesFromNamespace.newValue);
+
+    if (!newValueParsingResult.success) {
+      console.warn(`The new local storage value in namespace "${namespace}" failed to match the namespace schema with error: "${newValueParsingResult.error.toString()}"`);
+
+      return;
+    }
+
+    const newValue = newValueParsingResult.data;
+
+    if (deepEquals(newValue, changesFromNamespace.oldValue)) {
+      return;
+    }
+
+    changeListeners.forEach((changeListener) => changeListener(newValue));
+  };
+
   const get = async (): Promise<Content> => {
     try {
       const { [namespace]: storageContent = defaultValue } = await chrome.storage.local.get([namespace]);
@@ -33,9 +67,30 @@ export default <Content>(schema: z.ZodType<Content>, defaultValue?: Content) => 
     return newContent;
   };
 
+  type Unsubscribe = () => void
+
+  const subscribe = (listener: ChangeListener): Unsubscribe => {
+    changeListeners.add(listener);
+
+    if (!chrome.storage.onChanged.hasListener(invokeChangeListeners)) {
+      chrome.storage.onChanged.addListener(invokeChangeListeners);
+    }
+
+    get().then(listener).catch((e) => console.warn('Error getting data for a listener:', e));
+
+    return () => {
+      changeListeners.delete(listener);
+
+      if (!changeListeners.size) {
+        chrome.storage.onChanged.removeListener(invokeChangeListeners);
+      }
+    };
+  };
+
   return {
     get,
     set,
-    update
+    update,
+    subscribe
   };
 };

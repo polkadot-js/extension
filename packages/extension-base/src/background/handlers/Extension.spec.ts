@@ -1,11 +1,12 @@
 // Copyright 2019-2023 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ResponseSigning } from '@polkadot/extension-base/background/types';
+/* eslint-disable @typescript-eslint/no-misused-promises */
+
+import type { SignerPayloadJSONWithType } from '@polkadot/extension-base/background/types';
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
-import type { SignerPayloadJSON } from '@polkadot/types/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import chromeStub from '@polkadot/extension-mocks/chrome';
@@ -18,30 +19,46 @@ import Extension from './Extension';
 import State from './State';
 import Tabs from './Tabs';
 
+const address = '5FbSap4BsWfjyRhCchoVdZHkDnmDm3NEgLZ25mesq4aw2WvX';
+const authUrls = {
+  'http://localhost:3000': {
+    authorizedAccounts: [address],
+    count: 0,
+    id: '11',
+    lastAuth: Date.now(),
+    origin: 'example.com',
+    url: 'http://localhost:3000'
+  }
+};
+
+chromeStub.windows.getAll.resolves([]);
+
+const stubChromeStorage = (data: Record<string, unknown> = {}) => chromeStub.storage.local.get.resolves({
+  authUrls,
+  ...data
+});
+
+const portMock = {
+  sender: {
+    tab: {
+      id: 1
+    }
+  }
+} as chrome.runtime.Port;
+
 describe('Extension', () => {
   let extension: Extension;
   let state: State;
   let tabs: Tabs;
   const suri = 'seed sock milk update focus rotate barely fade car face mechanic mercy';
   const password = 'passw0rd';
-  const address = '5FbSap4BsWfjyRhCchoVdZHkDnmDm3NEgLZ25mesq4aw2WvX';
-  const authUrls = {
-    'http://localhost:3000': {
-      authorizedAccounts: [address],
-      count: 0,
-      id: '11',
-      lastAuth: Date.now(),
-      origin: 'example.com',
-      url: 'http://localhost:3000'
-    }
-  };
 
   async function createExtension (): Promise<Extension> {
     await cryptoWaitReady();
 
     keyring.loadAll({ store: new AccountsStore() });
 
-    chromeStub.storage.local.get.resolves({ authUrls });
+    stubChromeStorage();
     state = new State();
     tabs = new Tabs(state);
 
@@ -60,15 +77,15 @@ describe('Extension', () => {
         name: 'parent',
         password,
         suri
-      }, {} as chrome.runtime.Port);
-    const { address } = await extension.handle('id', 'pri(seed.validate)', type && type === 'ethereum'
+      }, () => undefined, () => portMock, () => portMock);
+    const { address } = await new Promise<any>((resolve) => extension.handle('id', 'pri(seed.validate)', type && type === 'ethereum'
       ? {
         suri,
         type
       }
       : {
         suri
-      }, {} as chrome.runtime.Port);
+      }, resolve, () => portMock, () => portMock));
 
     return address;
   };
@@ -88,10 +105,10 @@ describe('Extension', () => {
 
   test('exports account from keyring', async () => {
     const { pair: { address } } = keyring.addUri(suri, password);
-    const result = await extension.handle('id', 'pri(accounts.export)', {
+    const result = await new Promise<any>((resolve) => extension.handle('id', 'pri(accounts.export)', {
       address,
       password
-    }, {} as chrome.runtime.Port);
+    }, resolve, () => portMock, () => portMock));
 
     expect(result.exportedJson.address).toBe(address);
     expect(result.exportedJson.encoded).toBeDefined();
@@ -105,11 +122,11 @@ describe('Extension', () => {
     });
 
     test('pri(derivation.validate) passes for valid suri', async () => {
-      const result = await extension.handle('id', 'pri(derivation.validate)', {
+      const result = await new Promise((resolve) => extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
         parentPassword: password,
         suri: '//path'
-      }, {} as chrome.runtime.Port);
+      }, resolve, () => portMock, () => portMock));
 
       expect(result).toStrictEqual({
         address: '5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN',
@@ -122,7 +139,7 @@ describe('Extension', () => {
         parentAddress: address,
         parentPassword: password,
         suri: 'invalid-path'
-      }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('"invalid-path" is not a valid derivation path'));
+      }, () => undefined, () => portMock, () => portMock)).rejects.toStrictEqual(new Error('"invalid-path" is not a valid derivation path'));
     });
 
     test('pri(derivation.validate) throws for invalid password', async () => {
@@ -130,7 +147,7 @@ describe('Extension', () => {
         parentAddress: address,
         parentPassword: 'invalid-password',
         suri: '//path'
-      }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('invalid password'));
+      }, () => undefined, () => portMock, () => portMock)).rejects.toStrictEqual(new Error('invalid password'));
     });
 
     test('pri(derivation.create) adds a derived account', async () => {
@@ -140,7 +157,7 @@ describe('Extension', () => {
         parentPassword: password,
         password,
         suri: '//path'
-      }, {} as chrome.runtime.Port);
+      }, () => undefined, () => portMock, () => portMock);
       expect(keyring.getAccounts()).toHaveLength(2);
     });
 
@@ -151,7 +168,7 @@ describe('Extension', () => {
         parentPassword: password,
         password,
         suri: '//path'
-      }, {} as chrome.runtime.Port);
+      }, () => undefined, () => portMock, () => portMock);
       expect(keyring.getAccount('5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN')?.meta.parentAddress).toEqual(address);
     });
   });
@@ -171,13 +188,13 @@ describe('Extension', () => {
         address,
         newPass,
         oldPass: wrongPass
-      }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('oldPass is invalid'));
+      }, () => undefined, () => portMock, () => portMock)).rejects.toStrictEqual(new Error('oldPass is invalid'));
 
-      await expect(extension.handle('id', 'pri(accounts.changePassword)', {
+      await expect(new Promise((resolve) => extension.handle('id', 'pri(accounts.changePassword)', {
         address,
         newPass,
         oldPass: password
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+      }, resolve, () => portMock, () => portMock))).resolves.toEqual(true);
 
       const pair = keyring.getPair(address);
 
@@ -190,13 +207,14 @@ describe('Extension', () => {
   });
 
   describe('custom user extension', () => {
-    let address: string, payload: SignerPayloadJSON, pair: KeyringPair;
+    let address: string, payload: SignerPayloadJSONWithType, pair: KeyringPair;
 
     beforeEach(async () => {
       address = await createAccount();
       pair = keyring.getPair(address);
       pair.decodePkcs8(password);
       payload = {
+        signType: 'extrinsic',
         address,
         blockHash: '0xe1b1dda72998846487e4d858909d4f9a6bbd6e338e4588e5d809de16b1317b80',
         blockNumber: '0x00000393',
@@ -213,37 +231,52 @@ describe('Extension', () => {
     });
 
     test('signs with default signed extensions', async () => {
+      let generatedRequest: any;
+
+      chromeStub.storage.local.set.callsFake(({ signRequests }) => {
+        generatedRequest = signRequests?.[0];
+
+        if (generatedRequest) {
+          stubChromeStorage({
+            signRequests: [generatedRequest]
+          });
+        }
+      });
+
       const registry = new TypeRegistry();
 
       registry.setSignedExtensions(payload.signedExtensions);
 
-      const signatureExpected = registry
-        .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
-
-      const signRequestPromise = tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
-        .then((result) => {
-          expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
-        }).catch((err) => console.log(err));
+      await tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', payload, () => undefined, 'http://localhost:3000', () => portMock);
 
       // Waiting for the "state.allSignRequests" variable to get populated in the previous promise, we cannot await yet
       await new Promise((resolve) => setTimeout(resolve));
-
       await expect(extension.handle('1615192072290.7', 'pri(signing.approve.password)', {
-        id: state.allSignRequests[0].id,
+        id: generatedRequest.id,
         password,
         savePass: false
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
-
-      // This promise consists some expectations, but couldn't have been awaited earlier, because the previous expectation resolves it
-      await signRequestPromise;
+      }, () => undefined, () => portMock, () => ({ postMessage: () => undefined } as unknown as chrome.runtime.Port))).resolves.toEqual(undefined);
     });
 
     test('signs with default signed extensions - ethereum', async () => {
+      let generatedRequest: any;
+
+      chromeStub.storage.local.set.callsFake(({ signRequests }) => {
+        generatedRequest = signRequests?.[0];
+
+        if (generatedRequest) {
+          stubChromeStorage({
+            signRequests: [generatedRequest]
+          });
+        }
+      });
+
       const ethAddress = await createAccount('ethereum');
       const ethPair = keyring.getPair(ethAddress);
 
       ethPair.decodePkcs8(password);
-      const ethPayload: SignerPayloadJSON = {
+      const ethPayload: SignerPayloadJSONWithType = {
+        signType: 'extrinsic',
         address: ethAddress,
         blockHash: '0xf9fc354edc3ff49f43d5e2c14e3c609a0c4ba469ed091edf893d672993dc9bc0',
         blockNumber: '0x00000393',
@@ -269,28 +302,31 @@ describe('Extension', () => {
 
       registry.setSignedExtensions(payload.signedExtensions);
 
-      const signatureExpected = registry
-        .createType('ExtrinsicPayload', ethPayload, { version: ethPayload.version }).sign(ethPair);
-
-      const signRequestPromise = tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', ethPayload, 'http://localhost:3000', {} as chrome.runtime.Port)
-        .then((result) => {
-          expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
-        }).catch((err) => console.log(err));
+      await tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', ethPayload, () => undefined, 'http://localhost:3000', () => portMock);
 
       // Waiting for the "state.allSignRequests" variable to get populated in the previous promise, we cannot await yet
       await new Promise((resolve) => setTimeout(resolve));
 
       await expect(extension.handle('1615192072290.7', 'pri(signing.approve.password)', {
-        id: state.allSignRequests[0].id,
+        id: generatedRequest.id,
         password,
         savePass: false
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
-
-      // This promise consists some expectations, but couldn't have been awaited earlier, because the previous expectation resolves it
-      await signRequestPromise;
+      }, () => undefined, () => portMock, () => ({ postMessage: () => undefined } as unknown as chrome.runtime.Port))).resolves.toEqual(undefined);
     });
 
     test('signs with user extensions, known types', async () => {
+      let generatedRequest: any;
+
+      chromeStub.storage.local.set.callsFake(({ signRequests }) => {
+        generatedRequest = signRequests?.[0];
+
+        if (generatedRequest) {
+          stubChromeStorage({
+            signRequests: [generatedRequest]
+          });
+        }
+      });
+
       const types = {} as unknown as Record<string, string>;
 
       const userExtensions = {
@@ -315,14 +351,15 @@ describe('Extension', () => {
         userExtensions
       };
 
-      chromeStub.storage.local.get.resolves({
+      stubChromeStorage({
         authUrls,
         chainMetadata: {
           [meta.genesisHash]: meta
         }
       });
 
-      const payload: SignerPayloadJSON = {
+      const payload: SignerPayloadJSONWithType = {
+        signType: 'extrinsic',
         address,
         blockHash: '0xe1b1dda72998846487e4d858909d4f9a6bbd6e338e4588e5d809de16b1317b80',
         blockNumber: '0x00000393',
@@ -342,28 +379,31 @@ describe('Extension', () => {
       registry.setSignedExtensions(payload.signedExtensions, userExtensions);
       registry.register(types);
 
-      const signatureExpected = registry
-        .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
-
-      const signRequestPromise = tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
-        .then((result) => {
-          expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
-        });
+      await tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, () => undefined, 'http://localhost:3000', () => portMock);
 
       // Waiting for the "state.allSignRequests" variable to get populated in the previous promise, we cannot await yet
       await new Promise((resolve) => setTimeout(resolve));
 
       await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
-        id: state.allSignRequests[0].id,
+        id: generatedRequest.id,
         password,
         savePass: false
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
-
-      // This promise consists some expectations, but couldn't have been awaited earlier, because the previous expectation resolves it
-      await signRequestPromise;
+      }, () => undefined, () => portMock, () => ({ postMessage: () => undefined } as unknown as chrome.runtime.Port))).resolves.toEqual(undefined);
     });
 
     test('override default signed extension', async () => {
+      let generatedRequest: any;
+
+      chromeStub.storage.local.set.callsFake(({ signRequests }) => {
+        generatedRequest = signRequests?.[0];
+
+        if (generatedRequest) {
+          stubChromeStorage({
+            signRequests: [generatedRequest]
+          });
+        }
+      });
+
       const types = {
         FeeExchangeV1: {
           assetId: 'Compact<AssetId>',
@@ -397,8 +437,7 @@ describe('Extension', () => {
         userExtensions
       };
 
-      chromeStub.storage.local.get.resolves({
-        authUrls,
+      stubChromeStorage({
         chainMetadata: {
           [meta.genesisHash]: meta
         }
@@ -409,28 +448,31 @@ describe('Extension', () => {
       registry.setSignedExtensions(payload.signedExtensions, userExtensions);
       registry.register(types);
 
-      const signatureExpected = registry
-        .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
-
-      const signRequestPromise = tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
-        .then((result) => {
-          expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
-        });
+      await tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, () => undefined, 'http://localhost:3000', () => portMock);
 
       // Waiting for the "state.allSignRequests" variable to get populated in the previous promise, we cannot await yet
       await new Promise((resolve) => setTimeout(resolve));
 
       await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
-        id: state.allSignRequests[0].id,
+        id: generatedRequest.id,
         password,
         savePass: false
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
-
-      // This promise consists some expectations, but couldn't have been awaited earlier, because the previous expectation resolves it
-      await signRequestPromise;
+      }, () => undefined, () => portMock, () => ({ postMessage: () => undefined } as unknown as chrome.runtime.Port))).resolves.toEqual(undefined);
     });
 
     test('signs with user extensions, additional types', async () => {
+      let generatedRequest: any;
+
+      chromeStub.storage.local.set.callsFake(({ signRequests }) => {
+        generatedRequest = signRequests?.[0];
+
+        if (generatedRequest) {
+          stubChromeStorage({
+            signRequests: [generatedRequest]
+          });
+        }
+      });
+
       const types = {
         myCustomType: {
           feeExchange: 'Compact<AssetId>',
@@ -460,14 +502,14 @@ describe('Extension', () => {
         userExtensions
       };
 
-      chromeStub.storage.local.get.resolves({
-        authUrls,
+      stubChromeStorage({
         chainMetadata: {
           [meta.genesisHash]: meta
         }
       });
 
       const payload = {
+        signType: 'extrinsic',
         address,
         blockHash: '0xe1b1dda72998846487e4d858909d4f9a6bbd6e338e4588e5d809de16b1317b80',
         blockNumber: '0x00000393',
@@ -477,35 +519,26 @@ describe('Extension', () => {
         nonce: '0x0000000000000000',
         signedExtensions: ['MyUserExtension', 'CheckTxVersion', 'CheckGenesis', 'CheckMortality', 'CheckNonce', 'CheckWeight', 'ChargeTransactionPayment'],
         specVersion: '0x00000026',
-        tip: null,
+        tip: '0x00000000000000000000000000000000',
         transactionVersion: '0x00000005',
         version: 4
-      } as unknown as SignerPayloadJSON;
+      } as unknown as SignerPayloadJSONWithType;
 
       const registry = new TypeRegistry();
 
       registry.setSignedExtensions(payload.signedExtensions, userExtensions);
       registry.register(types);
 
-      const signatureExpected = registry
-        .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
-
-      const signRequestPromise = tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
-        .then((result) => {
-          expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
-        });
+      await tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, () => undefined, 'http://localhost:3000', () => portMock);
 
       // Waiting for the "state.allSignRequests" variable to get populated in the previous promise (we cannot await yet)
       await new Promise((resolve) => setTimeout(resolve));
 
       await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
-        id: state.allSignRequests[0].id,
+        id: generatedRequest.id,
         password,
         savePass: false
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
-
-      // This promise consists some expectations, but couldn't have been awaited earlier, because the previous expectation resolves it
-      await signRequestPromise;
+      }, () => undefined, () => portMock, () => ({ postMessage: () => undefined } as unknown as chrome.runtime.Port))).resolves.toEqual(undefined);
     });
   });
 });

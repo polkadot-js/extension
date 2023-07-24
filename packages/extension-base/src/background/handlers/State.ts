@@ -3,27 +3,21 @@
 
 import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import type { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
-
-import { BehaviorSubject } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+import type { AccountJson, AuthorizeTabRequestPayload, MetadataRequest, RequestPayload, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, ResponseRpcListProviders, SigningRequest } from '../types';
 
 import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import localStorageStores from '../../utils/localStorageStores';
+import { SignerPayloadJSONWithType, SignerPayloadRawWithType } from '../types';
 import { NORMAL_CREATE_WINDOW_DATA, POPUP_CREATE_WINDOW_DATA } from './consts';
 import { openCenteredWindow, withErrorLog } from './helpers';
 
-interface Resolver<T> {
-  reject: (error: Error) => void;
-  resolve: (result: T) => void;
-}
-
-interface AuthRequest extends Resolver<AuthResponse> {
+interface AuthRequest {
   id: string;
+  requestingTabId: number;
   idStr: string;
-  request: RequestAuthorizeTab;
+  payload: AuthorizeTabRequestPayload;
   url: string;
 }
 
@@ -44,17 +38,6 @@ export interface AuthUrlInfo {
   authorizedAccounts: string[];
 }
 
-interface MetaRequest extends Resolver<boolean> {
-  id: string;
-  request: MetadataDef;
-  url: string;
-}
-
-export interface AuthResponse {
-  result: boolean;
-  authorizedAccounts: string[];
-}
-
 // List of providers passed into constructor. This is the list of providers
 // exposed by the extension.
 type Providers = Record<string, {
@@ -64,10 +47,11 @@ type Providers = Record<string, {
   start: () => ProviderInterface;
 }>
 
-interface SignRequest extends Resolver<ResponseSigning> {
+interface SignRequest {
   account: AccountJson;
-  id: string;
-  request: RequestSign;
+  id: string,
+  requestingTabId: number;
+  payload: RequestPayload;
   url: string;
 }
 
@@ -80,27 +64,15 @@ export enum NotificationOptions {
 }
 
 export default class State {
-  readonly #authRequests: Record<string, AuthRequest> = {};
-
   // Map of providers currently injected in tabs
   readonly #injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
-
-  readonly #metaRequests: Record<string, MetaRequest> = {};
 
   #notification = settings.notification;
 
   // Map of all providers exposed by the extension, they are retrievable by key
   readonly #providers: Providers;
 
-  readonly #signRequests: Record<string, SignRequest> = {};
-
   #connectedTabsUrl: string[] = [];
-
-  public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
-
-  public readonly metaSubject: BehaviorSubject<MetadataRequest[]> = new BehaviorSubject<MetadataRequest[]>([]);
-
-  public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject<SigningRequest[]>([]);
 
   constructor (providers: Providers = {}) {
     this.#providers = providers;
@@ -110,34 +82,20 @@ export default class State {
     return Object.values(await localStorageStores.chainMetadata.get());
   }
 
-  public get numAuthRequests (): number {
-    return Object.keys(this.#authRequests).length;
+  public async getAuthRequestsNumber (): Promise<number> {
+    return (await localStorageStores.authRequests.get()).length;
   }
 
-  public get numMetaRequests (): number {
-    return Object.keys(this.#metaRequests).length;
+  public async getMetadataRequestsNumber (): Promise<number> {
+    return (await localStorageStores.metadataRequests.get()).length;
   }
 
-  public get numSignRequests (): number {
-    return Object.keys(this.#signRequests).length;
+  public async getSignRequestsNumber (): Promise<number> {
+    return (await localStorageStores.signRequests.get()).length;
   }
 
-  public get allAuthRequests (): AuthorizeRequest[] {
-    return Object
-      .values(this.#authRequests)
-      .map(({ id, request, url }): AuthorizeRequest => ({ id, request, url }));
-  }
-
-  public get allMetaRequests (): MetadataRequest[] {
-    return Object
-      .values(this.#metaRequests)
-      .map(({ id, request, url }): MetadataRequest => ({ id, request, url }));
-  }
-
-  public get allSignRequests (): SigningRequest[] {
-    return Object
-      .values(this.#signRequests)
-      .map(({ account, id, request, url }): SigningRequest => ({ account, id, request, url }));
+  public getAllSignRequests (): Promise<SigningRequest[]> {
+    return localStorageStores.signRequests.get();
   }
 
   public getAuthUrls (): Promise<AuthUrls> {
@@ -148,7 +106,7 @@ export default class State {
     return localStorageStores.defaultAuthAccounts.get();
   }
 
-  private popupOpen (): void {
+  private async openSingletonPopup (): Promise<void> {
     if (this.#notification === 'extension') {
       return;
     }
@@ -157,51 +115,44 @@ export default class State {
       ? NORMAL_CREATE_WINDOW_DATA
       : POPUP_CREATE_WINDOW_DATA;
 
-    openCenteredWindow({
+    const [extensionTabWindow] = await chrome.windows.getAll({
+      populate: true,
+      windowTypes: [createData.type]
+    });
+    const [extensionTab] = extensionTabWindow?.tabs?.filter((tab) => tab?.url?.startsWith(NOTIFICATION_URL)) || [];
+
+    // The popup already exists, so let's bring it to focus instead of creating a new one
+    if (extensionTabWindow?.id && extensionTab?.id) {
+      await chrome.windows.update(extensionTabWindow.id, { focused: true });
+      await chrome.tabs.update(extensionTab.id, { active: true });
+
+      return;
+    }
+
+    await openCenteredWindow({
       ...createData,
       url: NOTIFICATION_URL
     }).catch(console.error);
   }
 
-  private authComplete = (id: string, resolve: (resValue: AuthResponse) => void, reject: (error: Error) => void): Resolver<AuthResponse> => {
-    const clearAuth = () => {
-      delete this.#authRequests[id];
-      this.updateIconAuth();
-    };
+  public async addAuthorizedUrl (idStr: string, origin: string, url: string, authorizedAccounts: string[]) {
+    const urlOrigin = new URL(url).origin;
 
-    const complete = async (authorizedAccounts: string[] = []) => {
-      const { idStr, request: { origin }, url } = this.#authRequests[id];
-
-      const URLorigin = new URL(url).origin;
-
-      await Promise.all([
-        localStorageStores.authUrls.update((currentContent) => ({
-          ...currentContent,
-          [URLorigin]: {
-            authorizedAccounts,
-            count: 0,
-            id: idStr,
-            lastAuth: Date.now(),
-            origin,
-            url: URLorigin
-          }
-        })),
-        this.updateDefaultAuthAccounts(authorizedAccounts)
-      ]);
-
-      clearAuth();
-    };
-
-    return {
-      reject: (error: Error): void => {
-        clearAuth();
-        reject(error);
-      },
-      resolve: ({ authorizedAccounts, result }: AuthResponse): void => {
-        complete(authorizedAccounts).finally(() => resolve({ authorizedAccounts, result }));
-      }
-    };
-  };
+    await Promise.all([
+      localStorageStores.authUrls.update((currentContent) => ({
+        ...currentContent,
+        [urlOrigin]: {
+          authorizedAccounts,
+          count: 0,
+          id: idStr,
+          lastAuth: Date.now(),
+          origin,
+          url: urlOrigin
+        }
+      })),
+      this.updateDefaultAuthAccounts(authorizedAccounts)
+    ]);
+  }
 
   public async updateCurrentTabsUrl (urls: string[]) {
     const authUrls = await this.getAuthUrls();
@@ -230,55 +181,29 @@ export default class State {
     return this.#connectedTabsUrl;
   }
 
-  public deleteAuthRequest (requestId: string) {
-    delete this.#authRequests[requestId];
-    this.updateIconAuth();
+  public async removeAuthRequest (id: string) {
+    await localStorageStores.authRequests.update((authRequests) =>
+      authRequests.filter((authRequest) => authRequest.id !== id)
+    );
+
+    await this.updateIcon();
   }
 
   public async updateDefaultAuthAccounts (newList: string[]) {
     await localStorageStores.defaultAuthAccounts.set(newList);
   }
 
-  private metaComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
-    const complete = (): void => {
-      delete this.#metaRequests[id];
-      this.updateIconMeta();
-    };
+  private async updateIcon (): Promise<void> {
+    const [
+      authCount,
+      metaCount,
+      signCount
+    ] = await Promise.all([
+      this.getAuthRequestsNumber(),
+      this.getMetadataRequestsNumber(),
+      this.getSignRequestsNumber()
+    ]);
 
-    return {
-      reject: (error: Error): void => {
-        complete();
-        reject(error);
-      },
-      resolve: (result: boolean): void => {
-        complete();
-        resolve(result);
-      }
-    };
-  };
-
-  private signComplete = (id: string, resolve: (result: ResponseSigning) => void, reject: (error: Error) => void): Resolver<ResponseSigning> => {
-    const complete = (): void => {
-      delete this.#signRequests[id];
-      this.updateIconSign();
-    };
-
-    return {
-      reject: (error: Error): void => {
-        complete();
-        reject(error);
-      },
-      resolve: (result: ResponseSigning): void => {
-        complete();
-        resolve(result);
-      }
-    };
-  };
-
-  private updateIcon (): void {
-    const authCount = this.numAuthRequests;
-    const metaCount = this.numMetaRequests;
-    const signCount = this.numSignRequests;
     const text = (
       authCount
         ? 'Auth'
@@ -296,21 +221,6 @@ export default class State {
 
       return otherAuthUrls;
     });
-  }
-
-  private updateIconAuth (): void {
-    this.authSubject.next(this.allAuthRequests);
-    this.updateIcon();
-  }
-
-  private updateIconMeta (): void {
-    this.metaSubject.next(this.allMetaRequests);
-    this.updateIcon();
-  }
-
-  private updateIconSign (): void {
-    this.signSubject.next(this.allSignRequests);
-    this.updateIcon();
   }
 
   public async updateAuthorizedAccounts (authorizedAccountDiff: AuthorizedAccountsDiff): Promise<void> {
@@ -347,12 +257,11 @@ export default class State {
     }));
   }
 
-  public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {
+  public async authorizeUrl (url: string, messageId: string, requestingTabId: number, payload: AuthorizeTabRequestPayload, respond: (response: unknown) => void): Promise<void> {
     const idStr = new URL(url).origin;
 
     // Do not enqueue duplicate authorization requests.
-    const isDuplicate = Object
-      .values(this.#authRequests)
+    const isDuplicate = (await localStorageStores.authRequests.get())
       .some((request) => request.idStr === idStr);
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
@@ -362,26 +271,25 @@ export default class State {
     if (authUrls[idStr]) {
       assert(authUrls[idStr].authorizedAccounts || authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
-      return {
+      return respond({
         authorizedAccounts: [],
         result: false
-      };
+      });
     }
 
-    return new Promise((resolve, reject): void => {
-      const id = uuid();
-
-      this.#authRequests[id] = {
-        ...this.authComplete(id, resolve, reject),
-        id,
+    await localStorageStores.authRequests.update((authRequests) => [
+      ...authRequests,
+      {
+        id: messageId,
+        requestingTabId,
         idStr,
-        request,
+        payload,
         url
-      };
+      }
+    ]);
 
-      this.updateIconAuth();
-      this.popupOpen();
-    });
+    await this.updateIcon();
+    await this.openSingletonPopup();
   }
 
   public async ensureUrlAuthorized (url: string): Promise<boolean> {
@@ -392,32 +300,53 @@ export default class State {
     return true;
   }
 
-  public injectMetadata (url: string, request: MetadataDef): Promise<boolean> {
-    return new Promise((resolve, reject): void => {
-      const id = uuid();
+  public async injectMetadata (url: string, { types, ...restPayload }: MetadataDef, messageId: string, requestingTabId: number): Promise<void> {
+    type TypesType = ReturnType<Parameters<typeof localStorageStores.chainMetadata.update>[0]>[string]['types']
 
-      this.#metaRequests[id] = {
-        ...this.metaComplete(id, resolve, reject),
-        id,
-        request,
+    await localStorageStores.metadataRequests.update((signRequests) => [
+      ...signRequests,
+      {
+        id: messageId,
+        requestingTabId,
+        payload: {
+          ...restPayload,
+          // Type assertion, because "MetadataDef.types" can contain the CodecClass which should not appear here (and is not serializable anyway, so no use of it in local storage)
+          types: types as TypesType
+        },
         url
-      };
+      }
+    ]);
 
-      this.updateIconMeta();
-      this.popupOpen();
-    });
+    await this.updateIcon();
+    await this.openSingletonPopup();
   }
 
-  public getAuthRequest (id: string): AuthRequest {
-    return this.#authRequests[id];
+  public async getAuthRequest (id: string): Promise<AuthRequest | undefined> {
+    return (await localStorageStores.authRequests.get()).find((authRequest) => authRequest.id === id);
   }
 
-  public getMetaRequest (id: string): MetaRequest {
-    return this.#metaRequests[id];
+  public async getMetaRequest (id: string): Promise<MetadataRequest | undefined> {
+    return (await localStorageStores.metadataRequests.get()).find((metadataRequest) => metadataRequest.id === id);
   }
 
-  public getSignRequest (id: string): SignRequest {
-    return this.#signRequests[id];
+  public async getSignRequest (id: string): Promise<SignRequest | undefined> {
+    return (await localStorageStores.signRequests.get()).find((signRequest) => signRequest.id === id);
+  }
+
+  public async removeSignRequest (id: string): Promise<void> {
+    await localStorageStores.signRequests.update((signRequests) =>
+      signRequests.filter((signRequest) => signRequest.id !== id)
+    );
+
+    await this.updateIcon();
+  }
+
+  public async removeMetadataRequest (id: string): Promise<void> {
+    await localStorageStores.metadataRequests.update((metadataRequests) =>
+      metadataRequests.filter((metadataRequest) => metadataRequest.id !== id)
+    );
+
+    await this.updateIcon();
   }
 
   // List all providers the extension is exposing
@@ -507,20 +436,25 @@ export default class State {
     return true;
   }
 
-  public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
-    const id = uuid();
-
-    return new Promise((resolve, reject): void => {
-      this.#signRequests[id] = {
-        ...this.signComplete(id, resolve, reject),
+  public async invokeSignatureRequest (
+    url: string,
+    payload: SignerPayloadRawWithType | SignerPayloadJSONWithType,
+    account: AccountJson,
+    messageId: string,
+    requestingTabId: number
+  ): Promise<void> {
+    await localStorageStores.signRequests.update((signRequests) => [
+      ...signRequests,
+      {
         account,
-        id,
-        request,
+        id: messageId,
+        requestingTabId,
+        payload,
         url
-      };
+      }
+    ]);
 
-      this.updateIconSign();
-      this.popupOpen();
-    });
+    await this.updateIcon();
+    await this.openSingletonPopup();
   }
 }

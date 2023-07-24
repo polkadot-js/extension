@@ -4,13 +4,11 @@
 import type {
   AccountJson,
   AllowedPath,
-  AuthorizeRequest,
   ConnectedTabsUrlResponse,
   MessageTypes,
   MessageTypesWithNoSubscriptions,
   MessageTypesWithNullRequest,
   MessageTypesWithSubscriptions,
-  MetadataRequest,
   RequestTypes,
   ResponseAuthorizeList,
   ResponseDeriveValidate,
@@ -18,7 +16,6 @@ import type {
   ResponseSigningIsLocked,
   ResponseTypes,
   SeedLengths,
-  SigningRequest,
   SubscriptionMessageTypes
 } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
@@ -58,7 +55,7 @@ const connect = (): chrome.runtime.Port => {
     const handler = handlers[data.id];
 
     if (!handler) {
-      console.error(`Unknown response: ${JSON.stringify(data)}`);
+      console.info(`Unknown response: ${JSON.stringify(data)}`);
 
       return;
     }
@@ -139,19 +136,19 @@ export async function forgetAccount(address: string): Promise<boolean> {
   return sendMessage('pri(accounts.forget)', { address });
 }
 
-export async function approveAuthRequest(id: string, authorizedAccounts: string[]): Promise<boolean> {
+export async function approveAuthRequest(id: string, authorizedAccounts: string[]): Promise<void> {
   return sendMessage('pri(authorize.approve)', { authorizedAccounts, id });
 }
 
-export async function rejectAuthRequest(id: string): Promise<boolean> {
+export async function rejectAuthRequest(id: string): Promise<void> {
   return sendMessage('pri(authorize.reject)', { id });
 }
 
-export async function approveMetaRequest(id: string): Promise<boolean> {
+export async function approveMetaRequest(id: string): Promise<void> {
   return sendMessage('pri(metadata.approve)', { id });
 }
 
-export async function cancelSignRequest(id: string): Promise<boolean> {
+export async function cancelSignRequest(id: string): Promise<void> {
   return sendMessage('pri(signing.cancel)', { id });
 }
 
@@ -159,11 +156,11 @@ export async function isSignLocked(id: string): Promise<ResponseSigningIsLocked>
   return sendMessage('pri(signing.isLocked)', { id });
 }
 
-export async function approveSignPassword(id: string, savePass: boolean, password?: string): Promise<boolean> {
+export async function approveSignPassword(id: string, savePass: boolean, password?: string): Promise<void> {
   return sendMessage('pri(signing.approve.password)', { id, password, savePass });
 }
 
-export async function approveSignSignature(id: string, signature: HexString): Promise<boolean> {
+export async function approveSignSignature(id: string, signature: HexString): Promise<void> {
   return sendMessage('pri(signing.approve.signature)', { id, signature });
 }
 
@@ -247,16 +244,12 @@ export async function getConnectedTabsUrl(): Promise<ConnectedTabsUrlResponse> {
   return sendMessage('pri(connectedTabsUrl.get)', null);
 }
 
-export async function rejectMetaRequest(id: string): Promise<boolean> {
+export async function rejectMetaRequest(id: string): Promise<void> {
   return sendMessage('pri(metadata.reject)', { id });
 }
 
-export async function subscribeAccounts(cb: (accounts: AccountJson[]) => void): Promise<boolean> {
+export async function subscribeAccounts(cb: (accounts: AccountJson[]) => void): Promise<void> {
   return sendMessage('pri(accounts.subscribe)', null, cb);
-}
-
-export async function subscribeAuthorizeRequests(cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(authorize.requests)', null, cb);
 }
 
 export async function getAuthList(): Promise<ResponseAuthorizeList> {
@@ -277,14 +270,6 @@ export async function updateAuthorizationDate(url: string): Promise<void> {
 
 export async function deleteAuthRequest(requestId: string): Promise<void> {
   return sendMessage('pri(authorize.delete.request)', requestId);
-}
-
-export async function subscribeMetadataRequests(cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(metadata.requests)', null, cb);
-}
-
-export async function subscribeSigningRequests(cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(signing.requests)', null, cb);
 }
 
 export async function validateSeed(suri: string, type?: KeypairType): Promise<{ address: string; suri: string }> {

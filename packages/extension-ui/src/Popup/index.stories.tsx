@@ -9,7 +9,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 
 import { View } from '../components';
-import { subscribeMetadataRequests } from '../messaging';
 import Popup from '.';
 
 export default {
@@ -21,35 +20,29 @@ export default {
 
 type Story = StoryObj<typeof Popup>;
 
-type Mock = {
-  (...args: unknown[]): unknown;
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  setMockImpl(nextMockImpl: Function): void;
-};
-
 export const Metadata: Story = {
   decorators: [
     (Story) => {
-      (subscribeMetadataRequests as Mock).setMockImpl((sub: (tab: unknown[]) => void) =>
-        sub([
-          {
-            id: 'Aleph Zero Signer',
-            request: {
-              chain: 'Aleph Zero Testnet',
-              chainType: 'substrate',
-              color: '#00CCAB',
-              genesisHash: '0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5',
-              icon: 'substrate',
-              specVersion: 64,
-              ss58Format: 42,
-              tokenDecimals: 12,
-              tokenSymbol: 'TZERO',
-              metaCalls: ''
-            },
-            url: 'https://test.azero.dev/#/accounts'
-          }
-        ])
-      );
+      window.chrome.storage.local.get = () => Promise.resolve({
+        welcomeRead: 'ok',
+        metadataRequests: [{
+          id: 'Aleph Zero Signer',
+          payload: {
+            chain: 'Aleph Zero Testnet',
+            chainType: 'substrate',
+            color: '#00CCAB',
+            genesisHash: '0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5',
+            icon: 'substrate',
+            specVersion: 64,
+            ss58Format: 42,
+            tokenDecimals: 12,
+            tokenSymbol: 'TZERO',
+            metaCalls: '',
+            types: {},
+          },
+          url: 'https://test.azero.dev/#/accounts'
+        }]
+    });
 
       return (
         <View>

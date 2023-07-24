@@ -396,5 +396,10 @@
   "metadata updates": "",
   "metadata update": "",
   "transactions": "",
-  "transaction": ""
+  "transaction": "",
+  "authorizations": "",
+  "authorization": "",
+  "Authorization granted": "",
+  "Authorization declined": "",
+  "Soft derivation is only allowed for sr25519 accounts.": ""
 }

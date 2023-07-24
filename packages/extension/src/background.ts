@@ -9,20 +9,17 @@ import type { RequestSignatures, TransportRequestMessage } from '@polkadot/exten
 
 import handlers from '@polkadot/extension-base/background/handlers';
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
-import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
+import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { AccountsStore } from '@polkadot/extension-base/stores';
 import keyring from '@polkadot/ui-keyring';
-import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
+
+import listenOnPort from './listenOnPort';
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));
 
-// listen to all messages and handle appropriately
-chrome.runtime.onConnect.addListener((port): void => {
-  // shouldn't happen, however... only listen to what we know about
-  assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
-
+listenOnPort((getContentPort, getCurrentPort) => {
   /**
    * Trigger reconnection every < 5 minutes to maintain the communication with
    * the volatile service worker.
@@ -30,15 +27,15 @@ chrome.runtime.onConnect.addListener((port): void => {
    */
   const timer = setTimeout(() => {
     console.info('Performing a planned port reconnection.');
-    port.disconnect();
+    getCurrentPort().disconnect();
   }, 250e3);
 
   // message and disconnect handlers
-  port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => handlers(data, port));
-  port.onDisconnect.addListener(() => {
+  getCurrentPort().onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => handlers(data, getCurrentPort, getContentPort));
+  getCurrentPort().onDisconnect.addListener(() => {
     clearTimeout(timer);
 
-    console.log(`Disconnected from ${port.name}`);
+    console.log(`Disconnected from ${getCurrentPort().name}`);
   });
 });
 
@@ -59,7 +56,11 @@ function getActiveTabs () {
       request: { urls }
     };
 
-    handlers(request);
+    const portGetterMock = () => ({ name: PORT_EXTENSION } as chrome.runtime.Port);
+
+    // This invocation is only pretending to be handling a port connection message, so we're sending
+    // a mock port getter as there are no ports involved.
+    handlers(request, portGetterMock, portGetterMock);
   });
 }
 

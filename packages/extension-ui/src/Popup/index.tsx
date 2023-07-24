@@ -14,8 +14,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Route, Switch, useHistory } from 'react-router';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
-import { canDerive } from '@polkadot/extension-base/utils';
-import localStorageStores from '@polkadot/extension-base/utils/localStorageStores';
+import { canDerive, localStorageStores } from '@polkadot/extension-base/utils';
 import uiSettings from '@polkadot/ui-settings';
 
 import { GlobalErrorBoundary, Loading, SplashHandler } from '../components';
@@ -29,12 +28,7 @@ import {
   SigningReqContext
 } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import {
-  subscribeAccounts,
-  subscribeAuthorizeRequests,
-  subscribeMetadataRequests,
-  subscribeSigningRequests
-} from '../messaging';
+import { subscribeAccounts } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AddAccountMenu from './Accounts/AddAccountMenu';
 import ChangePassword from './Accounts/ChangePassword';
@@ -134,9 +128,6 @@ export default function Popup(): React.ReactElement {
   useEffect((): void => {
     Promise.all([
       subscribeAccounts(setAccounts),
-      subscribeAuthorizeRequests(setAuthRequests),
-      subscribeMetadataRequests(setMetaRequests),
-      subscribeSigningRequests(setSignRequests)
     ]).catch(console.error);
 
     uiSettings.on('change', (settings): void => {
@@ -146,6 +137,17 @@ export default function Popup(): React.ReactElement {
 
     _onAction();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
+  useEffect(() => {
+    const unsubscribers = [
+      localStorageStores.signRequests.subscribe(setSignRequests),
+      localStorageStores.metadataRequests.subscribe(setMetaRequests),
+      localStorageStores.authRequests.subscribe(setAuthRequests),
+    ];
+
+    return () => unsubscribers.forEach((unsubscribe) => unsubscribe());
   }, []);
 
   useEffect((): void => {

@@ -3,6 +3,7 @@
 
 import { z } from 'zod';
 
+import * as commonSchemas from './commonSchemas';
 import createStoreDefinition from './createStoreDefinition';
 
 /**
@@ -14,35 +15,7 @@ import createStoreDefinition from './createStoreDefinition';
 const STORES_DEFINITIONS = {
 
   chainMetadata: createStoreDefinition(
-    z.record(z.object({
-      chain: z.string(),
-      genesisHash: z.string(),
-      icon: z.string(),
-      ss58Format: z.number(),
-      chainType: z.enum(['substrate', 'ethereum']).optional()
-    }).extend({
-      color: z.string().optional(),
-      specVersion: z.number(),
-      tokenDecimals: z.number(),
-      tokenSymbol: z.string(),
-      types: // @polkadot/types-codec/types/registry.d.ts -> RegistryType
-        z.record(z.union([
-          z.string(),
-          z.record(z.string()),
-          z.object({
-            _enum: z.union([
-              z.array(z.string()),
-              z.record(z.number()),
-              z.record(z.string().or(z.null()))
-            ])
-          })
-        ])),
-      metaCalls: z.string().optional(),
-      userExtensions: z.record(z.object({
-        extrinsic: z.record(z.string()),
-        payload: z.record(z.string())
-      })).optional()
-    })),
+    z.record(commonSchemas.metadata),
     {}
   ),
 
@@ -65,7 +38,66 @@ const STORES_DEFINITIONS = {
 
   theme: createStoreDefinition(z.enum(['dark', 'light'])),
 
-  signerRequestIds: createStoreDefinition(z.number(), 0)
+  signerRequestIds: createStoreDefinition(z.number(), 0),
+
+  signRequests: createStoreDefinition(z.array(z.object({
+    id: z.string(),
+    requestingTabId: z.number(),
+    url: z.string(),
+    account: z.object({
+      address: z.string(),
+      genesisHash: z.string().nullable().optional(),
+      isExternal: z.boolean().optional(),
+      isHardware: z.boolean().optional(),
+      isHidden: z.boolean().optional(),
+      isDefaultAuthSelected: z.boolean().optional(),
+      name: z.string().optional(),
+      parentAddress: z.string().optional(),
+      suri: z.string().optional(),
+      type: z.enum(['ed25519', 'sr25519', 'ecdsa', 'ethereum']).optional(),
+      whenCreated: z.number().optional()
+    }),
+    payload: z.union([
+      z.object({
+        signType: z.literal('bytes'),
+        address: z.string(),
+        type: z.enum(['bytes', 'payload']),
+        data: z.string()
+      }),
+      z.object({
+        signType: z.literal('extrinsic'),
+        address: z.string(),
+        blockHash: z.string(),
+        blockNumber: z.string(),
+        era: z.string(),
+        genesisHash: z.string(),
+        method: z.string(),
+        nonce: z.string(),
+        specVersion: z.string(),
+        tip: z.string(),
+        transactionVersion: z.string(),
+        signedExtensions: z.array(z.string()),
+        version: z.number()
+      })
+    ])
+  })), []),
+
+  metadataRequests: createStoreDefinition(z.array(z.object({
+    id: z.string(),
+    requestingTabId: z.number(),
+    url: z.string(),
+    payload: commonSchemas.metadata
+  })), []),
+
+  authRequests: createStoreDefinition(z.array(z.object({
+    id: z.string(),
+    requestingTabId: z.number(),
+    idStr: z.string(),
+    url: z.string(),
+    payload: z.object({
+      origin: z.string()
+    })
+  })), [])
 
   // This is one of the rare cases where "any" is fine, as it describes a generic, not a particular value's type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

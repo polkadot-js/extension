@@ -40,7 +40,7 @@ export default function Metadata(): React.ReactElement {
           isLast={isOneRemaining}
           key={request.id}
           metaId={request.id}
-          request={request.request}
+          request={request.payload}
           url={request.url}
         />
       ) : (

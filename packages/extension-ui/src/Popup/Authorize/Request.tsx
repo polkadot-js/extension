@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
+import type { AuthorizeTabRequestPayload } from '@polkadot/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 
 import React, { FormEvent, useCallback, useContext, useEffect, useId } from 'react';
@@ -10,12 +10,11 @@ import styled from 'styled-components';
 import helpIcon from '../../assets/help.svg';
 import {
   AccountContext,
-  BottomWrapper,
+  ActionContext,
   Button,
   ButtonArea,
   HelperFooter,
   LearnMore,
-  ScrollWrapper,
   Svg,
   VerticalSpace
 } from '../../components';
@@ -30,8 +29,9 @@ interface Props extends ThemeProps {
   authId: string;
   className?: string;
   isFirst: boolean;
-  request: RequestAuthorizeTab;
+  payload: AuthorizeTabRequestPayload;
   url: string;
+  isLast: boolean;
 }
 
 const CustomFooter = styled(HelperFooter)`
@@ -57,7 +57,8 @@ const CustomFooter = styled(HelperFooter)`
   }
 `;
 
-function Request({ authId, className, isFirst, url }: Props): React.ReactElement<Props> {
+function Request({ authId, className, isFirst, isLast, url }: Props): React.ReactElement<Props> {
+  const onAction = useContext(ActionContext);
   const formId = useId();
 
   const { accounts, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
@@ -85,16 +86,35 @@ function Request({ authId, className, isFirst, url }: Props): React.ReactElement
     try {
       await approveAuthRequest(authId, selectedAccounts);
       show(t('App connected'), 'success');
-      window.close();
+
+      const params = new URLSearchParams({
+        isLast: isLast.toString(),
+        isSuccess: 'true',
+        message: t<string>('Authorization granted')
+      });
+
+      onAction(`/request-status?${params.toString()}`);
     } catch (error) {
       console.error(error);
     }
-  }, [authId, selectedAccounts, show, t]);
+  }, [authId, isLast, onAction, selectedAccounts, show, t]);
 
-  const _onClose = useCallback(() => {
-    rejectAuthRequest(authId);
-    window.close();
-  }, [authId]);
+  const _onClose = useCallback(async () => {
+    try {
+      await rejectAuthRequest(authId);
+
+      const params = new URLSearchParams({
+        isLast: isLast.toString(),
+        isSuccess: 'false',
+        message: t<string>('Authorization declined')
+      });
+
+      onAction(`/request-status?${params.toString()}`);
+    } catch (error) {
+      console.error(error);
+    }
+
+  }, [authId, isLast, onAction, t]);
 
   if (!accounts.length) {
     return <NoAccount authId={authId} />;
@@ -131,7 +151,7 @@ function Request({ authId, className, isFirst, url }: Props): React.ReactElement
   };
 
   return (
-    <StyledScrollWrapper>
+    <>
       <form
         className={className}
         id={formId}
@@ -158,16 +178,9 @@ function Request({ authId, className, isFirst, url }: Props): React.ReactElement
           </Button>
         )}
       </ButtonArea>
-    </StyledScrollWrapper>
+    </>
   );
 }
-
-const StyledScrollWrapper = styled(ScrollWrapper)`
-  & ${BottomWrapper} {
-    margin-inline: -16px;
-    padding-inline: 16px;
-  }
-`;
 
 export default styled(Request)`
   .accountList {

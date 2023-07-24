@@ -5,9 +5,8 @@ import type { Subscription } from 'rxjs';
 import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import type { MessageTypes, RequestAccountList, RequestAccountUnsubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types';
+import type { AuthorizeTabRequestPayload, MessageTypes, RequestAccountList, RequestAccountUnsubscribe, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, SignerPayloadJSONWithType, SignerPayloadRawWithType, SubscriptionMessageTypes } from '../types';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
@@ -16,10 +15,8 @@ import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, isNumber } from '@polkadot/util';
 
-import RequestBytesSign from '../RequestBytesSign';
-import RequestExtrinsicSign from '../RequestExtrinsicSign';
 import { withErrorLog } from './helpers';
-import State, { AuthResponse } from './State';
+import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 interface AccountSub {
@@ -63,8 +60,8 @@ export default class Tabs {
     );
   }
 
-  private authorize (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {
-    return this.#state.authorizeUrl(url, request);
+  private async authorize (url: string, messageId: string, requestingTabId: number, request: AuthorizeTabRequestPayload, respondImmediately: (response: unknown) => void): Promise<void> {
+    await this.#state.authorizeUrl(url, messageId, requestingTabId, request, respondImmediately);
   }
 
   private accountsListAuthorized (url: string, { anyType }: RequestAccountList): Promise<InjectedAccount[]> {
@@ -73,8 +70,8 @@ export default class Tabs {
     return this.filterForAuthorizedAccounts(transformedAccounts, url);
   }
 
-  private accountsSubscribeAuthorized (url: string, id: string, port: chrome.runtime.Port): string {
-    const cb = createSubscription<'pub(accounts.subscribe)'>(id, port);
+  private accountsSubscribeAuthorized (url: string, id: string, getCurrentPort: () => chrome.runtime.Port): string {
+    const cb = createSubscription<'pub(accounts.subscribe)'>(id, getCurrentPort);
 
     this.#accountSubs[id] = {
       subscription: accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
@@ -89,8 +86,13 @@ export default class Tabs {
       url
     };
 
-    port.onDisconnect.addListener((): void => {
-      this.accountsUnsubscribe(url, { id });
+    getCurrentPort().onDisconnect.addListener((): void => {
+      try {
+        // Test if the closed port hasn't been replaced with a new one - if no, postMessage fails, and we can unsubscribe
+        getCurrentPort().postMessage({});
+      } catch (e) {
+        this.accountsUnsubscribe(url, { id });
+      }
     });
 
     return id;
@@ -119,22 +121,22 @@ export default class Tabs {
     return pair;
   }
 
-  private bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
-    const address = request.address;
+  private async bytesSign (url: string, messageId: string, requestingTabId: number, payload: SignerPayloadRawWithType): Promise<void> {
+    const address = payload.address;
     const pair = this.getSigningPair(address);
 
-    return this.#state.sign(url, new RequestBytesSign(request), { address, ...pair.meta });
+    await this.#state.invokeSignatureRequest(url, payload, { address, ...pair.meta }, messageId, requestingTabId);
   }
 
-  private extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
-    const address = request.address;
+  private async extrinsicSign (url: string, messageId: string, requestingTabId: number, payload: SignerPayloadJSONWithType): Promise<void> {
+    const address = payload.address;
     const pair = this.getSigningPair(address);
 
-    return this.#state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
+    await this.#state.invokeSignatureRequest(url, payload, { address, ...pair.meta }, messageId, requestingTabId);
   }
 
-  private metadataProvide (url: string, request: MetadataDef): Promise<boolean> {
-    return this.#state.injectMetadata(url, request);
+  private async metadataProvide (url: string, messageId: string, requestingTabId: number, payload: MetadataDef): Promise<void> {
+    await this.#state.injectMetadata(url, payload, messageId, requestingTabId);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -149,42 +151,52 @@ export default class Tabs {
     return this.#state.rpcListProviders();
   }
 
-  private rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
-    return this.#state.rpcSend(request, port);
+  private rpcSend (request: RequestRpcSend, getCurrentPort: () => chrome.runtime.Port): Promise<JsonRpcResponse> {
+    return this.#state.rpcSend(request, getCurrentPort());
   }
 
-  private rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
-    return this.#state.rpcStartProvider(key, port);
+  private rpcStartProvider (key: string, getCurrentPort: () => chrome.runtime.Port): Promise<ProviderMeta> {
+    return this.#state.rpcStartProvider(key, getCurrentPort());
   }
 
-  private async rpcSubscribe (request: RequestRpcSubscribe, id: string, port: chrome.runtime.Port): Promise<boolean> {
-    const innerCb = createSubscription<'pub(rpc.subscribe)'>(id, port);
+  private async rpcSubscribe (request: RequestRpcSubscribe, id: string, getCurrentPort: () => chrome.runtime.Port): Promise<boolean> {
+    const innerCb = createSubscription<'pub(rpc.subscribe)'>(id, getCurrentPort);
     const cb = (_error: Error | null, data: SubscriptionMessageTypes['pub(rpc.subscribe)']): void => innerCb(data);
-    const subscriptionId = await this.#state.rpcSubscribe(request, cb, port);
+    const subscriptionId = await this.#state.rpcSubscribe(request, cb, getCurrentPort());
 
-    port.onDisconnect.addListener((): void => {
-      unsubscribe(id);
-      withErrorLog(() => this.rpcUnsubscribe({ ...request, subscriptionId }, port));
+    getCurrentPort().onDisconnect.addListener((): void => {
+      try {
+        // Test if the closed port hasn't been replaced with a new one - if no, postMessage fails, and we can unsubscribe
+        getCurrentPort().postMessage({});
+      } catch (e) {
+        unsubscribe(id);
+        withErrorLog(() => this.rpcUnsubscribe({ ...request, subscriptionId }, getCurrentPort));
+      }
     });
 
     return true;
   }
 
-  private rpcSubscribeConnected (request: null, id: string, port: chrome.runtime.Port): Promise<boolean> {
-    const innerCb = createSubscription<'pub(rpc.subscribeConnected)'>(id, port);
+  private rpcSubscribeConnected (request: null, id: string, getCurrentPort: () => chrome.runtime.Port): Promise<boolean> {
+    const innerCb = createSubscription<'pub(rpc.subscribeConnected)'>(id, getCurrentPort);
     const cb = (_error: Error | null, data: SubscriptionMessageTypes['pub(rpc.subscribeConnected)']): void => innerCb(data);
 
-    this.#state.rpcSubscribeConnected(request, cb, port);
+    this.#state.rpcSubscribeConnected(request, cb, getCurrentPort());
 
-    port.onDisconnect.addListener((): void => {
-      unsubscribe(id);
+    getCurrentPort().onDisconnect.addListener((): void => {
+      try {
+        // Test if the closed port hasn't been replaced with a new one - if no, postMessage fails, and we can unsubscribe
+        getCurrentPort().postMessage({});
+      } catch (e) {
+        unsubscribe(id);
+      }
     });
 
     return Promise.resolve(true);
   }
 
-  private async rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
-    return this.#state.rpcUnsubscribe(request, port);
+  private async rpcUnsubscribe (request: RequestRpcUnsubscribe, getCurrentPort: () => chrome.runtime.Port): Promise<boolean> {
+    return this.#state.rpcUnsubscribe(request, getCurrentPort());
   }
 
   private redirectPhishingLanding (phishingWebsite: string): void {
@@ -214,9 +226,16 @@ export default class Tabs {
     return false;
   }
 
-  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port?: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
+  public async handle<TMessageType extends MessageTypes> (
+    messageId: string,
+    type: TMessageType,
+    request: RequestTypes[TMessageType],
+    respondImmediately: (response: unknown) => void,
+    url: string,
+    getCurrentPort: () => chrome.runtime.Port
+  ): Promise<unknown> {
     if (type === 'pub(phishing.redirectIfDenied)') {
-      return this.redirectIfPhishing(url);
+      return this.redirectIfPhishing(url).then(respondImmediately);
     }
 
     if (type !== 'pub(authorize.tab)') {
@@ -225,49 +244,55 @@ export default class Tabs {
 
     switch (type) {
       case 'pub(authorize.tab)':
-        return this.authorize(url, request as RequestAuthorizeTab);
+        return this.authorize(url, messageId, ensureTabId(getCurrentPort().sender?.tab?.id), request as AuthorizeTabRequestPayload, respondImmediately);
 
       case 'pub(accounts.list)':
-        return this.accountsListAuthorized(url, request as RequestAccountList);
+        return this.accountsListAuthorized(url, request as RequestAccountList).then(respondImmediately);
 
       case 'pub(accounts.subscribe)':
-        return port && this.accountsSubscribeAuthorized(url, id, port);
+        return respondImmediately(this.accountsSubscribeAuthorized(url, messageId, getCurrentPort));
 
       case 'pub(accounts.unsubscribe)':
-        return this.accountsUnsubscribe(url, request as RequestAccountUnsubscribe);
+        return respondImmediately(this.accountsUnsubscribe(url, request as RequestAccountUnsubscribe));
 
       case 'pub(bytes.sign)':
-        return this.bytesSign(url, request as SignerPayloadRaw);
+        return this.bytesSign(url, messageId, ensureTabId(getCurrentPort().sender?.tab?.id), request as SignerPayloadRawWithType);
 
       case 'pub(extrinsic.sign)':
-        return this.extrinsicSign(url, request as SignerPayloadJSON);
+        return this.extrinsicSign(url, messageId, ensureTabId(getCurrentPort().sender?.tab?.id), request as SignerPayloadJSONWithType);
 
       case 'pub(metadata.list)':
-        return this.metadataList(url);
+        return this.metadataList(url).then(respondImmediately);
 
       case 'pub(metadata.provide)':
-        return this.metadataProvide(url, request as MetadataDef);
+        return this.metadataProvide(url, messageId, ensureTabId(getCurrentPort().sender?.tab?.id), request as MetadataDef);
 
       case 'pub(rpc.listProviders)':
-        return this.rpcListProviders();
+        return this.rpcListProviders().then(respondImmediately);
 
       case 'pub(rpc.send)':
-        return port && this.rpcSend(request as RequestRpcSend, port);
+        return this.rpcSend(request as RequestRpcSend, getCurrentPort).then(respondImmediately);
 
       case 'pub(rpc.startProvider)':
-        return port && this.rpcStartProvider(request as string, port);
+        return this.rpcStartProvider(request as string, getCurrentPort).then(respondImmediately);
 
       case 'pub(rpc.subscribe)':
-        return port && this.rpcSubscribe(request as RequestRpcSubscribe, id, port);
+        return this.rpcSubscribe(request as RequestRpcSubscribe, messageId, getCurrentPort).then(respondImmediately);
 
       case 'pub(rpc.subscribeConnected)':
-        return port && this.rpcSubscribeConnected(request as null, id, port);
+        return this.rpcSubscribeConnected(request as null, messageId, getCurrentPort).then(respondImmediately);
 
       case 'pub(rpc.unsubscribe)':
-        return port && this.rpcUnsubscribe(request as RequestRpcUnsubscribe, port);
+        return this.rpcUnsubscribe(request as RequestRpcUnsubscribe, getCurrentPort).then(respondImmediately);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);
     }
   }
 }
+
+const ensureTabId = (possibleTabId: number | undefined) => {
+  assert(possibleTabId, 'Sender tab id not available');
+
+  return possibleTabId;
+};

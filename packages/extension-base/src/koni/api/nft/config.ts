@@ -37,17 +37,17 @@ export const UNIQUE_IPFS_GATEWAY = 'https://ipfs.unique.network/ipfs/';
 
 export const NFT_STORAGE_GATEWAY = 'https://nftstorage.link/ipfs/';
 
-export const IPFS_IO_GATEWAY = 'https://ipfs.io/ipfs/';
+export const IPFS_W3S_LINK = 'https://w3s.link/ipfs/';
 
 export const GATEWAY_IPFS_IO = 'https://gateway.ipfs.io/ipfs/';
 
 export const DWEB_LINK = 'https://dweb.link/ipfs/';
 
-export const IPFS_GATEWAY_CLOUD = 'https://ipfs-gateway.cloud/ipfs/';
+export const IPFS_GATEWAY_4EVERLAND = 'https://4everland.io/ipfs/';
 
 export const IPFS_FLEEK = 'https://ipfs.fleek.co/ipfs/';
 
-export const IPFS_TELOS_MIAMI = 'https://ipfs.telos.miami/ipfs';
+export const IPFS_HARDBIN = 'https://hardbin.com/ipfs';
 
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
@@ -107,8 +107,8 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
 
 const RANDOM_IPFS_GATEWAY_SETTING = [
   {
-    provider: IPFS_IO_GATEWAY,
-    weight: 0 // Not stable
+    provider: IPFS_W3S_LINK,
+    weight: 1
   },
   {
     provider: CF_IPFS_GATEWAY,
@@ -131,12 +131,12 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
     weight: 5
   },
   {
-    provider: IPFS_GATEWAY_CLOUD,
-    weight: 0 // Deceptive site warning
+    provider: IPFS_GATEWAY_4EVERLAND,
+    weight: 2
   },
   {
-    provider: IPFS_TELOS_MIAMI,
-    weight: 0
+    provider: IPFS_HARDBIN,
+    weight: 1
   }
 ];
 

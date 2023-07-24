@@ -151,7 +151,6 @@ function Component (
           decimal={item?.fee?.decimals || 0}
           decimalOpacity={0.45}
           intOpacity={0.45}
-          suffix={item.fee?.symbol}
           unitOpacity={0.45}
           value={item.fee?.value || '0'}
         />
@@ -166,11 +165,14 @@ function Component (
         </Tag>
 
         <Button
-          icon={<Icon
-            phosphorIcon={ArrowSquareOut}
-            size='sm'
-          />}
+          icon={
+            <Icon
+              phosphorIcon={ArrowSquareOut}
+              size='sm'
+            />
+          }
           onClick={handleOnClick}
+          size={'xs'}
           type='ghost'
         />
       </div>
@@ -186,7 +188,7 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
     paddingBottom: 0,
     minHeight: 68,
 
-    '&:not(.__web-ui) .ant-number .ant-typography': {
+    '.ant-number .ant-typography': {
       fontSize: 'inherit !important',
       fontWeight: 'inherit !important',
       lineHeight: 'inherit'

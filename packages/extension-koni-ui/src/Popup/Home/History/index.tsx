@@ -390,7 +390,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             placeholder={'Chain, Address, Type,...'}
             searchValue={searchInput}
             showActionBtn
-            showExtraButton
           />
           <SwList
             filterBy={filterFunction}

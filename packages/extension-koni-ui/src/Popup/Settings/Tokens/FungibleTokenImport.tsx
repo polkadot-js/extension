@@ -470,7 +470,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   weight='fill'
                 />}
                 loading={loading}
-                onSubmit={onSubmit}
+                onClick={onSubmit}
               >
                 {t('Save')}
               </Button>

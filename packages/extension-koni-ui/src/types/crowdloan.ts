@@ -20,6 +20,7 @@ export type CrowdloanItemType = {
   contribute: string | BigN,
   convertedContribute: string | BigN,
   chainDisplayName: string,
+  relayParent: string,
   relayParentDisplayName: string,
   symbol: string,
   paraState?: CrowdloanParaState;

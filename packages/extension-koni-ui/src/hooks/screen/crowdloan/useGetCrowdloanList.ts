@@ -58,6 +58,7 @@ function getCrowdloanItem (
     chainDisplayName: chainInfo.name,
     slug: chainInfo.slug,
     symbol,
+    relayParent: relayParentKey,
     relayParentDisplayName,
     paraState: contributeValueInfo.paraState,
     crowdloanUrl: _getCrowdloanUrlFromChain(chainInfo)

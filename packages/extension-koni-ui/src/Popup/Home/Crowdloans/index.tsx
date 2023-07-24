@@ -1,14 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -16,10 +14,10 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { PriceChangeStatus, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
 import { CrowdloanItem, Icon, Logo, ModalContext, Number, SwList, Table, Tag } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
@@ -63,6 +61,17 @@ function getRelayParentKey (groupDisplayName: string) {
 
 const FILTER_MODAL_ID = 'crowdloan-filter-modal';
 
+type PriceChange = {
+  value: BigN,
+  changePercent: BigN,
+  changeStatus?: PriceChangeStatus,
+};
+
+type PriceChangeMap = Record<string, PriceChange>;
+
+const BN_0 = new BigN(0);
+const BN_100 = new BigN(100);
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
@@ -79,10 +88,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { isShowBalance } = useSelector((state) => state.settings);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
-
-  const { accountBalance: { tokenGroupBalanceMap } } = useContext(HomeContext);
-  const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
+  const priceMap = useSelector((state: RootState) => state.price.priceMap);
+  const price24hMap = useSelector((state: RootState) => state.price.price24hMap);
 
   const filterOptions = useMemo(() => [
     { label: t('Polkadot parachain'), value: FilterValue.POLKADOT_PARACHAIN },
@@ -204,17 +211,39 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const handleSearch = useCallback((value: string) => setSearchInput(value), [setSearchInput]);
 
-  const currentChainBalance = useCallback((crowdloanItem: CrowdloanItemType) => {
-    const currentChainAsset: _MultiChainAsset | _ChainAsset | undefined = Object.values(multiChainAssetMap).find((item) => item.name === crowdloanItem.chainDisplayName) || Object.values(assetRegistryMap).find((item) => item.name === crowdloanItem.chainDisplayName);
+  const getPriceChangeInfo = useCallback((chain: string): PriceChange => {
+    const priceValue = new BigN(priceMap[chain] || 0);
+    const price24Value = new BigN(price24hMap[chain] || 0);
 
-    if (!currentChainAsset) {
-      return undefined;
+    let change = BN_0;
+    let changePercent = BN_0;
+    let changeStatus: PriceChangeStatus | undefined;
+
+    if (priceValue.gt(price24Value)) {
+      change = priceValue.minus(price24Value);
+      changeStatus = 'increase';
+    } else if (price24Value.gt(priceValue)) {
+      change = price24Value.minus(priceValue);
+      changeStatus = 'decrease';
     }
 
-    const currentChainBalance: TokenBalanceItemType = tokenGroupBalanceMap[currentChainAsset.slug];
+    if (!change.eq(0)) {
+      changePercent = change.multipliedBy(BN_100).dividedBy(price24Value);
+    }
 
-    return currentChainBalance;
-  }, [assetRegistryMap, multiChainAssetMap, tokenGroupBalanceMap]);
+    return {
+      value: priceValue,
+      changePercent,
+      changeStatus
+    };
+  }, [price24hMap, priceMap]);
+
+  const priceChangeMap = useMemo<PriceChangeMap>(() => {
+    return {
+      polkadot: getPriceChangeInfo('polkadot'),
+      kusama: getPriceChangeInfo('kusama')
+    };
+  }, [getPriceChangeInfo]);
 
   const columns = useMemo(() => {
     return [
@@ -260,17 +289,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         dataIndex: 'price',
         key: 'price',
         render: (_: any, row: CrowdloanItemType) => {
-          // TODO: update priceChangeStatus
-          const currentChainInfo = currentChainBalance(row);
+          const priceChangeInfo = priceChangeMap[row.relayParent];
 
-          if (!currentChainInfo) {
+          if (!priceChangeInfo) {
             return <></>;
           }
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          const marginColor: string = currentChainInfo?.priceChangeStatus === 'increase' ? theme.token?.colorSuccess : theme.token?.colorError;
-          const { price24hValue, priceValue } = currentChainInfo;
-          const margin = !price24hValue || !priceValue ? 0 : Math.abs(price24hValue - priceValue) / price24hValue * 100;
+          const marginColor: string = priceChangeInfo.changeStatus === 'decrease' ? theme.token?.colorSuccess : theme.token?.colorError;
 
           return (
             <div className={'price-wrapper'}>
@@ -278,18 +304,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 decimal={0}
                 decimalOpacity={0.45}
                 prefix={'$'}
-                value={currentChainInfo?.priceValue}
+                value={priceChangeInfo?.value}
               />
               <Number
                 className='margin-percentage'
                 decimal={0}
                 decimalColor={marginColor}
                 intColor={marginColor}
-                prefix={currentChainInfo?.priceChangeStatus === 'decrease' ? '-' : '+'}
+                prefix={priceChangeInfo?.changeStatus === 'decrease' ? '-' : '+'}
                 size={12}
                 suffix='%'
                 unitColor={marginColor}
-                value={margin}
+                value={priceChangeInfo?.changePercent}
               />
             </div>
           );
@@ -320,11 +346,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       }
     ];
-  }, [currentChainBalance, getParaStateLabel, theme.token?.colorError, theme.token?.colorSuccess]);
+  }, [getParaStateLabel, priceChangeMap, theme.token?.colorError, theme.token?.colorSuccess]);
 
   const crowdloansContent = useMemo(() => {
-    console.log('filteredItems', filteredItems.length);
-
     if (isWebUI) {
       return (
         <div className='web-list'>
@@ -346,6 +370,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             {filteredItems.length > 0
               ? (
                 <Table
+                  rowKey={'slug'}
                   columns={columns}
                   dataSource={filteredItems}
                   pagination={false}

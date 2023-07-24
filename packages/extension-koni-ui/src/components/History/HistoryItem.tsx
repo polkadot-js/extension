@@ -5,6 +5,7 @@ import { TransactionDirection } from '@subwallet/extension-base/background/KoniT
 import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { HistoryStatusMap } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab, toShort } from '@subwallet/extension-koni-ui/utils';
@@ -14,7 +15,6 @@ import CN from 'classnames';
 import moment from 'moment';
 import { ArrowSquareOut, CaretRight } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -26,6 +26,7 @@ function Component (
   { className = '', item, onClick }: Props) {
   const displayData = item.displayData;
   const { isWebUI } = useContext(ScreenContext);
+  const { isShowBalance } = useSelector((state) => state.settings);
 
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
 
@@ -74,6 +75,7 @@ function Component (
                 className={'__value'}
                 decimal={item?.amount?.decimals || 0}
                 decimalOpacity={0.45}
+                hide={!isShowBalance}
                 suffix={item?.amount?.symbol}
                 value={item?.amount?.value || '0'}
               />
@@ -81,6 +83,7 @@ function Component (
                 className={'__fee'}
                 decimal={item?.fee?.decimals || 0}
                 decimalOpacity={0.45}
+                hide={!isShowBalance}
                 intOpacity={0.45}
                 suffix={item.fee?.symbol}
                 unitOpacity={0.45}
@@ -349,6 +352,5 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
         textAlign: 'right'
       }
     }
-
   });
 });

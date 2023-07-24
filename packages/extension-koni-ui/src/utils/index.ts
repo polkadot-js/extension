@@ -220,6 +220,7 @@ export * from './common';
 export * from './form';
 export * from './qr';
 export * from './scanner';
+export * from './sort';
 export * from './transaction';
 export * from './click';
 export * from './walletConnect';

@@ -8,6 +8,7 @@ import { BN_ZERO } from '@subwallet/extension-koni-ui/constants/number';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CrowdloanContributeValueType, CrowdloanItemType, CrowdloanValueInfo } from '@subwallet/extension-koni-ui/types/crowdloan';
+import { sortCrowdloanByValue } from '@subwallet/extension-koni-ui/utils';
 import BigN from 'bignumber.js';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -87,7 +88,7 @@ function getCrowdloanContributeList (
     result.push(getCrowdloanItem(n, contributeValueInfo, chainInfo));
   });
 
-  return result;
+  return result.sort(sortCrowdloanByValue);
 }
 
 function getCrowdloanContributeMap (

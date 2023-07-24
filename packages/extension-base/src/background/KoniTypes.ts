@@ -444,6 +444,8 @@ export type RequestChangeShowZeroBalance = { show: boolean };
 
 export type RequestChangeLanguage = { language: LanguageType };
 
+export type RequestChangeShowBalance = { enable: boolean };
+
 export interface RandomTestRequest {
   start: number;
   end: number;
@@ -2105,6 +2107,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.saveLanguage)': [RequestChangeLanguage, boolean];
   'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
+  'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

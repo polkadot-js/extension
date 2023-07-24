@@ -16,6 +16,7 @@ import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import CN from 'classnames';
@@ -121,7 +122,7 @@ function Component (): React.ReactElement {
           }
         });
 
-        return items;
+        return items.sort(sortTokenByValue);
       }
 
       if (tokenBalanceMap[tokenGroupSlug]) {

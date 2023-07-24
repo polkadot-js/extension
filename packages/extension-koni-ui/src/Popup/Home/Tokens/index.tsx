@@ -17,6 +17,7 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import { Coins, FadersHorizontal, SlidersHorizontal } from 'phosphor-react';
@@ -43,8 +44,6 @@ const Component = (): React.ReactElement => {
     searchInput: string,
     setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
   } = useOutletContext();
-  const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
 
   useEffect(() => {
     outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Token name');
@@ -166,26 +165,15 @@ const Component = (): React.ReactElement => {
 
   const tokenGroupBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
     const result: TokenBalanceItemType[] = [];
-    const searchTextLowerCase = outletContext?.searchInput?.toLowerCase() || '';
 
     sortedTokenGroups.forEach((tokenGroupSlug) => {
       if (tokenGroupBalanceMap[tokenGroupSlug]) {
-        const newItem = tokenGroupBalanceMap[tokenGroupSlug];
-        const chainAsset = multiChainAssetMap[newItem.slug] || assetRegistryMap[newItem.slug];
-
-        if (!chainAsset) {
-          console.warn('Not found chain asset for token slug: ', newItem.slug);
-          result.push({ ...newItem });
-        } else {
-          const chainDisplayName = chainAsset.name;
-
-          result.push({ ...newItem, chainDisplayName });
-        }
+        result.push(tokenGroupBalanceMap[tokenGroupSlug]);
       }
     });
 
-    return result.filter((item) => item.symbol.toLowerCase().includes(searchTextLowerCase));
-  }, [outletContext?.searchInput, sortedTokenGroups, tokenGroupBalanceMap, multiChainAssetMap, assetRegistryMap]);
+    return result.sort(sortTokenByValue);
+  }, [sortedTokenGroups, tokenGroupBalanceMap]);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);

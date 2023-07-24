@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.4
+Build date: Jul 24, 2023.
+
+Bugs fixed:
+- Can not load another NFTs when collection contain any NFT with wrong information (#1672)
+
 ## 1.1.3
 Build date: Jul 21, 2023.
 

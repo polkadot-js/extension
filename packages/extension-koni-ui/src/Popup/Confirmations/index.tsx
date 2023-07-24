@@ -3,7 +3,7 @@
 
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
-import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
 import { useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { ConfirmationHeader } from './parts';
-import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
+import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, NotSupportWCConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
 
 type Props = ThemeProps
 
@@ -28,7 +28,8 @@ const titleMap: Record<ConfirmationType, string> = {
   metadataRequest: detectTranslate('Update metadata'),
   signingRequest: detectTranslate('Signature request'),
   switchNetworkRequest: detectTranslate('Add network request'),
-  connectWCRequest: detectTranslate('WalletConnect')
+  connectWCRequest: detectTranslate('WalletConnect'),
+  notSupportWCRequest: detectTranslate('WalletConnect')
 } as Record<ConfirmationType, string>;
 
 const Component = function ({ className }: Props) {
@@ -123,6 +124,8 @@ const Component = function ({ className }: Props) {
         return (
           <ConnectWalletConnectConfirmation request={confirmation.item as WalletConnectSessionRequest} />
         );
+      case 'notSupportWCRequest':
+        return (<NotSupportWCConfirmation request={confirmation.item as WalletConnectNotSupportRequest} />);
     }
 
     return null;

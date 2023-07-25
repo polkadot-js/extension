@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // export const EXTENSION_VERSION = chrome.runtime.getManifest().version;
-export const EXTENSION_VERSION = '0.0.0';
+import * as process from 'process';
+
+export const EXTENSION_VERSION = process.env.PKG_VERSION || '0.0.0';
 export const WIKI_URL = 'https://docs.subwallet.app/';
 export const PRIVACY_AND_POLICY_URL = 'https://docs.subwallet.app/privacy-and-security/privacy-policy';
 export const TERMS_OF_SERVICE_URL = 'https://docs.subwallet.app/privacy-and-security/terms-of-service';

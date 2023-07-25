@@ -78,6 +78,10 @@ export default class State {
     this.#providers = providers;
   }
 
+  public async init (initialParams: { chainMetadataSets: MetadataDef[] }) {
+    await this.saveMetadata(initialParams.chainMetadataSets);
+  }
+
   public async getKnownMetadata (): Promise<MetadataDef[]> {
     return Object.values(await localStorageStores.chainMetadata.get());
   }
@@ -417,16 +421,19 @@ export default class State {
     return provider.unsubscribe(request.type, request.method, request.subscriptionId);
   }
 
-  public async saveMetadata ({ types, ...restMeta }: MetadataDef): Promise<void> {
+  public async saveMetadata (chainMetadataSets: MetadataDef[]): Promise<void> {
     type TypesType = ReturnType<Parameters<typeof localStorageStores.chainMetadata.update>[0]>[string]['types']
 
     await localStorageStores.chainMetadata.update((currentContent) => ({
       ...currentContent,
-      [restMeta.genesisHash]: {
-        ...restMeta,
-        // Type assertion, because "MetadataDef.types" can contain the CodecClass which should not appear here (and is not serializable anyway, so no use of it in local storage)
-        types: types as TypesType
-      }
+      ...Object.fromEntries(chainMetadataSets.map(({ types, ...restMeta }) => [
+        restMeta.genesisHash,
+        {
+          ...restMeta,
+          // Type assertion, because "MetadataDef.types" can contain the CodecClass which should not appear here (and is not serializable anyway, so no use of it in local storage)
+          types: types as TypesType
+        }
+      ]))
     }));
   }
 

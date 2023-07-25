@@ -3,6 +3,8 @@
 
 import type { MessageTypes, TransportRequestMessage } from '../types';
 
+import { MetadataDef } from '@polkadot/extension-inject/types';
+
 import { PORT_EXTENSION } from '../../defaults';
 import Extension from './Extension';
 import State from './State';
@@ -11,6 +13,10 @@ import Tabs from './Tabs';
 const state = new State();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
+
+export const init = async (initialParams: { chainMetadataSets: MetadataDef[] }) => {
+  await state.init(initialParams);
+};
 
 export default function handler<TMessageType extends MessageTypes> (
   { id: messageId, message, request }: TransportRequestMessage<TMessageType>,

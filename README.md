@@ -24,7 +24,12 @@ Simple Singer integration guide `<add link here>`. Find more information in [pol
 
 Steps to build the extension and view your changes in a browser:
 
-1. Build via `yarn build` or `yarn watch`
+1. Build via
+* `yarn build` or
+  ```
+  > yarn download-chains-metadata
+  > yarn watch
+  ```
 2. Install the extension
   - Chrome:
     - go to `chrome://extensions/`
@@ -144,3 +149,9 @@ Accounts can also be derived from existing accounts – `Derive New Account` opt
 ```
 
 The path will be added to the mnemonic phrase of the parent account.
+
+## Troubleshooting
+
+* `Module not found: Error: Can't resolve './chains-metadata.json'`
+  
+  The Signer bundles in the most recent (for the time of building) metadata for the production and testnet Aleph Zero chains. Apparently, the json file containing them is absent, so make sure to generate it by executing `yarn download-chains-metadata` before bundling the application.

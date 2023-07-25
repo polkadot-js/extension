@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "adapt-build-to-ff": "jq '.background.scripts = [.background.service_worker] | del(.background.service_worker)' packages/extension/build/manifest.json > tmp.$$.json && mv tmp.$$.json packages/extension/build/manifest.json",
-    "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
+    "build": "yarn download-chains-metadata && polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
     "build-storybook": "storybook build",
     "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
@@ -33,6 +33,7 @@
     "build:zip:dst:firefox": "rm -rf ./extension-firefox.zip && cd packages/extension/build && zip -r -FS ../../../extension-firefox.zip .",
     "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig .eslintignore .eslintrc.js babel.config.cjs CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js jest.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock",
     "clean": "polkadot-dev-clean-build",
+    "download-chains-metadata": "ts-node --esm scripts/downloadMetadata.mts",
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
     "start": "yarn watch",
@@ -46,7 +47,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
+    "@polkadot/api": "^10.5.1",
     "@polkadot/dev": "^0.67.177",
+    "@polkadot/util-crypto": "^12.1.2",
     "@storybook/addon-essentials": "^7.0.12",
     "@storybook/addon-styling": "^1.0.8",
     "@storybook/react": "^7.0.12",
@@ -59,13 +62,14 @@
     "eslint-plugin-storybook": "^0.6.12",
     "i18next-scanner": "^4.1.0",
     "sinon-chrome": "^3.0.1",
-    "storybook": "^7.0.12"
+    "storybook": "^7.0.12",
+    "ts-node": "^10.9.1"
   },
   "resolutions": {
     "@polkadot/api": "^10.5.1",
     "@polkadot/keyring": "^12.1.2",
     "@polkadot/networks": "patch:@polkadot/networks@npm:12.1.2#.yarn/patches/@polkadot-networks-npm-12.1.2-012217f8ff.patch",
-    "@polkadot/types": "^10.5.1",
+    "@polkadot/types": "10.5.1",
     "@polkadot/util": "^12.1.2",
     "@polkadot/util-crypto": "^12.1.2",
     "@polkadot/x-fetch": "^12.1.2",

@@ -29,3 +29,4 @@ _book
 docs/html
 .idea
 .vscode
+/packages/extension/src/chains-metadata.json

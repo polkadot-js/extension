@@ -241,7 +241,7 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    await this.#state.saveMetadata(queued.payload);
+    await this.#state.saveMetadata([queued.payload]);
 
     await this.#state.removeMetadataRequest(id);
     getContentPort(queued.requestingTabId).postMessage({ id });

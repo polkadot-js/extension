@@ -7,17 +7,27 @@ import '@polkadot/extension-inject/crossenv';
 
 import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 
-import handlers from '@polkadot/extension-base/background/handlers';
+import handlers, { init as initHandlers } from '@polkadot/extension-base/background/handlers';
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { AccountsStore } from '@polkadot/extension-base/stores';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
+import preloadedChainsMetadata from './chains-metadata.json';
 import listenOnPort from './listenOnPort';
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));
+
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    initHandlers({
+      // This type assertion is fine as the metadata is runtime-validated before being saved
+      chainMetadataSets: preloadedChainsMetadata as Parameters<typeof initHandlers>[0]['chainMetadataSets']
+    }).catch((e) => console.error('Error initializing handlers:', e));
+  }
+});
 
 listenOnPort((getContentPort, getCurrentPort) => {
   /**

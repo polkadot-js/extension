@@ -18,7 +18,8 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import classNames from 'classnames';
 import { Coins, FadersHorizontal, SlidersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -29,6 +30,7 @@ import styled from 'styled-components';
 import DetailTable from './DetailTable';
 
 type Props = ThemeProps;
+const BN_100 = new BigN(100);
 
 const Component = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -219,7 +221,17 @@ const Component = (): React.ReactElement => {
                   title: t<string>('Portfolio %'),
                   dataIndex: 'percentage',
                   key: 'percentage',
-                  render: () => <p>85%</p>
+                  className: '__percentage-col',
+                  render: (_, row) => {
+                    return (
+                      <Number
+                        decimal={0}
+                        decimalOpacity={0.45}
+                        suffix={'%'}
+                        value={row.total.convertedValue.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue)}
+                      />
+                    );
+                  }
                 },
                 {
                   title: t<string>('Price'),
@@ -331,22 +343,27 @@ const Component = (): React.ReactElement => {
           </Button>
         </div>
       </div>
+      {
+        !isWebUI && (
+          <>
+            <AccountSelectorModal
+              items={accountSelectorItems}
+              onSelectItem={openSelectAccount}
+            />
 
-      <AccountSelectorModal
-        items={accountSelectorItems}
-        onSelectItem={openSelectAccount}
-      />
+            <TokensSelectorModal
+              address={selectedAccount}
+              items={tokenSelectorItems}
+              onSelectItem={openSelectToken}
+            />
 
-      <TokensSelectorModal
-        address={selectedAccount}
-        items={tokenSelectorItems}
-        onSelectItem={openSelectToken}
-      />
-
-      <ReceiveQrModal
-        address={selectedAccount}
-        selectedNetwork={selectedNetwork}
-      />
+            <ReceiveQrModal
+              address={selectedAccount}
+              selectedNetwork={selectedNetwork}
+            />
+          </>
+        )
+      }
     </div>
   );
 };
@@ -377,6 +394,22 @@ const Tokens = styled(WrapperComponent)<WrapperProps>(({ theme: { extendToken, t
         marginBottom: '0px !important'
       }
     },
+
+    'td.__percentage-col': {
+      verticalAlign: 'top',
+
+      '.ant-number': {
+        lineHeight: token.lineHeightLG,
+        fontSize: token.fontSizeLG
+      },
+
+      '.ant-number .ant-typography': {
+        fontSize: 'inherit !important',
+        lineHeight: 'inherit',
+        textAlign: 'end'
+      }
+    },
+
     '.__empty-list': {
       marginTop: token.marginSM,
       marginBottom: token.marginSM

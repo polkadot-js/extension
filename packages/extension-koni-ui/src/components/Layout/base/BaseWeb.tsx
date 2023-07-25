@@ -56,6 +56,8 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken } }: Them
         left: 0,
         right: 0,
         height: 300,
+        zIndex: -1,
+
         '&.-decrease': {
           backgroundImage: extendToken.tokensScreenDangerBackgroundColor
         }

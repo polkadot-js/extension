@@ -16,6 +16,8 @@ export type AccountBalanceHookType = {
   totalBalanceInfo: {
     convertedValue: BigN,
     converted24hValue: BigN,
+    freeValue: BigN,
+    lockedValue: BigN,
     change: {
       value: BigN,
       status?: PriceChangeStatus,

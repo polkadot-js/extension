@@ -204,7 +204,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 size={30}
                 subFloatNumber
                 suffix='$'
-                value={totalValue}
+                value={totalBalanceInfo.freeValue}
               />
             )
             : (
@@ -232,7 +232,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 size={30}
                 subFloatNumber
                 suffix='$'
-                value={totalValue}
+                value={totalBalanceInfo.lockedValue}
               />
             )
             : (

@@ -94,6 +94,8 @@ function getAccountBalance (
   const totalBalanceInfo: AccountBalanceHookType['totalBalanceInfo'] = {
     convertedValue: new BigN(0),
     converted24hValue: new BigN(0),
+    freeValue: new BigN(0),
+    lockedValue: new BigN(0),
     change: {
       value: new BigN(0),
       percent: new BigN(0)
@@ -230,6 +232,8 @@ function getAccountBalance (
     }
 
     tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;
+    totalBalanceInfo.freeValue = totalBalanceInfo.freeValue.plus(tokenGroupBalance.free.convertedValue);
+    totalBalanceInfo.lockedValue = totalBalanceInfo.lockedValue.plus(tokenGroupBalance.locked.convertedValue);
     totalBalanceInfo.convertedValue = totalBalanceInfo.convertedValue.plus(tokenGroupBalance.total.convertedValue);
     totalBalanceInfo.converted24hValue = totalBalanceInfo.converted24hValue.plus(tokenGroupBalance.total.pastConvertedValue);
   });

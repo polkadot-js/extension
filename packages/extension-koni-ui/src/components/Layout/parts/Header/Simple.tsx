@@ -12,9 +12,13 @@ import styled from 'styled-components';
 export type Props = ThemeProps & {
   title?: string | React.ReactNode;
   onBack?: () => void;
+  showBackButton?: boolean
 }
 
-function Component (props: Props): React.ReactElement<Props> {
+function Component ({ className,
+  onBack,
+  showBackButton = true,
+  title }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
 
@@ -23,14 +27,14 @@ function Component (props: Props): React.ReactElement<Props> {
   }, [goHome]);
 
   return (
-    <div className={props.className}>
+    <div className={className}>
       <div className='__box'>
         <div className={'__left-part'}>
           <Logo2D
             height={24}
             width={24}
           />
-          {!!props.title && (
+          {!!title && showBackButton && (
             <Button
               className='__back-button'
               icon={
@@ -39,15 +43,15 @@ function Component (props: Props): React.ReactElement<Props> {
                   phosphorIcon={CaretLeft}
                 />
               }
-              onClick={props.onBack || defaultOnBack}
+              onClick={onBack || defaultOnBack}
               size='xs'
               type='ghost'
             />
           )}
         </div>
-        {!!props.title && (
+        {!!title && (
           <div className='__title-wrapper'>
-            <div className={'__title'}>{props.title}</div>
+            <div className={'__title'}>{title}</div>
           </div>
         )}
         <Button

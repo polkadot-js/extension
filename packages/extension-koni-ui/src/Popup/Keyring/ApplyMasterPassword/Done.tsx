@@ -67,7 +67,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const MigrateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    padding: `0 ${token.padding}px`,
     textAlign: 'center',
 
     '.page-icon': {

@@ -128,10 +128,11 @@ const Base = (props: LayoutBaseProps) => {
       <CurComponent
         key={key}
         onBack={onBack}
+        showBackButton={props.showBackButton}
         title={props.title}
       />
     );
-  }, [onBack, props.title]);
+  }, [onBack, props.showBackButton, props.title]);
 
   const isWebBase = useMemo(() => isWebUI && withSideMenu, [isWebUI, withSideMenu]);
 

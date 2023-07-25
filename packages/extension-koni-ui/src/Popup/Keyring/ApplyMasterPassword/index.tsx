@@ -4,6 +4,7 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useDefaultNavigate, useDeleteAccount, useNotification } from '@subwallet/extension-koni-ui/hooks';
 import { forgetAccount, keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -13,7 +14,7 @@ import { Button, ButtonProps, Field, Form, Icon, Input } from '@subwallet/react-
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle, Trash } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -81,6 +82,7 @@ const intersectionArray = (array1: AccountJson[], array2: AccountJson[]): Accoun
 };
 
 const Component: React.FC<Props> = (props: Props) => {
+  const { isWebUI } = useContext(ScreenContext);
   const { className } = props;
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
@@ -289,97 +291,127 @@ const Component: React.FC<Props> = (props: Props) => {
       animateOnce={true}
       className={CN(className)}
     >
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
+        {...(!isWebUI
+          ? {
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          })}
         disableBack={loading}
         onBack={onBack}
-        rightFooterButton={{
-          ...footerButton,
-          disabled: step === 'Migrate' && (isDisabled || deleting),
-          loading: step === 'Migrate' && loading
-        }}
         showBackButton={step !== 'Introduction'}
         subHeaderLeft={step === 'Done' && <CloseIcon />}
         title={title}
       >
-        {step === 'Introduction' && <IntroductionMigratePassword />}
-        {step === 'Done' && <MigrateDone accounts={canMigrate} />}
-        {step === 'Migrate' && currentAccount && (
-          <div className='body-container'>
-            <div className='account-avatar'>
-              <SwAvatar
-                size={token.sizeLG * 4}
-                theme={currentAccount.type === 'ethereum' ? 'ethereum' : 'polkadot'}
-                value={currentAccount.address}
-              />
-            </div>
-            <Form
-              form={form}
-              initialValues={{
-                [FormFieldName.PASSWORD]: ''
-              }}
-              name={formName}
-              onFieldsChange={onUpdate}
-              onFinish={onSubmit}
-            >
-              <Form.Item>
-                <Field
-                  content={currentAccount.name || ''}
-                  label={t('Account name')}
-                  placeholder={t('Account name')}
+        <div className={CN('__screen-body', {
+          '__web-ui': isWebUI
+        })}
+        >
+          {step === 'Introduction' && <IntroductionMigratePassword className={'__introduction-container'} />}
+          {step === 'Done' && (
+            <MigrateDone
+              accounts={canMigrate}
+              className={'__migrate-done-container'}
+            />
+          )}
+          {step === 'Migrate' && currentAccount && (
+            <div className='body-container'>
+              <div className='account-avatar'>
+                <SwAvatar
+                  size={token.sizeLG * 4}
+                  theme={currentAccount.type === 'ethereum' ? 'ethereum' : 'polkadot'}
+                  value={currentAccount.address}
                 />
-              </Form.Item>
-              <Form.Item>
-                <Field
-                  content={toShort(currentAccount.address || '', 15, 17)}
-                  label={t('Account address')}
-                  placeholder={t('Account address')}
-                />
-              </Form.Item>
-              <Form.Item
-                name={FormFieldName.PASSWORD}
-                rules={[
-                  {
-                    message: t('Current password is required'),
-                    required: true
-                  }
-                ]}
-                statusHelpAsTooltip={true}
+              </div>
+              <Form
+                form={form}
+                initialValues={{
+                  [FormFieldName.PASSWORD]: ''
+                }}
+                name={formName}
+                onFieldsChange={onUpdate}
+                onFinish={onSubmit}
               >
-                <Input
-                  label={t('Current password')}
-                  type='password'
-                />
-              </Form.Item>
-              {
-                isError && (
-                  <Form.Item
-                    className='form-item-button'
-                  >
-                    <Button
-                      icon={removeIcon}
-                      loading={deleting}
-                      onClick={onDelete}
-                      size='xs'
-                      type='ghost'
+                <Form.Item>
+                  <Field
+                    content={currentAccount.name || ''}
+                    label={t('Account name')}
+                    placeholder={t('Account name')}
+                  />
+                </Form.Item>
+                <Form.Item>
+                  <Field
+                    content={toShort(currentAccount.address || '', 15, 17)}
+                    label={t('Account address')}
+                    placeholder={t('Account address')}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name={FormFieldName.PASSWORD}
+                  rules={[
+                    {
+                      message: t('Current password is required'),
+                      required: true
+                    }
+                  ]}
+                  statusHelpAsTooltip={true}
+                >
+                  <Input
+                    label={t('Current password')}
+                    type='password'
+                  />
+                </Form.Item>
+                {
+                  isError && (
+                    <Form.Item
+                      className='form-item-button'
                     >
-                      {t('Remove this account')}
-                    </Button>
-                  </Form.Item>
-                )
-              }
-            </Form>
-          </div>
-        )}
-      </Layout.WithSubHeaderOnly>
+                      <Button
+                        icon={removeIcon}
+                        loading={deleting}
+                        onClick={onDelete}
+                        size='xs'
+                        type='ghost'
+                      >
+                        {t('Remove this account')}
+                      </Button>
+                    </Form.Item>
+                  )
+                }
+              </Form>
+            </div>
+          )}
+
+          <Button
+            {...footerButton}
+            block={true}
+            className={'__footer-button'}
+            disabled ={step === 'Migrate' && (isDisabled || deleting)}
+            loading={step === 'Migrate' && loading}
+          />
+        </div>
+      </Layout.Base>
     </PageWrapper>
   );
 };
 
 const ApplyMasterPassword = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.body-container': {
-      padding: `0 ${token.padding}px`,
+    '.__screen-body': {
+      maxWidth: '416px',
+      margin: '0 auto',
+      paddingLeft: token.padding,
+      paddingRight: token.padding
+    },
 
+    '.body-container': {
       '.account-avatar': {
         marginTop: token.margin,
         marginBottom: token.margin * 2,
@@ -413,6 +445,20 @@ const ApplyMasterPassword = styled(Component)<Props>(({ theme: { token } }: Prop
           flexDirection: 'row',
           justifyContent: 'center'
         }
+      }
+    },
+
+    '.__screen-body.__web-ui': {
+      '.__introduction-container': {
+        paddingBottom: token.padding
+      },
+
+      '.__migrate-done-container': {
+        paddingBottom: token.padding
+      },
+
+      '.__footer-button': {
+        marginTop: token.margin
       }
     }
   };

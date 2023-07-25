@@ -71,15 +71,11 @@ const Component: React.FC<Props> = (props: Props) => {
             }}
           />
         </div>
-        <div className={CN('title', {
-          '__web-ui': isWebUI
-        })}
+        <div className={CN('title')}
         >
           {!isWebUI ? t('All done!') : t("You're all done!")}
         </div>
-        <div className={CN('description', {
-          '__web-ui': isWebUI
-        })}
+        <div className={CN('description')}
         >
           {t('Follow along with product updates or reach out if you have any questions.')}
         </div>
@@ -111,7 +107,9 @@ const CreateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
     textAlign: 'center',
 
     '&.__web-ui': {
-      maxWidth: '400px',
+      maxWidth: '416px',
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
       margin: '0 auto'
     },
 
@@ -123,7 +121,6 @@ const CreateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.title': {
-      marginTop: token.margin,
       marginBottom: token.margin,
       fontWeight: token.fontWeightStrong,
       fontSize: token.fontSizeHeading3,
@@ -133,15 +130,11 @@ const CreateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.description': {
       padding: `0 ${token.controlHeightLG - token.padding}px`,
-      marginTop: token.margin,
       marginBottom: token.margin * 2,
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,
       color: token.colorTextDescription,
-      textAlign: 'center',
-      '&.__web-ui': {
-        padding: `0 ${token.controlHeightLG}px`
-      }
+      textAlign: 'center'
     },
 
     '.__button-wrapper': {

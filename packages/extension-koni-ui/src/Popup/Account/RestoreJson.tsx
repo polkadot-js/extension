@@ -291,7 +291,7 @@ function Component ({ className }: Props): JSX.Element {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={onBack}
         {...(!isWebUI
           ? {
@@ -314,13 +314,13 @@ function Component ({ className }: Props): JSX.Element {
         ]}
         title={t<string>('Import from Polkadot.{js}')}
       >
-        <div className={CN('container', {
+        <div className={CN('layout-container', {
           '__web-ui': isWebUI
         })}
         >
           <div className={CN('import-container')}>
             <div className='description'>
-              {t('Please drag an drop the .json file you exported from Polkadot.js')}
+              {t('Drag and drop the JSON file you exported from Polkadot.{js}')}
             </div>
             <Form
               className='form-container'
@@ -335,62 +335,67 @@ function Component ({ className }: Props): JSX.Element {
                   accept={'application/json'}
                   className='file-selector'
                   disabled={validating}
-                  hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
+                  hint={t('Drag and drop the JSON file you exported from Polkadot.{js}')}
                   onChange={onChange}
                   statusHelp={fileValidateState.message}
-                  title={t('Import from Polkadot.js')}
+                  title={t('Import by JSON file')}
                 />
               </Form.Item>
-              {!!accountsInfo.length && (
-                <Form.Item>
-                  {accountsInfo.length > 1
-                    ? (
-                      <SettingItem
-                        className='account-list-item'
-                        leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
-                        name={t('Import {{number}} accounts', { replace: { number: String(accountsInfo.length).padStart(2, '0') } })}
-                        onPressItem={openModal}
-                        rightItem={(
-                          <Icon
-                            phosphorIcon={DotsThree}
-                            size='sm'
+              {
+                !!accountsInfo.length && (
+                  <Form.Item>
+                    {
+                      accountsInfo.length > 1
+                        ? (
+                          <SettingItem
+                            className='account-list-item'
+                            leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
+                            name={t('Import {{number}} accounts', { replace: { number: String(accountsInfo.length).padStart(2, '0') } })}
+                            onPressItem={openModal}
+                            rightItem={(
+                              <Icon
+                                phosphorIcon={DotsThree}
+                                size='sm'
+                              />
+                            )}
                           />
-                        )}
-                      />
-                    )
-                    : (
-                      <SettingItem
-                        className='account-list-item'
-                        leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
-                        name={accountsInfo[0].name}
-                      />
-                    )}
-                </Form.Item>
+                        )
+                        : (
+                          <SettingItem
+                            className='account-list-item'
+                            leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
+                            name={accountsInfo[0].name}
+                          />
+                        )
+                    }
+                  </Form.Item>
+                )
+              }
+              {
+                requirePassword && (
+                  <Form.Item
+                    validateStatus={submitValidateState.status}
+                  >
+                    <div className='input-label'>
+                      {t('Please enter the password you have used when creating your Polkadot.{js} account')}
+                    </div>
+                    <Input
+                      id={`${formName}_${passwordField}`}
+                      onChange={onChangePassword}
+                      placeholder={t('Password')}
+                      statusHelp={submitValidateState.message}
+                      type='password'
+                      value={password}
+                    />
+                  </Form.Item>
+                )
+              }
+              {isWebUI && (
+                <Button
+                  {...buttonProps}
+                  className='action'
+                />
               )}
-              <>
-                <Form.Item
-                  validateStatus={submitValidateState.status}
-                >
-                  <div className='input-label'>
-                    {t('Please enter the password you set when creating your polkadot.js account')}
-                  </div>
-                  <Input
-                    id={`${formName}_${passwordField}`}
-                    onChange={onChangePassword}
-                    placeholder={t('Password')}
-                    statusHelp={submitValidateState.message}
-                    type='password'
-                    value={password}
-                  />
-
-                </Form.Item>
-                {isWebUI && (
-                  <Button
-                    {...buttonProps}
-                    className='action'
-                  />
-                )}
-              </>
             </Form>
             <SwModal
               className={className}
@@ -411,26 +416,28 @@ function Component ({ className }: Props): JSX.Element {
             <InstructionContainer contents={instructionContent} />
           )}
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 }
 
 const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--row-gap': token.sizeXS,
+    '--row-gap': `${token.sizeXS}px`,
 
-    '.container': {
+    '.layout-container': {
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
 
       '&.__web-ui': {
         display: 'flex',
         justifyContent: 'center',
-        maxWidth: '60%',
+        maxWidth: 816,
+        gap: token.size,
         margin: '0 auto'
       },
 
       '.import-container': {
-        padding: token.padding,
         paddingBottom: 0,
         flex: 1,
 
@@ -441,64 +448,61 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '.instruction-container': {
         flex: 1
+      }
+    },
+    '.description': {
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: token.colorTextDescription
+    },
+
+    '.form-container': {
+      marginTop: token.margin
+    },
+
+    '.ant-form-item:last-child': {
+      marginBottom: 0
+    },
+
+    '.input-label': {
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: token.colorTextDescription,
+      marginBottom: token.margin
+    },
+
+    '.account-list-item': {
+      marginTop: -token.marginXS,
+
+      '.account-item': {
+        cursor: 'default'
       },
 
-      '.description': {
-        padding: `0 ${token.padding}px`,
-        fontSize: token.fontSizeHeading6,
-        lineHeight: token.lineHeightHeading6,
-        color: token.colorTextDescription,
-        textAlign: 'center'
-      },
+      '.ant-web3-block-right-item': {
+        marginRight: 0
+      }
+    },
 
-      '.form-container': {
-        marginTop: token.margin
-      },
+    '.ant-web3-block': {
+      display: 'flex !important'
+    },
 
-      '.ant-form-item:last-child': {
-        marginBottom: 0
-      },
+    '.ant-sw-modal-body': {
+      padding: `${token.padding}px 0 ${token.padding}px`,
+      flexDirection: 'column',
+      display: 'flex'
+    },
 
-      '.input-label': {
-        fontSize: token.fontSizeHeading6,
-        lineHeight: token.lineHeightHeading6,
-        color: token.colorTextDescription,
-        marginBottom: token.margin
-      },
+    '.ant-sw-list-wrapper': {
+      overflow: 'hidden',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column'
+    },
 
-      '.account-list-item': {
-        marginTop: -token.marginXS,
-
-        '.account-item': {
-          cursor: 'default'
-        },
-
-        '.ant-web3-block-right-item': {
-          marginRight: 0
-        }
-      },
-
-      '.ant-web3-block': {
-        display: 'flex !important'
-      },
-
-      '.ant-sw-modal-body': {
-        padding: `${token.padding}px 0 ${token.padding}px`,
-        flexDirection: 'column',
-        display: 'flex'
-      },
-
-      '.ant-sw-list-wrapper': {
-        overflow: 'hidden',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column'
-      },
-
-      '.file-selector': {
-        '.ant-upload-drag-single': {
-          height: 168
-        }
+    '.file-selector': {
+      '.ant-upload-drag-single': {
+        height: 168
       }
     }
   };

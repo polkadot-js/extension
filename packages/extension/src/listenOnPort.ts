@@ -15,13 +15,13 @@ type GetContentPort = (tabId: number) => chrome.runtime.Port
 type GetCurrentPort = () => chrome.runtime.Port
 
 export default (cb: (getContentPort: GetContentPort, getCurrentPort: GetCurrentPort) => void) => {
-  const contentPorts: {
+  const contentPorts: Partial<{
     [tabId: string]: chrome.runtime.Port
-  } = {};
-  const extensionPorts: {
+  }> = {};
+  const extensionPorts: Partial<{
     // There is a special case in which the key is "undefined" representing the native extension popup
     [tabId: string]: chrome.runtime.Port
-  } = {};
+  }> = {};
 
   const getContentPort = (tabId: number) => {
     const port = contentPorts[tabId];
@@ -50,7 +50,15 @@ export default (cb: (getContentPort: GetContentPort, getCurrentPort: GetCurrentP
      * Not returning "port" directly in order to always return the fresh instance
      * of the port (i.e. with the same name).
      */
-    const getCurrentPort = () => portsMap[getPortTabAsString(port)];
+    const getCurrentPort = () => {
+      const currentPort = portsMap[getPortTabAsString(port)];
+
+      if (!currentPort) {
+        throw new Error('The current port is no longer connected.');
+      }
+
+      return port;
+    };
 
     cb(getContentPort, getCurrentPort);
   });

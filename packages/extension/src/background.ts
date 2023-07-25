@@ -32,10 +32,10 @@ listenOnPort((getContentPort, getCurrentPort) => {
 
   // message and disconnect handlers
   getCurrentPort().onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => handlers(data, getCurrentPort, getContentPort));
-  getCurrentPort().onDisconnect.addListener(() => {
+  getCurrentPort().onDisconnect.addListener((port) => {
     clearTimeout(timer);
 
-    console.log(`Disconnected from ${getCurrentPort().name}`);
+    console.log(`Disconnected from ${port.name}`);
   });
 });
 
@@ -56,7 +56,10 @@ function getActiveTabs () {
       request: { urls }
     };
 
-    const portGetterMock = () => ({ name: PORT_EXTENSION } as chrome.runtime.Port);
+    const portGetterMock = () => ({
+      name: PORT_EXTENSION,
+      postMessage: (param: any) => undefined, // eslint-disable-line
+    } as chrome.runtime.Port);
 
     // This invocation is only pretending to be handling a port connection message, so we're sending
     // a mock port getter as there are no ports involved.

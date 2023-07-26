@@ -801,5 +801,8 @@
   "{{name}} must be equal or less than {{maxString}}": "",
   "{{name}} must be greater than 0": "",
   "{{name}} must be equal {{maxString}}": "",
-  "If you unstake this amount your staking would fall below minimum stake required. Unstake all instead?": ""
+  "If you unstake this amount your staking would fall below minimum stake required. Unstake all instead?": "",
+  "Click <extension/> select SubWallet and then <pin/>": "",
+  "Hide balance": "Ẩn số dư",
+  "Show balance": "Hiện số dư"
 }

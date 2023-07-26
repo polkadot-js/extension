@@ -42,6 +42,12 @@ export interface RuntimeEnvironmentInfo {
   protocol?: string;
 }
 
+export type TargetEnvironment = 'extension' | 'webapp' | 'web-runner';
+
+export interface EnvironmentSupport {
+  MANTA_ZK: boolean;
+}
+
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
   chainStateMap: Record<string, _ChainState>;
@@ -437,6 +443,8 @@ export type RequestChangeEnableChainPatrol = { enable: boolean };
 export type RequestChangeShowZeroBalance = { show: boolean };
 
 export type RequestChangeLanguage = { language: LanguageType };
+
+export type RequestChangeShowBalance = { enable: boolean };
 
 export interface RandomTestRequest {
   start: number;
@@ -2099,6 +2107,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.saveLanguage)': [RequestChangeLanguage, boolean];
   'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
+  'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];
@@ -2210,3 +2219,6 @@ export interface KoniRequestSignatures {
 export interface ApplicationMetadataType {
   version: string;
 }
+
+export type OSType = 'Mac OS' | 'iOS' | 'Windows' | 'Android' | 'Linux' | 'Unknown';
+export const MobileOS: OSType[] = ['iOS', 'Android'];

@@ -50,6 +50,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           style: { top: 210 },
           direction: 'vertical',
           duration: 1.8,
+          closable: false,
           message: t('Reloading')
         });
 

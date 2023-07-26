@@ -105,7 +105,8 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         'process.env': {
           NODE_ENV: JSON.stringify(mode),
           PKG_NAME: JSON.stringify(pkgJson.name),
-          PKG_VERSION: JSON.stringify(pkgJson.version)
+          PKG_VERSION: JSON.stringify(pkgJson.version),
+          TARGET_ENV: JSON.stringify('webrunner')
         }
       }),
       new CopyPlugin({
@@ -162,4 +163,6 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
 module.exports = createConfig({
   fallback: './src/fallback.ts',
   'web-runner': './src/webRunner.ts'
-}, {}, false);
+}, {
+  'manta-extension-sdk': './manta-extension-sdk-empty.ts'
+}, false);

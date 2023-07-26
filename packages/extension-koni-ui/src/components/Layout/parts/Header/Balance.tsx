@@ -51,6 +51,8 @@ const actions: Action[] = [
 function Component ({ className }: Props): React.ReactElement<Props> {
   const locationPathname = useLocation().pathname;
   const tokenGroupSlug = useParams()?.slug;
+  const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
+  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
 
   const _tokenGroupSlug = useMemo(() => {
     if (locationPathname && tokenGroupSlug) {
@@ -117,6 +119,20 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     onOpenBuyTokens,
     onOpenReceive
   ]);
+
+  const buyTokenSymbol = useMemo<string>(() => {
+    if (tokenGroupSlug) {
+      if (multiChainAssetMap[tokenGroupSlug]) {
+        return multiChainAssetMap[tokenGroupSlug].symbol;
+      }
+
+      if (assetRegistryMap[tokenGroupSlug]) {
+        return assetRegistryMap[tokenGroupSlug].symbol;
+      }
+    }
+
+    return '';
+  }, [tokenGroupSlug, assetRegistryMap, multiChainAssetMap]);
 
   const handleCancelTransfer = useCallback(() => inactiveModal(TRANSFER_FUND_MODAL), [inactiveModal]);
   const handleCancelBuy = useCallback(() => inactiveModal(BUY_TOKEN_MODAL), [inactiveModal]);
@@ -290,7 +306,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         onCancel={handleCancelBuy}
         title={t('Buy token')}
       >
-        <BuyTokens modalContent />
+        <BuyTokens
+          modalContent
+          slug={buyTokenSymbol}
+        />
       </CustomModal>
 
       <AccountSelectorModal

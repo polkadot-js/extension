@@ -300,7 +300,7 @@ const Component: React.FC<Props> = (props: Props) => {
               name={FormFieldName.VALUE}
               rules={[
                 { required: true, message: t('Amount is required') },
-                validateUnStakeValue(minValue, bondedValue, decimals)
+                validateUnStakeValue(minValue, bondedValue, decimals, t)
               ]}
               statusHelpAsTooltip={true}
             >

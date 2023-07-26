@@ -49,7 +49,7 @@ const defaultErrorMap = {
     code: undefined
   },
   [BasicTxErrorType.UNSUPPORTED]: {
-    message: detectTranslate('This transaction is not supported'),
+    message: detectTranslate('This feature is not available with this token'),
     code: undefined
   },
   [BasicTxErrorType.TIMEOUT]: {

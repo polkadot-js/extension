@@ -60,7 +60,7 @@ export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: str
   let bnTotalStake = new BN(amount);
   const bnMinStake = new BN(chainStakingMetadata.minJoinNominationPool || '0');
   const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
-  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug);
+  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, true);
 
   if (selectedPool.state !== 'Open') {
     errors.push(new TransactionError(StakingTxErrorType.INACTIVE_NOMINATION_POOL));

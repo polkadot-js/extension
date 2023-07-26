@@ -290,7 +290,7 @@ export const ScannerContextProvider = ({ children }: ScannerContextProviderProps
 
     if (isSubstrateMessageParsedData(signRequest)) {
       if (signRequest.data.crypto !== 'sr25519') {
-        throw new Error(t('Subwallet only supports accounts using sr25519 crypto'));
+        throw new Error(t('SubWallet only supports accounts using sr25519 crypto'));
       }
 
       isHash = signRequest.isHash;

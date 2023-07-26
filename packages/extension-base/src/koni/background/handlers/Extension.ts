@@ -2073,7 +2073,7 @@ export default class KoniExtension {
 
         if (exists) {
           if (exists.type === (isEthereum ? 'ethereum' : 'sr25519')) {
-            return [{ code: AccountExternalErrorCode.INVALID_ADDRESS, message: 'Account exists' }];
+            return [{ code: AccountExternalErrorCode.INVALID_ADDRESS, message: t('Account exists') }];
           }
         }
       } catch (e) {

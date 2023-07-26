@@ -69,7 +69,7 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
   const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
   const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
   const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, chainStakingMetadata.maxValidatorPerNominator);
-  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug);
+  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, true);
 
   if (!nominatorMetadata || nominatorMetadata.status === StakingStatus.NOT_STAKING) {
     if (!bnTotalStake.gte(bnMinStake)) {

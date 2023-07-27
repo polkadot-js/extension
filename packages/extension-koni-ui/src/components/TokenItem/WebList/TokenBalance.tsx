@@ -26,7 +26,7 @@ function Component (
   // - price change status
 
   return (
-    <div className={classNames('token-group-balance-item', className)}>
+    <div className={classNames(className)}>
       <div className={'ant-balance-item-balance-info-wrapper'}>
         <Number
           className={'__value'}
@@ -41,7 +41,6 @@ function Component (
           decimalOpacity={0.45}
           intOpacity={0.45}
           prefix='$'
-          size={12}
           unitOpacity={0.45}
           value={convertedValue}
         />
@@ -52,7 +51,7 @@ function Component (
 
 export const TokenBalance = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    '.ant-number': {
+    '.ant-number .ant-typography': {
       fontSize: 'inherit !important',
       lineHeight: 'inherit',
       textAlign: 'end'

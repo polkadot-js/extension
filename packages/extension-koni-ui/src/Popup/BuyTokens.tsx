@@ -30,7 +30,8 @@ import styled from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps & {
-  modalContent?: boolean
+  modalContent?: boolean;
+  slug?: string;
 };
 
 type BuyTokensFormProps = {
@@ -79,9 +80,10 @@ const tokenKeyMapIsEthereum: Record<string, boolean> = (() => {
 
 const TransakUrl = 'https://global.transak.com';
 
-function Component ({ className, modalContent }: Props) {
+function Component ({ className, modalContent, slug }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
-  const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
+  const [_currentSymbol] = useState<string | undefined>(locationState?.symbol);
+  const currentSymbol = slug || _currentSymbol;
   const fixedTokenKey = currentSymbol ? PREDEFINED_TRANSAK_TOKEN[currentSymbol]?.slug : undefined;
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);

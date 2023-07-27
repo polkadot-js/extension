@@ -51,57 +51,39 @@ const DEFAULT_ITEM: NftItem = {
   id: 'unknown'
 };
 
-const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ modalContent = false,
-  nftDetail = DEFAULT_ITEM }) => {
+const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ modalContent = false, nftDetail }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { chain: nftChain = '', collectionId, itemId, owner = '' } = useParams();
+  const params = useParams();
+
+  const nftChain = nftDetail?.chain || params.chain || '';
+  const collectionId = nftDetail?.collectionId || params.collectionId || '';
+  const itemId = nftDetail?.id || params.itemId || '';
+  const owner = nftDetail?.owner || params.owner || '';
 
   const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { nftCollections, nftItems } = useSelector((state) => state.nft);
   const { accounts } = useSelector((state) => state.accountState);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
 
-  const currentNftDetails = useMemo(() => modalContent
-    ? {
-      nftChain: nftDetail.chain,
-      collectionId: nftDetail.collectionId,
-      itemId: nftDetail.id,
-      owner: nftDetail.owner
-    }
-    : {
-      nftChain,
-      collectionId,
-      itemId,
-      owner
-    }, [collectionId, itemId, nftChain, owner, modalContent, nftDetail]);
-
-  const nftItem = useMemo((): NftItem => {
-    const { collectionId,
-      itemId,
-      nftChain,
-      owner } = currentNftDetails;
-
-    return nftItems.find(
+  const nftItem = useMemo((): NftItem =>
+    nftItems.find(
       (item) =>
         isSameAddress(item.owner, owner) &&
         nftChain === item.chain &&
         item.collectionId === collectionId &&
         item.id === itemId
-    ) || DEFAULT_ITEM;
-  }, [currentNftDetails, nftItems]);
+    ) || DEFAULT_ITEM
+  , [collectionId, itemId, nftChain, nftItems, owner]);
 
-  const collectionInfo = useMemo((): NftCollection => {
-    const { collectionId,
-      nftChain } = currentNftDetails;
-
-    return nftCollections.find(
+  const collectionInfo = useMemo((): NftCollection =>
+    nftCollections.find(
       (item) =>
         nftChain === item.chain &&
       item.collectionId === collectionId
-    ) || DEFAULT_COLLECTION;
-  }, [currentNftDetails, nftCollections]);
+    ) || DEFAULT_COLLECTION
+  , [collectionId, nftChain, nftCollections]);
 
   const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
   const addressPrefix = useGetChainPrefixBySlug(nftChain);
@@ -162,14 +144,14 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
     });
   }, [from, accounts, t, chainInfoMap, chain]);
 
-  const onFieldsChange: FormCallbacks<SendNFTFormProps>['onFieldsChange'] = useCallback((_changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<SendNFTFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
 
     setIsDisable(error);
   }, []);
 
   // Submit transaction
-  const onSubmit: FormCallbacks<SendNFTFormProps>['onFinish'] = useCallback(
+  const  onSubmit: FormCallbacks<SendNFTFormProps>['onFinish'] = useCallback(
     (values: SendNFTFormProps) => {
       const isEthereumInterface = isEthereumAddress(from);
       const { to } = values;
@@ -216,9 +198,9 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
   const checkAction = usePreCheckAction(from);
 
   useEffect(() => {
-    setChain(currentNftDetails.nftChain);
-    setFrom(currentNftDetails.owner);
-  }, [currentNftDetails, setChain, setFrom]);
+    setChain(nftChain);
+    setFrom(owner);
+  }, [nftChain, owner, setChain, setFrom]);
 
   useEffect(() => {
     if (nftItem === DEFAULT_ITEM || collectionInfo === DEFAULT_COLLECTION) {

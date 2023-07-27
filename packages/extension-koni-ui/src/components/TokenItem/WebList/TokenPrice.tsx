@@ -36,18 +36,18 @@ function Component (
     })}
     >
       <Number
+        className={'__value'}
         decimal={0}
         decimalOpacity={0.45}
         prefix={'$'}
         value={value}
       />
       <Number
-        className='margin-percentage'
+        className={'__percentage'}
         decimal={0}
         decimalColor={marginColor}
         intColor={marginColor}
         prefix={priceChangeStatus === 'decrease' ? '-' : '+'}
-        size={12}
         suffix='%'
         unitColor={marginColor}
         value={margin}
@@ -58,13 +58,19 @@ function Component (
 
 export const TokenPrice = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    '.ant-number': {
+    '.ant-number .ant-typography': {
       fontSize: 'inherit !important',
       lineHeight: 'inherit',
       textAlign: 'end'
     },
 
-    '.margin-percentage': {
+    '.__value': {
+      lineHeight: token.lineHeightLG,
+      fontSize: token.fontSizeLG
+    },
+
+    '.__percentage': {
+      lineHeight: token.lineHeightSM,
       fontSize: token.fontSizeSM
     }
   });

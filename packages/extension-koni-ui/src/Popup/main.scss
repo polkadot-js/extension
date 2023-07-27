@@ -578,10 +578,6 @@ div#popup-container {
   left: 0;
 }
 
-.ant-sw-modal-root .ant-sw-modal-mask, .ant-sw-modal-root .ant-sw-modal-wrap, .ant-sw-qr-scanner-root .ant-sw-qr-scanner-wrap {
-  position: absolute;
-}
-
 .d-none {
   display: none;
 }
@@ -603,9 +599,9 @@ div#popup-container {
           border: none;
           text-align: end;
           padding: 0;
-          padding-bottom: 8px;
           display: table-cell;
           width: 25%;
+          font-weight: 500;
 
           &:first-child {
             text-align: start;
@@ -654,4 +650,34 @@ div#popup-container {
 
 .ant-menu-vertical {
   border-inline: none !important;
+}
+
+.ant-sw-modal {
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .ant-sw-modal-header.ant-sw-modal-header {
+    background-color: transparent;
+    border-bottom-color: #1A1A1A;
+  }
+
+  .ant-sw-modal-content.ant-sw-modal-content {
+    padding-bottom: 0;
+    border-bottom: 0;
+    background: #0C0C0C;
+    box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+  }
+
+  .ant-sw-header-container-center .ant-sw-header-center-part {
+    width: auto;
+    margin-left: 48px;
+    margin-right: 48px;
+  }
+
+  .ant-sw-modal-footer .ant-btn + .ant-btn:not(.ant-dropdown-trigger) {
+    margin-inline-start: 12px;
+  }
 }

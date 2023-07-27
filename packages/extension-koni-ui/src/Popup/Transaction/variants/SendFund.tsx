@@ -42,7 +42,8 @@ interface TransferFormProps extends TransactionFormBaseProps {
 }
 
 type Props = ThemeProps & {
-  modalContent?: boolean
+  modalContent?: boolean;
+  tokenGroupSlug?: string;
 };
 
 function isAssetTypeValid (
@@ -217,12 +218,13 @@ const filterAccountFunc = (
   };
 };
 
-const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<Props> => {
+const _SendFund = ({ className = '', modalContent, tokenGroupSlug: _tokenGroupSlug }: Props): React.ReactElement<Props> => {
   const { t } = useTranslation();
   const notification = useNotification();
 
   const locationState = useLocation().state as SendFundParam;
-  const [sendFundSlug] = useState<string | undefined>(locationState?.slug);
+  const [paramSlug] = useState<string | undefined>(locationState?.slug);
+  const tokenGroupSlug = paramSlug || _tokenGroupSlug;
 
   const { asset, chain, from, onDone, setAsset, setChain, setFrom } = useContext(TransactionContext);
 
@@ -302,10 +304,10 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       assetRegistry,
       assetSettingMap,
       multiChainAssetMap,
-      sendFundSlug,
+      tokenGroupSlug,
       isZKModeEnabled
     );
-  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, from, isZKModeEnabled, multiChainAssetMap, sendFundSlug]);
+  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, from, isZKModeEnabled, multiChainAssetMap, tokenGroupSlug]);
 
   const validateRecipientAddress = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
     if (!_recipientAddress) {
@@ -509,7 +511,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
     }, 300);
   }, [accounts, from, assetRegistry, asset, chain, notification, t, isTransferAll, onSuccess, onError]);
 
-  const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
+  const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, tokenGroupSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, tokenGroupSlug]);
 
   const onSetMaxTransferable = useCallback((value: boolean) => {
     const bnMaxTransfer = new BN(maxTransfer);
@@ -616,7 +618,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       })}
       >
         <div className={'__brief common-text text-light-4 text-center'}>
-          {modalContent ? t('You are doing a token transfer with the following information') : t('You are performing a transfer of a fungible token')}
+          {t('You are performing a transfer of a fungible token')}
         </div>
 
         <Form
@@ -649,13 +651,11 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
               />
             </Form.Item>
 
-            {!modalContent && (
-              <Icon
-                className={'middle-item'}
-                phosphorIcon={PaperPlaneRight}
-                size={'md'}
-              />
-            )}
+            <Icon
+              className={'middle-item'}
+              phosphorIcon={PaperPlaneRight}
+              size={'md'}
+            />
 
             <Form.Item name={'destChain'}>
               <ChainSelector
@@ -776,9 +776,7 @@ const SendFund = styled(_SendFund)(({ theme }) => {
       }
 
     },
-    '.ant-form-item:last-child': {
-      margin: 0
-    },
+
     '&.__modal-content': {
       padding: 0
     },

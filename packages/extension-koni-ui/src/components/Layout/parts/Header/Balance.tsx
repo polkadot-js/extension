@@ -80,6 +80,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     tokenSelectorItems } = useReceiveQR(_tokenGroupSlug);
 
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+  const [sendFundKey, setSendFundKey] = useState<string>('sendFundKey');
+  const [buyTokensKey, setBuyTokensKey] = useState<string>('buyTokensKey');
   const notify = useNotification();
 
   const isTotalBalanceDecrease = totalBalanceInfo.change.status === 'decrease';
@@ -134,8 +136,14 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     return '';
   }, [tokenGroupSlug, assetRegistryMap, multiChainAssetMap]);
 
-  const handleCancelTransfer = useCallback(() => inactiveModal(TRANSFER_FUND_MODAL), [inactiveModal]);
-  const handleCancelBuy = useCallback(() => inactiveModal(BUY_TOKEN_MODAL), [inactiveModal]);
+  const handleCancelTransfer = useCallback(() => {
+    inactiveModal(TRANSFER_FUND_MODAL);
+    setSendFundKey(`sendFundKey-${Date.now()}`);
+  }, [inactiveModal]);
+  const handleCancelBuy = useCallback(() => {
+    inactiveModal(BUY_TOKEN_MODAL);
+    setBuyTokensKey(`buyTokensKey-${Date.now()}`);
+  }, [inactiveModal]);
 
   return (
     <div className={CN(className, 'flex-row')}>
@@ -296,8 +304,14 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         onCancel={handleCancelTransfer}
         title={t('Transfer')}
       >
-        <Transaction modalContent>
-          <SendFund modalContent />
+        <Transaction
+          key={sendFundKey}
+          modalContent
+        >
+          <SendFund
+            modalContent
+            tokenGroupSlug={_tokenGroupSlug}
+          />
         </Transaction>
       </CustomModal>
 
@@ -307,6 +321,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         title={t('Buy token')}
       >
         <BuyTokens
+          key={buyTokensKey}
           modalContent
           slug={buyTokenSymbol}
         />

@@ -3,7 +3,7 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isAccountAll } from '@subwallet/extension-base/utils';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { baseServiceItems, Layout, PageWrapper, ServiceItem } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { ServiceSelector } from '@subwallet/extension-koni-ui/components/Field/BuyTokens/ServiceSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
@@ -72,6 +72,17 @@ const tokenKeyMapIsEthereum: Record<string, boolean> = (() => {
   return result;
 })();
 
+const getServiceItems = (tokenSlug: string): ServiceItem[] => {
+  const buyInfo = PREDEFINED_BUY_TOKEN_BY_SLUG[tokenSlug];
+  const result: ServiceItem[] = [];
+
+  for (const serviceItem of baseServiceItems) {
+    result.push({ ...serviceItem, disabled: buyInfo ? !buyInfo.services.includes(serviceItem.key) : true });
+  }
+
+  return result;
+};
+
 function Component ({ className }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
   const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
@@ -111,10 +122,6 @@ function Component ({ className }: Props) {
     return undefined;
   }, [accounts, chainInfoMap, selectedAddress]);
 
-  useEffect(() => {
-    selectedTokenKey && checkAsset(selectedTokenKey);
-  }, [checkAsset, selectedTokenKey]);
-
   const tokenItems = useMemo<TokenItemType[]>(() => {
     if (fixedTokenKey) {
       return getTokenItems('ALL', ledgerNetwork);
@@ -126,6 +133,19 @@ function Component ({ className }: Props) {
 
     return getTokenItems(accountType, ledgerNetwork);
   }, [accountType, fixedTokenKey, ledgerNetwork]);
+
+  const serviceItems = useMemo(() => getServiceItems(selectedTokenKey), [selectedTokenKey]);
+
+  const isSupportBuyTokens = useMemo(() => {
+    if (selectedService && selectedAddress && selectedTokenKey) {
+      const buyInfo = PREDEFINED_BUY_TOKEN_BY_SLUG[selectedTokenKey];
+      const accountType = getAccountType(selectedAddress);
+
+      return buyInfo && buyInfo.support === accountType && buyInfo.services.includes(selectedService) && tokenItems.find((item) => item.slug === selectedTokenKey);
+    }
+
+    return false;
+  }, [selectedService, selectedAddress, selectedTokenKey, tokenItems]);
 
   const onClickNext = useCallback(() => {
     setLoading(true);
@@ -172,16 +192,21 @@ function Component ({ className }: Props) {
     }
   }, [form, chainInfoMap, walletReference, notify, t]);
 
-  const isSupportBuyTokens = useMemo(() => {
-    if (selectedService && selectedAddress && selectedTokenKey) {
-      const buyInfo = PREDEFINED_BUY_TOKEN_BY_SLUG[selectedTokenKey];
-      const accountType = getAccountType(selectedAddress);
-
-      return buyInfo && buyInfo.support === accountType && buyInfo.services.includes(selectedService) && tokenItems.find((item) => item.slug === selectedTokenKey);
+  const accountsFilter = useCallback((account: AccountJson) => {
+    if (isAccountAll(account.address)) {
+      return false;
     }
 
-    return false;
-  }, [selectedService, selectedAddress, selectedTokenKey, tokenItems]);
+    if (fixedTokenKey) {
+      if (tokenKeyMapIsEthereum[fixedTokenKey]) {
+        return isEthereumAddress(account.address);
+      } else {
+        return !isEthereumAddress(account.address);
+      }
+    }
+
+    return true;
+  }, [fixedTokenKey]);
 
   useEffect(() => {
     if (currentAddress !== currentAccount?.address) {
@@ -205,21 +230,23 @@ function Component ({ className }: Props) {
     }
   }, [tokenItems, fixedTokenKey, form]);
 
-  const accountsFilter = useCallback((account: AccountJson) => {
-    if (isAccountAll(account.address)) {
-      return false;
-    }
+  useEffect(() => {
+    selectedTokenKey && checkAsset(selectedTokenKey);
+  }, [checkAsset, selectedTokenKey]);
 
-    if (fixedTokenKey) {
-      if (tokenKeyMapIsEthereum[fixedTokenKey]) {
-        return isEthereumAddress(account.address);
-      } else {
-        return !isEthereumAddress(account.address);
+  useEffect(() => {
+    if (selectedTokenKey) {
+      const services = getServiceItems(selectedTokenKey);
+      const selected = services.find((service) => service.key === selectedService && !service.disabled);
+
+      if (!selected) {
+        const service = services.find((service) => !service.disabled);
+
+        form.setFieldValue('service', service?.key || '');
       }
     }
-
-    return true;
-  }, [fixedTokenKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTokenKey, form]);
 
   return (
     <Layout.Home
@@ -274,6 +301,8 @@ function Component ({ className }: Props) {
 
               <Form.Item name={'service'}>
                 <ServiceSelector
+                  disabled={!selectedTokenKey}
+                  items={serviceItems}
                   placeholder={t('Select supplier')}
                   title={t('Select supplier')}
                 />

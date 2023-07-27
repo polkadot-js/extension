@@ -11,14 +11,16 @@ import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback } from 'react';
 import styled from 'styled-components';
 
-interface Props extends ThemeProps, BasicInputWrapper {}
-
-interface ServiceItem extends SelectModalItem {
+export interface ServiceItem extends SelectModalItem {
   key: SupportService,
   name: string
 }
 
-const serviceItems: ServiceItem[] = [
+interface Props extends ThemeProps, BasicInputWrapper {
+  items: ServiceItem[];
+}
+
+export const baseServiceItems: ServiceItem[] = [
   {
     key: 'transak',
     name: 'Transak',
@@ -42,7 +44,7 @@ const serviceItems: ServiceItem[] = [
 ];
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
-  const { className = '', disabled, id = 'service-selector', label, placeholder, statusHelp, value } = props;
+  const { className = '', disabled, id = 'service-selector', items, label, placeholder, statusHelp, value } = props;
   const { t } = useTranslation();
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
@@ -96,7 +98,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
         id={id}
         inputClassName={`${className} service-selector-input`}
         itemKey={'key'}
-        items={serviceItems}
+        items={items}
         label={label}
         onSelect={onSelect}
         placeholder={placeholder || t('Select service')}

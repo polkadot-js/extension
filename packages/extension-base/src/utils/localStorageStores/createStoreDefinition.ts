@@ -4,13 +4,11 @@
 import deepEquals from 'fast-deep-equal';
 import { z } from 'zod';
 
-import { SigningRequest } from '@polkadot/extension-base/background/types';
-
 export default <Content>(schema: z.ZodType<Content>, defaultValue?: Content) => (namespace: string) => {
   type ChangeListener = (content: Content) => void
   const changeListeners = new Set<ChangeListener>();
 
-  const invokeChangeListeners = (changes: { [namespace: string]: { newValue?: SigningRequest[], oldValue?: SigningRequest[] }}, storageArea: string) => {
+  const invokeChangeListeners = (changes: { [namespace: string]: { newValue?: Content, oldValue?: Content }}, storageArea: string) => {
     if (storageArea !== 'local') {
       return;
     }
@@ -24,7 +22,7 @@ export default <Content>(schema: z.ZodType<Content>, defaultValue?: Content) => 
     const newValueParsingResult = schema.safeParse(changesFromNamespace.newValue);
 
     if (!newValueParsingResult.success) {
-      console.warn(`The new local storage value in namespace "${namespace}" failed to match the namespace schema with error: "${newValueParsingResult.error.toString()}"`);
+      console.error(`The new local storage value in namespace "${namespace}" failed to match the namespace schema with error: "${newValueParsingResult.error.toString()}"`);
 
       return;
     }

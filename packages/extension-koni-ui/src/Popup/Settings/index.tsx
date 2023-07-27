@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -20,7 +20,7 @@ type Props = ThemeProps
 
 type SettingItemType = {
   key: string,
-  leftIcon: SwIconProps['phosphorIcon'],
+  leftIcon: SwIconProps['phosphorIcon'] | React.ReactNode,
   leftIconBgColor: string,
   rightIcon: SwIconProps['phosphorIcon'],
   title: string,
@@ -34,13 +34,20 @@ type SettingGroupItemType = {
   items: SettingItemType[],
 };
 
-function generateLeftIcon (backgroundColor: string, icon: SwIconProps['phosphorIcon']): React.ReactNode {
+const isReactNode = (element: unknown): element is React.ReactNode => {
+  return React.isValidElement(element);
+};
+
+function generateLeftIcon (backgroundColor: string, icon: SwIconProps['phosphorIcon'] | React.ReactNode): React.ReactNode {
+  const isNode = isReactNode(icon);
+
   return (
     <BackgroundIcon
       backgroundColor={backgroundColor}
-      phosphorIcon={icon}
+      customIcon={isNode ? icon : undefined}
+      phosphorIcon={isNode ? undefined : icon}
       size='sm'
-      type='phosphor'
+      type={isNode ? 'customIcon' : 'phosphor'}
       weight='fill'
     />
   );
@@ -88,7 +95,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [goHome, notify]);
 
   // todo: i18n all titles, labels below
-  const SettingGroupItemType: SettingGroupItemType[] = [
+  const SettingGroupItemType = useMemo((): SettingGroupItemType[] => ([
     {
       key: 'general',
       items: [
@@ -97,9 +104,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: FrameCorners,
           leftIconBgColor: token.colorPrimary,
           rightIcon: ArrowsOut,
-          title: 'Expand view',
+          title: t('Expand view'),
           onClick: () => {
-            windowOpen('/').catch(console.error);
+            windowOpen({ allowedPath: '/' }).catch(console.error);
           },
           isHidden: !isPopup
         },
@@ -108,7 +115,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: GlobeHemisphereEast,
           leftIconBgColor: token['magenta-6'],
           rightIcon: CaretRight,
-          title: 'General settings',
+          title: t('General settings'),
           onClick: () => {
             navigate('/settings/general');
           }
@@ -118,7 +125,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: ShieldCheck,
           leftIconBgColor: token['green-6'],
           rightIcon: CaretRight,
-          title: 'Security settings',
+          title: t('Security settings'),
           onClick: () => {
             navigate('/settings/security', { state: true });
           }
@@ -128,23 +135,38 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: BookBookmark,
           leftIconBgColor: token['blue-6'],
           rightIcon: CaretRight,
-          title: 'Manage address book',
+          title: t('Manage address book'),
           onClick: () => {
             navigate('/settings/address-book');
+          }
+        },
+        {
+          key: 'wallet-connect',
+          leftIcon: (
+            <WalletConnect
+              height='1em'
+              width='1em'
+            />
+          ),
+          leftIconBgColor: token['geekblue-6'],
+          rightIcon: CaretRight,
+          title: t('WalletConnect'),
+          onClick: () => {
+            navigate('/wallet-connect/list');
           }
         }
       ]
     },
     {
       key: 'networks-&-tokens',
-      label: 'Networks & tokens',
+      label: t('Networks & tokens'),
       items: [
         {
           key: 'manage-networks',
           leftIcon: ShareNetwork,
           leftIconBgColor: token['purple-7'],
           rightIcon: CaretRight,
-          title: 'Manage networks',
+          title: t('Manage networks'),
           onClick: () => {
             navigate('/settings/chains/manage');
           }
@@ -154,7 +176,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: Coin,
           leftIconBgColor: token['gold-6'],
           rightIcon: CaretRight,
-          title: 'Manage tokens',
+          title: t('Manage tokens'),
           onClick: () => {
             navigate('/settings/tokens/manage');
           }
@@ -163,14 +185,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     },
     {
       key: 'community-&-support',
-      label: 'Community & support',
+      label: t('Community & support'),
       items: [
         {
           key: 'twitter',
           leftIcon: TwitterLogo,
           leftIconBgColor: token['blue-6'],
           rightIcon: ArrowSquareOut,
-          title: 'Twitter',
+          title: t('Twitter'),
           onClick: openInNewTab(TWITTER_URL)
         },
         {
@@ -178,7 +200,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: DiscordLogo,
           leftIconBgColor: token['geekblue-8'],
           rightIcon: ArrowSquareOut,
-          title: 'Discord',
+          title: t('Discord'),
           onClick: openInNewTab(DISCORD_URL)
         },
         {
@@ -186,21 +208,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: TelegramLogo,
           leftIconBgColor: token['blue-5'],
           rightIcon: ArrowSquareOut,
-          title: 'Telegram',
+          title: t('Telegram'),
           onClick: openInNewTab(TELEGRAM_URL)
         }
       ]
     },
     {
       key: 'about',
-      label: 'About SubWallet',
+      label: t('About SubWallet'),
       items: [
         {
           key: 'website',
           leftIcon: ShieldCheck,
           leftIconBgColor: token['red-6'],
           rightIcon: ArrowSquareOut,
-          title: 'Website',
+          title: t('Website'),
           onClick: openInNewTab(WEBSITE_URL)
         },
         {
@@ -208,7 +230,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: Book,
           leftIconBgColor: token['green-6'],
           rightIcon: ArrowSquareOut,
-          title: 'User guide',
+          title: t('User guide'),
           onClick: openInNewTab(WIKI_URL)
         },
         {
@@ -216,7 +238,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: BookOpen,
           leftIconBgColor: token['volcano-7'],
           rightIcon: ArrowSquareOut,
-          title: 'Terms of service',
+          title: t('Terms of service'),
           onClick: openInNewTab(TERMS_OF_SERVICE_URL)
         },
         {
@@ -224,12 +246,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: BookBookmark,
           leftIconBgColor: token['geekblue-6'],
           rightIcon: ArrowSquareOut,
-          title: 'Privacy policy',
+          title: t('Privacy policy'),
           onClick: openInNewTab(PRIVACY_AND_POLICY_URL)
         }
       ]
     }
-  ];
+  ]), [isPopup, navigate, t, token]);
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
     return [
@@ -277,7 +299,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                           className={'__setting-item'}
                           key={item.key}
                           leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
-                          name={t(item.title)}
+                          name={item.title}
                           onPressItem={item.onClick}
                           rightItem={generateRightIcon(item.rightIcon)}
                         />

@@ -155,7 +155,7 @@ export function transformPoolName (input: string): string {
 export function parseIdentity (identityInfo: PalletIdentityRegistration | null): string | undefined {
   let identity;
 
-  if (identityInfo !== null) {
+  if (identityInfo) {
     const displayName = identityInfo?.info?.display?.Raw;
     const web = identityInfo?.info?.web?.Raw;
     const riot = identityInfo?.info?.riot?.Raw;
@@ -385,14 +385,7 @@ export function getStakingAvailableActionsByNominator (nominatorMetadata: Nomina
 
   if (nominatorMetadata.unstakings.length > 0) {
     result.push(StakingAction.CANCEL_UNSTAKE);
-    let hasClaimable = false;
-
-    for (const unstaking of nominatorMetadata.unstakings) {
-      if (unstaking.status === UnstakingStatus.CLAIMABLE) {
-        hasClaimable = true;
-        break;
-      }
-    }
+    const hasClaimable = nominatorMetadata.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
 
     if (hasClaimable) {
       result.push(StakingAction.WITHDRAW);

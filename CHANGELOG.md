@@ -1,5 +1,149 @@
 # CHANGELOG
 
+## 1.1.4
+Build date: Jul 24, 2023.
+
+Bugs fixed:
+- Can not load another NFTs when collection contain any NFT with wrong information (#1672)
+
+## 1.1.3
+Build date: Jul 21, 2023.
+
+Features & Update:
+- Support show/hide balance (#1582)
+- Support sort token by value (#1444)
+- Update UI for notification (#1639)
+- Auto update metadata (#588)
+- Update chainlist (0.2.7) (#1661)
+  - Integrate aSEED token for Acala
+  - Add support for LPtokens and qTokens on Interlay
+
+Bugs fixed:
+- Fixed bug video NFT size (#1651)
+- Fixed bug Show incorrect transaction time on the history screen (#1654)
+- Fixed bug Do not validate amount of the recipient address in case send token (#1657)
+- Fix bug signing transaction on Avail (#1670)
+
+## 1.1.2
+Build date: Jul 14, 2023.
+
+Features & Update:
+- Integrate Land/Estate NFT on Pioneer's metaverses (#1335)
+- Add Staking Support For Pendulum (#1595)
+- Support language: Vietnamese, Chinese (#1630)
+- Update QR code style for transaction with QR-signer account (#1418)
+- Support camera for WalletConnect (#1627)
+- Implement reload button on the Staking screen (#1545)
+- Improve calculation of withdrawal time (#1585)
+- Updated the criteria's icon on the Sorting pool/validator/collator/dApp screen (#1634)
+
+Bugs fixed:
+- Fixed bug Show incorrect earning reward status on All accounts mode (#1456)
+- Fixed bug Show incorrect withdrawal amount in case have multiple withdrawal requests (#1557)
+- Fixed Deprecate nominator controller accounts on some chains (#1350)
+- Fixed bug Still showing NFTs that have been sent (#1615)
+- Fixed sync configuration between expand view and popup view (#1243)
+- Fixed bug QR scanner not found (#1253)
+- Fixed UI bugs (#1548, #1507)
+
+Update chainlist (#1620)
+- Add support for Gemini 3e
+- Update price ID for JOY
+- Integrate Fantom network
+- Add support for USDT, DOT on Pendulum
+- Update XCM for Acala
+
+## 1.1.1
+Build date: Jul 06, 2023.
+
+Features & Update:
+- Integrate WalletConnect (#1497)
+- Support viewing ZK tokens on Manta (#1525)
+- Update XCM for Astar, Interlay, HydraDX (#1579)
+- Support add PSP token from dApp (#1529)
+- Improved connection experience with Ledger (#1573)
+
+Bugs fixed:
+- Fixed bugs related to address book (#1559)
+- Fixed NFT Gateway problems with non-extension environment (#1602)
+- Fixed bugs on the Staking screens (#1475)
+- Fixed bug show transaction fee on the History detail screen (#1580)
+
+Update `@subwallet/chain-list@0.2.4` (#1590):
+- Supported LP Tokens on Kintsugi (LP kBTC-USDT, LP KSM-kBTC, LP KSM-KINT)
+
+## 1.0.12
+Build date: Jun 29, 2023.
+
+Features & Update:
+- Add support Ledger with Aleph Zero network (#1565)
+
+Bugs fixed:
+- Fixed UI bugs on the Expand view (#1569)
+
+Update `@subwallet/chain-list@0.2.3` (#1576):
+- Add support for vFIL (Bifrost Polkadot), vETH (Ethereum)
+
+## 1.0.11
+Build date: Jun 24, 2023.
+
+Features & Update:
+- Improve connection stability (#1469)
+- Allow user download seed phrase file (#1560)
+- Update UI for expand view (#1229)
+
+Bugs fixed:
+- Fix bug detecting on-chain attributes for WASM NFTs (#1511)
+
+Update `@subwallet/chain-list@0.2.2` (#1556):
+- Integrate Polkadot Bridge Hub, Kusama Bridge Hub, Polkadot Collectives Parachain
+- Add logo for $CP token on Moonbeam
+
+## 1.0.10
+Build date: Jun 17, 2023.
+
+Features & Update:
+- Update Receive icon to Copy icon on Homepage screen (#1531)
+- Support display 3D NFT (#1516)
+- Re-check and update XCM feature for some chains: Polkadot, Statemint, Statemine, Bifrost Polkadot (#1546)
+
+Bugs fixed:
+- Fixed bug Show incorrect address book type (#1524)
+- Fixed bug Error fetching nominator data for Calamari (#1538)
+- Fixed bug Show incorrect Destination Chain fee on XCM history detail (#1550)
+
+Update `@subwallet/chain-list@0.2.1` (#1541):
+- Add INW (Aleph Zero) token
+- Add support for Avail testnet (Kate)
+- Re-name Statemint & Statemint Parachain to Polkadot Asset Hub & Kusama Asset Hub
+
+
+## 1.0.9
+Build date: Jun 13, 2023.
+
+Features & Update:
+- Integration Ledger EVM account (#538)
+- Allow DApp access to read-only account (#1225)
+- Review and support send fund for more token (#1449)
+- Optimize decode contract in transaction (#1474)
+- Update the new send fund screen (#1509)
+- Update chain-list (#1519)
+- Update uninstall URL (#1530)
+
+Bugs fixed:
+- Fixed bug Do not get transaction history in case the wallet have multi-account (#1411)
+- Fixed bug Show duplicate token on receive list when search custom token (#1514)
+- Fixed bug Do not transfer BNC token on the Bifrost Polkadot (#1522)
+- Fixed bug "Bad signature" when personal sign with EVM Ledger account (#1533)
+
+Update `@subwallet/chain-list@0.1.11`:
+- Add vsTokens and vTokens
+- Add VERSE token
+- Support WASM NFT Collection on the Astar network
+- Support USAGII NFT collection from Paras on the Astar network
+- Hide the channel xcm USDT: Equilibrium —> Statemint
+- Update provider for Calamari
+
 ## 1.0.8
 Build date: Jun 8, 2023.
 
@@ -669,7 +813,7 @@ Update:
   - Bifrost
 
 Bug Fixed:
-- Fix network list is incorrect in case importing an account from seed phase when there is no account yet (issue #120)
+- Fix network list is incorrect in case importing an account from seed phrase when there is no account yet (issue #120)
 - Fix grammar error and type issue of button (issue #156,#166)
 - Fix some network in wrong group (issue #180)
 

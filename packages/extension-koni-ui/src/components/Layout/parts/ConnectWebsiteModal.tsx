@@ -8,8 +8,6 @@ import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Con
 import { changeAuthorizationBlock, changeAuthorizationPerSite } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress } from '@subwallet/extension-koni-ui/utils';
-import { accountCanSign, getSignMode } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Button, Icon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, GlobeHemisphereWest, ShieldCheck, ShieldSlash, XCircle } from 'phosphor-react';
@@ -231,7 +229,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
         <>
           <div className={'__content-heading'}>{t('Not connected to this site')}</div>
           <div className={'text-tertiary __content-text'}>
-            {t('SubWallet is not connected to this site. Please find and click in the website the "Connect Wallet" button to connect. ')}
+            {t('SubWallet is not connected to this site. Please find and click in the website the "Connect Wallet" button to connect.')}
           </div>
         </>
       );
@@ -248,8 +246,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
       );
     }
 
-    const origin = Object.entries(allowedMap).map(([address, value]) => ({ address, value }));
-    const list = origin.filter(({ address }) => accountCanSign(getSignMode(findAccountByAddress(accounts, address))));
+    const list = Object.entries(allowedMap).map(([address, value]) => ({ address, value }));
 
     const current = list.find(({ address }) => address === currentAccount?.address);
 

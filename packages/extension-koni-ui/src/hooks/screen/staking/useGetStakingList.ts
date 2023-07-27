@@ -143,16 +143,18 @@ const groupStakingRewardItems = (stakingRewardItems: StakingRewardItem[]): Staki
   return groupedStakingRewardItems;
 };
 
-const getGroupStatus = (earnMapping: Record<string, boolean> = {}): StakingStatus => {
+const getGroupStatus = (earnMapping: Record<string, StakingStatus> = {}): StakingStatus => {
   const list = Object.values(earnMapping);
 
-  if (list.every((value) => !value)) {
+  if (list.every((value) => value === StakingStatus.NOT_EARNING)) {
     return StakingStatus.NOT_EARNING;
-  } else if (list.every((value) => value)) {
-    return StakingStatus.EARNING_REWARD;
-  } else {
-    return StakingStatus.PARTIALLY_EARNING;
   }
+
+  if (list.every((value) => value === StakingStatus.EARNING_REWARD)) {
+    return StakingStatus.EARNING_REWARD;
+  }
+
+  return StakingStatus.PARTIALLY_EARNING;
 };
 
 const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): NominatorMetadata[] => {
@@ -182,12 +184,12 @@ const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): No
     };
 
     let groupedActiveStake = BN_ZERO;
-    const earnMapping: Record<string, boolean> = {};
+    const earnMapping: Record<string, StakingStatus> = {};
 
     for (const nominatorMetadata of nominatorMetadataList) {
       if (nominatorMetadata.chain === chain && nominatorMetadata.type === type) {
         groupedActiveStake = groupedActiveStake.add(new BN(nominatorMetadata.activeStake));
-        earnMapping[nominatorMetadata.address] = nominatorMetadata.status === StakingStatus.EARNING_REWARD;
+        earnMapping[nominatorMetadata.address] = nominatorMetadata.status;
         groupedNominatorMetadata.unstakings = [...groupedNominatorMetadata.unstakings, ...nominatorMetadata.unstakings];
       }
     }

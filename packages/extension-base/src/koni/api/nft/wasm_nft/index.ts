@@ -75,7 +75,11 @@ export class WasmNftApi extends BaseNftApi {
     const _attributeCount = _onChainAttributeCount?.output?.toJSON() as Record<string, unknown>;
     const onChainAttributeCount = _onChainAttributeCount.output ? (_attributeCount?.ok || _attributeCount?.Ok) as string : '0';
 
-    return parseInt(onChainAttributeCount) !== 0;
+    if (!_onChainAttributeCount.result.isOk) {
+      return false;
+    }
+
+    return !!onChainAttributeCount && parseInt(onChainAttributeCount) !== 0;
   }
 
   private parseFeaturedTokenUri (tokenUri: string) {
@@ -372,8 +376,6 @@ export class WasmNftApi extends BaseNftApi {
       const balance = _balance.output ? ((balanceJson.ok || balanceJson.Ok) as string) : '0';
 
       if (parseInt(balance) === 0) {
-        nftParams.cleanUpNfts(this.chain, address, [smartContract], []);
-
         return;
       }
 
@@ -470,10 +472,6 @@ export class WasmNftApi extends BaseNftApi {
       } as NftCollection;
 
       nftParams.updateCollection(this.chain, nftCollection);
-
-      Object.entries(nftOwnerMap).forEach(([owner, nftIds]) => {
-        nftParams.cleanUpNfts(this.chain, owner, [smartContract], nftIds);
-      });
     }
   }
 

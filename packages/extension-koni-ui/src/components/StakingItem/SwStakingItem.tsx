@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
@@ -9,6 +10,7 @@ import { Icon, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { User, Users } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useMemo } from 'react';
+import { TFunction } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -19,7 +21,7 @@ interface Props extends ThemeProps {
   onClickItem: (item: StakingDataType) => void,
 }
 
-const getStakingTypeTag = (stakingType: StakingType) => {
+const getStakingTypeTag = (stakingType: StakingType, t: TFunction) => {
   const tagColor = stakingType === StakingType.POOLED ? 'success' : 'warning';
   const tagIcon: PhosphorIcon = stakingType === StakingType.POOLED ? Users : User;
 
@@ -29,13 +31,17 @@ const getStakingTypeTag = (stakingType: StakingType) => {
       color={tagColor}
       icon={<Icon phosphorIcon={tagIcon} />}
     >
-      {capitalize(stakingType)}
+      {t(capitalize(stakingType))}
     </Tag>
   );
 };
 
 const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickRightIcon, priceMap, stakingData }: Props) => {
   const { staking } = stakingData;
+
+  const { t } = useTranslation();
+
+  const { isShowBalance } = useSelector((state) => state.settings);
 
   const balanceValue = getBalanceValue(staking.balance || '0', decimals);
 
@@ -55,11 +61,12 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
       className={className}
       convertedStakingValue={convertedBalanceValue}
       decimal={0}
+      hideBalance={!isShowBalance}
       networkKey={staking.chain}
       onClickRightIcon={_onClickRightIcon}
       onPressItem={_onPressItem}
       stakingNetwork={staking.nativeToken}
-      stakingType={getStakingTypeTag(staking.type)}
+      stakingType={getStakingTypeTag(staking.type, t)}
       stakingValue={balanceValue}
     />
   );

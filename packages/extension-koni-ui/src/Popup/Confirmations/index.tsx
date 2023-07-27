@@ -3,6 +3,8 @@
 
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
 import { useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
@@ -13,19 +15,20 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { ConfirmationHeader } from './parts';
-import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
+import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
 
 type Props = ThemeProps
 
 const titleMap: Record<ConfirmationType, string> = {
-  addNetworkRequest: 'Add network request',
-  addTokenRequest: 'Add token request',
-  authorizeRequest: 'Connect with SubWallet',
-  evmSendTransactionRequest: 'Transaction request',
-  evmSignatureRequest: 'Signature request',
-  metadataRequest: 'Update metadata',
-  signingRequest: 'Signature request',
-  switchNetworkRequest: 'Add network request'
+  addNetworkRequest: detectTranslate('Add network request'),
+  addTokenRequest: detectTranslate('Add token request'),
+  authorizeRequest: detectTranslate('Connect with SubWallet'),
+  evmSendTransactionRequest: detectTranslate('Transaction request'),
+  evmSignatureRequest: detectTranslate('Signature request'),
+  metadataRequest: detectTranslate('Update metadata'),
+  signingRequest: detectTranslate('Signature request'),
+  switchNetworkRequest: detectTranslate('Add network request'),
+  connectWCRequest: detectTranslate('WalletConnect')
 } as Record<ConfirmationType, string>;
 
 const Component = function ({ className }: Props) {
@@ -115,6 +118,10 @@ const Component = function ({ className }: Props) {
       case 'signingRequest':
         return (
           <SignConfirmation request={confirmation.item as SigningRequest} />
+        );
+      case 'connectWCRequest':
+        return (
+          <ConnectWalletConnectConfirmation request={confirmation.item as WalletConnectSessionRequest} />
         );
     }
 

@@ -5,6 +5,10 @@ import { CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTyp
 import { SWTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 
 export interface EventRegistry {
+  'general.sleep': [boolean],
+  'general.wakeup': [boolean],
+  'crypto.ready': [boolean],
+  'database.ready': [boolean],
   'keyring.ready': [boolean],
   'account.updateCurrent': [CurrentAccountInfo],
   'account.ready': [boolean],
@@ -22,7 +26,10 @@ export interface EventRegistry {
   'transaction.done': [SWTransaction],
   'transaction.failed': [SWTransaction | undefined],
   'transaction.submitStaking': [string],
-  'transaction.transferNft': [SWTransaction | undefined]
+  'transaction.transferNft': [SWTransaction | undefined],
+  'mantaPay.initSync': [string | undefined], // zkAddress
+  'mantaPay.submitTransaction': [SWTransaction | undefined],
+  'mantaPay.enable': [string]
 }
 
 export type EventType = keyof EventRegistry;
@@ -33,7 +40,9 @@ export const COMMON_RELOAD_EVENTS: EventType[] = [
   'account.add',
   'chain.updateState',
   'account.remove',
-  'chain.add'
+  'chain.add',
+  'mantaPay.initSync', // TODO: re-check this
+  'mantaPay.enable'
 ];
 
 export interface EventItem<T extends EventType> {

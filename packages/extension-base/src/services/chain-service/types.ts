@@ -5,6 +5,7 @@
 
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { BehaviorSubject } from 'rxjs';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
@@ -46,13 +47,16 @@ export interface _ChainBaseApi {
   apiError?: string;
   apiRetry?: number;
   isApiReady: boolean;
+  isApiConnectedSubject: BehaviorSubject<boolean>;
   isApiReadyOnce: boolean;
   isApiConnected: boolean; // might be redundant
-  isApiInitialized: boolean;
-  isDevelopment?: boolean;
-  recoverConnect?: () => void;
+  updateApiUrl: (apiUrl: string) => Promise<void>;
+  connect: () => void;
+  disconnect: () => Promise<void>;
+  recoverConnect: () => Promise<void>;
+  destroy: () => Promise<void>;
 
-  isReady: Promise<any>; // to be overwritten by child interface
+  isReady: Promise<_ChainBaseApi>; // to be overwritten by child interface
 }
 
 export interface _SubstrateChainMetadata {
@@ -71,8 +75,6 @@ export interface _SubstrateApiState {
 
 export interface _SubstrateApi extends _SubstrateApiState, _ChainBaseApi {
   api: ApiPromise;
-  isNotSupport?: boolean;
-
   isReady: Promise<_SubstrateApi>;
 
   specName: string;

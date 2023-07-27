@@ -10,12 +10,14 @@ import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 interface NftData {
   nftCollections: NftCollection[]
   nftItems: NftItem[]
 }
 
-function filterNftByAccount (currentAccount: AccountJson | null, nftCollections: NftCollection[], nftItems: NftItem[], accountNetwork?: string): NftData {
+function filterNftByAccount (currentAccount: AccountJson | null, nftCollections: NftCollection[], nftItems: NftItem[], accountNetworks?: string[]): NftData {
   const isAll = !currentAccount || isAccountAll(currentAccount.address);
   const currentAddress = !isAll && reformatAddress(currentAccount.address, 0);
   const filteredNftItems: NftItem[] = [];
@@ -29,8 +31,8 @@ function filterNftByAccount (currentAccount: AccountJson | null, nftCollections:
     if (isAll || currentAddress === formattedOwnerAddress) {
       let pass = true;
 
-      if (accountNetwork) {
-        if (nftItem.chain !== accountNetwork) {
+      if (accountNetworks) {
+        if (!accountNetworks.includes(nftItem.chain)) {
           pass = false;
         }
       }
@@ -64,10 +66,16 @@ export default function useGetNftByAccount () {
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
   const accountNetwork = useMemo(() => {
-    const originGenesisHash = currentAccount?.originGenesisHash;
+    if (currentAccount?.isHardware) {
+      const isEthereum = isEthereumAddress(currentAccount.address || '');
 
-    if (originGenesisHash) {
-      return findNetworkJsonByGenesisHash(chainInfoMap, originGenesisHash)?.slug;
+      if (isEthereum) {
+        return undefined;
+      } else {
+        const availableGen: string[] = currentAccount.availableGenesisHashes || [];
+
+        return availableGen.map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug || '');
+      }
     } else {
       return undefined;
     }

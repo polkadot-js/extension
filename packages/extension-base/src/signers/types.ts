@@ -15,11 +15,11 @@ export interface Web3TransactionBase {
   gasLimit: number;
   nonce: number;
   chainId: number;
-  data: string;
+  data?: string;
   value: number;
 }
 
-export interface Web3Transaction extends Web3TransactionBase{
+export interface Web3Transaction extends Web3TransactionBase {
   from: string;
 }
 

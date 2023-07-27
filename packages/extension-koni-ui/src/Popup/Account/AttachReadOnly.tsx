@@ -115,7 +115,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         address: reformatAddress,
         genesisHash: '',
         isEthereum: isEthereum,
-        isAllowed: false,
+        isAllowed: true,
         isReadOnly: true
       })
         .then((errors) => {

@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { setSelectedAccountTypes } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Image, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
@@ -55,7 +56,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const openModal = useCallback((id: string) => {
     return () => {
       if (id === CREATE_ACCOUNT_MODAL) {
-        navigate('/accounts/new-seed-phrase', { state: { accountTypes: [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE] } });
+        setSelectedAccountTypes(DEFAULT_ACCOUNT_TYPES);
+        navigate('/accounts/new-seed-phrase');
       } else {
         inactiveModal(SELECT_ACCOUNT_MODAL);
         activeModal(id);

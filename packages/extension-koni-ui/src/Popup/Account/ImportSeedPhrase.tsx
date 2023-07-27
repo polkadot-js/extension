@@ -4,7 +4,7 @@
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
@@ -50,7 +50,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const [form] = Form.useForm();
 
-  const [keyTypes, setKeyTypes] = useState<KeypairType[]>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
+  const [keyTypes, setKeyTypes] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [validating, setValidating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -110,7 +110,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         });
 
         timeOutRef.current = setTimeout(() => {
-          validateSeedV2(seed, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
+          validateSeedV2(seed, DEFAULT_ACCOUNT_TYPES)
             .then((res) => {
               if (amount) {
                 setValidateState({});

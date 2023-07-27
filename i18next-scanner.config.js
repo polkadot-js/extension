@@ -34,13 +34,14 @@ module.exports = {
   ],
   options: {
     debug: true,
+    removeUnusedKeys: true,
     defaultLng: 'en',
     func: {
       extensions: ['.tsx', '.ts'],
-      list: ['t', 'i18next.t', 'i18n.t']
+      list: ['t', 'i18next.t', 'i18n.t', 'detectTranslate']
     },
     keySeparator: false, // key separator
-    lngs: ['en'],
+    lngs: ['en', 'vi', 'zh', 'ja'],
     nsSeparator: false, // namespace separator
     resource: {
       jsonIndent: 2,

@@ -1,13 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFilterModal, useGetStakingList, useNotification, usePreCheckReadOnly, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { sortStakingByValue } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { ArrowClockwise, FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -26,22 +27,21 @@ enum FilterValue {
   POOLED = 'pooled'
 }
 
-const FILTER_OPTIONS = [
-  { label: 'Nominated', value: StakingType.NOMINATED },
-  { label: 'Pooled', value: StakingType.POOLED }
-];
+const rightIcon = (
+  <Icon
+    phosphorIcon={Plus}
+    size='sm'
+    type='phosphor'
+  />
+);
 
-const rightIcon = <Icon
-  phosphorIcon={Plus}
-  size='sm'
-  type='phosphor'
-/>;
-
-const reloadIcon = <Icon
-  phosphorIcon={ArrowClockwise}
-  size='sm'
-  type='phosphor'
-/>;
+const reloadIcon = (
+  <Icon
+    phosphorIcon={ArrowClockwise}
+    size='sm'
+    type='phosphor'
+  />
+);
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
@@ -61,6 +61,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
+
+  const items = useMemo(() => {
+    const result = stakingItems.map((item) => ({ ...item, price: priceMap[item.staking.chain] || 0 }));
+
+    return result.sort(sortStakingByValue);
+  }, [priceMap, stakingItems]);
+
+  const FILTER_OPTIONS = useMemo(() => ([
+    { label: t('Nominated'), value: StakingType.NOMINATED },
+    { label: t('Pooled'), value: StakingType.POOLED }
+  ]), [t]);
 
   const filterFunction = useMemo<(item: StakingDataType) => boolean>(() => {
     return (item) => {
@@ -101,7 +112,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, 100);
   }, [activeModal]);
 
-  const preCheckReadOnly = usePreCheckReadOnly(currentAccount?.address);
+  const preCheck = usePreCheckAction(currentAccount?.address, false);
+
+  const onClickStakeMore = useCallback(() => {
+    navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`);
+  }, [navigate]);
 
   const subHeaderButton: ButtonProps[] = useMemo(() => ([
     {
@@ -115,6 +130,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           style: { top: 210 },
           direction: 'vertical',
           duration: 1.8,
+          closable: false,
           message: t('Reloading')
         });
 
@@ -127,9 +143,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     },
     {
       icon: rightIcon,
-      onClick: preCheckReadOnly(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`))
+      onClick: preCheck(onClickStakeMore, ExtrinsicType.STAKING_BOND)
     }
-  ]), [loading, preCheckReadOnly, notify, t, navigate]);
+  ]), [loading, preCheck, notify, t, onClickStakeMore]);
 
   const renderItem = useCallback((item: StakingDataType) => {
     return (
@@ -193,7 +209,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           )}
           enableSearchInput={true}
           filterBy={filterFunction}
-          list={stakingItems}
+          list={items}
           onClickActionBtn={onClickActionBtn}
           renderItem={renderItem}
           renderWhenEmpty={emptyStakingList}

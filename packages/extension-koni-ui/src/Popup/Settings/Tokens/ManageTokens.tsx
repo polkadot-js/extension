@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { Layout, OptionType, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import TokenToggleItem from '@subwallet/extension-koni-ui/components/TokenItem/TokenToggleItem';
@@ -29,12 +29,6 @@ enum FilterValue {
   DISABLED = 'disabled',
   CUSTOM = 'custom'
 }
-
-const FILTER_OPTIONS = [
-  { label: 'Enabled tokens', value: FilterValue.ENABLED },
-  { label: 'Disabled tokens', value: FilterValue.DISABLED },
-  { label: 'Custom tokens', value: FilterValue.CUSTOM }
-];
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -81,6 +75,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return false;
     };
   }, [assetSettingMap, selectedFilters]);
+
+  const FILTER_OPTIONS = useMemo((): OptionType[] => ([
+    { label: t('Enabled tokens'), value: FilterValue.ENABLED },
+    { label: t('Disabled tokens'), value: FilterValue.DISABLED },
+    { label: t('Custom tokens'), value: FilterValue.CUSTOM }
+  ]), [t]);
 
   const searchToken = useCallback((token: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();

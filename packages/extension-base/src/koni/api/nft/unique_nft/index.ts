@@ -165,9 +165,6 @@ export default class UniqueNftApi extends BaseNftApi {
         }
       }));
 
-      const collectionIds: string[] = [];
-      let allNftIds: string[] = [];
-
       await Promise.all(allCollectionId.map(async (collectionId) => {
         const collectionIdStr = collectionId.toString();
 
@@ -176,9 +173,6 @@ export default class UniqueNftApi extends BaseNftApi {
 
         collectionMap[collectionIdStr] = collection;
         const nftIds = Object.entries(nftMap).filter((item) => item[1] === collectionId).map((item) => item[0]);
-
-        collectionIds.push(collectionIdStr);
-        allNftIds = allNftIds.concat(nftIds);
 
         const parsedCollection: NftCollection = {
           collectionId: collectionIdStr,
@@ -214,8 +208,6 @@ export default class UniqueNftApi extends BaseNftApi {
           }
         }));
       }));
-
-      params.cleanUpNfts(this.chain, address, collectionIds, allNftIds);
     } catch (e) {
       console.error(`${this.chain}`, e);
     }

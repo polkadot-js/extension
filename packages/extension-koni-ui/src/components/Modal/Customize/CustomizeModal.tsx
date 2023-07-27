@@ -3,8 +3,8 @@
 
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { saveShowZeroBalance } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { updateShowZeroBalanceState } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import { Wallet } from 'phosphor-react';
@@ -22,9 +22,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
 
-  const onChangeZeroBalance = useCallback((checked: boolean) => {
-    updateShowZeroBalanceState(checked);
-  }, []);
+  const onChangeZeroBalance = useCallback(() => {
+    saveShowZeroBalance(!isShowZeroBalance).catch(console.error);
+  }, [isShowZeroBalance]);
 
   const onCancel = useCallback(() => {
     inactiveModal(CUSTOMIZE_MODAL);
@@ -52,7 +52,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               weight='fill'
             />
           }
-          name={t('Show tokens with zero balance')}
+          name={t('Show zero balance')}
           rightItem={
             <Switch
               checked={isShowZeroBalance}

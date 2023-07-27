@@ -27,7 +27,7 @@ async function handleCancel ({ id }: MetadataRequest) {
 function Component ({ className, request }: Props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const { specVersion, tokenDecimals, tokenSymbol } = request.request;
+  const { chain, specVersion, tokenDecimals, tokenSymbol } = request.request;
   // Handle buttons actions
 
   const onCancel = useCallback(() => {
@@ -54,7 +54,7 @@ function Component ({ className, request }: Props) {
             {t('Your metadata is out of date')}
           </Typography.Title>
           <Typography.Paragraph className='text-tertiary'>
-            {t('Approving this update will sync your metadata for SubWallet Connect Demo chain from' + ' ' + request.url)}
+            {t('Approving this update will sync your metadata for {{chainName}} chain from {{dAppUrl}}', { replace: { dAppUrl: request.url, chainName: chain } })}
           </Typography.Paragraph>
           <Typography.Paragraph className={'text-left'}>
             <span className='__prop-label text-tertiary text-right'>{t('Symbol')}</span> <span>{tokenSymbol}</span>

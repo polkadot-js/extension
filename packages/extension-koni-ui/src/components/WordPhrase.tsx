@@ -1,29 +1,44 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { WordItem } from '@subwallet/extension-koni-ui/types/account';
-import { convertToWords } from '@subwallet/extension-koni-ui/utils/account/seedPhrase';
+import { useCopy } from '@subwallet/extension-koni-ui/hooks';
+import { ThemeProps, WordItem } from '@subwallet/extension-koni-ui/types';
+import { convertToWords } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
+import { saveAs } from 'file-saver';
 import { CopySimple } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   seedPhrase: string;
+  enableDownload?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, seedPhrase } = props;
+  const { className, enableDownload, seedPhrase } = props;
 
   const { t } = useTranslation();
 
   const words: Array<Array<WordItem>> = useMemo(() => convertToWords(seedPhrase), [seedPhrase]);
 
   const onCopy = useCopy(seedPhrase);
+
+  const backupMnemonicSeed = useCallback(() => {
+    const blob = new Blob([seedPhrase], { type: 'text/plain' });
+
+    saveAs(blob, 'mnemonic-seed.txt');
+  }, [seedPhrase]);
+
+  const onClick = useCallback(() => {
+    onCopy();
+
+    if (enableDownload) {
+      backupMnemonicSeed();
+    }
+  }, [backupMnemonicSeed, enableDownload, onCopy]);
 
   return (
     <div className={CN(className)}>
@@ -57,10 +72,10 @@ const Component: React.FC<Props> = (props: Props) => {
         icon={(
           <Icon phosphorIcon={CopySimple} />
         )}
-        onClick={onCopy}
+        onClick={onClick}
         type='ghost'
       >
-        {t('Copy to clipboard')}
+        {enableDownload ? t('Copy & Save to the clipboard') : t('Copy to clipboard')}
       </Button>
     </div>
   );

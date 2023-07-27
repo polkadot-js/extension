@@ -4,11 +4,12 @@
 import useAccountAvatarInfo from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarInfo';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
+import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { Button, Icon, SwIconProps } from '@subwallet/react-ui';
 import AccountCard, { AccountCardProps } from '@subwallet/react-ui/es/web3-block/account-card';
-import { Eye, PencilSimpleLine, QrCode, Swatches } from 'phosphor-react';
+import { Eye, PencilSimpleLine, QrCode, ShieldCheck, Swatches } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -29,6 +30,7 @@ function Component (props: _AccountCardProps): React.ReactElement<_AccountCardPr
   const avatarTheme = useAccountAvatarTheme(address || '');
 
   const signMode = useGetAccountSignModeByAddress(address);
+  const isMantaPayEnabled = useIsMantaPayEnabled(address);
 
   const iconProps: SwIconProps | undefined = useMemo((): SwIconProps | undefined => {
     switch (signMode) {
@@ -49,8 +51,15 @@ function Component (props: _AccountCardProps): React.ReactElement<_AccountCardPr
         };
     }
 
+    if (isMantaPayEnabled) {
+      return {
+        type: 'phosphor',
+        phosphorIcon: ShieldCheck
+      };
+    }
+
     return undefined;
-  }, [signMode]);
+  }, [isMantaPayEnabled, signMode]);
 
   const _onClickMore: React.MouseEventHandler<HTMLAnchorElement | HTMLButtonElement> = useCallback((event) => {
     event.stopPropagation();

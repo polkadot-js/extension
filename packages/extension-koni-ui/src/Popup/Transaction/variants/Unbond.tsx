@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { getValidatorLabel, isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector, AmountInput, NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
@@ -225,7 +225,7 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [bondedValue, decimals, symbol]);
 
-  const onPreCheckReadOnly = usePreCheckReadOnly(from);
+  const onPreCheck = usePreCheckAction(from);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -299,7 +299,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <Form.Item
               name={FormFieldName.VALUE}
               rules={[
-                { required: true, message: 'Amount is required' },
+                { required: true, message: t('Amount is required') },
                 validateUnStakeValue(minValue, bondedValue, decimals)
               ]}
               statusHelpAsTooltip={true}
@@ -342,7 +342,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={onPreCheckReadOnly(form.submit)}
+          onClick={onPreCheck(form.submit, stakingType === StakingType.POOLED ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND)}
         >
           {t('Unbond')}
         </Button>

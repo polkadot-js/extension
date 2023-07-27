@@ -3,6 +3,7 @@
 
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset, _SubstrateChainType } from '@subwallet/chain-list/types';
 import { BasicTokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -392,4 +393,36 @@ export function _isCustomProvider (providerKey: string) {
 
 export function _generateCustomProviderKey (index: number) {
   return `${_CUSTOM_PREFIX}provider-${index}`;
+}
+
+export const findChainInfoByHalfGenesisHash = (chainMap: Record<string, _ChainInfo>, halfGenesisHash?: string): _ChainInfo | null => {
+  if (!halfGenesisHash) {
+    return null;
+  }
+
+  for (const chainInfo of Object.values(chainMap)) {
+    if (_getSubstrateGenesisHash(chainInfo)?.toLowerCase().substring(2, 2 + 32) === halfGenesisHash.toLowerCase()) {
+      return chainInfo;
+    }
+  }
+
+  return null;
+};
+
+export const findChainInfoByChainId = (chainMap: Record<string, _ChainInfo>, chainId?: number): _ChainInfo | null => {
+  if (!chainId) {
+    return null;
+  }
+
+  for (const chainInfo of Object.values(chainMap)) {
+    if (chainInfo.evmInfo?.evmChainId === chainId) {
+      return chainInfo;
+    }
+  }
+
+  return null;
+};
+
+export function _isMantaZkAsset (chainAsset: _ChainAsset) {
+  return _MANTA_ZK_CHAIN_GROUP.includes(chainAsset.originChain) && chainAsset.symbol.startsWith(_ZK_ASSET_PREFIX);
 }

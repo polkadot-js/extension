@@ -166,7 +166,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           <div className='instruction'>
             <div className='instruction'>
-              <span>{t('Click the "Scan QR" button, or read ')}&nbsp;</span>
+              <span>{t('Click the "Scan QR" button, or read')}&nbsp;</span>
               <a
                 className='link'
                 href='#'

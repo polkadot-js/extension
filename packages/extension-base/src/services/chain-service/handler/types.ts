@@ -1,6 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
+
+import { ApiPromise } from '@polkadot/api';
+
 export interface _EvmChainSpec {
   evmChainId: number,
   name: string,
@@ -17,6 +21,13 @@ export interface _SubstrateChainSpec {
   decimals: number,
   existentialDeposit: string,
   paraId: number | null
+}
+
+export interface _ApiOptions {
+  providerName?: string,
+  metadata?: MetadataItem,
+  onUpdateStatus?: (isConnected: boolean) => void;
+  externalApiPromise?: ApiPromise;
 }
 
 export enum _CHAIN_VALIDATION_ERROR {

@@ -6,8 +6,7 @@ import { addMetadata } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 
 import { knownGenesis } from '@polkadot/networks/defaults';
-
-import { OSType } from '../types';
+import { HexString } from '@polkadot/util/types';
 
 export const extractMetadata = (store: MetadataStore): void => {
   store.allMap((map): void => {
@@ -18,11 +17,11 @@ export const extractMetadata = (store: MetadataStore): void => {
     Object
       .entries(map)
       .forEach(([key, def]): void => {
-        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash));
+        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash as HexString));
 
         if (entry) {
           const [name, hashes] = entry;
-          const index = hashes.indexOf(def.genesisHash);
+          const index = hashes.indexOf(def.genesisHash as HexString);
 
           // flatten the known metadata based on the genesis index
           // (lower is better/newer)
@@ -43,29 +42,4 @@ export const extractMetadata = (store: MetadataStore): void => {
     removals.forEach((key) => store.remove(key));
     Object.values(defs).forEach(({ def }) => addMetadata(def));
   });
-};
-
-export const getOS = (): OSType => {
-  const userAgent = window.navigator.userAgent;
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-  const platform: string = window.navigator?.userAgentData?.platform || window.navigator.platform;
-  const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'];
-  const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
-  const iosPlatforms = ['iPhone', 'iPad', 'iPod'];
-  let os: OSType = 'Unknown';
-
-  if (macosPlatforms.indexOf(platform) !== -1) {
-    os = 'Mac OS';
-  } else if (iosPlatforms.indexOf(platform) !== -1) {
-    os = 'iOS';
-  } else if (windowsPlatforms.indexOf(platform) !== -1) {
-    os = 'Windows';
-  } else if (/Android/.test(userAgent)) {
-    os = 'Android';
-  } else if (/Linux/.test(platform)) {
-    os = 'Linux';
-  }
-
-  return os;
 };

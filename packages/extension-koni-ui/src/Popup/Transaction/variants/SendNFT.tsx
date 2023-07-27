@@ -1,12 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -78,7 +79,7 @@ const Component: React.FC = () => {
 
   const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
   const addressPrefix = useGetChainPrefixBySlug(nftChain);
-  const fromChainGenesisHash = chainInfoMap[nftChain]?.substrateInfo?.genesisHash || '';
+  const chainGenesisHash = chainInfoMap[nftChain]?.substrateInfo?.genesisHash || '';
 
   const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
@@ -120,12 +121,13 @@ const Component: React.FC = () => {
         const account = findAccountByAddress(accounts, _recipientAddress);
 
         if (account && account.isHardware) {
-          const destChainInfo = chainInfoMap[chain];
+          const chainInfo = chainInfoMap[chain];
+          const availableGen: string[] = account.availableGenesisHashes || [];
 
-          if (account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
-            const destChainName = destChainInfo?.name || 'Unknown';
+          if (!isEthereumAddress(account.address) && !availableGen.includes(chainInfo?.substrateInfo?.genesisHash || '')) {
+            const chainName = chainInfo?.name || 'Unknown';
 
-            return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
+            return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: chainName } }));
           }
         }
 
@@ -185,7 +187,7 @@ const Component: React.FC = () => {
     [chain, from, nftItem, onError, onSuccess]
   );
 
-  const preCheckReadOnly = usePreCheckReadOnly(from);
+  const checkAction = usePreCheckAction(from);
 
   useEffect(() => {
     setChain(nftChain);
@@ -201,13 +203,17 @@ const Component: React.FC = () => {
   // Focus to the first field
   useFocusFormItem(form, 'to');
 
+  const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
+
   return (
     <>
       <TransactionContent className={CN('-transaction-content')}>
         <div className={'nft_item_detail text-center'}>
           <Image
             height={120}
+            modelViewerProps={show3DModel ? DEFAULT_MODEL_VIEWER_PROPS : undefined}
             src={nftItem.image}
+            width={120}
           />
           <Typography.Title level={5}>
             {nftItem.name}
@@ -231,7 +237,7 @@ const Component: React.FC = () => {
             <AddressInput
               addressPrefix={addressPrefix}
               label={t('Send to')}
-              networkGenesisHash={fromChainGenesisHash}
+              networkGenesisHash={chainGenesisHash}
               placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}
@@ -270,7 +276,7 @@ const Component: React.FC = () => {
             />
           )}
           loading={loading}
-          onClick={preCheckReadOnly(form.submit)}
+          onClick={checkAction(form.submit, ExtrinsicType.SEND_NFT)}
         >
           {t('Next')}
         </Button>
@@ -304,6 +310,18 @@ const SendNFT = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.nft_item_detail h5': {
       marginTop: token.marginXS,
       marginBottom: token.margin
+    },
+
+    '.nft_item_detail': {
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+
+      '.ant-image-img': {
+        maxWidth: '100%',
+        objectFit: 'cover'
+      }
     }
   };
 });

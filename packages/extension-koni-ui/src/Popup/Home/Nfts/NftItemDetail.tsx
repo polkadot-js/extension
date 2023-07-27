@@ -12,7 +12,6 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetAccountInfoByAddress from '@subwallet/extension-koni-ui/hooks/screen/common/useGetAccountInfoByAddress';
-import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
@@ -22,7 +21,7 @@ import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
 import { CaretLeft, Info, PaperPlaneTilt } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -47,7 +46,9 @@ const modalCloseButton =
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
-  const { collectionInfo, nftItem } = location.state as INftItemDetail;
+  const [collectionInfo] = useState(location.state?.collectionInfo);
+  const [nftItem] = useState(location.state?.nftItem);
+
   const outletContext: {
     searchInput: string,
     setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
@@ -68,7 +69,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
 
   const originChainInfo = useGetChainInfo(nftItem.chain);
-
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
   const accountExternalUrl = getExplorerLink(originChainInfo, nftItem.owner, 'account');
 

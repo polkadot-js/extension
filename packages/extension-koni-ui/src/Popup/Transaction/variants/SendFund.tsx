@@ -224,7 +224,7 @@ const _SendFund = ({ className = '', modalContent, tokenGroupSlug: _tokenGroupSl
 
   const locationState = useLocation().state as SendFundParam;
   const [paramSlug] = useState<string | undefined>(locationState?.slug);
-  const tokenGroupSlug = paramSlug || _tokenGroupSlug;
+  const tokenGroupSlug = _tokenGroupSlug || paramSlug;
 
   const { asset, chain, from, onDone, setAsset, setChain, setFrom } = useContext(TransactionContext);
 

@@ -83,7 +83,7 @@ const TransakUrl = 'https://global.transak.com';
 function Component ({ className, modalContent, slug }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
   const [_currentSymbol] = useState<string | undefined>(locationState?.symbol);
-  const currentSymbol = _currentSymbol || slug;
+  const currentSymbol = slug || _currentSymbol;
   const fixedTokenKey = currentSymbol ? PREDEFINED_TRANSAK_TOKEN[currentSymbol]?.slug : undefined;
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);

@@ -55,15 +55,15 @@ function getActiveTabs () {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     // get the urls of the active tabs. In the case of new tab the url may be empty or undefined
     // we filter these out
-    const urls: string[] = tabs
+    const url = tabs
       .map(({ url }) => url)
-      .filter((url) => !!url) as string[];
+      .filter((url) => !!url)[0];
 
-    const request: TransportRequestMessage<'pri(activeTabsUrl.update)'> = {
+    const request: TransportRequestMessage<'pri(activeTabUrl.update)'> = {
       id: 'background',
-      message: 'pri(activeTabsUrl.update)',
+      message: 'pri(activeTabUrl.update)',
       origin: 'background',
-      request: { urls }
+      request: { url }
     };
 
     const portGetterMock = () => ({

@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import connectionStatus from '../assets/anim_connection_status.svg';
@@ -45,10 +45,10 @@ function Header({
   withHelp,
   withSettings
 }: Props): React.ReactElement<Props> {
-  const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
+  const [connectedActiveTabUrl, setConnectedActiveTabUrl] = useState<string | undefined>();
   const { t } = useTranslation();
 
-  const isConnected = useMemo(() => connectedTabsUrl.length >= 1, [connectedTabsUrl]);
+  const isConnected = !!connectedActiveTabUrl;
   const onAction = useContext(ActionContext);
 
   useEffect(() => {
@@ -57,7 +57,7 @@ function Header({
     }
 
     getConnectedTabsUrl()
-      .then((tabsUrl) => setConnectedTabsUrl(tabsUrl))
+      .then(setConnectedActiveTabUrl)
       .catch(console.error);
   }, [withConnectedAccounts]);
 
@@ -132,7 +132,7 @@ function Header({
             {isConnected ? (
               <Link
                 className='connectedAccounts'
-                to={connectedTabsUrl.length === 1 ? `/url/manage?url=${connectedTabsUrl[0]}` : '/auth-list'}
+                to={connectedActiveTabUrl ? `/url/manage?url=${connectedActiveTabUrl}` : '/auth-list'}
               >
                 <img
                   className='greenDot'

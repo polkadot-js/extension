@@ -72,7 +72,7 @@ export default class State {
   // Map of all providers exposed by the extension, they are retrievable by key
   readonly #providers: Providers;
 
-  #connectedTabsUrl: string[] = [];
+  #activeTabUrl: string | undefined;
 
   constructor (providers: Providers = {}) {
     this.#providers = providers;
@@ -158,31 +158,29 @@ export default class State {
     ]);
   }
 
-  public async updateCurrentTabsUrl (urls: string[]) {
-    const authUrls = await this.getAuthUrls();
-
-    const connectedTabs = urls.map((url) => {
-      let strippedUrl = '';
-
-      // the assert in stripUrl may throw for new tabs with "chrome://newtab/"
-      try {
-        strippedUrl = new URL(url).origin;
-      } catch (e) {
-        console.error(e);
-      }
-
-      // return the stripped url only if this website is known
-      return !!strippedUrl && authUrls[strippedUrl]
-        ? strippedUrl
-        : undefined;
-    })
-      .filter((value) => !!value) as string[];
-
-    this.#connectedTabsUrl = connectedTabs;
+  public updateActiveTabUrl (url: string | undefined) {
+    this.#activeTabUrl = url;
   }
 
-  public getConnectedTabsUrl () {
-    return this.#connectedTabsUrl;
+  public async getConnectedActiveTabUrl () {
+    const authUrls = await this.getAuthUrls();
+
+    if (!this.#activeTabUrl) {
+      return undefined;
+    }
+
+    try {
+      // may throw for new tabs with "chrome://newtab/"
+      const rawUrl = new URL(this.#activeTabUrl).origin;
+
+      const isConnected = authUrls[rawUrl];
+
+      return isConnected ? rawUrl : undefined;
+    } catch (e) {
+      console.error('Error calculating connected active tab url:', e);
+
+      return undefined;
+    }
   }
 
   public async removeAuthRequest (id: string) {

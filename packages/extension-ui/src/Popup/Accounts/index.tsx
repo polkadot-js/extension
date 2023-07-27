@@ -54,7 +54,7 @@ function Accounts({ className }: Props): React.ReactElement {
   const [filter, setFilter] = useState('');
   const [filteredAccount, setFilteredAccount] = useState<AccountWithChildren[]>([]);
   const [authList, setAuthList] = useState<AuthUrls | null>(null);
-  const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
+  const [connectedActiveTabUrl, setConnectedActiveTabUrl] = useState<string | undefined>();
   const { hierarchy } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const networkMap = useMemo(() => getNetworkMap(), []);
@@ -70,7 +70,7 @@ function Accounts({ className }: Props): React.ReactElement {
       .then(({ list }) => setAuthList(list))
       .catch((e) => console.error(e));
     getConnectedTabsUrl()
-      .then((tabsUrl) => setConnectedTabsUrl(tabsUrl))
+      .then(setConnectedActiveTabUrl)
       .catch(console.error);
   }, []);
 
@@ -79,18 +79,18 @@ function Accounts({ className }: Props): React.ReactElement {
       return;
     }
 
-    if (connectedTabsUrl.length > 0) {
+    if (connectedActiveTabUrl) {
       setAccountsCreatedAfterLastAuth(
         flattened.filter(
-          (account) => account?.whenCreated && account?.whenCreated > authList[connectedTabsUrl[0]]?.lastAuth
+          (account) => account?.whenCreated && account?.whenCreated > authList[connectedActiveTabUrl]?.lastAuth
         )
       );
     }
 
-    if (accountsCreatedAfterLastAuth.length > 0) {
-      onAction(`/url/new?url=${connectedTabsUrl[0]}`);
+    if (accountsCreatedAfterLastAuth.length > 0 && connectedActiveTabUrl) {
+      onAction(`/url/new?url=${connectedActiveTabUrl}`);
     }
-  }, [accountsCreatedAfterLastAuth.length, authList, connectedTabsUrl, flattened, onAction]);
+  }, [accountsCreatedAfterLastAuth.length, authList, connectedActiveTabUrl, flattened, onAction]);
 
   useEffect(() => {
     setFilteredAccount(

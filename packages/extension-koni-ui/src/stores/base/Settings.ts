@@ -17,7 +17,6 @@ const initialState: AppSettings = {
   // UI settings
 
   ...DEFAULT_SETTING,
-  walletReference: '',
 
   // AuthUrls
   authUrls: {},

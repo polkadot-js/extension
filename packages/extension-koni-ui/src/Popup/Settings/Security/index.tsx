@@ -4,7 +4,6 @@
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { EDIT_AUTO_LOCK_TIME_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveAutoLockTime, saveCameraSetting, saveEnableChainPatrol, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -12,7 +11,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
-import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch, SwModal, SwSubHeader } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockLaminated, ShieldStar } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -57,7 +56,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const location = useLocation();
   const canGoBack = !!location.state;
   const isPopup = useIsPopup();
-  const { isWebUI } = useContext(ScreenContext);
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
@@ -106,14 +104,10 @@ const Component: React.FC<Props> = (props: Props) => {
       if (noAccount) {
         navigate(DEFAULT_ROUTER_PATH);
       } else {
-        if (isWebUI) {
-          navigate('/settings');
-        } else {
-          navigate('/settings/list');
-        }
+        navigate('/settings/list');
       }
     }
-  }, [canGoBack, goBack, isWebUI, navigate, noAccount]);
+  }, [canGoBack, goBack, navigate, noAccount]);
 
   const updateCamera = useCallback((currentValue: boolean) => {
     return () => {
@@ -231,37 +225,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={onBack}
         title={t('Security settings')}
-        withSideMenu
       >
-        {isWebUI
-          ? (
-            <SwSubHeader
-              background='transparent'
-              center={false}
-              className='web-header'
-              onBack={goBack}
-              showBackButton={true}
-              title={t('Security settings')}
-            />
-          )
-          : (
-            <SwSubHeader
-              background={'transparent'}
-              center
-              onBack={goBack}
-              paddingVertical
-              showBackButton
-              title={t('Security settings')}
-            />
-
-          )}
-        <div className={CN('body-container', {
-          '__web-ui': isWebUI
-        })}
-        >
+        <div className='body-container'>
           <div className='items-container'>
             {items.map(onRenderItem)}
           </div>
@@ -356,7 +324,7 @@ const Component: React.FC<Props> = (props: Props) => {
             }
           </div>
         </SwModal>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 };
@@ -364,13 +332,7 @@ const Component: React.FC<Props> = (props: Props) => {
 const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.body-container': {
-      padding: `${token.padding}px ${token.padding}px`,
-
-      '&.__web-ui': {
-        padding: `${token.padding + 24}px ${token.padding}px ${token.padding}px`,
-        maxWidth: '70%',
-        margin: '0 auto'
-      }
+      padding: `${token.padding}px ${token.padding}px`
     },
 
     '.items-container': {

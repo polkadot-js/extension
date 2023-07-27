@@ -125,7 +125,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <Layout.WithSubHeaderOnly
-      className={CN(className)}
+      className={CN(className, 'setting-pages')}
       onBack={goBack}
       rightFooterButton={{
         children: t('Connect'),

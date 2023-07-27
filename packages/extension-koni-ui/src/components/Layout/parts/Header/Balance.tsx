@@ -3,7 +3,9 @@
 
 import { CustomModal, ReceiveQrModal, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import { BackgroundColorMap, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { useNotification, useReceiveQR, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import BuyTokens from '@subwallet/extension-koni-ui/Popup/BuyTokens';
 import Transaction from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
@@ -13,7 +15,7 @@ import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Divider, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowFatLinesDown, Eye, EyeClosed, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -49,6 +51,8 @@ const actions: Action[] = [
 ];
 
 function Component ({ className }: Props): React.ReactElement<Props> {
+  const dataContext = useContext(DataContext);
+  const { setBackground } = useContext(WebUIContext);
   const locationPathname = useLocation().pathname;
   const tokenGroupSlug = useParams()?.slug;
 
@@ -89,6 +93,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     activeModal(BUY_TOKEN_MODAL);
   }, [activeModal]);
 
+  useEffect(() => {
+    dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance']).catch(console.error);
+  }, [dataContext]);
+
   const onOpenSendFund = useCallback(() => {
     if (currentAccount && currentAccount.isReadOnly) {
       notify({
@@ -104,6 +112,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   },
   [currentAccount, notify, t, activeModal]
   );
+
+  useEffect(() => {
+    isTotalBalanceDecrease ? setBackground(BackgroundColorMap.DECREASE) : setBackground(BackgroundColorMap.INCREASE);
+  }, [isTotalBalanceDecrease, setBackground]);
 
   const handleClick = useCallback((type: string) => {
     switch (type) {
@@ -316,7 +328,8 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'stretch',
-  marginBottom: 62,
+  marginTop: 50,
+  marginBottom: 50,
 
   '.divider': {
     alignSelf: 'stretch',

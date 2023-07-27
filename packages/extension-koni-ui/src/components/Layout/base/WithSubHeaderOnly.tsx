@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import React from 'react';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
+import React, { useContext } from 'react';
 
 import { LayoutBaseProps } from './Base';
 
@@ -17,19 +19,21 @@ const WithSubHeaderOnly = (props: Props) => {
     showBackButton = true,
     subHeaderCenter = true,
     subHeaderPaddingVertical = true,
-    withSideMenu = false,
     ...restProps } = props;
+
+  const { isWebUI } = useContext(ScreenContext);
+  const { isSettingPage } = useContext(WebUIContext);
 
   return (
     <Layout.Base
+      className={'layout-with-sub-header-only'}
       showBackButton={showBackButton}
-      showSubHeader={true}
+      showSubHeader={!isWebUI || isSettingPage}
       subHeaderBackground='transparent'
       subHeaderCenter={subHeaderCenter}
       subHeaderPaddingVertical={subHeaderPaddingVertical}
       {...restProps}
       showHeader={false}
-      withSideMenu={withSideMenu}
     >
       {children}
     </Layout.Base>

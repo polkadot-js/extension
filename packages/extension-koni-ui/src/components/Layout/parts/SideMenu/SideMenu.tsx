@@ -7,7 +7,7 @@ import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Image, Menu } from '@subwallet/react-ui';
 import { MenuItemType } from '@subwallet/react-ui/es/menu/hooks/useItems';
 import CN from 'classnames';
-import { ArrowSquareUpRight, Clock, Database, Gear, Globe, Info, MessengerLogo, Rocket, Wallet } from 'phosphor-react';
+import { ArrowSquareUpRight, Clock, Database, Gear, Info, MessengerLogo, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
@@ -16,7 +16,7 @@ export type Props = ThemeProps;
 type SideMenuItemType = MenuItemType;
 const menuItems: SideMenuItemType[] = [
   {
-    label: 'Porfolio',
+    label: 'Portfolio',
     key: '/home',
     icon: (
       <Wallet
@@ -48,17 +48,17 @@ const menuItems: SideMenuItemType[] = [
       />
     )
   },
-  {
-    label: 'DApps',
-    key: '/home/dapps',
-    icon: (
-      <Globe
-        height={20}
-        weight='fill'
-        width={20}
-      />
-    )
-  },
+  // {
+  //   label: 'DApps',
+  //   key: '/home/dapps',
+  //   icon: (
+  //     <Globe
+  //       height={20}
+  //       weight='fill'
+  //       width={20}
+  //     />
+  //   )
+  // },
   { label: 'History',
     key: '/home/history',
     icon: (

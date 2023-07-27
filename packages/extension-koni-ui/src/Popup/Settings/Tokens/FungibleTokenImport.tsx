@@ -339,7 +339,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           children: t('Import token')
         }}
         title={t<string>('Import token')}
-        withSideMenu
       >
         <SwSubHeader
           background='transparent'

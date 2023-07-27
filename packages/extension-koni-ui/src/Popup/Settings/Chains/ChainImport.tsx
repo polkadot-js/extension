@@ -316,7 +316,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         leftFooterButton={backBtnProps}
         onBack={onBack}
         rightFooterButton={submitBtnProps}
-        withSideMenu
       >
         <SwSubHeader
           background='transparent'

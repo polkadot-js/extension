@@ -225,7 +225,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
         title={t<string>('Token detail')}
-        withSideMenu
       >
         {isWebUI && <SwSubHeader
           background='transparent'

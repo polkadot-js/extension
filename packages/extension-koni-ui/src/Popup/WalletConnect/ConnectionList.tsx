@@ -82,6 +82,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <Layout.WithSubHeaderOnly
+      className={'setting-pages'}
       onBack={goBack}
       rightFooterButton={{
         children: t('New connection'),

@@ -158,6 +158,7 @@ const Component: React.FC<ComponentProps> = (props) => {
 
   return (
     <Layout.WithSubHeaderOnly
+      className={'setting-pages'}
       onBack={goBack}
       rightFooterButton={{
         icon: (

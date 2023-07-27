@@ -500,14 +500,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['staking', 'price'])}
     >
       <Layout.Base
-        {...!isWebUI && {
-          title: t('Staking'),
-          subHeaderBackground: 'transparent',
-          subHeaderCenter: false,
-          subHeaderIcons: subHeaderButton,
-          subHeaderPaddingVertical: true,
-          showSubHeader: true
-        }}
+        showSubHeader={true}
+        subHeaderBackground={'transparent'}
+        subHeaderCenter={false}
+        subHeaderIcons={subHeaderButton}
+        subHeaderPaddingVertical={true}
+        title={t('Staking')}
       >
 
         {listSection}

@@ -18,7 +18,7 @@ export type Props = ThemeProps & {
   showBackButton?: boolean
 }
 
-function Component ({ className, onBack, showBackButton, title = 'Porfolio' }: Props): React.ReactElement<Props> {
+function Component ({ className, onBack, showBackButton, title = '' }: Props): React.ReactElement<Props> {
   const { activeModal } = useContext(ModalContext);
 
   const backButton = useMemo(() => {
@@ -74,8 +74,9 @@ function Component ({ className, onBack, showBackButton, title = 'Porfolio' }: P
 }
 
 const Controller = styled(Component)<Props>(({ theme }: Props) => ({
+  width: '100%',
+
   '.common-header': {
-    paddingBottom: 40,
     display: 'flex',
     justifyContent: 'space-between',
 

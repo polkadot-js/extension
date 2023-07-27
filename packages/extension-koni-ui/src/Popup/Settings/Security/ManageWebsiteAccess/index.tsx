@@ -200,55 +200,28 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   return (
     <PageWrapper className={`manage-website-access ${className}`}>
-      <Layout.Base
-        withSideMenu
-      >
-        {isWebUI
-          ? (
-            <SwSubHeader
-              background='transparent'
-              center={false}
-              onBack={goBack}
-              rightButtons={[
-                {
-                  icon: (
-                    <Icon
-                      customSize={'24px'}
-                      phosphorIcon={GearSix}
-                      type='phosphor'
-                      weight={'bold'}
-                    />
-                  ),
-                  onClick: onOpenActionModal
-                }
-              ]}
-              showBackButton={true}
-              title={t('Manage website access')}
-            />
-          )
-          : (
-            <SwSubHeader
-              background={'transparent'}
-              center
-              onBack={goBack}
-              paddingVertical
-              rightButtons={[
-                {
-                  icon: (
-                    <Icon
-                      customSize={'24px'}
-                      phosphorIcon={GearSix}
-                      type='phosphor'
-                      weight={'bold'}
-                    />
-                  ),
-                  onClick: onOpenActionModal
-                }
-              ]}
-              showBackButton
-              title={t('Manage website access')}
-            />
-          )}
+      <Layout.Base>
+        <SwSubHeader
+          background={'transparent'}
+          center
+          onBack={goBack}
+          paddingVertical
+          rightButtons={[
+            {
+              icon: (
+                <Icon
+                  customSize={'24px'}
+                  phosphorIcon={GearSix}
+                  type='phosphor'
+                  weight={'bold'}
+                />
+              ),
+              onClick: onOpenActionModal
+            }
+          ]}
+          showBackButton
+          title={t('Manage website access')}
+        />
 
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}

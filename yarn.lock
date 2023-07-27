@@ -3538,7 +3538,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-app-eth@npm:^6.33.4":
+"@ledgerhq/hw-app-eth@npm:6.33.4":
   version: 6.33.4
   resolution: "@ledgerhq/hw-app-eth@npm:6.33.4"
   dependencies:

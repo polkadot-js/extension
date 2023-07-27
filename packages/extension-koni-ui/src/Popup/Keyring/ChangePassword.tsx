@@ -124,17 +124,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           }
         ]}
         title={t('Change password')}
-        withSideMenu
       >
-        {isWebUI && (
-          <SwSubHeader
-            background='transparent'
-            center={false}
-            onBack={goBack}
-            showBackButton={true}
-            title={t('Change password')}
-          />
-        )}
         <div className={CN('body-container', {
           '__web-ui': isWebUI
         })}

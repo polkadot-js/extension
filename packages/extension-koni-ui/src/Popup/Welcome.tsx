@@ -202,8 +202,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   return (
     <Layout.Base
       className={CN(className, '__welcome-layout-containter')}
-      headerList={['Simple']}
-      showWebHeader
     >
       <div className='bg-gradient' />
       {!isWebUI && <div className='bg-image' />}

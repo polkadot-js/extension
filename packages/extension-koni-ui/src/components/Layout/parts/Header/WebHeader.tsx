@@ -32,7 +32,7 @@ const mock = [
   }
 ];
 
-function Component ({ className, title = 'Porfolio', withController = true }: Props): React.ReactElement<Props> {
+function Component ({ className, title = 'Portfolio', withController = true }: Props): React.ReactElement<Props> {
   return (
     <div className={CN(className)}>
       <div className='common-header'>

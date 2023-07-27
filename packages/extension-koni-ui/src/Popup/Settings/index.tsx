@@ -1,11 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
-import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
+import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-// import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
@@ -14,7 +12,6 @@ import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging'
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
-import CN from 'classnames';
 import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
@@ -74,10 +71,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
   const notify = useNotification();
   const { goHome } = useDefaultNavigate();
-  const { isWebUI } = useContext(ScreenContext);
   const { t } = useTranslation();
-
   const [locking, setLocking] = useState(false);
+  const { isWebUI } = useContext(ScreenContext);
 
   const onLock = useCallback(() => {
     setLocking(true);
@@ -276,84 +272,68 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   return (
     <PageWrapper className={`settings ${className}`}>
-      <Layout.Base
-        withSideMenu
-      >
-        <div className={CN({
-          'web-wrapper': isWebUI
-        })}
+      <>
+        {!isWebUI && <SwHeader
+          left='logo'
+          onClickLeft={goHome}
+          rightButtons={headerIcons}
+          showLeftButton={true}
         >
-          {!isWebUI
-            ? (
-              <SwHeader
-                left='logo'
-                onClickLeft={goHome}
-                rightButtons={headerIcons}
-                showLeftButton={true}
-              >
-                Settings
-              </SwHeader>
-            )
-            : (
-              <Headers.Controller title='Settings' />
-            )}
-          <div className={CN({
-            '__scroll-container': !isWebUI,
-            '__web-container': isWebUI
-          })}
-          >
-            {
-              SettingGroupItemType.map((group) => {
-                return (
-                  <div
-                    className={'__group-container'}
-                    key={group.key}
-                  >
-                    {!!group.label && (<div className='__group-label'>{group.label}</div>)}
+          {t('Settings')}
+        </SwHeader>}
 
-                    <div className={'__group-content'}>
-                      {group.items.map((item) => item.isHidden
-                        ? null
-                        : (
-                          <SettingItem
-                            className={'__setting-item'}
-                            key={item.key}
-                            leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
-                            name={t(item.title)}
-                            onPressItem={item.onClick}
-                            rightItem={generateRightIcon(item.rightIcon)}
-                          />
-                        ))}
-                    </div>
+        <div className={'__scroll-container'}>
+          {
+            SettingGroupItemType.map((group) => {
+              return (
+                <div
+                  className={'__group-container'}
+                  key={group.key}
+                >
+                  {!!group.label && (<div className='__group-label'>{group.label}</div>)}
+
+                  <div className={'__group-content'}>
+                    {group.items.map((item) => item.isHidden
+                      ? null
+                      : (
+                        <SettingItem
+                          className={'__setting-item'}
+                          key={item.key}
+                          leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
+                          name={item.title}
+                          onPressItem={item.onClick}
+                          rightItem={generateRightIcon(item.rightIcon)}
+                        />
+                      ))}
                   </div>
-                );
-              })
+                </div>
+              );
+            })
+          }
+
+          <Button
+            block
+            icon={
+              <Icon
+                phosphorIcon={Lock}
+                type='phosphor'
+                weight={'fill'}
+              />
             }
+            loading={locking}
+            onClick={onLock}
+            schema={'secondary'}
+          >
+            {t('Lock')}
+          </Button>
 
-            <Button
-              block
-              icon={
-                <Icon
-                  phosphorIcon={Lock}
-                  type='phosphor'
-                  weight={'fill'}
-                />
-              }
-              loading={locking}
-              onClick={onLock}
-              schema={'secondary'}
-            >
-              {t('Lock')}
-            </Button>
-
-            <div className={'__version'}>
-            SubWallet v {EXTENSION_VERSION}
-            </div>
+          <div className={'__version'}>
+          SubWallet v {EXTENSION_VERSION}
           </div>
-
-          <Outlet />
         </div>
-      </Layout.Base>
+
+        <Outlet />
+      </>
     </PageWrapper>
   );
 }
@@ -372,6 +352,10 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       backgroundColor: token.colorBgDefault
     },
 
+    '.web-ui-enable &, .web-ui-enable & .ant-sw-header-container': {
+      backgroundColor: 'transparent'
+    },
+
     '.ant-sw-header-center-part': {
       color: token.colorTextLight1,
       fontSize: token.fontSizeHeading4,
@@ -379,13 +363,9 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       fontWeight: token.headingFontWeight
     },
 
-    '.__web-container': {
-      width: '70%',
-      margin: '0 auto',
-
-      '.group-content': {
-        marginBottom: 16
-      }
+    '.custom-header': {
+      paddingTop: token.paddingLG,
+      paddingBottom: token.paddingLG
     },
 
     '.__scroll-container': {
@@ -393,7 +373,14 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       paddingTop: token.padding,
       paddingRight: token.padding,
       paddingLeft: token.padding,
-      paddingBottom: token.paddingLG
+      paddingBottom: token.paddingLG,
+
+      '.web-ui-enable &': {
+        paddingBottom: token.paddingLG,
+        margin: '0 auto',
+        width: 600,
+        maxWidth: '100%'
+      }
     },
 
     '.__group-label': {

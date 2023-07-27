@@ -326,7 +326,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         // subHeaderIcons={subHeaderButton}
         // subHeaderPaddingVertical={true}
         title={t<string>('Network detail')}
-        withSideMenu
       >
         <SwSubHeader
           background='transparent'

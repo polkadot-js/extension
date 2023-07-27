@@ -409,13 +409,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['crowdloan', 'price', 'chainStore'])}
     >
       <Layout.Base
-        {...!isWebUI && {
-          title: t<string>('Crowdloans'),
-          subHeaderBackground: 'transparent',
-          subHeaderCenter: false,
-          subHeaderPaddingVertical: true,
-          showSubHeader: true
-        }}
+        showSubHeader={true}
+        subHeaderBackground={'transparent'}
+        subHeaderCenter={false}
+        subHeaderPaddingVertical={true}
+        title={t<string>('Crowdloans')}
       >
         {crowdloansContent}
         <FilterModal

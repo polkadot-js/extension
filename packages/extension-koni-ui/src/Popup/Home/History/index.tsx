@@ -4,7 +4,7 @@
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
-import { EmptyList, FilterModal, HistoryItem, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import {EmptyList, FilterModal, HistoryItem, Layout, PageWrapper} from '@subwallet/extension-koni-ui/components';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
@@ -430,30 +430,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         className={`history ${className}`}
         resolve={dataContext.awaitStores(['transactionHistory'])}
       >
-        {!isWebUI && (
-          <SwSubHeader
-            background={'transparent'}
-            center={false}
-            className={'history-header'}
-            paddingVertical
-            // todo: enable this code if support download feature
-            // rightButtons={[
-            //   {
-            //     icon: (
-            //       <Icon
-            //         phosphorIcon={DownloadSimple}
-            //         size={'md'}
-            //         type='phosphor'
-            //       />
-            //     )
-            //   }
-            // ]}
-            showBackButton={false}
-            title={t('History')}
-          />
-        )}
+        <Layout.Base
+          title={t('History')}
+        >
+          {!isWebUI && (
+            <SwSubHeader
+              background={'transparent'}
+              center={false}
+              className={'history-header'}
+              paddingVertical
+              showBackButton={false}
+              title={t('History')}
+            />
+          )}
 
-        {listSection}
+          {listSection}
+        </Layout.Base>
       </PageWrapper>
 
       <HistoryDetailModal

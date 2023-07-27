@@ -178,6 +178,7 @@ export const router = createBrowserRouter([
         path: '/settings',
         children: [
           Settings.generateRouterObject('/settings'),
+          Settings.generateRouterObject('list'),
           GeneralSetting.generateRouterObject('general'),
           ManageAddressBook.generateRouterObject('address-book'),
           SecurityList.generateRouterObject('security'),

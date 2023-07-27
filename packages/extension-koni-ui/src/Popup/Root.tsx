@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { BackgroundExpandView, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import BaseWeb from '@subwallet/extension-koni-ui/components/Layout/base/BaseWeb';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import { useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -16,10 +18,13 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils';
 import { changeHeaderLogo } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
+import CN from 'classnames';
 import React, { useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { BackgroundColorMap, WebUIContext, WebUIContextProvider } from '../contexts/WebUIContext';
 
 changeHeaderLogo(<Logo2D />);
 
@@ -45,6 +50,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const navigate = useNavigate();
   const { goBack, goHome } = useDefaultNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
+  const { setBackground, setShowHeader, setShowSidebar, isPortfolio } = useContext(WebUIContext);
   const notify = useNotification();
 
   useSubscribeLanguage();
@@ -99,16 +105,28 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   }, [location]);
 
   useEffect(() => {
+    if (needMigrate || !hasMasterPassword || isNoAccount(accounts)) {
+      setShowSidebar(false);
+      setShowHeader(false);
+      setBackground(BackgroundColorMap.NO_SIDEBAR);
+    } else {
+      setShowSidebar(true);
+      setShowHeader(true);
+      !isPortfolio && setBackground(BackgroundColorMap.COMMON);
+    }
+  }, [accounts, hasMasterPassword, isLocked, isPortfolio, needMigrate, setBackground, setShowHeader, setShowSidebar]);
+
+  useEffect(() => {
     const pathName = location.pathname;
 
     if (needMigrate && hasMasterPassword && !isLocked) {
       if (pathName !== migratePasswordUrl) {
         navigate(migratePasswordUrl);
       }
-    } else if (hasMasterPassword && isLocked) {
-      if (pathName !== loginUrl) {
-        navigate(loginUrl);
-      }
+    // } else if (hasMasterPassword && isLocked) {
+    //   if (pathName !== loginUrl) {
+    //     navigate(loginUrl);
+    //   }
     } else if (!hasMasterPassword) {
       if (isNoAccount(accounts)) {
         if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
@@ -143,23 +161,27 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
 function _Root ({ className }: ThemeProps): React.ReactElement {
   const dataContext = useContext(DataContext);
+  const screenContext = useContext(ScreenContext);
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
 
   return (
-    <WalletModalContext>
-      <PageWrapper
-        animateOnce={true}
-        className={'main-page-container'}
-        resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay'])}
-      >
-        <DefaultRoute>
-          <main className={className}>
-            <Outlet />
-          </main>
-        </DefaultRoute>
-      </PageWrapper>
-      <BackgroundExpandView />
-    </WalletModalContext>
+    <WebUIContextProvider>
+      <WalletModalContext>
+        <PageWrapper
+          animateOnce={true}
+          className={'main-page-container'}
+          resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay'])}
+        >
+          <DefaultRoute>
+            <main className={CN(className, `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
+              <BaseWeb>
+                <Outlet />
+              </BaseWeb>
+            </main>
+          </DefaultRoute>
+        </PageWrapper>
+      </WalletModalContext>
+    </WebUIContextProvider>
   );
 }
 

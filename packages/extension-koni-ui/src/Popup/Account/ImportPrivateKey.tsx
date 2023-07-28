@@ -16,7 +16,7 @@ import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
-import { Form, Icon, Input } from '@subwallet/react-ui';
+import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -164,13 +164,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         onBack={onBack}
-        rightFooterButton={{
-          children: validating ? t('Validating') : t('Import account'),
-          icon: FooterIcon,
-          onClick: form.submit,
-          disabled: !privateKey || !!validateState.status,
-          loading: validating || loading
-        }}
+        rightFooterButton={!isWebUI
+          ? {
+            children: validating ? t('Validating') : t('Import account'),
+            icon: FooterIcon,
+            onClick: form.submit,
+            disabled: !privateKey || !!validateState.status,
+            loading: validating || loading
+          }
+          : undefined}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -204,6 +206,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   statusHelp={validateState.message}
                 />
               </Form.Item>
+              <Form.Item hidden={!isWebUI}>
+                <Button
+                  disabled={!privateKey || !!validateState.status}
+                  icon={FooterIcon}
+                  loading={validating || loading}
+                  onClick={form.submit}
+                >
+                  {validating ? t('Validating') : t('Import account')}
+                </Button>
+              </Form.Item>
             </Form>
           </div>
 
@@ -216,13 +228,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   );
 };
 
-const ImportPrivateKey = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ImportPrivateKey = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return {
     '.container': {
       '&.__web-ui': {
         display: 'flex',
         justifyContent: 'center',
-        maxWidth: '60%',
+        width: extendToken.twoColumnWidth,
+        maxWidth: '100%',
         margin: '0 auto',
 
         '& > *': {

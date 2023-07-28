@@ -339,14 +339,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-const TokenDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const TokenDetail = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return ({
     '.token_detail__container': {
       marginLeft: token.margin,
       marginRight: token.margin,
 
       '&.__web-ui': {
-        width: '60%',
+        width: extendToken.twoColumnWidth,
+        maxWidth: '100%',
         margin: '0 auto'
       }
     },

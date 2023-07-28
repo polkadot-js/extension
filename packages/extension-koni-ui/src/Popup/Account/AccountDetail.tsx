@@ -423,14 +423,15 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const AccountDetail = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return {
     '.body-container': {
       '&.__web-ui': {
         display: 'flex',
         justifyContent: 'center',
         gap: 16,
-        width: '60%',
+        width: extendToken.twoColumnWidth,
+        maxWidth: '100%',
         margin: '0 auto',
 
         '.anticon': {

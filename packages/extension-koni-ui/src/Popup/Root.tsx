@@ -108,7 +108,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     if (needMigrate || !hasMasterPassword || isNoAccount(accounts) || location.pathname === '/create-done') {
       setShowSidebar(false);
       setHeaderType(HeaderType.SIMPLE);
-      setBackground(BackgroundColorMap.NO_SIDEBAR);
+      setBackground(BackgroundColorMap.INFO);
     } else {
       setShowSidebar(true);
       setHeaderType(HeaderType.COMMON);

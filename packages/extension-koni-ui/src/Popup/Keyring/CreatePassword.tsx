@@ -266,7 +266,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   );
 };
 
-const CreatePassword = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const CreatePassword = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return {
     '.__web-ui': {
       display: 'flex',
@@ -287,7 +287,8 @@ const CreatePassword = styled(Component)<Props>(({ theme: { token } }: Props) =>
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
-      maxWidth: 768,
+      width: extendToken.twoColumnWidth,
+      maxWidth: '100%',
       margin: '0 auto',
 
       '.page-icon': {

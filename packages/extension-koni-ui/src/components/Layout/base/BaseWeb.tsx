@@ -17,7 +17,7 @@ export interface LayoutBaseWebProps {
   className?: string;
 }
 
-const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => {
+const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken, token } }: ThemeProps) => {
   return {
     display: 'flex',
     flex: 'auto',
@@ -30,7 +30,21 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps
       right: 0,
       bottom: 0,
       zIndex: -1,
-      transitionDuration: 'background-color 0.3s ease'
+      transitionDuration: 'background-color 0.3s ease',
+      background: extendToken.tokensScreenInfoBackgroundColor,
+
+      '&.__background-common': {
+        background: token.colorBgDefault
+      },
+      '&.__background-info': {
+        background: extendToken.tokensScreenInfoBackgroundColor
+      },
+      '&.__background-increase': {
+        background: extendToken.tokensScreenSuccessBackgroundColor
+      },
+      '&.__background-decrease': {
+        background: extendToken.tokensScreenDangerBackgroundColor
+      }
     },
 
     '.web-layout-container': {
@@ -76,12 +90,13 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps
 
     '.setting-pages .ant-sw-screen-layout-body, .setting-pages .ant-sw-screen-layout-footer': {
       margin: '0 auto',
-      width: 600,
+      width: extendToken.bigOneColumnWidth,
       maxWidth: '100%'
     },
 
     '.web-single-column': {
-      maxWidth: 400,
+      width: extendToken.oneColumnWidth,
+      maxWidth: '100%',
       marginLeft: 'auto',
       marginRight: 'auto'
     },
@@ -124,8 +139,7 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   return (
     <StyledLayout className={CN('web-layout-container', `header-type-${headerType}`)}>
       <div
-        className='web-layout-background'
-        style={{ background }}
+        className={CN('web-layout-background', `__background-${background}`)}
       />
       {showSidebar && <div className='web-layout-sidebar'>
         <SideMenu />

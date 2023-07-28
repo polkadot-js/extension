@@ -9,10 +9,10 @@ interface WebUIContextProviderProps {
 }
 
 export enum BackgroundColorMap {
-  NO_SIDEBAR = 'linear-gradient(rgba(0, 75, 255, 0.1) 5%, rgba(217, 217, 217, 0) 33%)',
-  COMMON = '#0C0C0C',
-  INCREASE = 'linear-gradient(180deg, rgba(76, 234, 172, 0.10) 5%, rgba(217, 217, 217, 0.00) 33%)',
-  DECREASE = 'linear-gradient(180deg, rgba(234, 76, 76, 0.10) 5%, rgba(217, 217, 217, 0.00) 33%)'
+  COMMON = 'common',
+  INFO = 'info',
+  INCREASE = 'increase',
+  DECREASE = 'decrease',
 }
 
 export enum HeaderType {
@@ -45,7 +45,7 @@ function checkPortfolioPage (pathname: string) {
 }
 
 export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) => {
-  const [background, setBackground] = useState<BackgroundColorMap>(BackgroundColorMap.NO_SIDEBAR);
+  const [background, setBackground] = useState<BackgroundColorMap>(BackgroundColorMap.INFO);
   const [headerType, setHeaderType] = useState(HeaderType.NONE);
   const [showSidebar, setShowSidebar] = useState(true);
   const [title, setTitle] = useState<string | React.ReactNode>('');

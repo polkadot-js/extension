@@ -421,7 +421,7 @@ function Component ({ className }: Props): JSX.Element {
   );
 }
 
-const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ImportJson = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return {
     '--row-gap': `${token.sizeXS}px`,
 
@@ -432,7 +432,8 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '&.__web-ui': {
         display: 'flex',
         justifyContent: 'center',
-        maxWidth: 816,
+        width: extendToken.twoColumnWidth,
+        maxWidth: '100%',
         gap: token.size,
         margin: '0 auto'
       },

@@ -150,7 +150,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 };
 
 const Login = styled(Component)<Props>(({ theme }: Props) => {
-  const { token } = theme;
+  const { extendToken, token } = theme;
 
   return {
     position: 'relative',
@@ -216,7 +216,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        width: '400px',
+        width: extendToken.oneColumnWidth,
         margin: '0 auto'
       },
 

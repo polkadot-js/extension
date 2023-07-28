@@ -8,7 +8,7 @@ import { KeyringService } from '@subwallet/extension-base/services/keyring-servi
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { MetadataDef } from '@subwallet/extension-inject/types';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 
@@ -135,11 +135,11 @@ export default class RequestService {
     return this.#authRequestHandler.getDAppChainInfo(options);
   }
 
-  public get subscribeEvmChainChange (): Subject<AuthUrls> {
+  public get subscribeEvmChainChange () {
     return this.#authRequestHandler.subscribeEvmChainChange;
   }
 
-  public get subscribeAuthorizeUrlSubject (): Subject<AuthUrls> {
+  public get subscribeAuthorizeUrlSubject () {
     return this.#authRequestHandler.subscribeAuthorizeUrlSubject;
   }
 

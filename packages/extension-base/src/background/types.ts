@@ -312,6 +312,10 @@ export interface RequestAccountSubscribe {
   accountAuthType?: AccountAuthType
 }
 
+export interface RequestAccountUnsubscribe {
+  id: string
+}
+
 export interface RequestRpcSend {
   method: string;
   params: unknown[];

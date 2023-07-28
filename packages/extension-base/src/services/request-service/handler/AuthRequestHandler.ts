@@ -13,7 +13,7 @@ import { AuthUrls } from '@subwallet/extension-base/services/request-service/typ
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
 import { getDomainFromUrl, stripUrl } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { assert } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -26,8 +26,8 @@ export default class AuthRequestHandler {
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private authorizeCached: AuthUrls | undefined = undefined;
-  private readonly authorizeUrlSubject = new Subject<AuthUrls>();
-  private readonly evmChainSubject = new Subject<AuthUrls>();
+  private readonly authorizeUrlSubject = new BehaviorSubject<AuthUrls>({});
+  private readonly evmChainSubject = new BehaviorSubject<AuthUrls>({});
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
   constructor (requestService: RequestService, chainService: ChainService, private keyringService: KeyringService) {
@@ -72,6 +72,8 @@ export default class AuthRequestHandler {
     } else {
       this.authorizeStore.get('authUrls', (data) => {
         this.authorizeCached = data || {};
+        this.evmChainSubject.next(this.authorizeCached);
+        this.authorizeUrlSubject.next(this.authorizeCached);
         update(this.authorizeCached);
       });
     }
@@ -285,11 +287,11 @@ export default class AuthRequestHandler {
     return this.#authRequestsV2[id];
   }
 
-  public get subscribeEvmChainChange (): Subject<AuthUrls> {
+  public get subscribeEvmChainChange () {
     return this.evmChainSubject;
   }
 
-  public get subscribeAuthorizeUrlSubject (): Subject<AuthUrls> {
+  public get subscribeAuthorizeUrlSubject () {
     return this.authorizeUrlSubject;
   }
 

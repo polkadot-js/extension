@@ -43,8 +43,8 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
         <div className='description'>
           <AlertBox
-            description={t('This request is not supported for WalletConnect')}
-            title={t('Not support')}
+            description={t('SubWallet has not supported this request for WalletConnect yet')}
+            title={t('Request not supported')}
             type='warning'
           />
         </div>

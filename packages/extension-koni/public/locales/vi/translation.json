@@ -724,5 +724,7 @@
   "Nominate": "Nominate",
   "Click <extension/> select SubWallet and then <pin/>": "",
   "Hide balance": "Ẩn số dư",
-  "Show balance": "Hiện số dư"
+  "Show balance": "Hiện số dư",
+  "SubWallet has not supported this request for WalletConnect yet": "SubWallet chưa hỗ trợ yêu cầu này cho WalletConnect",
+  "Request not supported": "Yêu cầu không được hỗ trợ"
 }

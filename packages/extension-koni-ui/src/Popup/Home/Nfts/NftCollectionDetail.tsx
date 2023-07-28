@@ -178,19 +178,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         {isWebUI
           ? (
             <>
-              <SwList
-                className={CN('nft_item_list__container')}
-                displayGrid={true}
-                enableSearchInput={true}
-                gridGap={'14px'}
-                list={nftList}
-                minColumnWidth={'160px'}
-                renderItem={renderNft}
-                renderOnScroll={true}
-                renderWhenEmpty={emptyNft}
-                searchBy={searchNft}
-                searchTerm={outletContext.searchInput}
-              />
+              <div className={'nft-item-list-wrapper'}>
+                <SwList
+                  className={CN('nft_item_list')}
+                  displayGrid={true}
+                  enableSearchInput={true}
+                  gridGap={'14px'}
+                  list={nftList}
+                  minColumnWidth={'160px'}
+                  renderItem={renderNft}
+                  renderOnScroll={true}
+                  renderWhenEmpty={emptyNft}
+                  searchBy={searchNft}
+                  searchTerm={outletContext.searchInput}
+                />
+              </div>
 
               <Button
                 block
@@ -264,6 +266,10 @@ const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Prop
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden'
+    },
+
+    '.nft-item-list-wrapper': {
+      flex: 1
     }
   });
 });

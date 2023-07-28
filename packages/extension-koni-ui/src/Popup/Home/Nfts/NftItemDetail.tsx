@@ -73,6 +73,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const originChainInfo = useGetChainInfo(nftItem.chain);
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
   const accountExternalUrl = getExplorerLink(originChainInfo, nftItem.owner, 'account');
+  const [sendNftKey, setSendNftKey] = useState<string>('sendNftKey');
 
   useNavigateOnChangeAccount('/home/nfts/collections');
 
@@ -207,7 +208,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setDetailTitle?.(nftItem.name || nftItem.id);
   }, [nftItem, setDetailTitle]);
 
-  const handleCancelModal = useCallback(() => inactiveModal(TRANSFER_NFT_MODAL), [inactiveModal]);
+  const handleCancelModal = useCallback(() => {
+    inactiveModal(TRANSFER_NFT_MODAL);
+    setSendNftKey(`sendNftKey-${Date.now()}`);
+  }, [inactiveModal]);
 
   const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
 
@@ -360,7 +364,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onCancel={handleCancelModal}
           title={t('Transfer')}
         >
-          <Transaction modalContent>
+          <Transaction
+            key={sendNftKey}
+            modalContent
+          >
             <SendNFT
               modalContent
               nftDetail={nftItem}
@@ -543,8 +550,10 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
         display: 'flex',
         flexDirection: 'column',
         flexBasis: 384,
+        maxWidth: 384,
         gap: token.size,
-        alignItems: 'center'
+        alignItems: 'center',
+        justifyContent: 'flex-start'
       },
 
       '.nft_item_detail_field_container': {

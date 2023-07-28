@@ -14,7 +14,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowClockwise, Image, Plus, PlusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -47,6 +47,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     searchInput: string,
     setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
   } = useOutletContext();
+
+  const setSearchPlaceholder = outletContext?.setSearchPlaceholder;
+
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
   const { nftCollections, nftItems } = useGetNftByAccount();
@@ -54,10 +57,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const notify = useNotification();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const [importNftKey, setImportNftKey] = useState<string>('importNftKey');
 
   useEffect(() => {
-    outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Collectible name');
-  }, [outletContext, outletContext?.setSearchPlaceholder]);
+    setSearchPlaceholder?.('Collectible name');
+  }, [setSearchPlaceholder]);
 
   const subHeaderButton: ButtonProps[] = [
     {
@@ -162,6 +166,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const closeImportModal = useCallback(() => {
     inactiveModal(IMPORT_NFT_MODAL);
+    setImportNftKey(`importNftKey-${Date.now()}`);
   }, [inactiveModal]);
 
   const listSection = useMemo(() => {
@@ -186,17 +191,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     if (nftCollections.length > 0) {
       return (
-        <SwList
-          displayGrid={true}
-          gridGap={'14px'}
-          list={nftCollections}
-          minColumnWidth={'160px'}
-          renderItem={renderNftCollection}
-          renderOnScroll={true}
-          renderWhenEmpty={emptyNft}
-          searchBy={searchCollection}
-          searchTerm={outletContext?.searchInput}
-        />
+        <div className={'nft-collect-list-wrapper'}>
+          <SwList
+            displayGrid={true}
+            gridGap={'14px'}
+            list={nftCollections}
+            minColumnWidth={'160px'}
+            renderItem={renderNftCollection}
+            renderOnScroll={true}
+            renderWhenEmpty={emptyNft}
+            searchBy={searchCollection}
+            searchTerm={outletContext?.searchInput}
+          />
+        </div>
       );
     }
 
@@ -236,11 +243,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       </Layout.Base>
 
       <CustomModal
+        className={CN('import-nft-modal', className)}
         id={IMPORT_NFT_MODAL}
         onCancel={closeImportModal}
         title={t('Import NFT')}
       >
-        <NftImport modalContent />
+        <NftImport
+          key={importNftKey}
+          modalContent
+        />
       </CustomModal>
     </PageWrapper>
   );
@@ -248,21 +259,49 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
 const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    color: token.colorTextLight1,
-    fontSize: token.fontSizeLG,
+    '&.nft_container': {
+      color: token.colorTextLight1,
+      fontSize: token.fontSizeLG,
 
-    '&__inner': {
-      display: 'flex',
-      flexDirection: 'column'
+      '&__inner': {
+        display: 'flex',
+        flexDirection: 'column'
+      },
+
+      '.nft_collection_list__container': {
+        height: '100%',
+        flex: 1,
+
+        '.ant-sw-list': {
+          paddingBottom: 1,
+          marginBottom: -1
+        }
+      },
+
+      '.nft-collect-list-wrapper': {
+        flex: 1
+      }
     },
+    '&.import-nft-modal': {
+      '.ant-sw-modal-body': {
+        paddingLeft: 0,
+        paddingRight: 0,
+        paddingBottom: 0
+      },
 
-    '.nft_collection_list__container': {
-      height: '100%',
-      flex: 1,
+      '.nft_import__container': {
+        marginTop: token.marginXS,
+        marginBottom: token.marginXS
+      },
 
-      '.ant-sw-list': {
-        paddingBottom: 1,
-        marginBottom: -1
+      '.ant-sw-screen-layout-container .ant-sw-screen-layout-footer-button-container-alone': {
+        marginBottom: token.margin
+      },
+
+      '.ant-form': {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: token.sizeXS
       }
     }
   });

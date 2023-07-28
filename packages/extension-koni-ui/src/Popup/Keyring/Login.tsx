@@ -1,17 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, Logo2DWithBorder, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
 import SocialGroup from '@subwallet/extension-koni-ui/components/SocialGroup';
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
-import { Button, Form, Input, ModalContext } from '@subwallet/react-ui';
+import { Button, Form, Image, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -33,7 +32,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { activeModal } = useContext(ModalContext);
 
   const [form] = Form.useForm<LoginFormState>();
-  const { isWebUI } = useContext(ScreenContext);
 
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
@@ -77,73 +75,65 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
-        className='login-container'
-      >
-        {!isWebUI && <div className='bg-image' />}
-        <div className={CN('body-container', {
-          '__web-ui': isWebUI
-        })}
-        >
-          <div className='main-wrapper'>
-            <div className='logo-container'>
-              <Logo2DWithBorder
-                height={'100%'}
-                width={'100%'}
-              />
-            </div>
-            <div className='title'>
-              {t('Welcome back!')}
-            </div>
-            <div className='sub-title'>
-              {t('Enter your password to unlock account')}
-            </div>
-            <Form
-              className={'__form'}
-              form={form}
-              initialValues={{ [FormFieldName.PASSWORD]: '' }}
-              onFieldsChange={onUpdate}
-              onFinish={onSubmit}
-            >
-              <Form.Item
-                name={FormFieldName.PASSWORD}
-                rules={[
-                  {
-                    message: t('Password is required'),
-                    required: true
-                  }
-                ]}
-                statusHelpAsTooltip={true}
-              >
-                <Input.Password
-                  containerClassName='password-input'
-                  id={passwordInputId}
-                  placeholder={t('Password')}
-                />
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  block={true}
-                  disabled={isDisable}
-                  htmlType='submit'
-                  loading={loading}
-                >
-                  {t('Unlock')}
-                </Button>
-              </Form.Item>
-              <Form.Item>
-                <div
-                  className='forgot-password'
-                  onClick={onReset}
-                >
-                  {t('Don’t remember your password?')}
-                </div>
-              </Form.Item>
-            </Form>
-            <ResetWalletModal />
+      <Layout.Base>
+        <div className='bg-image' />
+        <div className='body-container'>
+          <div className='logo-container'>
+            <Image
+              src='/images/subwallet/gradient-logo.png'
+              width={80}
+            />
           </div>
-          <SocialGroup />
+          <div className='title'>
+            {t('Welcome back!')}
+          </div>
+          <div className='sub-title'>
+            {t('Enter your password to unlock wallet')}
+          </div>
+          <Form
+            form={form}
+            initialValues={{ [FormFieldName.PASSWORD]: '' }}
+            onFieldsChange={onUpdate}
+            onFinish={onSubmit}
+          >
+            <Form.Item
+              name={FormFieldName.PASSWORD}
+              rules={[
+                {
+                  message: t('Password is required'),
+                  required: true
+                }
+              ]}
+              statusHelpAsTooltip={true}
+            >
+              <Input.Password
+                containerClassName='password-input'
+                id={passwordInputId}
+                placeholder={t('Password')}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                block={true}
+                disabled={isDisable}
+                htmlType='submit'
+                loading={loading}
+              >
+                {t('Unlock')}
+              </Button>
+            </Form.Item>
+            <Form.Item>
+              <div
+                className='forgot-password'
+                onClick={onReset}
+              >
+                {t('Don’t remember your password?')}
+              </div>
+            </Form.Item>
+          </Form>
+          <ResetWalletModal />
         </div>
+        <SocialGroup className={'social-group'} />
       </Layout.Base>
     </PageWrapper>
   );
@@ -155,16 +145,11 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
   return {
     position: 'relative',
 
-    '.ant-sw-screen-layout-body': {
-      display: 'flex',
-      flexDirection: 'column'
-    },
-
     '.bg-image': {
-      backgroundImage: 'url("/images/subwallet/welcome-background.png")',
+      backgroundImage: 'url("./images/subwallet/welcome-background.png")',
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'top',
-      backgroundSize: 'cover',
+      backgroundSize: 'contain',
       height: '100%',
       position: 'absolute',
       width: '100%',
@@ -172,14 +157,23 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       top: 0
     },
 
-    '.logo-container': {
-      height: 120
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
     },
 
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
       opacity: 0.999,
+      width: extendToken.oneColumnWidth,
+      maxWidth: '100%',
+      margin: 'auto',
+
+      '.logo-container': {
+        marginTop: 0,
+        color: token.colorTextBase
+      },
 
       '.title': {
         marginTop: token.margin,
@@ -193,8 +187,11 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         marginTop: token.marginXS,
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
-        color: token.colorTextLight3,
-        marginBottom: 36
+        color: token.colorTextLight3
+      },
+
+      '.password-input': {
+        marginTop: 62
       },
 
       '.forgot-password': {
@@ -203,26 +200,23 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         lineHeight: token.lineHeightHeading5,
         color: token.colorTextLight4,
         marginTop: 27
+      },
+
+      '.web-ui-enable &': {
+        '.password-input': {
+          marginTop: token.paddingLG
+        },
+
+        '.forgot-password': {
+          marginTop: token.paddingMD
+        }
       }
     },
 
-    '.__web-ui': {
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-
-      '.main-wrapper': {
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        width: extendToken.oneColumnWidth,
-        margin: '0 auto'
-      },
-
-      '.forgot-password': {
-        marginTop: '0 !important'
-      }
+    '.social-group': {
+      marginTop: 0,
+      paddingTop: 40,
+      textAlign: 'center'
     }
   };
 });

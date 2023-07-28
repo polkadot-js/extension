@@ -300,10 +300,7 @@ const Component: React.FC<Props> = (props: Props) => {
             subHeaderCenter: true,
             subHeaderBackground: 'transparent'
           }
-          : {
-            headerList: ['Simple'],
-            showWebHeader: true
-          })}
+          : {})}
         disableBack={loading}
         onBack={onBack}
         showBackButton={step !== 'Introduction'}

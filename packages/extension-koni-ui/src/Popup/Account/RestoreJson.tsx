@@ -302,10 +302,7 @@ function Component ({ className }: Props): JSX.Element {
             subHeaderCenter: true,
             subHeaderBackground: 'transparent'
           }
-          : {
-            headerList: ['Simple'],
-            showWebHeader: true
-          })}
+          : {})}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,

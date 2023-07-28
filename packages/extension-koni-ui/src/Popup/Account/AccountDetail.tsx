@@ -238,8 +238,6 @@ const Component: React.FC<Props> = (props: Props) => {
     <PageWrapper className={CN(className)}>
       <Layout.Base
         disableBack={deriving}
-        headerList={['Simple']}
-        showWebHeader={isWebUI}
         {...!isWebUI && {
           showBackButton: true,
           showSubHeader: true,

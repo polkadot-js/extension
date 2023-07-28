@@ -105,7 +105,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   }, [location]);
 
   useEffect(() => {
-    if (needMigrate || !hasMasterPassword || isNoAccount(accounts) || location.pathname === '/create-done') {
+    if (needMigrate || !hasMasterPassword || isNoAccount(accounts) || isLocked || location.pathname === '/create-done') {
       setShowSidebar(false);
       setHeaderType(HeaderType.SIMPLE);
       setBackground(BackgroundColorMap.INFO);
@@ -123,10 +123,10 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       if (pathName !== migratePasswordUrl) {
         navigate(migratePasswordUrl);
       }
-    // } else if (hasMasterPassword && isLocked) {
-    //   if (pathName !== loginUrl) {
-    //     navigate(loginUrl);
-    //   }
+    } else if (hasMasterPassword && isLocked) {
+      if (pathName !== loginUrl) {
+        navigate(loginUrl);
+      }
     } else if (!hasMasterPassword) {
       if (isNoAccount(accounts)) {
         if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {

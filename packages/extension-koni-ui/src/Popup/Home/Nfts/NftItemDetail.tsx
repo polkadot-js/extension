@@ -213,6 +213,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const imageSize = isWebUI ? 384 : 358;
 
+  const isShowProperties = !!nftItem.properties && !!Object.values(nftItem.properties).length;
+
   return (
     <PageWrapper
       className={`${className}`}
@@ -312,7 +314,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             </div>
 
             {
-              nftItem.properties && (
+              isShowProperties && (
                 <div className={'nft_item_detail__prop_section'}>
                   <div className={'nft_item_detail__section_title'}>{t<string>('Properties')}</div>
                   <div className={'nft_item_detail__atts_container'}>

@@ -107,10 +107,6 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
 
 const RANDOM_IPFS_GATEWAY_SETTING = [
   {
-    provider: IPFS_W3S_LINK,
-    weight: 1
-  },
-  {
     provider: CF_IPFS_GATEWAY,
     weight: 4
   },
@@ -129,14 +125,6 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
   {
     provider: DWEB_LINK,
     weight: 5
-  },
-  {
-    provider: IPFS_GATEWAY_4EVERLAND,
-    weight: 2
-  },
-  {
-    provider: IPFS_HARDBIN,
-    weight: 1
   }
 ];
 
@@ -148,6 +136,18 @@ if (!RuntimeInfo.protocol || (RuntimeInfo.protocol && !RuntimeInfo.protocol.star
   RANDOM_IPFS_GATEWAY_SETTING.push({
     provider: IPFS_FLEEK,
     weight: 4
+  });
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: IPFS_HARDBIN,
+    weight: 1
+  });
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: IPFS_GATEWAY_4EVERLAND,
+    weight: 2
+  });
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: IPFS_W3S_LINK,
+    weight: 1
   });
 }
 

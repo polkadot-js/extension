@@ -79,10 +79,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     <PageWrapper className={CN(className)}>
       <Layout.Base
         className='login-container'
-        headerList={['Simple']}
-        showWebHeader
       >
-        <div className='bg-gradient' />
         {!isWebUI && <div className='bg-image' />}
         <div className={CN('body-container', {
           '__web-ui': isWebUI
@@ -153,7 +150,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 };
 
 const Login = styled(Component)<Props>(({ theme }: Props) => {
-  const { token } = theme;
+  const { extendToken, token } = theme;
 
   return {
     position: 'relative',
@@ -161,15 +158,6 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
     '.ant-sw-screen-layout-body': {
       display: 'flex',
       flexDirection: 'column'
-    },
-
-    '.bg-gradient': {
-      backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
-      height: 290,
-      width: '100%',
-      position: 'absolute',
-      left: 0,
-      top: 0
     },
 
     '.bg-image': {
@@ -228,7 +216,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        width: '400px',
+        width: extendToken.oneColumnWidth,
         margin: '0 auto'
       },
 

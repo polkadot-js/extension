@@ -255,13 +255,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   );
 };
 
-const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ImportSeedPhrase = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return {
     '.container': {
       '&.__web-ui': {
         display: 'flex',
         justifyContent: 'center',
-        maxWidth: '60%',
+        width: extendToken.twoColumnWidth,
+        maxWidth: '100%',
         margin: '0 auto',
 
         '& .ant-btn': {

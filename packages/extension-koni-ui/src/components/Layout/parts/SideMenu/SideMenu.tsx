@@ -148,11 +148,11 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const selectedKey = useMemo(() => {
     const availableKey: string[] = [
       ...menuItems.map((i) => i.key as string),
-      ...staticMenuItems.map((i) => i.key as string)
+      // ...staticMenuItems.map((i) => i.key as string)
     ];
     const current = availableKey.filter((i: string) => i !== '/home' && pathname.includes(i));
 
-    return current.length ? current : ['/home'];
+    return current.length ? current : (pathname.startsWith('/home') ? ['/home'] : ['/settings']);
   }, [pathname]);
 
   return (

@@ -203,7 +203,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     <Layout.Base
       className={CN(className, '__welcome-layout-containter')}
     >
-      <div className='bg-gradient' />
       {!isWebUI && <div className='bg-image' />}
       <div className={CN('body-container', {
         '__web-ui': isWebUI,
@@ -298,7 +297,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
               </Button>
             </Form>
 
-            <SocialGroup />
+            <SocialGroup className={'social-group'} />
           </>
         )}
       </div>
@@ -320,16 +319,6 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flexDirection: 'column',
       justifyContent: 'space-around',
       alignItems: 'center'
-    },
-
-    '.bg-gradient': {
-      background:
-        'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
-      height: 290,
-      width: '100%',
-      position: 'absolute',
-      left: 0,
-      top: 0
     },
 
     '.logo-container': {
@@ -492,6 +481,10 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
           color: token.colorTextLabel
         }
       }
+    },
+
+    '.social-group': {
+      paddingTop: token.paddingLG,
     }
 
   };

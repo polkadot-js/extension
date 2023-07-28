@@ -230,10 +230,11 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const ImportQrCode = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ImportQrCode = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return {
     '.__web-ui': {
-      maxWidth: '400px',
+      width: extendToken.oneColumnWidth,
+      maxWidth: '100%',
       margin: '0 auto'
     },
     '.container': {

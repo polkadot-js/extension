@@ -3,7 +3,7 @@
 
 import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
+import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
@@ -17,7 +17,7 @@ export interface LayoutBaseWebProps {
   className?: string;
 }
 
-const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => {
+const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken, token } }: ThemeProps) => {
   return {
     display: 'flex',
     flex: 'auto',
@@ -30,7 +30,21 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps
       right: 0,
       bottom: 0,
       zIndex: -1,
-      transitionDuration: 'background-color 0.3s ease'
+      transitionDuration: 'background-color 0.3s ease',
+      background: extendToken.tokensScreenInfoBackgroundColor,
+
+      '&.__background-common': {
+        background: token.colorBgDefault
+      },
+      '&.__background-info': {
+        background: extendToken.tokensScreenInfoBackgroundColor
+      },
+      '&.__background-increase': {
+        background: extendToken.tokensScreenSuccessBackgroundColor
+      },
+      '&.__background-decrease': {
+        background: extendToken.tokensScreenDangerBackgroundColor
+      }
     },
 
     '.web-layout-container': {
@@ -48,12 +62,15 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps
 
     '.web-layout-body': {
       position: 'relative',
-      height: '100vh',
-      width: '100%',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'auto',
       flex: 1
+    },
+
+    '&.header-type-common .web-layout-body': {
+      height: '100vh',
+      width: '100%'
     },
 
     '.web-layout-header': {
@@ -73,8 +90,19 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps
 
     '.setting-pages .ant-sw-screen-layout-body, .setting-pages .ant-sw-screen-layout-footer': {
       margin: '0 auto',
-      width: 600,
+      width: extendToken.bigOneColumnWidth,
       maxWidth: '100%'
+    },
+
+    '.web-single-column': {
+      width: extendToken.oneColumnWidth,
+      maxWidth: '100%',
+      marginLeft: 'auto',
+      marginRight: 'auto'
+    },
+
+    '.web-cancel-fill-height .ant-sw-screen-layout-body': {
+      flex: 'initial'
     },
 
     '.ant-sw-screen-layout-container': {
@@ -91,7 +119,7 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps
 const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
-  const { background, isPortfolio, isSettingPage, showHeader, showSidebar, title } = useContext(WebUIContext);
+  const { background, headerType, isPortfolio, isSettingPage, showSidebar, title } = useContext(WebUIContext);
   const headerTitle = useMemo(() => {
     if (isPortfolio) {
       return t('Portfolio');
@@ -109,18 +137,20 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   }
 
   return (
-    <StyledLayout className='web-layout-container'>
+    <StyledLayout className={CN('web-layout-container', `header-type-${headerType}`)}>
       <div
-        className='web-layout-background'
-        style={{ background }}
+        className={CN('web-layout-background', `__background-${background}`)}
       />
       {showSidebar && <div className='web-layout-sidebar'>
         <SideMenu />
       </div>}
 
       <div className={CN('web-layout-body', { 'setting-pages': isSettingPage })}>
-        {showHeader && <div className={'web-layout-header'}>
+        {headerType === HeaderType.COMMON && <div className={'web-layout-header'}>
           <Headers.Controller title={headerTitle} />
+        </div>}
+        {headerType === HeaderType.SIMPLE && <div className={'web-layout-header-simple'}>
+          <Headers.Simple title={headerTitle} />
         </div>}
         <div className={CN('web-layout-content', { '__with-padding': showSidebar })}>
           {children}

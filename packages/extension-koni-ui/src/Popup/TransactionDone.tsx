@@ -121,13 +121,13 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const TransactionDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const TransactionDone = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return {
     textAlign: 'center',
 
     '&.__web-ui': {
       textAlign: 'center',
-      width: '400px',
+      width: extendToken.oneColumnWidth,
       margin: '0 auto'
     },
 

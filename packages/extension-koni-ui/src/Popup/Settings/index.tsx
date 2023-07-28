@@ -338,7 +338,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const Settings = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return ({
     height: '100%',
     backgroundColor: token.colorBgDefault,
@@ -378,7 +378,7 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       '.web-ui-enable &': {
         paddingBottom: token.paddingLG,
         margin: '0 auto',
-        width: 600,
+        width: extendToken.bigOneColumnWidth,
         maxWidth: '100%'
       }
     },

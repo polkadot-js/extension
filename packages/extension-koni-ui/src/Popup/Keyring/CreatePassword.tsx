@@ -139,27 +139,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
-        {...(!isWebUI
+      <Layout.WithSubHeaderOnly
+        rightFooterButton={!isWebUI
           ? {
-            rightFooterButton: {
-              children: t('Continue'),
-              onClick: form.submit,
-              loading: loading,
-              disabled: isDisabled,
-              icon: FooterIcon
-            },
-            showBackButton: true,
-            subHeaderPaddingVertical: true,
-            showSubHeader: true,
-            subHeaderCenter: true,
-            subHeaderBackground: 'transparent'
+            children: t('Continue'),
+            onClick: form.submit,
+            loading: loading,
+            disabled: isDisabled,
+            icon: FooterIcon
           }
-          : {
-            headerList: ['Simple'],
-            showWebHeader: true
-          }
-        )}
+          : undefined}
         subHeaderIcons={[
           {
             icon: <InfoIcon />,
@@ -272,12 +261,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               )}
           </div>
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 };
 
-const CreatePassword = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const CreatePassword = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return {
     '.__web-ui': {
       display: 'flex',
@@ -298,7 +287,8 @@ const CreatePassword = styled(Component)<Props>(({ theme: { token } }: Props) =>
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
-      maxWidth: 768,
+      width: extendToken.twoColumnWidth,
+      maxWidth: '100%',
       margin: '0 auto',
 
       '.page-icon': {

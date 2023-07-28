@@ -28,6 +28,7 @@ import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import keyring from '@subwallet/ui-keyring';
+import BigN from 'bignumber.js';
 import { addHexPrefix } from 'ethereumjs-util';
 import { ethers, TransactionLike } from 'ethers';
 import EventEmitter from 'eventemitter3';
@@ -146,7 +147,7 @@ export default class TransactionService {
         } catch (e) {
           const error = e as Error;
 
-          if (error.message.includes('gas required exceeds allowance')) {
+          if (error.message.includes('gas required exceeds allowance') && error.message.includes('insufficient funds')) {
             validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
           }
 
@@ -180,6 +181,10 @@ export default class TransactionService {
     const balanceNum = parseInt(balance.value);
     const edNum = parseInt(existentialDeposit);
     const transferNativeNum = parseInt(transferNative);
+
+    if (!new BigN(balance.value).gt(0)) {
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+    }
 
     if (transferNativeNum + feeNum > balanceNum) {
       if (!isTransferAll) {

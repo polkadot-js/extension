@@ -851,6 +851,15 @@ export class ChainService {
     const storedAssetRegistry = await this.dbService.getAllAssetStore();
     const latestAssetRegistry = await this.fetchLatestData(_CHAIN_ASSET_SRC, ChainAssetMap) as Record<string, _ChainAsset>;
 
+    // Fill out zk assets from latestAssetRegistry if not supported
+    if (!MODULE_SUPPORT.MANTA_ZK) {
+      Object.keys(latestAssetRegistry).forEach((slug) => {
+        if (_isMantaZkAsset(latestAssetRegistry[slug])) {
+          delete latestAssetRegistry[slug];
+        }
+      });
+    }
+
     if (storedAssetRegistry.length === 0) {
       this.dataMap.assetRegistry = latestAssetRegistry;
     } else {

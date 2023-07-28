@@ -30,6 +30,7 @@ import styled from 'styled-components';
 import DetailTable from './DetailTable';
 
 type Props = ThemeProps;
+const BN_0 = new BigN(0);
 const BN_100 = new BigN(100);
 
 const Component = (): React.ReactElement => {
@@ -192,6 +193,8 @@ const Component = (): React.ReactElement => {
   }, [onClickItem]);
 
   if (isWebUI) {
+    const isTotalZero = totalBalanceInfo.convertedValue.eq(BN_0);
+
     return (
       <div className='token-table'>
         {tokenGroupBalanceItems.length <= 0
@@ -228,7 +231,7 @@ const Component = (): React.ReactElement => {
                         decimal={0}
                         decimalOpacity={0.45}
                         suffix={'%'}
-                        value={row.total.convertedValue.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue)}
+                        value={isTotalZero ? BN_0 : row.total.convertedValue.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue)}
                       />
                     );
                   }

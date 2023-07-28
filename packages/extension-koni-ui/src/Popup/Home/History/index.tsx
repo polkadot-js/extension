@@ -4,7 +4,7 @@
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
-import {EmptyList, FilterModal, HistoryItem, Layout, PageWrapper} from '@subwallet/extension-koni-ui/components';
+import { EmptyList, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';

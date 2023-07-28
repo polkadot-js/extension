@@ -45,10 +45,7 @@ const Component: React.FC<Props> = (props: Props) => {
           subHeaderCenter: true,
           subHeaderBackground: 'transparent'
         }
-        : {
-          headerList: ['Simple'],
-          showWebHeader: true
-        })}
+        : { })}
       showBackButton={true}
       subHeaderLeft={(
         <Icon
@@ -71,12 +68,10 @@ const Component: React.FC<Props> = (props: Props) => {
             }}
           />
         </div>
-        <div className={CN('title')}
-        >
+        <div className={CN('title')}>
           {!isWebUI ? t('All done!') : t("You're all done!")}
         </div>
-        <div className={CN('description')}
-        >
+        <div className={CN('description')}>
           {t('Follow along with product updates or reach out if you have any questions.')}
         </div>
         <SocialButtonGroup />

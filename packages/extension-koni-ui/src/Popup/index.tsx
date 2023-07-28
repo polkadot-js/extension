@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import './main.scss';
-
 import { DataContextProvider } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScannerContextProvider } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { ThemeProvider } from '@subwallet/extension-koni-ui/contexts/ThemeContext';

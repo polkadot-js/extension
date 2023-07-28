@@ -10,6 +10,8 @@ export const HomeContext = React.createContext<HomeContextType>({
     tokenBalanceMap: {},
     tokenGroupBalanceMap: {},
     totalBalanceInfo: {
+      freeValue: new BigN(0),
+      lockedValue: new BigN(0),
       convertedValue: new BigN(0),
       converted24hValue: new BigN(0),
       change: {

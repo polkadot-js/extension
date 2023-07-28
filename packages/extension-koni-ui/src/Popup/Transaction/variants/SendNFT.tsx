@@ -151,7 +151,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
   }, []);
 
   // Submit transaction
-  const  onSubmit: FormCallbacks<SendNFTFormProps>['onFinish'] = useCallback(
+  const onSubmit: FormCallbacks<SendNFTFormProps>['onFinish'] = useCallback(
     (values: SendNFTFormProps) => {
       const isEthereumInterface = isEthereumAddress(from);
       const { to } = values;

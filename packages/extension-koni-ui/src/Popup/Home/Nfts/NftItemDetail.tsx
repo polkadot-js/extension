@@ -30,6 +30,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import Transaction from '../../Transaction/Transaction';
 import SendNFT from '../../Transaction/variants/SendNFT';
+import { INftItemDetail } from '.';
 
 type Props = ThemeProps
 
@@ -46,8 +47,8 @@ const modalCloseButton =
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
-  const [collectionInfo] = useState(location.state?.collectionInfo);
-  const [nftItem] = useState(location.state?.nftItem);
+  const [collectionInfo] = useState((location.state as INftItemDetail)?.collectionInfo);
+  const [nftItem] = useState((location.state as INftItemDetail)?.nftItem);
 
   const outletContext: {
     searchInput: string,

@@ -370,10 +370,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             {filteredItems.length > 0
               ? (
                 <Table
-                  rowKey={'slug'}
                   columns={columns}
                   dataSource={filteredItems}
                   pagination={false}
+                  rowKey={'slug'}
                 />
               )
               : (

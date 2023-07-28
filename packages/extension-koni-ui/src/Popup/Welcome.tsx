@@ -484,7 +484,7 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.social-group': {
-      paddingTop: token.paddingLG,
+      paddingTop: token.paddingLG
     }
 
   };

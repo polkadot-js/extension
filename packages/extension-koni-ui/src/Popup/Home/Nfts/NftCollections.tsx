@@ -251,6 +251,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <NftImport
           key={importNftKey}
           modalContent
+          onSubmitCallback={closeImportModal}
         />
       </CustomModal>
     </PageWrapper>

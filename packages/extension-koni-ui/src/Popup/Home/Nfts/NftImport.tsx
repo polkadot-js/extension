@@ -20,7 +20,8 @@ import styled from 'styled-components';
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps & {
-  modalContent?: boolean
+  modalContent?: boolean,
+  onSubmitCallback?: () => void,
 };
 
 interface NftImportFormType {
@@ -54,7 +55,7 @@ function getNftTypeSupported (chainInfo: _ChainInfo) {
   return result;
 }
 
-function Component ({ className = '', modalContent }: Props): React.ReactElement<Props> {
+function Component ({ className = '', modalContent, onSubmitCallback }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const showNotification = useNotification();
   const navigate = useNavigate();
@@ -81,8 +82,12 @@ function Component ({ className = '', modalContent }: Props): React.ReactElement
   const checkChain = useChainChecker();
 
   const goBack = useCallback(() => {
-    navigate('/home/nfts/collections');
-  }, [navigate]);
+    if (modalContent) {
+      onSubmitCallback?.();
+    } else {
+      navigate('/home/nfts/collections');
+    }
+  }, [modalContent, navigate, onSubmitCallback]);
 
   const onFieldsChange: FormCallbacks<NftImportFormType>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);

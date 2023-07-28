@@ -6,7 +6,6 @@ import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/c
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { ActionItemType, ActionModal } from '@subwallet/extension-koni-ui/components/Modal/ActionModal';
 import { WebsiteAccessItem } from '@subwallet/extension-koni-ui/components/Setting/WebsiteAccessItem';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { changeAuthorizationAll, forgetAllSite } from '@subwallet/extension-koni-ui/messaging';
@@ -58,7 +57,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const authUrlMap = useSelector((state: RootState) => state.settings.authUrls);
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { t } = useTranslation();
-  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const goBack = useDefaultNavigate().goBack;
   const { token } = useTheme() as Theme;

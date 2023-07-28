@@ -12,7 +12,13 @@ export enum BackgroundColorMap {
   NO_SIDEBAR = 'linear-gradient(rgba(0, 75, 255, 0.1) 5%, rgba(217, 217, 217, 0) 33%)',
   COMMON = '#0C0C0C',
   INCREASE = 'linear-gradient(180deg, rgba(76, 234, 172, 0.10) 5%, rgba(217, 217, 217, 0.00) 33%)',
-  DECREASE = 'linear-gradient(180deg, rgba(76, 234, 172, 0.10) 5%, rgba(217, 217, 217, 0.00) 33%)'
+  DECREASE = 'linear-gradient(180deg, rgba(234, 76, 76, 0.10) 5%, rgba(217, 217, 217, 0.00) 33%)'
+}
+
+export enum HeaderType {
+  NONE= 'none',
+  COMMON= 'common',
+  SIMPLE= 'simple',
 }
 
 type WebUIContext = {
@@ -20,8 +26,8 @@ type WebUIContext = {
   setBackground: (background: BackgroundColorMap) => void
   title: string | React.ReactNode
   setTitle: (title: string | React.ReactNode) => void
-  showHeader: boolean
-  setShowHeader: (showHeader: boolean) => void
+  headerType: HeaderType
+  setHeaderType: (showHeader: HeaderType) => void
   showSidebar: boolean
   setShowSidebar: (showSidebar: boolean) => void
   isSettingPage: boolean,
@@ -40,7 +46,7 @@ function checkPortfolioPage (pathname: string) {
 
 export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) => {
   const [background, setBackground] = useState<BackgroundColorMap>(BackgroundColorMap.NO_SIDEBAR);
-  const [showHeader, setShowHeader] = useState(true);
+  const [headerType, setHeaderType] = useState(HeaderType.NONE);
   const [showSidebar, setShowSidebar] = useState(true);
   const [title, setTitle] = useState<string | React.ReactNode>('');
   const pathname = useLocation().pathname;
@@ -59,8 +65,8 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
         setBackground,
         title,
         setTitle,
-        showHeader,
-        setShowHeader,
+        headerType,
+        setHeaderType,
         showSidebar,
         setShowSidebar,
         isSettingPage,

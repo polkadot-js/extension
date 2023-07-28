@@ -3,7 +3,7 @@
 
 import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
+import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
@@ -48,12 +48,15 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps
 
     '.web-layout-body': {
       position: 'relative',
-      height: '100vh',
-      width: '100%',
       display: 'flex',
       flexDirection: 'column',
       overflow: 'auto',
       flex: 1
+    },
+
+    '&.header-type-common .web-layout-body': {
+      height: '100vh',
+      width: '100%'
     },
 
     '.web-layout-header': {
@@ -77,6 +80,16 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps
       maxWidth: '100%'
     },
 
+    '.web-single-column': {
+      maxWidth: 400,
+      marginLeft: 'auto',
+      marginRight: 'auto'
+    },
+
+    '.web-cancel-fill-height .ant-sw-screen-layout-body': {
+      flex: 'initial'
+    },
+
     '.ant-sw-screen-layout-container': {
       backgroundColor: 'transparent'
     },
@@ -91,7 +104,7 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps
 const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
-  const { background, isPortfolio, isSettingPage, showHeader, showSidebar, title } = useContext(WebUIContext);
+  const { background, headerType, isPortfolio, isSettingPage, showSidebar, title } = useContext(WebUIContext);
   const headerTitle = useMemo(() => {
     if (isPortfolio) {
       return t('Portfolio');
@@ -109,7 +122,7 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   }
 
   return (
-    <StyledLayout className='web-layout-container'>
+    <StyledLayout className={CN('web-layout-container', `header-type-${headerType}`)}>
       <div
         className='web-layout-background'
         style={{ background }}
@@ -119,8 +132,11 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
       </div>}
 
       <div className={CN('web-layout-body', { 'setting-pages': isSettingPage })}>
-        {showHeader && <div className={'web-layout-header'}>
+        {headerType === HeaderType.COMMON && <div className={'web-layout-header'}>
           <Headers.Controller title={headerTitle} />
+        </div>}
+        {headerType === HeaderType.SIMPLE && <div className={'web-layout-header-simple'}>
+          <Headers.Simple title={headerTitle} />
         </div>}
         <div className={CN('web-layout-content', { '__with-padding': showSidebar })}>
           {children}

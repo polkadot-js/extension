@@ -118,7 +118,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   );
 
   useEffect(() => {
-    isTotalBalanceDecrease ? setBackground(BackgroundColorMap.DECREASE) : setBackground(BackgroundColorMap.INCREASE);
+    const backgroundColor = isTotalBalanceDecrease ? BackgroundColorMap.DECREASE : BackgroundColorMap.INCREASE;
+
+    setBackground(backgroundColor);
   }, [isTotalBalanceDecrease, setBackground]);
 
   const handleClick = useCallback((type: string) => {

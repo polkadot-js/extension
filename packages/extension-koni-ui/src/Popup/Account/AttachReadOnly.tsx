@@ -5,7 +5,6 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
@@ -17,11 +16,11 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
 import { readOnlyScan } from '@subwallet/extension-koni-ui/utils/scanner/attach';
-import { Button, Form, Icon, PageIcon } from '@subwallet/react-ui';
+import { Form, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Eye } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -48,7 +47,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
-  const { isWebUI } = useContext(ScreenContext);
 
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
@@ -73,47 +71,40 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, []);
 
-  const onFieldsChange: Callbacks<ReadOnlyAccountInput>['onFieldsChange'] =
-    useCallback(
-      (changes: FieldData[], allFields: FieldData[]) => {
-        const { empty, error } = simpleCheckForm(allFields);
+  const onFieldsChange: Callbacks<ReadOnlyAccountInput>['onFieldsChange'] = useCallback((changes: FieldData[], allFields: FieldData[]) => {
+    const { empty, error } = simpleCheckForm(allFields);
 
-        setIsDisable(error || empty);
+    setIsDisable(error || empty);
 
-        const changeMap = convertFieldToObject<ReadOnlyAccountInput>(changes);
+    const changeMap = convertFieldToObject<ReadOnlyAccountInput>(changes);
 
-        if (changeMap.address) {
-          handleResult(changeMap.address);
-        }
-      },
-      [handleResult]
-    );
+    if (changeMap.address) {
+      handleResult(changeMap.address);
+    }
+  }, [handleResult]);
 
-  const accountAddressValidator = useCallback(
-    (rule: RuleObject, value: string) => {
-      const result = readOnlyScan(value);
+  const accountAddressValidator = useCallback((rule: RuleObject, value: string) => {
+    const result = readOnlyScan(value);
 
-      if (result) {
-        // For each account, check if the address already exists return promise reject
-        for (const account of accounts) {
-          if (account.address === result.content) {
-            setReformatAddress('');
+    if (result) {
+      // For each account, check if the address already exists return promise reject
+      for (const account of accounts) {
+        if (account.address === result.content) {
+          setReformatAddress('');
 
-            return Promise.reject(t('Account already exists'));
-          }
-        }
-      } else {
-        setReformatAddress('');
-
-        if (value !== '') {
-          return Promise.reject(t('Invalid address'));
+          return Promise.reject(t('Account already exists'));
         }
       }
+    } else {
+      setReformatAddress('');
 
-      return Promise.resolve();
-    },
-    [accounts, t]
-  );
+      if (value !== '') {
+        return Promise.reject(t('Invalid address'));
+      }
+    }
+
+    return Promise.resolve();
+  }, [accounts, t]);
 
   const onSubmit = useCallback(() => {
     setLoading(true);
@@ -129,9 +120,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       })
         .then((errors) => {
           if (errors.length) {
-            form.setFields([
-              { name: fieldName, errors: errors.map((e) => e.message) }
-            ]);
+            form.setFields([{ name: fieldName, errors: errors.map((e) => e.message) }]);
           } else {
             onComplete();
           }
@@ -149,31 +138,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   useFocusById(modalId);
 
-  const buttonProps = {
-    children: t('Attach watch-only account'),
-    icon: FooterIcon,
-    disabled: isDisable,
-    onClick: onSubmit,
-    loading: loading
-  };
-
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
+        className='web-single-column web-cancel-fill-height'
         onBack={onBack}
-        {...(!isWebUI
-          ? {
-            rightFooterButton: buttonProps,
-            showBackButton: true,
-            subHeaderPaddingVertical: true,
-            showSubHeader: true,
-            subHeaderCenter: true,
-            subHeaderBackground: 'transparent'
-          }
-          : {
-            headerList: ['Simple'],
-            showWebHeader: true
-          })}
+        rightFooterButton={{
+          children: t('Attach watch-only account'),
+          icon: FooterIcon,
+          disabled: isDisable,
+          onClick: onSubmit,
+          loading: loading
+        }}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -182,10 +158,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         ]}
         title={t<string>('Attach watch-only account')}
       >
-        <div className={CN('container', {
-          '__web-ui': isWebUI
-        })}
-        >
+        <div className={CN('container')}>
           <div className='description'>
             {t('Track the activity of any wallet without a private key')}
           </div>
@@ -224,53 +197,41 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 showScanner={true}
               />
             </Form.Item>
-
-            {isWebUI && (
-              <Button
-                {...buttonProps}
-                className='submit-button'
-              />
-            )}
           </Form>
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 };
 
-const AttachReadOnly = styled(Component)<Props>(
-  ({ theme: { token } }: Props) => {
-    return {
-      '.__web-ui': {
-        maxWidth: '400px',
-        margin: '0 auto'
-      },
-      '.container': {
-        padding: token.padding,
+const AttachReadOnly = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  return {
+    '.container': {
+      padding: token.padding,
 
-        '& .submit-button': {
-          width: '100%',
-          marginTop: 36
-        }
-      },
-
-      '.description': {
-        padding: `0 ${token.padding}px`,
-        fontSize: token.fontSizeHeading6,
-        lineHeight: token.lineHeightHeading6,
-        color: token.colorTextDescription,
-        textAlign: 'center'
-      },
-
-      '.page-icon': {
-        display: 'flex',
-        justifyContent: 'center',
-        marginTop: token.controlHeightLG,
-        marginBottom: token.sizeXXL,
-        '--page-icon-color': token.colorSecondary
+      '.web-ui-enable &': {
+        paddingTop: 0,
+        paddingBottom: 0,
+        marginBottom: -16
       }
-    };
-  }
-);
+    },
+
+    '.description': {
+      padding: `0 ${token.padding}px`,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: token.colorTextDescription,
+      textAlign: 'center'
+    },
+
+    '.page-icon': {
+      display: 'flex',
+      justifyContent: 'center',
+      marginTop: token.controlHeightLG,
+      marginBottom: token.sizeXXL,
+      '--page-icon-color': token.colorSecondary
+    }
+  };
+});
 
 export default AttachReadOnly;

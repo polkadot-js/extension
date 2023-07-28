@@ -8,7 +8,7 @@ import { useDefaultNavigate, useFocusFormItem, useTranslation } from '@subwallet
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon, Input, PageIcon, SwSubHeader } from '@subwallet/react-ui';
+import { Button, Form, Icon, Input, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FloppyDiskBack, ShieldCheck } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -105,18 +105,20 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         onBack={goBack}
-        rightFooterButton={{
-          children: t('Save'),
-          onClick: form.submit,
-          loading: loading,
-          disabled: isDisabled,
-          icon: (
-            <Icon
-              phosphorIcon={FloppyDiskBack}
-              weight='fill'
-            />
-          )
-        }}
+        rightFooterButton={!isWebUI
+          ? {
+            children: t('Save'),
+            onClick: form.submit,
+            loading: loading,
+            disabled: isDisabled,
+            icon: (
+              <Icon
+                phosphorIcon={FloppyDiskBack}
+                weight='fill'
+              />
+            )
+          }
+          : undefined}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,

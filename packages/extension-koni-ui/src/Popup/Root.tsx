@@ -24,7 +24,7 @@ import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { BackgroundColorMap, WebUIContext, WebUIContextProvider } from '../contexts/WebUIContext';
+import { BackgroundColorMap, HeaderType, WebUIContext, WebUIContextProvider } from '../contexts/WebUIContext';
 
 changeHeaderLogo(<Logo2D />);
 
@@ -50,7 +50,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const navigate = useNavigate();
   const { goBack, goHome } = useDefaultNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
-  const { setBackground, setShowHeader, setShowSidebar, isPortfolio } = useContext(WebUIContext);
+  const { isPortfolio, setBackground, setHeaderType, setShowSidebar } = useContext(WebUIContext);
   const notify = useNotification();
 
   useSubscribeLanguage();
@@ -105,16 +105,16 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   }, [location]);
 
   useEffect(() => {
-    if (needMigrate || !hasMasterPassword || isNoAccount(accounts)) {
+    if (needMigrate || !hasMasterPassword || isNoAccount(accounts) || location.pathname === '/create-done') {
       setShowSidebar(false);
-      setShowHeader(false);
+      setHeaderType(HeaderType.SIMPLE);
       setBackground(BackgroundColorMap.NO_SIDEBAR);
     } else {
       setShowSidebar(true);
-      setShowHeader(true);
+      setHeaderType(HeaderType.COMMON);
       !isPortfolio && setBackground(BackgroundColorMap.COMMON);
     }
-  }, [accounts, hasMasterPassword, isLocked, isPortfolio, needMigrate, setBackground, setShowHeader, setShowSidebar]);
+  }, [accounts, hasMasterPassword, isLocked, isPortfolio, location.pathname, needMigrate, setBackground, setHeaderType, setShowSidebar]);
 
   useEffect(() => {
     const pathName = location.pathname;
@@ -188,5 +188,6 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
 export const Root = styled(_Root)<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
   display: 'flex',
   height: '100%',
-  flexDirection: 'column'
+  flexDirection: 'column',
+  overflow: 'auto'
 }));

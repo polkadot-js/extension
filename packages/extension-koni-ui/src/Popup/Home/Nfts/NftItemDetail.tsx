@@ -53,6 +53,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     searchInput: string,
     setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
   } = useOutletContext();
+  const setDetailTitle = outletContext?.setDetailTitle;
 
   const { isWebUI } = useContext(ScreenContext);
 
@@ -202,12 +203,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [nftItem.externalUrl]);
 
   useEffect(() => {
-    outletContext?.setDetailTitle(nftItem.name || nftItem.id);
-  }, [nftItem, outletContext]);
+    setDetailTitle?.(nftItem.name || nftItem.id);
+  }, [nftItem, setDetailTitle]);
 
   const handleCancelModal = useCallback(() => inactiveModal(TRANSFER_NFT_MODAL), [inactiveModal]);
 
   const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
+
+  const imageSize = isWebUI ? 384 : 358;
 
   return (
     <PageWrapper
@@ -226,18 +229,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           title: nftItem.name || nftItem.id
         }}
       >
-        <div className={CN('nft_item_detail__container', {
-          '__web-ui': isWebUI
-        })}
-        >
+        <div className={'nft_item_detail__container'}>
           <div className={'nft_item_detail__nft_image'}>
             <Image
               className={CN({ clickable: nftItem.externalUrl })}
-              height={358}
+              height={imageSize}
               modelViewerProps={show3DModel ? { ...DEFAULT_MODEL_VIEWER_PROPS, ...CAMERA_CONTROLS_MODEL_VIEWER_PROPS } : undefined}
               onClick={onImageClick}
               src={nftItem.image}
-              width={ show3DModel ? 358 : undefined}
+              width={ show3DModel ? imageSize : undefined}
             />
 
             {isWebUI && (
@@ -259,9 +259,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
           <div className={'nft_item_detail_field_container'}>
             <div className={'nft_item_detail__info_container'}>
-              {!isWebUI && <div className={'nft_item_detail__section_title'}>{t<string>('NFT information')}</div>}
+              {!isWebUI && <div className={'nft_item_detail__section_title'}>{t<string>('NFT details')}</div>}
+
+              {isWebUI && !!nftItem.description && (<div className={'nft_item_detail__description'}>
+                {nftItem.description}
+              </div>)}
+
               {
-                nftItem.description && (
+                !isWebUI && !!nftItem.description && (
                   <div
                     className={'nft_item_detail__description_container'}
                     onClick={handleShowNftDescription}
@@ -297,25 +302,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   suffix={externalInfoIcon('account')}
                 />
 
-                {isWebUI && (
-                  <Field
-                    content={'created by...'}
-                    label={t<string>('Created By')}
-                    prefix={nftItem.owner && ownerPrefix()}
-                    suffix={externalInfoIcon('account')}
-                  />
-                )}
-
                 <Field
                   content={originChainInfo.name}
-                  label={t<string>('Chain')}
+                  label={t<string>('Network')}
                   prefix={originChainLogo()}
                 />
               </div>
             </div>
 
             {
-              nftItem.properties && nftItem.properties.length > 0 && (
+              nftItem.properties && (
                 <div className={'nft_item_detail__prop_section'}>
                   <div className={'nft_item_detail__section_title'}>{t<string>('Properties')}</div>
                   <div className={'nft_item_detail__atts_container'}>
@@ -407,54 +403,7 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       marginTop: token.marginSM,
       paddingRight: token.margin,
       paddingLeft: token.margin,
-      paddingBottom: token.margin,
-
-      '.nft_item_detail__info_field_container': {
-        gap: 8,
-        display: 'flex',
-        flexDirection: 'column'
-      },
-
-      '&.__web-ui': {
-        display: 'flex',
-        gap: 16,
-        paddingRight: 0,
-
-        '.nft_item_detail__nft_image': {
-          gap: 16,
-          flex: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'stretch',
-          maxWidth: 358,
-
-          img: {
-            aspectRatio: '1',
-            objectFit: 'cover'
-          }
-        },
-
-        '.nft_item_detail_field_container': {
-          flex: 1,
-
-          '.nft_item_detail__info_container': {
-            margin: 0,
-            marginBottom: 16,
-
-            '.nft_item_detail__info_field_container': {
-              gap: 8,
-              display: 'flex',
-              flexWrap: 'wrap',
-              flexDirection: 'row',
-
-              '.ant-field-container': {
-                flex: '0 1',
-                minWidth: 'calc(50% - 4px)'
-              }
-            }
-          }
-        }
-      }
+      paddingBottom: token.margin
     },
 
     '.clickable': {
@@ -568,6 +517,75 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       '.ant-image-img': {
         maxWidth: '100%',
         objectFit: 'cover'
+      }
+    },
+
+    '.nft_item_detail__info_field_container': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.sizeXS
+    },
+
+    '.web-ui-enable &': {
+      '.nft_item_detail__container': {
+        marginTop: 0,
+        padding: 0,
+        display: 'flex',
+        gap: token.size,
+        flexWrap: 'wrap',
+        justifyContent: 'center'
+      },
+
+      '.nft_item_detail__nft_image': {
+        display: 'flex',
+        flexDirection: 'column',
+        flexBasis: 384,
+        gap: token.size,
+        alignItems: 'center'
+      },
+
+      '.nft_item_detail_field_container': {
+        flexGrow: 1,
+        flexBasis: 500
+      },
+
+      '.nft_item_detail__description': {
+        backgroundColor: token.colorBgSecondary,
+        padding: token.paddingSM,
+        borderRadius: token.borderRadiusLG,
+        color: token.colorTextLight4,
+        fontSize: token.fontSize,
+        lineHeight: token.lineHeight
+      },
+
+      '.nft_item_detail__info_container': {
+        marginTop: 0,
+        gap: token.size
+      },
+
+      '.nft_item_detail__info_field_container': {
+        flexWrap: 'wrap',
+        flexDirection: 'row',
+        gap: token.size
+      },
+
+      '.nft_item_detail__info_field_container .ant-field-container': {
+        flexBasis: 'calc(50% - 8px)'
+      },
+
+      '.nft_item_detail__atts_container': {
+        gap: token.sizeSM,
+
+        '.ant-field-container .ant-field-label': {
+          paddingTop: token.paddingSM,
+          top: 0
+        },
+
+        '.ant-field-container .ant-field-wrapper': {
+          paddingTop: token.paddingXXS,
+          paddingBottom: token.paddingSM,
+          minHeight: 0
+        }
       }
     }
   });

@@ -296,8 +296,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 icon={(
                   <Icon
                     phosphorIcon={item.icon}
-                    size='sm'
-                    weight='bold'
+                    size='md'
+                    weight='duotone'
                   />
                 )}
                 // eslint-disable-next-line react/jsx-no-bind
@@ -449,6 +449,11 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
         alignItems: 'center',
         gap: 8,
         marginTop: 20
+      },
+
+      '.ant-squircle': {
+        marginLeft: 6,
+        marginRight: 6
       }
     }
   }

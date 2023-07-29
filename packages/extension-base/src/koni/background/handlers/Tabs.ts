@@ -139,16 +139,26 @@ export default class KoniTabs {
     return pair;
   }
 
-  private bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
+  private async bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
     const address = request.address;
     const pair = this.getSigningPair(address);
+    const authInfo = await this.getAuthInfo(url);
+
+    if (!authInfo || !authInfo.isAllowed || !authInfo.isAllowedMap[pair.address]) {
+      throw new Error('Account {{address}} not in allowed list'.replace('{{address}}', address));
+    }
 
     return this.#koniState.sign(url, new RequestBytesSign(request), { address, ...pair.meta });
   }
 
-  private extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
+  private async extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
     const address = request.address;
     const pair = this.getSigningPair(address);
+    const authInfo = await this.getAuthInfo(url);
+
+    if (!authInfo || !authInfo.isAllowed || !authInfo.isAllowedMap[pair.address]) {
+      throw new Error('Account {{address}} not in allowed list'.replace('{{address}}', address));
+    }
 
     return this.#koniState.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }

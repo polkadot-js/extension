@@ -699,11 +699,11 @@ export default class KoniExtension {
     return true;
   }
 
-  private getNonReadonlyAccounts (): string[] {
+  private getAccounts (): string[] {
     const storedAccounts = this.#koniState.keyringService.accounts;
     const transformedAccounts = transformAccounts(storedAccounts);
 
-    return transformedAccounts.filter((a) => !a.isReadOnly).map((a) => a.address);
+    return transformedAccounts.map((a) => a.address);
   }
 
   private isAddressValidWithAuthType (address: string, accountAuthType?: AccountAuthType): boolean {
@@ -730,14 +730,14 @@ export default class KoniExtension {
     this.#koniState.getAuthorize((value) => {
       assert(value, 'The source is not known');
 
-      const nonReadonlyAccounts = this.getNonReadonlyAccounts();
+      const accounts = this.getAccounts();
 
       Object.keys(value).forEach((url) => {
         if (!value[url].isAllowed) {
           return;
         }
 
-        const targetAccounts = this.filterAccountsByAccountAuthType(nonReadonlyAccounts, value[url].accountAuthType);
+        const targetAccounts = this.filterAccountsByAccountAuthType(accounts, value[url].accountAuthType);
 
         targetAccounts.forEach((address) => {
           value[url].isAllowedMap[address] = connectValue;
@@ -767,8 +767,8 @@ export default class KoniExtension {
     this.#koniState.getAuthorize((value) => {
       assert(value[url], 'The source is not known');
 
-      const nonReadonlyAccounts = this.getNonReadonlyAccounts();
-      const targetAccounts = this.filterAccountsByAccountAuthType(nonReadonlyAccounts, value[url].accountAuthType);
+      const accounts = this.getAccounts();
+      const targetAccounts = this.filterAccountsByAccountAuthType(accounts, value[url].accountAuthType);
 
       targetAccounts.forEach((address) => {
         value[url].isAllowedMap[address] = connectValue;

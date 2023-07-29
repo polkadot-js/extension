@@ -73,11 +73,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           ]
         },
         {
-          test: [/\.css$/i, /\.scss$/i],
-          use: ['style-loader', 'css-loader', 'sass-loader']
-        },
-        {
-          test: [/\.svg$/, /\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.woff2?$/],
+          test: [/\.svg$/, /\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.woff2?$/, /\.css?$/],
           use: [
             {
               loader: require.resolve('url-loader'),
@@ -122,6 +118,10 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           {
             from: path.resolve(__dirname, './package.json'),
             to: path.resolve(__dirname, './build/package.json')
+          },
+          {
+            from: path.resolve(__dirname, './public/assets'),
+            to: path.resolve(__dirname, './build/assets')
           },
           {
             from: path.resolve(__dirname, './public/images'),

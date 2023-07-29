@@ -229,7 +229,7 @@ export default function useGetStakingList () {
           parseFloat(stakingItem.balance) > 0 &&
           Math.round(parseFloat(stakingItem.balance) * 100) / 100 !== 0
         ) {
-          parsedPriceMap[stakingItem.chain] = priceMap[chainInfo.slug || stakingItem.chain];
+          parsedPriceMap[stakingItem.chain] = priceMap[chainInfo?.slug || stakingItem.chain];
           readyStakingItems.push(stakingItem);
         }
       }

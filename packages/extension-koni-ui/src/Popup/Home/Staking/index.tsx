@@ -1,29 +1,26 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { ExtrinsicType, StakingItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenItem } from '@subwallet/extension-koni-ui/components';
+import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenBalance, TokenItem, TokenPrice } from '@subwallet/extension-koni-ui/components';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { stopClickPropagation } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, Number as NumberItem, Popover, SwList, Table, Tag } from '@subwallet/react-ui';
+import { sortStakingByValue, stopClickPropagation } from '@subwallet/extension-koni-ui/utils';
+import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, Popover, SwList, Table, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
+import CN from 'classnames';
 import { ArrowClockwise, DotsThree, FadersHorizontal, Plus, Trophy, User, Users } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled, { ThemeContext } from 'styled-components';
+import styled from 'styled-components';
 
 import MoreActionModal, { MORE_ACTION_MODAL } from './MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from './StakingDetailModal';
@@ -53,20 +50,23 @@ const reloadIcon = (
   />
 );
 
+interface StakingItem extends StakingDataType {
+  price: number;
+  key: string;
+  price24h: number;
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState<string>('');
-
-  const { accountBalance: { tokenGroupBalanceMap } } = useContext(HomeContext);
-  const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
 
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { data: stakingItems, priceMap } = useGetStakingList();
+  const price24hMap = useSelector((state: RootState) => state.price.price24hMap);
 
   const { currentAccount } = useSelector((state) => state.accountState);
 
@@ -77,6 +77,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
+
+  const items = useMemo<StakingItem[]>(() => {
+    const result = stakingItems
+      .map((item) => (
+        {
+          ...item,
+          key: item.staking.chain + item.staking.type,
+          price: priceMap[item.staking.chain] || 0,
+          price24h: price24hMap[item.staking.chain] || 0
+        }));
+
+    return result.sort(sortStakingByValue);
+  }, [price24hMap, priceMap, stakingItems]);
 
   const FILTER_OPTIONS = useMemo(() => ([
     { label: t('Nominated'), value: StakingType.NOMINATED },
@@ -180,10 +193,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const filteredList = useMemo(() => {
-    return stakingItems.filter(filterFunction).filter((item: StakingDataType) =>
+    return items.filter(filterFunction).filter((item: StakingDataType) =>
       searchFunction(item, searchInput)
     );
-  }, [filterFunction, searchFunction, searchInput, stakingItems]);
+  }, [filterFunction, searchFunction, searchInput, items]);
 
   const emptyStakingList = useCallback(() => {
     return (
@@ -203,30 +216,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [address, currentAccount?.address, inactiveModal, navigate]);
 
-  const currentChainBalance = useCallback((staking: StakingItem) => {
-    const currentChainAsset: _MultiChainAsset | _ChainAsset | undefined = Object.values(multiChainAssetMap).find((item) => item.name === staking.name) || Object.values(assetRegistryMap).find((item) => item.name === staking.name);
-
-    if (!currentChainAsset) {
-      return undefined;
-    }
-
-    const currentChainBalance: TokenBalanceItemType = tokenGroupBalanceMap[currentChainAsset.slug];
-
-    return currentChainBalance;
-  }, [assetRegistryMap, multiChainAssetMap, tokenGroupBalanceMap]);
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { token }: {
-    token: GlobalToken
-  } = useContext(ThemeContext);
-
   const columns = useMemo(() => {
     return [
       {
         title: 'Token name',
         dataIndex: 'name',
         key: 'name',
-        render: (_: any, row: StakingDataType) => {
+        render: (_: any, row: StakingItem) => {
           const { staking: { chain,
             name,
             nativeToken } } = row;
@@ -251,9 +247,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             Type
           </span>
         ),
+        className: '__tag-col',
         dataIndex: 'type',
         key: 'type',
-        render: (_: any, row: StakingDataType) => {
+        render: (_: any, row: StakingItem) => {
           const { staking: { type: stakingType } } = row;
           const tagColor = stakingType === StakingType.POOLED ? 'success' : 'warning';
           const tagIcon: PhosphorIcon = stakingType === StakingType.POOLED ? Users : User;
@@ -273,39 +270,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title: 'Price',
         dataIndex: 'price',
         key: 'price',
-        render: (_: any, row: StakingDataType) => {
-          // TODO: update priceChangeStatus
-          const currentChainInfo = currentChainBalance(row.staking);
-
-          if (!currentChainInfo) {
-            return <></>;
-          }
-
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          const marginColor: string = currentChainInfo?.priceChangeStatus === 'increase' ? token?.colorSuccess : token?.colorError;
-          const { price24hValue, priceValue } = currentChainInfo;
-          const margin = !price24hValue || !priceValue ? 0 : Math.abs(price24hValue - priceValue) / price24hValue * 100;
-
+        render: (_: any, row: StakingItem) => {
           return (
-            <div className={'price-wrapper'}>
-              <NumberItem
-                decimal={0}
-                decimalOpacity={0.45}
-                prefix={'$'}
-                value={currentChainInfo?.priceValue}
-              />
-              <NumberItem
-                className='margin-percentage'
-                decimal={0}
-                decimalColor={marginColor}
-                intColor={marginColor}
-                prefix={currentChainInfo?.priceChangeStatus === 'decrease' ? '-' : '+'}
-                size={12}
-                suffix='%'
-                unitColor={marginColor}
-                value={margin}
-              />
-            </div>
+            <TokenPrice
+              pastValue={row.price24h}
+              value={row.price}
+            />
           );
         }
       },
@@ -313,50 +283,39 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title: 'Bonded funds',
         dataIndex: 'bonded',
         key: 'bonded',
-        render: (_: any, row: StakingDataType) => {
+        render: (_: any, row: StakingItem) => {
           const { staking } = row;
-          const currentChainInfo = currentChainBalance(row.staking);
-
-          if (!currentChainInfo) {
-            return <></>;
-          }
 
           const balanceValue = getBalanceValue(staking.balance || '0', row.decimals);
           const convertedBalanceValue = getConvertedBalanceValue(balanceValue, Number(`${priceMap[staking.chain] || 0}`));
 
           return (
             <div className='funds-wrapper'>
-              <div className='funds'>
-                <NumberItem
-                  className={'__value'}
-                  decimal={0}
-                  decimalOpacity={0.45}
-                  suffix={staking.unit}
-                  value={balanceValue}
-                />
-                <NumberItem
-                  className={'__converted-value'}
-                  decimal={0}
-                  decimalOpacity={0.45}
-                  intOpacity={0.45}
-                  prefix='$'
-                  size={12}
-                  unitOpacity={0.45}
-                  value={convertedBalanceValue}
-                />
-              </div>
+              <TokenBalance
+                convertedValue={convertedBalanceValue}
+                symbol={staking.unit}
+                value={balanceValue}
+              />
+
               <Popover
                 content={
-                  'TODO: add Action List'
-                  // <MoreActionModal
-                  //   chainStakingMetadata={row.chainStakingMetadata}
-                  //   nominatorMetadata={row.nominatorMetadata}
-                  //   reward={row.reward}
-                  // />
+                  <div
+                    className={CN(className, 'popover')}
+                    onClick={stopClickPropagation}
+                  >
+                    <MoreActionModal
+                      chainStakingMetadata={row.chainStakingMetadata}
+                      nominatorMetadata={row.nominatorMetadata}
+                      reward={row.reward}
+                      showContentOnly={true}
+                      staking={row.staking}
+                    />
+                  </div>
                 }
                 overlayInnerStyle={{
                   padding: '0',
-                  background: '#1A1A1A'
+                  boxShadow: 'none',
+                  backgroundColor: 'transparent'
                 }}
                 placement='bottomRight'
                 showArrow={false}
@@ -367,13 +326,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   icon={(
                     <Icon
                       className={'right-icon'}
+                      customSize={'20px'}
                       phosphorIcon={DotsThree}
-                      size='xs'
                       type='phosphor'
                     />
                   )}
                   onClick={stopClickPropagation}
-                  size='sm'
+                  size='xs'
                   type='ghost'
                 />
               </Popover>
@@ -382,7 +341,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       }
     ];
-  }, [currentChainBalance, priceMap, token?.colorError, token?.colorSuccess]);
+  }, [className, priceMap]);
 
   const onClickReload = useCallback(() => {
     setLoading(true);
@@ -464,6 +423,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 dataSource={filteredList}
                 onRow={onRow}
                 pagination={false}
+                rowKey={'key'}
               />
             )
             : (
@@ -483,7 +443,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         )}
         enableSearchInput={true}
         filterBy={filterFunction}
-        list={stakingItems}
+        list={items}
         onClickActionBtn={onClickActionBtn}
         renderItem={renderItem}
         renderWhenEmpty={emptyStakingList}
@@ -493,7 +453,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [columns, emptyStakingList, filterFunction, filteredList, isWebUI, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, renderItem, searchFunction, searchInput, stakingItems, t]);
+  }, [columns, emptyStakingList, filterFunction, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, renderItem, searchFunction, searchInput, t]);
 
   return (
     <PageWrapper
@@ -549,55 +509,74 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
 export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    color: token.colorTextLight1,
-    fontSize: token.fontSizeLG,
+    '&.staking': {
+      color: token.colorTextLight1,
+      fontSize: token.fontSizeLG,
 
-    '.web-list': {
-      width: '100%',
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      '.ant-sw-list': {
+      'td.__tag-col': {
+        verticalAlign: 'top'
+      },
+
+      '.web-list': {
+        width: '100%',
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        '.ant-sw-list': {
+          flex: 1
+        },
+        '.container': {
+          marginBottom: 24
+        }
+      },
+
+      '.funds-wrapper': {
+        display: 'flex',
+        justifyContent: 'end',
+        marginRight: -token.margin,
+
+        '.extra-button': {
+          marginLeft: token.margin,
+          '.anticon': {
+            width: 'fit-content'
+          }
+        }
+      },
+
+      '.ant-sw-screen-layout-body': {
+        display: 'flex'
+      },
+
+      '.ant-sw-list-section': {
         flex: 1
       },
-      '.container': {
-        marginBottom: 24
+
+      '.staking__filter_option': {
+        width: '100%'
+      },
+
+      '.staking__filter_option_wrapper': {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: token.marginLG
+      },
+
+      '.staking-item': {
+        marginBottom: token.marginXS
       }
     },
+    '&.popover': {
+      padding: token.padding,
+      borderRadius: token.borderRadiusLG,
+      border: '1px solid',
+      backgroundColor: token.colorBgSecondary,
+      borderColor: token.colorBorderBg,
+      boxShadow: '4px 4px 4px 0px rgba(0, 0, 0, 0.25)',
+      marginRight: 10,
 
-    '.funds-wrapper': {
-      display: 'flex',
-      justifyContent: 'end',
-
-      '.extra-button': {
-        minWidth: 'unset',
-        marginLeft: 30,
-        '.anticon': {
-          width: 'fit-content'
-        }
+      '.action-more-container': {
+        gap: 0
       }
-    },
-
-    '.ant-sw-screen-layout-body': {
-      display: 'flex'
-    },
-
-    '.ant-sw-list-section': {
-      flex: 1
-    },
-
-    '.staking__filter_option': {
-      width: '100%'
-    },
-
-    '.staking__filter_option_wrapper': {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: token.marginLG
-    },
-
-    '.staking-item': {
-      marginBottom: token.marginXS
     }
   });
 });

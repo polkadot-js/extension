@@ -12,13 +12,11 @@ type Props = ThemeProps & {
   onPressItem?: BalanceItemProps['onPressItem'],
   value: number,
   pastValue: number,
-  priceChangeStatus?: string,
 };
 
 function Component (
   { className = '',
     pastValue,
-    priceChangeStatus,
     value }: Props) {
   // todo: Update BalanceItem in react-ui lib
   // - loading
@@ -26,8 +24,17 @@ function Component (
   // - price change status
 
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
+  const priceChangeStatus = (() => {
+    if (value > pastValue) {
+      return 'increase';
+    } else if (value < pastValue) {
+      return 'decrease';
+    }
 
-  const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError;
+    return null;
+  })();
+
+  const marginColor = priceChangeStatus === 'decrease' ? token.colorError : token.colorSuccess;
   const margin = !pastValue || !value ? 0 : Math.abs(pastValue - value) / pastValue * 100;
 
   return (

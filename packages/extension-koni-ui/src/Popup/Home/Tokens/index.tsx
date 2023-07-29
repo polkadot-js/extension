@@ -244,7 +244,6 @@ const Component = (): React.ReactElement => {
                     return (
                       <TokenPrice
                         pastValue={row.price24hValue}
-                        priceChangeStatus={row.priceChangeStatus}
                         value={row.priceValue}
                       />
                     );

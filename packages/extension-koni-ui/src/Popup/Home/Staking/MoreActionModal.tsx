@@ -19,8 +19,9 @@ import styled, { useTheme } from 'styled-components';
 type Props = ThemeProps & {
   staking: StakingItem;
   reward?: StakingRewardItem;
-  chainStakingMetadata: ChainStakingMetadata;
-  nominatorMetadata: NominatorMetadata;
+  chainStakingMetadata?: ChainStakingMetadata;
+  nominatorMetadata?: NominatorMetadata;
+  showContentOnly?: boolean;
 }
 
 export const MORE_ACTION_MODAL = 'more-action-modal';
@@ -34,7 +35,7 @@ type ActionListType = {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chainStakingMetadata, className, nominatorMetadata, reward } = props;
+  const { chainStakingMetadata, className, nominatorMetadata, reward, showContentOnly } = props;
 
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
@@ -198,7 +199,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const onPreCheck = usePreCheckAction(currentAccount?.address, false);
 
   const convertStakingActionToExtrinsicType = useCallback((action: StakingAction): ExtrinsicType => {
-    const isPool = nominatorMetadata.type === StakingType.POOLED;
+    const isPool = nominatorMetadata?.type === StakingType.POOLED;
 
     switch (action) {
       case StakingAction.STAKE:
@@ -214,7 +215,7 @@ const Component: React.FC<Props> = (props: Props) => {
       default:
         return ExtrinsicType.UNKNOWN;
     }
-  }, [nominatorMetadata.type]);
+  }, [nominatorMetadata?.type]);
 
   const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
     const _onClick = () => {
@@ -227,15 +228,8 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [convertStakingActionToExtrinsicType, onPreCheck]);
 
-  return (
-    <SwModal
-      className={className}
-      closable={true}
-      id={MORE_ACTION_MODAL}
-      maskClosable={true}
-      onCancel={!selected ? onCancel : undefined}
-      title={t('Actions')}
-    >
+  const modalContent = (
+    <div className={CN(className, 'action-more-container')}>
       {actionList.map((item) => {
         const actionDisable = !availableActions.includes(item.action);
         const hasAnAction = !!selected;
@@ -272,14 +266,32 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         );
       })}
+    </div>
+  );
+
+  if (showContentOnly) {
+    return modalContent;
+  }
+
+  return (
+    <SwModal
+      closable={true}
+      id={MORE_ACTION_MODAL}
+      maskClosable={true}
+      onCancel={!selected ? onCancel : undefined}
+      title={t('Actions')}
+    >
+      {modalContent}
     </SwModal>
   );
 };
 
 const MoreActionModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.action-more-item:not(:last-child)': {
-      marginBottom: token.marginXS
+    '&.action-more-container': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.sizeXS
     },
 
     '.ant-web3-block-right-item': {

@@ -5828,12 +5828,12 @@ __metadata:
 
 "@subwallet/chain-list@file:C:\\Users\\99999\\Downloads\\builds\\build::locator=root-workspace-0b6124%40workspace%3A.":
   version: 0.2.8-beta.0
-  resolution: "@subwallet/chain-list@file:/C%3A/Users/99999/Downloads/builds/build#/C%3A/Users/99999/Downloads/builds/build::hash=749aa9&locator=root-workspace-0b6124%40workspace%3A."
+  resolution: "@subwallet/chain-list@file:/C%3A/Users/99999/Downloads/builds/build#/C%3A/Users/99999/Downloads/builds/build::hash=eec16d&locator=root-workspace-0b6124%40workspace%3A."
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: f1a0e46c92c3c91f1c2be00b2fab89684b1daf2cf88156134c046bf9da1db757b90b036a3fc3f3efecabb617acce5d0ee07da790113fcdb7e7562990632381a1
+  checksum: d8ec8ea06b8870fea8d693570d9f22a18b5574e20d2fc4d38366317b6b1658cdf14c9635b2e23a01a4e48a1787c003fac1e5e7b7fe6751597f4675a1507d1e44
   languageName: node
   linkType: hard
 

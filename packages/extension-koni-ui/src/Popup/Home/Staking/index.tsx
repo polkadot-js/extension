@@ -83,7 +83,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       .map((item) => (
         {
           ...item,
-          key: item.staking.chain + item.staking.type,
+          key: item.staking.chain + item.staking.address + item.staking.type,
           price: priceMap[item.staking.chain] || 0,
           price24h: price24hMap[item.staking.chain] || 0
         }));

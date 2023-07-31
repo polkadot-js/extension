@@ -120,6 +120,10 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
             to: path.resolve(__dirname, './build/package.json')
           },
           {
+            from: path.resolve(__dirname, './public/_redirects'),
+            to: path.resolve(__dirname, './build/_redirects')
+          },
+          {
             from: path.resolve(__dirname, './public/assets'),
             to: path.resolve(__dirname, './build/assets')
           },

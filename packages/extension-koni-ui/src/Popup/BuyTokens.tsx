@@ -314,15 +314,14 @@ function Component ({ className }: Props) {
   useEffect(() => {
     if (selectedTokenKey) {
       const services = getServiceItems(selectedTokenKey);
-      const selected = services.find((service) => service.key === selectedService && !service.disabled);
+      const filtered = services.filter((service) => !service.disabled);
 
-      if (!selected) {
-        const service = services.find((service) => !service.disabled);
-
-        form.setFieldValue('service', service?.key || '');
+      if (filtered.length > 1) {
+        form.setFieldValue('service', '');
+      } else {
+        form.setFieldValue('service', filtered[0]?.key || '');
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTokenKey, form]);
 
   const service = BUY_SERVICE_CONTACTS[selectedService];

@@ -22,7 +22,6 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
   const { t } = useTranslation();
   const showNotification = useNotification();
   const [loading, setLoading] = useState(false);
-  const [checked, setChecked] = useState(chainInfo.active);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSwitchChainState = useCallback((checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
@@ -32,9 +31,7 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
         .then((result) => {
           setLoading(false);
 
-          if (result) {
-            setChecked(checked);
-          } else {
+          if (!result) {
             showNotification({
               message: t('Error'),
               type: 'error'
@@ -58,7 +55,7 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
   return (
     <div className={`${className}`}>
       <Switch
-        checked={checked}
+        checked={chainInfo.active}
         loading={loading}
         onClick={onSwitchChainState}
       />

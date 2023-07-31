@@ -87,17 +87,13 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       transak: {
         network: 'moonriver',
         symbol: 'MOVR'
-      },
-      banxa: {
-        network: 'MOVR',
-        symbol: 'MOVR'
       }
     },
     network: 'moonriver',
     slug: 'moonriver-NATIVE-MOVR',
     symbol: 'MOVR',
     support: 'ETHEREUM',
-    services: ['transak', 'banxa']
+    services: ['transak']
   },
   ETH: {
     serviceInfo: {

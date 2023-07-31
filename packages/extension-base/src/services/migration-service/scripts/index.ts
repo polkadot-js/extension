@@ -27,6 +27,6 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.0.3-02': MigrateChainPatrol,
   '1.0.9-01': MigrateLedgerAccount,
   '1.0.12-02': MigrateEthProvider,
-  '1.1.5-01': MigrateWalletReference
+  '1.1.6-01': MigrateWalletReference
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

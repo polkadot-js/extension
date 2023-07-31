@@ -12,7 +12,7 @@ import { useAssetChecker, useDefaultNavigate, useNotification, useTranslation } 
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType, CreateBuyOrderFunction, SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BuyTokensParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { createBanxaOrder, createTransakOrder, findAccountByAddress, noop, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { createBanxaOrder, createTransakOrder, findAccountByAddress, isFirefox, noop, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { getAccountType } from '@subwallet/extension-koni-ui/utils/account/account';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
@@ -83,7 +83,16 @@ const getServiceItems = (tokenSlug: string): ServiceItem[] => {
   const result: ServiceItem[] = [];
 
   for (const serviceItem of baseServiceItems) {
-    result.push({ ...serviceItem, disabled: buyInfo ? !buyInfo.services.includes(serviceItem.key) : true });
+    const temp: ServiceItem = {
+      ...serviceItem,
+      disabled: buyInfo ? !buyInfo.services.includes(serviceItem.key) : true
+    };
+
+    if (serviceItem.key === 'banxa' && isFirefox()) {
+      temp.disabled = true;
+    }
+
+    result.push(temp);
   }
 
   return result;

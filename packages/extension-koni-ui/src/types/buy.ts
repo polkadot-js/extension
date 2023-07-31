@@ -17,8 +17,12 @@ export interface BuyTokenInfo {
   serviceInfo: Record<SupportService, BuyService>;
 }
 
-export interface BuyServiceInfo extends BuyService {
-  support: BuyTokenInfo['support']
+export interface BuyServiceInfo {
+  name: string;
+  contactUrl: string;
+  termUrl: string;
+  policyUrl: string;
+  url: string;
 }
 
 export type CreateBuyOrderFunction = (token: string, address: string, network: string, walletReference: string) => Promise<string>;

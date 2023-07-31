@@ -1,25 +1,26 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountJson } from '@subwallet/extension-base/background/types';
-import { isAccountAll } from '@subwallet/extension-base/utils';
+import { AccountJson, Resolver } from '@subwallet/extension-base/background/types';
+import { detectTranslate, isAccountAll } from '@subwallet/extension-base/utils';
 import { baseServiceItems, Layout, PageWrapper, ServiceItem } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { ServiceSelector } from '@subwallet/extension-koni-ui/components/Field/BuyTokens/ServiceSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { PREDEFINED_BUY_TOKEN, PREDEFINED_BUY_TOKEN_BY_SLUG } from '@subwallet/extension-koni-ui/constants';
+import { BUY_SERVICE_CONTACTS, PREDEFINED_BUY_TOKEN, PREDEFINED_BUY_TOKEN_BY_SLUG } from '@subwallet/extension-koni-ui/constants';
 import { useAssetChecker, useDefaultNavigate, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType, CreateBuyOrderFunction, SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BuyTokensParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { createBanxaOrder, createTransakOrder, findAccountByAddress, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { createBanxaOrder, createTransakOrder, findAccountByAddress, noop, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { getAccountType } from '@subwallet/extension-koni-ui/utils/account/account';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
-import { Button, Form, Icon, SwSubHeader } from '@subwallet/react-ui';
+import { Button, Form, Icon, ModalContext, SwModal, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ShoppingCartSimple } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { CheckCircle, ShoppingCartSimple, XCircle } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -32,6 +33,11 @@ type BuyTokensFormProps = {
   address: string;
   tokenKey: string;
   service: SupportService;
+}
+
+interface LinkUrlProps {
+  url: string;
+  content: string;
 }
 
 function getTokenItems (accountType: AccountType, ledgerNetwork?: string): TokenItemType[] {
@@ -83,12 +89,31 @@ const getServiceItems = (tokenSlug: string): ServiceItem[] => {
   return result;
 };
 
+const LinkUrl: React.FC<LinkUrlProps> = (props: LinkUrlProps) => {
+  if (props.url) {
+    return (
+      <a
+        href={props.url}
+        target='__blank'
+      >
+        {props.content}
+      </a>
+    );
+  } else {
+    return <span>{props.content}</span>;
+  }
+};
+
+const modalId = 'disclaimer-modal';
+
 function Component ({ className }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
   const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
   const fixedTokenKey = currentSymbol ? PREDEFINED_BUY_TOKEN[currentSymbol]?.slug : undefined;
 
   const notify = useNotification();
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
@@ -105,11 +130,44 @@ function Component ({ className }: Props) {
     service: '' as SupportService
   };
 
+  const promiseRef = useRef<Resolver<void>>({ resolve: noop, reject: noop });
+
   const [loading, setLoading] = useState(false);
+  const [disclaimerAgree, setDisclaimerAgree] = useState<Record<SupportService, boolean>>({
+    transak: false,
+    banxa: false,
+    onramper: false,
+    moonpay: false
+  });
 
   const selectedAddress = Form.useWatch('address', form);
   const selectedTokenKey = Form.useWatch('tokenKey', form);
   const selectedService = Form.useWatch('service', form);
+
+  const onConfirm = useCallback((): Promise<void> => {
+    activeModal(modalId);
+
+    return new Promise((resolve, reject) => {
+      promiseRef.current = {
+        resolve: () => {
+          inactiveModal(modalId);
+          resolve();
+        },
+        reject: (e) => {
+          inactiveModal(modalId);
+          reject(e);
+        }
+      };
+    });
+  }, [activeModal, inactiveModal]);
+
+  const onApprove = useCallback(() => {
+    promiseRef.current.resolve();
+  }, []);
+
+  const onReject = useCallback(() => {
+    promiseRef.current.reject(new Error('User reject'));
+  }, []);
 
   const accountType = selectedAddress ? getAccountType(selectedAddress) : '';
   const ledgerNetwork = useMemo((): string | undefined => {
@@ -174,15 +232,34 @@ function Component ({ className }: Props) {
     if (urlPromise && serviceInfo && buyInfo.services.includes(service)) {
       const { network: serviceNetwork, symbol } = serviceInfo;
 
-      urlPromise(symbol, walletAddress, serviceNetwork, walletReference)
+      const disclaimerPromise = new Promise<void>((resolve, reject) => {
+        if (!disclaimerAgree[service]) {
+          onConfirm().then(() => {
+            setDisclaimerAgree((oldState) => ({ ...oldState, [service]: true }));
+            resolve();
+          }).catch((e) => {
+            reject(e);
+          });
+        } else {
+          resolve();
+        }
+      });
+
+      disclaimerPromise.then(() => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return urlPromise!(symbol, walletAddress, serviceNetwork, walletReference);
+      })
         .then((url) => {
           openInNewTab(url)();
         })
-        .catch((e) => {
-          console.error(e);
-          notify({
-            message: t('Create buy order fail')
-          });
+        .catch((e: Error) => {
+          if (e.message !== 'User reject') {
+            console.error(e);
+
+            notify({
+              message: t('Create buy order fail')
+            });
+          }
         })
         .finally(() => {
           setLoading(false);
@@ -190,7 +267,7 @@ function Component ({ className }: Props) {
     } else {
       setLoading(false);
     }
-  }, [form, chainInfoMap, walletReference, notify, t]);
+  }, [form, chainInfoMap, disclaimerAgree, onConfirm, walletReference, notify, t]);
 
   const accountsFilter = useCallback((account: AccountJson) => {
     if (isAccountAll(account.address)) {
@@ -247,6 +324,9 @@ function Component ({ className }: Props) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTokenKey, form]);
+
+  const service = BUY_SERVICE_CONTACTS[selectedService];
+  const { contactUrl, name: serviceName, policyUrl, termUrl, url } = service || { name: '', url: '', contactUrl: '', policyUrl: '', termUrl: '' };
 
   return (
     <Layout.Home
@@ -330,6 +410,74 @@ function Component ({ className }: Props) {
             {t('Buy now')}
           </Button>
         </div>
+        <SwModal
+          className={CN(className)}
+          footer={(
+            <>
+              <Button
+                block={true}
+                icon={(
+                  <Icon
+                    phosphorIcon={XCircle}
+                    weight='fill'
+                  />
+                )}
+                onClick={onReject}
+                schema={'secondary'}
+              >
+                {t('Cancel')}
+              </Button>
+              <Button
+                block={true}
+                icon={(
+                  <Icon
+                    phosphorIcon={CheckCircle}
+                    weight='fill'
+                  />
+                )}
+                onClick={onApprove}
+              >
+                {t('Agree')}
+              </Button>
+            </>
+          )}
+          id={modalId}
+          onCancel={onReject}
+          title={t('Disclaimer')}
+        >
+          <Trans
+            components={{
+              mainUrl: (
+                <LinkUrl
+                  content={serviceName}
+                  url={url}
+                />
+              ),
+              termUrl: (
+                <LinkUrl
+                  content={t('Terms of Service')}
+                  url={termUrl}
+                />
+              ),
+              policyUrl: (
+                <LinkUrl
+                  content={t('Privacy Policy')}
+                  url={policyUrl}
+                />
+              ),
+              contactUrl: (
+                <LinkUrl
+                  content={t('support site')}
+                  url={contactUrl}
+                />
+              )
+            }}
+            i18nKey={detectTranslate('You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}\'s <termUrl/> and <policyUrl/>. For any question related to {{service}}\'s services, please visit {{service}}\'s <contactUrl/>.')}
+            values={{
+              service: serviceName
+            }}
+          />
+        </SwModal>
       </PageWrapper>
     </Layout.Home>
   );
@@ -339,6 +487,14 @@ const BuyTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     flexDirection: 'column',
+
+    '.ant-sw-modal-footer': {
+      display: 'flex'
+    },
+
+    '.ant-sw-modal-body': {
+      color: token.colorTextSecondary
+    },
 
     '.__scroll-container': {
       flex: 1,

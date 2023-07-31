@@ -9,7 +9,7 @@ import { ProposalTypes } from '@walletconnect/types/dist/types/sign-client/propo
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE, WALLET_CONNECT_REQUEST_KEY, WALLET_CONNECT_SUPPORT_NAMESPACES } from './constants';
-import { EIP155_SIGNING_METHODS, WalletConnectParamMap, WalletConnectSessionRequest, WalletConnectSigningMethod } from './types';
+import { EIP155_SIGNING_METHODS, WalletConnectNotSupportRequest, WalletConnectParamMap, WalletConnectSessionRequest, WalletConnectSigningMethod } from './types';
 
 export const getWCId = (id: number): string => {
   return [WALLET_CONNECT_REQUEST_KEY, Date.now(), id].join('.');
@@ -21,6 +21,15 @@ export const convertConnectRequest = (request: SignClientTypes.EventArguments['s
     isInternal: false,
     request: request,
     url: request.params.proposer.metadata.url
+  };
+};
+
+export const convertNotSupportRequest = (request: SignClientTypes.EventArguments['session_request'], url: string): WalletConnectNotSupportRequest => {
+  return {
+    id: getWCId(request.id),
+    isInternal: false,
+    request: request,
+    url: url
   };
 };
 

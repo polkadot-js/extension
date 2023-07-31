@@ -1,0 +1,15 @@
+diff --git a/scripts/polkadot-dev-build-ts.mjs b/scripts/polkadot-dev-build-ts.mjs
+index fad362bc904314c9c5a3286d27472cb78a43512f..3f857d6d18d798fc0d3ce6565cf6d4e7fb33dfb4 100755
+--- a/scripts/polkadot-dev-build-ts.mjs
++++ b/scripts/polkadot-dev-build-ts.mjs
+@@ -866,7 +866,9 @@ async function buildJs (repoPath, dir, locals) {
+     return;
+   }
+ 
+-  lintInput(dir);
++  // We don't want to add the legal notes to the files created by us, which this script makes impossible not
++  // to do. At the same time we leave the original legal notes in the files created by Polkadot.
++  // lintInput(dir);
+ 
+   console.log(`*** ${name} ${version}`);
+ 

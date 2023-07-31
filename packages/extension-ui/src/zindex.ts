@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 export const Z_INDEX = {
   ADDRESS: 1,
   ADD_ACCOUNT_BACKGROUND: -100,

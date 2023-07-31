@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import BigNumber from 'bignumber.js';
 import React, { useMemo }  from 'react';
 import styled from 'styled-components';

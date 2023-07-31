@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 
 /**

@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Transition } from 'react-transition-group';
 import styled from 'styled-components';

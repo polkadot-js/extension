@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import { useEffect, useState } from 'react';
 
 const getSafeIndex = (index: number, arrLength: number) => Math.min(index, Math.max(arrLength - 1, 0));

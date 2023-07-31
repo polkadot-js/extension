@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension-bg authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import deepEquals from 'fast-deep-equal';
 import { z } from 'zod';
 

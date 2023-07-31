@@ -14,6 +14,7 @@ module.exports = {
     // this seems very broken atm, false positives
     '@typescript-eslint/unbound-method': 'off',
     'sort-keys': 'off',
+    'header/header': 'off'
   },
   overrides: [...base.overrides, {
     files: ['**/*.test.*', '**/*.spec.*', '**/*.stories.*'],

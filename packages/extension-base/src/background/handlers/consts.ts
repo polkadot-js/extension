@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 export const BASE_CREATE_WINDOW_DATA = {
   focused: true,
   width: 376,

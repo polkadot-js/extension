@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import React, { FormEvent, useCallback, useContext, useId, useState } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';

@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import type { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 

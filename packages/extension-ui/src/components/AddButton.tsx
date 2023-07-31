@@ -1,13 +1,9 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import add from '../assets/add.svg';
 import { ThemeProps } from '../types';
-import Svg from './Svg';
 
 interface Props extends ThemeProps {
   className?: string;

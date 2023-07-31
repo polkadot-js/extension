@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import type { Meta, StoryObj } from '@storybook/react';
 
 import React, { useState } from 'react';

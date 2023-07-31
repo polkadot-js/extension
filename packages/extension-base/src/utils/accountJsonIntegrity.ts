@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import canonicalize from 'canonicalize';
 import { z } from 'zod';
 

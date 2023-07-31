@@ -3101,7 +3101,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.67.177":
+"@polkadot/dev@npm:0.67.189":
   version: 0.67.189
   resolution: "@polkadot/dev@npm:0.67.189"
   dependencies:
@@ -3197,6 +3197,105 @@ __metadata:
     polkadot-exec-tsc: scripts/polkadot-exec-tsc.mjs
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.mjs
   checksum: 180efa58b18957faa80644cc9d75bbf8eef21941e0f950f3c074c725e1198508806a1e9de54834d5d2fc8a224ccdb6b9214705b333fc7eb23eb732ce271b7f7d
+  languageName: node
+  linkType: hard
+
+"@polkadot/dev@patch:@polkadot/dev@npm:0.67.189#.yarn/patches/@polkadot-dev-npm-0.67.189-c0ab0e7167.patch::locator=root-workspace-0b6124%40workspace%3A.":
+  version: 0.67.189
+  resolution: "@polkadot/dev@patch:@polkadot/dev@npm%3A0.67.189#.yarn/patches/@polkadot-dev-npm-0.67.189-c0ab0e7167.patch::version=0.67.189&hash=f1006a&locator=root-workspace-0b6124%40workspace%3A."
+  dependencies:
+    "@babel/cli": ^7.20.7
+    "@babel/core": ^7.20.12
+    "@babel/plugin-proposal-nullish-coalescing-operator": ^7.18.6
+    "@babel/plugin-proposal-numeric-separator": ^7.18.6
+    "@babel/plugin-proposal-optional-chaining": ^7.20.7
+    "@babel/plugin-syntax-bigint": ^7.8.3
+    "@babel/plugin-syntax-dynamic-import": ^7.8.3
+    "@babel/plugin-syntax-import-assertions": ^7.20.0
+    "@babel/plugin-syntax-import-meta": ^7.10.4
+    "@babel/plugin-syntax-top-level-await": ^7.14.5
+    "@babel/plugin-transform-regenerator": ^7.20.5
+    "@babel/plugin-transform-runtime": ^7.19.6
+    "@babel/preset-env": ^7.20.2
+    "@babel/preset-react": ^7.18.6
+    "@babel/preset-typescript": ^7.18.6
+    "@babel/register": ^7.18.9
+    "@babel/runtime": ^7.20.13
+    "@rollup/plugin-alias": ^4.0.3
+    "@rollup/plugin-commonjs": ^24.0.1
+    "@rollup/plugin-dynamic-import-vars": ^2.0.3
+    "@rollup/plugin-inject": ^5.0.3
+    "@rollup/plugin-json": ^6.0.0
+    "@rollup/plugin-node-resolve": ^15.0.1
+    "@rushstack/eslint-patch": ^1.2.0
+    "@typescript-eslint/eslint-plugin": ^5.49.0
+    "@typescript-eslint/parser": ^5.49.0
+    "@vue/component-compiler-utils": ^3.3.0
+    babel-jest: ^29.4.1
+    babel-plugin-module-extension-resolver: ^1.0.0
+    babel-plugin-module-resolver: ^5.0.0
+    babel-plugin-styled-components: ^2.0.7
+    browserslist: ^4.21.4
+    coveralls: ^3.1.1
+    eslint: ^8.32.0
+    eslint-config-standard: ^17.0.0
+    eslint-import-resolver-node: ^0.3.7
+    eslint-plugin-deprecation: ^1.3.3
+    eslint-plugin-header: ^3.1.1
+    eslint-plugin-import: ^2.27.5
+    eslint-plugin-import-newlines: ^1.3.0
+    eslint-plugin-n: ^15.6.1
+    eslint-plugin-promise: ^6.1.1
+    eslint-plugin-react: ^7.32.1
+    eslint-plugin-react-hooks: ^4.6.0
+    eslint-plugin-simple-import-sort: ^9.0.0
+    eslint-plugin-sort-destructure-keys: ^1.4.0
+    gh-pages: ^5.0.0
+    gh-release: ^7.0.2
+    jest: ^29.4.1
+    jest-cli: ^29.4.1
+    jest-config: ^29.4.1
+    jest-environment-jsdom: ^29.4.1
+    jest-haste-map: ^29.4.1
+    jest-resolve: ^29.4.1
+    madge: ^5.0.1
+    prettier: ^2.8.3
+    rollup: ^3.11.0
+    rollup-plugin-cleanup: ^3.2.1
+    typescript: ^4.9.4
+    webpack: ^5.75.0
+    webpack-cli: ^5.0.1
+    webpack-dev-server: ^4.11.1
+    webpack-merge: ^5.8.0
+    webpack-subresource-integrity: ^5.1.0
+    yargs: ^17.6.2
+  bin:
+    polkadot-ci-ghact-build: scripts/polkadot-ci-ghact-build.mjs
+    polkadot-ci-ghact-docs: scripts/polkadot-ci-ghact-docs.mjs
+    polkadot-ci-ghpages-force: scripts/polkadot-ci-ghpages-force.mjs
+    polkadot-dev-build-docs: scripts/polkadot-dev-build-docs.mjs
+    polkadot-dev-build-ts: scripts/polkadot-dev-build-ts.mjs
+    polkadot-dev-circular: scripts/polkadot-dev-circular.mjs
+    polkadot-dev-clean-build: scripts/polkadot-dev-clean-build.mjs
+    polkadot-dev-contrib: scripts/polkadot-dev-contrib.mjs
+    polkadot-dev-copy-dir: scripts/polkadot-dev-copy-dir.mjs
+    polkadot-dev-copy-to: scripts/polkadot-dev-copy-to.mjs
+    polkadot-dev-deno-map: scripts/polkadot-dev-deno-map.mjs
+    polkadot-dev-run-lint: scripts/polkadot-dev-run-lint.mjs
+    polkadot-dev-run-prettier: scripts/polkadot-dev-run-prettier.mjs
+    polkadot-dev-run-swc: scripts/polkadot-dev-run-swc.mjs
+    polkadot-dev-run-test: scripts/polkadot-dev-run-test.mjs
+    polkadot-dev-version: scripts/polkadot-dev-version.mjs
+    polkadot-dev-yarn-only: scripts/polkadot-dev-yarn-only.mjs
+    polkadot-exec-eslint: scripts/polkadot-exec-eslint.mjs
+    polkadot-exec-ghpages: scripts/polkadot-exec-ghpages.mjs
+    polkadot-exec-ghrelease: scripts/polkadot-exec-ghrelease.mjs
+    polkadot-exec-prettier: scripts/polkadot-exec-prettier.mjs
+    polkadot-exec-rollup: scripts/polkadot-exec-rollup.mjs
+    polkadot-exec-swc: scripts/polkadot-exec-swc.mjs
+    polkadot-exec-tsc: scripts/polkadot-exec-tsc.mjs
+    polkadot-exec-webpack: scripts/polkadot-exec-webpack.mjs
+  checksum: 6cbb08d34e8204624ea51834ca5ae24c220a287cdd616ea98db974aa8adb9e70c9f15a9145fc883b5876b898d1f0945828d36157f491bbb39dc0ed0104480dfb
   languageName: node
   linkType: hard
 

@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import { z } from 'zod';
 
 export const metadata = z.object({

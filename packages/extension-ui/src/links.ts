@@ -1,6 +1,3 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 export const LINKS = {
   MAIN_WEBSITE: 'https://alephzero.org/',
   GENERAL_INTRODUCTION: 'https://docs.alephzero.org/aleph-zero/aleph-zero-signer/general-introduction',

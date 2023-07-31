@@ -67,6 +67,7 @@
   },
   "resolutions": {
     "@polkadot/api": "^10.5.1",
+    "@polkadot/dev": "patch:@polkadot/dev@npm:0.67.189#.yarn/patches/@polkadot-dev-npm-0.67.189-c0ab0e7167.patch",
     "@polkadot/keyring": "^12.1.2",
     "@polkadot/networks": "patch:@polkadot/networks@npm:12.1.2#.yarn/patches/@polkadot-networks-npm-12.1.2-012217f8ff.patch",
     "@polkadot/types": "10.5.1",

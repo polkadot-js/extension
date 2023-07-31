@@ -1,6 +1,3 @@
-// Copyright 2017-2023 @polkadot/dev authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 // ordering here important (at least from a rule maintenance pov)
 /* eslint-disable sort-keys */
 
@@ -26,7 +23,8 @@ module.exports = {
     'sort-keys': 'off',
     'react/jsx-no-bind': 'off',
     '@typescript-eslint/no-misused-promises': 'off',
-    '@typescript-eslint/no-floating-promises': 'off'
+    '@typescript-eslint/no-floating-promises': 'off',
+    'header/header': 'off'
   },
   plugins: [...base.plugins, 'prettier'],
   extends: [...base.extends, 'prettier'],

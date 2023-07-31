@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
@@ -41,6 +41,8 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
 
   const { t } = useTranslation();
 
+  const { isShowBalance } = useSelector((state) => state.settings);
+
   const balanceValue = getBalanceValue(staking.balance || '0', decimals);
 
   const convertedBalanceValue = useMemo(() => {
@@ -59,6 +61,7 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
       className={className}
       convertedStakingValue={convertedBalanceValue}
       decimal={0}
+      hideBalance={!isShowBalance}
       networkKey={staking.chain}
       onClickRightIcon={_onClickRightIcon}
       onPressItem={_onPressItem}

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionDirection } from '@subwallet/extension-base/background/KoniTypes';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { Icon, Logo, Number, Web3Block } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -17,6 +18,7 @@ type Props = ThemeProps & {
 function Component (
   { className = '', item, onClick }: Props) {
   const displayData = item.displayData;
+  const { isShowBalance } = useSelector((state) => state.settings);
 
   return (
     <Web3Block
@@ -51,6 +53,7 @@ function Component (
               className={'__value'}
               decimal={item?.amount?.decimals || 0}
               decimalOpacity={0.45}
+              hide={!isShowBalance}
               suffix={item?.amount?.symbol}
               value={item?.amount?.value || '0'}
             />
@@ -58,6 +61,7 @@ function Component (
               className={'__fee'}
               decimal={item?.fee?.decimals || 0}
               decimalOpacity={0.45}
+              hide={!isShowBalance}
               intOpacity={0.45}
               suffix={item.fee?.symbol}
               unitOpacity={0.45}

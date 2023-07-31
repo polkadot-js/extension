@@ -24,7 +24,6 @@ function Component ({ assetSetting, className = '', navigate, tokenInfo }: Props
   const showNotification = useNotification();
 
   const [loading, setLoading] = useState(false);
-  const [checked, setChecked] = useState(assetSetting?.visible || false);
 
   const onSwitchTokenVisible = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
     if (!loading) {
@@ -37,9 +36,7 @@ function Component ({ assetSetting, className = '', navigate, tokenInfo }: Props
           }
         })
           .then((result) => {
-            if (result) {
-              setChecked(checked);
-            } else {
+            if (!result) {
               showNotification({
                 message: t('Error'),
                 type: 'error'
@@ -66,7 +63,7 @@ function Component ({ assetSetting, className = '', navigate, tokenInfo }: Props
   return (
     <div className={`manage_tokens__right_item_container ${className}`}>
       <Switch
-        checked={checked}
+        checked={!!assetSetting?.visible}
         loading={loading}
         onClick={onSwitchTokenVisible}
       />

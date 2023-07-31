@@ -94,8 +94,10 @@ export interface SigData {
 }
 
 export * from './account';
+export * from './balance';
 export * from './chain';
 export * from './confirmation';
+export * from './crowdloan';
 export * from './form';
 export * from './history';
 export * from './ledger';

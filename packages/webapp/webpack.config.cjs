@@ -120,24 +120,11 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
             to: path.resolve(__dirname, './build/package.json')
           },
           {
-            from: path.resolve(__dirname, './public/_redirects'),
-            to: path.resolve(__dirname, './build/_redirects')
-          },
-          {
-            from: path.resolve(__dirname, './public/assets'),
-            to: path.resolve(__dirname, './build/assets')
-          },
-          {
-            from: path.resolve(__dirname, './public/images'),
-            to: path.resolve(__dirname, './build/images')
-          },
-          {
-            from: path.resolve(__dirname, './public/fonts'),
-            to: path.resolve(__dirname, './build/fonts')
-          },
-          {
-            from: path.resolve(__dirname, './public/locales'),
-            to: path.resolve(__dirname, './build/locales')
+            from: path.resolve(__dirname, './public'),
+            to: path.resolve(__dirname, './build/'),
+            globOptions: {
+              ignore: ['**/index.html']
+            }
           }
         ]
       }),

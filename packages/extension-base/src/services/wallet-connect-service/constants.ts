@@ -3,7 +3,7 @@
 
 import { MobileOS } from '@subwallet/extension-base/background/KoniTypes';
 import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, WalletConnectSigningMethod } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { getOS } from '@subwallet/extension-base/utils';
+import { getOS, isMobile } from '@subwallet/extension-base/utils';
 import { SignClientTypes } from '@walletconnect/types';
 
 export const PROJECT_ID_EXTENSION = '6da34c0b48164d27681924dd9a46d6be';

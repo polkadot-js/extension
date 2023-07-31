@@ -80,11 +80,11 @@ function Component ({ className = '', fallbackImage, handleOnClick, have3dViewer
         <LazyLoadComponent>
           <video
             autoPlay
-            height='124'
+            height={'100%'}
             loop={true}
             muted
             onError={handleVideoError}
-            width='124'
+            width={'100%'}
           >
             <source
               src={getCollectionImage()}

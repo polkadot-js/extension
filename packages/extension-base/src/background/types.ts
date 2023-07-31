@@ -162,6 +162,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];
   'pub(metadata.provide)': [MetadataDef, boolean];
   'pub(phishing.redirectIfDenied)': [null, boolean];
+  'pub(ping)': [null, boolean];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
   'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse<unknown>];
   'pub(rpc.startProvider)': [string, ProviderMeta];
@@ -310,6 +311,10 @@ export interface RequestAccountList {
 
 export interface RequestAccountSubscribe {
   accountAuthType?: AccountAuthType
+}
+
+export interface RequestAccountUnsubscribe {
+  id: string
 }
 
 export interface RequestRpcSend {

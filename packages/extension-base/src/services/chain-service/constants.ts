@@ -89,7 +89,9 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   amplitude_test: 2,
   pendulum: 2,
   kilt: 2,
-  kilt_peregrine: 2
+  kilt_peregrine: 2,
+  edgeware: 6,
+  kate: 6
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {

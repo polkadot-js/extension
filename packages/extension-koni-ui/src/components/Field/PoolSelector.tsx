@@ -9,7 +9,6 @@ import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/Filte
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
 import { PoolDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal';
 import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
@@ -63,7 +62,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { t } = useTranslation();
 
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
 
   const isActive = checkActive(id);
 
@@ -233,7 +231,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             <Icon phosphorIcon={FadersHorizontal} />
           </Badge>
         )}
-        className={`${className} ${!isWebUI ? 'modal-full' : ''}`}
+        className={className}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}
@@ -336,13 +334,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
 const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
-    '.ant-sw-modal-header': {
-      paddingTop: token.paddingXS,
-      paddingBottom: token.paddingLG
-    },
+    '&.ant-sw-modal': {
+      '.ant-sw-modal-header': {
+        paddingTop: 0,
+        paddingBottom: token.padding
+      },
 
-    '.ant-sw-modal-content': {
-      paddingBottom: token.padding
+      '.ant-sw-modal-body': {
+        paddingLeft: 0,
+        paddingRight: 0
+      }
     },
 
     '&.pool-selector-input': {

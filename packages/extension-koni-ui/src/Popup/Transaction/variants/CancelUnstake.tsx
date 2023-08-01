@@ -130,7 +130,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <TransactionContent>
         <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
           <Form
-            className={`${className} form-container form-space-sm`}
+            className={'form-container form-space-sm'}
             form={form}
             initialValues={formDefault}
             onFieldsChange={onFieldsChange}
@@ -203,6 +203,7 @@ const CancelUnstake = styled(Component)<Props>(({ theme: { token } }: Props) => 
     flexDirection: 'column',
 
     '.web-ui-enable &': {
+      paddingTop: 24,
       display: 'block',
       maxWidth: 416,
       width: '100%',
@@ -210,7 +211,8 @@ const CancelUnstake = styled(Component)<Props>(({ theme: { token } }: Props) => 
       marginRight: 'auto',
 
       '.transaction-footer': {
-        paddingTop: 4
+        paddingTop: 4,
+        gap: token.size
       }
     },
 

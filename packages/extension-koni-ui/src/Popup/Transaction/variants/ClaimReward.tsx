@@ -189,7 +189,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <TransactionContent>
         <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
           <Form
-            className={CN(className, 'form-container form-space-sm')}
+            className={CN('form-container form-space-sm')}
             form={form}
             initialValues={formDefault}
             onFieldsChange={onFieldsChange}
@@ -287,6 +287,7 @@ const ClaimReward = styled(Component)<Props>(({ theme: { token } }: Props) => {
     flexDirection: 'column',
 
     '.web-ui-enable &': {
+      paddingTop: 24,
       display: 'block',
       maxWidth: 416,
       width: '100%',
@@ -294,7 +295,8 @@ const ClaimReward = styled(Component)<Props>(({ theme: { token } }: Props) => {
       marginRight: 'auto',
 
       '.transaction-footer': {
-        paddingTop: 4
+        paddingTop: 4,
+        gap: token.size
       }
     },
 

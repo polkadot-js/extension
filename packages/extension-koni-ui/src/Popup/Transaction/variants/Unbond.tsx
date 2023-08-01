@@ -248,7 +248,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [form, amountChange, minValue, bondedValue, decimals]);
 
   return (
-    <>
+    <div className={className}>
       <TransactionContent>
         <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
           <Form
@@ -347,12 +347,25 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Unbond')}
         </Button>
       </TransactionFooter>
-    </>
+    </div>
   );
 };
 
 const Unbond = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+
+    '.web-ui-enable &': {
+      paddingTop: 24,
+      display: 'block',
+      maxWidth: 416,
+      width: '100%',
+      marginLeft: 'auto',
+      marginRight: 'auto'
+    },
+
     '.bonded-balance, .free-balance': {
       marginBottom: token.margin
     },

@@ -11,7 +11,6 @@ import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/Sort
 import { ValidatorDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Staking/ValidatorDetailModal';
 import StakingValidatorItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingValidatorItem';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { useSelectValidators } from '@subwallet/extension-koni-ui/hooks/modal/useSelectValidators';
 import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetChainStakingMetadata';
@@ -80,7 +79,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, loading, onChange, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
 
   useExcludeModal(id);
   const isActive = checkActive(id);
@@ -282,7 +280,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         value={value || ''}
       />
       <SwModal
-        className={`${className} ${!isWebUI ? 'modal-full' : ''}`}
+        className={className}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}
@@ -363,22 +361,20 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
 const MultiValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
-    '.ant-sw-modal-header': {
-      paddingTop: token.paddingXS,
-      paddingBottom: token.paddingLG
-    },
+    '&.ant-sw-modal': {
+      '.ant-sw-modal-header': {
+        paddingTop: 0,
+        paddingBottom: token.padding
+      },
 
-    '.ant-sw-modal-body': {
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column'
-    },
+      '.ant-sw-modal-body': {
+        paddingLeft: 0,
+        paddingRight: 0
+      },
 
-    '.ant-sw-modal-footer': {
-      margin: 0,
-      marginTop: token.marginXS,
-      borderTop: 0,
-      marginBottom: token.margin
+      '.ant-sw-modal-footer': {
+        borderTop: 0
+      }
     },
 
     '.pool-item:not(:last-child)': {

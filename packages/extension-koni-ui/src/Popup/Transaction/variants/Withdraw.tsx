@@ -146,11 +146,11 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [setChain, stakingChain]);
 
   return (
-    <>
+    <div className={className}>
       <TransactionContent>
         <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
           <Form
-            className={`${className} form-container form-space-sm`}
+            className={'form-container form-space-sm'}
             form={form}
             initialValues={formDefault}
             onFieldsChange={onFieldsChange}
@@ -224,12 +224,30 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Continue')}
         </Button>
       </TransactionFooter>
-    </>
+    </div>
   );
 };
 
 const Withdraw = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+
+    '.web-ui-enable &': {
+      paddingTop: 24,
+      display: 'block',
+      maxWidth: 416,
+      width: '100%',
+      marginLeft: 'auto',
+      marginRight: 'auto',
+
+      '.transaction-footer': {
+        paddingTop: 4,
+        gap: token.size
+      }
+    },
+
     '.free-balance': {
       marginBottom: token.marginXS
     },

@@ -105,16 +105,23 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   }, [location]);
 
   useEffect(() => {
-    if (needMigrate || !hasMasterPassword || isNoAccount(accounts) || isLocked || location.pathname === '/create-done') {
+    const pathName = location.pathname;
+
+    if (needMigrate || !hasMasterPassword || isNoAccount(accounts) || location.pathname === '/create-done') {
       setShowSidebar(false);
-      setHeaderType(HeaderType.SIMPLE);
       setBackground(BackgroundColorMap.INFO);
+      setHeaderType(HeaderType.SIMPLE);
     } else {
       setShowSidebar(true);
-      setHeaderType(HeaderType.COMMON);
       !isPortfolio && setBackground(BackgroundColorMap.COMMON);
+
+      if (pathName.startsWith('/home') || pathName.startsWith('/transactions') || pathName === '/settings' || pathName === '/settings/list') {
+        setHeaderType(HeaderType.COMMON);
+      } else {
+        setHeaderType(HeaderType.NONE);
+      }
     }
-  }, [accounts, hasMasterPassword, isLocked, isPortfolio, location.pathname, needMigrate, setBackground, setHeaderType, setShowSidebar]);
+  }, [accounts, hasMasterPassword, isPortfolio, location.pathname, needMigrate, setBackground, setHeaderType, setShowSidebar]);
 
   useEffect(() => {
     const pathName = location.pathname;
@@ -123,10 +130,10 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       if (pathName !== migratePasswordUrl) {
         navigate(migratePasswordUrl);
       }
-    } else if (hasMasterPassword && isLocked) {
-      if (pathName !== loginUrl) {
-        navigate(loginUrl);
-      }
+    // } else if (hasMasterPassword && isLocked) {
+    //   if (pathName !== loginUrl) {
+    //     navigate(loginUrl);
+    //   }
     } else if (!hasMasterPassword) {
       if (isNoAccount(accounts)) {
         if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {

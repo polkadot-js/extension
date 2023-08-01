@@ -130,7 +130,11 @@ const ConnectionList = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
     '.sessions-list': {
       '--row-gap': token.sizeXS,
-      margin: `0 -${token.margin}px`
+      margin: `0 -${token.margin}px`,
+
+      '&.ant-sw-list-section .ant-sw-list-wrapper': {
+        flexBasis: 300
+      }
     }
   };
 });

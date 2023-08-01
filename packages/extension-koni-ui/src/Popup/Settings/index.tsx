@@ -4,6 +4,7 @@
 import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
@@ -13,8 +14,8 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
 import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps
@@ -70,10 +71,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const isPopup = useIsPopup();
   const notify = useNotification();
+  const location = useLocation();
   const { goHome } = useDefaultNavigate();
   const { t } = useTranslation();
   const [locking, setLocking] = useState(false);
   const { isWebUI } = useContext(ScreenContext);
+  const { setTitle } = useContext(WebUIContext);
 
   const onLock = useCallback(() => {
     setLocking(true);
@@ -269,6 +272,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     ];
   }, [goHome]);
+
+  useEffect(() => {
+    if (location.pathname === '/settings' || location.pathname === '/settings/list') {
+      setTitle(t('Settings'));
+    }
+  }, [location.pathname, setTitle, t]);
 
   return (
     <PageWrapper className={`settings ${className}`}>

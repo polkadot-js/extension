@@ -94,13 +94,6 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken, token } 
       maxWidth: '100%'
     },
 
-    '.web-single-column': {
-      width: extendToken.oneColumnWidth,
-      maxWidth: '100%',
-      marginLeft: 'auto',
-      marginRight: 'auto'
-    },
-
     '.web-cancel-fill-height .ant-sw-screen-layout-body': {
       flex: 'initial'
     },
@@ -112,6 +105,35 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken, token } 
     '.ant-sw-screen-layout-body': {
       display: 'flex',
       flexDirection: 'column'
+    },
+
+    '.web-single-column': {
+      '.ant-sw-screen-layout-body, .ant-sw-screen-layout-footer': {
+        width: extendToken.oneColumnWidth,
+        maxWidth: '100%',
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }
+    },
+
+    // Custom layout header
+    '.ant-sw-screen-layout-header .ant-sw-header-container-center': {
+      paddingTop: token.paddingLG,
+      paddingBottom: token.paddingLG,
+
+      '.ant-sw-header-left-part': {
+        marginLeft: 0
+      },
+
+      '.ant-sw-header-center-part': {
+        right: 'initial',
+        left: 40,
+        width: 'auto',
+
+        '.ant-sw-sub-header-title-content': {
+          fontSize: 30
+        }
+      }
     }
   };
 });
@@ -125,12 +147,8 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
       return t('Portfolio');
     }
 
-    if (isSettingPage) {
-      return t('Settings');
-    }
-
     return title;
-  }, [isPortfolio, isSettingPage, t, title]);
+  }, [isPortfolio, t, title]);
 
   if (!isWebUI) {
     return <>{children}</>;

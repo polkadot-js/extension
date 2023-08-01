@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import Customization from '@subwallet/extension-koni-ui/components/Layout/parts/Header/Customization';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, ModalContext, Typography } from '@subwallet/react-ui';
+import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CaretLeft, FadersHorizontal } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import { CaretLeft } from 'phosphor-react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import Accounts from './Accounts';
@@ -19,8 +19,6 @@ export type Props = ThemeProps & {
 }
 
 function Component ({ className, onBack, showBackButton, title = '' }: Props): React.ReactElement<Props> {
-  const { activeModal } = useContext(ModalContext);
-
   const backButton = useMemo(() => {
     if (showBackButton && onBack) {
       return (
@@ -43,10 +41,6 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
     return null;
   }, [onBack, showBackButton]);
 
-  const onOpenCustomizeModal = useCallback(() => {
-    activeModal(CUSTOMIZE_MODAL);
-  }, [activeModal]);
-
   return (
     <div className={CN(className)}>
       <div className='common-header'>
@@ -55,17 +49,7 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
           <Typography.Title className='page-name'>{title}</Typography.Title>
         </div>
         <div className='action-group'>
-          <Button
-            icon={(
-              <Icon
-                phosphorIcon={FadersHorizontal}
-                size={'sm'}
-              />
-            )}
-            onClick={onOpenCustomizeModal}
-            size={'xs'}
-            type={'ghost'}
-          />
+          <Customization />
           <Networks />
           <Accounts />
         </div>

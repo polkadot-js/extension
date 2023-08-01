@@ -1,17 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { CustomizeModalSetting } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModalSetting';
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { saveShowZeroBalance } from '@subwallet/extension-koni-ui/messaging';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
-import { Wallet } from 'phosphor-react';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ModalContext, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import CustomizeModalContent from './CustomizeModalContent';
 
@@ -21,12 +18,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { token } = useTheme() as Theme;
-  const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
-
-  const onChangeZeroBalance = useCallback(() => {
-    saveShowZeroBalance(!isShowZeroBalance).catch(console.error);
-  }, [isShowZeroBalance]);
 
   const onCancel = useCallback(() => {
     inactiveModal(CUSTOMIZE_MODAL);
@@ -42,26 +33,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     >
       <div className={'__group-label'}>{t('Balance')}</div>
       <div className={'__group-content'}>
-        <SettingItem
-          className={'__setting-item'}
-          leftItemIcon={
-            <BackgroundIcon
-              backgroundColor={token['green-6']}
-              iconColor={token.colorTextLight1}
-              phosphorIcon={Wallet}
-              size='sm'
-              type='phosphor'
-              weight='fill'
-            />
-          }
-          name={t('Show zero balance')}
-          rightItem={
-            <Switch
-              checked={isShowZeroBalance}
-              onClick={onChangeZeroBalance}
-              style={{ marginRight: 8 }}
-            />}
-        />
+        <CustomizeModalSetting />
       </div>
       {!isWebUI && (
         <>

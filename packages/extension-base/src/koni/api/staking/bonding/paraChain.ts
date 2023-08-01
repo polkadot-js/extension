@@ -46,7 +46,7 @@ export function validateParaChainUnbondingCondition (amount: string, nominatorMe
 
   const bnChainMinStake = new BN(chainStakingMetadata.minStake || '0');
   const bnCollatorMinStake = new BN(targetNomination.validatorMinStake || '0');
-  const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
+  const bnMinStake = BN.max(bnCollatorMinStake, bnChainMinStake);
 
   if (targetNomination.hasUnstaking) {
     errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));

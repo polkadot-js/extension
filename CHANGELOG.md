@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 1.1.5
+Build date: Jul 29, 2023.
+
+Features & Update:
+- Update logo for Avail network (#1708)
+- Allow substrate Dapp subscribe allow access accounts List (#1712)
+
+Bugs fixed:
+- Fixed bug signature method handling is not supported for Wallet Connect (#1674)
+- Fixed bug does not synchronize the configuration of the network and the token (#1633)
+- Fixed bug still send local token in case the native token balance = 0 (#1667)
+
 ## 1.1.4
 Build date: Jul 24, 2023.
 

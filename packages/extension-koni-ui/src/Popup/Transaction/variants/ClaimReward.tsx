@@ -185,7 +185,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [form]);
 
   return (
-    <>
+    <div className={className}>
       <TransactionContent>
         <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
           <Form
@@ -276,12 +276,28 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Continue')}
         </Button>
       </TransactionFooter>
-    </>
+    </div>
   );
 };
 
 const ClaimReward = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+
+    '.web-ui-enable &': {
+      display: 'block',
+      maxWidth: 416,
+      width: '100%',
+      marginLeft: 'auto',
+      marginRight: 'auto',
+
+      '.transaction-footer': {
+        paddingTop: 4
+      }
+    },
+
     '.unstaked-field, .free-balance': {
       marginBottom: token.marginXS
     },

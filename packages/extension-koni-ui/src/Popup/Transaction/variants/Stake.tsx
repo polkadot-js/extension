@@ -7,6 +7,7 @@ import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
+import NetworkInformation from '@subwallet/extension-koni-ui/components/NetworkInformation';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -20,7 +21,7 @@ import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useOutletContext, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -53,9 +54,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { setStakingType }: {
-    setStakingType: React.Dispatch<React.SetStateAction<React.ReactNode>>
-  } = useOutletContext();
 
   const { asset,
     chain,
@@ -97,10 +95,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const [isDisable, setIsDisable] = useState(true);
 
   const stakingType = Form.useWatch(FormFieldName.TYPE, form);
-
-  useEffect(() => {
-    setStakingType && setStakingType(stakingType);
-  }, [setStakingType, stakingType]);
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
   const nominatorMetadataList = useGetNominatorInfo(chain, stakingType, from);
@@ -377,171 +371,181 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <TransactionContent>
-        <PageWrapper
-          className={className}
-          resolve={dataContext.awaitStores(['staking'])}
-        >
-          <Form
-            className={'form-container form-space-sm'}
-            form={form}
-            initialValues={formDefault}
-            onFieldsChange={onFieldsChange}
-            onFinish={onSubmit}
-          >
-            <Form.Item
-              className='staking-type'
-              hidden={_stakingType !== ALL_KEY}
-              name={FormFieldName.TYPE}
+      <div className={className}>
+        <div className={'__transaction-block'}>
+          <TransactionContent>
+            <PageWrapper
+              resolve={dataContext.awaitStores(['staking'])}
             >
-              <RadioGroup
-                optionType='button'
-                options={[
-                  {
-                    label: t('Pools'),
-                    value: StakingType.POOLED,
-                    disabled: isEthAdr
-                  },
-                  {
-                    label: t('Nominate'),
-                    value: StakingType.NOMINATED
-                  }
-                ]}
-              />
-            </Form.Item>
-            <Form.Item
-              hidden={!isAllAccount}
-              name={'from'}
-            >
-              <AccountSelector filter={accountFilterFunc(chainInfoMap, stakingType, stakingChain)} />
-            </Form.Item>
-
-            {
-              !isAllAccount &&
-              (
-                <Form.Item name={'asset'}>
-                  <TokenSelector
-                    disabled={stakingChain !== ALL_KEY || !from}
-                    items={tokenList}
-                    prefixShape='circle'
+              <Form
+                className={'form-container form-space-sm'}
+                form={form}
+                initialValues={formDefault}
+                onFieldsChange={onFieldsChange}
+                onFinish={onSubmit}
+              >
+                <Form.Item
+                  className='staking-type'
+                  hidden={_stakingType !== ALL_KEY}
+                  name={FormFieldName.TYPE}
+                >
+                  <RadioGroup
+                    optionType='button'
+                    options={[
+                      {
+                        label: t('Pools'),
+                        value: StakingType.POOLED,
+                        disabled: isEthAdr
+                      },
+                      {
+                        label: t('Nominate'),
+                        value: StakingType.NOMINATED
+                      }
+                    ]}
                   />
                 </Form.Item>
-              )
-            }
+                <Form.Item
+                  hidden={!isAllAccount}
+                  name={'from'}
+                >
+                  <AccountSelector filter={accountFilterFunc(chainInfoMap, stakingType, stakingChain)} />
+                </Form.Item>
 
-            <FreeBalance
-              address={from}
-              chain={chain}
-              className={'account-free-balance'}
-              label={t('Available balance:')}
-              onBalanceReady={setIsBalanceReady}
-            />
+                {
+                  !isAllAccount &&
+                  (
+                    <Form.Item name={'asset'}>
+                      <TokenSelector
+                        disabled={stakingChain !== ALL_KEY || !from}
+                        items={tokenList}
+                        prefixShape='circle'
+                      />
+                    </Form.Item>
+                  )
+                }
 
-            <div className={'form-row'}>
-              {
-                isAllAccount &&
-                (
-                  <Form.Item name={'asset'}>
-                    <TokenSelector
-                      disabled={stakingChain !== ALL_KEY || !from}
-                      items={tokenList}
-                      prefixShape='circle'
+                <FreeBalance
+                  address={from}
+                  chain={chain}
+                  className={'account-free-balance'}
+                  label={t('Available balance:')}
+                  onBalanceReady={setIsBalanceReady}
+                />
+
+                <div className={'form-row'}>
+                  {
+                    isAllAccount &&
+                    (
+                      <Form.Item name={'asset'}>
+                        <TokenSelector
+                          disabled={stakingChain !== ALL_KEY || !from}
+                          items={tokenList}
+                          prefixShape='circle'
+                        />
+                      </Form.Item>
+                    )
+                  }
+
+                  <Form.Item
+                    name={FormFieldName.VALUE}
+                    rules={[
+                      { required: true, message: t('Amount is required') },
+                      ({ getFieldValue }) => ({
+                        validator: (_, value: string) => {
+                          const type = getFieldValue(FormFieldName.TYPE) as StakingType;
+                          const val = new BigN(value);
+
+                          if (type === StakingType.POOLED) {
+                            if (val.lte(0)) {
+                              return Promise.reject(new Error(t('Amount must be greater than 0')));
+                            }
+                          } else {
+                            if (!nominatorMetadata?.isBondedBefore || !isRelayChain) {
+                              if (val.lte(0)) {
+                                return Promise.reject(new Error(t('Amount must be greater than 0')));
+                              }
+                            }
+                          }
+
+                          if (val.gt(nativeTokenBalance.value)) {
+                            return Promise.reject(t('Amount cannot exceed your balance'));
+                          }
+
+                          return Promise.resolve();
+                        }
+                      })
+                    ]}
+                    statusHelpAsTooltip={true}
+                  >
+                    <AmountInput
+                      decimals={(chain && from) ? decimals : -1}
+                      maxValue={maxValue}
+                      showMaxButton={false}
                     />
                   </Form.Item>
+                </div>
+
+                <Form.Item
+                  hidden={stakingType !== StakingType.POOLED}
+                  name={FormFieldName.POOL}
+                >
+                  <PoolSelector
+                    chain={chain}
+                    from={from}
+                    label={t('Select pool')}
+                    loading={poolLoading}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  hidden={stakingType !== StakingType.NOMINATED}
+                  name={FormFieldName.NOMINATE}
+                >
+                  <MultiValidatorSelector
+                    chain={asset ? chain : ''}
+                    from={asset ? from : ''}
+                    loading={validatorLoading}
+                  />
+                </Form.Item>
+              </Form>
+              {
+                (chainStakingMetadata && !isWebUI) && (
+                  <>
+                    <Divider className='staking-divider' />
+                    {getMetaInfo()}
+                  </>
                 )
               }
+            </PageWrapper>
+          </TransactionContent>
 
-              <Form.Item
-                name={FormFieldName.VALUE}
-                rules={[
-                  { required: true, message: t('Amount is required') },
-                  ({ getFieldValue }) => ({
-                    validator: (_, value: string) => {
-                      const type = getFieldValue(FormFieldName.TYPE) as StakingType;
-                      const val = new BigN(value);
-
-                      if (type === StakingType.POOLED) {
-                        if (val.lte(0)) {
-                          return Promise.reject(new Error(t('Amount must be greater than 0')));
-                        }
-                      } else {
-                        if (!nominatorMetadata?.isBondedBefore || !isRelayChain) {
-                          if (val.lte(0)) {
-                            return Promise.reject(new Error(t('Amount must be greater than 0')));
-                          }
-                        }
-                      }
-
-                      if (val.gt(nativeTokenBalance.value)) {
-                        return Promise.reject(t('Amount cannot exceed your balance'));
-                      }
-
-                      return Promise.resolve();
-                    }
-                  })
-                ]}
-                statusHelpAsTooltip={true}
-              >
-                <AmountInput
-                  decimals={(chain && from) ? decimals : -1}
-                  maxValue={maxValue}
-                  showMaxButton={false}
+          <TransactionFooter
+            errors={[]}
+            warnings={[]}
+          >
+            <Button
+              disabled={isDisable || !isBalanceReady}
+              icon={(
+                <Icon
+                  phosphorIcon={PlusCircle}
+                  weight={'fill'}
                 />
-              </Form.Item>
-            </div>
-
-            <Form.Item
-              hidden={stakingType !== StakingType.POOLED}
-              name={FormFieldName.POOL}
+              )}
+              loading={loading}
+              onClick={checkAction(form.submit, stakingType === StakingType.POOLED ? ExtrinsicType.STAKING_JOIN_POOL : ExtrinsicType.STAKING_BOND)}
             >
-              <PoolSelector
-                chain={chain}
-                from={from}
-                label={t('Select pool')}
-                loading={poolLoading}
-              />
-            </Form.Item>
+              {t('Stake')}
+            </Button>
+          </TransactionFooter>
+        </div>
 
-            <Form.Item
-              hidden={stakingType !== StakingType.NOMINATED}
-              name={FormFieldName.NOMINATE}
-            >
-              <MultiValidatorSelector
-                chain={asset ? chain : ''}
-                from={asset ? from : ''}
-                loading={validatorLoading}
-              />
-            </Form.Item>
-          </Form>
-          {
-            (chainStakingMetadata && !isWebUI) && (
-              <>
-                <Divider className='staking-divider' />
-                {getMetaInfo()}
-              </>
-            )
-          }
-        </PageWrapper>
-      </TransactionContent>
-
-      <TransactionFooter
-        errors={[]}
-        warnings={[]}
-      >
-        <Button
-          disabled={isDisable || !isBalanceReady}
-          icon={(
-            <Icon
-              phosphorIcon={PlusCircle}
-              weight={'fill'}
-            />
-          )}
-          loading={loading}
-          onClick={checkAction(form.submit, stakingType === StakingType.POOLED ? ExtrinsicType.STAKING_JOIN_POOL : ExtrinsicType.STAKING_BOND)}
-        >
-          {t('Stake')}
-        </Button>
-      </TransactionFooter>
+        {isWebUI && (
+          <NetworkInformation
+            className={'__network-information-block'}
+            stakingType={stakingType}
+          />
+        )}
+      </div>
 
       {
         chainStakingMetadata &&
@@ -563,6 +567,45 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const Stake = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    display: 'flex',
+    flex: 1,
+
+    '.__transaction-block': {
+      display: 'flex',
+      flexDirection: 'column',
+      flex: 1
+    },
+
+    '.__network-information-block': {
+      flex: 1
+    },
+
+    '.web-ui-enable &': {
+      paddingTop: 24,
+      maxWidth: 784,
+      width: '100%',
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      gap: token.size,
+
+      '.__transaction-block': {
+        display: 'block',
+        flex: 1
+      },
+
+      '.transaction-content': {
+        paddingLeft: 0,
+        paddingRight: 0
+      },
+
+      '.transaction-footer': {
+        paddingTop: 4,
+        paddingLeft: 0,
+        paddingRight: 0,
+        marginBottom: 0
+      }
+    },
+
     '.staking-type': {
       marginBottom: token.margin
     },

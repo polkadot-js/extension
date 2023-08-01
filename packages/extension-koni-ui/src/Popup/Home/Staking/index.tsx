@@ -141,34 +141,36 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`);
   }, [navigate]);
 
+  const onClickReload = useCallback(() => {
+    setLoading(true);
+    notify({
+      icon: <ActivityIndicator size={32} />,
+      style: { top: 210 },
+      direction: 'vertical',
+      duration: 1.8,
+      closable: false,
+      message: t('Reloading')
+    });
+
+    reloadCron({ data: 'staking' })
+      .then(() => {
+        setLoading(false);
+      })
+      .catch(console.error);
+  }, [notify, t]);
+
   const subHeaderButton: ButtonProps[] = useMemo(() => ([
     {
       icon: reloadIcon,
       disabled: loading,
       size: 'sm',
-      onClick: () => {
-        setLoading(true);
-        notify({
-          icon: <ActivityIndicator size={32} />,
-          style: { top: 210 },
-          direction: 'vertical',
-          duration: 1.8,
-          closable: false,
-          message: t('Reloading')
-        });
-
-        reloadCron({ data: 'staking' })
-          .then(() => {
-            setLoading(false);
-          })
-          .catch(console.error);
-      }
+      onClick: onClickReload
     },
     {
       icon: rightIcon,
       onClick: preCheck(onClickStakeMore, ExtrinsicType.STAKING_BOND)
     }
-  ]), [loading, preCheck, notify, t, onClickStakeMore]);
+  ]), [loading, onClickReload, preCheck, onClickStakeMore]);
 
   const renderItem = useCallback((item: StakingDataType) => {
     return (
@@ -343,23 +345,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [className, priceMap]);
 
-  const onClickReload = useCallback(() => {
-    setLoading(true);
-    notify({
-      icon: <ActivityIndicator size={32} />,
-      style: { top: 210 },
-      direction: 'vertical',
-      duration: 1.8,
-      message: t('Reloading')
-    });
-
-    reloadCron({ data: 'staking' })
-      .then(() => {
-        setLoading(false);
-      })
-      .catch(console.error);
-  }, [notify, t]);
-
   const onSearch = useCallback((value: string) => setSearchInput(value), []);
 
   const onRow = useCallback(
@@ -370,7 +355,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, [onClickItem]);
 
   const onClickStake = useCallback(() => {
-    preCheck(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`), ExtrinsicType.STAKING_BOND);
+    preCheck(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`), ExtrinsicType.STAKING_BOND)();
   }, [navigate, preCheck]);
 
   const listSection = useMemo(() => {

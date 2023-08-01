@@ -115,7 +115,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       setShowSidebar(true);
       !isPortfolio && setBackground(BackgroundColorMap.COMMON);
 
-      if (pathName.startsWith('/home') || pathName.startsWith('/transactions') || pathName === '/settings' || pathName === '/settings/list') {
+      if (pathName.startsWith('/home') || pathName.startsWith('/transaction') || pathName === '/settings' || pathName === '/settings/list') {
         setHeaderType(HeaderType.COMMON);
       } else {
         setHeaderType(HeaderType.NONE);

@@ -4,7 +4,7 @@
 import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
-import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useDefaultNavigate, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React, { useContext, useMemo } from 'react';
@@ -142,6 +142,8 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
   const { background, headerType, isPortfolio, isSettingPage, showSidebar, title } = useContext(WebUIContext);
+  const { goBack } = useDefaultNavigate();
+
   const headerTitle = useMemo(() => {
     if (isPortfolio) {
       return t('Portfolio');
@@ -166,6 +168,13 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
       <div className={CN('web-layout-body', { 'setting-pages': isSettingPage })}>
         {headerType === HeaderType.COMMON && <div className={'web-layout-header'}>
           <Headers.Controller title={headerTitle} />
+        </div>}
+        {headerType === HeaderType.COMMON_BACK && <div className={'web-layout-header'}>
+          <Headers.Controller
+            onBack={goBack}
+            showBackButton={true}
+            title={headerTitle}
+          />
         </div>}
         {headerType === HeaderType.SIMPLE && <div className={'web-layout-header-simple'}>
           <Headers.Simple title={headerTitle} />

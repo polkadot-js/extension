@@ -291,18 +291,17 @@ function Component ({ className }: Props): JSX.Element {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={onBack}
-        {...(!isWebUI
+        rightFooterButton={!isWebUI
           ? {
-            rightFooterButton: buttonProps,
-            showBackButton: true,
-            subHeaderPaddingVertical: true,
-            showSubHeader: true,
-            subHeaderCenter: true,
-            subHeaderBackground: 'transparent'
+            children: t('Import by JSON file'),
+            icon: FooterIcon,
+            onClick: form.submit,
+            disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
+            loading: validating || loading
           }
-          : {})}
+          : undefined}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -413,7 +412,7 @@ function Component ({ className }: Props): JSX.Element {
             <InstructionContainer contents={instructionContent} />
           )}
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }

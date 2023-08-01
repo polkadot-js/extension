@@ -29,11 +29,12 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
             (
               <Icon
                 phosphorIcon={CaretLeft}
-                size={'sm'}
+                size={'lg'}
               />
             )
           }
           onClick={onBack}
+          size={'xs'}
           type='ghost'
         />
       );

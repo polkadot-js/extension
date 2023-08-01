@@ -18,6 +18,7 @@ export enum BackgroundColorMap {
 export enum HeaderType {
   NONE= 'none',
   COMMON= 'common',
+  COMMON_BACK= 'common-back',
   SIMPLE= 'simple',
 }
 

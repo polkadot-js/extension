@@ -127,18 +127,16 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={onBack}
-        {...(!isWebUI
+        rightFooterButton={!isWebUI
           ? {
-            rightFooterButton: buttonProps,
-            showBackButton: true,
-            subHeaderPaddingVertical: true,
-            showSubHeader: true,
-            subHeaderCenter: true,
-            subHeaderBackground: 'transparent'
+            children: loading ? t('Creating') : t('Scan QR'),
+            icon: FooterIcon,
+            onClick: openCamera,
+            loading: loading
           }
-          : {})}
+          : undefined}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -222,7 +220,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 };

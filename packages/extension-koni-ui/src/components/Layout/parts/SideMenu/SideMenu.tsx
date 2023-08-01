@@ -152,6 +152,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     ];
     const current = availableKey.filter((i: string) => i !== '/home' && pathname.includes(i));
 
+    if (pathname.startsWith('/transaction')) {
+      return ['/home/staking'];
+    }
+
     return current.length ? current : (pathname.startsWith('/home') ? ['/home'] : ['/settings']);
   }, [pathname]);
 

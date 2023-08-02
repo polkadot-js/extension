@@ -59,7 +59,8 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
     })
       .then((done) => {
         this._subscribed = true;
-      }).catch(console.error);
+      })
+      .catch(console.error);
   }
 
   public async enable () {
@@ -67,6 +68,9 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   }
 
   request<T> ({ method, params }: RequestArguments): Promise<T> {
+    // Subscribe event
+    this.subscribeExtensionEvents();
+
     switch (method) {
       case 'eth_requestAccounts':
         return new Promise((resolve, reject) => {
@@ -74,9 +78,6 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
 
           this.sendMessage('pub(authorize.tabV2)', { origin, accountAuthType: 'evm' })
             .then(() => {
-              // Subscribe event
-              this.subscribeExtensionEvents();
-
               // Return account list
               this.request<string[]>({ method: 'eth_accounts' })
                 .then((accounts) => {

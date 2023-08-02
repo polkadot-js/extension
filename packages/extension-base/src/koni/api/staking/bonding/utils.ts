@@ -50,10 +50,10 @@ export interface ParachainStakingStakeOption {
 }
 
 export interface ParachainStakingCandidateMetadata {
-  bond: number,
+  bond: string,
   delegationCount: number,
-  totalCounted: number,
-  lowestTopDelegationAmount: number,
+  totalCounted: string,
+  lowestTopDelegationAmount: string,
   status: any | 'Active'
 }
 

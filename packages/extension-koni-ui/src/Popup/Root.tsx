@@ -178,11 +178,11 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
       <WalletModalContext>
         <PageWrapper
           animateOnce={true}
-          className={'main-page-container'}
+          className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}
           resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay'])}
         >
           <DefaultRoute>
-            <main className={CN(className, `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
+            <main className={className}>
               <BaseWeb>
                 <Outlet />
               </BaseWeb>
@@ -198,5 +198,9 @@ export const Root = styled(_Root)<ThemeProps>(({ theme: { token } }: ThemeProps)
   display: 'flex',
   height: '100%',
   flexDirection: 'column',
-  overflow: 'auto'
+  overflow: 'auto',
+
+  '.web-layout-container': {
+    height: '100%'
+  }
 }));

@@ -46,6 +46,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       boxSizing: 'border-box'
     },
 
+    '.main-page-container.web-ui-enable': {
+      border: 0
+    },
+
     '.ant-sw-modal .ant-sw-modal-header': {
       borderRadius: '24px 24px 0 0'
     },

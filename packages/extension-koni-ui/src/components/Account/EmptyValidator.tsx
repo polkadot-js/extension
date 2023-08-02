@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useNotification } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { PageIcon } from '@subwallet/react-ui';
+import { ActivityIndicator, PageIcon } from '@subwallet/react-ui';
 import { MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,10 +16,19 @@ interface Props extends ThemeProps {
 
 const Component: React.FC<Props> = ({ className, onClickReload, validatorTitle }: Props) => {
   const { t } = useTranslation();
+  const notify = useNotification();
 
   const handleReload = useCallback(() => {
+    notify({
+      icon: <ActivityIndicator size={32} />,
+      style: { top: 210 },
+      direction: 'vertical',
+      duration: 1.8,
+      closable: false,
+      message: t('Reloading')
+    });
     onClickReload(true);
-  }, [onClickReload]);
+  }, [notify, onClickReload, t]);
 
   return (
     <div className={className}>

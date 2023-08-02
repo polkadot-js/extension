@@ -96,18 +96,18 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   }, []);
 
   const onSuccess = useCallback((result: ScannerResult) => {
-    inputRef?.current?.focus();
     setScanError('');
     inactiveModal(scannerId);
     parseAndChangeValue(result.text);
-    inputRef?.current?.blur();
-  }, [inactiveModal, scannerId, parseAndChangeValue, inputRef]);
+    // @ts-ignore
+    onBlur?.({});
+  }, [inactiveModal, scannerId, parseAndChangeValue, onBlur]);
 
   const onCloseScan = useCallback(() => {
-    inputRef?.current?.focus();
     setScanError('');
-    inputRef?.current?.blur();
-  }, [inputRef]);
+    // @ts-ignore
+    onBlur?.({});
+  }, [onBlur]);
 
   const onOpenAddressBook = useCallback((e?: SyntheticEvent) => {
     e && e.stopPropagation();
@@ -115,10 +115,10 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   }, [activeModal, addressBookId]);
 
   const onSelectAddressBook = useCallback((value: string) => {
-    inputRef?.current?.focus();
     parseAndChangeValue(value);
-    inputRef?.current?.blur();
-  }, [inputRef, parseAndChangeValue]);
+    // @ts-ignore
+    onBlur?.({});
+  }, [onBlur, parseAndChangeValue]);
 
   // todo: Will work with "Manage address book" feature later
   return (

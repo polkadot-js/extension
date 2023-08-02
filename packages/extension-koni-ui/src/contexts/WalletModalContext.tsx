@@ -32,7 +32,7 @@ export const usePredefinedModal = () => {
       }
 
       return prev;
-    });
+    }, { replace: true });
   }, [setSearchParams]);
 
   const isOpenPModal = useCallback(
@@ -75,7 +75,7 @@ export const WalletModalContext = ({ children }: Props) => {
       prev.delete('popup');
 
       return prev;
-    });
+    }, { replace: true });
   }, [setSearchParams]);
 
   useEffect(() => {

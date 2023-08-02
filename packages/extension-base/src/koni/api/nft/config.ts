@@ -47,7 +47,7 @@ export const IPFS_GATEWAY_4EVERLAND = 'https://4everland.io/ipfs/';
 
 export const IPFS_FLEEK = 'https://ipfs.fleek.co/ipfs/';
 
-export const IPFS_HARDBIN = 'https://hardbin.com/ipfs';
+export const IPFS_HARDBIN = 'https://hardbin.com/ipfs/';
 
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',

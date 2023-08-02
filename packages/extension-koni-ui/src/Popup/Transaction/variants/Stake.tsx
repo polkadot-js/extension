@@ -174,6 +174,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
       setAsset(asset);
       setChain(chain);
+      form.resetFields(['nominate', 'pool']);
     }
 
     const checkEmpty: Record<string, boolean> = {};
@@ -191,7 +192,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     setIsDisable(error || Object.values(checkEmpty).some((value) => !value));
-  }, [setAsset, setChain, setFrom]);
+  }, [form, setAsset, setChain, setFrom]);
 
   const getSelectedValidators = useCallback((nominations: string[]) => {
     const validatorList = validatorInfoMap[chain];

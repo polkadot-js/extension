@@ -296,7 +296,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           }
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          const marginColor: string = priceChangeInfo.changeStatus === 'decrease' ? theme.token?.colorSuccess : theme.token?.colorError;
+          const marginColor: string = priceChangeInfo.changeStatus === 'decrease' ? theme.token?.colorError : theme.token?.colorSuccess;
 
           return (
             <div className={'price-wrapper'}>

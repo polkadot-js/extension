@@ -5,7 +5,6 @@ import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/backg
 import { AccountCardSelection, AccountItemWithName } from '@subwallet/extension-koni-ui/components/Account';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components/MetaInfo';
-// import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -190,7 +189,8 @@ const Component: React.FC = () => {
     if (!currentAccount || !currentAccount.name) {
       return null;
     } else {
-      const content: string = isAccountAll(currentAccount?.address) ? 'All accounts' : currentAccount?.name;
+      const isAllAccount = isAccountAll(currentAccount?.address);
+      const content: string = isAllAccount ? 'All accounts' : currentAccount?.name;
 
       return (
         <div
@@ -201,11 +201,21 @@ const Component: React.FC = () => {
             zIndex: 999
           }}
         >
-          <MetaInfo.AccountGroup
-            accounts={accounts}
-            className='ava-group'
-            content={content}
-          />
+          {isAllAccount
+            ? (
+              <MetaInfo.AccountGroup
+                accounts={accounts}
+                className='ava-group'
+                content={content}
+              />
+            )
+            : (
+              <MetaInfo.Account
+                address={currentAccount?.address}
+                name={currentAccount?.name}
+              />
+            )
+          }
 
           <Button
             icon={<CaretDown size={12} />}

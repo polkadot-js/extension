@@ -58,7 +58,7 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
   );
 }
 
-const Controller = styled(Component)<Props>(({ theme }: Props) => ({
+const Controller = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   width: '100%',
 
   '.common-header': {
@@ -82,16 +82,17 @@ const Controller = styled(Component)<Props>(({ theme }: Props) => ({
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
+      gap: 8,
 
       '.trigger-container': {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         cursor: 'pointer',
-        margin: '0 4px',
-        padding: '10px 16px',
+        padding: `0 ${token.padding}px`,
+        height: 40,
         gap: 8,
-        background: '#1A1A1A',
+        background: token.colorBgSecondary,
         borderRadius: 32,
 
         '.ant-btn': {
@@ -100,12 +101,10 @@ const Controller = styled(Component)<Props>(({ theme }: Props) => ({
           width: 'fit-content'
         },
 
-        '.ava-group': {
-          '.__account-item': {
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }
+        '.__account-item': {
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
         }
       }
     }

@@ -108,6 +108,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [isBalanceReady, setIsBalanceReady] = useState(true);
   const [valueChange, setValueChange] = useState(false);
   const [, update] = useState({});
+  const [forceFetchValidator, setForceFetchValidator] = useState(false);
 
   const existentialDeposit = useMemo(() => {
     if (assetInfo) {
@@ -339,14 +340,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
     // fetch validators when change chain
     // _stakingType is predefined form start
-    if (!!chain && !!from && chainState?.active) {
-      fetchChainValidators(chain, _stakingType || ALL_KEY, unmount, setPoolLoading, setValidatorLoading);
+    if ((!!chain && !!from && chainState?.active) || forceFetchValidator) {
+      fetchChainValidators(chain, _stakingType || ALL_KEY, unmount, setPoolLoading, setValidatorLoading, setForceFetchValidator);
     }
 
     return () => {
       unmount = true;
     };
-  }, [from, _stakingType, chain, chainState?.active]);
+  }, [from, _stakingType, chain, chainState?.active, forceFetchValidator]);
 
   useEffect(() => {
     let cancel = false;
@@ -489,6 +490,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 from={from}
                 label={t('Select pool')}
                 loading={poolLoading}
+                setForceFetchValidator={setForceFetchValidator}
               />
             </Form.Item>
 
@@ -500,6 +502,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 chain={asset ? chain : ''}
                 from={asset ? from : ''}
                 loading={validatorLoading}
+                setForceFetchValidator={setForceFetchValidator}
               />
             </Form.Item>
           </Form>

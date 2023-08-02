@@ -4,14 +4,21 @@
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { PageIcon } from '@subwallet/react-ui';
 import { MagnifyingGlass } from 'phosphor-react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-type Props = ThemeProps;
+interface Props extends ThemeProps {
+  validatorTitle: string,
+  onClickReload: (val: boolean) => void
+}
 
-const Component: React.FC<Props> = ({ className }: Props) => {
+const Component: React.FC<Props> = ({ className, onClickReload, validatorTitle }: Props) => {
   const { t } = useTranslation();
+
+  const handleReload = useCallback(() => {
+    onClickReload(true);
+  }, [onClickReload]);
 
   return (
     <div className={className}>
@@ -27,13 +34,22 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         {t('No results found')}
       </div>
       <div className='description'>
-        {t('Please change your search criteria try again')}
+        {t('Unable to fetch {{value}} information', { replace: { value: validatorTitle } })}
+      </div>
+      <div className={'description'}>
+        <span
+          className={'reload-text'}
+          onClick={handleReload}
+        >
+          {t('Reload')}
+        </span>
+        <span> and try again</span>
       </div>
     </div>
   );
 };
 
-const EmptyAccount = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const EmptyValidator = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '--icon-color': token['gray-4'],
     paddingTop: token.padding,
@@ -54,8 +70,15 @@ const EmptyAccount = styled(Component)<Props>(({ theme: { token } }: Props) => {
       color: token.colorTextDescription,
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6
+    },
+
+    '.reload-text': {
+      color: token.geekblue,
+      textDecoration: 'underline',
+      cursor: 'pointer',
+      fontWeight: token.headingFontWeight
     }
   };
 });
 
-export default EmptyAccount;
+export default EmptyValidator;

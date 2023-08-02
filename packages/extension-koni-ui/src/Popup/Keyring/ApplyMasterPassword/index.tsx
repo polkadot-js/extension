@@ -403,6 +403,7 @@ const ApplyMasterPassword = styled(Component)<Props>(({ theme: { token } }: Prop
   return {
     '.__screen-body': {
       maxWidth: '416px',
+      width: '100%',
       margin: '0 auto',
       paddingLeft: token.padding,
       paddingRight: token.padding

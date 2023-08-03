@@ -116,7 +116,7 @@ export function subscribeParaChainStakingMetadata (chain: string, substrateApi: 
   return substrateApi.api.query.parachainStaking.round((_round: Codec) => {
     const roundObj = _round.toHuman() as Record<string, string>;
     const round = parseRawNumber(roundObj.current);
-    const maxDelegations = substrateApi.api.consts.parachainStaking.maxDelegationsPerDelegator.toString();
+    const maxDelegations = substrateApi.api.consts?.parachainStaking?.maxDelegationsPerDelegator?.toString();
     const unstakingDelay = substrateApi.api.consts.parachainStaking.delegationBondLessDelay.toString();
     const unstakingPeriod = parseInt(unstakingDelay) * (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default);
 

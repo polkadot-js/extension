@@ -727,5 +727,11 @@
   "Show balance": "Hiện số dư",
   "SubWallet has not supported this request for WalletConnect yet": "SubWallet chưa hỗ trợ yêu cầu này cho WalletConnect",
   "Request not supported": "Yêu cầu không được hỗ trợ",
-  "{{number}} accounts": "{{number}} tài khoản"
+  "Unable to fetch {{value}} information": "Không thể lấy thông tin của {{value}}",
+  "{{number}} accounts": "{{number}} tài khoản",
+  "Please": "Xin vui lòng",
+  "dapp": "",
+  "validator": "",
+  "collator": "",
+  " reload": " tải lại"
 }

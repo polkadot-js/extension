@@ -727,5 +727,11 @@
   "Show balance": "显示余额",
   "SubWallet has not supported this request for WalletConnect yet": "SubWallet 尚不支持连接钱包的这一请求",
   "Request not supported": "不支持的请求",
-  "{{number}} accounts": "{{number}} 账户"
+  "Unable to fetch {{value}} information": "无法获取{{value}}资料",
+  "{{number}} accounts": "{{number}} 账户",
+  "Please": "请",
+  "dapp": "",
+  "validator": "验证者",
+  "collator": "整理者",
+  " reload": "重新加载"
 }

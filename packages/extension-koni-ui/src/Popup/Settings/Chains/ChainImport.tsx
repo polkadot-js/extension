@@ -7,17 +7,15 @@ import { _generateCustomProviderKey } from '@subwallet/extension-base/services/c
 import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, Button, Col, Form, Icon, Input, Row, SwSubHeader } from '@subwallet/react-ui';
-import CN from 'classnames';
+import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -48,7 +46,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
   const [form] = Form.useForm<ChainImportForm>();
-  const { isWebUI } = useContext(ScreenContext);
   const [loading, setLoading] = useState(false);
   const [isPureEvmChain, setIsPureEvmChain] = useState(false);
   const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
@@ -133,7 +130,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       });
   }, [existentialDeposit, form, genesisHash, isPureEvmChain, navigate, showNotification, t]);
 
-  const blockExplorerValidator = useCallback((_rule: RuleObject, value: string): Promise<void> => {
+  const blockExplorerValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (value.length === 0 || isUrl(value)) {
         resolve();
@@ -143,7 +140,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     });
   }, [t]);
 
-  const crowdloanUrlValidator = useCallback((_rule: RuleObject, value: string): Promise<void> => {
+  const crowdloanUrlValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (value.length === 0 || isUrl(value)) {
         resolve();
@@ -166,7 +163,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [t]);
 
-  const providerValidator = useCallback((_rule: RuleObject, provider: string): Promise<void> => {
+  const providerValidator = useCallback((rule: RuleObject, provider: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (isUrl(provider)) {
         setIsShowConnectionStatus(true);
@@ -274,59 +271,37 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useFocusFormItem(form, 'provider');
 
-  const backBtnProps = useMemo(() => ({
-    onClick: onBack,
-    children: t('Cancel')
-  }), [onBack, t]);
-
-  const submitBtnProps = useMemo(() => ({
-    block: true,
-    disabled: isSubmitDisabled(),
-    icon: !isWebUI && (
-      <Icon
-        phosphorIcon={FloppyDiskBack}
-        type='phosphor'
-        weight={'fill'}
-      />
-    ),
-    loading: loading,
-    onClick: onSubmit,
-    children: 'Save'
-  }), [isSubmitDisabled, isWebUI, loading, onSubmit]);
-
-  const subHeaderProps = useMemo(() => isWebUI
-    ? {
-      title: t('Add network'),
-      center: false
-    }
-    : {
-      title: t<string>('Import network'),
-      center: true,
-      rightButtons: [
-        {
-          icon: <InfoIcon />,
-          onClick: handleClickSubheaderButton
-        }
-      ]
-    }, [isWebUI, t, handleClickSubheaderButton]);
-
   return (
     <PageWrapper className={`chain_import ${className}`}>
-      <Layout.Base
-        leftFooterButton={backBtnProps}
+      <Layout.WithSubHeaderOnly
+        leftFooterButton={{
+          onClick: onBack,
+          children: t('Cancel')
+        }}
         onBack={onBack}
-        rightFooterButton={submitBtnProps}
+        rightFooterButton={{
+          block: true,
+          disabled: isSubmitDisabled(),
+          icon: (
+            <Icon
+              phosphorIcon={FloppyDiskBack}
+              type='phosphor'
+              weight={'fill'}
+            />
+          ),
+          loading: loading,
+          onClick: onSubmit,
+          children: t('Save')
+        }}
+        subHeaderIcons={[
+          {
+            icon: <InfoIcon />,
+            onClick: handleClickSubheaderButton
+          }
+        ]}
+        title={t<string>('Import network')}
       >
-        <SwSubHeader
-          background='transparent'
-          onBack={onBack}
-          showBackButton={true}
-          {...subHeaderProps}
-        />
-        <div className={CN('chain_import__container', {
-          '__web-ui': isWebUI
-        })}
-        >
+        <div className={'chain_import__container'}>
           <div className={'chain_import__header_info'}>
             {t('Currently support WSS provider for Substrate networks and HTTP provider for EVM network')}
           </div>
@@ -360,26 +335,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               </Form.Item>
 
               <Row gutter={token.paddingSM}>
-                <Col span={isWebUI ? 12 : 16}>
+                <Col span={16}>
                   <Form.Item name={'name'}>
                     <Input
                       disabled={true}
                       placeholder={t('Network name')}
-                      prefix={(
-                        <Icon
-                          customSize={'24px'}
-                          iconColor={token['gray-4']}
-                          phosphorIcon={Globe}
-                          type={'phosphor'}
-                          weight={'bold'}
-                        />
-                      )}
+                      prefix={<Icon
+                        customSize={'24px'}
+                        iconColor={token['gray-4']}
+                        phosphorIcon={Globe}
+                        type={'phosphor'}
+                        weight={'bold'}
+                      />}
                       tooltip={t('Network name')}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
                 </Col>
-                <Col span={isWebUI ? 12 : 8}>
+                <Col span={8}>
                   <Form.Item name={'symbol'}>
                     <Input
                       disabled={true}
@@ -438,18 +411,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 />
               </Form.Item>
             </div>
-            {isWebUI && (
-              <div className='action-wrapper'>
-                <Button
-                  {...backBtnProps}
-                  schema='secondary'
-                />
-                <Button {...submitBtnProps} />
-              </div>
-            )}
           </Form>
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }
@@ -464,34 +428,12 @@ const ChainImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
       width: '100%',
       textAlign: 'center',
       marginBottom: token.margin,
-      marginTop: 22
+      marginTop: 24
     },
 
     '.chain_import__container': {
       marginRight: token.margin,
-      marginLeft: token.margin,
-
-      '&.__web-ui': {
-        margin: '0 auto',
-        width: '60%',
-
-        '.chain_import__header_info': {
-          margin: `${token.margin}px auto`,
-          maxWidth: '50%'
-        },
-
-        '.action-wrapper': {
-          display: 'flex',
-          width: '100%',
-          marginTop: token.marginMD,
-          gap: 16,
-
-          '& > *': {
-            flex: 1
-          }
-        }
-
-      }
+      marginLeft: token.margin
     },
 
     '.chain_import__attributes_container': {
@@ -522,6 +464,19 @@ const ChainImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-input-container .ant-input-suffix': {
       marginRight: 0
+    },
+
+    '.web-ui-enable &': {
+      '.ant-sw-screen-layout-body': {
+        flex: '0 0 auto',
+        marginBottom: token.marginXS
+      },
+
+      '.chain_import__header_info': {
+        maxWidth: 384,
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }
     }
   });
 });

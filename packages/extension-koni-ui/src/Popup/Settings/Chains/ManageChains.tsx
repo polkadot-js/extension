@@ -91,6 +91,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         chainInfo={chainInfo}
         isShowSubLogo={true}
         key={chainInfo.slug}
+        showDetailNavigation={true}
         withDivider={true}
       />
     );

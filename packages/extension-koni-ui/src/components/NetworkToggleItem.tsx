@@ -14,11 +14,11 @@ type Props = ThemeProps & {
   chainInfo: ChainInfoWithState;
   isShowSubLogo?: boolean;
   withDivider?: boolean;
-  showNavigation?: boolean;
+  showDetailNavigation?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chainInfo, className, isShowSubLogo = false, showNavigation = false, withDivider = false } = props;
+  const { chainInfo, className, isShowSubLogo = false, showDetailNavigation = false, withDivider = false } = props;
   const navigate = useNavigate();
   const connectSymbol = (chainInfo.connectionStatus === _ChainConnectionStatus.CONNECTED) ? '__connected__' : '__disconnected__';
 
@@ -36,7 +36,7 @@ const Component: React.FC<Props> = (props: Props) => {
           chainInfo={chainInfo}
           className={'__toggle-area'}
           navigate={navigate}
-          showDetailNavigation={showNavigation}
+          showDetailNavigation={showDetailNavigation}
         />
       )}
       subSymbol={connectSymbol}

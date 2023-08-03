@@ -323,6 +323,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <div className={'nft_item_detail__section_title'}>{t<string>('Properties')}</div>
                   <div className={'nft_item_detail__atts_container'}>
                     {
+                      // @ts-ignore
                       Object.entries(nftItem.properties).map(([attName, attValueObj], index) => {
                         const { value: attValue } = attValueObj as Record<string, string>;
 

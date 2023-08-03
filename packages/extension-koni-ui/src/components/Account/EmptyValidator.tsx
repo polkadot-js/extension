@@ -11,10 +11,11 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   validatorTitle: string,
-  onClickReload: (val: boolean) => void
+  onClickReload: (val: boolean) => void,
+  isDataEmpty: boolean
 }
 
-const Component: React.FC<Props> = ({ className, onClickReload, validatorTitle }: Props) => {
+const Component: React.FC<Props> = ({ className, isDataEmpty, onClickReload, validatorTitle }: Props) => {
   const { t } = useTranslation();
   const notify = useNotification();
 
@@ -43,18 +44,30 @@ const Component: React.FC<Props> = ({ className, onClickReload, validatorTitle }
       <div className='message'>
         {t('No results found')}
       </div>
-      <div className='description'>
-        {t('Unable to fetch {{value}} information', { replace: { value: validatorTitle } })}
-      </div>
-      <div className={'description'}>
-        <span
-          className={'reload-text'}
-          onClick={handleReload}
-        >
-          {t('Reload')}
-        </span>
-        <span> {t('and try again')}</span>
-      </div>
+      {
+        isDataEmpty
+          ? (
+            <div className={'data-empty-msg'}>
+              <div className='description'>
+                {t('Unable to fetch {{value}} information', { replace: { value: validatorTitle } })}
+              </div>
+              <div className={'description'}>
+                <span> {t('Please')}</span>
+                <span
+                  className={'reload-text'}
+                  onClick={handleReload}
+                >
+                  {t('reload')}
+                </span>
+              </div>
+            </div>
+          )
+          : (
+            <div className='description'>
+              {t('Please change your search criteria try again')}
+            </div>
+          )
+      }
     </div>
   );
 };
@@ -67,6 +80,12 @@ const EmptyValidator = styled(Component)<Props>(({ theme: { token } }: Props) =>
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+
+    '.data-empty-msg': {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
+    },
 
     '.message': {
       color: token.colorTextHeading,

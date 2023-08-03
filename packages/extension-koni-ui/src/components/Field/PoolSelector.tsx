@@ -181,11 +181,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const renderEmpty = useCallback(() => {
     return (
       <EmptyValidator
+        isDataEmpty={items.length === 0}
         onClickReload={setForceFetchValidator}
         validatorTitle={t(getValidatorLabel(chain).toLowerCase())}
       />
     );
-  }, [chain, setForceFetchValidator, t]);
+  }, [chain, items.length, setForceFetchValidator, t]);
 
   const renderSelected = useCallback((item: NominationPoolDataType) => {
     return (

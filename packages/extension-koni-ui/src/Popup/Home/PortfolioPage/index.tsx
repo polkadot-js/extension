@@ -7,7 +7,7 @@ import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Input, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { ChangeEventHandler, useCallback, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import styled from 'styled-components';
@@ -50,6 +50,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   }, [pathname]);
 
   const isDetail = useMemo(() => pathname.includes('detail'), [pathname]);
+
+  useEffect(() => {
+    setSearchInput('');
+  }, [pathname]);
 
   return (
     <div className={CN(className, 'portfolio-container')}>

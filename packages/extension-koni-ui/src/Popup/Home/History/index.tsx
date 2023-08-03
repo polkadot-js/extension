@@ -399,6 +399,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             renderItem={renderItem}
             renderWhenEmpty={emptyList}
             searchBy={searchFunc}
+            searchMinCharactersCount={2}
             searchTerm={searchInput}
           />
         </div>

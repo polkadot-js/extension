@@ -190,6 +190,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   renderOnScroll={true}
                   renderWhenEmpty={emptyNft}
                   searchBy={searchNft}
+                  searchMinCharactersCount={2}
                   searchTerm={outletContext.searchInput}
                 />
               </div>

@@ -727,6 +727,7 @@
   "Show balance": "",
   "SubWallet has not supported this request for WalletConnect yet": "",
   "Request not supported": "",
+  "{{number}} accounts": "",
   "Unable to fetch {{value}} information": "",
   "Reload": "",
   "and try again": ""

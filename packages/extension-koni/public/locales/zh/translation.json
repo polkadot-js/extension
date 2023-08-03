@@ -731,5 +731,6 @@
   "Reload": "重新加载",
   "and try again": "请",
   "validator": "验证者",
-  "collator": "整理者"
+  "collator": "整理者",
+  "{{number}} accounts": "{{number}} 账户"
 }

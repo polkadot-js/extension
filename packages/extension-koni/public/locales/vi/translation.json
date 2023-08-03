@@ -729,5 +729,6 @@
   "Request not supported": "Yêu cầu không được hỗ trợ",
   "Unable to fetch {{value}} information": "Không thể lấy thông tin của {{value}}",
   "Reload": "Tải lại",
-  "and try again": "và thử lại"
+  "and try again": "và thử lại",
+  "{{number}} accounts": "{{number}} tài khoản"
 }

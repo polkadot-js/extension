@@ -1526,7 +1526,12 @@ export default class KoniExtension {
 
     const historySubject = await this.#koniState.historyService.getHistorySubject();
 
-    historySubject.subscribe(cb);
+    historySubject.subscribe((histories) => {
+      const addresses = keyring.getAccounts().map((a) => a.address.toLowerCase());
+
+      // Re-filter
+      cb(histories.filter((item) => addresses.includes(item.address.toLowerCase())));
+    });
 
     this.createUnsubscriptionHandle(id, historySubject.unsubscribe);
 
@@ -1534,7 +1539,10 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return historySubject.getValue();
+    const addresses = keyring.getAccounts().map((a) => a.address.toLowerCase());
+
+    // Re-filter
+    return historySubject.getValue().filter((item) => addresses.includes(item.address.toLowerCase()));
   }
 
   // Save address to contact

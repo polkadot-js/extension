@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {SwScreenLayoutProps} from '@subwallet/react-ui';
-import {SwScreenLayout} from '@subwallet/react-ui';
+import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
-import {ScreenContext} from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import {HeaderType, WebUIContext} from '@subwallet/extension-koni-ui/contexts/WebUIContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import {SwTabBarItem} from '@subwallet/react-ui/es/sw-tab-bar';
+import { SwScreenLayout } from '@subwallet/react-ui';
+import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
-import {Aperture, Clock, Database, Rocket, Wallet} from 'phosphor-react';
-import React, {useCallback, useContext, useEffect, useMemo, useState} from 'react';
-import {useTranslation} from 'react-i18next';
-import {useLocation, useNavigate} from 'react-router-dom';
+import { Aperture, Clock, Database, Rocket, Wallet } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import Footer from '../parts/Footer';
 import SelectAccount from '../parts/SelectAccount';

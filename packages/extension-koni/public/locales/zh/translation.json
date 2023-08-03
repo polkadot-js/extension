@@ -730,8 +730,8 @@
   "Unable to fetch {{value}} information": "无法获取{{value}}资料",
   "{{number}} accounts": "{{number}} 账户",
   "Please": "请",
-  "reload": "重新加载",
   "dapp": "",
   "validator": "验证者",
-  "collator": "整理者"
+  "collator": "整理者",
+  " reload": "重新加载"
 }

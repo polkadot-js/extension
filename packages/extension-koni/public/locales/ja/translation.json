@@ -730,8 +730,8 @@
   "{{number}} accounts": "",
   "Unable to fetch {{value}} information": "",
   "Please": "",
-  "reload": "",
   "dapp": "",
   "validator": "",
-  "collator": ""
+  "collator": "",
+  " reload": ""
 }

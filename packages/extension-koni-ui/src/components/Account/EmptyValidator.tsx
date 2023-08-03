@@ -56,9 +56,7 @@ const Component: React.FC<Props> = ({ className, isDataEmpty, onClickReload, val
                 <span
                   className={'reload-text'}
                   onClick={handleReload}
-                >
-                  {t('reload')}
-                </span>
+                >{t(' reload')}</span>
               </div>
             </div>
           )

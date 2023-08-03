@@ -730,8 +730,8 @@
   "Unable to fetch {{value}} information": "Không thể lấy thông tin của {{value}}",
   "{{number}} accounts": "{{number}} tài khoản",
   "Please": "Xin vui lòng",
-  "reload": "tải lại",
   "dapp": "",
   "validator": "",
-  "collator": ""
+  "collator": "",
+  " reload": " tải lại"
 }

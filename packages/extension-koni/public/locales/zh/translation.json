@@ -726,5 +726,6 @@
   "Hide balance": "隐藏余额",
   "Show balance": "显示余额",
   "SubWallet has not supported this request for WalletConnect yet": "SubWallet 尚不支持连接钱包的这一请求",
-  "Request not supported": "不支持的请求"
+  "Request not supported": "不支持的请求",
+  "{{number}} accounts": "{{number}} 账户"
 }

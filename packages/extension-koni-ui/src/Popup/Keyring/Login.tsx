@@ -157,6 +157,10 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       top: 0
     },
 
+    '.web-ui-enable & .bg-image': {
+      display: 'none'
+    },
+
     '.ant-sw-screen-layout-body': {
       display: 'flex',
       flexDirection: 'column'

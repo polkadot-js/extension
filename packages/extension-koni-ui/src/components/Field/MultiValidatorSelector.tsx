@@ -210,10 +210,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return (
       <EmptyValidator
         onClickReload={setForceFetchValidator}
-        validatorTitle={'validator'}
+        validatorTitle={t(getValidatorLabel(chain).toLowerCase())}
       />
     );
-  }, [setForceFetchValidator]);
+  }, [chain, setForceFetchValidator, t]);
 
   const renderItem = useCallback((item: ValidatorDataType) => {
     const key = getValidatorKey(item.address, item.identity);

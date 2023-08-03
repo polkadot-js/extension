@@ -53,7 +53,7 @@ const Component: React.FC<Props> = ({ className, onClickReload, validatorTitle }
         >
           {t('Reload')}
         </span>
-        <span> and try again</span>
+        <span> {t('and try again')}</span>
       </div>
     </div>
   );

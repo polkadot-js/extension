@@ -3,6 +3,7 @@
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -181,10 +182,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return (
       <EmptyValidator
         onClickReload={setForceFetchValidator}
-        validatorTitle={'validator'}
+        validatorTitle={t(getValidatorLabel(chain).toLowerCase())}
       />
     );
-  }, [setForceFetchValidator]);
+  }, [chain, setForceFetchValidator, t]);
 
   const renderSelected = useCallback((item: NominationPoolDataType) => {
     return (

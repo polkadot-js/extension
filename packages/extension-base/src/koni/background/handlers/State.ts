@@ -422,8 +422,6 @@ export default class KoniState {
 
     const stakings = await this.dbService.getStakings(addresses, this.activeChainSlugs);
 
-    console.log('stakings', stakings);
-
     return { ready: true, details: stakings } as StakingJson;
   }
 
@@ -895,8 +893,6 @@ export default class KoniState {
       .catch((e) => this.logger.warn(e));
 
     const addresses = this.getDecodedAddresses(newAddress);
-
-    console.log('this.activeChainSlugs', this.activeChainSlugs);
 
     this.dbService.subscribeStaking(addresses, this.activeChainSlugs, (stakings) => {
       this.stakingSubject.next({

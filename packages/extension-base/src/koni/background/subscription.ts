@@ -131,11 +131,6 @@ export class KoniSubscription {
     this.state.resetStaking(address);
     const addresses = this.state.getDecodedAddresses(address);
 
-    this.state.getStaking().then((staking) => {
-      console.log(staking);
-    })
-      .catch(console.error);
-
     if (!addresses.length) {
       return;
     }

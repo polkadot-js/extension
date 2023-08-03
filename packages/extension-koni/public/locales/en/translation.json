@@ -729,6 +729,9 @@
   "Request not supported": "",
   "{{number}} accounts": "",
   "Unable to fetch {{value}} information": "",
-  "Reload": "",
-  "and try again": ""
+  "Please": "",
+  "reload": "",
+  "dapp": "",
+  "validator": "",
+  "collator": ""
 }

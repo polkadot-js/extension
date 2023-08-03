@@ -4,7 +4,7 @@
 import { _AssetType } from '@subwallet/chain-list/types';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { AbstractChainHandler, SHORT_RETRY_TIME } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
+import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -54,8 +54,8 @@ export class SubstrateChainHandler extends AbstractChainHandler {
         if (!api.useLightClient) {
           // Manual fire handle connect to avoid some chain can not reconnect
           setTimeout(() => {
-            this.handleConnection(chain, api.connectionStatus);
-          }, SHORT_RETRY_TIME);
+            this.handleConnection(chain, api.connectionStatus, true);
+          }, 10000);
         }
       }
     }

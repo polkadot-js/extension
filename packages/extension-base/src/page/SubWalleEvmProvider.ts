@@ -13,13 +13,14 @@ export interface SendSyncJsonRpcRequest extends JsonRpcRequest<unknown> {
   method: 'net_version';
 }
 
+let subscribeFlag = false;
+
 export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvider {
   public readonly isSubWallet = true;
   public readonly isMetaMask = false;
   public readonly version;
   protected sendMessage: SendRequest;
   protected _connected = false;
-  protected _subscribed = false;
 
   constructor (sendMessage: SendRequest, version: string) {
     super();
@@ -37,7 +38,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   }
 
   protected subscribeExtensionEvents () {
-    if (this._subscribed) {
+    if (subscribeFlag) {
       return;
     }
 
@@ -58,19 +59,35 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
       }
     })
       .then((done) => {
-        this._subscribed = true;
+        subscribeFlag = true;
       })
-      .catch(console.error);
+      .catch(() => {
+        subscribeFlag = false;
+      });
+
+    subscribeFlag = true;
   }
 
   public async enable () {
     return this.request({ method: 'eth_requestAccounts' });
   }
 
-  request<T> ({ method, params }: RequestArguments): Promise<T> {
-    // Subscribe event
+  public override on (eventName: string | symbol, listener: (...args: any[]) => void): this {
     this.subscribeExtensionEvents();
+    super.on(eventName, listener);
 
+    return this;
+  }
+
+  public override once (eventName: string | symbol, listener: (...args: any[]) => void): this {
+    this.subscribeExtensionEvents();
+    super.once(eventName, listener);
+
+    return this;
+  }
+
+  request<T> ({ method, params }: RequestArguments): Promise<T> {
+    // Subscribe events
     switch (method) {
       case 'eth_requestAccounts':
         return new Promise((resolve, reject) => {

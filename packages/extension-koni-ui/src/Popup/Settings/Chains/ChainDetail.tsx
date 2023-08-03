@@ -7,7 +7,6 @@ import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ProviderSelector } from '@subwallet/extension-koni-ui/components/Field/ProviderSelector';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
@@ -33,7 +32,6 @@ interface ChainDetailForm {
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const location = useLocation();
@@ -288,7 +286,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showSubHeader={true}
         subHeaderBackground={'transparent'}
         subHeaderCenter={true}
-        subHeaderIcons={isWebUI ? undefined : subHeaderButton}
+        subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
         title={t<string>('Network detail')}
       >

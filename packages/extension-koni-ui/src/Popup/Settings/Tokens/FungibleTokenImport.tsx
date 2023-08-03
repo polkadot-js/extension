@@ -6,15 +6,13 @@ import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmart
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useChainChecker, useDefaultNavigate, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Button, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SelectModal, SettingItem, SwSubHeader } from '@subwallet/react-ui';
+import { BackgroundIcon, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import CN from 'classnames';
 import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -69,7 +67,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const logosMaps = useSelector((state: RootState) => state.settings.logoMaps.chainLogoMap);
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
-  const { isWebUI } = useContext(ScreenContext);
 
   const formRef = useRef<FormInstance<TokenImportFormType>>(null);
   const chainInfoMap = useGetContractSupportedChains();
@@ -323,7 +320,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       className={`import_token ${className}`}
       resolve={dataContext.awaitStores(['assetRegistry'])}
     >
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={goBack}
         rightFooterButton={{
           block: true,
@@ -340,18 +337,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }}
         title={t<string>('Import token')}
       >
-        <SwSubHeader
-          background='transparent'
-          center={!isWebUI}
-          onBack={goBack}
-          showBackButton={true}
-          title={t<string>('Import token')}
-        />
-        <div className={CN('import_token__container', {
-          '__web-ui': isWebUI
-        })}
-        >
+        <div className={'import_token__container'}>
           <Form
+            className={'form-space-sm'}
             initialValues={{
               contractAddress: '',
               chain: '',
@@ -459,24 +447,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               />
             </Form.Item>
           </Form>
-          {isWebUI && (
-            <div className='action-wrapper'>
-              <Button
-                block={true}
-                disabled={isSubmitDisabled()}
-                icon={<Icon
-                  phosphorIcon={PlusCircle}
-                  weight='fill'
-                />}
-                loading={loading}
-                onClick={onSubmit}
-              >
-                {t('Save')}
-              </Button>
-            </div>
-          )}
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }
@@ -486,12 +458,7 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
     '.import_token__container': {
       paddingTop: token.padding,
       marginLeft: token.margin,
-      marginRight: token.margin,
-
-      '&.__web-ui': {
-        width: '60%',
-        margin: '0 auto'
-      }
+      marginRight: token.margin
     },
 
     '.import_token__selected_option': {
@@ -520,6 +487,18 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
       color: token.colorText
+    },
+
+    '.web-ui-enable &': {
+      '.ant-sw-screen-layout-body': {
+        paddingTop: token.paddingSM,
+        flex: '0 0 auto',
+        marginBottom: token.marginXS
+      },
+
+      '.ant-form .ant-form-item:last-of-type': {
+        marginBottom: 0
+      }
     }
   });
 });

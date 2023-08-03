@@ -14,4 +14,10 @@ export class SubstrateLedger extends ZondaxLedger implements Ledger {
   signMessage (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): Promise<LedgerSignature> {
     throw new Error('You are using a Ledger - Substrate account. Sign message is not supported with this account type');
   }
+
+  disconnect (): Promise<void> {
+    return super.withApp(async (app) => {
+      await app.transport.close();
+    });
+  }
 }

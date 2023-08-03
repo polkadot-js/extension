@@ -8,22 +8,24 @@ import { EvmProviderError } from '@subwallet/extension-base/background/errors/Ev
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, PassPhishing, RequestEvmProviderSend, RequestSettingsType, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, PassPhishing, RequestAddPspToken, RequestEvmProviderSend, RequestSettingsType, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
-import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
+import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAccountUnsubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
 import { canDerive, stripUrl } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { KeyringPair } from '@subwallet/keyring/types';
 import keyring from '@subwallet/ui-keyring';
 import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
+import { Subscription } from 'rxjs';
 import Web3 from 'web3';
 import { HttpProvider, RequestArguments, WebsocketProvider } from 'web3-core';
 import { JsonRpcPayload } from 'web3-core-helpers';
@@ -32,6 +34,11 @@ import { checkIfDenied } from '@polkadot/phishing';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { assert, isNumber } from '@polkadot/util';
+
+interface AccountSub {
+  subscription: Subscription;
+  url: string;
+}
 
 function transformAccountsV2 (accounts: SubjectInfo, anyType = false, authInfo?: AuthUrlInfo, accountAuthType?: AccountAuthType): InjectedAccount[] {
   const accountSelected = authInfo
@@ -93,7 +100,10 @@ export const chainPatrolCheckUrl = async (url: string) => {
 };
 
 export default class KoniTabs {
+  readonly #accountSubs: Record<string, AccountSub> = {};
+
   readonly #koniState: KoniState;
+
   private evmEventEmitterMap: Record<string, Record<string, (eventName: EvmEventType, payload: any) => void>> = {};
   #chainPatrolService: boolean = DEFAULT_CHAIN_PATROL_ENABLE;
   #passPhishing: Record<string, PassPhishing> = {};
@@ -129,16 +139,26 @@ export default class KoniTabs {
     return pair;
   }
 
-  private bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
+  private async bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
     const address = request.address;
     const pair = this.getSigningPair(address);
+    const authInfo = await this.getAuthInfo(url);
+
+    if (!authInfo || !authInfo.isAllowed || !authInfo.isAllowedMap[pair.address]) {
+      throw new Error('Account {{address}} not in allowed list'.replace('{{address}}', address));
+    }
 
     return this.#koniState.sign(url, new RequestBytesSign(request), { address, ...pair.meta });
   }
 
-  private extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
+  private async extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
     const address = request.address;
     const pair = this.getSigningPair(address);
+    const authInfo = await this.getAuthInfo(url);
+
+    if (!authInfo || !authInfo.isAllowed || !authInfo.isAllowedMap[pair.address]) {
+      throw new Error('Account {{address}} not in allowed list'.replace('{{address}}', address));
+    }
 
     return this.#koniState.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }
@@ -258,8 +278,8 @@ export default class KoniTabs {
     this.#koniState.createUnsubscriptionHandle(id, unsubscribe);
   }
 
-  async getAuthInfo (url: string): Promise<AuthUrlInfo | undefined> {
-    const authList = await this.#koniState.getAuthList();
+  async getAuthInfo (url: string, fromList?: AuthUrls): Promise<AuthUrlInfo | undefined> {
+    const authList = fromList || (await this.#koniState.getAuthList());
     const shortenUrl = stripUrl(url);
 
     return authList[shortenUrl];
@@ -272,19 +292,42 @@ export default class KoniTabs {
     return transformAccountsV2(this.#koniState.keyringService.accounts, anyType, authInfo, accountAuthType);
   }
 
-  private accountsSubscribeV2 (url: string, { accountAuthType }: RequestAccountSubscribe, id: string, port: chrome.runtime.Port): boolean {
+  private accountsSubscribeV2 (url: string, { accountAuthType }: RequestAccountSubscribe, id: string, port: chrome.runtime.Port): string {
     const cb = createSubscription<'pub(accounts.subscribeV2)'>(id, port);
-    const subscription = this.#koniState.keyringService.accountSubject.subscribe((accounts: SubjectInfo): void => {
-      this.getAuthInfo(url).then((authInfo) => {
-        cb(transformAccountsV2(accounts, false, authInfo, accountAuthType));
-      }).catch(console.error);
-    });
+    const authInfoSubject = this.#koniState.requestService.subscribeAuthorizeUrlSubject;
 
-    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+    // Update unsubscribe from @polkadot/extension-base
+    this.#accountSubs[id] = {
+      subscription: authInfoSubject.subscribe((infos: AuthUrls) => {
+        this.getAuthInfo(url, infos)
+          .then((authInfo) => {
+            const accounts = this.#koniState.keyringService.accounts;
+
+            return cb(transformAccountsV2(accounts, false, authInfo, accountAuthType));
+          })
+          .catch(console.error);
+      }),
+      url
+    };
 
     port.onDisconnect.addListener((): void => {
-      this.cancelSubscription(id);
+      this.accountsUnsubscribe(url, { id });
     });
+
+    return id;
+  }
+
+  private accountsUnsubscribe (url: string, { id }: RequestAccountUnsubscribe): boolean {
+    const sub = this.#accountSubs[id];
+
+    if (!sub || sub.url !== url) {
+      return false;
+    }
+
+    delete this.#accountSubs[id];
+
+    unsubscribe(id);
+    sub.subscription.unsubscribe();
 
     return true;
   }
@@ -472,7 +515,7 @@ export default class KoniTabs {
           tokenInfo.contractError = true;
         } else {
           tokenInfo.slug = validate?.existedSlug;
-          tokenInfo.name = validate.name;
+          tokenInfo.name = validate.name || tokenInfo.name;
           tokenInfo.symbol = validate.symbol;
           tokenInfo.decimals = validate.decimals;
         }
@@ -921,6 +964,73 @@ export default class KoniTabs {
     }
   }
 
+  public async addPspToken (id: string, url: string, { genesisHash, tokenInfo: input }: RequestAddPspToken) {
+    const _tokenType = input.type;
+
+    if (_tokenType !== 'psp22' && _tokenType !== 'psp34') {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, `Assets type ${_tokenType} is not supported`);
+    }
+
+    if (!input.address || !input.symbol) {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Assets params require address and symbol');
+    }
+
+    const [chain] = this.#koniState.findNetworkKeyByGenesisHash(genesisHash);
+
+    if (!chain) {
+      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current chain is not available');
+    }
+
+    const state = this.#koniState.getChainStateByKey(chain);
+
+    if (!state.active) {
+      await this.#koniState.enableChain(chain, false);
+      const api = this.#koniState.getSubstrateApi(chain);
+
+      await api.isReady;
+    }
+
+    const tokenType = _tokenType === 'psp22' ? _AssetType.PSP22 : _AssetType.PSP34;
+
+    const tokenInfo: AddTokenRequestExternal = {
+      slug: '',
+      type: tokenType,
+      name: input.symbol || '',
+      contractAddress: input.address,
+      symbol: input.symbol || '',
+      decimals: input.decimals || 0,
+      originChain: chain,
+      contractError: false,
+      validated: false
+    };
+
+    this.#koniState.validateCustomAsset({
+      type: tokenType,
+      contractAddress: input.address,
+      originChain: chain
+    })
+      .then((validate) => {
+        if (validate.contractError) {
+          tokenInfo.contractError = true;
+        } else {
+          tokenInfo.slug = validate?.existedSlug;
+          tokenInfo.name = validate.name || tokenInfo.name;
+          tokenInfo.symbol = validate.symbol;
+          tokenInfo.decimals = validate.decimals;
+        }
+      })
+      .catch(() => {
+        tokenInfo.contractError = true;
+      })
+      .finally(() => {
+        tokenInfo.validated = true;
+
+        this.#koniState.requestService.updateConfirmation(id, 'addTokenRequest', tokenInfo);
+      });
+
+    return await this.#koniState.addTokenConfirm(id, url, tokenInfo);
+  }
+
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type === 'pub(phishing.redirectIfDenied)') {
       return this.redirectIfPhishing(url);
@@ -951,6 +1061,9 @@ export default class KoniTabs {
       case 'pub(metadata.provide)':
         return this.metadataProvide(url, request as MetadataDef);
 
+      case 'pub(ping)':
+        return Promise.resolve(true);
+
       case 'pub(rpc.listProviders)':
         return this.rpcListProviders();
 
@@ -969,6 +1082,9 @@ export default class KoniTabs {
       case 'pub(rpc.unsubscribe)':
         return this.rpcUnsubscribe(request as RequestRpcUnsubscribe, port);
 
+      case 'pub(token.add)':
+        return this.addPspToken(id, url, request as RequestAddPspToken);
+
       ///
       case 'pub(authorize.tabV2)':
         return this.authorizeV2(url, request as RequestAuthorizeTab);
@@ -976,6 +1092,8 @@ export default class KoniTabs {
         return this.accountsListV2(url, request as RequestAccountList);
       case 'pub(accounts.subscribeV2)':
         return this.accountsSubscribeV2(url, request as RequestAccountSubscribe, id, port);
+      case 'pub(accounts.unsubscribe)':
+        return this.accountsUnsubscribe(url, request as RequestAccountUnsubscribe);
       case 'evm(events.subscribe)':
         return await this.evmSubscribeEvents(url, id, port);
       case 'evm(request)':

@@ -12,6 +12,7 @@ import { DEFAULT_AUX } from '@subwallet/extension-base/services/chain-service/ha
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainConnectionStatus, _SubstrateApi, _SubstrateDefaultFormatBalance } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
+import { spec as availSpec } from 'avail-js-sdk';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
@@ -111,6 +112,13 @@ export class SubstrateApi implements _SubstrateApi {
         rpc: oakRpc,
         types: oakTypes
       });
+    } else if (_API_OPTIONS_CHAIN_GROUP.avail.includes(this.chainSlug)) {
+      return new ApiPromise({
+        provider,
+        rpc: availSpec.rpc,
+        types: availSpec.types,
+        signedExtensions: availSpec.signedExtensions
+      });
     } else {
       api = new ApiPromise(apiOption);
     }
@@ -123,14 +131,14 @@ export class SubstrateApi implements _SubstrateApi {
     return api;
   }
 
-  constructor (chainSlug: string, apiUrl: string, { metadata, providerName }: _ApiOptions = {}) {
+  constructor (chainSlug: string, apiUrl: string, { externalApiPromise, metadata, providerName }: _ApiOptions = {}) {
     this.chainSlug = chainSlug;
     this.apiUrl = apiUrl;
     this.providerName = providerName;
     this.registry = new TypeRegistry();
     this.metadata = metadata;
     this.provider = this.createProvider(apiUrl);
-    this.api = this.createApi(this.provider);
+    this.api = externalApiPromise || this.createApi(this.provider);
 
     this.handleApiReady = createPromiseHandler<_SubstrateApi>();
   }

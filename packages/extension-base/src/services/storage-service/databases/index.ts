@@ -35,6 +35,8 @@ export interface IMigration {
 
 export interface IMetadataItem extends MetadataItem, DefaultChainDoc {}
 
+export type IMantaPayLedger = any;
+
 export default class KoniDatabase extends Dexie {
   public price!: Table<PriceJson, object>;
   public balances!: Table<IBalance, object>;
@@ -52,6 +54,8 @@ export default class KoniDatabase extends Dexie {
 
   public chainStakingMetadata!: Table<ChainStakingMetadata, object>;
   public nominatorMetadata!: Table<NominatorMetadata, object>;
+
+  public mantaPay!: Table<IMantaPayLedger, object>;
 
   private schemaVersion: number;
 
@@ -80,6 +84,10 @@ export default class KoniDatabase extends Dexie {
 
     this.conditionalVersion(2, {
       metadata: 'genesisHash, chain'
+    });
+
+    this.conditionalVersion(3, {
+      mantaPay: 'key, chain'
     });
   }
 

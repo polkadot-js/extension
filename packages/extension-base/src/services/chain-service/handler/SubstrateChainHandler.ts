@@ -201,7 +201,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     substrateAPI?.destroy().catch(console.error);
   }
 
-  public async initApi (chainSlug: string, apiUrl: string, { onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<_SubstrateApi> {
+  public async initApi (chainSlug: string, apiUrl: string, { externalApiPromise, onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<SubstrateApi> {
     const existed = this.substrateApiMap[chainSlug];
 
     // Return existed to avoid re-init metadata
@@ -216,7 +216,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     }
 
     const metadata = await this.parent?.getMetadata(chainSlug);
-    const apiObject = new SubstrateApi(chainSlug, apiUrl, { providerName, metadata });
+    const apiObject = new SubstrateApi(chainSlug, apiUrl, { providerName, metadata, externalApiPromise });
 
     apiObject.connectionStatusSubject.subscribe(this.handleConnection.bind(this, chainSlug));
     onUpdateStatus && apiObject.connectionStatusSubject.subscribe(onUpdateStatus);

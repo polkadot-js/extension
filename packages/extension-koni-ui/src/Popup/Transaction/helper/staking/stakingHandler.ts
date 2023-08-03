@@ -1,38 +1,39 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingType, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
 import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import moment from 'moment';
+import { TFunction } from 'react-i18next';
 
-export function getUnstakingPeriod (unstakingPeriod?: number) {
+export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
   if (unstakingPeriod) {
     const days = unstakingPeriod / 24;
 
     if (days < 1) {
-      return `${unstakingPeriod} hours`;
+      return t('{{time}} hours', { replace: { time: unstakingPeriod } });
     } else {
-      return `${days} days`;
+      return t('{{time}} days', { replace: { time: days } });
     }
   }
 
   return '';
 }
 
-export function getWaitingTime (waitingTime?: number) {
-  const days = waitingTime ? moment.duration(waitingTime, 'hours').humanize() : 0;
-
-  if (days < 1) {
-    if (days) {
-      return 'Withdraw in a day';
-    } else {
-      return 'Available for withdrawal';
-    }
+export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t: TFunction) {
+  if (status === UnstakingStatus.CLAIMABLE) {
+    return t('Available for withdrawal');
   } else {
-    return `Withdraw in ${days}`;
+    if (waitingTime >= 1) {
+      const days = moment.duration(waitingTime, 'hours').humanize();
+
+      return t('Withdraw in {{time}}', { replace: { time: days } });
+    } else {
+      return t('Withdrawable in a day');
+    }
   }
 }
 

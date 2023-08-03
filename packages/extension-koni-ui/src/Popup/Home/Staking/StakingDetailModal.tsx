@@ -6,16 +6,19 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { getValidatorLabel, isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
 import { useGetAccountByAddress, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
+import useGetAccountsByStaking from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetAccountsByStaking';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/utils';
+import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
@@ -41,7 +44,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
   const showingOption = isShowNominationByValidator(chain);
   const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
-  const modalTitle = type === StakingType.NOMINATED.valueOf() ? 'Nomination details' : 'Pooled details';
+  const modalTitle = type === StakingType.NOMINATED.valueOf() ? detectTranslate('Nomination details') : detectTranslate('Pooled details');
 
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
@@ -56,6 +59,8 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
   const account = useGetAccountByAddress(staking.address);
+
+  const stakingAccounts = useGetAccountsByStaking(chain, type);
 
   const stakingTypeNameMap: Record<string, string> = {
     nominated: t('Nominated'),
@@ -89,6 +94,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         />
         <Button
           className='__action-btn'
+          disabled={new BigN(activeStake || '0').lte(0) }
           onClick={onClickFooterButton(
             onClickUnstakeBtn,
             staking.type === StakingType.POOLED ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND
@@ -181,7 +187,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
             {unstakingData.status === UnstakingStatus.UNLOCKING.valueOf() &&
               <div className={'sm-text text-light-4'}>
-                {getWaitingTime(unstakingData.waitingTime)}
+                {getWaitingTime(unstakingData.waitingTime, unstakingData.status, t)}
               </div>
             }
           </div>
@@ -190,7 +196,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         <MetaInfo.Status
           label={t('Staking status')}
           statusIcon={getStakingStatus(item.status).icon}
-          statusName={getStakingStatus(item.status).name}
+          statusName={t(getStakingStatus(item.status).name)}
           valueColorSchema={getStakingStatus(item.status).schema}
         />
       </MetaInfo>
@@ -209,6 +215,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     >
       <MetaInfo>
         <MetaInfo.Account
+          accounts={isAccountAll(address) ? stakingAccounts : undefined}
           address={address}
           label={t('Account')}
           name={account?.name}
@@ -224,7 +231,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         <MetaInfo.Status
           label={t('Staking status')}
           statusIcon={getStakingStatus(nominatorMetadata.status).icon}
-          statusName={getStakingStatus(nominatorMetadata.status).name}
+          statusName={t(getStakingStatus(nominatorMetadata.status).name)}
           valueColorSchema={getStakingStatus(nominatorMetadata.status).schema}
         />
 
@@ -253,19 +260,19 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           value={String(parseFloat(activeStake) + parseFloat(staking.unlockingBalance || '0'))}
         />
 
-        {<MetaInfo.Number
+        <MetaInfo.Number
           decimals={decimals}
           label={t('Active staked')}
           suffix={staking.nativeToken}
           value={activeStake}
-        />}
+        />
 
-        {<MetaInfo.Number
+        <MetaInfo.Number
           decimals={decimals}
           label={t('Unstaked')}
           suffix={staking.nativeToken}
           value={staking.unlockingBalance || '0'}
-        />}
+        />
 
         <MetaInfo.Chain
           chain={staking.chain}
@@ -316,7 +323,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
             label={t('Unstaking period')}
             valueColorSchema={'gray'}
           >
-            {getUnstakingPeriod(unstakingPeriod)}
+            {getUnstakingPeriod(t, unstakingPeriod)}
           </MetaInfo.Default>}
         </MetaInfo>
 
@@ -395,7 +402,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                   <MetaInfo.Number
                     decimals={decimals}
                     key={`${item.validatorAddress || item.chain}-${item.status}-${item.claimable}`}
-                    label={getWaitingTime(item.waitingTime) ? t(getWaitingTime(item.waitingTime)) : t('Withdraw')}
+                    label={getWaitingTime(item.waitingTime, item.status, t) ? t(getWaitingTime(item.waitingTime, item.status, t)) : t('Withdraw')}
                     suffix={staking.nativeToken}
                     value={item.claimable || ''}
                     valueColorSchema={'gray'}

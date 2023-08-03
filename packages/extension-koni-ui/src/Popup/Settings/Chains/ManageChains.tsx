@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { Layout, OptionType, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
@@ -29,14 +29,6 @@ enum FilterValue {
   EVM = 'evm'
 }
 
-const FILTER_OPTIONS = [
-  { label: 'EVM networks', value: FilterValue.EVM },
-  { label: 'Substrate networks', value: FilterValue.SUBSTRATE },
-  { label: 'Custom networks', value: FilterValue.CUSTOM },
-  { label: 'Enabled networks', value: FilterValue.ENABLED },
-  { label: 'Disabled networks', value: FilterValue.DISABLED }
-];
-
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -44,6 +36,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal } = useContext(ModalContext);
   const chainInfoList = useChainInfoWithState();
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const FILTER_OPTIONS = useMemo((): OptionType[] => ([
+    { label: t('EVM networks'), value: FilterValue.EVM },
+    { label: t('Substrate networks'), value: FilterValue.SUBSTRATE },
+    { label: t('Custom networks'), value: FilterValue.CUSTOM },
+    { label: t('Enabled networks'), value: FilterValue.ENABLED },
+    { label: t('Disabled networks'), value: FilterValue.DISABLED }
+  ]), [t]);
+
   const filterFunction = useMemo<(item: ChainInfoWithState) => boolean>(() => {
     return (chainInfo) => {
       if (!selectedFilters.length) {
@@ -222,6 +223,17 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
       'button + button': {
         marginLeft: token.marginXS
       }
+    },
+
+    '.ant-web3-block .ant-web3-block-middle-item': {
+      width: 190
+    },
+
+    '.ant-network-item-name': {
+      overflow: 'hidden',
+      textWrap: 'nowrap',
+      textOverflow: 'ellipsis',
+      paddingRight: token.paddingXS
     }
   });
 });

@@ -151,7 +151,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
   'pri(signing.isLocked)': [RequestSigningIsLocked, ResponseSigningIsLocked];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
-  'pri(window.open)': [AllowedPath, boolean];
+  'pri(window.open)': [WindowOpenParams, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
@@ -162,6 +162,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];
   'pub(metadata.provide)': [MetadataDef, boolean];
   'pub(phishing.redirectIfDenied)': [null, boolean];
+  'pub(ping)': [null, boolean];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
   'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse<unknown>];
   'pub(rpc.startProvider)': [string, ProviderMeta];
@@ -312,6 +313,10 @@ export interface RequestAccountSubscribe {
   accountAuthType?: AccountAuthType
 }
 
+export interface RequestAccountUnsubscribe {
+  id: string
+}
+
 export interface RequestRpcSend {
   method: string;
   params: unknown[];
@@ -458,6 +463,12 @@ export interface ResponseJsonRestore {
 }
 
 export type AllowedPath = typeof ALLOWED_PATH[number];
+
+export type WindowOpenParams = {
+  allowedPath: AllowedPath;
+  subPath?: string;
+  params?: Record<string, string>;
+}
 
 export interface ResponseJsonGetAccountInfo {
   address: string;

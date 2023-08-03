@@ -10,11 +10,11 @@ import { INft } from '../databases';
 export default class NftStore extends BaseStoreWithAddressAndChain<INft> {
   getNft (addresses: string[], chainList: string[] = []) {
     if (addresses.length) {
-      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => !chainList.length || chainList.includes(item.chain)).toArray();
+      return this.table.where('address').anyOfIgnoreCase(addresses).and((item) => chainList && chainList.includes(item.chain)).toArray();
     }
 
     // return this.table.filter((item) => !chainHashes.length || chainHashes.includes(item.chainHash)).toArray();
-    return this.table.filter((item) => !chainList.length || chainList.includes(item.chain)).toArray();
+    return this.table.filter((item) => chainList && chainList.includes(item.chain)).toArray();
   }
 
   subscribeNft (addresses: string[], chainList: string[] = []) {
@@ -60,6 +60,10 @@ export default class NftStore extends BaseStoreWithAddressAndChain<INft> {
       address,
       collectionId
     }).filter((item) => nftIds.includes(item.id || '')).delete();
+  }
+
+  removeNftsByAddress (addresses: string[]) {
+    return this.table.where('address').anyOfIgnoreCase(addresses).delete();
   }
 
   // reformatCollectionIds (items: INft[]) {

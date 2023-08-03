@@ -11,7 +11,8 @@ export const API_MAX_RETRY = 2;
 
 export const _API_OPTIONS_CHAIN_GROUP = {
   acala: ['acala', 'karura', 'origintrail', 'kintsugi'],
-  turing: ['turingStaging', 'turing']
+  turing: ['turingStaging', 'turing'],
+  avail: ['kate']
 };
 
 export const _PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {
@@ -30,8 +31,8 @@ export const _BALANCE_CHAIN_GROUP = {
   kintsugi: ['kintsugi', 'interlay', 'kintsugi_test', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
-  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main'],
-  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel'],
+  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum'],
+  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'] // perhaps there are some runtime updates
 };
 
@@ -55,7 +56,7 @@ export const _STAKING_CHAIN_GROUP = {
   relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
   astar: ['astar', 'shiden', 'shibuya'],
-  amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine'], // amplitude and kilt only share some common logic
+  amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine', 'pendulum'], // amplitude and kilt only share some common logic
   kilt: ['kilt', 'kilt_peregrine'],
   nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph'],
   bifrost: ['bifrost', 'bifrost_testnet'],
@@ -86,6 +87,7 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   calamari_test: 6,
   amplitude: 2,
   amplitude_test: 2,
+  pendulum: 2,
   kilt: 2,
   kilt_peregrine: 2
 };
@@ -184,12 +186,19 @@ export const _TRANSFER_CHAIN_GROUP = {
   statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel'],
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
-  avail: ['kate']
+  avail: ['kate'],
+  pendulum: ['pendulum']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {
   bobabeam: ['bobabeam', 'bobabase']
 };
+
+export const _MANTA_ZK_CHAIN_GROUP = ['calamari'];
+
+export const _ZK_ASSET_PREFIX = 'zk';
+
+export const _DEFAULT_MANTA_ZK_CHAIN = 'calamari';
 
 // XCM------------------------------------------------------------------------------------------------------------------
 

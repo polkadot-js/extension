@@ -123,7 +123,7 @@ function Component ({ activeNominators,
         />
 
         {!!unstakingPeriod && <MetaInfo.Default label={t('Unstaking period')}>
-          <span>{getUnstakingPeriod(unstakingPeriod)}</span>
+          <span>{getUnstakingPeriod(t, unstakingPeriod)}</span>
         </MetaInfo.Default>}
       </MetaInfo>
     </SwModal>

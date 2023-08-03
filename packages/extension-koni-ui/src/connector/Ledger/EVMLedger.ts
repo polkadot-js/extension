@@ -27,7 +27,7 @@ export class EVMLedger extends Ledger {
   }
 
   getAddress (confirm?: boolean, accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): Promise<LedgerAddress> {
-    return this.#withApp(async (app): Promise<LedgerAddress> => {
+    return this.withApp(async (app): Promise<LedgerAddress> => {
       const path = this.#serializePath(accountOffset, addressOffset, accountOptions);
 
       const { address, publicKey } = await this.#wrapError(app.getAddress(path, confirm));
@@ -40,7 +40,7 @@ export class EVMLedger extends Ledger {
   }
 
   getVersion (): Promise<LedgerVersion> {
-    return this.#withApp(async (app): Promise<LedgerVersion> => {
+    return this.withApp(async (app): Promise<LedgerVersion> => {
       const { version } = await this.#wrapError(app.getAppConfiguration());
 
       const [_major, _minor, _patch] = version.split('.');
@@ -58,7 +58,7 @@ export class EVMLedger extends Ledger {
   }
 
   async signTransaction (message: Uint8Array, accountOffset = 0, addressOffset = 0, accountOptions: AccountOptions): Promise<LedgerSignature> {
-    return this.#withApp(async (app): Promise<LedgerSignature> => {
+    return this.withApp(async (app): Promise<LedgerSignature> => {
       const hex = hexStripPrefix(u8aToHex(message));
       const path = this.#serializePath(accountOffset, addressOffset, accountOptions);
 
@@ -75,7 +75,7 @@ export class EVMLedger extends Ledger {
   }
 
   async signMessage (message: Uint8Array, accountOffset = 0, addressOffset = 0, accountOptions: AccountOptions): Promise<LedgerSignature> {
-    return this.#withApp(async (app): Promise<LedgerSignature> => {
+    return this.withApp(async (app): Promise<LedgerSignature> => {
       const hex = hexStripPrefix(u8aToHex(message));
       const path = this.#serializePath(accountOffset, addressOffset, accountOptions);
 
@@ -116,7 +116,7 @@ export class EVMLedger extends Ledger {
     return this.#app;
   };
 
-  #withApp = async<T> (fn: (_app: EthApp) => Promise<T>): Promise<T> => {
+  withApp = async<T> (fn: (_app: EthApp) => Promise<T>): Promise<T> => {
     try {
       const app = await this.#getApp();
 
@@ -132,12 +132,19 @@ export class EVMLedger extends Ledger {
     try {
       return await promise;
     } catch (e) {
-      const error = (e as Error).message;
-      const message = mappingError(error);
+      const error = e as Error;
 
-      throw new Error(message);
+      error.message = mappingError(error.message);
+
+      throw error;
     }
   };
+
+  override disconnect (): Promise<void> {
+    return this.withApp(async (app) => {
+      await app.transport.close();
+    });
+  }
 }
 
 const mappingError = (error: string): string => {

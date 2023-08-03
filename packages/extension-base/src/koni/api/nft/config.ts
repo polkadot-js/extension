@@ -19,7 +19,9 @@ export const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
 
 export const CLOUDFLARE_PINATA_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 
-export const BIT_COUNTRY_SERVER = 'https://ipfs-cdn.bit.country/';
+export const BIT_COUNTRY_IPFS_SERVER = 'https://ipfs-cdn.bit.country/';
+
+export const BIT_COUNTRY_LAND_ESTATE_METADATA_API = 'https://pioneer-api.bit.country/metadata/landTokenUriPioneer';
 
 export const BIT_COUNTRY_THUMBNAIL_RESOLVER = 'https://res.cloudinary.com/ddftctzph/image/upload/c_scale,q_100,w_250/production-ipfs/asset/';
 
@@ -35,17 +37,17 @@ export const UNIQUE_IPFS_GATEWAY = 'https://ipfs.unique.network/ipfs/';
 
 export const NFT_STORAGE_GATEWAY = 'https://nftstorage.link/ipfs/';
 
-export const IPFS_IO_GATEWAY = 'https://ipfs.io/ipfs/';
+export const IPFS_W3S_LINK = 'https://w3s.link/ipfs/';
 
 export const GATEWAY_IPFS_IO = 'https://gateway.ipfs.io/ipfs/';
 
 export const DWEB_LINK = 'https://dweb.link/ipfs/';
 
-export const IPFS_GATEWAY_CLOUD = 'https://ipfs-gateway.cloud/ipfs/';
+export const IPFS_GATEWAY_4EVERLAND = 'https://4everland.io/ipfs/';
 
 export const IPFS_FLEEK = 'https://ipfs.fleek.co/ipfs/';
 
-export const IPFS_TELOS_MIAMI = 'https://ipfs.telos.miami/ipfs';
+export const IPFS_HARDBIN = 'https://hardbin.com/ipfs/';
 
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
@@ -105,10 +107,6 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
 
 const RANDOM_IPFS_GATEWAY_SETTING = [
   {
-    provider: IPFS_IO_GATEWAY,
-    weight: 0 // Not stable
-  },
-  {
     provider: CF_IPFS_GATEWAY,
     weight: 4
   },
@@ -127,14 +125,6 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
   {
     provider: DWEB_LINK,
     weight: 5
-  },
-  {
-    provider: IPFS_GATEWAY_CLOUD,
-    weight: 0 // Deceptive site warning
-  },
-  {
-    provider: IPFS_TELOS_MIAMI,
-    weight: 0
   }
 ];
 
@@ -146,6 +136,18 @@ if (!RuntimeInfo.protocol || (RuntimeInfo.protocol && !RuntimeInfo.protocol.star
   RANDOM_IPFS_GATEWAY_SETTING.push({
     provider: IPFS_FLEEK,
     weight: 4
+  });
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: IPFS_HARDBIN,
+    weight: 1
+  });
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: IPFS_GATEWAY_4EVERLAND,
+    weight: 2
+  });
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: IPFS_W3S_LINK,
+    weight: 1
   });
 }
 

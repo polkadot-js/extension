@@ -145,15 +145,15 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
 
   if (unlockingChunks.length > 0) {
     for (const unlockingChunk of unlockingChunks) {
-      const isClaimable = unlockingChunk.unlockEra - parseInt(currentEra) <= 0;
-      const remainingEra = unlockingChunk.unlockEra - (parseInt(currentEra) + 1);
+      const isClaimable = unlockingChunk.unlockEra - parseInt(currentEra) < 0;
+      const remainingEra = unlockingChunk.unlockEra - parseInt(currentEra);
       const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
 
       unstakingList.push({
         chain: chainInfo.slug,
         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
         claimable: unlockingChunk.amount.toString(),
-        waitingTime: waitingTime > 0 ? waitingTime : 0
+        waitingTime
       });
     }
   }
@@ -258,15 +258,15 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
 
   if (unlockingChunks.length > 0) {
     for (const unlockingChunk of unlockingChunks) {
-      const isClaimable = unlockingChunk.unlockEra - parseInt(currentEra) <= 0;
-      const remainingEra = unlockingChunk.unlockEra - (parseInt(currentEra) + 1);
+      const isClaimable = unlockingChunk.unlockEra - parseInt(currentEra) < 0;
+      const remainingEra = unlockingChunk.unlockEra - parseInt(currentEra);
       const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
 
       unstakingList.push({
         chain,
         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
         claimable: unlockingChunk.amount.toString(),
-        waitingTime: waitingTime > 0 ? waitingTime : 0
+        waitingTime
       });
     }
   }

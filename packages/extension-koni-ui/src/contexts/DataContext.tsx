@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import { getLogoMaps, subscribeAccountsData, subscribeAddressBook, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeChainInfoMap, subscribeChainStakingMetadata, subscribeChainStateMap, subscribeConfirmationRequests, subscribeConnectWCRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStaking, subscribeStakingNominatorMetadata, subscribeStakingReward, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeWalletConnectSessions, subscribeXcmRefMap } from '@subwallet/extension-koni-ui/stores/utils';
+import { getLogoMaps, subscribeAccountsData, subscribeAddressBook, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeChainInfoMap, subscribeChainStakingMetadata, subscribeChainStateMap, subscribeConfirmationRequests, subscribeConnectWCRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMantaPayConfig, subscribeMantaPaySyncingState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStaking, subscribeStakingNominatorMetadata, subscribeStakingReward, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeWalletConnectSessions, subscribeWCNotSupportRequests, subscribeXcmRefMap } from '@subwallet/extension-koni-ui/stores/utils';
 import Bowser from 'bowser';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -200,6 +200,9 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeAssetSettings, name: 'subscribeAssetSettings', relatedStores: ['assetRegistry'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeXcmRefMap, name: 'subscribeXcmRefMap', relatedStores: ['assetRegistry'], isStartImmediately: true });
 
+  _DataContext.addHandler({ ...subscribeMantaPayConfig, name: 'subscribeMantaPayConfig', relatedStores: ['mantaPay'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeMantaPaySyncingState, name: 'subscribeMantaPaySyncingState', relatedStores: ['mantaPay'], isStartImmediately: true });
+
   // Settings
   _DataContext.addHandler({ ...subscribeUiSettings, name: 'subscribeUiSettings', relatedStores: ['settings'], isStartImmediately: true });
   _DataContext.addHandler({ ...getLogoMaps, name: 'getLogoMaps', relatedStores: ['settings'], isStartImmediately: true });
@@ -212,6 +215,7 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeConfirmationRequests, name: 'subscribeConfirmationRequests', relatedStores: ['requestState'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeTransactionRequests, name: 'subscribeTransactionRequests', relatedStores: ['requestState'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeConnectWCRequests, name: 'subscribeConnectWCRequests', relatedStores: ['requestState'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeWCNotSupportRequests, name: 'subscribeWCNotSupportRequests', relatedStores: ['requestState'], isStartImmediately: true });
 
   // Features
   _DataContext.addHandler({ ...subscribePrice, name: 'subscribePrice', relatedStores: ['price'] });

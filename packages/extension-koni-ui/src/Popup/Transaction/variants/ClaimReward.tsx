@@ -160,7 +160,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(_stakingChain);
     const bnUnclaimedReward = new BN(reward?.unclaimedReward || '0');
 
-    return ((stakingType === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) || isAstarNetwork;
+    return ((stakingType === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) || (isAstarNetwork && !!nominatorMetadata.nominations.length);
   }, [allNominatorInfo, chainInfoMap, rewardList, stakingChain, stakingType]);
 
   useEffect(() => {

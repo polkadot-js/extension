@@ -4,6 +4,8 @@
 import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 
+import { ApiPromise } from '@polkadot/api';
+
 export interface _EvmChainSpec {
   evmChainId: number,
   name: string,
@@ -25,7 +27,8 @@ export interface _SubstrateChainSpec {
 export interface _ApiOptions {
   providerName?: string,
   metadata?: MetadataItem,
-  onUpdateStatus?: (status: _ChainConnectionStatus) => void;
+  onUpdateStatus?: (status: _ChainConnectionStatus) => void,
+  externalApiPromise?: ApiPromise
 }
 
 export enum _CHAIN_VALIDATION_ERROR {

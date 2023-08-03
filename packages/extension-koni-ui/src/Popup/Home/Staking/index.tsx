@@ -8,6 +8,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { sortStakingByValue } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { ArrowClockwise, FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -25,11 +26,6 @@ enum FilterValue {
   NOMINATED = 'nominated',
   POOLED = 'pooled'
 }
-
-const FILTER_OPTIONS = [
-  { label: 'Nominated', value: StakingType.NOMINATED },
-  { label: 'Pooled', value: StakingType.POOLED }
-];
 
 const rightIcon = (
   <Icon
@@ -65,6 +61,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
+
+  const items = useMemo(() => {
+    const result = stakingItems.map((item) => ({ ...item, price: priceMap[item.staking.chain] || 0 }));
+
+    return result.sort(sortStakingByValue);
+  }, [priceMap, stakingItems]);
+
+  const FILTER_OPTIONS = useMemo(() => ([
+    { label: t('Nominated'), value: StakingType.NOMINATED },
+    { label: t('Pooled'), value: StakingType.POOLED }
+  ]), [t]);
 
   const filterFunction = useMemo<(item: StakingDataType) => boolean>(() => {
     return (item) => {
@@ -123,6 +130,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           style: { top: 210 },
           direction: 'vertical',
           duration: 1.8,
+          closable: false,
           message: t('Reloading')
         });
 
@@ -201,7 +209,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           )}
           enableSearchInput={true}
           filterBy={filterFunction}
-          list={stakingItems}
+          list={items}
           onClickActionBtn={onClickActionBtn}
           renderItem={renderItem}
           renderWhenEmpty={emptyStakingList}

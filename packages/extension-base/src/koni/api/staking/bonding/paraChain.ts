@@ -18,9 +18,6 @@ interface CollatorExtraInfo {
   active: boolean,
   identity?: string,
   isVerified: boolean,
-  delegationCount: number,
-  bond: string,
-  minDelegation: string
 }
 
 export function validateParaChainUnbondingCondition (amount: string, nominatorMetadata: NominatorMetadata, chainStakingMetadata: ChainStakingMetadata, selectedCollator: string): TransactionError[] {
@@ -46,7 +43,7 @@ export function validateParaChainUnbondingCondition (amount: string, nominatorMe
 
   const bnChainMinStake = new BN(chainStakingMetadata.minStake || '0');
   const bnCollatorMinStake = new BN(targetNomination.validatorMinStake || '0');
-  const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
+  const bnMinStake = BN.max(bnCollatorMinStake, bnChainMinStake);
 
   if (targetNomination.hasUnstaking) {
     errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
@@ -218,8 +215,8 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
     if (delegationScheduledRequests) {
       for (const scheduledRequest of delegationScheduledRequests) {
         if (reformatAddress(scheduledRequest.delegator, 0) === reformatAddress(address, 0)) { // add network prefix
-          const isClaimable = scheduledRequest.whenExecutable - currentRound <= 0;
-          const remainingEra = scheduledRequest.whenExecutable - (currentRound + 1);
+          const isClaimable = scheduledRequest.whenExecutable - currentRound < 0;
+          const remainingEra = scheduledRequest.whenExecutable - currentRound;
           const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
           const claimable = Object.values(scheduledRequest.action)[0];
 
@@ -228,7 +225,7 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
             status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
             validatorAddress: delegation.owner,
             claimable: claimable.toString(),
-            waitingTime: waitingTime > 0 ? waitingTime : 0
+            waitingTime
           } as UnstakingInfo;
 
           hasUnstaking = true;
@@ -331,7 +328,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
     if (delegationScheduledRequests) {
       for (const scheduledRequest of delegationScheduledRequests) {
         if (reformatAddress(scheduledRequest.delegator, 0) === reformatAddress(address, 0)) { // add network prefix
-          const isClaimable = scheduledRequest.whenExecutable - currentRound <= 0;
+          const isClaimable = scheduledRequest.whenExecutable - currentRound < 0;
           const remainingEra = scheduledRequest.whenExecutable - (currentRound + 1);
           const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
           const claimable = Object.values(scheduledRequest.action)[0];
@@ -341,7 +338,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
             status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
             validatorAddress: delegation.owner,
             claimable: claimable.toString(),
-            waitingTime: waitingTime > 0 ? waitingTime : 0
+            waitingTime: waitingTime
           } as UnstakingInfo;
 
           hasUnstaking = true;
@@ -411,17 +408,22 @@ export async function getParachainCollatorsInfo (chain: string, substrateApi: _S
     const collatorAddress = _collatorAddress[0];
     const collatorInfo = collator[1].toPrimitive() as unknown as ParachainStakingCandidateMetadata;
 
+    const bnTotalStake = new BN(collatorInfo.totalCounted);
+    const bnOwnStake = new BN(collatorInfo.bond);
+    const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+    const bnMinBond = new BN(collatorInfo.lowestTopDelegationAmount);
+
     allCollators.push({
       commission: 0,
       expectedReturn: 0,
       address: collatorAddress,
-      totalStake: collatorInfo.totalCounted.toString(),
-      ownStake: collatorInfo.bond.toString(),
-      otherStake: (collatorInfo.totalCounted - collatorInfo.bond).toString(),
+      totalStake: bnTotalStake.toString(),
+      ownStake: bnOwnStake.toString(),
+      otherStake: bnOtherStake.toString(),
       nominatorCount: collatorInfo.delegationCount,
       blocked: false,
       isVerified: false,
-      minBond: collatorInfo.lowestTopDelegationAmount.toString(),
+      minBond: bnMinBond.toString(),
       chain,
       isCrowded: parseInt(maxDelegationPerCollator) > 0
     });
@@ -438,10 +440,6 @@ export async function getParachainCollatorsInfo (chain: string, substrateApi: _S
     const rawInfo = _info.toHuman() as Record<string, any>;
     const rawIdentity = _identity ? _identity.toHuman() as unknown as PalletIdentityRegistration : null;
 
-    const rawBond = rawInfo?.bond as string;
-    const bond = new BN(rawBond.replaceAll(',', ''));
-    const delegationCount = parseRawNumber(rawInfo?.delegationCount as string);
-    const minDelegation = parseRawNumber(rawInfo?.lowestTopDelegationAmount as string);
     const active = rawInfo?.status === 'Active';
 
     let isReasonable = false;
@@ -456,22 +454,15 @@ export async function getParachainCollatorsInfo (chain: string, substrateApi: _S
     extraInfoMap[collator.address] = {
       identity,
       isVerified: isReasonable,
-      bond: bond.toString(),
-      minDelegation: minDelegation.toString(),
-      delegationCount,
       active
     } as CollatorExtraInfo;
   }));
 
   for (const validator of allCollators) {
-    validator.minBond = extraInfoMap[validator.address].minDelegation.toString();
-    validator.ownStake = extraInfoMap[validator.address].bond.toString();
     validator.blocked = !extraInfoMap[validator.address].active;
     validator.identity = extraInfoMap[validator.address].identity;
     validator.isVerified = extraInfoMap[validator.address].isVerified;
     // @ts-ignore
-    validator.otherStake = (validator.totalStake - validator.ownStake).toString();
-    validator.nominatorCount = extraInfoMap[validator.address].delegationCount;
     validator.commission = collatorCommission;
   }
 

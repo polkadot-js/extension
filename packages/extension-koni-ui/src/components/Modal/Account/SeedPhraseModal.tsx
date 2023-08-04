@@ -6,7 +6,7 @@ import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { CREATE_ACCOUNT_MODAL, SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -19,6 +19,7 @@ import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -30,18 +31,16 @@ type Props = ThemeProps & {
 const modalId = SEED_PHRASE_MODAL;
 
 const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { checkActive, inactiveModal } = useContext(ModalContext);
   const isActive = checkActive(modalId);
   const notify = useNotification();
   const accountName = useGetDefaultAccountName();
 
-  const onComplete = useCompleteCreateAccount();
-  //
-  // const [accountTypes] = useState<KeypairType[]>((location.state as NewSeedPhraseState)?.accountTypes || []);
-  //
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);
+  const [createSeedTrigger, setCreateSeedTrigger] = useState<string>(`${Date.now()}`);
 
   useEffect(() => {
     createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
@@ -53,10 +52,11 @@ const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
       .catch((e: Error) => {
         console.error(e);
       });
-  }, []);
+  }, [createSeedTrigger]);
 
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
+    setCreateSeedTrigger(`${Date.now()}`);
   }, [inactiveModal]);
 
   const onSubmit = useCallback(() => {
@@ -64,12 +64,6 @@ const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
       return;
     }
 
-    console.log('===>', {
-      name: accountName,
-      suri: seedPhrase,
-      types: accountTypes,
-      isAllowed: true
-    });
     setLoading(true);
 
     setTimeout(() => {
@@ -80,7 +74,7 @@ const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
         isAllowed: true
       })
         .then(() => {
-          onComplete();
+          navigate(DEFAULT_ROUTER_PATH);
         })
         .catch((error: Error): void => {
           notify({
@@ -93,7 +87,7 @@ const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
           inactiveModal(modalId);
         });
     }, 500);
-  }, [seedPhrase, inactiveModal, accountName, accountTypes, onComplete, notify]);
+  }, [seedPhrase, accountName, accountTypes, navigate, notify, inactiveModal]);
 
   const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL);
 
@@ -110,10 +104,16 @@ const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
         icon: <CloseIcon />,
         onClick: onCancel
       }}
-      title={t<string>('Select account type')}
+      title={t<string>('Your recovery phrase')}
     >
       <div className='items-container'>
-        <WordPhrase seedPhrase={seedPhrase} />
+        <div className='__description'>
+          {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
+        </div>
+        <WordPhrase
+          className={'__word-phrase'}
+          seedPhrase={seedPhrase}
+        />
         <Button
           block={true}
           disabled={!seedPhrase}
@@ -139,7 +139,21 @@ const SeedPhraseModal = styled(Component)<Props>(({ theme: { token } }: Props) =
     '.items-container': {
       display: 'flex',
       flexDirection: 'column',
-      gap: token.sizeXS
+      gap: token.size
+    },
+
+    '.__description': {
+      fontSize: token.size,
+      lineHeight: token.lineHeight,
+      color: token.colorTextLight4,
+      textAlign: 'center'
+    },
+
+    '.__word-phrase': {
+      '.ant-btn.-size-md': {
+        height: 40,
+        lineHeight: '40px'
+      }
     }
   };
 });

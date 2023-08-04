@@ -3,6 +3,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const dotenv = require('dotenv');
 
 const CopyPlugin = require('copy-webpack-plugin');
 const ManifestPlugin = require('webpack-extension-manifest-plugin');
@@ -12,6 +13,7 @@ const manifest = require('./manifest.json');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const args = process.argv.slice(2);
+
 let mode = 'production';
 
 if (args) {
@@ -21,6 +23,10 @@ if (args) {
     }
   });
 }
+
+const envPath = mode === 'production' ? '.env' : '.env.local';
+
+dotenv.config({ path: `../../${envPath}` });
 
 console.log('You are using ' + mode + ' mode.');
 
@@ -89,7 +95,12 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
           NODE_ENV: JSON.stringify(mode),
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
-          TARGET_ENV: JSON.stringify('extension')
+          TARGET_ENV: JSON.stringify('extension'),
+          TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
+          TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
+          BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
+          BANXA_SANDBOX_API_KEY: JSON.stringify(process.env.BANXA_SANDBOX_API_KEY),
+          BANXA_SANBOX_API_SECRET: JSON.stringify(process.env.BANXA_SANBOX_API_SECRET)
         }
       }),
       new CopyPlugin({

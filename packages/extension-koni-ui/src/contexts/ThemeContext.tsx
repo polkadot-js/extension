@@ -206,6 +206,12 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       '.ant-input': {
         overflow: 'hidden'
       }
+    },
+
+    '.ant-tooltip-placement-bottom, .ant-tooltip-placement-bottomLeft, .ant-tooltip-placement-bottomRight': {
+      '.ant-tooltip-arrow': {
+        top: 1
+      }
     }
   });
 });

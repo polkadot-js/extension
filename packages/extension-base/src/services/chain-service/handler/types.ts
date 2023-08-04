@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 
 import { ApiPromise } from '@polkadot/api';
 
@@ -26,8 +27,8 @@ export interface _SubstrateChainSpec {
 export interface _ApiOptions {
   providerName?: string,
   metadata?: MetadataItem,
-  onUpdateStatus?: (isConnected: boolean) => void;
-  externalApiPromise?: ApiPromise;
+  onUpdateStatus?: (status: _ChainConnectionStatus) => void,
+  externalApiPromise?: ApiPromise
 }
 
 export enum _CHAIN_VALIDATION_ERROR {

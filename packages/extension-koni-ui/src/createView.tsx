@@ -18,10 +18,8 @@ export default function Root (Entry: React.ComponentType, rootId = 'root'): void
   const root = ReactDOM.createRoot(rootElement);
 
   root.render(
-    <React.StrictMode>
-      <Suspense>
-        <Entry />
-      </Suspense>
-    </React.StrictMode>
+    <Suspense>
+      <Entry />
+    </Suspense>
   );
 }

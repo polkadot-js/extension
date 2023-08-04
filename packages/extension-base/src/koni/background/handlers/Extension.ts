@@ -1526,15 +1526,23 @@ export default class KoniExtension {
 
     const historySubject = await this.#koniState.historyService.getHistorySubject();
 
-    historySubject.subscribe(cb);
+    const subscription = historySubject.subscribe((histories) => {
+      const addresses = keyring.getAccounts().map((a) => a.address.toLowerCase());
 
-    this.createUnsubscriptionHandle(id, historySubject.unsubscribe);
+      // Re-filter
+      cb(histories.filter((item) => addresses.includes(item.address.toLowerCase())));
+    });
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
 
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
 
-    return historySubject.getValue();
+    const addresses = keyring.getAccounts().map((a) => a.address.toLowerCase());
+
+    // Re-filter
+    return historySubject.getValue().filter((item) => addresses.includes(item.address.toLowerCase()));
   }
 
   // Save address to contact
@@ -1830,6 +1838,10 @@ export default class KoniExtension {
 
   private async enableChain ({ chainSlug, enableTokens }: EnableChainParams): Promise<boolean> {
     return await this.#koniState.enableChain(chainSlug, enableTokens);
+  }
+
+  private async reconnectChain (chainSlug: string): Promise<boolean> {
+    return this.#koniState.chainService.reconnectChain(chainSlug);
   }
 
   private async validateNetwork ({ existedChainSlug,
@@ -3937,6 +3949,8 @@ export default class KoniExtension {
         return this.getSupportedSmartContractTypes();
       case 'pri(chainService.enableChain)':
         return await this.enableChain(request as EnableChainParams);
+      case 'pri(chainService.reconnectChain)':
+        return await this.reconnectChain(request as string);
       case 'pri(chainService.disableChain)':
         return await this.disableChain(request as string);
       case 'pri(chainService.removeChain)':

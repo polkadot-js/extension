@@ -32,7 +32,7 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionE
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
+import { isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -1527,10 +1527,10 @@ export default class KoniExtension {
     const historySubject = await this.#koniState.historyService.getHistorySubject();
 
     const subscription = historySubject.subscribe((histories) => {
-      const addresses = keyring.getAccounts().map((a) => a.address.toLowerCase());
+      const addresses = keyring.getAccounts().map((a) => a.address);
 
       // Re-filter
-      cb(histories.filter((item) => addresses.includes(item.address.toLowerCase())));
+      cb(histories.filter((item) => addresses.some((address) => isSameAddress(item.address, address))));
     });
 
     this.createUnsubscriptionHandle(id, subscription.unsubscribe);
@@ -1539,10 +1539,10 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    const addresses = keyring.getAccounts().map((a) => a.address.toLowerCase());
+    const addresses = keyring.getAccounts().map((a) => a.address);
 
     // Re-filter
-    return historySubject.getValue().filter((item) => addresses.includes(item.address.toLowerCase()));
+    return historySubject.getValue().filter((item) => addresses.some((address) => isSameAddress(item.address, address)));
   }
 
   // Save address to contact

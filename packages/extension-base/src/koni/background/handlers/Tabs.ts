@@ -957,11 +957,11 @@ export default class KoniTabs {
   }
 
   public isEvmPublicRequest (type: string, request: RequestArguments) {
-    if (type === 'evm(request)' && ['eth_chainId', 'net_version'].includes(request?.method)) {
-      return true;
-    } else {
-      return false;
-    }
+    return type === 'evm(request)' &&
+      [
+        'eth_chainId',
+        'net_version'
+      ].includes(request?.method);
   }
 
   public async addPspToken (id: string, url: string, { genesisHash, tokenInfo: input }: RequestAddPspToken) {

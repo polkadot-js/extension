@@ -136,7 +136,7 @@ export enum StakingType {
 }
 
 export interface StakingRewardItem {
-  state: APIItemState
+  state: APIItemState,
   name: string,
   chain: string,
   address: string,

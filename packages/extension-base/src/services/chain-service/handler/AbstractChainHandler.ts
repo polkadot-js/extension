@@ -51,7 +51,7 @@ export abstract class AbstractChainHandler {
     }
 
     // Handle connection change
-    if ((oldStatus === _ChainConnectionStatus.CONNECTED || forceRecover) && newStatus === _ChainConnectionStatus.DISCONNECTED) {
+    if ((!this.isRecovering(chain) || forceRecover) && newStatus === _ChainConnectionStatus.DISCONNECTED) {
       this.handleRecover(chain);
     }
   }
@@ -92,6 +92,10 @@ export abstract class AbstractChainHandler {
     }, retryTimeout);
 
     this.recoverMap[chain] = { ...retryRecord, retryTimes: retryTimes + 1, timeout };
+  }
+
+  protected isRecovering (chain: string): boolean {
+    return !!this.recoverMap[chain];
   }
 
   protected cancelRecover (chain: string): void {

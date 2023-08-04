@@ -54,7 +54,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
         if (!api.useLightClient) {
           // Manual fire handle connect to avoid some chain can not reconnect
           setTimeout(() => {
-            this.handleConnection(chain, api.connectionStatus, true);
+            this.handleConnection(chain, api.connectionStatus);
           }, 10000);
         }
       }

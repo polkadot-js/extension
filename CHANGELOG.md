@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 1.1.6
+Build date: Aug 04, 2023.
+
+Features & Update:
+- Integrate Banxa for fiat on-ramp (#1084)
+- Optimize WalletConnect - Not implement if no connection (#1626)
+- Update showing min stake value (#1537)
+- Improve connection status (#1554)
+- Improve EVM Inject Object (#1710)
+- Update chain list (#1715)
+  - Integrate Krest network
+  - Add PANX token for Aleph Zero network
+  - Support staking for Avail
+  - Support staking for Edgeware
+
+Bugs fixed:
+- Fixed bug Still show history of the removed account (#1731)
+- Fixed bug Showing staking account on the Staking detail screen (#1643)
+- Fixed bug Do not show validator on the Select validator screen in case turn on network when stake (#1496)
+- Fixed bug Still show NFT and staking data when turn off all networks (#1728)
+- Fixed bug Do not reset selected validator when change token to stake (#1721)
+- Fixed bug Do not display the history of addresses other than the original address (#1748)
+
 ## 1.1.5
 Build date: Jul 29, 2023.
 

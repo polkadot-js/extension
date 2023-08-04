@@ -5846,7 +5846,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/extension-base@^1.1.5-0, @subwallet/extension-base@workspace:packages/extension-base":
+"@subwallet/extension-base@^1.1.6-0, @subwallet/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-base@workspace:packages/extension-base"
   dependencies:
@@ -5877,11 +5877,11 @@ __metadata:
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
     "@subwallet/chain-list": 0.2.9-beta.1
-    "@subwallet/extension-base": ^1.1.5-0
-    "@subwallet/extension-chains": ^1.1.5-0
-    "@subwallet/extension-dapp": ^1.1.5-0
-    "@subwallet/extension-inject": ^1.1.5-0
-    "@subwallet/extension-mocks": ^1.1.5-0
+    "@subwallet/extension-base": ^1.1.6-0
+    "@subwallet/extension-chains": ^1.1.6-0
+    "@subwallet/extension-dapp": ^1.1.6-0
+    "@subwallet/extension-inject": ^1.1.6-0
+    "@subwallet/extension-mocks": ^1.1.6-0
     "@subwallet/keyring": ^0.0.10
     "@subwallet/ui-keyring": ^0.0.10
     "@types/uuid": ^9.0.1
@@ -5907,7 +5907,7 @@ __metadata:
     json-rpc-engine: ^6.1.0
     manta-extension-sdk: ^1.1.0
     moment: ^2.29.4
-    protobufjs: ^7.1.2
+    protobufjs: ^7.2.4
     rxjs: ^7.8.1
     uuid: ^9.0.0
     web3: ^1.10.0
@@ -5918,7 +5918,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-chains@^1.1.5-0, @subwallet/extension-chains@workspace:packages/extension-chains":
+"@subwallet/extension-chains@^1.1.6-0, @subwallet/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-chains@workspace:packages/extension-chains"
   dependencies:
@@ -5926,7 +5926,7 @@ __metadata:
     "@polkadot/networks": ^12.3.2
     "@polkadot/util": ^12.3.2
     "@polkadot/util-crypto": ^12.3.2
-    "@subwallet/extension-inject": ^1.1.5-0
+    "@subwallet/extension-inject": ^1.1.6-0
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/types": "*"
@@ -5941,21 +5941,21 @@ __metadata:
     "@metamask/detect-provider": ^1.2.0
     "@polkadot/types": ^10.9.1
     "@polkadot/util": ^12.3.2
-    "@subwallet/extension-inject": ^1.1.5-0
+    "@subwallet/extension-inject": ^1.1.6-0
     web3: ^1.10.0
   peerDependencies:
     "@polkadot/util": "*"
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-dapp@^1.1.5-0, @subwallet/extension-dapp@workspace:packages/extension-dapp":
+"@subwallet/extension-dapp@^1.1.6-0, @subwallet/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/util": ^12.3.2
     "@polkadot/util-crypto": ^12.3.2
-    "@subwallet/extension-inject": ^1.1.5-0
+    "@subwallet/extension-inject": ^1.1.6-0
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/util": "*"
@@ -5963,7 +5963,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-inject@^1.1.5-0, @subwallet/extension-inject@workspace:packages/extension-inject":
+"@subwallet/extension-inject@^1.1.6-0, @subwallet/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -5981,7 +5981,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-koni-ui@^1.1.5-0, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
+"@subwallet/extension-koni-ui@^1.1.6-0, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
@@ -6004,11 +6004,11 @@ __metadata:
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
     "@subwallet/chain-list": 0.2.9-beta.1
-    "@subwallet/extension-base": ^1.1.5-0
-    "@subwallet/extension-chains": ^1.1.5-0
-    "@subwallet/extension-dapp": ^1.1.5-0
-    "@subwallet/extension-inject": ^1.1.5-0
-    "@subwallet/extension-mocks": ^1.1.5-0
+    "@subwallet/extension-base": ^1.1.6-0
+    "@subwallet/extension-chains": ^1.1.6-0
+    "@subwallet/extension-dapp": ^1.1.6-0
+    "@subwallet/extension-inject": ^1.1.6-0
+    "@subwallet/extension-mocks": ^1.1.6-0
     "@subwallet/keyring": ^0.0.10
     "@subwallet/react-ui": 5.1.2-b69
     "@subwallet/ui-keyring": ^0.0.10
@@ -6070,9 +6070,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.5-0
-    "@subwallet/extension-inject": ^1.1.5-0
-    "@subwallet/extension-koni-ui": ^1.1.5-0
+    "@subwallet/extension-base": ^1.1.6-0
+    "@subwallet/extension-inject": ^1.1.6-0
+    "@subwallet/extension-koni-ui": ^1.1.6-0
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -6097,7 +6097,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-mocks@^1.1.5-0, @subwallet/extension-mocks@workspace:packages/extension-mocks":
+"@subwallet/extension-mocks@^1.1.6-0, @subwallet/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
@@ -6221,9 +6221,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.5-0
-    "@subwallet/extension-inject": ^1.1.5-0
-    "@subwallet/extension-koni-ui": ^1.1.5-0
+    "@subwallet/extension-base": ^1.1.6-0
+    "@subwallet/extension-inject": ^1.1.6-0
+    "@subwallet/extension-koni-ui": ^1.1.6-0
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -20117,9 +20117,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:^7.1.2":
-  version: 7.1.2
-  resolution: "protobufjs@npm:7.1.2"
+"protobufjs@npm:^7.2.4":
+  version: 7.2.4
+  resolution: "protobufjs@npm:7.2.4"
   dependencies:
     "@protobufjs/aspromise": ^1.1.2
     "@protobufjs/base64": ^1.1.2
@@ -20133,7 +20133,7 @@ __metadata:
     "@protobufjs/utf8": ^1.1.0
     "@types/node": ">=13.7.0"
     long: ^5.0.0
-  checksum: ae41669b1b0372fb1d49f506f2d1f2b0fb3dc3cece85987b17bcb544e4cef7c8d27f480486cdec324146ad0a5d22a327166a7ea864a9b3e49cc3c92a5d3f6500
+  checksum: a952cdf2a5e5250c16ae651b570849b6f5b20a5475c3eef63ffb290ad239aa2916adfc1cc676f7fc93c69f48113df268761c0c246f7f023118c85bdd1a170044
   languageName: node
   linkType: hard
 

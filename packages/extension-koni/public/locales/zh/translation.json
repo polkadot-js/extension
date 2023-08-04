@@ -733,5 +733,12 @@
   "dapp": "",
   "validator": "验证者",
   "collator": "整理者",
-  " reload": "重新加载"
+  " reload": "重新加载",
+  "Create buy order fail": "",
+  "Agree": "",
+  "Disclaimer": "",
+  "Terms of Service": "",
+  "Privacy Policy": "",
+  "support site": "",
+  "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": ""
 }

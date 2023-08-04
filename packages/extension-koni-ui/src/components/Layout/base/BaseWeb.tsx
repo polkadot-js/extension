@@ -141,7 +141,7 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken, token } 
 const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
-  const { background, headerType, isPortfolio, isSettingPage, showSidebar, title } = useContext(WebUIContext);
+  const { background, headerType, isPortfolio, isSettingPage, showBackButtonOnHeader, showSidebar, title } = useContext(WebUIContext);
   const { goBack } = useDefaultNavigate();
 
   const headerTitle = useMemo(() => {
@@ -177,7 +177,10 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
           />
         </div>}
         {headerType === HeaderType.SIMPLE && <div className={'web-layout-header-simple'}>
-          <Headers.Simple title={headerTitle} />
+          <Headers.Simple
+            showBackButton={showBackButtonOnHeader}
+            title={headerTitle}
+          />
         </div>}
         <div className={CN('web-layout-content', { '__with-padding': showSidebar })}>
           {children}

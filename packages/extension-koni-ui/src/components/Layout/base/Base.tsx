@@ -33,7 +33,7 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
   const { pathname } = useLocation();
   const { t } = useTranslation();
   const { setTitle } = useContext(WebUIContext);
-  const { isSettingPage } = useContext(WebUIContext);
+  const { isSettingPage, setShowBackButtonOnHeader } = useContext(WebUIContext);
   const [customClassName, setCustomClassName] = useState('');
 
   const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
@@ -117,6 +117,10 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
     setCustomClassName('common-pages');
     setTitle(props.title);
   }, [isSettingPage, pathname, props.title, setTitle, t]);
+
+  useEffect(() => {
+    setShowBackButtonOnHeader(props.showBackButton);
+  }, [props.showBackButton, setShowBackButtonOnHeader]);
 
   return (
     <SwScreenLayout

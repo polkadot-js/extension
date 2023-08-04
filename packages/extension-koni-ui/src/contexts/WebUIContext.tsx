@@ -33,6 +33,8 @@ type WebUIContext = {
   setShowSidebar: (showSidebar: boolean) => void
   isSettingPage: boolean,
   isPortfolio: boolean
+  showBackButtonOnHeader?: boolean
+  setShowBackButtonOnHeader: (show?: boolean) => void
 }
 
 export const WebUIContext = React.createContext({} as WebUIContext);
@@ -49,6 +51,7 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
   const [background, setBackground] = useState<BackgroundColorMap>(BackgroundColorMap.INFO);
   const [headerType, setHeaderType] = useState(HeaderType.NONE);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [showBackButtonOnHeader, setShowBackButtonOnHeader] = useState<boolean | undefined>(undefined);
   const [title, setTitle] = useState<string | React.ReactNode>('');
   const pathname = useLocation().pathname;
   const [isSettingPage, setIsSettingPage] = useState(checkSettingPage(pathname));
@@ -71,7 +74,9 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
         showSidebar,
         setShowSidebar,
         isSettingPage,
-        isPortfolio
+        isPortfolio,
+        showBackButtonOnHeader,
+        setShowBackButtonOnHeader
       }}
     >
       {children}

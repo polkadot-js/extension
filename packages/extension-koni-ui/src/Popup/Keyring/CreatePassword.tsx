@@ -130,10 +130,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [inactiveModal]);
 
   useEffect(() => {
-    if (!noAccount) {
+    if (!noAccount && !isWebUI) {
       activeModal(REQUEST_CREATE_PASSWORD_MODAL);
     }
-  }, [activeModal, noAccount]);
+  }, [activeModal, isWebUI, noAccount]);
 
   useFocusFormItem(form, FormFieldName.PASSWORD, !checkActive(REQUEST_CREATE_PASSWORD_MODAL));
 
@@ -149,6 +149,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             icon: FooterIcon
           }
           : undefined}
+        showBackButton={noAccount}
         subHeaderIcons={[
           {
             icon: <InfoIcon />,

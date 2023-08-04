@@ -6,45 +6,35 @@ import NetworkGroupItem from '@subwallet/extension-koni-ui/components/MetaInfo/p
 import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
 import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Divider, Icon, Popover, SwList } from '@subwallet/react-ui';
+import { Button, Icon, Popover, SwList } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { CaretDown, ListChecks, SlidersHorizontal } from 'phosphor-react';
-import React, { forwardRef, LegacyRef, useCallback, useMemo } from 'react';
+import React, { forwardRef, LegacyRef, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-const StyledSection = styled(SwList.Section)<ThemeProps>(({ theme: { token } }: ThemeProps) => {
-  return {
-    '&.manage_chains__container': {
-      maxHeight: 500,
-      width: 390,
-      background: token.colorBgBase,
+const MANAGE_NETWORK_KEY = 'manage-network-key';
 
-      '.ant-sw-list': {
-        padding: '8px 16px 10px',
-
-        '.ant-web3-block': {
-          padding: 10,
-          margin: '4px 0',
-
-          '.ant-web3-block-right-item': {
-            marginRight: 0
-          }
-        }
-      }
-    }
-  };
-});
-
-const Component: React.FC = () => {
+const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
   const { t } = useTranslation();
   const chainInfoList = useChainInfoWithState();
+  const [manageNetworkKey, setManageNetworkKey] = useState<string>(MANAGE_NETWORK_KEY);
+  const [open, setOpen] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const searchToken = useCallback((chainInfo: ChainInfoWithState, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
     return chainInfo.name.toLowerCase().includes(searchTextLowerCase);
+  }, []);
+
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    if (newOpen) {
+      setManageNetworkKey(`${MANAGE_NETWORK_KEY} + ${Date.now()}`);
+    }
+
+    setOpen(newOpen);
   }, []);
 
   const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
@@ -73,9 +63,12 @@ const Component: React.FC = () => {
 
   const popOverContent = useMemo(() => {
     return (
-      <>
-        <StyledSection
-          className={'manage_chains__container'}
+      <div
+        className={CN(className, 'manage-network-container')}
+        key={manageNetworkKey}
+      >
+        <SwList.Section
+          className={'__list-container'}
           enableSearchInput
           list={chainInfoList}
           mode={'boxed'}
@@ -85,29 +78,23 @@ const Component: React.FC = () => {
           searchMinCharactersCount={2}
           searchPlaceholder={t<string>('Search chain')}
         />
-        <Divider />
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}
-        >
+        <div className={'__action-container'}>
           <Button
             icon={(
               <Icon
                 phosphorIcon={SlidersHorizontal}
-                size={'sm'}
               />
             )}
             onClick={handleManageNetworks}
+            size={'xs'}
             type='ghost'
           >
             {t<string>('Manage networks')}
           </Button>
         </div>
-      </>
+      </div>
     );
-  }, [chainInfoList, emptyTokenList, handleManageNetworks, renderChainItem, searchToken, t]);
+  }, [chainInfoList, className, emptyTokenList, handleManageNetworks, manageNetworkKey, renderChainItem, searchToken, t]);
 
   // Remove ref error
   // eslint-disable-next-line react/display-name
@@ -135,8 +122,12 @@ const Component: React.FC = () => {
   return (
     <Popover
       content={popOverContent}
+      onOpenChange={handleOpenChange}
+      open={open}
       overlayInnerStyle={{
-        padding: '16px 0'
+        padding: '0',
+        boxShadow: 'none',
+        backgroundColor: 'transparent'
       }}
       placement='bottomRight'
       showArrow={false}
@@ -147,8 +138,61 @@ const Component: React.FC = () => {
   );
 };
 
-const Networks = styled(Component)<ThemeProps>(() => {
+const Networks = styled(Component)<ThemeProps>(({ theme: { token } }: ThemeProps) => {
   return {
+    '&.manage-network-container': {
+      paddingTop: token.padding,
+      background: token.colorBgDefault,
+      border: `1px solid ${token.colorBgBorder}`,
+      boxShadow: '4px 4px 4px 0px rgba(0, 0, 0, 0.25)',
+      borderRadius: token.borderRadiusLG,
+
+      '.__list-container': {
+        width: 390,
+        maxHeight: 500,
+        marginBottom: token.margin
+      },
+
+      '.ant-sw-list': {
+        paddingLeft: token.padding,
+        paddingRight: token.padding,
+        paddingTop: 0,
+        paddingBottom: 0,
+
+        '> div:not(:first-of-type)': {
+          marginTop: token.marginXXS
+        }
+      },
+
+      '.ant-web3-block': {
+        height: 52,
+        padding: 0,
+        paddingLeft: token.paddingSM,
+        paddingRight: token.paddingSM
+      },
+
+      '.ant-web3-block-middle-item': {
+        paddingRight: token.paddingXS
+      },
+
+      '.ant-network-item-name': {
+        'white-space': 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
+      },
+
+      '.ant-web3-block-right-item': {
+        marginRight: 0
+      },
+
+      '.__action-container': {
+        borderTop: `2px solid ${token.colorBgBorder}`,
+        gap: token.sizeSM,
+        padding: token.padding,
+        display: 'flex',
+        justifyContent: 'center'
+      }
+    }
   };
 });
 

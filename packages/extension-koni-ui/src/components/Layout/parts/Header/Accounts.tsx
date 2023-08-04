@@ -3,15 +3,15 @@
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import { AccountCardSelection, AccountItemWithName } from '@subwallet/extension-koni-ui/components/Account';
-import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
-import { Button, Divider, Logo, Popover, SwList } from '@subwallet/react-ui';
-import { CaretDown, ListChecks } from 'phosphor-react';
+import { Button, Logo, Popover, SwList } from '@subwallet/react-ui';
+import CN from 'classnames';
+import { CaretDown } from 'phosphor-react';
 import React, { forwardRef, LegacyRef, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -20,51 +20,19 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import GeneralEmptyList from '../../../GeneralEmptyList';
 import SelectAccountFooter from '../SelectAccount/Footer';
 
-const StyledSection = styled(SwList.Section)<ThemeProps>(({ theme: { token } }: ThemeProps) => {
-  return {
-    '&.manage_chains__container': {
-      maxHeight: 500,
-      width: 390,
-      background: token.colorBgBase,
+const emptyTokenList = () => <GeneralEmptyList />;
 
-      '.ant-sw-list': {
-        padding: '8px 16px 10px',
+const ACCOUNT_SELECTOR_KEY = 'main-account-selector-Key';
 
-        '.ant-web3-block': {
-          padding: 10,
-          margin: '4px 0',
-
-          '.ant-web3-block-right-item': {
-            marginRight: 0
-          }
-        }
-      }
-    }
-  };
-});
-
-const StyledActions = styled.div<ThemeProps>(({ theme: { token } }: ThemeProps) => {
-  return {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-
-    '& > div': {
-      display: 'flex',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      gap: '8px'
-    }
-  };
-});
-
-const Component: React.FC = () => {
+const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
   const { t } = useTranslation();
   const { accounts: _accounts, currentAccount } = useSelector((state: RootState) => state.accountState);
 
   const [open, setOpen] = useState<boolean>(false);
+  const [accountSelectorKey, setAccountSelectorKey] = useState<string>(ACCOUNT_SELECTOR_KEY);
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
   // const currentAuth = useGetCurrentAuth();
@@ -76,6 +44,10 @@ const Component: React.FC = () => {
   }, [accounts]);
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
+    if (newOpen) {
+      setAccountSelectorKey(`${ACCOUNT_SELECTOR_KEY} + ${Date.now()}`);
+    }
+
     setOpen(newOpen);
   }, []);
 
@@ -173,16 +145,6 @@ const Component: React.FC = () => {
     );
   }, [currentAccount?.address, clickSelect, onClickDetailAccount]);
 
-  const emptyTokenList = useCallback(() => {
-    return (
-      <EmptyList
-        emptyMessage={t<string>('Your chain will appear here.')}
-        emptyTitle={t<string>('No chain found')}
-        phosphorIcon={ListChecks}
-      />
-    );
-  }, [t]);
-
   // Remove ref error
   // eslint-disable-next-line react/display-name
   const TriggerComponent = forwardRef((props, ref) => {
@@ -228,25 +190,28 @@ const Component: React.FC = () => {
 
   const popOverContent = useMemo(() => {
     return (
-      <>
-        <StyledSection
-          className={'manage_chains__container'}
+      <div
+        className={CN(className, 'account-selector-container')}
+        key={accountSelectorKey}
+      >
+        <SwList.Section
+          className={'__list-container'}
           enableSearchInput
           list={noAllAccounts.length <= 1 ? noAllAccounts : accounts}
-          mode={'boxed'}
           renderItem={renderItem}
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchAccountFunction}
           searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search chain')}
+          searchPlaceholder={t<string>('Account name')}
         />
-        <Divider />
-        <StyledActions>
-          <SelectAccountFooter extraAction={handleOpenChange} />
-        </StyledActions>
-      </>
+
+        <SelectAccountFooter
+          className={'__action-container'}
+          extraAction={handleOpenChange}
+        />
+      </div>
     );
-  }, [accounts, emptyTokenList, handleOpenChange, noAllAccounts, renderItem, t]);
+  }, [accountSelectorKey, accounts, className, handleOpenChange, noAllAccounts, renderItem, t]);
 
   return (
     <Popover
@@ -254,7 +219,9 @@ const Component: React.FC = () => {
       onOpenChange={handleOpenChange}
       open={open}
       overlayInnerStyle={{
-        padding: '16px 0'
+        padding: '0',
+        boxShadow: 'none',
+        backgroundColor: 'transparent'
       }}
       placement='bottomRight'
       showArrow={false}
@@ -267,6 +234,46 @@ const Component: React.FC = () => {
 
 const Accounts = styled(Component)<ThemeProps>(({ theme: { token } }: ThemeProps) => {
   return {
+    '&.account-selector-container': {
+      paddingTop: token.padding,
+      background: token.colorBgDefault,
+      border: `1px solid ${token.colorBgBorder}`,
+      boxShadow: '4px 4px 4px 0px rgba(0, 0, 0, 0.25)',
+      borderRadius: token.borderRadiusLG,
+
+      '.__list-container': {
+        width: '100%',
+        maxHeight: 500,
+        marginBottom: token.margin
+      },
+
+      '.ant-sw-list': {
+        paddingLeft: token.padding,
+        paddingRight: token.padding,
+        paddingTop: 0,
+        paddingBottom: 0,
+
+        '> div:not(:first-of-type)': {
+          marginTop: token.marginXS
+        }
+      },
+
+      '.ant-account-card-name': {
+        'white-space': 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
+      },
+
+      '.ant-web3-block-right-item': {
+        marginRight: 0
+      },
+
+      '.__action-container': {
+        borderTop: `2px solid ${token.colorBgBorder}`,
+        gap: token.sizeSM,
+        padding: token.padding
+      }
+    }
   };
 });
 

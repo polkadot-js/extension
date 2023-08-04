@@ -105,6 +105,12 @@ const Controller = styled(Component)<Props>(({ theme: { token } }: Props) => ({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center'
+        },
+        '.__account-name': {
+          'white-space': 'nowrap',
+          maxWidth: 200,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
         }
       }
     }

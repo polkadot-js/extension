@@ -75,7 +75,7 @@
     "json-rpc-engine": "^6.1.0",
     "manta-extension-sdk": "^1.1.0",
     "moment": "^2.29.4",
-    "protobufjs": "^7.1.2",
+    "protobufjs": "^7.2.4",
     "rxjs": "^7.8.1",
     "web3": "^1.10.0",
     "web3-core": "^1.10.0",

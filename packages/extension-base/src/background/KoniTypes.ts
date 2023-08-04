@@ -136,7 +136,7 @@ export enum StakingType {
 }
 
 export interface StakingRewardItem {
-  state: APIItemState
+  state: APIItemState,
   name: string,
   chain: string,
   address: string,
@@ -430,6 +430,8 @@ export interface UiSettings {
   camera: boolean;
   timeAutoLock: number;
   enableChainPatrol: boolean;
+  // On-ramp service account reference
+  walletReference: string;
 }
 
 export type RequestSettingsType = UiSettings;

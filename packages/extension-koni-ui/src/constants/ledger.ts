@@ -96,10 +96,11 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   //   isDevMode: true
   // },
   // {
-  //   displayName: 'Polkadex',
-  //   genesisHash: '0x3920bcb4960a1eef5580cd5367ff3f430eef052774f78468852f7b9cb39f8a3c',
+  //   displayName: 'Polkadex network',
+  //   genesisHash: ChainInfoMap.polkadex.substrateInfo?.genesisHash || '0x3920bcb4960a1eef5580cd5367ff3f430eef052774f78468852f7b9cb39f8a3c',
   //   icon: 'substrate',
   //   network: 'polkadex',
+  //   slug: ChainInfoMap.polkadex.slug,
   //   isDevMode: true
   // }
 ];

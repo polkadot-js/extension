@@ -36,3 +36,6 @@ export const StakingStatusUi: Record<StakingStatusType, StakingStatusUiProps> = 
     name: detectTranslate('Waiting')
   }
 };
+
+// @ts-ignore
+const stakingValidatorLabel = [detectTranslate('dapp'), detectTranslate('validator'), detectTranslate('collator')];

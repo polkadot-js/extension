@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './account';
+export * from './buy';
 export * from './common';
 export * from './history';
 export * from './modal';

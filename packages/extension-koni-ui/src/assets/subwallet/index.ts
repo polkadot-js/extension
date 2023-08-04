@@ -11,7 +11,8 @@ const SwLogosMap: Record<string, string> = {
   default: DefaultLogosMap.default,
   transak: DefaultLogosMap.transak,
   onramper: DefaultLogosMap.onramper,
-  moonpay: DefaultLogosMap.moonpay
+  moonpay: DefaultLogosMap.moonpay,
+  banxa: DefaultLogosMap.banxa
 };
 
 export default SwLogosMap;

@@ -1840,6 +1840,10 @@ export default class KoniExtension {
     return await this.#koniState.enableChain(chainSlug, enableTokens);
   }
 
+  private async reconnectChain (chainSlug: string): Promise<boolean> {
+    return this.#koniState.chainService.reconnectChain(chainSlug);
+  }
+
   private async validateNetwork ({ existedChainSlug,
     provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
     return await this.#koniState.validateCustomChain(provider, existedChainSlug);
@@ -3945,6 +3949,8 @@ export default class KoniExtension {
         return this.getSupportedSmartContractTypes();
       case 'pri(chainService.enableChain)':
         return await this.enableChain(request as EnableChainParams);
+      case 'pri(chainService.reconnectChain)':
+        return await this.reconnectChain(request as string);
       case 'pri(chainService.disableChain)':
         return await this.disableChain(request as string);
       case 'pri(chainService.removeChain)':

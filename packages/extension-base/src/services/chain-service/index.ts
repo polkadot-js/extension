@@ -503,7 +503,7 @@ export class ChainService {
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
-    this.chainStateMapSubject.next(this.getChainStateMap());
+    this.updateChainStateMapSubscription();
     this.assetRegistrySubject.next(this.getAssetRegistry());
     this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
 
@@ -531,14 +531,14 @@ export class ChainService {
   private async initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
-    const onUpdateStatus = (isConnected: boolean) => {
+    const onUpdateStatus = (status: _ChainConnectionStatus) => {
       const currentStatus = this.getChainStateByKey(chainInfo.slug).connectionStatus;
-      const newStatus = isConnected ? _ChainConnectionStatus.CONNECTED : _ChainConnectionStatus.DISCONNECTED;
 
       // Avoid unnecessary update in case disable chain
-      if (currentStatus !== newStatus) {
-        this.setChainConnectionStatus(chainInfo.slug, newStatus);
-        this.chainStateMapSubject.next(this.getChainStateMap());
+      if (currentStatus !== status) {
+        console.log(chainInfo.name, currentStatus, status);
+        this.setChainConnectionStatus(chainInfo.slug, status);
+        this.updateChainStateMapSubscription();
       }
     };
 
@@ -636,6 +636,13 @@ export class ChainService {
     needUpdate && this.updateChainStateMapSubscription();
 
     return needUpdate;
+  }
+
+  public async reconnectChain (chain: string) {
+    await this.getSubstrateApi(chain)?.recoverConnect();
+    await this.getEvmApi(chain)?.recoverConnect();
+
+    return true;
   }
 
   public disableChain (chainSlug: string): boolean {

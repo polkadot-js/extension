@@ -7,7 +7,7 @@ import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Input, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { ChangeEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import styled from 'styled-components';
@@ -15,6 +15,54 @@ import styled from 'styled-components';
 type Props = ThemeProps & {
   className?: string;
 }
+
+type SearchInputProps = {
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className: string;
+};
+
+type SearchInputRef = {
+  setValue: (value: string) => void
+}
+
+const _SearchInput = ({ className,
+  onChange,
+  placeholder }: SearchInputProps, ref: ForwardedRef<SearchInputRef>) => {
+  const [value, setValue] = useState<string>('');
+
+  useImperativeHandle(ref, () => ({
+    setValue
+  }));
+
+  const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
+    const value = e?.target?.value;
+
+    setValue(value);
+  }, []);
+
+  useEffect(() => {
+    const timeOut = setTimeout(() => {
+      onChange(value);
+    }, 300);
+
+    return () => {
+      return clearTimeout(timeOut);
+    };
+  }, [onChange, value]);
+
+  return (
+    <Input.Search
+      className={className}
+      onChange={_onChange}
+      placeholder={placeholder}
+      size='md'
+      value={value}
+    />
+  );
+};
+
+const SearchInput = forwardRef(_SearchInput);
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { pathname } = useLocation();
@@ -25,12 +73,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const goBack = useCallback(() => navigate(-1), [navigate]);
   const [searchInput, setSearchInput] = useState<string>('');
-
-  const handleInputChange: ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
-    const value = e?.target?.value;
-
-    setSearchInput(value);
-  }, []);
+  const searchInputRef = useRef<SearchInputRef>(null);
 
   const TAB_LIST = [t('Tokens'), t('NFTs')];
 
@@ -52,7 +95,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isDetail = useMemo(() => pathname.includes('detail'), [pathname]);
 
   useEffect(() => {
-    setSearchInput('');
+    searchInputRef.current?.setValue('');
   }, [pathname]);
 
   return (
@@ -96,12 +139,11 @@ function Component ({ className }: Props): React.ReactElement<Props> {
               )
           }
           <div className='right-section'>
-            <Input.Search
+            <SearchInput
               className='search-input'
-              onChange={handleInputChange}
+              onChange={setSearchInput}
               placeholder={searchPlaceholder}
-              size='md'
-              value={searchInput}
+              ref={searchInputRef}
             />
           </div>
         </div>

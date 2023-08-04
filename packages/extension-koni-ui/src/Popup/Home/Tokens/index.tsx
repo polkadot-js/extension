@@ -33,6 +33,13 @@ type Props = ThemeProps;
 const BN_0 = new BigN(0);
 const BN_100 = new BigN(100);
 
+const searchFunc = (item: TokenBalanceItemType, searchText: string) => {
+  const searchTextLowerCase = searchText.toLowerCase();
+  const symbol = item.symbol.toLowerCase();
+
+  return symbol.includes(searchTextLowerCase);
+};
+
 const Component = (): React.ReactElement => {
   const { t } = useTranslation();
   const [isShrink, setIsShrink] = useState<boolean>(false);
@@ -47,6 +54,8 @@ const Component = (): React.ReactElement => {
     searchInput: string,
     setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
   } = useOutletContext();
+
+  const searchInput = outletContext?.searchInput;
 
   useEffect(() => {
     outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Token name');
@@ -170,13 +179,23 @@ const Component = (): React.ReactElement => {
     const result: TokenBalanceItemType[] = [];
 
     sortedTokenGroups.forEach((tokenGroupSlug) => {
-      if (tokenGroupBalanceMap[tokenGroupSlug]) {
-        result.push(tokenGroupBalanceMap[tokenGroupSlug]);
+      const item = tokenGroupBalanceMap[tokenGroupSlug];
+
+      if (!item) {
+        return;
+      }
+
+      if (searchInput) {
+        if (searchFunc(item, searchInput)) {
+          result.push(item);
+        }
+      } else {
+        result.push(item);
       }
     });
 
     return result.sort(sortTokenByValue);
-  }, [sortedTokenGroups, tokenGroupBalanceMap]);
+  }, [sortedTokenGroups, tokenGroupBalanceMap, searchInput]);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);

@@ -6,6 +6,7 @@ import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrap
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
@@ -49,13 +50,26 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
 
 const TokenDetailModalId = 'tokenDetailModalId';
 
+const searchFunc = (item: TokenBalanceItemType, searchText: string) => {
+  const searchTextLowerCase = searchText.toLowerCase();
+  const chainName = item.chainDisplayName?.toLowerCase() || '';
+  const symbol = item.symbol.toLowerCase();
+
+  return (
+    symbol.includes(searchTextLowerCase) ||
+    (chainName && chainName.includes(searchTextLowerCase))
+  );
+};
+
 function Component (): React.ReactElement {
   const { slug: tokenGroupSlug } = useParams();
-  const OutletContext: {
+  const outletContext: {
+    searchInput: string,
     setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
   } = useOutletContext();
 
-  const setDetailTitle = OutletContext?.setDetailTitle;
+  const searchInput = outletContext?.searchInput;
+  const setDetailTitle = outletContext?.setDetailTitle;
 
   const notify = useNotification();
   const { t } = useTranslation();
@@ -117,8 +131,18 @@ function Component (): React.ReactElement {
         const items: TokenBalanceItemType[] = [];
 
         tokenGroupMap[tokenGroupSlug].forEach((tokenSlug) => {
-          if (tokenBalanceMap[tokenSlug]) {
-            items.push(tokenBalanceMap[tokenSlug]);
+          const item = tokenBalanceMap[tokenSlug];
+
+          if (!item) {
+            return;
+          }
+
+          if (searchInput) {
+            if (searchFunc(item, searchInput)) {
+              items.push(item);
+            }
+          } else {
+            items.push(item);
           }
         });
 
@@ -126,12 +150,18 @@ function Component (): React.ReactElement {
       }
 
       if (tokenBalanceMap[tokenGroupSlug]) {
+        if (searchInput) {
+          if (!searchFunc(tokenBalanceMap[tokenGroupSlug], searchInput)) {
+            return [];
+          }
+        }
+
         return [tokenBalanceMap[tokenGroupSlug]];
       }
     }
 
     return [] as TokenBalanceItemType[];
-  }, [tokenGroupSlug, tokenGroupMap, tokenBalanceMap]);
+  }, [tokenGroupSlug, tokenGroupMap, tokenBalanceMap, searchInput]);
 
   const [currentTokenInfo, setCurrentTokenInfo] = useState<CurrentSelectToken| undefined>(undefined);
   const [isShrink, setIsShrink] = useState<boolean>(false);
@@ -252,10 +282,10 @@ function Component (): React.ReactElement {
   }, [tokenGroupSlug]);
 
   useEffect(() => {
-    if (!tokenBalanceItems.length) {
+    if (!tokenBalanceItems.length && !searchInput) {
       goHome();
     }
-  }, [goHome, tokenBalanceItems.length]);
+  }, [goHome, searchInput, tokenBalanceItems.length]);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -306,86 +336,93 @@ function Component (): React.ReactElement {
           />
         </div>
       )}
-      {!isWebUI
+
+      {!tokenBalanceItems.length
         ? (
-          <div
-            className={'__scroll-container'}
-          >
-            {
-              tokenBalanceItems.map((item) => (
-                <TokenBalanceDetailItem
-                  key={item.slug}
-                  {...item}
-                  onClick={itemClickAction(item)}
-                />
-              ))
-            }
-          </div>
+          <NoContent pageType={PAGE_TYPE.TOKEN} />
         )
-        : (
-          <DetailTable
-            columns={[
+        : !isWebUI
+          ? (
+            <div
+              className={'__scroll-container'}
+            >
               {
-                title: 'Token name',
-                dataIndex: 'name',
-                key: 'name',
-                render: (_, row) => {
-                  return <TokenItem
-                    chain={row.chain}
-                    chainDisplayName={row.chainDisplayName || ''}
-                    logoKey={row.logoKey}
-                    slug={row.slug}
-                    symbol={row.symbol}
-                  />;
-                }
-              },
-              {
-                title: 'Transferable',
-                dataIndex: 'percentage',
-                key: 'percentage',
-                render: (_, row) => {
-                  return (
-                    <TokenBalance
-                      convertedValue={row.free.convertedValue}
-                      symbol={row.symbol}
-                      value={row.free.value}
-                    />
-                  );
-                }
-              },
-              {
-                title: 'Locked',
-                dataIndex: 'price',
-                key: 'price',
-                render: (_, row) => {
-                  return (
-                    <TokenBalance
-                      convertedValue={row.locked.convertedValue}
-                      symbol={row.symbol}
-                      value={row.locked.value}
-                    />
-                  );
-                }
-              },
-              {
-                title: 'Balance',
-                dataIndex: 'balance',
-                key: 'balance',
-                render: (_, row) => {
-                  return (
-                    <TokenBalance
-                      convertedValue={row.total.convertedValue}
-                      symbol={row.symbol}
-                      value={row.total.value}
-                    />
-                  );
-                }
+                tokenBalanceItems.map((item) => (
+                  <TokenBalanceDetailItem
+                    key={item.slug}
+                    {...item}
+                    onClick={itemClickAction(item)}
+                  />
+                ))
               }
-            ]}
-            dataSource={tokenBalanceItems}
-            onClick={onClickItem}
-          />
-        )}
+            </div>
+          )
+          : (
+            <DetailTable
+              columns={[
+                {
+                  title: 'Token name',
+                  dataIndex: 'name',
+                  key: 'name',
+                  render: (_, row) => {
+                    return (
+                      <TokenItem
+                        chain={row.chain}
+                        chainDisplayName={row.chainDisplayName || ''}
+                        logoKey={row.logoKey}
+                        slug={row.slug}
+                        symbol={row.symbol}
+                      />
+                    );
+                  }
+                },
+                {
+                  title: 'Transferable',
+                  dataIndex: 'percentage',
+                  key: 'percentage',
+                  render: (_, row) => {
+                    return (
+                      <TokenBalance
+                        convertedValue={row.free.convertedValue}
+                        symbol={row.symbol}
+                        value={row.free.value}
+                      />
+                    );
+                  }
+                },
+                {
+                  title: 'Locked',
+                  dataIndex: 'price',
+                  key: 'price',
+                  render: (_, row) => {
+                    return (
+                      <TokenBalance
+                        convertedValue={row.locked.convertedValue}
+                        symbol={row.symbol}
+                        value={row.locked.value}
+                      />
+                    );
+                  }
+                },
+                {
+                  title: 'Balance',
+                  dataIndex: 'balance',
+                  key: 'balance',
+                  render: (_, row) => {
+                    return (
+                      <TokenBalance
+                        convertedValue={row.total.convertedValue}
+                        symbol={row.symbol}
+                        value={row.total.value}
+                      />
+                    );
+                  }
+                }
+              ]}
+              dataSource={tokenBalanceItems}
+              onClick={onClickItem}
+            />
+          )}
 
       <DetailModal
         currentTokenInfo={currentTokenInfo}

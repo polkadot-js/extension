@@ -85,7 +85,7 @@ export class SubstrateApi implements _SubstrateApi {
     }
   }
 
-  private createApi (provider: ProviderInterface): ApiPromise {
+  private createApi (provider: ProviderInterface, externalApiPromise?: ApiPromise): ApiPromise {
     const apiOption: ApiOptions = {
       provider,
       typesBundle,
@@ -104,7 +104,9 @@ export class SubstrateApi implements _SubstrateApi {
 
     let api: ApiPromise;
 
-    if (_API_OPTIONS_CHAIN_GROUP.acala.includes(this.chainSlug)) {
+    if (externalApiPromise) {
+      api = externalApiPromise;
+    } else if (_API_OPTIONS_CHAIN_GROUP.acala.includes(this.chainSlug)) {
       api = new ApiPromise(acalaOptions({ provider }));
     } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(this.chainSlug)) {
       api = new ApiPromise({
@@ -113,7 +115,7 @@ export class SubstrateApi implements _SubstrateApi {
         types: oakTypes
       });
     } else if (_API_OPTIONS_CHAIN_GROUP.avail.includes(this.chainSlug)) {
-      return new ApiPromise({
+      api = new ApiPromise({
         provider,
         rpc: availSpec.rpc,
         types: availSpec.types,
@@ -138,7 +140,7 @@ export class SubstrateApi implements _SubstrateApi {
     this.registry = new TypeRegistry();
     this.metadata = metadata;
     this.provider = this.createProvider(apiUrl);
-    this.api = externalApiPromise || this.createApi(this.provider);
+    this.api = this.createApi(this.provider, externalApiPromise);
 
     this.handleApiReady = createPromiseHandler<_SubstrateApi>();
   }

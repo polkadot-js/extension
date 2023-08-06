@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 1.1.7
+Build date: Aug 06, 2023.
+
+Bugs fixed:
+- Fix error issue can not get address
+- Fix error can not export account
+- Fix error can not buy with Banxa
+
 ## 1.1.6
 Build date: Aug 04, 2023.
 

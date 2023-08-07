@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
+import { HELP_URL } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import { CaretLeft, Question } from 'phosphor-react';
 import React, { useCallback } from 'react';
@@ -63,6 +65,7 @@ function Component ({ className,
               weight={'duotone'}
             />
           }
+          onClick={openInNewTab(HELP_URL)}
           size='xs'
           type='ghost'
         >

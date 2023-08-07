@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, Logo2DWithBorder } from '@subwallet/extension-koni-ui/components';
+import { Layout } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ACCOUNT_TYPES, DOWNLOAD_EXTENSION } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Form, Icon, Input, ModalContext } from '@subwallet/react-ui';
+import { Button, ButtonProps, Form, Icon, Image, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
@@ -146,7 +146,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       description: t('Create a new account with SubWallet'),
       icon: PlusCircle,
       id: CREATE_ACCOUNT_MODAL,
-      schema: 'secondary',
+      schema: isWebUI ? 'secondary' : 'primary',
       title: t('Create a new account')
     },
     {
@@ -170,7 +170,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       schema: 'secondary',
       title: t('Download SubWallet extension')
     }
-  ], [t]);
+  ], [isWebUI, t]);
 
   const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI, items]);
 
@@ -204,21 +204,30 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       className={CN(className, '__welcome-layout-containter')}
     >
       {!isWebUI && <div className='bg-image' />}
-      <div className={CN('body-container', {
-        '__web-ui': isWebUI,
-        'flex-column': isWebUI
-      })}
-      >
+      <div className={'body-container'}>
         <div className={CN('brand-container', 'flex-column')}>
           <div className='logo-container'>
-            <Logo2DWithBorder
-              height={'100%'}
-              width={'100%'}
-            />
+            {
+              isWebUI
+                ? (
+                  <Image
+                    src='/images/subwallet/gradient-logo.png'
+                    width={80}
+                  />
+                )
+                : (
+                  <Image
+                    src={'./images/subwallet/welcome-logo.png'}
+                    width={139}
+                  />
+                )
+            }
           </div>
-          <div className='title'>{t('Welcome to SubWallet!')}</div>
+          {
+            isWebUI && (<div className='title'>{t('Welcome to SubWallet!')}</div>)
+          }
           <div className='sub-title'>
-            {t(isWebUI ? "Choose how you'd like to set up your wallet" : 'Polkadot, Substrate & Ethereum wallet')}
+            {t('Choose how you\'d like to set up your wallet')}
           </div>
         </div>
 
@@ -259,7 +268,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         {isWebUI && (
           <>
             <Form
-              className={CN('add-wallet-container', 'flex-column')}
+              className={CN('add-wallet-container')}
               form={form}
               initialValues={formDefault}
               onFieldsChange={onFieldsChange}
@@ -296,11 +305,13 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 {t('Add watch-only wallet')}
               </Button>
             </Form>
-
-            <SocialGroup className={'social-group'} />
           </>
         )}
       </div>
+
+      {isWebUI && (
+        <SocialGroup className={'social-group'} />
+      )}
     </Layout.Base>
   );
 }
@@ -311,18 +322,8 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-sw-screen-layout-body': {
       display: 'flex',
-      flexDirection: 'column'
-    },
-
-    '.flex-column': {
-      display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-around',
-      alignItems: 'center'
-    },
-
-    '.logo-container': {
-      height: 120
+      justifyContent: 'center'
     },
 
     '.bg-image': {
@@ -379,68 +380,9 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '.add-wallet-container': {
         maxWidth: 384,
         width: '100%',
-        alignItems: 'stretch',
+        marginLeft: 'auto',
+        marginRight: 'auto',
         marginBottom: token.margin
-      },
-
-      '&.__web-ui': {
-        textAlign: 'center',
-        height: '100%',
-        width: '100%',
-        maxWidth: 816,
-        margin: '0 auto',
-
-        '.title': {
-          marginTop: token.marginSM + 4,
-          marginBottom: token.marginXS
-        },
-
-        '.sub-title': {
-          margin: 0
-        },
-
-        '.logo-container': {
-          marginTop: 0,
-          color: token.colorTextBase
-        },
-
-        '.buttons-container': {
-          marginBottom: token.marginXL,
-          marginTop: token.marginXL * 2,
-          width: '100%',
-
-          '.divider': {
-            marginTop: token.marginLG
-          },
-
-          '.buttons': {
-            display: 'grid',
-            // flexDirection: "column",
-            gridTemplateRows: '1fr 1fr',
-            gridTemplateColumns: '1fr 1fr',
-            gap: token.sizeMS,
-
-            [`.type-${CREATE_ACCOUNT_MODAL}`]: {
-              color: token['green-6']
-            },
-
-            [`.type-${IMPORT_ACCOUNT_MODAL}`]: {
-              color: token['orange-7']
-            },
-
-            [`.type-${ATTACH_ACCOUNT_MODAL}`]: {
-              color: token['magenta-6']
-            },
-            [`.type-${DOWNLOAD_EXTENSION}`]: {
-              color: '#4CEAAC'
-            },
-
-            '.welcome-import-button': {
-              width: '100%',
-              paddingRight: 14
-            }
-          }
-        }
       }
     },
 
@@ -485,8 +427,67 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.social-group': {
       paddingTop: token.paddingLG
-    }
+    },
 
+    '.web-ui-enable &': {
+      textAlign: 'center',
+      height: '100%',
+      width: '100%',
+      maxWidth: 816,
+      margin: '0 auto',
+
+      '.logo-container': {
+        height: 120,
+        marginTop: 0,
+        color: token.colorTextBase
+      },
+
+      '.title': {
+        marginTop: token.marginSM + 4,
+        marginBottom: token.marginXS
+      },
+
+      '.sub-title': {
+        margin: 0
+      },
+
+      '.buttons-container': {
+        marginBottom: token.marginXL,
+        marginTop: 72,
+        width: '100%',
+
+        '.divider': {
+          marginTop: token.marginLG
+        },
+
+        '.buttons': {
+          display: 'grid',
+          gridTemplateRows: '1fr 1fr',
+          gridTemplateColumns: '1fr 1fr',
+          gap: token.sizeMS,
+
+          [`.type-${CREATE_ACCOUNT_MODAL}`]: {
+            color: token['green-6']
+          },
+
+          [`.type-${IMPORT_ACCOUNT_MODAL}`]: {
+            color: token['orange-7']
+          },
+
+          [`.type-${ATTACH_ACCOUNT_MODAL}`]: {
+            color: token['magenta-6']
+          },
+          [`.type-${DOWNLOAD_EXTENSION}`]: {
+            color: token.colorSuccess
+          },
+
+          '.welcome-import-button': {
+            width: '100%',
+            paddingRight: 14
+          }
+        }
+      }
+    }
   };
 });
 

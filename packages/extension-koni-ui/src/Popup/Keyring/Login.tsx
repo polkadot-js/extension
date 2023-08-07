@@ -157,10 +157,6 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       top: 0
     },
 
-    '.web-ui-enable & .bg-image': {
-      display: 'none'
-    },
-
     '.ant-sw-screen-layout-body': {
       display: 'flex',
       flexDirection: 'column'
@@ -204,16 +200,6 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         lineHeight: token.lineHeightHeading5,
         color: token.colorTextLight4,
         marginTop: 27
-      },
-
-      '.web-ui-enable &': {
-        '.password-input': {
-          marginTop: token.paddingLG
-        },
-
-        '.forgot-password': {
-          marginTop: token.paddingMD
-        }
       }
     },
 
@@ -221,6 +207,20 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       marginTop: 0,
       paddingTop: 40,
       textAlign: 'center'
+    },
+
+    '.web-ui-enable &': {
+      '.bg-image': {
+        display: 'none'
+      },
+
+      '.password-input': {
+        marginTop: 36
+      },
+
+      '.forgot-password': {
+        marginTop: 0
+      }
     }
   };
 });

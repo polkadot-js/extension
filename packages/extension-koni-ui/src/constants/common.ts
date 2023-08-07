@@ -16,3 +16,4 @@ export const DISCORD_URL = 'https://discord.com/invite/vPCN4vdB8v';
 export const EXTENSION_URL = 'https://subwallet.app/download.html';
 export const CONTACT_US = 'mailto:agent@subwallet.app';
 export const ALL_KEY = 'all';
+export const HELP_URL = 'https://docs.subwallet.app/main/';

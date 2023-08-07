@@ -76,7 +76,7 @@ const filterOptions = [
 const defaultModalId = 'multi-validator-selector';
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, setForceFetchValidator, className = '', from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, onChange, value, loading } = props;
+  const { chain, className = '', from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, loading, onChange, setForceFetchValidator, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
 
@@ -387,8 +387,20 @@ const MultiValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { 
       }
     },
 
-    '.pool-item:not(:last-child)': {
-      marginBottom: token.marginXS
+    '.ant-sw-list, .ant-sw-modal-body': {
+      paddingBottom: 0
+    },
+
+    '.pool-item:not(:first-of-type)': {
+      marginTop: token.marginXS
+    },
+
+    '.ant-sw-list-section': {
+      height: '100%'
+    },
+
+    '.ant-sw-list-section .ant-sw-list-wrapper': {
+      flexBasis: 'auto'
     }
   };
 });

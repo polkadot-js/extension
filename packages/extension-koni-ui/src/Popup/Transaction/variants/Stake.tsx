@@ -608,6 +608,28 @@ const Stake = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flex: 1
     },
 
+    '.staking-type': {
+      marginBottom: token.margin
+    },
+
+    '.account-free-balance': {
+      marginBottom: token.marginXS
+    },
+
+    '.meta-info': {
+      marginTop: token.paddingSM
+    },
+
+    '.react-tabs__tab-list': {
+      marginLeft: 0,
+      marginRight: 0
+    },
+
+    '.staking-divider': {
+      marginTop: token.margin + 2,
+      marginBottom: token.marginSM
+    },
+
     '.web-ui-enable &': {
       paddingTop: 24,
       maxWidth: 784,
@@ -631,29 +653,11 @@ const Stake = styled(Component)<Props>(({ theme: { token } }: Props) => {
         paddingLeft: 0,
         paddingRight: 0,
         marginBottom: 0
+      },
+
+      '.meta-info': {
+        marginBottom: token.marginSM
       }
-    },
-
-    '.staking-type': {
-      marginBottom: token.margin
-    },
-
-    '.account-free-balance': {
-      marginBottom: token.marginXS
-    },
-
-    '.meta-info': {
-      marginTop: token.paddingSM
-    },
-
-    '.react-tabs__tab-list': {
-      marginLeft: 0,
-      marginRight: 0
-    },
-
-    '.staking-divider': {
-      marginTop: token.margin + 2,
-      marginBottom: token.marginSM
     }
   };
 });

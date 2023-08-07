@@ -212,7 +212,7 @@ const Component: React.FC<Props> = (props: Props) => {
       setFrom(from);
     }
 
-    if (asset !== undefined) {
+    if (asset) {
       const chain = _getOriginChainOfAsset(asset);
 
       setAsset(asset);

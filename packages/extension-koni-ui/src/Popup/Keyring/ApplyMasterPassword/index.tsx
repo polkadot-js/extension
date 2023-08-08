@@ -8,7 +8,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useDefaultNavigate, useDeleteAccount, useNotification } from '@subwallet/extension-koni-ui/hooks';
 import { forgetAccount, keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { CreateDoneParam, FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { simpleCheckForm, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Field, Form, Icon, Input } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
@@ -17,6 +17,7 @@ import { ArrowCircleRight, CheckCircle, Trash } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import MigrateDone from './Done';
@@ -83,6 +84,7 @@ const intersectionArray = (array1: AccountJson[], array2: AccountJson[]): Accoun
 
 const Component: React.FC<Props> = (props: Props) => {
   const { isWebUI } = useContext(ScreenContext);
+  const navigate = useNavigate();
   const { className } = props;
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
@@ -187,6 +189,14 @@ const Component: React.FC<Props> = (props: Props) => {
         return {
           children: t('Apply master password now'),
           onClick: () => {
+            if (isWebUI) {
+              if (needMigrate.length) {
+                setStep('Migrate');
+              }
+
+              return;
+            }
+
             setStep(needMigrate.length ? 'Migrate' : 'Done');
           },
           icon: nextIcon
@@ -208,7 +218,7 @@ const Component: React.FC<Props> = (props: Props) => {
           icon: nextIcon
         };
     }
-  }, [form, goHome, needMigrate.length, step, t]);
+  }, [form, goHome, isWebUI, needMigrate.length, step, t]);
 
   const onDelete = useCallback(() => {
     if (currentAccount?.address) {
@@ -245,12 +255,16 @@ const Component: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     setStep((prevState) => {
       if (prevState !== 'Introduction') {
+        if (isWebUI) {
+          return needMigrate.length ? 'Migrate' : prevState;
+        }
+
         return needMigrate.length ? 'Migrate' : 'Done';
       } else {
         return 'Introduction';
       }
     });
-  }, [needMigrate.length, deleting]);
+  }, [needMigrate.length, deleting, isWebUI]);
 
   useEffect(() => {
     if (step === 'Migrate') {
@@ -286,6 +300,12 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [form, needMigrate, deleting, step]);
 
+  useEffect(() => {
+    if (step !== 'Introduction' && isWebUI && !needMigrate.length) {
+      navigate('/create-done', { state: { accounts: canMigrate } as CreateDoneParam });
+    }
+  }, [isWebUI, navigate, canMigrate, needMigrate.length, step]);
+
   return (
     <PageWrapper
       animateOnce={true}
@@ -312,7 +332,7 @@ const Component: React.FC<Props> = (props: Props) => {
         })}
         >
           {step === 'Introduction' && <IntroductionMigratePassword className={'__introduction-container'} />}
-          {step === 'Done' && (
+          {!isWebUI && step === 'Done' && (
             <MigrateDone
               accounts={canMigrate}
               className={'__migrate-done-container'}

@@ -1,14 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import MigrateDone from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Done';
+import { CreateDoneParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle, Wallet, X } from 'phosphor-react';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { Layout, SocialButtonGroup } from '../components';
@@ -18,35 +21,62 @@ type Props = ThemeProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
+  const { isWebUI } = useContext(ScreenContext);
+  const locationState = useLocation().state as CreateDoneParam;
+  const [accounts] = useState<AccountJson[] | undefined>(locationState?.accounts);
+
   const { className } = props;
 
   const { goHome } = useDefaultNavigate();
-  const { isWebUI } = useContext(ScreenContext);
 
   const { t } = useTranslation();
 
+  if (accounts) {
+    return (
+      <Layout.Base
+        showBackButton={false}
+        title={t('Successful')}
+      >
+        <div className={className}>
+          <MigrateDone
+            accounts={accounts}
+          />
+
+          <div className='__button-wrapper'>
+            <Button
+              block={true}
+              className={'__footer-button'}
+              icon={
+                (
+                  <Icon
+                    phosphorIcon={CheckCircle}
+                    weight='fill'
+                  />
+                )
+              }
+              onClick={goHome}
+            >
+              {t('Finish')}
+            </Button>
+          </div>
+        </div>
+      </Layout.Base>
+    );
+  }
+
   return (
-    <Layout.Base
-      {...(!isWebUI
+    <Layout.WithSubHeaderOnly
+      rightFooterButton={!isWebUI
         ? {
-          rightFooterButton: {
-            children: t('Go to home'),
-            onClick: goHome,
-            icon: (
-              <Icon
-                phosphorIcon={ArrowCircleRight}
-                weight={'fill'}
-              />
-            )
-          },
-          showBackButton: true,
-          subHeaderPaddingVertical: true,
-          showSubHeader: true,
-          subHeaderCenter: true,
-          subHeaderBackground: 'transparent'
+          children: t('Go to home'),
+          onClick: goHome,
+          icon: <Icon
+            phosphorIcon={ArrowCircleRight}
+            weight={'fill'}
+          />
         }
-        : { })}
-      showBackButton={true}
+        : undefined}
+      showBackButton={false}
       subHeaderLeft={(
         <Icon
           phosphorIcon={X}
@@ -55,10 +85,7 @@ const Component: React.FC<Props> = (props: Props) => {
       )}
       title={t('Successful')}
     >
-      <div className={CN(className, {
-        '__web-ui': isWebUI
-      })}
-      >
+      <div className={CN(className)}>
         <div className='page-icon'>
           <PageIcon
             color='var(--page-icon-color)'
@@ -68,32 +95,36 @@ const Component: React.FC<Props> = (props: Props) => {
             }}
           />
         </div>
-        <div className={CN('title')}>
-          {!isWebUI ? t('All done!') : t("You're all done!")}
+        <div className='title'>
+          {t('All done!')}
         </div>
-        <div className={CN('description')}>
+        <div className='description'>
           {t('Follow along with product updates or reach out if you have any questions.')}
         </div>
         <SocialButtonGroup />
 
-        <div className={'__button-wrapper'}>
-          <Button
-            block={true}
-            className={'__button'}
-            icon={(
-              <Icon
-                phosphorIcon={Wallet}
-                weight='fill'
-              />
-            )}
-            onClick={goHome}
-            schema={'primary'}
-          >
-            {t('Go to portfolio')}
-          </Button>
-        </div>
+        {
+          isWebUI && (
+            <div className={'__button-wrapper'}>
+              <Button
+                block={true}
+                className={'__button'}
+                icon={(
+                  <Icon
+                    phosphorIcon={Wallet}
+                    weight='fill'
+                  />
+                )}
+                onClick={goHome}
+                schema={'primary'}
+              >
+                {t('Go to portfolio')}
+              </Button>
+            </div>
+          )
+        }
       </div>
-    </Layout.Base>
+    </Layout.WithSubHeaderOnly>
   );
 };
 
@@ -101,21 +132,16 @@ const CreateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     textAlign: 'center',
 
-    '&.__web-ui': {
-      maxWidth: '416px',
-      paddingLeft: token.padding,
-      paddingRight: token.padding,
-      margin: '0 auto'
-    },
-
     '.page-icon': {
       display: 'flex',
       justifyContent: 'center',
+      marginTop: token.controlHeightLG,
       marginBottom: token.margin,
       '--page-icon-color': token.colorSecondary
     },
 
     '.title': {
+      marginTop: token.margin,
       marginBottom: token.margin,
       fontWeight: token.fontWeightStrong,
       fontSize: token.fontSizeHeading3,
@@ -125,6 +151,7 @@ const CreateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.description': {
       padding: `0 ${token.controlHeightLG - token.padding}px`,
+      marginTop: token.margin,
       marginBottom: token.margin * 2,
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,
@@ -134,6 +161,25 @@ const CreateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.__button-wrapper': {
       paddingTop: 64
+    },
+
+    '.web-ui-enable &': {
+      maxWidth: '416px',
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
+      margin: '0 auto',
+
+      '.page-icon': {
+        marginTop: 0
+      },
+
+      '.title': {
+        marginTop: 0
+      },
+
+      '.description': {
+        marginTop: 0
+      }
     }
   };
 });

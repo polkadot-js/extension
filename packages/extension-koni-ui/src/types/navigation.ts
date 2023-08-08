@@ -1,6 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// Account
+
+import { AccountJson } from '@subwallet/extension-base/background/types';
+
+export type CreateDoneParam = {
+  accounts: AccountJson[];
+};
+
 // token
 
 export type TokenDetailParam = {

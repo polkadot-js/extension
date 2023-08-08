@@ -84,10 +84,10 @@ const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
         })
         .finally(() => {
           setLoading(false);
-          inactiveModal(modalId);
+          onCancel();
         });
     }, 500);
-  }, [seedPhrase, accountName, accountTypes, navigate, notify, inactiveModal]);
+  }, [seedPhrase, accountName, accountTypes, navigate, notify, onCancel]);
 
   const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL);
 

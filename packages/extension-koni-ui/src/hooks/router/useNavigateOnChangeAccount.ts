@@ -6,7 +6,7 @@ import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const useNavigateOnChangeAccount = (path = DEFAULT_ROUTER_PATH) => {
+const useNavigateOnChangeAccount = (path = DEFAULT_ROUTER_PATH, active = true) => {
   const navigate = useNavigate();
 
   const { currentAccount } = useSelector((state) => state.accountState);
@@ -15,9 +15,9 @@ const useNavigateOnChangeAccount = (path = DEFAULT_ROUTER_PATH) => {
 
   useEffect(() => {
     if (currentAccount?.address !== address) {
-      navigate(path);
+      active && navigate(path);
     }
-  }, [address, currentAccount?.address, navigate, path]);
+  }, [active, address, currentAccount?.address, navigate, path]);
 };
 
 export default useNavigateOnChangeAccount;

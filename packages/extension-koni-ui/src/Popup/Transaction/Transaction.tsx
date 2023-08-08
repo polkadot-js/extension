@@ -149,7 +149,7 @@ function Component ({ children, className, modalContent = false }: Props) {
     return result;
   }, [t]);
 
-  useNavigateOnChangeAccount(homePath);
+  useNavigateOnChangeAccount(homePath, !modalContent);
 
   const [from, setFrom] = useState(!isAllAccount ? currentAccount?.address || '' : '');
   const [chain, setChain] = useState('');

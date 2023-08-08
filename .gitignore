@@ -19,7 +19,7 @@ cc-test-reporter
 lerna-debug.log*
 extension-chrome.zip
 extension-firefox.zip
-master-src.zip
+source-code.zip
 npm-debug.log*
 tsconfig.*buildinfo
 yarn-debug.log*

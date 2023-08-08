@@ -20,7 +20,7 @@
     "packages/*"
   ],
   "scripts": {
-    "adapt-build-to-ff": "jq '.background.scripts = [.background.service_worker] | del(.background.service_worker)' packages/extension/build/manifest.json > tmp.$$.json && mv tmp.$$.json packages/extension/build/manifest.json",
+    "adapt-build-to-ff": "ts-node --esm scripts/adaptBuildToFf.mts",
     "build": "yarn download-chains-metadata && polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
     "build-storybook": "storybook build",
     "build:extra": "yarn build:i18n && yarn build:ui",
@@ -31,7 +31,7 @@
     "build:zip": "yarn build:zip:dst:chrome && yarn adapt-build-to-ff && yarn build:zip:dst:firefox && yarn build:zip:src",
     "build:zip:dst:chrome": "rm -rf ./extension-chrome.zip && cd packages/extension/build && zip -r -FS ../../../extension-chrome.zip .",
     "build:zip:dst:firefox": "rm -rf ./extension-firefox.zip && cd packages/extension/build && zip -r -FS ../../../extension-firefox.zip .",
-    "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig .eslintignore .eslintrc.js babel.config.cjs CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js jest.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock",
+    "build:zip:src": "rm -rf ./source-code.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./source-code.zip packages .editorconfig .eslintignore .eslintrc.js babel.config.cjs CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js jest.config.cjs LICENSE package.json README.md tsconfig.json tsconfig.base.json tsconfig.build.json rollup.config.mjs yarn.lock .yarn/patches .yarn/plugins .yarn/releases scripts",
     "clean": "polkadot-dev-clean-build",
     "download-chains-metadata": "ts-node --esm scripts/downloadMetadata.mts",
     "lint": "polkadot-dev-run-lint",

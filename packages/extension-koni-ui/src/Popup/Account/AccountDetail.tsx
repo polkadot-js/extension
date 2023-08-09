@@ -236,29 +236,20 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         disableBack={deriving}
-        {...!isWebUI && {
-          showBackButton: true,
-          showSubHeader: true,
-          subHeaderBackground: 'transparent',
-          subHeaderCenter: true,
-          subHeaderPaddingVertical: true,
-          showHeader: false
-        }}
-        subHeaderIcons={[
-          {
-            icon: <CloseIcon />,
-            onClick: goHome,
-            disabled: deriving
-          }
-        ]}
+        subHeaderIcons={isWebUI
+          ? undefined
+          : ([
+            {
+              icon: <CloseIcon />,
+              onClick: goHome,
+              disabled: deriving
+            }
+          ])}
         title={t('Account details')}
       >
-        <div className={CN('body-container', {
-          '__web-ui': isWebUI
-        })}
-        >
+        <div className={CN('body-container')}>
           <div className='main-content'>
             {!isWebUI && (
               <div className='account-qr'>
@@ -416,7 +407,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </CustomModal>
         )}
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 };
@@ -424,30 +415,6 @@ const Component: React.FC<Props> = (props: Props) => {
 const AccountDetail = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return {
     '.body-container': {
-      '&.__web-ui': {
-        display: 'flex',
-        justifyContent: 'center',
-        gap: 16,
-        width: extendToken.twoColumnWidth,
-        maxWidth: '100%',
-        margin: '0 auto',
-
-        '.anticon': {
-          height: 'unset !important',
-          width: 'unset !important'
-        },
-
-        '& > *': {
-          flex: 1
-        },
-
-        '.form-container': {
-          '.ant-btn': {
-            width: '100%'
-          }
-        }
-      },
-
       padding: `0 ${token.padding}px`,
       '--wallet-name-icon-bg-color': token['geekblue-6'],
       '--wallet-name-icon-color': token.colorWhite,
@@ -539,6 +506,36 @@ const AccountDetail = styled(Component)<Props>(({ theme: { extendToken, token } 
       '.loading': {
         color: token['gray-5'],
         animation: 'spinner-loading 1s infinite linear'
+      }
+    },
+
+    '.web-ui-enable &': {
+      '.ant-sw-sub-header-container': {
+        marginBottom: 24
+      },
+
+      '.body-container': {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: 16,
+        width: extendToken.twoColumnWidth,
+        maxWidth: '100%',
+        margin: '0 auto',
+
+        '.anticon': {
+          height: 'unset !important',
+          width: 'unset !important'
+        },
+
+        '& > *': {
+          flex: 1
+        },
+
+        '.form-container': {
+          '.ant-btn': {
+            width: '100%'
+          }
+        }
       }
     }
   };

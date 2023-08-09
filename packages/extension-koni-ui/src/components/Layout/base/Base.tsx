@@ -26,14 +26,13 @@ SwScreenLayoutProps,
 }
 
 const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBaseProps) => {
-  const { headerType } = useContext(WebUIContext);
   const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
   const { pathname } = useLocation();
   const { t } = useTranslation();
   const { setTitle } = useContext(WebUIContext);
-  const { isSettingPage, setShowBackButtonOnHeader } = useContext(WebUIContext);
+  const { headerType, isSettingPage, setShowBackButtonOnHeader } = useContext(WebUIContext);
   const [customClassName, setCustomClassName] = useState('');
 
   const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
@@ -132,7 +131,7 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
       onBack={onBack || defaultOnBack}
       selectedTabBarItem={selectedTab}
       showHeader={(!isWebUI || headerType === HeaderType.NONE) && props.showHeader}
-      showSubHeader={((!isWebUI || headerType === HeaderType.NONE) || isSettingPage) && props.showSubHeader}
+      showSubHeader={(!isWebUI || headerType === HeaderType.NONE || (isSettingPage && headerType !== HeaderType.SIMPLE)) && props.showSubHeader}
       showTabBar={!isWebUI && props.showTabBar}
       tabBarItems={tabBarItems.map((item) => ({
         ...item,

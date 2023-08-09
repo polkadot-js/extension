@@ -640,6 +640,7 @@ const Stake = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '.__transaction-block': {
         display: 'block',
+        maxWidth: 384,
         flex: 1
       },
 

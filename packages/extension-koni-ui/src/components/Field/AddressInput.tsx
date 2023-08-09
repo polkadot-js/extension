@@ -160,6 +160,8 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
           })
           .catch(console.error);
       }
+    } else {
+      setDomainName(undefined);
     }
   }, [allowDomain, chain, parseAndChangeValue, value]);
 

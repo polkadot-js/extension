@@ -262,12 +262,15 @@ const StyledHeader = styled(Header)`
 `;
 
 const MnemonicWrapper = styled.div`
-  &&& > * {
+  display: flow-root;
+  margin-bottom: 8px;
+
+  & > * {
     margin-bottom: 16px;
   }
 
-  && > :only-child {
-    margin-bottom: 24px;
+  & > :last-child:not(:only-child) {
+    margin-bottom: 8px;
   }
 `;
 

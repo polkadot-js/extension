@@ -16,7 +16,7 @@ const MnemonicInput = ({ className, onChange, seedWords, showError }: Props) => 
   const handlePaste = (event: React.ClipboardEvent) => {
     event.preventDefault();
 
-    const pastedWords = event.clipboardData.getData('text').trim().split(/\s+/);
+    const pastedWords = event.clipboardData.getData('text').toLowerCase().trim().split(/\s+/);
 
     inputRefs.current[Math.min(pastedWords.length, seedWords.length - 1)]?.focus();
 
@@ -29,7 +29,7 @@ const MnemonicInput = ({ className, onChange, seedWords, showError }: Props) => 
     const words = value.split(/\s+/);
 
     words.forEach((word, subIndex) => {
-      nextSeedWords[index + subIndex] = word;
+      nextSeedWords[index + subIndex] = word.toLowerCase();
     });
 
     inputRefs.current[index + words.length - 1]?.focus();

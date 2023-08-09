@@ -28,6 +28,7 @@ const MnemonicPill = ({ className, index, inputRef, name, onChange, onKeyDown, w
     <div className={className}>
       <div className='mnemonic-index'>{index + 1}</div>
       <input
+        autoCapitalize='off'
         name={name}
         onChange={_handleChange}
         onKeyDown={onKeyDown}

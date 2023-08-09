@@ -145,6 +145,8 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
             if (result) {
               setDomainName(value);
               parseAndChangeValue(result, true);
+              inputRef?.current?.focus();
+              inputRef?.current?.blur();
             }
           })
           .catch(console.error);
@@ -163,7 +165,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     } else {
       setDomainName(undefined);
     }
-  }, [allowDomain, chain, parseAndChangeValue, value]);
+  }, [allowDomain, chain, inputRef, parseAndChangeValue, value]);
 
   // todo: Will work with "Manage address book" feature later
   return (

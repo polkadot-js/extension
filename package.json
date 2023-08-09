@@ -49,6 +49,7 @@
   "dependencies": {
     "@types/node": "^17.0.10",
     "dexie": "^3.2.2",
+    "loglevel": "^1.8.1",
     "typescript": "^4.5.4"
   },
   "devDependencies": {

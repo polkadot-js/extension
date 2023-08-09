@@ -82,19 +82,25 @@ export default class KoniExtension {
   readonly #koniState: KoniState;
   #timeAutoLock: number = DEFAULT_AUTO_LOCK_TIME;
   #skipAutoLock = false;
+  #alwaysLock = false;
 
   constructor (state: KoniState) {
     this.#koniState = state;
 
     const updateTimeAutoLock = (rs: RequestSettingsType) => {
       this.#timeAutoLock = rs.timeAutoLock;
+      this.#alwaysLock = !rs.timeAutoLock;
       clearTimeout(this.#lockTimeOut);
 
-      this.#lockTimeOut = setTimeout(() => {
-        if (!this.#skipAutoLock) {
-          this.keyringLock();
-        }
-      }, this.#timeAutoLock * 60 * 1000);
+      if (this.#alwaysLock) {}
+
+      if (this.#timeAutoLock > 0) {
+        this.#lockTimeOut = setTimeout(() => {
+          if (!this.#skipAutoLock) {
+            this.keyringLock();
+          }
+        }, this.#timeAutoLock * 60 * 1000);
+      }
     };
 
     this.#koniState.settingService.getSettings(updateTimeAutoLock);
@@ -3710,11 +3716,13 @@ export default class KoniExtension {
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     clearTimeout(this.#lockTimeOut);
 
-    this.#lockTimeOut = setTimeout(() => {
-      if (!this.#skipAutoLock) {
-        this.keyringLock();
-      }
-    }, this.#timeAutoLock * 60 * 1000);
+    if (this.#timeAutoLock > 0) {
+      this.#lockTimeOut = setTimeout(() => {
+        if (!this.#skipAutoLock) {
+          this.keyringLock();
+        }
+      }, this.#timeAutoLock * 60 * 1000);
+    }
 
     switch (type) {
       /// Clone from PolkadotJs

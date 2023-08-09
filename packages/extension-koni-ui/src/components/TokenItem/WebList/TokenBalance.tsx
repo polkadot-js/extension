@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -19,12 +20,15 @@ function Component (
     convertedValue,
     symbol,
     value }: Props) {
+  const isShowBalance = useSelector((state) => state.settings.isShowBalance);
+
   return (
     <div className={classNames(className)}>
       <Number
         className={'__value'}
         decimal={0}
         decimalOpacity={0.45}
+        hide={!isShowBalance}
         suffix={symbol}
         value={value}
       />
@@ -32,6 +36,7 @@ function Component (
         className={'__converted-value'}
         decimal={0}
         decimalOpacity={0.45}
+        hide={!isShowBalance}
         intOpacity={0.45}
         prefix='$'
         unitOpacity={0.45}

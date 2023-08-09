@@ -24,6 +24,7 @@ const ScrollbarContainer = styled.div`
 
   width: 100vw;
   overflow-x: hidden;
+  overflow-y: auto;
 
   outline-offset: -3px;
 
@@ -42,8 +43,7 @@ const ScrollbarContainer = styled.div`
 const ScrollWrapperContent = styled.div`
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100%;
   padding-top: 32px;
 

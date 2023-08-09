@@ -16,7 +16,7 @@ import {
   LearnMore,
   RadioGroup,
   ScrollWrapper,
-  Svg,
+  Svg
 } from '../../components';
 import { ALEPH_ZERO_TESTNET_GENESIS_HASH } from '../../constants';
 import useToast from '../../hooks/useToast';
@@ -121,7 +121,7 @@ function EditNetwork({
           />
           {footer}
         </Form>
-        <CustomButtonArea>
+        <ButtonArea>
           <Button
             onClick={_goTo(`/account/edit-menu/${address}?isExternal=${isExternal.toString()}`)}
             secondary
@@ -136,7 +136,7 @@ function EditNetwork({
           >
             {t<string>('Change')}
           </Button>
-        </CustomButtonArea>
+        </ButtonArea>
       </StyledScrollWrapper>
     </>
   );
@@ -165,10 +165,6 @@ const CustomFooter = styled(HelperFooter)`
     gap: 8px;
     margin-left: -12px;
   };
-`;
-
-const CustomButtonArea = styled(ButtonArea)`
-  padding-top:8px;
 `;
 
 const CheckboxContainer = styled.div`

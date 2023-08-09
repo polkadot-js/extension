@@ -4,6 +4,7 @@
 const general = require('@polkadot/dev/config/babel-general.cjs');
 const plugins = require('@polkadot/dev/config/babel-plugins.cjs');
 const presets = require('@polkadot/dev/config/babel-presets.cjs');
+const dotenv = require('dotenv');
 
 module.exports = {
   ...general,
@@ -29,6 +30,10 @@ if (args) {
     }
   });
 }
+
+const envPath = mode === 'production' ? '.env' : '.env.local';
+
+dotenv.config({ path: `../../${envPath}` });
 
 console.log('You are using ' + mode + ' mode.');
 

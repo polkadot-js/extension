@@ -92,14 +92,14 @@ export default class KoniExtension {
       this.#alwaysLock = !rs.timeAutoLock;
       clearTimeout(this.#lockTimeOut);
 
-      if (this.#alwaysLock) {}
-
       if (this.#timeAutoLock > 0) {
         this.#lockTimeOut = setTimeout(() => {
           if (!this.#skipAutoLock) {
             this.keyringLock();
           }
         }, this.#timeAutoLock * 60 * 1000);
+      } else if (this.#alwaysLock) {
+        this.keyringLock();
       }
     };
 
@@ -1262,6 +1262,10 @@ export default class KoniExtension {
       });
     });
 
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
+
     return addressDict;
   }
 
@@ -1413,6 +1417,10 @@ export default class KoniExtension {
           keyring.restoreAccount(file, password, withMasterPassword);
           this._addAddressToAuthList(address, isAllowed);
         });
+
+        if (this.#alwaysLock) {
+          this.keyringLock();
+        }
       } catch (error) {
         throw new Error((error as Error).message);
       }
@@ -1431,6 +1439,10 @@ export default class KoniExtension {
           keyring.restoreAccounts(file, password);
           this._addAddressesToAuthList(addressList, isAllowed);
         });
+
+        if (this.#alwaysLock) {
+          this.keyringLock();
+        }
       } catch (error) {
         throw new Error((error as Error).message);
       }
@@ -1695,7 +1707,8 @@ export default class KoniExtension {
       ignoreWarnings: transferAll,
       isTransferAll: isTransferNativeToken ? transferAll : false,
       edAsWarning: isTransferNativeToken,
-      additionalValidator: additionalValidator
+      additionalValidator: additionalValidator,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -1800,7 +1813,8 @@ export default class KoniExtension {
       isTransferAll: inputData.transferAll,
       errors,
       additionalValidator: additionalValidator,
-      eventsHandler: eventsHandler
+      eventsHandler: eventsHandler,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -1820,7 +1834,8 @@ export default class KoniExtension {
       data: inputData,
       extrinsicType: ExtrinsicType.SEND_NFT,
       transaction,
-      url: EXTENSION_REQUEST_URL
+      url: EXTENSION_REQUEST_URL,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -2056,7 +2071,8 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: { ...inputData, isSendingSelf },
       extrinsicType: ExtrinsicType.SEND_NFT,
-      chainType: ChainType.SUBSTRATE
+      chainType: ChainType.SUBSTRATE,
+      lockAfterCreate: this.#alwaysLock
     });
 
     return { ...rs, isSendingSelf };
@@ -2319,6 +2335,10 @@ export default class KoniExtension {
           resolve();
         });
       });
+
+      if (this.#alwaysLock) {
+        this.keyringLock();
+      }
 
       return {
         errors: [],
@@ -2611,7 +2631,8 @@ export default class KoniExtension {
       extrinsicType: ExtrinsicType.STAKING_BOND,
       transaction: extrinsic,
       url: EXTENSION_REQUEST_URL,
-      transferNativeAmount: amount
+      transferNativeAmount: amount,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -2639,7 +2660,8 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_UNBOND,
-      chainType: ChainType.SUBSTRATE
+      chainType: ChainType.SUBSTRATE,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -2659,7 +2681,8 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_WITHDRAW,
-      chainType: ChainType.SUBSTRATE
+      chainType: ChainType.SUBSTRATE,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -2679,7 +2702,8 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_CLAIM_REWARD,
-      chainType: ChainType.SUBSTRATE
+      chainType: ChainType.SUBSTRATE,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -2699,7 +2723,8 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_CANCEL_UNSTAKE,
-      chainType: ChainType.SUBSTRATE
+      chainType: ChainType.SUBSTRATE,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -2731,7 +2756,8 @@ export default class KoniExtension {
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_JOIN_POOL,
       chainType: ChainType.SUBSTRATE,
-      transferNativeAmount: amount
+      transferNativeAmount: amount,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -2761,7 +2787,8 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_LEAVE_POOL,
-      chainType: ChainType.SUBSTRATE
+      chainType: ChainType.SUBSTRATE,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -2793,7 +2820,8 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_COMPOUNDING,
-      chainType: ChainType.SUBSTRATE
+      chainType: ChainType.SUBSTRATE,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -2816,7 +2844,8 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_CANCEL_COMPOUNDING,
-      chainType: ChainType.SUBSTRATE
+      chainType: ChainType.SUBSTRATE,
+      lockAfterCreate: this.#alwaysLock
     });
   }
 
@@ -2928,9 +2957,7 @@ export default class KoniExtension {
   // Lock wallet
 
   private keyringLock (): void {
-    keyring.lockAll();
-
-    this.#koniState.updateKeyringState();
+    this.#koniState.keyringService.lock();
     clearTimeout(this.#lockTimeOut);
   }
 
@@ -3030,6 +3057,10 @@ export default class KoniExtension {
       // In case evm chain, must be cut 2 character after 0x
       signature: isEvm ? `0x${result.signature.slice(4)}` : result.signature
     });
+
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
 
     return true;
   }
@@ -3139,6 +3170,10 @@ export default class KoniExtension {
       keyring.addPair(childPair, true);
       this._addAddressToAuthList(address, true);
     });
+
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
 
     return true;
   }

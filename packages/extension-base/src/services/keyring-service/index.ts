@@ -98,6 +98,11 @@ export class KeyringService {
     this.currentAccountStore.set('CurrentAccountInfo', currentAccountData);
   }
 
+  public lock () {
+    keyring.lockAll();
+    this.updateKeyringState();
+  }
+
   resetWallet (resetAll: boolean) {
     keyring.resetWallet(resetAll);
     this.updateKeyringState();

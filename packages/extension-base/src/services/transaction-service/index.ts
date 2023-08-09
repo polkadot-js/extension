@@ -13,6 +13,7 @@ import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-
 import { _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
+import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
@@ -43,20 +44,21 @@ import { isHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 
 export default class TransactionService {
-  private readonly chainService: ChainService;
-  private readonly eventService: EventService;
-  private readonly databaseService: DatabaseService;
-  private readonly requestService: RequestService;
   private readonly balanceService: BalanceService;
+  private readonly chainService: ChainService;
+  private readonly databaseService: DatabaseService;
+  private readonly eventService: EventService;
   private readonly historyService: HistoryService;
+  private readonly keyringService: KeyringService;
   private readonly notificationService: NotificationService;
+  private readonly requestService: RequestService;
   private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
 
   private get transactions (): Record<string, SWTransaction> {
     return this.transactionSubject.getValue();
   }
 
-  constructor (chainService: ChainService, eventService: EventService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService, notificationService: NotificationService, databaseService: DatabaseService) {
+  constructor (chainService: ChainService, eventService: EventService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService, notificationService: NotificationService, databaseService: DatabaseService, keyringService: KeyringService) {
     this.chainService = chainService;
     this.eventService = eventService;
     this.requestService = requestService;
@@ -64,6 +66,7 @@ export default class TransactionService {
     this.historyService = historyService;
     this.notificationService = notificationService;
     this.databaseService = databaseService;
+    this.keyringService = keyringService;
   }
 
   private get allTransactions (): SWTransaction[] {
@@ -283,6 +286,10 @@ export default class TransactionService {
     validatedTransaction.warnings = [];
 
     const emitter = await this.addTransaction(validatedTransaction);
+
+    if (transaction.lockAfterCreate) {
+      this.keyringService.lock();
+    }
 
     await new Promise<void>((resolve) => {
       emitter.on('signed', (data: TransactionEventResponse) => {

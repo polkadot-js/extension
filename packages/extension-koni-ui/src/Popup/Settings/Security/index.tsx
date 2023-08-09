@@ -45,7 +45,7 @@ interface AutoLockOption {
 
 const modalId = EDIT_AUTO_LOCK_TIME_MODAL;
 
-const timeOptions = [5, 10, 15, 30, 60, -1];
+const timeOptions = [0, 5, 10, 15, 30, 60, -1];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;

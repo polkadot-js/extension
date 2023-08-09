@@ -119,7 +119,10 @@ export function subscribeRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
     const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
-    const [_minNominatorBond, _minPoolJoin, _minimumActiveStake] = await Promise.all([
+    const [_totalEraStake, _totalIssuance, _auctionCounter, _minNominatorBond, _minPoolJoin, _minimumActiveStake] = await Promise.all([
+      substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
+      substrateApi.api.query.balances.totalIssuance(),
+      substrateApi.api.query.auctions?.auctionCounter(),
       substrateApi.api.query.staking.minNominatorBond(),
       substrateApi.api.query?.nominationPools?.minJoinBond(),
       substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake()
@@ -132,13 +135,22 @@ export function subscribeRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     const bnMinNominatorBond = new BN(minNominatorBond);
 
     const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
+    const rawTotalEraStake = _totalEraStake.toString();
+    const rawTotalIssuance = _totalIssuance.toString();
 
+    const numAuctions = _auctionCounter ? _auctionCounter.toHuman() as number : 0;
+    const bnTotalEraStake = new BN(rawTotalEraStake);
+    const bnTotalIssuance = new BN(rawTotalIssuance);
+
+    const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
+    const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
     const minPoolJoin = _minPoolJoin?.toString() || undefined;
     const unlockingPeriod = parseInt(unlockingEras) * (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default); // in hours
 
     callback(chainInfo.slug, {
       chain: chainInfo.slug,
       type: StakingType.NOMINATED,
+      expectedReturn: !_STAKING_CHAIN_GROUP.ternoa.includes(chainInfo.slug) ? expectedReturn : undefined, // in %, annually
       era: parseInt(currentEra),
       minStake: minStake.toString(),
       maxValidatorPerNominator: parseInt(maxNominations),
@@ -744,6 +756,8 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
     validator.identity = extraInfoMap[validator.address].identity;
     validator.isVerified = extraInfoMap[validator.address].isVerified;
   }
+
+  console.log('validatorInfoList', validatorInfoList);
 
   return validatorInfoList;
 }

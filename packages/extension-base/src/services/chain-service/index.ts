@@ -536,7 +536,6 @@ export class ChainService {
 
       // Avoid unnecessary update in case disable chain
       if (currentStatus !== status) {
-        console.log(chainInfo.name, currentStatus, status);
         this.setChainConnectionStatus(chainInfo.slug, status);
         this.updateChainStateMapSubscription();
       }

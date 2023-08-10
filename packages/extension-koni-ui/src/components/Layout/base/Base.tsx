@@ -23,9 +23,10 @@ SwScreenLayoutProps,
 > {
   children: React.ReactNode | React.ReactNode[];
   showFooter?: boolean;
+  isSetTitleContext?: boolean;
 }
 
-const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBaseProps) => {
+const Base = ({ children, headerIcons, isSetTitleContext = true, onBack, showFooter, ...props }: LayoutBaseProps) => {
   const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
@@ -114,8 +115,11 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
 
   useEffect(() => {
     setCustomClassName('common-pages');
-    setTitle(props.title);
-  }, [isSettingPage, pathname, props.title, setTitle, t]);
+
+    if (isSetTitleContext) {
+      setTitle(props.title);
+    }
+  }, [isSetTitleContext, isSettingPage, pathname, props.title, setTitle, t]);
 
   useEffect(() => {
     setShowBackButtonOnHeader(props.showBackButton);

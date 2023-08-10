@@ -173,126 +173,130 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={onBack}
-        {...(!isWebUI
-          ? {
-            rightFooterButton: buttonProps,
-            showBackButton: true,
-            subHeaderPaddingVertical: true,
-            showSubHeader: true,
-            subHeaderCenter: true,
-            subHeaderBackground: 'transparent'
-          }
-          : {})}
-        subHeaderIcons={[
-          {
-            icon: <CloseIcon />,
-            onClick: goHome
-          }
-        ]}
+        rightFooterButton={isWebUI ? undefined : buttonProps}
+        subHeaderIcons={isWebUI
+          ? undefined
+          : ([
+            {
+              icon: <CloseIcon />,
+              onClick: goHome
+            }
+          ])}
         title={t<string>('Import from seed phrase')}
       >
-
-        <div className={CN('container', {
-          '__web-ui': isWebUI
-        })}
-        >
-          <div className='secret-phrase-container'>
-            <div className='description'>
-              {t('To import an existing Polkdot wallet, please enter the recovery seed phrase here:')}
-            </div>
-            <Form
-              className='form-container'
-              form={form}
-              name={formName}
-            >
-              <Form.Item
-                name={fieldName}
-                validateStatus={validateState.status}
-              >
-                <Input.TextArea
-                  className='seed-phrase-input'
-                  onChange={onChange}
-                  placeholder={t('Secret phrase')}
-                  statusHelp={validateState.message}
-                />
-              </Form.Item>
-              <Form.Item>
-                <SelectAccountType
-                  selectedItems={keyTypes}
-                  setSelectedItems={setKeyTypes}
-                  withLabel={true}
-                />
-              </Form.Item>
-
-              {isWebUI && (
-                <>
-                  {/* TODO: add logic to form item */}
-                  {/* <Form.Item> */}
-                  {/*   <Checkbox> */}
-                  {/*     <span className={'__option-label'}>Import multiple accounts from this seed phrase</span> */}
-                  {/*   </Checkbox> */}
-                  {/* </Form.Item> */}
-                  <Button
-                    {...buttonProps}
-                    className='action'
-                  />
-                </>
-              )}
-            </Form>
+        <div className='container'>
+          <div className='description'>
+            {t('To import an existing account, please enter seed phrase')}
           </div>
+          <Form
+            className='form-container'
+            form={form}
+            name={formName}
+          >
+            <Form.Item
+              name={fieldName}
+              validateStatus={validateState.status}
+            >
+              <Input.TextArea
+                className='seed-phrase-input'
+                onChange={onChange}
+                placeholder={t('Seed phrase')}
+                statusHelp={validateState.message}
+              />
+            </Form.Item>
+            <Form.Item>
+              <SelectAccountType
+                label={t('Select account type')}
+                selectedItems={keyTypes}
+                setSelectedItems={setKeyTypes}
+                withLabel={true}
+              />
+            </Form.Item>
+          </Form>
 
           {isWebUI && (
-            <InstructionContainer contents={instructionContent} />
+            <>
+              <Button
+                {...buttonProps}
+                block={true}
+                className='__submit-button'
+              />
+            </>
           )}
         </div>
-      </Layout.Base>
+
+        {isWebUI && (
+          <InstructionContainer contents={instructionContent} />
+        )}
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 };
 
-const ImportSeedPhrase = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
+const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      '&.__web-ui': {
-        display: 'flex',
-        justifyContent: 'center',
-        width: extendToken.twoColumnWidth,
-        maxWidth: '100%',
-        margin: '0 auto',
+      padding: token.padding
+    },
 
-        '& .ant-btn': {
-          width: '100%',
-          marginTop: 24
-        }
+    '.ant-form-item:last-child': {
+      marginBottom: 0
+    },
+
+    '.description': {
+      padding: `0 ${token.padding}px`,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: token.colorTextDescription,
+      textAlign: 'center'
+    },
+
+    '.form-container': {
+      marginTop: token.margin
+    },
+
+    '.seed-phrase-input': {
+      textarea: {
+        resize: 'none',
+        height: `${token.sizeLG * 6}px !important`
+      }
+    },
+
+    '.web-ui-enable &': {
+      '.ant-sw-sub-header-container': {
+        marginBottom: 24
       },
 
-      '.secret-phrase-container': {
-        padding: token.padding
+      '.ant-sw-screen-layout-body': {
+        maxWidth: 784,
+        gap: token.size,
+        width: '100%',
+        flexDirection: 'row',
+        marginLeft: 'auto',
+        marginRight: 'auto'
       },
 
-      '.ant-form-item:last-child': {
-        marginBottom: 0
+      '.container': {
+        paddingTop: 0,
+        paddingLeft: 0,
+        paddingRight: 0,
+        flex: 1
       },
 
       '.description': {
-        padding: `0 ${token.padding}px`,
-        fontSize: token.fontSizeHeading6,
-        lineHeight: token.lineHeightHeading6,
-        color: token.colorTextDescription,
-        textAlign: 'center'
+        paddingLeft: 0,
+        paddingRight: 0,
+        textAlign: 'left'
       },
 
-      '.form-container': {
+      '.__submit-button': {
         marginTop: token.margin
       },
 
-      '.seed-phrase-input': {
-        textarea: {
-          resize: 'none',
-          height: `${token.sizeLG * 6}px !important`
-        }
+      '.instruction-container': {
+        flex: 1
       }
     }
   };

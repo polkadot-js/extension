@@ -7,6 +7,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { BackgroundColorMap, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { useNotification, useReceiveQR, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import BuyTokens from '@subwallet/extension-koni-ui/Popup/BuyTokens';
 import Transaction from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import SendFund from '@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund';
@@ -57,6 +58,11 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const tokenGroupSlug = useParams()?.slug;
   const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
+  const isShowBalance = useSelector((state: RootState) => state.settings.isShowBalance);
+
+  const onChangeShowBalance = useCallback(() => {
+    saveShowBalance(!isShowBalance).catch(console.error);
+  }, [isShowBalance]);
 
   const _tokenGroupSlug = useMemo(() => {
     if (locationPathname && tokenGroupSlug) {
@@ -67,10 +73,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
     return undefined;
   }, [locationPathname, tokenGroupSlug]);
-
-  const [displayBalance, setDisplayBalance] = useState<boolean>(true);
-
-  const handleDisplayBalance = useCallback(() => setDisplayBalance(!displayBalance), [displayBalance]);
 
   const { t } = useTranslation();
   const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
@@ -170,15 +172,15 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             className='toggle-show-balance'
             icon={
               <Icon
-                phosphorIcon={displayBalance ? Eye : EyeClosed}
+                phosphorIcon={isShowBalance ? Eye : EyeClosed}
                 size='sm'
               />
             }
-            onClick={handleDisplayBalance}
+            onClick={onChangeShowBalance}
             type='ghost'
           />
         </div>
-        {displayBalance
+        {isShowBalance
           ? (
             <>
               <Number
@@ -233,7 +235,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </Typography.Text>
 
         {
-          displayBalance
+          isShowBalance
             ? (
               <Number
                 className='balance-value'
@@ -261,7 +263,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           Locked balance
         </Typography.Text>
         {
-          displayBalance
+          isShowBalance
             ? (
               <Number
                 className='balance-value'

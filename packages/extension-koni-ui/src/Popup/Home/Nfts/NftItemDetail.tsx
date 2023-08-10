@@ -247,29 +247,41 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             />
           </div>
 
-          {
-            nftItem.properties && (
-              <div className={'nft_item_detail__prop_section'}>
-                <div className={'nft_item_detail__section_title'}>{t<string>('Properties')}</div>
-                <div className={'nft_item_detail__atts_container'}>
-                  {
-                    Object.entries(nftItem.properties).map(([attName, attValueObj], index) => {
-                      const { value: attValue } = attValueObj as Record<string, string>;
+          <div className={'nft_item_detail__prop_section'}>
+            <div className={'nft_item_detail__section_title'}>{t<string>('Properties')}</div>
+            <div className={'nft_item_detail__atts_container'}>
+              <Field
+                className={'nft_item_detail__id_field'}
+                content={nftItem.id}
+                key={'NFT ID'}
+                label={'NFT ID'}
+                width={'fit-content'}
+              />
 
-                      return (
-                        <Field
-                          content={attValue.toString()}
-                          key={index}
-                          label={attName}
-                          width={'fit-content'}
-                        />
-                      );
-                    })
-                  }
-                </div>
-              </div>
-            )
-          }
+              <Field
+                className={'nft_item_detail__id_field'}
+                content={nftItem.collectionId}
+                key={'Collection ID'}
+                label={'Collection ID'}
+                width={'fit-content'}
+              />
+
+              {
+                nftItem.properties && Object.entries(nftItem.properties).map(([attName, attValueObj], index) => {
+                  const { value: attValue } = attValueObj as Record<string, string>;
+
+                  return (
+                    <Field
+                      content={attValue.toString()}
+                      key={index}
+                      label={attName}
+                      width={'fit-content'}
+                    />
+                  );
+                })
+              }
+            </div>
+          </div>
 
           <Button
             block
@@ -437,6 +449,11 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
         maxWidth: '100%',
         objectFit: 'cover'
       }
+    },
+
+    '.nft_item_detail__id_field .ant-field-wrapper .ant-field-content-wrapper .ant-field-content': {
+      overflow: 'scroll',
+      textOverflow: 'initial'
     }
   });
 });

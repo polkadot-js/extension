@@ -170,7 +170,8 @@ export class KoniSubscription {
         maxWithdrawalRequestPerValidator: rs.maxWithdrawalRequestPerValidator, // by default
         allowCancelUnstaking: rs.allowCancelUnstaking,
         unstakingPeriod: rs.unstakingPeriod,
-        expectedReturn: rs.expectedReturn
+        expectedReturn: rs.expectedReturn,
+        inflation: rs.inflation
       });
     });
 

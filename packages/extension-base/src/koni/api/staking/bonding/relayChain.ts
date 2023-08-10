@@ -151,6 +151,7 @@ export function subscribeRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
       chain: chainInfo.slug,
       type: StakingType.NOMINATED,
       expectedReturn: !_STAKING_CHAIN_GROUP.ternoa.includes(chainInfo.slug) ? expectedReturn : undefined, // in %, annually
+      inflation,
       era: parseInt(currentEra),
       minStake: minStake.toString(),
       maxValidatorPerNominator: parseInt(maxNominations),

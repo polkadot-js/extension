@@ -14,7 +14,7 @@ import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, PageIcon, QRCode, SettingItem, SwSubHeader } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, PageIcon, SettingItem, SwQRCode, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { saveAs } from 'file-saver';
 import { CheckCircle, CopySimple, DownloadSimple, FileJs, Leaf, QrCode, Wallet } from 'phosphor-react';
@@ -487,9 +487,9 @@ const Component: React.FC<Props> = (props: Props) => {
                     <div className='result-content'>
                       <div className='result-title'>{titleMap[ExportType.QR_CODE]}</div>
                       <div className='qr-area'>
-                        <QRCode
+                        <SwQRCode
                           errorLevel='Q'
-                          // logoPadding={!isEthereumAddress(account.address) ? 4 : 3}
+                          logoPadding={!isEthereumAddress(account.address) ? 4 : 3}
                           size={264}
                           value={qrData}
                         />
@@ -562,11 +562,7 @@ const Component: React.FC<Props> = (props: Props) => {
 const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.modal-container': {
-      '.ant-sw-screen-layout-footer': {
-        background: '#000'
-      },
       '.ant-sw-screen-layout-footer-button-container': {
-        background: '#000',
         padding: 0,
         margin: 0,
         marginTop: 32,
@@ -580,7 +576,6 @@ const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
       '&.__modal-ui': {
         padding: 0,
-        background: '#000',
 
         '.notice': {
           marginTop: '0 !important'

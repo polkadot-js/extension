@@ -227,7 +227,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
             height={modalContent ? 180 : 120}
             modelViewerProps={show3DModel ? DEFAULT_MODEL_VIEWER_PROPS : undefined}
             src={nftItem.image}
-            width={120}
+            width={modalContent ? 180 : 120}
           />
           <Typography.Title level={5}>
             {nftItem.name}

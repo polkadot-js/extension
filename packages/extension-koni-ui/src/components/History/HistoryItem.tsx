@@ -143,6 +143,7 @@ function Component (
           className={'__value'}
           decimal={item?.amount?.decimals || 0}
           decimalOpacity={0.45}
+          hide={!isShowBalance}
           suffix={item?.amount?.symbol}
           value={item?.amount?.value || '0'}
         />
@@ -150,6 +151,7 @@ function Component (
           className={'__fee'}
           decimal={item?.fee?.decimals || 0}
           decimalOpacity={0.45}
+          hide={!isShowBalance}
           intOpacity={0.45}
           unitOpacity={0.45}
           value={item.fee?.value || '0'}

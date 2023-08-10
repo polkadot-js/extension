@@ -331,12 +331,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Number
                 decimal={0}
                 decimalOpacity={0.45}
+                hide={!isShowBalance}
                 suffix={row.symbol}
                 value={row.contribute}
               />
               <Number
                 decimal={0}
                 decimalOpacity={0.45}
+                hide={!isShowBalance}
                 prefix='$'
                 size={12}
                 value={row.convertedContribute}
@@ -346,7 +348,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       }
     ];
-  }, [getParaStateLabel, priceChangeMap, theme.token?.colorError, theme.token?.colorSuccess]);
+  }, [getParaStateLabel, isShowBalance, priceChangeMap, theme.token?.colorError, theme.token?.colorSuccess]);
 
   const crowdloansContent = useMemo(() => {
     if (isWebUI) {

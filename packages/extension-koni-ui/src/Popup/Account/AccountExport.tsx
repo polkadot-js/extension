@@ -562,10 +562,18 @@ const Component: React.FC<Props> = (props: Props) => {
 const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.modal-container': {
+      '.ant-sw-screen-layout-body': {
+        paddingBottom: token.padding
+      },
+
+      '.ant-sw-screen-layout-footer': {
+        paddingTop: token.padding
+      },
+
       '.ant-sw-screen-layout-footer-button-container': {
         padding: 0,
         margin: 0,
-        marginTop: 32,
+
         '.ant-btn': {
           margin: 0
         }

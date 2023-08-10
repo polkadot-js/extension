@@ -236,6 +236,8 @@ const Component: React.FC = () => {
           >
             <AddressInput
               addressPrefix={addressPrefix}
+              allowDomain={true}
+              chain={chain}
               label={t('Send to')}
               networkGenesisHash={chainGenesisHash}
               placeholder={t('Account address')}

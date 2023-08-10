@@ -41,7 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
   if (isWebUI) {
     return (
       <SwModal
-        className={CN(className, 'modal-full', '-web-ui')}
+        className={CN(className, '-web-ui')}
         closable={false}
         destroyOnClose={true}
         id={modalId}
@@ -131,15 +131,20 @@ const DisplayPayloadModal = styled(Component)<Props>(({ theme: { token } }: Prop
         borderBottom: `2px solid ${token.colorBgSecondary}`
       },
 
+      '.ant-sw-modal-content': {
+        paddingTop: 0
+      },
+
       '.ant-sw-modal-body': {
-        flex: 1,
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        padding: 0
       },
 
       '.body-container': {
         flex: 1,
-        paddingTop: 32
+        paddingTop: 32,
+        paddingBottom: 16
       },
 
       '.__button-wrapper': {

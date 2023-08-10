@@ -3,9 +3,11 @@ on:
   pull_request:
     branches:
       - webapp
+      - webapp-dev
   push:
     branches:
       - webapp
+      - webapp-dev
 
 jobs:
   master:

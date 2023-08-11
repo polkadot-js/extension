@@ -410,9 +410,13 @@ const Tokens = styled(WrapperComponent)<WrapperProps>(({ theme: { extendToken, t
   return ({
     overflow: 'hidden',
 
-    'token-table': {
+    '.token-table': {
       '.token-group-balance-item': {
         marginBottom: '0px !important'
+      },
+
+      '.ant-table-row': {
+        cursor: 'pointer'
       }
     },
 

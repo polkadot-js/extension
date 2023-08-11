@@ -36,7 +36,7 @@ export const CustomModal = styled(Component)<Props>(({ theme: { token } }: Props
   return ({
 
     '.ant-sw-modal-content': {
-      maxHeight: 'unset'
+      maxHeight: '100%'
     },
 
     '.ant-sw-modal-body': {

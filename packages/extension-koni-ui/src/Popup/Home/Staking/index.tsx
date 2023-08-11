@@ -498,6 +498,10 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
       color: token.colorTextLight1,
       fontSize: token.fontSizeLG,
 
+      '.ant-table-row': {
+        cursor: 'pointer'
+      },
+
       'td.__tag-col': {
         verticalAlign: 'top'
       },

@@ -359,6 +359,7 @@ function Component (): React.ReactElement {
           )
           : (
             <DetailTable
+              className={'__table'}
               columns={[
                 {
                   title: 'Token name',
@@ -459,6 +460,12 @@ function Component (): React.ReactElement {
 const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, token } }: ThemeProps) => {
   return ({
     overflow: 'hidden',
+
+    '.__table': {
+      '.ant-table-row': {
+        cursor: 'pointer'
+      }
+    },
 
     '.token-detail-container': {
       height: '100%',

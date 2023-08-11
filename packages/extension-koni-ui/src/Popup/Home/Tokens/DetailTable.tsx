@@ -14,11 +14,13 @@ type Props<T> = {
   onClick?: (item: T) => void
 }
 
-const Component = <T extends object>({ columns,
+const Component = <T extends object>({ className,
+  columns,
   dataSource,
   onClick }: Props<T & { slug: string}>): React.ReactElement<Props<T & { slug: string}>> => {
   return (
     <Table
+      className={className}
       columns={columns}
       dataSource={dataSource}
       onRow={(record) => {

@@ -758,8 +758,6 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
     validator.isVerified = extraInfoMap[validator.address].isVerified;
   }
 
-  console.log('validatorInfoList', validatorInfoList);
-
   return validatorInfoList;
 }
 

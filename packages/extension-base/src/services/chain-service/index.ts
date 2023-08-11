@@ -363,6 +363,34 @@ export class ChainService {
   }
 
   // Setter
+  public forceRemoveChain (slug: string) {
+    if (this.lockChainInfoMap) {
+      return false;
+    }
+
+    this.lockChainInfoMap = true;
+
+    const chainInfoMap = this.getChainInfoMap();
+    const chainStateMap = this.getChainStateMap();
+
+    if (!(slug in chainInfoMap)) {
+      return false;
+    }
+
+    delete chainStateMap[slug];
+    delete chainInfoMap[slug];
+    this.deleteAssetsByChain(slug);
+    this.dbService.removeFromChainStore([slug]).catch(console.error);
+
+    this.updateChainSubscription();
+
+    this.lockChainInfoMap = false;
+
+    this.eventService.emit('chain.updateState', slug);
+
+    return true;
+  }
+
   public removeCustomChain (slug: string) {
     if (this.lockChainInfoMap) {
       return false;

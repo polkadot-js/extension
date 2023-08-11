@@ -57,6 +57,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
+  const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
 
   const needMigrate = useMemo(
     () => !!accounts
@@ -107,7 +108,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   useEffect(() => {
     const pathName = location.pathname;
 
-    if (needMigrate || !hasMasterPassword || isLocked || isNoAccount(accounts) || location.pathname === '/create-done') {
+    if (needMigrate || !hasMasterPassword || isLocked || noAccount || location.pathname === '/create-done') {
       setShowSidebar(false);
       setBackground(BackgroundColorMap.INFO);
       setHeaderType(HeaderType.SIMPLE);
@@ -123,7 +124,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
         setHeaderType(HeaderType.NONE);
       }
     }
-  }, [accounts, hasMasterPassword, isLocked, isPortfolio, location.pathname, needMigrate, setBackground, setHeaderType, setShowSidebar]);
+  }, [noAccount, hasMasterPassword, isLocked, isPortfolio, location.pathname, needMigrate, setBackground, setHeaderType, setShowSidebar]);
 
   useEffect(() => {
     const pathName = location.pathname;
@@ -137,14 +138,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
         navigate(loginUrl);
       }
     } else if (!hasMasterPassword) {
-      if (isNoAccount(accounts)) {
+      if (noAccount) {
         if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
           navigate(welcomeUrl);
         }
       } else if (pathName !== createPasswordUrl) {
         navigate(createPasswordUrl);
       }
-    } else if (isNoAccount(accounts)) {
+    } else if (noAccount) {
       if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
         navigate(welcomeUrl);
       }
@@ -161,7 +162,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
       openPModal(null);
     }
-  }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
+  }, [noAccount, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
 
   return <>
     {children}

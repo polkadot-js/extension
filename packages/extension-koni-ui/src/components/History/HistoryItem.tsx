@@ -1,18 +1,19 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionDirection } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { ExtrinsicType, TransactionAdditionalInfo, TransactionDirection } from '@subwallet/extension-base/background/KoniTypes';
 import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { HistoryStatusMap } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { openInNewTab, toShort } from '@subwallet/extension-koni-ui/utils';
+import { customFormatDate, openInNewTab, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
-import moment from 'moment';
 import { ArrowSquareOut, CaretRight } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext } from 'react';
 import styled from 'styled-components';
@@ -22,6 +23,24 @@ type Props = ThemeProps & {
   onClick?: () => void,
 };
 
+function getLink (data: TransactionHistoryDisplayItem, chainInfoMap: Record<string, _ChainInfo>) {
+  const extrinsicType = data.type;
+  const chainInfo = chainInfoMap[data.chain];
+  let originChainInfo = chainInfo;
+
+  if (extrinsicType === ExtrinsicType.TRANSFER_XCM && data.additionalInfo) {
+    const additionalInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.TRANSFER_XCM>;
+
+    originChainInfo = chainInfoMap[additionalInfo.originalChain] || chainInfo;
+  }
+
+  if (data.extrinsicHash && data.extrinsicHash !== '') {
+    return getExplorerLink(originChainInfo, data.extrinsicHash, 'tx');
+  }
+
+  return undefined;
+}
+
 function Component (
   { className = '', item, onClick }: Props) {
   const displayData = item.displayData;
@@ -29,10 +48,10 @@ function Component (
   const { isShowBalance } = useSelector((state) => state.settings);
 
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+  const priceMap = useSelector((state: RootState) => state.price.priceMap);
 
-  const chainInfo = chainInfoMap[item.chain];
-  const time = moment(item.time).format('hh:mm A');
-  const link = !!item.extrinsicHash && getExplorerLink(chainInfo, item.extrinsicHash, 'tx');
+  const time = customFormatDate(item.time, '#hhhh#:#mm#');
+  const link = getLink(item, chainInfoMap);
 
   const handleOnClick = useCallback(
     (e?: SyntheticEvent) => {
@@ -102,6 +121,9 @@ function Component (
     );
   }
 
+  const balanceValue = getBalanceValue(item?.amount?.value || '0', item?.amount?.decimals || 0);
+  const convertedBalanceValue = getConvertedBalanceValue(balanceValue, +`${priceMap[item.chain] || 0}`);
+
   return (
     <div
       className={CN(className, displayData.className, '__web-ui')}
@@ -141,32 +163,34 @@ function Component (
       <div className='value-wrapper'>
         <Number
           className={'__value'}
-          decimal={item?.amount?.decimals || 0}
+          decimal={0}
           decimalOpacity={0.45}
           hide={!isShowBalance}
           suffix={item?.amount?.symbol}
-          value={item?.amount?.value || '0'}
+          value={balanceValue}
         />
         <Number
-          className={'__fee'}
-          decimal={item?.fee?.decimals || 0}
+          className={'__meta'}
+          decimal={0}
           decimalOpacity={0.45}
           hide={!isShowBalance}
           intOpacity={0.45}
+          prefix='$'
           unitOpacity={0.45}
-          value={item.fee?.value || '0'}
+          value={convertedBalanceValue}
         />
       </div>
 
       <div className='status-tag'>
         <Tag
           className='tag'
-          color={HistoryStatusMap[item.status].schema}
+          color={HistoryStatusMap[item.status].schema === 'danger' ? 'error' : HistoryStatusMap[item.status].schema}
         >
           {HistoryStatusMap[item.status].name}
         </Tag>
 
         <Button
+          disabled={!link}
           icon={
             <Icon
               phosphorIcon={ArrowSquareOut}
@@ -308,10 +332,6 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
       marginBottom: 8,
       cursor: 'pointer',
 
-      '& > *': {
-        width: '25%',
-        flex: 1
-      },
       '.__account-name': {
         fontWeight: 500
       },
@@ -321,14 +341,18 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
       },
 
       '.status-wrapper': {
+        flex: 1,
+        paddingLeft: token.padding,
+        paddingRight: token.padding,
         display: 'flex',
-        justifyContent: 'center',
+
         '.__main-icon-wrapper': {
           marginRight: 8
         }
       },
 
       '.account-wrapper': {
+        flex: 2,
         display: 'inline-flex',
         alignItems: 'center',
 
@@ -347,12 +371,14 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
       },
 
       '.status-tag': {
+        flex: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-end'
       },
 
       '.value-wrapper': {
+        flex: 1,
         textAlign: 'right'
       }
     }

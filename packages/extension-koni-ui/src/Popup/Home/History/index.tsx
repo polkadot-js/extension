@@ -429,7 +429,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     <>
       <PageWrapper
         className={`history ${className}`}
-        resolve={dataContext.awaitStores(['transactionHistory'])}
+        resolve={dataContext.awaitStores(['transactionHistory', 'price'])}
       >
         <Layout.Base
           title={t('History')}

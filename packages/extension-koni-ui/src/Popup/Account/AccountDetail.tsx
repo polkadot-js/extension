@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CloseIcon, CustomModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
 import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
+import { ACCOUNT_EXPORT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
@@ -43,8 +44,6 @@ interface DetailFormState {
   [FormFieldName.NAME]: string;
 }
 
-const EXPORT_ACCOUNT_MODAL = 'export_account_modal';
-
 const instructionContents: InstructionContentType[] = [
   {
     title: 'Why do I need to enter a password?',
@@ -67,7 +66,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const notify = useNotification();
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal } = useContext(ModalContext);
+  const [exportAccountKey, setExportAccountKey] = useState<string>('exportAccountKey');
 
   const [form] = Form.useForm<DetailFormState>();
 
@@ -169,7 +169,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const onExport = useCallback(() => {
     if (account?.address) {
       if (isWebUI) {
-        activeModal(EXPORT_ACCOUNT_MODAL);
+        activeModal(ACCOUNT_EXPORT_MODAL);
       } else {
         navigate(`/accounts/export/${account.address}`);
       }
@@ -220,15 +220,15 @@ const Component: React.FC<Props> = (props: Props) => {
       });
   }, [account]);
 
+  const onCancelExportAccount = useCallback(() => {
+    setExportAccountKey(`exportAccountKey-${Date.now()}`);
+  }, []);
+
   useEffect(() => {
     if (!account) {
       goHome();
     }
   }, [account, goHome, navigate]);
-
-  const closeExportModal = useCallback(() => {
-    inactiveModal(EXPORT_ACCOUNT_MODAL);
-  }, [inactiveModal]);
 
   if (!account) {
     return null;
@@ -396,16 +396,12 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
 
         {isWebUI && (
-          <CustomModal
-            id={EXPORT_ACCOUNT_MODAL}
-            onCancel={closeExportModal}
-            title={t('Export account')}
-          >
-            <AccountExport
-              accountAddress={account?.address}
-              modalContent
-            />
-          </CustomModal>
+          <AccountExport
+            accountAddress={account?.address}
+            isModalMode={true}
+            key={exportAccountKey}
+            onCancelModal={onCancelExportAccount}
+          />
         )}
       </Layout.WithSubHeaderOnly>
     </PageWrapper>

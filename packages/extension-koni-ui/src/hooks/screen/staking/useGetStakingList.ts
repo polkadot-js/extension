@@ -3,7 +3,7 @@
 
 import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { StakingData, StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
@@ -207,6 +207,7 @@ export default function useGetStakingList () {
   const { chainStakingMetadataList, nominatorMetadataList, stakingMap, stakingRewardMap } = useSelector((state: RootState) => state.staking);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
 
   const isAll = useMemo(() => {
@@ -222,6 +223,8 @@ export default function useGetStakingList () {
 
     stakingMap.forEach((stakingItem) => {
       const chainInfo = chainInfoMap[stakingItem.chain];
+      const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
+      const chainAsset = assetRegistry[nativeTokenSlug];
 
       if (stakingItem.state === APIItemState.READY) {
         if (
@@ -229,7 +232,7 @@ export default function useGetStakingList () {
           parseFloat(stakingItem.balance) > 0 &&
           Math.round(parseFloat(stakingItem.balance) * 100) / 100 !== 0
         ) {
-          parsedPriceMap[stakingItem.chain] = priceMap[chainInfo.slug || stakingItem.chain];
+          parsedPriceMap[stakingItem.chain] = priceMap[chainAsset.priceId || stakingItem.chain];
           readyStakingItems.push(stakingItem);
         }
       }
@@ -290,7 +293,7 @@ export default function useGetStakingList () {
       data: stakingData,
       priceMap: parsedPriceMap
     };
-  }, [chainInfoMap, chainStakingMetadataList, isAll, nominatorMetadataList, priceMap, stakingMap, stakingRewardMap]);
+  }, [assetRegistry, chainInfoMap, chainStakingMetadataList, isAll, nominatorMetadataList, priceMap, stakingMap, stakingRewardMap]);
 
   return useMemo((): StakingData => ({ ...partResult }), [partResult]);
 }

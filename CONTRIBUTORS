@@ -1,5 +1,5 @@
     1852	Nam Phạm                      	[Issue 1777] fix bug locking chainInfoMap incorrectly
-    1546	AnhMTV                        	
+    1547	AnhMTV                        	Release version 1.1.8
     1137	S2kael                        	[Issue-1757] Fix bug select validator on nominate mode
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly

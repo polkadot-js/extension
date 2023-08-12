@@ -368,14 +368,14 @@ export class ChainService {
       return false;
     }
 
-    this.lockChainInfoMap = true;
-
     const chainInfoMap = this.getChainInfoMap();
     const chainStateMap = this.getChainStateMap();
 
     if (!(slug in chainInfoMap)) {
       return false;
     }
+
+    this.lockChainInfoMap = true;
 
     delete chainStateMap[slug];
     delete chainInfoMap[slug];
@@ -396,8 +396,6 @@ export class ChainService {
       return false;
     }
 
-    this.lockChainInfoMap = true;
-
     const chainInfoMap = this.getChainInfoMap();
     const chainStateMap = this.getChainStateMap();
 
@@ -412,6 +410,8 @@ export class ChainService {
     if (chainStateMap[slug].active) {
       return false;
     }
+
+    this.lockChainInfoMap = true;
 
     delete chainStateMap[slug];
     delete chainInfoMap[slug];

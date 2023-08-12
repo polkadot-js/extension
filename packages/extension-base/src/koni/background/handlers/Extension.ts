@@ -1707,8 +1707,7 @@ export default class KoniExtension {
       ignoreWarnings: transferAll,
       isTransferAll: isTransferNativeToken ? transferAll : false,
       edAsWarning: isTransferNativeToken,
-      additionalValidator: additionalValidator,
-      lockAfterCreate: this.#alwaysLock
+      additionalValidator: additionalValidator
     });
   }
 
@@ -1813,8 +1812,7 @@ export default class KoniExtension {
       isTransferAll: inputData.transferAll,
       errors,
       additionalValidator: additionalValidator,
-      eventsHandler: eventsHandler,
-      lockAfterCreate: this.#alwaysLock
+      eventsHandler: eventsHandler
     });
   }
 
@@ -1834,8 +1832,7 @@ export default class KoniExtension {
       data: inputData,
       extrinsicType: ExtrinsicType.SEND_NFT,
       transaction,
-      url: EXTENSION_REQUEST_URL,
-      lockAfterCreate: this.#alwaysLock
+      url: EXTENSION_REQUEST_URL
     });
   }
 
@@ -2071,8 +2068,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: { ...inputData, isSendingSelf },
       extrinsicType: ExtrinsicType.SEND_NFT,
-      chainType: ChainType.SUBSTRATE,
-      lockAfterCreate: this.#alwaysLock
+      chainType: ChainType.SUBSTRATE
     });
 
     return { ...rs, isSendingSelf };
@@ -2631,8 +2627,7 @@ export default class KoniExtension {
       extrinsicType: ExtrinsicType.STAKING_BOND,
       transaction: extrinsic,
       url: EXTENSION_REQUEST_URL,
-      transferNativeAmount: amount,
-      lockAfterCreate: this.#alwaysLock
+      transferNativeAmount: amount
     });
   }
 
@@ -2660,8 +2655,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_UNBOND,
-      chainType: ChainType.SUBSTRATE,
-      lockAfterCreate: this.#alwaysLock
+      chainType: ChainType.SUBSTRATE
     });
   }
 
@@ -2681,8 +2675,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_WITHDRAW,
-      chainType: ChainType.SUBSTRATE,
-      lockAfterCreate: this.#alwaysLock
+      chainType: ChainType.SUBSTRATE
     });
   }
 
@@ -2702,8 +2695,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_CLAIM_REWARD,
-      chainType: ChainType.SUBSTRATE,
-      lockAfterCreate: this.#alwaysLock
+      chainType: ChainType.SUBSTRATE
     });
   }
 
@@ -2723,8 +2715,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_CANCEL_UNSTAKE,
-      chainType: ChainType.SUBSTRATE,
-      lockAfterCreate: this.#alwaysLock
+      chainType: ChainType.SUBSTRATE
     });
   }
 
@@ -2756,8 +2747,7 @@ export default class KoniExtension {
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_JOIN_POOL,
       chainType: ChainType.SUBSTRATE,
-      transferNativeAmount: amount,
-      lockAfterCreate: this.#alwaysLock
+      transferNativeAmount: amount
     });
   }
 
@@ -2787,8 +2777,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_LEAVE_POOL,
-      chainType: ChainType.SUBSTRATE,
-      lockAfterCreate: this.#alwaysLock
+      chainType: ChainType.SUBSTRATE
     });
   }
 
@@ -2820,8 +2809,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_COMPOUNDING,
-      chainType: ChainType.SUBSTRATE,
-      lockAfterCreate: this.#alwaysLock
+      chainType: ChainType.SUBSTRATE
     });
   }
 
@@ -2844,8 +2832,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_CANCEL_COMPOUNDING,
-      chainType: ChainType.SUBSTRATE,
-      lockAfterCreate: this.#alwaysLock
+      chainType: ChainType.SUBSTRATE
     });
   }
 

@@ -39,7 +39,6 @@ export interface SWTransactionInput extends SwInputBase, Partial<Pick<SWTransact
   errors?: SWTransaction['errors'];
   edAsWarning?: boolean;
   isTransferAll?: boolean;
-  lockAfterCreate?: boolean; // Use for case always required password on mobile
 }
 
 export type SWTransactionResponse = SwInputBase & Pick<SWTransaction, 'warnings' | 'errors'> & Partial<Pick<SWTransaction, 'id' | 'extrinsicHash' | 'status' | 'estimateFee'>>;

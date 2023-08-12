@@ -426,6 +426,7 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.social-group': {
+      marginTop: 0,
       paddingTop: token.paddingLG
     },
 
@@ -435,15 +436,31 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
       width: '100%',
       maxWidth: 816,
       margin: '0 auto',
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+
+      '.ant-sw-screen-layout-body': {
+        justifyContent: 'flex-start'
+      },
+
+      '.body-container': {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      },
 
       '.logo-container': {
         height: 120,
-        marginTop: 0,
-        color: token.colorTextBase
+        color: token.colorTextBase,
+        marginBottom: token.margin,
+        marginTop: 24
       },
 
       '.title': {
-        marginTop: token.marginSM + 4,
         marginBottom: token.marginXS
       },
 
@@ -485,6 +502,21 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
             width: '100%',
             paddingRight: 14
           }
+        }
+      },
+
+      '@media (max-width: 1600px)': {
+        '.buttons-container': {
+          marginTop: 32,
+          marginBottom: 32
+        },
+
+        '.add-wallet-container': {
+          marginBottom: 0
+        },
+
+        '.social-group': {
+          paddingBottom: 32
         }
       }
     }

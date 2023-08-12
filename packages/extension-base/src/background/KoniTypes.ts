@@ -1997,6 +1997,16 @@ export interface ResponseFindRawMetadata {
   specVersion: number;
 }
 
+export interface ResolveDomainRequest {
+  chain: string,
+  domain: string
+}
+
+export interface ResolveAddressToDomainRequest {
+  chain: string,
+  address: string
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -2110,6 +2120,8 @@ export interface KoniRequestSignatures {
   'pri(accounts.subscribeAddresses)': [null, AddressBookInfo, AddressBookInfo];
   'pri(accounts.editContact)': [RequestEditContactAccount, boolean];
   'pri(accounts.deleteContact)': [RequestDeleteContactAccount, boolean];
+  'pri(accounts.resolveDomainToAddress)': [ResolveDomainRequest, string | undefined];
+  'pri(accounts.resolveAddressToDomain)': [ResolveAddressToDomainRequest, string | undefined];
 
   // Settings
   'pri(settings.changeBalancesVisibility)': [null, boolean];

@@ -246,6 +246,7 @@ export default class WalletConnectService {
     }
 
     await this.#initClient();
+    this.#updateSessions();
   }
 
   public async disconnect (topic: string) {

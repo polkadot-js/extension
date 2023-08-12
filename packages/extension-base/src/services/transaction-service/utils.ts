@@ -16,6 +16,10 @@ function getBlockExplorerAccountRoute (explorerLink: string) {
     return 'accounts';
   }
 
+  if (explorerLink.includes('deeperscan.io')) {
+    return 'account';
+  }
+
   if (explorerLink.includes('subscan.io')) {
     return 'account';
   }
@@ -28,7 +32,7 @@ function getBlockExplorerTxRoute (chainInfo: _ChainInfo) {
     return 'tx';
   }
 
-  if (['aventus'].includes(chainInfo.slug)) {
+  if (['aventus', 'deeper_network'].includes(chainInfo.slug)) {
     return 'transaction';
   }
 

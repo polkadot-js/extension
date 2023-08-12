@@ -198,6 +198,10 @@ const Component: React.FC<Props> = (props: Props) => {
     return chainStakingMetadata?.minJoinNominationPool || '0';
   }, [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, getSelectedValidators, getValidatorMinStake, nominate, stakingType]);
 
+  const chainMinStake = useMemo(() => {
+    return stakingType === StakingType.NOMINATED ? (chainStakingMetadata?.minStake || '0') : (chainStakingMetadata?.minJoinNominationPool || '0');
+  }, [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, stakingType]);
+
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   const onFieldsChange: FormCallbacks<StakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
@@ -216,7 +220,7 @@ const Component: React.FC<Props> = (props: Props) => {
       setFrom(from);
     }
 
-    if (asset !== undefined) {
+    if (asset) {
       const chain = _getOriginChainOfAsset(asset);
 
       setAsset(asset);
@@ -583,7 +587,7 @@ const Component: React.FC<Props> = (props: Props) => {
             estimatedEarning={chainStakingMetadata.expectedReturn}
             inflation={chainStakingMetadata.inflation}
             maxValidatorPerNominator={chainStakingMetadata.maxValidatorPerNominator}
-            minimumActive={{ decimals, value: minStake, symbol }}
+            minimumActive={{ decimals, value: chainMinStake, symbol }}
             stakingType={stakingType}
             unstakingPeriod={chainStakingMetadata.unstakingPeriod}
           />

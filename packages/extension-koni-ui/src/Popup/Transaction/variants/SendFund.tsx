@@ -392,6 +392,14 @@ const _SendFund = ({ className = '', modalContent, tokenGroupSlug: _tokenGroupSl
         form.resetFields(['asset']);
       }
 
+      if (part.destChain) {
+        setForceUpdateMaxValue(isTransferAll ? {} : undefined);
+
+        if (values.to) {
+          validateField.push('to');
+        }
+      }
+
       if (part.asset) {
         const chain = assetRegistry[part.asset].originChain;
 
@@ -412,14 +420,6 @@ const _SendFund = ({ className = '', modalContent, tokenGroupSlug: _tokenGroupSl
         setAsset(part.asset);
         setIsTransferAll(false);
         setForceUpdateMaxValue(undefined);
-      }
-
-      if (part.destChain) {
-        setForceUpdateMaxValue(isTransferAll ? {} : undefined);
-
-        if (values.to) {
-          validateField.push('to');
-        }
       }
 
       if (validateField.length) {
@@ -688,6 +688,8 @@ const _SendFund = ({ className = '', modalContent, tokenGroupSlug: _tokenGroupSl
           >
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
+              allowDomain={true}
+              chain={chain}
               label={t('Send to')}
               networkGenesisHash={destChainGenesisHash}
               placeholder={t('Account address')}

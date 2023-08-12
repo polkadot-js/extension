@@ -92,7 +92,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const maxCount = chainStakingMetadata?.maxValidatorPerNominator || 1;
 
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
-  const nominations = useMemo(() => nominatorMetadata[0]?.nominations, [nominatorMetadata]);
+  const nominations = useMemo(() => from ? nominatorMetadata[0]?.nominations : [], [from, nominatorMetadata]);
   const isSingleSelect = useMemo(() => _isSingleSelect || !isRelayChain, [_isSingleSelect, isRelayChain]);
   const hasReturn = useMemo(() => items[0]?.expectedReturn !== undefined, [items]);
 

@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 1.1.8
+Build date: Aug 12, 2023.
+
+Features & Update:
+- Integrate Azero domain (#1750)
+- Show collection ID and NFT Id in the NFT detail screen (#1784)
+- Update chain list (#1777)
+  - Remove Snow and Arctic network
+  - Integrate Deeper network
+
+Bugs fixed:
+- Fixed bug showing staking APY (#1726)
+- Fixed bug showing token price for staking item (Calamari network) (#1766)
+- Fixed bug showing Minimum active value on the network detail screen (#1752)
+- Fixed bug Validator avatars are auto-generated continuously (#1757)
+- Fixed bug do not delete connection when reset wallet (#1762)
+
 ## 1.1.7
 Build date: Aug 06, 2023.
 

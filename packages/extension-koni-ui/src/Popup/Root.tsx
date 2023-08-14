@@ -149,12 +149,10 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
         navigate(welcomeUrl);
       }
+    } else if (hasConfirmations) {
+      openPModal('confirmations');
     } else if (pathName === DEFAULT_ROUTER_PATH) {
-      if (hasConfirmations) {
-        openPModal('confirmations');
-      } else {
-        navigate(tokenUrl);
-      }
+      navigate(tokenUrl);
     } else if (pathName === loginUrl && !isLocked) {
       goHome();
     } else if (hasInternalConfirmations) {

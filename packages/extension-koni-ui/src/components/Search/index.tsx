@@ -63,7 +63,7 @@ const Component: React.FC<Props> = ({ actionBtnIcon,
   ), [extraButton]);
 
   return (
-    <div className={CN('container', className)}>
+    <div className={CN('search-container', className)}>
       <div className='right-section'>
         {showExtraButton && button}
         <Input.Search

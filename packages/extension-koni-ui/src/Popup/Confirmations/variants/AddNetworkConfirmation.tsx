@@ -219,7 +219,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AddNetworkConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--content-gap': token.size,
+    '--content-gap': `${token.size}px`,
 
     '.ant-field-container': {
       textAlign: 'left',

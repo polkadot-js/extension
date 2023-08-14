@@ -3,6 +3,7 @@
 
 import { CustomModal, ReceiveQrModal, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
+import { PREDEFINED_BUY_TOKEN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { BackgroundColorMap, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
@@ -13,6 +14,7 @@ import Transaction from '@subwallet/extension-koni-ui/Popup/Transaction/Transact
 import SendFund from '@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getAccountType } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowFatLinesDown, Eye, EyeClosed, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
@@ -31,25 +33,8 @@ type Action = {
   type: string
   icon: PhosphorIcon
   onClick?: () => void
+  disabled?: boolean
 }
-
-const actions: Action[] = [
-  {
-    label: 'Receive',
-    type: 'receive',
-    icon: ArrowFatLinesDown
-  },
-  {
-    label: 'Send',
-    type: 'send',
-    icon: PaperPlaneTilt
-  },
-  {
-    label: 'Buy',
-    type: 'buys',
-    icon: ShoppingCartSimple
-  }
-];
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
@@ -95,6 +80,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const totalChangeValue = totalBalanceInfo.change.value;
   const totalValue = totalBalanceInfo.convertedValue;
 
+  const accounts = useSelector((state: RootState) => state.accountState.accounts);
+  const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
+
   const onOpenBuyTokens = useCallback(() => {
     activeModal(BUY_TOKEN_MODAL);
   }, [activeModal]);
@@ -120,23 +108,15 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   );
 
   useEffect(() => {
+    setSendFundKey(`sendFundKey-${Date.now()}`);
+    setBuyTokensKey(`buyTokensKey-${Date.now()}`);
+  }, [locationPathname]);
+
+  useEffect(() => {
     const backgroundColor = isTotalBalanceDecrease ? BackgroundColorMap.DECREASE : BackgroundColorMap.INCREASE;
 
     setBackground(backgroundColor);
   }, [isTotalBalanceDecrease, setBackground]);
-
-  const handleClick = useCallback((type: string) => {
-    switch (type) {
-      case 'buys': return onOpenBuyTokens();
-      case 'send': return onOpenSendFund();
-      case 'receive': return onOpenReceive();
-      default:
-    }
-  }, [
-    onOpenSendFund,
-    onOpenBuyTokens,
-    onOpenReceive
-  ]);
 
   const buyTokenSymbol = useMemo<string>(() => {
     if (tokenGroupSlug) {
@@ -156,10 +136,59 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     inactiveModal(TRANSFER_FUND_MODAL);
     setSendFundKey(`sendFundKey-${Date.now()}`);
   }, [inactiveModal]);
+
   const handleCancelBuy = useCallback(() => {
     inactiveModal(BUY_TOKEN_MODAL);
     setBuyTokensKey(`buyTokensKey-${Date.now()}`);
   }, [inactiveModal]);
+
+  const isSupportBuyTokens = useMemo(() => {
+    if (!locationPathname.includes('/home/tokens/detail/')) {
+      return true;
+    }
+
+    const buyInfo = PREDEFINED_BUY_TOKEN[buyTokenSymbol];
+
+    if (buyInfo) {
+      const supportType = buyInfo.support;
+
+      if (isAllAccount) {
+        for (const account of accounts) {
+          if (supportType === getAccountType(account.address)) {
+            return true;
+          }
+        }
+      } else {
+        if (currentAccount?.address && (supportType === getAccountType(currentAccount?.address))) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }, [locationPathname, buyTokenSymbol, isAllAccount, accounts, currentAccount?.address]);
+
+  const actions: Action[] = [
+    {
+      label: 'Receive',
+      type: 'receive',
+      icon: ArrowFatLinesDown,
+      onClick: onOpenReceive
+    },
+    {
+      label: 'Send',
+      type: 'send',
+      icon: PaperPlaneTilt,
+      onClick: onOpenSendFund
+    },
+    {
+      label: 'Buy',
+      type: 'buys',
+      icon: ShoppingCartSimple,
+      onClick: onOpenBuyTokens,
+      disabled: !isSupportBuyTokens
+    }
+  ];
 
   return (
     <div className={CN(className, 'flex-row')}>
@@ -297,6 +326,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             >
               <Button
                 className={CN(`type-${item.type}`)}
+                disabled={item.disabled}
                 icon={(
                   <Icon
                     phosphorIcon={item.icon}
@@ -304,8 +334,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                     weight='duotone'
                   />
                 )}
-                // eslint-disable-next-line react/jsx-no-bind
-                onClick={() => handleClick(item.type)}
+                onClick={item.onClick}
                 shape='squircle'
                 size='sm'
               />

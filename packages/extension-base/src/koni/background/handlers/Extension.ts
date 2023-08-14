@@ -89,18 +89,21 @@ export default class KoniExtension {
     this.#koniState = state;
 
     const updateTimeAutoLock = (rs: RequestSettingsType) => {
-      this.#timeAutoLock = rs.timeAutoLock;
-      this.#alwaysLock = !rs.timeAutoLock;
-      clearTimeout(this.#lockTimeOut);
+      // Check time auto lock change
+      if (this.#timeAutoLock !== rs.timeAutoLock) {
+        this.#timeAutoLock = rs.timeAutoLock;
+        this.#alwaysLock = !rs.timeAutoLock;
+        clearTimeout(this.#lockTimeOut);
 
-      if (this.#timeAutoLock > 0) {
-        this.#lockTimeOut = setTimeout(() => {
-          if (!this.#skipAutoLock) {
-            this.keyringLock();
-          }
-        }, this.#timeAutoLock * 60 * 1000);
-      } else if (this.#alwaysLock) {
-        this.keyringLock();
+        if (this.#timeAutoLock > 0) {
+          this.#lockTimeOut = setTimeout(() => {
+            if (!this.#skipAutoLock) {
+              this.keyringLock();
+            }
+          }, this.#timeAutoLock * 60 * 1000);
+        } else if (this.#alwaysLock) {
+          this.keyringLock();
+        }
       }
     };
 

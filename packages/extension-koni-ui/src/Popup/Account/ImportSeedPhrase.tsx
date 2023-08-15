@@ -1,24 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
-import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
-import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
-import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
-import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
-import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
-import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { CloseIcon, Layout, PageWrapper, SeedPhraseInput, SelectAccountTypeInput } from '@subwallet/extension-koni-ui/components';
+import { DEFAULT_ACCOUNT_TYPES, IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useFocusFormItem, useGetDefaultAccountName, useGoBackFromCreateAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
-import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
-import { Form, Icon, Input } from '@subwallet/react-ui';
+import { FormCallbacks, ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
+import { Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown } from 'phosphor-react';
-import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -33,7 +24,12 @@ const FooterIcon = (
 );
 
 const formName = 'import-seed-phrase-form';
-const fieldName = 'seed-phrase';
+const fieldNamePrefix = 'seed-phrase-';
+const phraseNumber = 12;
+
+interface FormState extends Record<`seed-phrase-${number}`, string> {
+  keyTypes: KeypairType[]
+}
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
@@ -46,117 +42,74 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const accountName = useGetDefaultAccountName();
 
-  const timeOutRef = useRef<NodeJS.Timer>();
+  const [form] = Form.useForm<FormState>();
 
-  const [form] = Form.useForm();
-
-  const [keyTypes, setKeyTypes] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
   const [validateState, setValidateState] = useState<ValidateState>({});
-  const [validating, setValidating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [changed, setChanged] = useState(false);
-  const [seedPhrase, setSeedPhrase] = useState('');
 
-  const onChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback((event) => {
-    setChanged(true);
-    const val = event.target.value;
+  const formDefault: FormState = useMemo(() => ({
+    keyTypes: DEFAULT_ACCOUNT_TYPES
+  }), []);
 
-    setSeedPhrase(val);
-  }, []);
+  const onFinish: FormCallbacks<FormState>['onFinish'] = useCallback((values: FormState) => {
+    const seedKeys = Object.keys(values).filter((key) => key.startsWith(fieldNamePrefix));
+    const { keyTypes } = values;
 
-  const onSubmit = useCallback(() => {
-    const seed = seedPhrase.trimStart().trimEnd();
+    if (![12, 15, 18, 21, 24].includes(seedKeys.length)) {
+      throw Error('Mnemonic needs to contain 12, 15, 18, 21, 24 words');
+    }
+
+    const seeds: string[] = [];
+
+    for (let i = 0; i < phraseNumber; i++) {
+      seeds.push(values[`${fieldNamePrefix}${i}`]);
+    }
+
+    if (seeds.some((value) => !value)) {
+      throw Error('Mnemonic needs to contain 12, 15, 18, 21, 24 words');
+    }
+
+    const seed = seeds.join(' ');
 
     if (seed) {
       setSubmitting(true);
-      setTimeout(() => {
-        createAccountSuriV2({
-          name: accountName,
-          suri: seed,
-          isAllowed: true,
-          types: keyTypes
-        })
-          .then(() => {
-            onComplete();
-          })
-          .catch((error: Error): void => {
-            setValidateState({
-              status: 'error',
-              message: error.message
-            });
-          })
-          .finally(() => {
-            setSubmitting(false);
+
+      validateSeedV2(seed, DEFAULT_ACCOUNT_TYPES)
+        .then(() => {
+          return createAccountSuriV2({
+            name: accountName,
+            suri: seed,
+            isAllowed: true,
+            types: keyTypes
           });
-      }, 300);
-    }
-  }, [seedPhrase, accountName, keyTypes, onComplete]);
-
-  useEffect(() => {
-    let amount = true;
-
-    if (timeOutRef.current) {
-      clearTimeout(timeOutRef.current);
-    }
-
-    const seed = seedPhrase.trimStart().trimEnd();
-
-    if (amount) {
-      if (seed) {
-        setValidating(true);
-        setValidateState({
-          status: 'validating',
-          message: ''
-        });
-
-        timeOutRef.current = setTimeout(() => {
-          validateSeedV2(seed, DEFAULT_ACCOUNT_TYPES)
-            .then((res) => {
-              if (amount) {
-                setValidateState({});
-              }
-            })
-            .catch((e: Error) => {
-              if (amount) {
-                setValidateState({
-                  status: 'error',
-                  message: t('Invalid mnemonic seed')
-                });
-              }
-            })
-            .finally(() => {
-              if (amount) {
-                setValidating(false);
-              }
-            });
-        }, 300);
-      } else {
-        if (changed) {
+        })
+        .then(() => {
+          onComplete();
+        })
+        .catch((error: Error): void => {
           setValidateState({
             status: 'error',
-            message: t('Mnemonic needs to contain 12, 15, 18, 21, 24 words')
+            message: error.message
           });
-        }
-      }
+        })
+        .finally(() => {
+          setSubmitting(false);
+        });
     }
+  }, [accountName, onComplete]);
 
-    return () => {
-      amount = false;
-    };
-  }, [seedPhrase, changed, t]);
-
-  useFocusFormItem(form, fieldName);
+  useFocusFormItem(form, `${fieldNamePrefix}0`);
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         rightFooterButton={{
-          children: validating ? t('Validating') : t('Import account'),
+          children: t('Import account'),
           icon: FooterIcon,
-          onClick: onSubmit,
-          disabled: !seedPhrase || !!validateState.status || !keyTypes.length,
-          loading: validating || submitting
+          onClick: form.submit,
+          disabled: !!validateState.status,
+          loading: submitting
         }}
         subHeaderIcons={[
           {
@@ -173,25 +126,43 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           <Form
             className='form-container'
             form={form}
+            initialValues={formDefault}
             name={formName}
+            onFinish={onFinish}
           >
+            <div className='seed-container'>
+              {
+                new Array(phraseNumber).fill(null).map((value, index) => {
+                  const name = fieldNamePrefix + String(index);
+
+                  return (
+                    <Form.Item
+                      key={index}
+                      name={name}
+                      rules={[
+                        {
+                          required: true,
+                          message: t('This field is required')
+                        }
+                      ]}
+                      statusHelpAsTooltip={true}
+                    >
+                      <SeedPhraseInput
+                        form={form}
+                        formName={formName}
+                        index={index}
+                        prefix={fieldNamePrefix}
+                      />
+                    </Form.Item>
+                  );
+                })
+              }
+            </div>
             <Form.Item
-              name={fieldName}
-              validateStatus={validateState.status}
+              name='keyTypes'
             >
-              <Input.TextArea
-                className='seed-phrase-input'
-                onChange={onChange}
-                placeholder={t('Seed phrase')}
-                statusHelp={validateState.message}
-              />
-            </Form.Item>
-            <Form.Item>
-              <SelectAccountType
+              <SelectAccountTypeInput
                 label={t('Select account type')}
-                selectedItems={keyTypes}
-                setSelectedItems={setKeyTypes}
-                withLabel={true}
               />
             </Form.Item>
           </Form>
@@ -227,6 +198,16 @@ const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) 
       textarea: {
         resize: 'none',
         height: `${token.sizeLG * 6}px !important`
+      }
+    },
+
+    '.seed-container': {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      columnGap: token.size,
+
+      '.ant-form-item': {
+        minWidth: 0
       }
     }
   };

@@ -4,10 +4,12 @@
 export type { BasicInputWrapper, BasicOnChangeFunction, BasicInputEvent } from './Base';
 
 export { default as AmountInput } from './AmountInput';
-export { default as MultiValidatorSelector } from './MultiValidatorSelector';
-export { default as PoolSelector } from './PoolSelector';
-export { default as NominationSelector } from './NominationSelector';
 export { default as CancelUnstakeSelector } from './CancelUnstakeSelector';
+export { default as MultiValidatorSelector } from './MultiValidatorSelector';
+export { default as NominationSelector } from './NominationSelector';
+export { default as PoolSelector } from './PoolSelector';
+export { default as SeedPhraseInput } from './SeedPhraseInput';
+export { default as SelectAccountTypeInput } from './SelectAccountTypeInput';
 
 export * from './AccountSelector';
 export * from './AddressInput';

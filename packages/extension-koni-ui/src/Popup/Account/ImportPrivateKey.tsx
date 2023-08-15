@@ -9,6 +9,7 @@ import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -51,6 +52,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [loading, setLoading] = useState(false);
   const [changed, setChanged] = useState(false);
   const [form] = Form.useForm<FormState>();
+  const checkUnlock = useUnlockChecker();
 
   const accountName = useGetDefaultAccountName();
 
@@ -62,28 +64,33 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onSubmit: FormCallbacks<FormState>['onFinish'] = useCallback((values: FormState) => {
     const { [fieldName]: privateKey } = values;
 
-    if (privateKey?.trim()) {
-      setLoading(true);
-      createAccountSuriV2({
-        name: accountName,
-        suri: privateKey.trim(),
-        isAllowed: true,
-        types: [EVM_ACCOUNT_TYPE]
-      })
-        .then(() => {
-          onComplete();
+    checkUnlock().then(() => {
+      if (privateKey?.trim()) {
+        setLoading(true);
+        createAccountSuriV2({
+          name: accountName,
+          suri: privateKey.trim(),
+          isAllowed: true,
+          types: [EVM_ACCOUNT_TYPE]
         })
-        .catch((error: Error): void => {
-          setValidateState({
-            status: 'error',
-            message: error.message
+          .then(() => {
+            onComplete();
+          })
+          .catch((error: Error): void => {
+            setValidateState({
+              status: 'error',
+              message: error.message
+            });
+          })
+          .finally(() => {
+            setLoading(false);
           });
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [accountName, onComplete]);
+      }
+    })
+      .catch(() => {
+      // User cancel unlock
+      });
+  }, [accountName, checkUnlock, onComplete]);
 
   useEffect(() => {
     let amount = true;

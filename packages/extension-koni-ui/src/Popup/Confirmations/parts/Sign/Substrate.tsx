@@ -5,6 +5,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { useNotification } from '@subwallet/extension-koni-ui/hooks';
 import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -43,6 +44,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const notify = useNotification();
+  const checkUnlock = useUnlockChecker();
 
   const { activeModal } = useContext(ModalContext);
 
@@ -175,9 +177,13 @@ const Component: React.FC<Props> = (props: Props) => {
         onConfirmLedger();
         break;
       default:
-        onApprovePassword();
+        checkUnlock().then(() => {
+          onApprovePassword();
+        }).catch(() => {
+          // Unlock is cancelled
+        });
     }
-  }, [onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
+  }, [checkUnlock, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
     !!ledgerError && notify({

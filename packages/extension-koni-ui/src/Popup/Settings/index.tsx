@@ -3,15 +3,17 @@
 
 import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
-import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, LockOpen, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -72,12 +74,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { goHome } = useDefaultNavigate();
   const { t } = useTranslation();
 
+  const isLocked = useSelector((state) => state.accountState.isLocked);
+  const checkUnlock = useUnlockChecker();
   const [locking, setLocking] = useState(false);
 
-  const onLock = useCallback(() => {
-    setLocking(true);
-
-    setTimeout(() => {
+  const toggleLock = useCallback(() => {
+    if (isLocked) {
+      checkUnlock().then(() => {
+        goHome();
+      }).catch(() => {
+        // User cancelled unlock
+      });
+    } else {
+      setLocking(true);
       keyringLock()
         .then(() => {
           goHome();
@@ -87,12 +96,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             message: e.message,
             type: 'error'
           });
-        })
-        .finally(() => {
+        }).finally(() => {
           setLocking(false);
         });
-    }, 100);
-  }, [goHome, notify]);
+    }
+  }, [checkUnlock, goHome, isLocked, notify]);
 
   // todo: i18n all titles, labels below
   const SettingGroupItemType = useMemo((): SettingGroupItemType[] => ([
@@ -314,16 +322,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             block
             icon={
               <Icon
-                phosphorIcon={Lock}
+                phosphorIcon={isLocked ? LockOpen : Lock}
                 type='phosphor'
                 weight={'fill'}
               />
             }
             loading={locking}
-            onClick={onLock}
+            onClick={toggleLock}
             schema={'secondary'}
           >
-            {t('Lock')}
+            {(isLocked && !locking) ? t('Unlock') : t('Lock')}
           </Button>
 
           <div className={'__version'}>

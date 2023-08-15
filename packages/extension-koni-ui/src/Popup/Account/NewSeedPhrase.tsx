@@ -11,6 +11,7 @@ import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -60,6 +61,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { goHome } = useDefaultNavigate();
   const { activeModal } = useContext(ModalContext);
+  const checkUnlock = useUnlockChecker();
   const { isWebUI } = useContext(ScreenContext);
 
   const onComplete = useCompleteCreateAccount();
@@ -98,27 +100,31 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
     setLoading(true);
 
-    setTimeout(() => {
-      createAccountSuriV2({
-        name: accountName,
-        suri: seedPhrase,
-        types: accountTypes,
-        isAllowed: true
-      })
-        .then(() => {
-          onComplete();
+    checkUnlock().then(() => {
+      setTimeout(() => {
+        createAccountSuriV2({
+          name: accountName,
+          suri: seedPhrase,
+          types: accountTypes,
+          isAllowed: true
         })
-        .catch((error: Error): void => {
-          notify({
-            message: error.message,
-            type: 'error'
+          .then(() => {
+            onComplete();
+          })
+          .catch((error: Error): void => {
+            notify({
+              message: error.message,
+              type: 'error'
+            });
+          })
+          .finally(() => {
+            setLoading(false);
           });
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }, 500);
-  }, [seedPhrase, accountName, accountTypes, onComplete, notify]);
+      }, 500);
+    }).catch(() => {
+      // User cancel unlock
+    });
+  }, [seedPhrase, checkUnlock, accountName, accountTypes, onComplete, notify]);
 
   useEffect(() => {
     createSeedV2(undefined, undefined, DEFAULT_ACCOUNT_TYPES)

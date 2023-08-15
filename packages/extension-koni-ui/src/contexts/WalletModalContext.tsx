@@ -13,6 +13,7 @@ import { useSearchParams } from 'react-router-dom';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import SeedPhraseModal from '../components/Modal/Account/SeedPhraseModal';
+import { UnlockModal } from '../components/Modal/UnlockModal';
 
 interface Props {
   children: React.ReactNode;
@@ -103,5 +104,6 @@ export const WalletModalContext = ({ children }: Props) => {
     <RequestCreatePasswordModal />
     <RequestCameraAccessModal />
     <CustomizeModal />
+    <UnlockModal />
   </>;
 };

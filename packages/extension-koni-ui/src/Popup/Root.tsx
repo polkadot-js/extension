@@ -109,8 +109,9 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   useEffect(() => {
     const pathName = location.pathname;
+    const alwaysRequiredPassword = unlockType === WalletUnlockType.ALWAYS_REQUIRED;
 
-    if (needMigrate || !hasMasterPassword || isLocked || noAccount || location.pathname === '/create-done') {
+    if (needMigrate || !hasMasterPassword || (isLocked && alwaysRequiredPassword) || noAccount || location.pathname === '/create-done') {
       setShowSidebar(false);
       setBackground(BackgroundColorMap.INFO);
       setHeaderType(HeaderType.SIMPLE);

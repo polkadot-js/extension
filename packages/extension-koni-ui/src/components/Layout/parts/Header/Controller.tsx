@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import Accounts from './Accounts';
 import Networks from './Networks';
+import LockStatus from "@subwallet/extension-koni-ui/components/Layout/parts/Header/LockStatus";
 
 export type Props = ThemeProps & {
   title?: string | React.ReactNode;
@@ -52,6 +53,7 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
           <Customization />
           <Networks />
           <Accounts />
+          <LockStatus />
         </div>
       </div>
     </div>

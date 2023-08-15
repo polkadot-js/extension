@@ -15,9 +15,9 @@ import SendFund from '@subwallet/extension-koni-ui/Popup/Transaction/variants/Se
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getAccountType } from '@subwallet/extension-koni-ui/utils';
-import { Button, Divider, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowFatLinesDown, Eye, EyeClosed, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import { ArrowFatLinesDown, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
@@ -192,136 +192,118 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   return (
     <div className={CN(className, 'flex-row')}>
-      <div className='balance-item'>
-        <div className='flex-row'>
-          <Typography.Text className='balance-title'>
-            Total balance
-          </Typography.Text>
+      <div className={CN('__block-item', '__total-balance-block')}>
+        <div className={'__block-title-wrapper'}>
+          <div className={'__block-title'}>{t('Total balance')}</div>
+
           <Button
-            className='toggle-show-balance'
+            className='__balance-visibility-toggle'
             icon={
               <Icon
-                phosphorIcon={isShowBalance ? Eye : EyeClosed}
-                size='sm'
+                phosphorIcon={isShowBalance ? Eye : EyeSlash}
               />
             }
             onClick={onChangeShowBalance}
+            size={'xs'}
             type='ghost'
           />
         </div>
-        {isShowBalance
-          ? (
-            <>
-              <Number
-                className={'balance-value'}
-                decimal={0}
-                decimalOpacity={0.45}
-                size={30}
-                subFloatNumber
-                suffix='$'
-                value={totalValue}
-              />
 
-              <div className={'__balance-change-container'}>
-                <Number
-                  className={'__balance-change-value'}
-                  decimal={0}
-                  decimalOpacity={1}
-                  prefix={isTotalBalanceDecrease ? '- $' : '+ $'}
-                  size={10}
-                  value={totalChangeValue}
-                />
-                <Tag
-                  className={`__balance-change-percent ${isTotalBalanceDecrease ? '-decrease' : ''}`}
-                  shape={'round'}
-                >
-                  <Number
-                    decimal={0}
-                    decimalOpacity={1}
-                    prefix={isTotalBalanceDecrease ? '-' : '+'}
-                    size={10}
-                    suffix={'%'}
-                    value={totalChangePercent}
-                    weight={700}
-                  />
-                </Tag>
-              </div>
-            </>
-          )
-          : (
-            <Typography.Text className='hidden-balance'>*******</Typography.Text>
-          )}
+        <div className={'__block-content'}>
+          <Number
+            className={'__balance-value'}
+            decimal={0}
+            decimalOpacity={0.45}
+            hide={!isShowBalance}
+            prefix='$'
+            subFloatNumber
+            value={totalValue}
+          />
+
+          <div className={'__balance-change-container'}>
+            <Number
+              className={'__balance-change-value'}
+              decimal={0}
+              decimalOpacity={1}
+              hide={!isShowBalance}
+              prefix={isTotalBalanceDecrease ? '- $' : '+ $'}
+              value={totalChangeValue}
+            />
+            <Tag
+              className={`__balance-change-percent ${isTotalBalanceDecrease ? '-decrease' : ''}`}
+              shape={'round'}
+            >
+              <Number
+                decimal={0}
+                decimalOpacity={1}
+                hide={!isShowBalance}
+                prefix={isTotalBalanceDecrease ? '-' : '+'}
+                suffix={'%'}
+                value={totalChangePercent}
+                weight={700}
+              />
+            </Tag>
+          </div>
+        </div>
       </div>
 
-      <Divider
-        className='divider'
-        type='vertical'
+      <div
+        className='__block-divider'
       />
 
-      <div className='balance-item'>
-        <Typography.Text className='balance-title'>
-          Transferable balance
-        </Typography.Text>
+      <div className={CN('__block-item', '__balance-block')}>
+        <div className='__block-title-wrapper'>
+          <div className={'__block-title'}>{t('Transferable balance')}</div>
+        </div>
 
-        {
-          isShowBalance
-            ? (
-              <Number
-                className='balance-value'
-                decimal={0}
-                decimalOpacity={0.45}
-                size={30}
-                subFloatNumber
-                suffix='$'
-                value={totalBalanceInfo.freeValue}
-              />
-            )
-            : (
-              <Typography.Text className='hidden-balance'>*******</Typography.Text>
-            )
-        }
+        <div className={'__block-content'}>
+          <Number
+            className='__balance-value'
+            decimal={0}
+            decimalOpacity={0.45}
+            hide={!isShowBalance}
+            prefix='$'
+            subFloatNumber
+            value={totalBalanceInfo.freeValue}
+          />
+        </div>
       </div>
 
-      <Divider
-        className='divider'
-        type='vertical'
+      <div
+        className='__block-divider'
       />
 
-      <div className='balance-item'>
-        <Typography.Text className='balance-title'>
-          Locked balance
-        </Typography.Text>
-        {
-          isShowBalance
-            ? (
-              <Number
-                className='balance-value'
-                decimal={0}
-                decimalOpacity={0.45}
-                size={30}
-                subFloatNumber
-                suffix='$'
-                value={totalBalanceInfo.lockedValue}
-              />
-            )
-            : (
-              <Typography.Text className='hidden-balance'>*******</Typography.Text>
-            )
-        }
+      <div className={CN('__block-item', '__balance-block')}>
+        <div className='__block-title-wrapper'>
+          <div className={'__block-title'}>{t('Locked balance')}</div>
+        </div>
+
+        <div className={'__block-content'}>
+          <Number
+            className='__balance-value'
+            decimal={0}
+            decimalOpacity={0.45}
+            hide={!isShowBalance}
+            prefix='$'
+            subFloatNumber
+            value={totalBalanceInfo.lockedValue}
+          />
+        </div>
       </div>
 
-      <Divider
-        className='divider'
-        type='vertical'
+      <div
+        className='__block-divider'
       />
 
-      <div className={CN('balance-item', 'action-wrapper')}>
-        <Typography.Text className='balance-title'>Actions</Typography.Text>
+      <div className={CN('__block-item', '__action-block')}>
+        <div className='__block-title-wrapper'>
+          <div className={'__block-title'}>{t('Actions')}</div>
+        </div>
 
-        <div className='actions'>
+        <div className={'__block-content'}>
           {actions.map((item) => (
             <div
-              className='action-button'
+              className='__action-button'
               key={item.type}
             >
               <Button
@@ -395,59 +377,45 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'stretch',
-  marginTop: 50,
-  marginBottom: 50,
+  marginTop: 24,
+  marginBottom: 56,
 
-  '.divider': {
-    alignSelf: 'stretch',
-    height: 'unset'
+  '.ant-number .ant-typography': {
+    fontSize: 'inherit !important',
+    fontWeight: 'inherit !important',
+    lineHeight: 'inherit'
   },
 
-  '.flex-row': {
-    display: 'flex'
+  '.__block-title': {
+    fontSize: token.fontSize,
+    lineHeight: token.lineHeight
   },
 
-  '.toggle-show-balance': {
-    height: 'fit-content'
-  },
+  '.__balance-value': {
+    fontWeight: token.headingFontWeight,
 
-  '.balance-item': {
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-
-    '&:not(:first-child)': {
-      alignItems: 'center'
-    },
-
-    '.balance-title': {
-      marginBottom: 5
-    },
-    '&:not(:first-child) > .balance-title': {
-      textAlign: 'center',
-      display: 'block',
-      width: '100%'
-    },
-
-    '.balance-value': {
-      margin: '12px 0'
+    '.ant-number-decimal': {
+      fontSize: '24px !important',
+      lineHeight: '32px !important'
     }
+  },
+
+  '.__block-divider': {
+    height: 116,
+    width: 1,
+    backgroundColor: token.colorBgDivider,
+    marginTop: token.marginSM
   },
 
   '.__balance-change-container': {
     display: 'flex',
     justifyContent: 'start',
-    alignItems: 'flex-end',
-
-    '.ant-typography': {
-      lineHeight: 'inherit',
-      // todo: may update number component to clear this !important
-      color: 'inherit !important'
-    }
+    alignItems: 'center',
+    marginTop: token.marginSM
   },
 
   '.__balance-change-value': {
-    marginRight: token.sizeSM,
+    marginRight: token.sizeXS,
     lineHeight: token.lineHeight
   },
 
@@ -466,28 +434,55 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       fontSize: token.fontSizeXS
     }
   },
-  '.hidden-balance': {
-    margin: '20px 0'
+
+  '.__block-item': {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1
   },
 
-  '.action-wrapper': {
-    justifyContent: 'space-between',
-    '.actions': {
+  '.__block-title-wrapper': {
+    display: 'flex',
+    gap: token.sizeXS,
+    minHeight: 40,
+    marginBottom: token.marginXS,
+    alignItems: 'center'
+  },
+
+  '.__total-balance-block': {
+    '.__balance-value': {
+      fontSize: 38,
+      lineHeight: '46px'
+    }
+  },
+
+  '.__balance-block': {
+    alignItems: 'center',
+
+    '.__balance-value': {
+      fontSize: 30,
+      lineHeight: '38px'
+    }
+  },
+
+  '.__action-block': {
+    alignItems: 'center',
+
+    '.__block-content': {
       display: 'flex',
-      gap: 12,
+      gap: token.sizeSM
+    }
+  },
 
-      '.action-button': {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 8,
-        marginTop: 20
-      },
+  '.__action-button': {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: token.sizeSM,
 
-      '.ant-squircle': {
-        marginLeft: 6,
-        marginRight: 6
-      }
+    '.ant-squircle': {
+      marginLeft: 6,
+      marginRight: 6
     }
   }
 }));

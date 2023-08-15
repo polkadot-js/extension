@@ -41,6 +41,7 @@ const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     overflow: 'hidden',
     marginTop: 48,
+    marginBottom: 48,
     display: 'flex',
     flexWrap: 'wrap',
     gap: token.padding,

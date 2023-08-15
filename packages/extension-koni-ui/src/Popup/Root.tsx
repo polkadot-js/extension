@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BackgroundExpandView, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
@@ -47,6 +48,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   useSubscribeLanguage();
 
+  const { unlockType } = useSelector((state: RootState) => state.settings);
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
@@ -98,12 +100,13 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   useEffect(() => {
     const pathName = location.pathname;
+    const alwaysRequiredPassword = unlockType === WalletUnlockType.ALWAYS_REQUIRED;
 
-    if (needMigrate && hasMasterPassword && !isLocked) {
+    if (needMigrate && hasMasterPassword && !(isLocked && alwaysRequiredPassword)) {
       if (pathName !== migratePasswordUrl) {
         navigate(migratePasswordUrl);
       }
-    } else if (hasMasterPassword && isLocked) {
+    } else if (hasMasterPassword && isLocked && alwaysRequiredPassword) {
       if (pathName !== loginUrl) {
         navigate(loginUrl);
       }
@@ -125,7 +128,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       } else {
         navigate(tokenUrl);
       }
-    } else if (pathName === loginUrl && !isLocked) {
+    } else if (pathName === loginUrl && !(isLocked && alwaysRequiredPassword)) {
       goHome();
     } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {
       goHome();
@@ -134,7 +137,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
       openPModal(null);
     }
-  }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
+  }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal, unlockType]);
 
   return <>
     {children}

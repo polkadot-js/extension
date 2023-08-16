@@ -1759,6 +1759,10 @@ export interface KeyringState {
   isLocked: boolean;
 }
 
+export interface UIViewState {
+  isUILocked: boolean;
+}
+
 export interface AddressBookState {
   contacts: AddressJson[];
   recent: AddressJson[];

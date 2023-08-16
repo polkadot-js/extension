@@ -12,6 +12,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import { useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -25,7 +26,7 @@ import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { BackgroundColorMap, HeaderType, WebUIContext, WebUIContextProvider } from '../contexts/WebUIContext';
+import { WebUIContextProvider } from '../contexts/WebUIContext';
 
 changeHeaderLogo(<Logo2D />);
 
@@ -51,7 +52,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const navigate = useNavigate();
   const { goBack, goHome } = useDefaultNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
-  const { isPortfolio, setBackground, setHeaderType, setShowSidebar } = useContext(WebUIContext);
   const notify = useNotification();
 
   useSubscribeLanguage();
@@ -60,6 +60,8 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
+  const { isUILocked } = useUILock();
+  const needUnlock = isUILocked || (isLocked && unlockType === WalletUnlockType.ALWAYS_REQUIRED);
 
   const needMigrate = useMemo(
     () => !!accounts
@@ -109,35 +111,12 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   useEffect(() => {
     const pathName = location.pathname;
-    const alwaysRequiredPassword = unlockType === WalletUnlockType.ALWAYS_REQUIRED;
 
-    if (needMigrate || !hasMasterPassword || (isLocked && alwaysRequiredPassword) || noAccount || location.pathname === '/create-done') {
-      setShowSidebar(false);
-      setBackground(BackgroundColorMap.INFO);
-      setHeaderType(HeaderType.SIMPLE);
-    } else {
-      setShowSidebar(true);
-      !isPortfolio && setBackground(BackgroundColorMap.COMMON);
-
-      if (pathName.startsWith('/home') || pathName === '/settings' || pathName === '/settings/list') {
-        setHeaderType(HeaderType.COMMON);
-      } else if (pathName.startsWith('/transaction')) {
-        setHeaderType(HeaderType.COMMON_BACK);
-      } else {
-        setHeaderType(HeaderType.NONE);
-      }
-    }
-  }, [noAccount, hasMasterPassword, isLocked, isPortfolio, location.pathname, needMigrate, setBackground, setHeaderType, setShowSidebar]);
-
-  useEffect(() => {
-    const pathName = location.pathname;
-    const alwaysRequiredPassword = unlockType === WalletUnlockType.ALWAYS_REQUIRED;
-
-    if (needMigrate && hasMasterPassword && !(isLocked && alwaysRequiredPassword)) {
+    if (needMigrate && hasMasterPassword && !needUnlock) {
       if (pathName !== migratePasswordUrl) {
         navigate(migratePasswordUrl);
       }
-    } else if (hasMasterPassword && isLocked && alwaysRequiredPassword) {
+    } else if (hasMasterPassword && needUnlock) {
       if (pathName !== loginUrl) {
         navigate(loginUrl);
       }
@@ -157,14 +136,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       openPModal('confirmations');
     } else if (pathName === DEFAULT_ROUTER_PATH) {
       navigate(tokenUrl);
-    } else if (pathName === loginUrl && !(isLocked && alwaysRequiredPassword)) {
+    } else if (pathName === loginUrl && !needUnlock) {
       goHome();
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');
     } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
       openPModal(null);
     }
-  }, [noAccount, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal, unlockType]);
+  }, [noAccount, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isOpenPModal, location.pathname, navigate, needMigrate, openPModal, needUnlock]);
 
   return <>
     {children}

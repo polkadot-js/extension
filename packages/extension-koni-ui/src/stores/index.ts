@@ -8,6 +8,7 @@ import storage from 'redux-persist/lib/storage';
 import AccountStateReducer from './base/AccountState';
 import RequestStateReducer from './base/RequestState';
 import SettingsReducer from './base/Settings';
+import UIViewStateReducer from './base/UIViewState';
 import BalanceReducer from './feature/Balance';
 import BondingReducer from './feature/Bonding';
 import AssetRegistryReducer from './feature/common/AssetRegistry';
@@ -26,6 +27,7 @@ const persistConfig = {
   storage: storage,
   whitelist: [
     'settings',
+    'uiViewState',
     'staking'
   ]
 };
@@ -49,6 +51,7 @@ const rootReducers = combineReducers({
   requestState: RequestStateReducer,
   settings: SettingsReducer,
   accountState: AccountStateReducer,
+  uiViewState: UIViewStateReducer,
 
   // wallet connect
   walletConnect: WalletConnectReducer

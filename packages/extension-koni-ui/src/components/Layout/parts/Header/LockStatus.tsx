@@ -2,42 +2,42 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
-import { keyringLock } from '@subwallet/extension-koni-ui/messaging';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon } from '@subwallet/react-ui';
-import { LockKey, LockKeyOpen } from 'phosphor-react';
-import React, { useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { Lock } from 'phosphor-react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
   const { t } = useTranslation();
-  const isLocked = useSelector((state: RootState) => state.accountState.isLocked);
-  const unlockCheck = useUnlockChecker();
+  const { lock } = useUILock();
+  const [locking, setLocking] = useState(false);
 
-  const toggleLock = useCallback(() => {
-    if (isLocked) {
-      unlockCheck().catch(() => {
-        // unlock is cancelled
+  const onLock = useCallback(() => {
+    setLocking(true);
+    lock()
+      .then(() => {
+        // Do nothing
+      })
+      .catch(console.error)
+      .finally(() => {
+        setLocking(false);
       });
-    } else {
-      keyringLock().catch(console.log);
-    }
-  }, [isLocked, unlockCheck]);
+  }, [lock]);
 
   return (<div className={className}>
     <Button
       icon={<Icon
-        phosphorIcon={isLocked ? LockKeyOpen : LockKey}
+        phosphorIcon={Lock}
         size={'sm'}
       />}
-      onClick={toggleLock}
+      loading={locking}
+      onClick={onLock}
       schema={'secondary'}
       shape={'circle'}
       size={'xs'}
-      tooltip={isLocked ? t('Click to unlock') : t('Click to lock')}
+      tooltip={t('Lock')}
     />
   </div>);
 };

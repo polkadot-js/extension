@@ -5,17 +5,16 @@ import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/compone
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
+import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
-import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, LockOpen, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -76,23 +75,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
   const { goHome } = useDefaultNavigate();
   const { t } = useTranslation();
-
-  const isLocked = useSelector((state) => state.accountState.isLocked);
-  const checkUnlock = useUnlockChecker();
   const [locking, setLocking] = useState(false);
   const { isWebUI } = useContext(ScreenContext);
   const { setTitle } = useContext(WebUIContext);
 
-  const toggleLock = useCallback(() => {
-    if (isLocked) {
-      checkUnlock().then(() => {
-        goHome();
-      }).catch(() => {
-        // User cancelled unlock
-      });
+  const { isUILocked, lock, unlock } = useUILock();
+
+  const onLock = useCallback(() => {
+    if (isUILocked) {
+      unlock();
+      goHome();
     } else {
       setLocking(true);
-      keyringLock()
+      lock()
         .then(() => {
           goHome();
         })
@@ -105,7 +100,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           setLocking(false);
         });
     }
-  }, [checkUnlock, goHome, isLocked, notify]);
+  }, [goHome, isUILocked, lock, notify, unlock]);
 
   // todo: i18n all titles, labels below
   const SettingGroupItemType = useMemo((): SettingGroupItemType[] => ([
@@ -333,16 +328,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             block
             icon={
               <Icon
-                phosphorIcon={isLocked ? LockOpen : Lock}
+                phosphorIcon={Lock}
                 type='phosphor'
                 weight={'fill'}
               />
             }
             loading={locking}
-            onClick={toggleLock}
+            onClick={onLock}
             schema={'secondary'}
           >
-            {(isLocked && !locking) ? t('Unlock') : t('Lock')}
+            {t('Lock')}
           </Button>
 
           <div className={'__version'}>

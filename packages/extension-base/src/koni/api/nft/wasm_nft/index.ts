@@ -15,6 +15,7 @@ import fetch from 'cross-fetch';
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import { isUrl } from '@subwallet/extension-base/utils';
 
 // interface CollectionAttributes {
 //   storedOnChain: boolean,
@@ -85,6 +86,10 @@ export class WasmNftApi extends BaseNftApi {
   private parseFeaturedTokenUri (tokenUri: string) {
     if (!tokenUri || tokenUri.length === 0) {
       return undefined;
+    }
+
+    if (isUrl(tokenUri)) {
+      return tokenUri;
     }
 
     if (tokenUri.startsWith('/ipfs/')) {
@@ -293,6 +298,8 @@ export class WasmNftApi extends BaseNftApi {
   private async processOffChainMetadata (contractPromise: ContractPromise, address: string, tokenId: string, isFeatured: boolean): Promise<NftItem> {
     const nftItem: NftItem = { chain: '', collectionId: '', id: '', owner: '', name: tokenId };
 
+    console.log('run here');
+
     const _tokenUri = await contractPromise.query['psp34Traits::tokenUri'](address, { gasLimit: getDefaultWeightV2(this.substrateApi?.api as ApiPromise) }, tokenId);
 
     if (_tokenUri.output) {
@@ -301,6 +308,8 @@ export class WasmNftApi extends BaseNftApi {
       const _tokenUriObj = _tokenUri.output.toJSON() as Record<string, any>;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const tokenUri = (_tokenUriObj.Ok || _tokenUriObj.ok) as string;
+
+      console.log('tokenUri', tokenUri);
 
       if (isFeatured) {
         const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri);
@@ -312,7 +321,10 @@ export class WasmNftApi extends BaseNftApi {
         }
       } else {
         const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri);
+        console.log('parsedTokenUri', parsedTokenUri);
         const detailUrl = this.parseUrl(parsedTokenUri as string);
+
+        console.log('detailUrl', detailUrl);
 
         if (detailUrl) {
           const resp = await fetch(detailUrl);
@@ -375,6 +387,8 @@ export class WasmNftApi extends BaseNftApi {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const balance = _balance.output ? ((balanceJson.ok || balanceJson.Ok) as string) : '0';
 
+      console.log('balance', balance);
+
       if (parseInt(balance) === 0) {
         return;
       }
@@ -394,6 +408,9 @@ export class WasmNftApi extends BaseNftApi {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             const tokenIdObj = (rawTokenId.Ok.Ok || rawTokenId.ok.ok) as Record<string, string>; // capital O, not normal o
             const tokenId = Object.values(tokenIdObj)[0].replaceAll(',', '');
+
+            console.log('tokenId', tokenId);
+            console.log('isAttributeOnChain', isAttributeOnChain);
 
             nftIds.push(tokenId);
 

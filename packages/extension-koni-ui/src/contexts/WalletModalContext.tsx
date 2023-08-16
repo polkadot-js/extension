@@ -16,6 +16,7 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import SeedPhraseModal from '../components/Modal/Account/SeedPhraseModal';
 import useSwitchModal from '../hooks/modal/useSwitchModal';
+import { UnlockModal } from '../components/Modal/UnlockModal';
 
 interface Props {
   children: React.ReactNode;
@@ -118,5 +119,6 @@ export const WalletModalContext = ({ children }: Props) => {
     <RequestCreatePasswordModal />
     <RequestCameraAccessModal />
     <CustomizeModal />
+    <UnlockModal />
   </>;
 };

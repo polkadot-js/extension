@@ -22,6 +22,7 @@ export const ADD_ADDRESS_BOOK_MODAL = 'add-address-book-modal';
 export const EDIT_ADDRESS_BOOK_MODAL = 'edit-address-book-modal';
 export const DELETE_ADDRESS_BOOK_MODAL = 'delete-address-book-modal';
 export const EDIT_AUTO_LOCK_TIME_MODAL = 'edit-auto-lock-time-modal';
+export const EDIT_UNLOCK_TYPE_MODAL = 'edit-unlock-type-modal';
 export const RESET_WALLET_MODAL = 'reset-wallet-modal';
 export const SEED_PHRASE_MODAL = 'seed-phrase-modal';
 export const ADD_CONNECTION_MODAL = 'add-connection-modal';

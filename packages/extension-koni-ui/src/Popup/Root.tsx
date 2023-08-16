@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import BaseWeb from '@subwallet/extension-koni-ui/components/Layout/base/BaseWeb';
@@ -55,6 +56,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   useSubscribeLanguage();
 
+  const { unlockType } = useSelector((state: RootState) => state.settings);
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
@@ -107,8 +109,9 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   useEffect(() => {
     const pathName = location.pathname;
+    const alwaysRequiredPassword = unlockType === WalletUnlockType.ALWAYS_REQUIRED;
 
-    if (needMigrate || !hasMasterPassword || isLocked || noAccount || location.pathname === '/create-done') {
+    if (needMigrate || !hasMasterPassword || (isLocked && alwaysRequiredPassword) || noAccount || location.pathname === '/create-done') {
       setShowSidebar(false);
       setBackground(BackgroundColorMap.INFO);
       setHeaderType(HeaderType.SIMPLE);
@@ -128,12 +131,13 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   useEffect(() => {
     const pathName = location.pathname;
+    const alwaysRequiredPassword = unlockType === WalletUnlockType.ALWAYS_REQUIRED;
 
-    if (needMigrate && hasMasterPassword && !isLocked) {
+    if (needMigrate && hasMasterPassword && !(isLocked && alwaysRequiredPassword)) {
       if (pathName !== migratePasswordUrl) {
         navigate(migratePasswordUrl);
       }
-    } else if (hasMasterPassword && isLocked) {
+    } else if (hasMasterPassword && isLocked && alwaysRequiredPassword) {
       if (pathName !== loginUrl) {
         navigate(loginUrl);
       }
@@ -153,14 +157,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       openPModal('confirmations');
     } else if (pathName === DEFAULT_ROUTER_PATH) {
       navigate(tokenUrl);
-    } else if (pathName === loginUrl && !isLocked) {
+    } else if (pathName === loginUrl && !(isLocked && alwaysRequiredPassword)) {
       goHome();
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');
     } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
       openPModal(null);
     }
-  }, [noAccount, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
+  }, [noAccount, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal, unlockType]);
 
   return <>
     {children}

@@ -240,6 +240,7 @@ const Accounts = styled(Component)<ThemeProps>(({ theme: { token } }: ThemeProps
       border: `1px solid ${token.colorBgBorder}`,
       boxShadow: '4px 4px 4px 0px rgba(0, 0, 0, 0.25)',
       borderRadius: token.borderRadiusLG,
+      width: 390,
 
       '.__list-container': {
         width: '100%',
@@ -270,8 +271,12 @@ const Accounts = styled(Component)<ThemeProps>(({ theme: { token } }: ThemeProps
 
       '.__action-container': {
         borderTop: `2px solid ${token.colorBgBorder}`,
-        gap: token.sizeSM,
+        justifyContent: 'space-between',
         padding: token.padding
+      },
+
+      '.ant-btn.ant-btn-block': {
+        width: 'auto'
       }
     }
   };

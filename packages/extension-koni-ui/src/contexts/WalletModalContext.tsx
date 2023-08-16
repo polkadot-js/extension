@@ -15,8 +15,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import SeedPhraseModal from '../components/Modal/Account/SeedPhraseModal';
-import useSwitchModal from '../hooks/modal/useSwitchModal';
 import { UnlockModal } from '../components/Modal/UnlockModal';
+import useSwitchModal from '../hooks/modal/useSwitchModal';
 
 interface Props {
   children: React.ReactNode;

@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { isArray } from '@polkadot/util';
 import { FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { FieldData } from 'rc-field-form/lib/interface';
+
+import { isArray } from '@polkadot/util';
 
 export function convertFieldToObject<T = Record<string, any>> (fields: FieldData[]) {
   const rs = fields.reduce((data, { name, value }) => {
@@ -34,7 +35,7 @@ export const simpleCheckForm = (allFields: FormFieldData[], ignoreFields?: strin
 
     const isIgnore = ignoreFields?.some((name) => names.includes(name));
 
-    return isIgnore ? false : !value;
+    return isIgnore ? false : typeof value === 'boolean' ? false : !value;
   });
 
   return {

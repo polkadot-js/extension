@@ -129,6 +129,8 @@ const Component: React.FC = () => {
     };
   }, [defaultData, defaultStakingType, defaultSlug]);
 
+  const [isChangeData, setIsChangeData] = useState(false);
+
   const getSelectedValidators = useCallback((nominations: string[]) => {
     const validatorList = validatorInfoMap[chain];
 
@@ -178,6 +180,22 @@ const Component: React.FC = () => {
     return stakingType === StakingType.NOMINATED ? (chainStakingMetadata?.minStake || '0') : (chainStakingMetadata?.minJoinNominationPool || '0');
   }, [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, stakingType]);
 
+  const persistValidator = useMemo(() => {
+    if (chain === defaultData.chain && from === defaultData.from && !isChangeData) {
+      return defaultData.nominate;
+    } else {
+      return '';
+    }
+  }, [chain, defaultData.chain, defaultData.from, defaultData.nominate, from, isChangeData]);
+
+  const persistPool = useMemo(() => {
+    if (chain === defaultData.chain && from === defaultData.from && !isChangeData) {
+      return defaultData.pool;
+    } else {
+      return '';
+    }
+  }, [chain, defaultData.chain, defaultData.from, defaultData.pool, from, isChangeData]);
+
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   const onFieldsChange: FormCallbacks<StakeParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
@@ -186,10 +204,14 @@ const Component: React.FC = () => {
     const allMap = convertFieldToObject<StakeParams>(allFields);
     const changesMap = convertFieldToObject<StakeParams>(changedFields);
 
-    const { asset, value } = changesMap;
+    const { asset, from, value } = changesMap;
 
     if (value) {
       setValueChange(true);
+    }
+
+    if (asset || from) {
+      setIsChangeData(true);
     }
 
     if (asset) {
@@ -466,6 +488,8 @@ const Component: React.FC = () => {
           >
             <PoolSelector
               chain={chain}
+              // Not use initialValues of Form, because some state changes by hook, it will be delayed
+              defaultValue={persistPool}
               from={from}
               label={t('Select pool')}
               loading={poolLoading}
@@ -479,6 +503,8 @@ const Component: React.FC = () => {
           >
             <MultiValidatorSelector
               chain={asset ? chain : ''}
+              // Not use initialValues of Form, because some state changes by hook, it will be delayed
+              defaultValue={persistValidator}
               from={asset ? from : ''}
               loading={validatorLoading}
               setForceFetchValidator={setForceFetchValidator}

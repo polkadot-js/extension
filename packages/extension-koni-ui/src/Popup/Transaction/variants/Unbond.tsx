@@ -10,7 +10,7 @@ import { AccountSelector, AmountInput, HiddenInput, NominationSelector, PageWrap
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
-import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
@@ -42,12 +42,9 @@ const _accountFilterFunc = (
 
 const hideFields: Array<keyof UnStakeParams> = ['chain', 'asset', 'type'];
 
-const Component: React.FC<Props> = (props: Props) => {
-  const { className = '' } = props;
-
+const Component: React.FC = () => {
   const { t } = useTranslation();
 
-  const dataContext = useContext(DataContext);
   const { onDone, persistData } = useContext(TransactionContext);
   const defaultData = useContext(TransactionContext).defaultData as UnStakeParams;
   const { chain, type } = defaultData;
@@ -93,6 +90,16 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [mustChooseValidator, nominatorMetadata?.activeStake, selectedValidator?.activeStake]);
 
+  const [isChangeData, setIsChangeData] = useState(false);
+
+  const persistValidator = useMemo(() => {
+    if (from === defaultData.from && !isChangeData) {
+      return defaultData.validator;
+    } else {
+      return '';
+    }
+  }, [defaultData.from, defaultData.validator, from, isChangeData]);
+
   const minValue = useMemo((): string => {
     if (type === StakingType.POOLED) {
       return chainStakingMetadata?.minJoinNominationPool || '0';
@@ -125,17 +132,21 @@ const Component: React.FC<Props> = (props: Props) => {
   const [isDisable, setIsDisable] = useState(true);
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
-  const onValuesChange: FormCallbacks<UnStakeParams>['onValuesChange'] = useCallback((changes: Partial<UnStakeParams>) => {
+  const onValuesChange: FormCallbacks<UnStakeParams>['onValuesChange'] = useCallback((changes: Partial<UnStakeParams>, values: UnStakeParams) => {
     const { from, validator, value } = changes;
 
-    if ((from || validator) && amountChange) {
+    if (from) {
+      setIsChangeData(true);
+    }
+
+    if ((from || validator) && (amountChange || defaultData.value)) {
       form.validateFields(['value']).finally(noop);
     }
 
     if (value !== undefined) {
       setAmountChange(true);
     }
-  }, [amountChange, form]);
+  }, [amountChange, form, defaultData.value]);
 
   const onFieldsChange: FormCallbacks<UnStakeParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
@@ -231,86 +242,85 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <>
       <TransactionContent>
-        <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
-          <Form
-            className={`${className} form-container form-space-xxs`}
-            form={form}
-            initialValues={formDefault}
-            name='unstake-form'
-            onFieldsChange={onFieldsChange}
-            onFinish={onSubmit}
-            onValuesChange={onValuesChange}
+        <Form
+          className={CN('form-container', 'form-space-xxs')}
+          form={form}
+          initialValues={formDefault}
+          name='unstake-form'
+          onFieldsChange={onFieldsChange}
+          onFinish={onSubmit}
+          onValuesChange={onValuesChange}
+        >
+          <HiddenInput fields={hideFields} />
+          <Form.Item
+            hidden={!isAll}
+            name={'from'}
           >
-            <HiddenInput fields={hideFields} />
-            <Form.Item
-              hidden={!isAll}
-              name={'from'}
-            >
-              <AccountSelector
-                filter={_accountFilterFunc(allNominatorInfo, chainInfoMap, type, chain)}
-                label={t('Unstake from account')}
-              />
-            </Form.Item>
-            <FreeBalance
-              address={from}
-              chain={chain}
-              className={'free-balance'}
-              label={t('Available balance:')}
-              onBalanceReady={setIsBalanceReady}
+            <AccountSelector
+              filter={_accountFilterFunc(allNominatorInfo, chainInfoMap, type, chain)}
+              label={t('Unstake from account')}
             />
+          </Form.Item>
+          <FreeBalance
+            address={from}
+            chain={chain}
+            className={'free-balance'}
+            label={t('Available balance:')}
+            onBalanceReady={setIsBalanceReady}
+          />
 
-            <Form.Item
-              hidden={!mustChooseValidator}
-              name={'validator'}
-            >
-              <NominationSelector
-                chain={chain}
-                disabled={!from}
-                label={t(`Select ${getValidatorLabel(chain)}`)}
-                nominators={ from ? nominatorMetadata?.nominations || [] : []}
-              />
-            </Form.Item>
+          <Form.Item
+            hidden={!mustChooseValidator}
+            name={'validator'}
+          >
+            <NominationSelector
+              chain={chain}
+              defaultValue={persistValidator}
+              disabled={!from}
+              label={t(`Select ${getValidatorLabel(chain)}`)}
+              nominators={ from ? nominatorMetadata?.nominations || [] : []}
+            />
+          </Form.Item>
 
+          {
+            mustChooseValidator && (
+              <>
+                {renderBounded()}
+              </>
+            )
+          }
+
+          <Form.Item
+            name={'value'}
+            rules={[
+              { required: true, message: t('Amount is required') },
+              validateUnStakeValue(minValue, bondedValue, decimals)
+            ]}
+            statusHelpAsTooltip={true}
+          >
+            <AmountInput
+              decimals={decimals}
+              maxValue={bondedValue}
+              showMaxButton={true}
+            />
+          </Form.Item>
+
+          {!mustChooseValidator && renderBounded()}
+
+          <div className={CN('text-light-4', { mt: mustChooseValidator })}>
             {
-              mustChooseValidator && (
-                <>
-                  {renderBounded()}
-                </>
-              )
-            }
-
-            <Form.Item
-              name={'value'}
-              rules={[
-                { required: true, message: t('Amount is required') },
-                validateUnStakeValue(minValue, bondedValue, decimals)
-              ]}
-              statusHelpAsTooltip={true}
-            >
-              <AmountInput
-                decimals={decimals}
-                maxValue={bondedValue}
-                showMaxButton={true}
-              />
-            </Form.Item>
-
-            {!mustChooseValidator && renderBounded()}
-
-            <div className={CN('text-light-4', { mt: mustChooseValidator })}>
-              {
-                t(
-                  'Once unbonded, your funds would be available for withdrawal after {{time}}.',
-                  {
-                    replace:
+              t(
+                'Once unbonded, your funds would be available for withdrawal after {{time}}.',
+                {
+                  replace:
                       {
                         time: unBondedTime
                       }
-                  }
-                )
-              }
-            </div>
-          </Form>
-        </PageWrapper>
+                }
+              )
+            }
+          </div>
+        </Form>
       </TransactionContent>
       <TransactionFooter
         errors={[]}
@@ -334,7 +344,24 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const Unbond = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Wrapper: React.FC<Props> = (props: Props) => {
+  const { className } = props;
+
+  useSetCurrentPage('/transaction/unstake');
+
+  const dataContext = useContext(DataContext);
+
+  return (
+    <PageWrapper
+      className={className}
+      resolve={dataContext.awaitStores(['staking'])}
+    >
+      <Component />
+    </PageWrapper>
+  );
+};
+
+const Unbond = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
     '.bonded-balance, .free-balance': {
       marginBottom: token.margin

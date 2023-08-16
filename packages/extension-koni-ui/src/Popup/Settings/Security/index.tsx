@@ -261,7 +261,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <div className='items-container'>
             {items.map(onRenderItem)}
           </div>
-          <div className='setting-config-container'>
+          <div className='setting-config-container hidden'>
             <div className='label'>
               {t('Website access')}
             </div>

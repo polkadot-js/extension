@@ -6,6 +6,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useDefaultNavigate, useDeleteAccount, useNotification } from '@subwallet/extension-koni-ui/hooks';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import { forgetAccount, keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CreateDoneParam, FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -102,6 +103,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const checkUnlock = useUnlockChecker();
+
   const migratedRef = useRef<AccountJson[]>(accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && acc.isMasterPassword));
 
   const migrated = useMemo(() => {
@@ -189,15 +192,19 @@ const Component: React.FC<Props> = (props: Props) => {
         return {
           children: t('Apply master password now'),
           onClick: () => {
-            if (isWebUI) {
-              if (needMigrate.length) {
-                setStep('Migrate');
+            checkUnlock().then(() => {
+              if (isWebUI) {
+                if (needMigrate.length) {
+                  setStep('Migrate');
+                }
+
+                return;
               }
 
-              return;
-            }
-
-            setStep(needMigrate.length ? 'Migrate' : 'Done');
+              setStep(needMigrate.length ? 'Migrate' : 'Done');
+            }).catch(() => {
+              // User cancel unlock
+            });
           },
           icon: nextIcon
         };
@@ -218,7 +225,7 @@ const Component: React.FC<Props> = (props: Props) => {
           icon: nextIcon
         };
     }
-  }, [form, goHome, isWebUI, needMigrate.length, step, t]);
+  }, [checkUnlock, form, goHome, isWebUI, needMigrate.length, step, t]);
 
   const onDelete = useCallback(() => {
     if (currentAccount?.address) {

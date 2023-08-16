@@ -69,7 +69,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   useEffect(() => {
     if (!value) {
-      onSelect(filteredItems[0]?.validatorAddress || '');
+      if (filteredItems[0]?.validatorAddress) {
+        onSelect(filteredItems[0].validatorAddress);
+      }
     } else {
       const existed = filteredItems.find((item) => item.validatorAddress === value);
 

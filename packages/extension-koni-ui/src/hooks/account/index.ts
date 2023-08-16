@@ -12,5 +12,11 @@ export { default as useGetAccountSignModeByAddress } from './useGetAccountSignMo
 export { default as useGetAccountTitleByAddress } from './useGetAccountTitleByAddress';
 export { default as useGetDefaultAccountName } from './useGetDefaultAccountName';
 export { default as useGoBackFromCreateAccount } from './useGoBackFromCreateAccount';
+export { default as useHandleMantaPaySync } from './useHandleMantaPaySync';
 export { default as useIsReadOnlyAccount } from './useIsReadOnlyAccount';
 export { default as usePreCheckAction } from './usePreCheckAction';
+
+export * from './useGetMantaPayConfig';
+export * from './useGetZkAddress';
+export * from './useIsMantaPayAvailable';
+export * from './useIsMantaPayEnabled';

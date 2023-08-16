@@ -1,93 +1,77 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, CancelUnstakeSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, CancelUnstakeSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
+import { useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
-import { accountFilterFunc } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
-import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { CancelUnStakeParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { accountFilterFunc } from '../helper';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
-import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
 type Props = ThemeProps;
 
-enum FormFieldName {
-  UNSTAKE = 'unstake'
-}
-
-interface CancelUnstakeFormProps extends TransactionFormBaseProps {
-  [FormFieldName.UNSTAKE]: string;
-}
+const hideFields: Array<keyof CancelUnStakeParams> = ['type', 'chain', 'asset'];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className = '' } = props;
-
-  const { chain: stakingChain, type: _stakingType } = useParams();
-  const stakingType = _stakingType as StakingType;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const dataContext = useContext(DataContext);
-  const { asset, chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
+  const { onDone, persistData } = useContext(TransactionContext);
+  const defaultData = useContext(TransactionContext).defaultData as CancelUnStakeParams;
+  const { chain, type } = defaultData;
 
-  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
+  const [form] = Form.useForm<CancelUnStakeParams>();
+  const formDefault = useMemo((): CancelUnStakeParams => ({ ...defaultData }), [defaultData]);
+
+  const { isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
-  const allNominatorInfo = useGetNominatorInfo(stakingChain, stakingType);
-  const nominatorInfo = useGetNominatorInfo(stakingChain, stakingType, from);
+  const from = useWatchTransaction('from', form, defaultData);
+
+  const allNominatorInfo = useGetNominatorInfo(chain, type);
+  const nominatorInfo = useGetNominatorInfo(chain, type, from);
   const nominatorMetadata = nominatorInfo[0];
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
 
-  const [form] = Form.useForm<CancelUnstakeFormProps>();
-  const formDefault = useMemo((): CancelUnstakeFormProps => ({
-    from: from,
-    chain: chain,
-    asset: asset,
-    [FormFieldName.UNSTAKE]: ''
-  }), [asset, chain, from]);
-
   const goHome = useCallback(() => {
     navigate('/home/staking');
   }, [navigate]);
 
-  const onFieldsChange: FormCallbacks<CancelUnstakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<CancelUnStakeParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
-    const { empty, error } = simpleCheckForm(allFields);
+    const { empty, error } = simpleCheckForm(allFields, ['asset']);
 
-    const changesMap = convertFieldToObject<CancelUnstakeFormProps>(changedFields);
-
-    const { from } = changesMap;
-
-    if (from !== undefined) {
-      setFrom(from);
-    }
+    const values = convertFieldToObject<CancelUnStakeParams>(allFields);
 
     setIsDisable(empty || error);
-  }, [setFrom]);
+    persistData(values);
+  }, [persistData]);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
-  const onSubmit: FormCallbacks<CancelUnstakeFormProps>['onFinish'] = useCallback((values: CancelUnstakeFormProps) => {
+  const onSubmit: FormCallbacks<CancelUnStakeParams>['onFinish'] = useCallback((values: CancelUnStakeParams) => {
     setLoading(true);
 
-    const { [FormFieldName.UNSTAKE]: unstakeIndex } = values;
+    const { chain, from, unstake: unstakeIndex } = values;
 
     setTimeout(() => {
       submitStakeCancelWithdrawal({
@@ -101,29 +85,15 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         });
     }, 300);
-  }, [chain, from, nominatorMetadata.unstakings, onError, onSuccess]);
+  }, [nominatorMetadata.unstakings, onError, onSuccess]);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const nomination = allNominatorInfo.find((data) => isSameAddress(data.address, account.address));
 
-    return (nomination ? nomination.unstakings.length > 0 : false) && accountFilterFunc(chainInfoMap, stakingType, stakingChain)(account);
-  }, [chainInfoMap, allNominatorInfo, stakingChain, stakingType]);
+    return (nomination ? nomination.unstakings.length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
+  }, [chainInfoMap, allNominatorInfo, chain, type]);
 
   const onPreCheck = usePreCheckAction(from);
-
-  useEffect(() => {
-    const address = currentAccount?.address || '';
-
-    if (address) {
-      if (!isAccountAll(address)) {
-        setFrom(address);
-      }
-    }
-  }, [currentAccount?.address, setFrom]);
-
-  useEffect(() => {
-    setChain(stakingChain || '');
-  }, [setChain, stakingChain]);
 
   return (
     <>
@@ -136,6 +106,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
           >
+            <HiddenInput fields={hideFields} />
             <Form.Item
               hidden={!isAllAccount}
               name={'from'}
@@ -149,7 +120,7 @@ const Component: React.FC<Props> = (props: Props) => {
               label={t('Available balance:')}
               onBalanceReady={setIsBalanceReady}
             />
-            <Form.Item name={FormFieldName.UNSTAKE}>
+            <Form.Item name={'unstake'}>
               <CancelUnstakeSelector
                 chain={chain}
                 disabled={!from}

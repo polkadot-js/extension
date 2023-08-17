@@ -45,9 +45,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const closeModal = useCallback(
     () => {
+      form.resetFields();
       inactiveModal(UNLOCK_MODAL_ID);
     },
-    [inactiveModal]
+    [form, inactiveModal]
   );
 
   // Auto close modal if unlocked

@@ -266,16 +266,12 @@
   "Connect Polkadot Vault": "",
   "Creating": "",
   "Scan QR code": "",
-  "will provide you with a QR code to scan. Read": "",
-  "this instruction": "",
-  "for more details.": "",
   "Validating": "",
   "To import an existing wallet, please enter private key": "",
   "Enter private key": "",
   "Import by private key": "",
   "Scan QR": "",
   "Please make sure that you have granted SubWallet the access to your device's camera.": "",
-  "Click the \"Scan QR\" button, or read": "",
   "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "",
   "To import an existing account, please enter seed phrase": "",
   "Seed phrase": "",
@@ -820,5 +816,7 @@
   "Terms of Service": "",
   "Privacy Policy": "",
   "support site": "",
-  "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": ""
+  "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": "",
+  "{{deviceName}} will provide you with a QR code to scan. Read <highlight>this instruction</highlight>, for more details.": "",
+  "Click the \"Scan QR\" button, or read <highlight>this instruction</highlight>, for more details.": ""
 }

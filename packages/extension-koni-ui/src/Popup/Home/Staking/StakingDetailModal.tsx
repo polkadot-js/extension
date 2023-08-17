@@ -12,10 +12,11 @@ import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
 import { useGetAccountByAddress, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
+import useGetAccountsByStaking from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetAccountsByStaking';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/utils';
+import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -58,6 +59,8 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
   const account = useGetAccountByAddress(staking.address);
+
+  const stakingAccounts = useGetAccountsByStaking(chain, type);
 
   const stakingTypeNameMap: Record<string, string> = {
     nominated: t('Nominated'),
@@ -212,6 +215,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     >
       <MetaInfo>
         <MetaInfo.Account
+          accounts={isAccountAll(address) ? stakingAccounts : undefined}
           address={address}
           label={t('Account')}
           name={account?.name}
@@ -256,19 +260,19 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           value={String(parseFloat(activeStake) + parseFloat(staking.unlockingBalance || '0'))}
         />
 
-        {<MetaInfo.Number
+        <MetaInfo.Number
           decimals={decimals}
           label={t('Active staked')}
           suffix={staking.nativeToken}
           value={activeStake}
-        />}
+        />
 
-        {<MetaInfo.Number
+        <MetaInfo.Number
           decimals={decimals}
           label={t('Unstaked')}
           suffix={staking.nativeToken}
           value={staking.unlockingBalance || '0'}
-        />}
+        />
 
         <MetaInfo.Chain
           chain={staking.chain}

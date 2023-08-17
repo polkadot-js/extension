@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
+import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { accountFilterFunc, fetchChainValidators } from '../helper';
@@ -91,6 +92,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [isDisable, setIsDisable] = useState(true);
 
   const stakingType = Form.useWatch(FormFieldName.TYPE, form);
+  const nominate = Form.useWatch(FormFieldName.NOMINATE, form);
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
   const nominatorMetadataList = useGetNominatorInfo(chain, stakingType, from);
@@ -108,6 +110,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [isBalanceReady, setIsBalanceReady] = useState(true);
   const [valueChange, setValueChange] = useState(false);
   const [, update] = useState({});
+  const [forceFetchValidator, setForceFetchValidator] = useState(false);
 
   const existentialDeposit = useMemo(() => {
     if (assetInfo) {
@@ -146,10 +149,54 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [defaultSlug, from, defaultStakingType, chain]);
 
-  const minStake = useMemo(() =>
-    stakingType === StakingType.POOLED ? chainStakingMetadata?.minJoinNominationPool || '0' : chainStakingMetadata?.minStake || '0'
-  , [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, stakingType]
-  );
+  const getSelectedValidators = useCallback((nominations: string[]) => {
+    const validatorList = validatorInfoMap[chain];
+
+    if (!validatorList) {
+      return [];
+    }
+
+    const result: ValidatorInfo[] = [];
+
+    validatorList.forEach((validator) => {
+      if (nominations.some((nomination) => isSameAddress(nomination, validator.address))) { // remember the format of the address
+        result.push(validator);
+      }
+    });
+
+    return result;
+  }, [chain, validatorInfoMap]);
+
+  const getValidatorMinStake = useCallback((validatorInfos: ValidatorInfo[]) => {
+    let minStake = BN_ZERO;
+
+    validatorInfos.forEach((validatorInfo) => {
+      const bnMinBond = new BN(validatorInfo?.minBond);
+
+      if (bnMinBond.gt(minStake)) {
+        minStake = bnMinBond;
+      }
+    });
+
+    return minStake.toString();
+  }, []);
+
+  const minStake = useMemo(() => {
+    if (stakingType === StakingType.NOMINATED) {
+      const validatorInfos = getSelectedValidators(parseNominations(nominate));
+      const validatorMinStake = getValidatorMinStake(validatorInfos);
+
+      const nominatedMinStake = BN.max(new BN(validatorMinStake), new BN(chainStakingMetadata?.minStake || '0'));
+
+      return nominatedMinStake.toString();
+    }
+
+    return chainStakingMetadata?.minJoinNominationPool || '0';
+  }, [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, getSelectedValidators, getValidatorMinStake, nominate, stakingType]);
+
+  const chainMinStake = useMemo(() => {
+    return stakingType === StakingType.NOMINATED ? (chainStakingMetadata?.minStake || '0') : (chainStakingMetadata?.minJoinNominationPool || '0');
+  }, [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, stakingType]);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
@@ -169,11 +216,12 @@ const Component: React.FC<Props> = (props: Props) => {
       setFrom(from);
     }
 
-    if (asset !== undefined) {
+    if (asset) {
       const chain = _getOriginChainOfAsset(asset);
 
       setAsset(asset);
       setChain(chain);
+      form.resetFields(['nominate', 'pool']);
     }
 
     const checkEmpty: Record<string, boolean> = {};
@@ -191,25 +239,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     setIsDisable(error || Object.values(checkEmpty).some((value) => !value));
-  }, [setAsset, setChain, setFrom]);
-
-  const getSelectedValidators = useCallback((nominations: string[]) => {
-    const validatorList = validatorInfoMap[chain];
-
-    if (!validatorList) {
-      return [];
-    }
-
-    const result: ValidatorInfo[] = [];
-
-    validatorList.forEach((validator) => {
-      if (nominations.some((nomination) => isSameAddress(nomination, validator.address))) { // remember the format of the address
-        result.push(validator);
-      }
-    });
-
-    return result;
-  }, [chain, validatorInfoMap]);
+  }, [form, setAsset, setChain, setFrom]);
 
   const getSelectedPool = useCallback((poolId?: string) => {
     const nominationPoolList = nominationPoolInfoMap[chain];
@@ -339,14 +369,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
     // fetch validators when change chain
     // _stakingType is predefined form start
-    if (!!chain && !!from && chainState?.active) {
-      fetchChainValidators(chain, _stakingType || ALL_KEY, unmount, setPoolLoading, setValidatorLoading);
+    if ((!!chain && !!from && chainState?.active) || forceFetchValidator) {
+      fetchChainValidators(chain, _stakingType || ALL_KEY, unmount, setPoolLoading, setValidatorLoading, setForceFetchValidator);
     }
 
     return () => {
       unmount = true;
     };
-  }, [from, _stakingType, chain, chainState?.active]);
+  }, [from, _stakingType, chain, chainState?.active, forceFetchValidator]);
 
   useEffect(() => {
     let cancel = false;
@@ -489,6 +519,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 from={from}
                 label={t('Select pool')}
                 loading={poolLoading}
+                setForceFetchValidator={setForceFetchValidator}
               />
             </Form.Item>
 
@@ -500,6 +531,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 chain={asset ? chain : ''}
                 from={asset ? from : ''}
                 loading={validatorLoading}
+                setForceFetchValidator={setForceFetchValidator}
               />
             </Form.Item>
           </Form>
@@ -541,7 +573,7 @@ const Component: React.FC<Props> = (props: Props) => {
             estimatedEarning={chainStakingMetadata.expectedReturn}
             inflation={chainStakingMetadata.inflation}
             maxValidatorPerNominator={chainStakingMetadata.maxValidatorPerNominator}
-            minimumActive={{ decimals, value: minStake, symbol }}
+            minimumActive={{ decimals, value: chainMinStake, symbol }}
             stakingType={stakingType}
             unstakingPeriod={chainStakingMetadata.unstakingPeriod}
           />

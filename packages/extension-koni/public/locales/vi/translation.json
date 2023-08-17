@@ -804,5 +804,21 @@
   "If you unstake this amount your staking would fall below minimum stake required. Unstake all instead?": "",
   "Click <extension/> select SubWallet and then <pin/>": "",
   "Hide balance": "Ẩn số dư",
-  "Show balance": "Hiện số dư"
+  "Show balance": "Hiện số dư",
+  "SubWallet has not supported this request for WalletConnect yet": "SubWallet chưa hỗ trợ yêu cầu này cho WalletConnect",
+  "Request not supported": "Yêu cầu không được hỗ trợ",
+  "Unable to fetch {{value}} information": "Không thể lấy thông tin của {{value}}",
+  "{{number}} accounts": "{{number}} tài khoản",
+  "Please": "Xin vui lòng",
+  "dapp": "",
+  "validator": "",
+  "collator": "",
+  " reload": " tải lại",
+  "Create buy order fail": "",
+  "Agree": "",
+  "Disclaimer": "",
+  "Terms of Service": "",
+  "Privacy Policy": "",
+  "support site": "",
+  "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": ""
 }

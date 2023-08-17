@@ -4,7 +4,7 @@
 import { _AssetType } from '@subwallet/chain-list/types';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { AbstractChainHandler, SHORT_RETRY_TIME } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
+import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -49,13 +49,13 @@ export class SubstrateChainHandler extends AbstractChainHandler {
 
       // Not found substrateInterface mean it active with evm interface
       if (api) {
-        api?.connect();
+        api.connect();
 
         if (!api.useLightClient) {
           // Manual fire handle connect to avoid some chain can not reconnect
           setTimeout(() => {
-            this.handleConnect(chain, api.isApiConnected);
-          }, SHORT_RETRY_TIME);
+            this.handleConnection(chain, api.connectionStatus);
+          }, 10000);
         }
       }
     }
@@ -218,8 +218,8 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     const metadata = await this.parent?.getMetadata(chainSlug);
     const apiObject = new SubstrateApi(chainSlug, apiUrl, { providerName, metadata, externalApiPromise });
 
-    apiObject.isApiConnectedSubject.subscribe(this.handleConnect.bind(this, chainSlug));
-    onUpdateStatus && apiObject.isApiConnectedSubject.subscribe(onUpdateStatus);
+    apiObject.connectionStatusSubject.subscribe(this.handleConnection.bind(this, chainSlug));
+    onUpdateStatus && apiObject.connectionStatusSubject.subscribe(onUpdateStatus);
 
     // Update metadata to database with async methods
     apiObject.isReady.then((api) => {

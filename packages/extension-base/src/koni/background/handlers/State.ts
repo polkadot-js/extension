@@ -1068,6 +1068,10 @@ export default class KoniState {
     return this.chainService.removeCustomChain(networkKey);
   }
 
+  public forceRemoveChain (networkKey: string) {
+    this.chainService.forceRemoveChain(networkKey);
+  }
+
   // TODO: avoids turning off chains related to ledger account
   private getDefaultNetworkKeys = (): string[] => {
     const genesisHashes: Record<string, string> = {};

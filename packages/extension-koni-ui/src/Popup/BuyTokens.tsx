@@ -1,28 +1,26 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountJson } from '@subwallet/extension-base/background/types';
-import { isAccountAll } from '@subwallet/extension-base/utils';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountJson, Resolver } from '@subwallet/extension-base/background/types';
+import { detectTranslate, isAccountAll } from '@subwallet/extension-base/utils';
+import { baseServiceItems, Layout, PageWrapper, ServiceItem } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { ServiceSelector } from '@subwallet/extension-koni-ui/components/Field/BuyTokens/ServiceSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { PREDEFINED_TRANSAK_TOKEN, PREDEFINED_TRANSAK_TOKEN_BY_SLUG } from '@subwallet/extension-koni-ui/constants/transak';
-import useAssetChecker from '@subwallet/extension-koni-ui/hooks/chain/useAssetChecker';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { BUY_SERVICE_CONTACTS, PREDEFINED_BUY_TOKEN, PREDEFINED_BUY_TOKEN_BY_SLUG } from '@subwallet/extension-koni-ui/constants';
+import { useAssetChecker, useDefaultNavigate, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { AccountType, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AccountType, CreateBuyOrderFunction, SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BuyTokensParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { findAccountByAddress, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { createBanxaOrder, createTransakOrder, findAccountByAddress, isFirefox, noop, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { getAccountType } from '@subwallet/extension-koni-ui/utils/account/account';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
-import { Button, Form, Icon, SwSubHeader } from '@subwallet/react-ui';
+import { Button, Form, Icon, ModalContext, SwModal, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ShoppingCartSimple } from 'phosphor-react';
-import qs from 'querystring';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { CheckCircle, ShoppingCartSimple, XCircle } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -32,22 +30,27 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 type Props = ThemeProps;
 
 type BuyTokensFormProps = {
-  address: string,
-  tokenKey: string,
-  service: 'transak' | 'moonPay' | 'onramper'
+  address: string;
+  tokenKey: string;
+  service: SupportService;
+}
+
+interface LinkUrlProps {
+  url: string;
+  content: string;
 }
 
 function getTokenItems (accountType: AccountType, ledgerNetwork?: string): TokenItemType[] {
   const result: TokenItemType[] = [];
 
-  Object.values(PREDEFINED_TRANSAK_TOKEN).forEach((info) => {
+  Object.values(PREDEFINED_BUY_TOKEN).forEach((info) => {
     if (ledgerNetwork) {
-      if (info.chain === ledgerNetwork) {
+      if (info.network === ledgerNetwork) {
         result.push({
           name: info.symbol,
           slug: info.slug,
           symbol: info.symbol,
-          originChain: info.chain
+          originChain: info.network
         });
       }
     } else {
@@ -56,7 +59,7 @@ function getTokenItems (accountType: AccountType, ledgerNetwork?: string): Token
           name: info.symbol,
           slug: info.slug,
           symbol: info.symbol,
-          originChain: info.chain
+          originChain: info.network
         });
       }
     }
@@ -68,22 +71,62 @@ function getTokenItems (accountType: AccountType, ledgerNetwork?: string): Token
 const tokenKeyMapIsEthereum: Record<string, boolean> = (() => {
   const result: Record<string, boolean> = {};
 
-  Object.values(PREDEFINED_TRANSAK_TOKEN).forEach((info) => {
+  Object.values(PREDEFINED_BUY_TOKEN).forEach((info) => {
     result[info.slug] = info.support === 'ETHEREUM';
   });
 
   return result;
 })();
 
-const TransakUrl = 'https://global.transak.com';
+const getServiceItems = (tokenSlug: string): ServiceItem[] => {
+  const buyInfo = PREDEFINED_BUY_TOKEN_BY_SLUG[tokenSlug];
+  const result: ServiceItem[] = [];
+
+  for (const serviceItem of baseServiceItems) {
+    const temp: ServiceItem = {
+      ...serviceItem,
+      disabled: buyInfo ? !buyInfo.services.includes(serviceItem.key) : true
+    };
+
+    if (serviceItem.key === 'banxa' && isFirefox()) {
+      temp.disabled = true;
+    }
+
+    result.push(temp);
+  }
+
+  return result;
+};
+
+const LinkUrl: React.FC<LinkUrlProps> = (props: LinkUrlProps) => {
+  if (props.url) {
+    return (
+      <a
+        href={props.url}
+        target='__blank'
+      >
+        {props.content}
+      </a>
+    );
+  } else {
+    return <span>{props.content}</span>;
+  }
+};
+
+const modalId = 'disclaimer-modal';
 
 function Component ({ className }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
   const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
-  const fixedTokenKey = currentSymbol ? PREDEFINED_TRANSAK_TOKEN[currentSymbol]?.slug : undefined;
+  const fixedTokenKey = currentSymbol ? PREDEFINED_BUY_TOKEN[currentSymbol]?.slug : undefined;
+
+  const notify = useNotification();
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const { walletReference } = useSelector((state: RootState) => state.settings);
   const checkAsset = useAssetChecker();
 
   const [currentAddress] = useState<string | undefined>(currentAccount?.address);
@@ -93,12 +136,47 @@ function Component ({ className }: Props) {
   const formDefault: BuyTokensFormProps = {
     address: isAllAccount ? '' : (currentAccount?.address || ''),
     tokenKey: fixedTokenKey || '',
-    service: 'transak'
+    service: '' as SupportService
   };
+
+  const promiseRef = useRef<Resolver<void>>({ resolve: noop, reject: noop });
+
+  const [loading, setLoading] = useState(false);
+  const [disclaimerAgree, setDisclaimerAgree] = useState<Record<SupportService, boolean>>({
+    transak: false,
+    banxa: false,
+    onramper: false,
+    moonpay: false
+  });
 
   const selectedAddress = Form.useWatch('address', form);
   const selectedTokenKey = Form.useWatch('tokenKey', form);
   const selectedService = Form.useWatch('service', form);
+
+  const onConfirm = useCallback((): Promise<void> => {
+    activeModal(modalId);
+
+    return new Promise((resolve, reject) => {
+      promiseRef.current = {
+        resolve: () => {
+          inactiveModal(modalId);
+          resolve();
+        },
+        reject: (e) => {
+          inactiveModal(modalId);
+          reject(e);
+        }
+      };
+    });
+  }, [activeModal, inactiveModal]);
+
+  const onApprove = useCallback(() => {
+    promiseRef.current.resolve();
+  }, []);
+
+  const onReject = useCallback(() => {
+    promiseRef.current.reject(new Error('User reject'));
+  }, []);
 
   const accountType = selectedAddress ? getAccountType(selectedAddress) : '';
   const ledgerNetwork = useMemo((): string | undefined => {
@@ -110,10 +188,6 @@ function Component ({ className }: Props) {
 
     return undefined;
   }, [accounts, chainInfoMap, selectedAddress]);
-
-  useEffect(() => {
-    selectedTokenKey && checkAsset(selectedTokenKey);
-  }, [checkAsset, selectedTokenKey]);
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
     if (fixedTokenKey) {
@@ -127,47 +201,98 @@ function Component ({ className }: Props) {
     return getTokenItems(accountType, ledgerNetwork);
   }, [accountType, fixedTokenKey, ledgerNetwork]);
 
-  const onClickNext = useCallback(() => {
-    const { address, service, tokenKey } = form.getFieldsValue();
-
-    if (service === 'transak') {
-      const transakInfo = PREDEFINED_TRANSAK_TOKEN_BY_SLUG[selectedTokenKey];
-
-      if (!transakInfo) {
-        return;
-      }
-
-      const { chain, symbol, transakNetwork } = transakInfo;
-      const networkPrefix = chainInfoMap[chain].substrateInfo?.addressPrefix;
-
-      const walletAddress = tokenKeyMapIsEthereum[tokenKey]
-        ? address
-        : reformatAddress(address, networkPrefix === undefined ? -1 : networkPrefix);
-
-      const params = {
-        apiKey: '4b3bfb00-7f7c-44b3-844f-d4504f1065be',
-        defaultCryptoCurrency: symbol,
-        networks: transakNetwork,
-        cryptoCurrencyList: symbol,
-        walletAddress
-      };
-
-      const query = qs.stringify(params);
-
-      openInNewTab(`${TransakUrl}?${query}`)();
-    }
-  }, [form, selectedTokenKey, chainInfoMap]);
+  const serviceItems = useMemo(() => getServiceItems(selectedTokenKey), [selectedTokenKey]);
 
   const isSupportBuyTokens = useMemo(() => {
-    if ((selectedService === 'transak') && selectedAddress && selectedTokenKey) {
-      const transakInfo = PREDEFINED_TRANSAK_TOKEN_BY_SLUG[selectedTokenKey];
+    if (selectedService && selectedAddress && selectedTokenKey) {
+      const buyInfo = PREDEFINED_BUY_TOKEN_BY_SLUG[selectedTokenKey];
       const accountType = getAccountType(selectedAddress);
 
-      return transakInfo && transakInfo.support === accountType && tokenItems.find((item) => item.slug === selectedTokenKey);
+      return buyInfo && buyInfo.support === accountType && buyInfo.services.includes(selectedService) && tokenItems.find((item) => item.slug === selectedTokenKey);
     }
 
     return false;
   }, [selectedService, selectedAddress, selectedTokenKey, tokenItems]);
+
+  const onClickNext = useCallback(() => {
+    setLoading(true);
+
+    const { address, service, tokenKey } = form.getFieldsValue();
+
+    let urlPromise: CreateBuyOrderFunction | undefined;
+
+    const buyInfo = PREDEFINED_BUY_TOKEN_BY_SLUG[tokenKey];
+    const { network } = buyInfo;
+
+    const serviceInfo = buyInfo.serviceInfo[service];
+    const networkPrefix = chainInfoMap[network].substrateInfo?.addressPrefix;
+
+    const walletAddress = reformatAddress(address, networkPrefix === undefined ? -1 : networkPrefix);
+
+    switch (service) {
+      case 'transak':
+        urlPromise = createTransakOrder;
+        break;
+      case 'banxa':
+        urlPromise = createBanxaOrder;
+        break;
+    }
+
+    if (urlPromise && serviceInfo && buyInfo.services.includes(service)) {
+      const { network: serviceNetwork, symbol } = serviceInfo;
+
+      const disclaimerPromise = new Promise<void>((resolve, reject) => {
+        if (!disclaimerAgree[service]) {
+          onConfirm().then(() => {
+            setDisclaimerAgree((oldState) => ({ ...oldState, [service]: true }));
+            resolve();
+          }).catch((e) => {
+            reject(e);
+          });
+        } else {
+          resolve();
+        }
+      });
+
+      disclaimerPromise.then(() => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return urlPromise!(symbol, walletAddress, serviceNetwork, walletReference);
+      })
+        .then((url) => {
+          openInNewTab(url)();
+        })
+        .catch((e: Error) => {
+          if (e.message !== 'User reject') {
+            console.error(e);
+
+            notify({
+              message: t('Create buy order fail')
+            });
+          }
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, [form, chainInfoMap, disclaimerAgree, onConfirm, walletReference, notify, t]);
+
+  const accountsFilter = useCallback((account: AccountJson) => {
+    if (isAccountAll(account.address)) {
+      return false;
+    }
+
+    if (fixedTokenKey) {
+      if (tokenKeyMapIsEthereum[fixedTokenKey]) {
+        return isEthereumAddress(account.address);
+      } else {
+        return !isEthereumAddress(account.address);
+      }
+    }
+
+    return true;
+  }, [fixedTokenKey]);
 
   useEffect(() => {
     if (currentAddress !== currentAccount?.address) {
@@ -191,21 +316,25 @@ function Component ({ className }: Props) {
     }
   }, [tokenItems, fixedTokenKey, form]);
 
-  const accountsFilter = useCallback((account: AccountJson) => {
-    if (isAccountAll(account.address)) {
-      return false;
-    }
+  useEffect(() => {
+    selectedTokenKey && checkAsset(selectedTokenKey);
+  }, [checkAsset, selectedTokenKey]);
 
-    if (fixedTokenKey) {
-      if (tokenKeyMapIsEthereum[fixedTokenKey]) {
-        return isEthereumAddress(account.address);
+  useEffect(() => {
+    if (selectedTokenKey) {
+      const services = getServiceItems(selectedTokenKey);
+      const filtered = services.filter((service) => !service.disabled);
+
+      if (filtered.length > 1) {
+        form.setFieldValue('service', '');
       } else {
-        return !isEthereumAddress(account.address);
+        form.setFieldValue('service', filtered[0]?.key || '');
       }
     }
+  }, [selectedTokenKey, form]);
 
-    return true;
-  }, [fixedTokenKey]);
+  const service = BUY_SERVICE_CONTACTS[selectedService];
+  const { contactUrl, name: serviceName, policyUrl, termUrl, url } = service || { name: '', url: '', contactUrl: '', policyUrl: '', termUrl: '' };
 
   return (
     <Layout.Home
@@ -260,6 +389,8 @@ function Component ({ className }: Props) {
 
               <Form.Item name={'service'}>
                 <ServiceSelector
+                  disabled={!selectedTokenKey}
+                  items={serviceItems}
                   placeholder={t('Select supplier')}
                   title={t('Select supplier')}
                 />
@@ -281,11 +412,80 @@ function Component ({ className }: Props) {
                 weight={'fill'}
               />
             )}
+            loading={loading}
             onClick={onClickNext}
           >
             {t('Buy now')}
           </Button>
         </div>
+        <SwModal
+          className={CN(className)}
+          footer={(
+            <>
+              <Button
+                block={true}
+                icon={(
+                  <Icon
+                    phosphorIcon={XCircle}
+                    weight='fill'
+                  />
+                )}
+                onClick={onReject}
+                schema={'secondary'}
+              >
+                {t('Cancel')}
+              </Button>
+              <Button
+                block={true}
+                icon={(
+                  <Icon
+                    phosphorIcon={CheckCircle}
+                    weight='fill'
+                  />
+                )}
+                onClick={onApprove}
+              >
+                {t('Agree')}
+              </Button>
+            </>
+          )}
+          id={modalId}
+          onCancel={onReject}
+          title={t('Disclaimer')}
+        >
+          <Trans
+            components={{
+              mainUrl: (
+                <LinkUrl
+                  content={serviceName}
+                  url={url}
+                />
+              ),
+              termUrl: (
+                <LinkUrl
+                  content={t('Terms of Service')}
+                  url={termUrl}
+                />
+              ),
+              policyUrl: (
+                <LinkUrl
+                  content={t('Privacy Policy')}
+                  url={policyUrl}
+                />
+              ),
+              contactUrl: (
+                <LinkUrl
+                  content={t('support site')}
+                  url={contactUrl}
+                />
+              )
+            }}
+            i18nKey={detectTranslate('You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}\'s <termUrl/> and <policyUrl/>. For any question related to {{service}}\'s services, please visit {{service}}\'s <contactUrl/>.')}
+            values={{
+              service: serviceName
+            }}
+          />
+        </SwModal>
       </PageWrapper>
     </Layout.Home>
   );
@@ -295,6 +495,14 @@ const BuyTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     flexDirection: 'column',
+
+    '.ant-sw-modal-footer': {
+      display: 'flex'
+    },
+
+    '.ant-sw-modal-body': {
+      color: token.colorTextSecondary
+    },
 
     '.__scroll-container': {
       flex: 1,

@@ -3,6 +3,7 @@
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -23,12 +24,13 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import EmptyAccount from '../Account/EmptyAccount';
+import EmptyValidator from '../Account/EmptyValidator';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
   from: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
+  setForceFetchValidator: (val: boolean) => void;
 }
 
 enum SortKey {
@@ -51,11 +53,9 @@ interface FilterOption {
 const SORTING_MODAL_ID = 'pool-sorting-modal';
 const FILTER_MODAL_ID = 'pool-filter-modal';
 
-const renderEmpty = () => <EmptyAccount />;
-
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, from, id = 'pool-selector', label, loading, onChange, onClickBookBtn, placeholder, statusHelp, value } = props;
+  const { chain, className = '', disabled, from, id = 'pool-selector', label, loading, onChange, onClickBookBtn, placeholder, setForceFetchValidator, statusHelp, value } = props;
 
   useExcludeModal(id);
 
@@ -177,6 +177,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       />
     );
   }, [onClickMore]);
+
+  const renderEmpty = useCallback(() => {
+    return (
+      <EmptyValidator
+        isDataEmpty={items.length === 0}
+        onClickReload={setForceFetchValidator}
+        validatorTitle={t(getValidatorLabel(chain).toLowerCase())}
+      />
+    );
+  }, [chain, items.length, setForceFetchValidator, t]);
 
   const renderSelected = useCallback((item: NominationPoolDataType) => {
     return (

@@ -2,17 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AbstractAddressJson } from '@subwallet/extension-base/background/types';
+import { CHAINS_SUPPORTED_DOMAIN, isAzeroDomain } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { AddressBookModal } from '@subwallet/extension-koni-ui/components';
 import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { saveRecentAccount } from '@subwallet/extension-koni-ui/messaging';
+import { resolveAddressToDomain, resolveDomainToAddress, saveRecentAccount } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
 import { findContactByAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
-import React, { ChangeEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
@@ -27,6 +28,8 @@ interface Props extends BasicInputWrapper, ThemeProps {
   addressPrefix?: number;
   saveAddress?: boolean;
   networkGenesisHash?: string;
+  chain?: string;
+  allowDomain?: boolean;
 }
 
 const defaultScannerModalId = 'input-account-address-scanner-modal';
@@ -34,10 +37,12 @@ const defaultAddressBookModalId = 'input-account-address-book-modal';
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { addressPrefix,
-    className = '', disabled, id, label, networkGenesisHash, onBlur, onChange, onFocus,
-    placeholder, readOnly, saveAddress, showAddressBook, showScanner, status, statusHelp, value } = props;
+    allowDomain, chain, className = '', disabled, id, label, networkGenesisHash, onBlur,
+    onChange, onFocus, placeholder, readOnly, saveAddress, showAddressBook, showScanner, status,
+    statusHelp, value } = props;
   const { t } = useTranslation();
 
+  const [domainName, setDomainName] = useState<string | undefined>(undefined);
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { accounts, contacts } = useSelector((root) => root.accountState);
@@ -53,8 +58,16 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const accountName = useMemo(() => {
     const account = findContactByAddress(_contacts, value);
 
-    return account?.name;
-  }, [_contacts, value]);
+    if (account?.name) {
+      return account?.name;
+    } else {
+      if (allowDomain && domainName) {
+        return domainName;
+      }
+    }
+
+    return undefined;
+  }, [_contacts, allowDomain, domainName, value]);
 
   const formattedAddress = useMemo((): string => {
     const _value = value || '';
@@ -70,10 +83,11 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     }
   }, [addressPrefix, value]);
 
-  const parseAndChangeValue = useCallback((value: string) => {
+  const parseAndChangeValue = useCallback((value: string, skipClearDomainName?: boolean) => {
     const val = value.trim();
 
     onChange && onChange({ target: { value: val } });
+    !skipClearDomainName && setDomainName(undefined);
 
     if (isAddress(val) && saveAddress) {
       saveRecentAccount(val).catch(console.error);
@@ -119,6 +133,39 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     parseAndChangeValue(value);
     inputRef?.current?.blur();
   }, [inputRef, parseAndChangeValue]);
+
+  useEffect(() => {
+    if (allowDomain && chain && value && CHAINS_SUPPORTED_DOMAIN.includes(chain)) {
+      if (isAzeroDomain(value)) {
+        resolveDomainToAddress({
+          chain,
+          domain: value
+        })
+          .then((result) => {
+            if (result) {
+              setDomainName(value);
+              parseAndChangeValue(result, true);
+              inputRef?.current?.focus();
+              inputRef?.current?.blur();
+            }
+          })
+          .catch(console.error);
+      } else if (isAddress(value)) {
+        resolveAddressToDomain({
+          chain,
+          address: value
+        })
+          .then((result) => {
+            if (result) {
+              setDomainName(result);
+            }
+          })
+          .catch(console.error);
+      }
+    } else {
+      setDomainName(undefined);
+    }
+  }, [allowDomain, chain, inputRef, parseAndChangeValue, value]);
 
   // todo: Will work with "Manage address book" feature later
   return (

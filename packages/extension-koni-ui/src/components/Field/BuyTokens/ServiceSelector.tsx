@@ -4,24 +4,31 @@
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, InputRef, Logo, SelectModal, SelectModalItem, Web3Block } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback } from 'react';
 import styled from 'styled-components';
 
-interface Props extends ThemeProps, BasicInputWrapper {}
-
-interface ServiceItem extends SelectModalItem {
-  key: string,
+export interface ServiceItem extends SelectModalItem {
+  key: SupportService,
   name: string
 }
 
-const serviceItems: ServiceItem[] = [
+interface Props extends ThemeProps, BasicInputWrapper {
+  items: ServiceItem[];
+}
+
+export const baseServiceItems: ServiceItem[] = [
   {
     key: 'transak',
     name: 'Transak',
+    disabled: false
+  },
+  {
+    key: 'banxa',
+    name: 'Banxa',
     disabled: false
   },
   {
@@ -37,7 +44,7 @@ const serviceItems: ServiceItem[] = [
 ];
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
-  const { className = '', disabled, id = 'service-selector', label, placeholder, statusHelp, value } = props;
+  const { className = '', disabled, id = 'service-selector', items, label, placeholder, statusHelp, value } = props;
   const { t } = useTranslation();
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
@@ -65,6 +72,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
           <Logo
             className={'__option-logo'}
             network={item.key}
+            shape='squircle'
             size={24}
           />
         )}
@@ -90,7 +98,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
         id={id}
         inputClassName={`${className} service-selector-input`}
         itemKey={'key'}
-        items={serviceItems}
+        items={items}
         label={label}
         onSelect={onSelect}
         placeholder={placeholder || t('Select service')}

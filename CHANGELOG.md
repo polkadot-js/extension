@@ -1,5 +1,65 @@
 # CHANGELOG
 
+## 1.1.8
+Build date: Aug 12, 2023.
+
+Features & Update:
+- Integrate Azero domain (#1750)
+- Show collection ID and NFT Id in the NFT detail screen (#1784)
+- Update chain list (#1777)
+  - Remove Snow and Arctic network
+  - Integrate Deeper network
+
+Bugs fixed:
+- Fixed bug showing staking APY (#1726)
+- Fixed bug showing token price for staking item (Calamari network) (#1766)
+- Fixed bug showing Minimum active value on the network detail screen (#1752)
+- Fixed bug Validator avatars are auto-generated continuously (#1757)
+- Fixed bug do not delete connection when reset wallet (#1762)
+
+## 1.1.7
+Build date: Aug 06, 2023.
+
+Bugs fixed:
+- Fix error issue can not get address
+- Fix error can not export account
+- Fix error can not buy with Banxa
+
+## 1.1.6
+Build date: Aug 04, 2023.
+
+Features & Update:
+- Integrate Banxa for fiat on-ramp (#1084)
+- Optimize WalletConnect - Not implement if no connection (#1626)
+- Update showing min stake value (#1537)
+- Improve connection status (#1554)
+- Improve EVM Inject Object (#1710)
+- Update chain list (#1715)
+  - Integrate Krest network
+  - Add PANX token for Aleph Zero network
+  - Support staking for Avail
+  - Support staking for Edgeware
+
+Bugs fixed:
+- Fixed bug Still show history of the removed account (#1731)
+- Fixed bug Showing staking account on the Staking detail screen (#1643)
+- Fixed bug Do not show validator on the Select validator screen in case turn on network when stake (#1496)
+- Fixed bug Still show NFT and staking data when turn off all networks (#1728)
+- Fixed bug Do not reset selected validator when change token to stake (#1721)
+- Fixed bug Do not display the history of addresses other than the original address (#1748)
+
+## 1.1.5
+Build date: Jul 29, 2023.
+
+Features & Update:
+- Update logo for Avail network (#1708)
+- Allow substrate Dapp subscribe allow access accounts List (#1712)
+
+Bugs fixed:
+- Fixed bug signature method handling is not supported for Wallet Connect (#1674)
+- Fixed bug does not synchronize the configuration of the network and the token (#1633)
+- Fixed bug still send local token in case the native token balance = 0 (#1667)
+
 ## 1.1.4
 Build date: Jul 24, 2023.
 

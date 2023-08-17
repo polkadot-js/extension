@@ -363,12 +363,38 @@ export class ChainService {
   }
 
   // Setter
-  public removeCustomChain (slug: string) {
+  public forceRemoveChain (slug: string) {
     if (this.lockChainInfoMap) {
       return false;
     }
 
+    const chainInfoMap = this.getChainInfoMap();
+    const chainStateMap = this.getChainStateMap();
+
+    if (!(slug in chainInfoMap)) {
+      return false;
+    }
+
     this.lockChainInfoMap = true;
+
+    delete chainStateMap[slug];
+    delete chainInfoMap[slug];
+    this.deleteAssetsByChain(slug);
+    this.dbService.removeFromChainStore([slug]).catch(console.error);
+
+    this.updateChainSubscription();
+
+    this.lockChainInfoMap = false;
+
+    this.eventService.emit('chain.updateState', slug);
+
+    return true;
+  }
+
+  public removeCustomChain (slug: string) {
+    if (this.lockChainInfoMap) {
+      return false;
+    }
 
     const chainInfoMap = this.getChainInfoMap();
     const chainStateMap = this.getChainStateMap();
@@ -384,6 +410,8 @@ export class ChainService {
     if (chainStateMap[slug].active) {
       return false;
     }
+
+    this.lockChainInfoMap = true;
 
     delete chainStateMap[slug];
     delete chainInfoMap[slug];
@@ -503,7 +531,7 @@ export class ChainService {
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
-    this.chainStateMapSubject.next(this.getChainStateMap());
+    this.updateChainStateMapSubscription();
     this.assetRegistrySubject.next(this.getAssetRegistry());
     this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
 
@@ -531,14 +559,13 @@ export class ChainService {
   private async initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
-    const onUpdateStatus = (isConnected: boolean) => {
+    const onUpdateStatus = (status: _ChainConnectionStatus) => {
       const currentStatus = this.getChainStateByKey(chainInfo.slug).connectionStatus;
-      const newStatus = isConnected ? _ChainConnectionStatus.CONNECTED : _ChainConnectionStatus.DISCONNECTED;
 
       // Avoid unnecessary update in case disable chain
-      if (currentStatus !== newStatus) {
-        this.setChainConnectionStatus(chainInfo.slug, newStatus);
-        this.chainStateMapSubject.next(this.getChainStateMap());
+      if (currentStatus !== status) {
+        this.setChainConnectionStatus(chainInfo.slug, status);
+        this.updateChainStateMapSubscription();
       }
     };
 
@@ -636,6 +663,13 @@ export class ChainService {
     needUpdate && this.updateChainStateMapSubscription();
 
     return needUpdate;
+  }
+
+  public async reconnectChain (chain: string) {
+    await this.getSubstrateApi(chain)?.recoverConnect();
+    await this.getEvmApi(chain)?.recoverConnect();
+
+    return true;
   }
 
   public disableChain (chainSlug: string): boolean {

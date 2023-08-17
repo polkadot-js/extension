@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import PolkadotRequestHandler from './handler/PolkadotRequestHandler';
 import { ALL_WALLET_CONNECT_EVENT, DEFAULT_WALLET_CONNECT_OPTIONS, WALLET_CONNECT_SUPPORTED_METHODS } from './constants';
-import { convertConnectRequest, isSupportWalletConnectChain } from './helpers';
+import { convertConnectRequest, convertNotSupportRequest, isSupportWalletConnectChain } from './helpers';
 import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, ResultApproveWalletConnectSession, WalletConnectSigningMethod } from './types';
 
 export default class WalletConnectService {
@@ -129,6 +129,13 @@ export default class WalletConnectService {
     } catch (e) {
       console.log(e);
 
+      try {
+        const requestSession = this.getSession(topic);
+        const notSupportRequest = convertNotSupportRequest(requestEvent, requestSession.peer.metadata.url);
+
+        this.#requestService.addNotSupportWCRequest(notSupportRequest);
+      } catch (e) {}
+
       this.responseRequest({
         topic: topic,
         response: formatJsonRpcError(id, (e as Error).message)
@@ -239,6 +246,7 @@ export default class WalletConnectService {
     }
 
     await this.#initClient();
+    this.#updateSessions();
   }
 
   public async disconnect (topic: string) {

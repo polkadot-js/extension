@@ -50,6 +50,7 @@ export interface _ChainBaseApi {
   isApiConnectedSubject: BehaviorSubject<boolean>;
   isApiReadyOnce: boolean;
   isApiConnected: boolean; // might be redundant
+  connectionStatus: _ChainConnectionStatus; // might be redundant
   updateApiUrl: (apiUrl: string) => Promise<void>;
   connect: () => void;
   disconnect: () => Promise<void>;

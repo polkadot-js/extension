@@ -37,7 +37,7 @@ export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t:
   }
 }
 
-const fetchChainValidator = (chain: string, unmount: boolean, setValidatorLoading: (value: boolean) => void) => {
+const fetchChainValidator = (chain: string, unmount: boolean, setValidatorLoading: (value: boolean) => void, setForceFetchValidator: (value: boolean) => void) => {
   if (!unmount) {
     setValidatorLoading(true);
     getBondingOptions(chain, StakingType.NOMINATED)
@@ -48,12 +48,13 @@ const fetchChainValidator = (chain: string, unmount: boolean, setValidatorLoadin
       .finally(() => {
         if (!unmount) {
           setValidatorLoading(false);
+          setForceFetchValidator(false);
         }
       });
   }
 };
 
-const fetchChainPool = (chain: string, unmount: boolean, setPoolLoading: (value: boolean) => void) => {
+const fetchChainPool = (chain: string, unmount: boolean, setPoolLoading: (value: boolean) => void, setForceFetchValidator: (value: boolean) => void) => {
   if (!unmount && _STAKING_CHAIN_GROUP.nominationPool.includes(chain)) {
     setPoolLoading(true);
     getNominationPoolOptions(chain)
@@ -64,6 +65,7 @@ const fetchChainPool = (chain: string, unmount: boolean, setPoolLoading: (value:
       .finally(() => {
         if (!unmount) {
           setPoolLoading(false);
+          setForceFetchValidator(false);
         }
       });
   }
@@ -74,14 +76,15 @@ export function fetchChainValidators (
   stakingType: string,
   unmount: boolean,
   setPoolLoading: (value: boolean) => void,
-  setValidatorLoading: (value: boolean) => void
+  setValidatorLoading: (value: boolean) => void,
+  setForceFetchValidator: (value: boolean) => void
 ) {
   if (stakingType === ALL_KEY) {
-    fetchChainValidator(chain, unmount, setValidatorLoading);
-    fetchChainPool(chain, unmount, setPoolLoading);
+    fetchChainValidator(chain, unmount, setValidatorLoading, setForceFetchValidator);
+    fetchChainPool(chain, unmount, setPoolLoading, setForceFetchValidator);
   } else if (stakingType === StakingType.NOMINATED) {
-    fetchChainValidator(chain, unmount, setValidatorLoading);
+    fetchChainValidator(chain, unmount, setValidatorLoading, setForceFetchValidator);
   } else if (stakingType === StakingType.POOLED) {
-    fetchChainPool(chain, unmount, setPoolLoading);
+    fetchChainPool(chain, unmount, setPoolLoading, setForceFetchValidator);
   }
 }

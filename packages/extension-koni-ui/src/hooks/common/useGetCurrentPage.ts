@@ -5,7 +5,7 @@ import { CURRENT_PAGE } from '@subwallet/extension-koni-ui/constants/localStorag
 import { useLocalStorage } from 'usehooks-ts';
 
 const useGetCurrentPage = () => {
-  const [storage] = useLocalStorage<string>(CURRENT_PAGE, '/');
+  const [storage] = useLocalStorage<string>(CURRENT_PAGE, '/home/tokens');
 
   return storage;
 };

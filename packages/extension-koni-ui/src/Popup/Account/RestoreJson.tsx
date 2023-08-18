@@ -11,6 +11,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/extension-koni-ui/messaging';
@@ -103,6 +104,7 @@ function Component ({ className }: Props): JSX.Element {
   const [password, setPassword] = useState('');
   const [jsonFile, setJsonFile] = useState<KeyringPair$Json | KeyringPairs$Json | undefined>(undefined);
   const [accountsInfo, setAccountsInfo] = useState<ResponseJsonGetAccountInfo[]>([]);
+  const checkUnlock = useUnlockChecker();
 
   const closeModal = useCallback(() => {
     inactiveModal(modalId);
@@ -209,41 +211,45 @@ function Component ({ className }: Props): JSX.Element {
       return;
     }
 
-    setLoading(true);
+    checkUnlock().then(() => {
+      setLoading(true);
 
-    setTimeout(() => {
-      const isMultiple = isKeyringPairs$Json(jsonFile);
+      setTimeout(() => {
+        const isMultiple = isKeyringPairs$Json(jsonFile);
 
-      (isMultiple
-        ? batchRestoreV2(jsonFile, password, accountsInfo, true)
-        : jsonRestoreV2({
-          file: jsonFile,
-          password: password,
-          address: accountsInfo[0].address,
-          isAllowed: true,
-          withMasterPassword: true
-        }))
-        .then(() => {
-          setTimeout(() => {
-            if (isMultiple) {
-              navigate('/keyring/migrate-password');
-            } else {
-              onComplete();
-            }
-          }, 1000);
-        })
-        .catch((e: Error) => {
-          setSubmitValidateState({
-            message: e.message,
-            status: 'error'
+        (isMultiple
+          ? batchRestoreV2(jsonFile, password, accountsInfo, true)
+          : jsonRestoreV2({
+            file: jsonFile,
+            password: password,
+            address: accountsInfo[0].address,
+            isAllowed: true,
+            withMasterPassword: true
+          }))
+          .then(() => {
+            setTimeout(() => {
+              if (isMultiple) {
+                navigate('/keyring/migrate-password');
+              } else {
+                onComplete();
+              }
+            }, 1000);
+          })
+          .catch((e: Error) => {
+            setSubmitValidateState({
+              message: e.message,
+              status: 'error'
+            });
+            selectPassword();
+          })
+          .finally(() => {
+            setLoading(false);
           });
-          selectPassword();
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }, 500);
-  }, [jsonFile, requirePassword, password, accountsInfo, navigate, onComplete]);
+      }, 500);
+    }).catch(() => {
+      // User cancel unlock
+    });
+  }, [jsonFile, requirePassword, password, checkUnlock, accountsInfo, navigate, onComplete]);
 
   const renderItem = useCallback((account: ResponseJsonGetAccountInfo): React.ReactNode => {
     return (

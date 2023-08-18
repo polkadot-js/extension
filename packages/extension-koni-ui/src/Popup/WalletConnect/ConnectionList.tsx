@@ -129,12 +129,21 @@ const ConnectionList = styled(Component)<Props>(({ theme: { token } }: Props) =>
     flexDirection: 'column',
 
     '.sessions-list': {
-      '--row-gap': token.sizeXS,
+      '--row-gap': `${token.sizeXS}px`,
       margin: `0 -${token.margin}px`,
+      height: '100%',
+
+      '.ant-sw-list': {
+        height: '100%'
+      },
 
       '&.ant-sw-list-section .ant-sw-list-wrapper': {
         flexBasis: 300
       }
+    },
+
+    '.connection-item.connection-item.connection-item': {
+      flex: '0 0 auto'
     }
   };
 });

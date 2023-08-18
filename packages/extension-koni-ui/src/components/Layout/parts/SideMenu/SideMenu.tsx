@@ -8,7 +8,7 @@ import { Image, Menu } from '@subwallet/react-ui';
 import { MenuItemType } from '@subwallet/react-ui/es/menu/hooks/useItems';
 import CN from 'classnames';
 import { ArrowSquareUpRight, Clock, Database, Gear, Info, MessengerLogo, Rocket, Wallet } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
 export type Props = ThemeProps;
@@ -121,6 +121,7 @@ const staticMenuItems: SideMenuItemType[] = [
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   // animate sidebar
   // const [isHovered, setHovered] = useState<boolean>(true);
 
@@ -145,19 +146,43 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     navigate(`${key}`);
   }, [navigate]);
 
-  const selectedKey = useMemo(() => {
+  const getSelectedKeys = useCallback((pathname: string) => {
+    if (pathname.startsWith('/accounts') || pathname.startsWith('/transaction-done')) {
+      return undefined;
+    }
+
+    if (pathname.startsWith('/settings') || pathname.startsWith('/wallet-connect')) {
+      return ['/settings'];
+    }
+
+    if (pathname.startsWith('/transaction')) {
+      return ['/home/staking'];
+    }
+
     const availableKey: string[] = [
       ...menuItems.map((i) => i.key as string)
       // ...staticMenuItems.map((i) => i.key as string)
     ];
     const current = availableKey.filter((i: string) => i !== '/home' && pathname.includes(i));
 
-    if (pathname.startsWith('/transaction')) {
-      return ['/home/staking'];
-    }
+    return current.length ? current : (pathname.startsWith('/home') ? ['/home'] : undefined);
+  }, []);
 
-    return current.length ? current : (pathname.startsWith('/home') ? ['/home'] : ['/settings']);
-  }, [pathname]);
+  useEffect(() => {
+    setSelectedKeys((prev) => {
+      const _selectedKeys = getSelectedKeys(pathname);
+
+      if (_selectedKeys) {
+        return _selectedKeys;
+      }
+
+      if (!_selectedKeys && !prev) {
+        return ['/home'];
+      }
+
+      return prev;
+    });
+  }, [getSelectedKeys, pathname]);
 
   return (
     <div
@@ -176,12 +201,11 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         <Menu
           items={menuItems}
           onClick={handleNavigate}
-          selectedKeys={selectedKey}
+          selectedKeys={selectedKeys}
         />
         <Menu
           items={staticMenuItems}
           onClick={handleLinks}
-          selectedKeys={selectedKey}
         />
       </div>
     </div>

@@ -49,6 +49,7 @@ function Component (
 
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
+  const chainAssetMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
 
   const time = customFormatDate(item.time, '#hhhh#:#mm#');
   const link = getLink(item, chainInfoMap);
@@ -121,8 +122,14 @@ function Component (
     );
   }
 
+  const chainAsset = Object.values(chainAssetMap).find((ca) => {
+    return item.chain === ca.originChain && item.amount?.symbol === ca.symbol;
+  });
+
+  const price = chainAsset?.priceId ? priceMap[chainAsset?.priceId] : 0;
+
   const balanceValue = getBalanceValue(item?.amount?.value || '0', item?.amount?.decimals || 0);
-  const convertedBalanceValue = getConvertedBalanceValue(balanceValue, +`${priceMap[item.chain] || 0}`);
+  const convertedBalanceValue = getConvertedBalanceValue(balanceValue, price);
 
   return (
     <div

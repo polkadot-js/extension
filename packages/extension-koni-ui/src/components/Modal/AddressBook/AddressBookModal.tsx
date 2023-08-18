@@ -264,7 +264,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AddressBookModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--row-gap': token.sizeXS,
+    '--row-gap': `${token.sizeXS}px`,
 
     '.ant-sw-modal-body': {
       display: 'flex',

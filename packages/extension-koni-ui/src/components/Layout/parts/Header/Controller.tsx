@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Customization from '@subwallet/extension-koni-ui/components/Layout/parts/Header/Customization';
+import LockStatus from '@subwallet/extension-koni-ui/components/Layout/parts/Header/LockStatus';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -11,7 +12,6 @@ import styled from 'styled-components';
 
 import Accounts from './Accounts';
 import Networks from './Networks';
-import LockStatus from "@subwallet/extension-koni-ui/components/Layout/parts/Header/LockStatus";
 
 export type Props = ThemeProps & {
   title?: string | React.ReactNode;

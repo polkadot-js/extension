@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// import { Layout } from '@subwallet/extension-koni-ui/components';
 import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -169,7 +168,7 @@ const PortfolioPage = styled(Component)<Props>(({ theme: { token } }: Props) => 
     height: '100%',
 
     '.portfolio-header': {
-      flex: '0 0 300px',
+      flex: '0 0 auto',
       paddingBottom: token.paddingLG
     },
 

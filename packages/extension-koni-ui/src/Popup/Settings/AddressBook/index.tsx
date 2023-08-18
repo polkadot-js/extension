@@ -243,7 +243,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const ManageAddressBook = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--row-gap': token.sizeXS,
+    '--row-gap': `${token.sizeXS}px`,
 
     '.ant-sw-screen-layout-body': {
       paddingTop: token.padding,

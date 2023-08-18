@@ -5,13 +5,10 @@ import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
-import { CREATE_ACCOUNT_MODAL, SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
-import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
 import { createAccountSuriV2, createSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
@@ -19,19 +16,18 @@ import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 type Props = ThemeProps & {
-  accountTypes: KeypairType[]
+  accountTypes: KeypairType[],
+  modalId: string,
+  onBack?: () => void;
+  onSubmitSuccess?: () => void;
 };
 
-const modalId = SEED_PHRASE_MODAL;
-
-const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
-  const navigate = useNavigate();
+const Component: React.FC<Props> = ({ accountTypes, className, modalId, onBack, onSubmitSuccess }: Props) => {
   const { t } = useTranslation();
   const { checkActive, inactiveModal } = useContext(ModalContext);
   const isActive = checkActive(modalId);
@@ -57,7 +53,12 @@ const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
     setCreateSeedTrigger(`${Date.now()}`);
-  }, [inactiveModal]);
+  }, [inactiveModal, modalId]);
+
+  const _onBack = useCallback(() => {
+    onBack?.();
+    setCreateSeedTrigger(`${Date.now()}`);
+  }, [onBack]);
 
   const onSubmit = useCallback(() => {
     if (!seedPhrase) {
@@ -74,7 +75,7 @@ const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
         isAllowed: true
       })
         .then(() => {
-          navigate(DEFAULT_ROUTER_PATH);
+          onSubmitSuccess?.();
         })
         .catch((error: Error): void => {
           notify({
@@ -87,23 +88,23 @@ const Component: React.FC<Props> = ({ accountTypes, className }: Props) => {
           onCancel();
         });
     }, 500);
-  }, [seedPhrase, accountName, accountTypes, navigate, notify, onCancel]);
-
-  const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL);
+  }, [seedPhrase, accountName, accountTypes, onSubmitSuccess, notify, onCancel]);
 
   useClickOutSide(isActive, renderModalSelector(className), onCancel);
 
   return (
     <SwModal
       className={CN(className)}
-      closeIcon={(<BackIcon />)}
+      closeIcon={!!onBack && (<BackIcon />)}
       id={modalId}
       maskClosable={false}
-      onCancel={onBack}
-      rightIconProps={{
-        icon: <CloseIcon />,
-        onClick: onCancel
-      }}
+      onCancel={onBack ? _onBack : onCancel}
+      rightIconProps={ onBack
+        ? ({
+          icon: <CloseIcon />,
+          onClick: onCancel
+        })
+        : undefined}
       title={t<string>('Your recovery phrase')}
     >
       <div className='items-container'>

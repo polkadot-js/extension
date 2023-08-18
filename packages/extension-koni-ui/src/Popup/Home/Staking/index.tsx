@@ -514,7 +514,7 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
         '.ant-sw-list': {
           flex: 1
         },
-        '.container': {
+        '.search-container': {
           marginBottom: 24
         }
       },

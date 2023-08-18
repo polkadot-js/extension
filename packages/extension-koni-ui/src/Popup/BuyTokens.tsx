@@ -120,7 +120,8 @@ const modalId = 'disclaimer-modal';
 
 function Component ({ className, modalContent, slug }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
-  const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
+  const [_currentSymbol] = useState<string | undefined>(locationState?.symbol);
+  const currentSymbol = slug || _currentSymbol;
   const fixedTokenKey = currentSymbol ? PREDEFINED_BUY_TOKEN[currentSymbol]?.slug : undefined;
 
   const notify = useNotification();

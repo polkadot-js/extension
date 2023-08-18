@@ -4,16 +4,19 @@
 import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, NewAccountModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
 import { ConfirmationModal } from '@subwallet/extension-koni-ui/components/Modal/ConfirmationModal';
 import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModal';
+import { CREATE_ACCOUNT_MODAL, SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext, useExcludeModal } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import SeedPhraseModal from '../components/Modal/Account/SeedPhraseModal';
 import { UnlockModal } from '../components/Modal/UnlockModal';
+import useSwitchModal from '../hooks/modal/useSwitchModal';
 
 interface Props {
   children: React.ReactNode;
@@ -53,6 +56,7 @@ export const usePredefinedModal = () => {
 };
 
 export const WalletModalContext = ({ children }: Props) => {
+  const navigate = useNavigate();
   const { activeModal, hasActiveModal, inactiveAll, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [accountTypes, setAccountTypes] = useState<KeypairType[]>([]);
@@ -71,7 +75,7 @@ export const WalletModalContext = ({ children }: Props) => {
     }
   }, [activeModal, inactiveModals, searchParams]);
 
-  const onCloseModal = useCallback(() => {
+  const onCloseConfirmationModal = useCallback(() => {
     setSearchParams((prev) => {
       prev.delete('popup');
 
@@ -85,6 +89,12 @@ export const WalletModalContext = ({ children }: Props) => {
     }
   }, [hasMasterPassword, inactiveAll, isLocked]);
 
+  const onSeedPhraseModalBack = useSwitchModal(SEED_PHRASE_MODAL, CREATE_ACCOUNT_MODAL);
+
+  const onSeedPhraseModalSubmitSuccess = useCallback(() => {
+    navigate(DEFAULT_ROUTER_PATH);
+  }, [navigate]);
+
   return <>
     <div
       id='popup-container'
@@ -93,10 +103,15 @@ export const WalletModalContext = ({ children }: Props) => {
     {children}
     <ConfirmationModal
       id={'confirmations'}
-      onCancel={onCloseModal}
+      onCancel={onCloseConfirmationModal}
     />
     <CreateAccountModal />
-    <SeedPhraseModal accountTypes={accountTypes} />
+    <SeedPhraseModal
+      accountTypes={accountTypes}
+      modalId={SEED_PHRASE_MODAL}
+      onBack={onSeedPhraseModalBack}
+      onSubmitSuccess={onSeedPhraseModalSubmitSuccess}
+    />
     <ImportAccountModal />
     <AttachAccountModal />
     <NewAccountModal setAccountTypes={setAccountTypes} />

@@ -1,4 +1,4 @@
-// Copyright 2017-2023 @polkadot/react-components authors & contributors
+// Copyright 2017-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { DropzoneRef } from 'react-dropzone';
@@ -74,7 +74,7 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
         reader.onerror = NOOP;
 
         reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
-          if (target && target.result) {
+          if (target?.result) {
             const name = file.name;
             const data = convertResult(target.result as ArrayBuffer, convertHex);
 

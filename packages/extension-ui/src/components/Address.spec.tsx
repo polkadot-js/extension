@@ -342,7 +342,7 @@ describe('Address', () => {
     });
 
     it('shows the parent account and suri', () => {
-      const expectedParentNameSuri = getParentNameSuri(childAccount.parentName as string, childAccount.suri);
+      const expectedParentNameSuri = getParentNameSuri(childAccount.parentName, childAccount.suri);
 
       expect(wrapper.find('.parentName').text()).toEqual(expectedParentNameSuri);
     });

@@ -50,7 +50,7 @@ export default class PostMessageProvider implements InjectedProvider {
   }
 
   public get isClonable (): boolean {
-    return true;
+    return !!true;
   }
 
   /**
@@ -83,7 +83,7 @@ export default class PostMessageProvider implements InjectedProvider {
    */
   public get hasSubscriptions (): boolean {
     // FIXME This should see if the extension's state's provider has subscriptions
-    return true;
+    return !!true;
   }
 
   /**

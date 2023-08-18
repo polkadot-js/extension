@@ -20,12 +20,15 @@ const tabs = new Tabs(state);
 
 export default function handler<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port?: chrome.runtime.Port, extensionPortName = PORT_EXTENSION): void {
   const isExtension = !port || port?.name === extensionPortName;
+  const sender = port?.sender;
 
-  const sender = port?.sender as chrome.runtime.MessageSender;
+  if (!sender) {
+    throw new Error('Unable to extract message sender');
+  }
 
   const from = isExtension
     ? 'extension'
-    : (sender.tab && sender.tab.url) || sender.url || '<unknown>';
+    : (sender.tab?.url) || sender.url || '<unknown>';
   const source = `${from}: ${id}: ${message}`;
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);

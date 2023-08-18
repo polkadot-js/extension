@@ -47,7 +47,7 @@ export type AccountWithChildren = AccountJson & {
   children?: AccountWithChildren[];
 }
 
-export type AccountsContext = {
+export interface AccountsContext {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
   master?: AccountJson;

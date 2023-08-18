@@ -28,7 +28,7 @@ function ImportSeed (): React.ReactElement {
   const [name, setName] = useState<string | null>(null);
   const [step1, setStep1] = useState(true);
   const [type, setType] = useState(DEFAULT_TYPE);
-  const chain = useMetadata(account && account.genesis, true);
+  const chain = useMetadata(account?.genesis, true);
 
   useEffect((): void => {
     !accounts.length && onAction();

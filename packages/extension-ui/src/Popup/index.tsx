@@ -129,11 +129,11 @@ export default function Popup (): React.ReactElement {
   }
 
   const Root = isWelcomeDone
-    ? authRequests && authRequests.length
+    ? authRequests?.length
       ? wrapWithErrorBoundary(<Authorize />, 'authorize')
-      : metaRequests && metaRequests.length
+      : metaRequests?.length
         ? wrapWithErrorBoundary(<Metadata />, 'metadata')
-        : signRequests && signRequests.length
+        : signRequests?.length
           ? wrapWithErrorBoundary(<Signing />, 'signing')
           : wrapWithErrorBoundary(<Accounts />, 'accounts')
     : wrapWithErrorBoundary(<Welcome />, 'welcome');

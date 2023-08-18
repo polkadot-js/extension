@@ -112,8 +112,8 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
         }
         {isHardware && (
           <LedgerSign
-            accountIndex={accountIndex as number || 0}
-            addressOffset={addressOffset as number || 0}
+            accountIndex={accountIndex || 0}
+            addressOffset={addressOffset || 0}
             error={error}
             genesisHash={json.genesisHash}
             onSignature={_onSignature}

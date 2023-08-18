@@ -36,7 +36,7 @@ function WebsiteEntry ({ className = '', info: { authorizedAccounts, isAllowed }
         className='connectedAccounts'
         to={`/url/manage/${url}`}
       >{
-          authorizedAccounts && authorizedAccounts.length
+          authorizedAccounts?.length
             ? t('{{total}} accounts', {
               replace: {
                 total: authorizedAccounts.length

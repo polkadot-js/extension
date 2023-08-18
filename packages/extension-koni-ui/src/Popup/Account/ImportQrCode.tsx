@@ -11,6 +11,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useScanAccountQr from '@subwallet/extension-koni-ui/hooks/qr/useScanAccountQr';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -62,6 +63,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const accountName = useGetDefaultAccountName();
   const onComplete = useCompleteCreateAccount();
   const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
+  const checkUnlock = useUnlockChecker();
 
   const { inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
@@ -114,14 +116,24 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         });
     }, 300);
-  }, [accountName, onComplete, inactiveModal]);
+  }, [inactiveModal, accountName, onComplete]);
 
   const { onClose, onError, onSuccess, openCamera } = useScanAccountQr(modalId, importQrScan, setValidateState, onSubmit);
+
+  const onScan = useCallback(() => {
+    checkUnlock().then(() => {
+      setTimeout(() => {
+        openCamera();
+      }, 300);
+    }).catch(() => {
+      // User cancelled unlock
+    });
+  }, [checkUnlock, openCamera]);
 
   const buttonProps = {
     children: loading ? t('Creating') : t('Scan the QR code'),
     icon: FooterIcon,
-    onClick: openCamera,
+    onClick: onScan,
     loading: loading
   };
 

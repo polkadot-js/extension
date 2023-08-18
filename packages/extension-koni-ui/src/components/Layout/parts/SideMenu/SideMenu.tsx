@@ -4,14 +4,17 @@
 import { CONTACT_US, FAQS_URL, TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Image, Menu } from '@subwallet/react-ui';
+import { Button, Icon, Image, Menu } from '@subwallet/react-ui';
 import { MenuItemType } from '@subwallet/react-ui/es/menu/hooks/useItems';
 import CN from 'classnames';
-import { ArrowSquareUpRight, Clock, Database, Gear, Info, MessengerLogo, Rocket, Wallet } from 'phosphor-react';
+import { ArrowCircleLeft, ArrowCircleRight, ArrowSquareUpRight, Clock, Database, Gear, Info, MessengerLogo, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
-export type Props = ThemeProps;
+export type Props = ThemeProps & {
+  isCollapsed: boolean,
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>
+};
 
 type SideMenuItemType = MenuItemType;
 const menuItems: SideMenuItemType[] = [
@@ -19,10 +22,9 @@ const menuItems: SideMenuItemType[] = [
     label: 'Portfolio',
     key: '/home',
     icon: (
-      <Wallet
-        height={20}
+      <Icon
+        phosphorIcon={Wallet}
         weight='fill'
-        width={20}
       />
     )
   },
@@ -30,10 +32,9 @@ const menuItems: SideMenuItemType[] = [
     label: 'Crowdloans',
     key: '/home/crowdloans',
     icon: (
-      <Rocket
-        height={20}
+      <Icon
+        phosphorIcon={Rocket}
         weight='fill'
-        width={20}
       />
     )
   },
@@ -41,10 +42,9 @@ const menuItems: SideMenuItemType[] = [
     label: 'Staking',
     key: '/home/staking',
     icon: (
-      <Database
-        height={20}
+      <Icon
+        phosphorIcon={Database}
         weight='fill'
-        width={20}
       />
     )
   },
@@ -59,24 +59,23 @@ const menuItems: SideMenuItemType[] = [
   //     />
   //   )
   // },
-  { label: 'History',
+  {
+    label: 'History',
     key: '/home/history',
     icon: (
-      <Clock
-        height={20}
+      <Icon
+        phosphorIcon={Clock}
         weight='fill'
-        width={20}
       />
-
-    ) },
+    )
+  },
   {
     label: 'Settings',
     key: '/settings',
     icon: (
-      <Gear
-        height={20}
+      <Icon
+        phosphorIcon={Gear}
         weight='fill'
-        width={20}
       />
     )
   }
@@ -87,10 +86,9 @@ const staticMenuItems: SideMenuItemType[] = [
     label: 'FAQs',
     key: 'faqs',
     icon: (
-      <Info
-        height={20}
+      <Icon
+        phosphorIcon={Info}
         weight='fill'
-        width={20}
       />
     )
   },
@@ -98,10 +96,9 @@ const staticMenuItems: SideMenuItemType[] = [
     label: 'Contact',
     key: 'contact',
     icon: (
-      <MessengerLogo
-        height={20}
+      <Icon
+        phosphorIcon={MessengerLogo}
         weight='fill'
-        width={20}
       />
     )
   },
@@ -109,16 +106,17 @@ const staticMenuItems: SideMenuItemType[] = [
     label: 'Terms of services',
     key: 'tos',
     icon: (
-      <ArrowSquareUpRight
-        height={20}
+      <Icon
+        phosphorIcon={ArrowSquareUpRight}
         weight='fill'
-        width={20}
       />
     )
   }
 ];
 
-function Component ({ className }: Props): React.ReactElement<Props> {
+function Component ({ className,
+  isCollapsed,
+  setCollapsed }: Props): React.ReactElement<Props> {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
@@ -161,12 +159,15 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
     const availableKey: string[] = [
       ...menuItems.map((i) => i.key as string)
-      // ...staticMenuItems.map((i) => i.key as string)
     ];
     const current = availableKey.filter((i: string) => i !== '/home' && pathname.includes(i));
 
     return current.length ? current : (pathname.startsWith('/home') ? ['/home'] : undefined);
   }, []);
+
+  const onToggleCollapse = useCallback(() => {
+    setCollapsed((prev) => !prev);
+  }, [setCollapsed]);
 
   useEffect(() => {
     setSelectedKeys((prev) => {
@@ -186,18 +187,35 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   return (
     <div
-      className={CN(className, 'flex-col', 'side-menu-wrapper', {
-        __expanded: true
-        // '__expanded': isHovered
+      className={CN(className, 'side-menu', {
+        '-expanded': !isCollapsed,
+        '-collapsed': isCollapsed
       })}
     >
-      <div className='logo-container'>
+      <div className='__logo-container'>
         <Image
+          shape={'square'}
           src='/images/subwallet/gradient-logo.png'
-          width={46}
+        />
+
+        <Button
+          className={'__sidebar-collapse-trigger'}
+          icon={
+            (
+              <Icon
+                phosphorIcon={isCollapsed ? ArrowCircleRight : ArrowCircleLeft}
+                size={'xs'}
+                weight={'fill'}
+              />
+            )
+          }
+          onClick={onToggleCollapse}
+          size={'xs'}
+          type='ghost'
         />
       </div>
-      <div className={CN('menu-wrapper', 'flex-col')}>
+
+      <div className={CN('__menu-container')}>
         <Menu
           items={menuItems}
           onClick={handleNavigate}

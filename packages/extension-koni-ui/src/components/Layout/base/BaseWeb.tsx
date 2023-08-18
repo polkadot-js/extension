@@ -141,7 +141,7 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken, token } 
 const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
-  const { background, headerType, isPortfolio, isSettingPage, showBackButtonOnHeader, showSidebar, title } = useContext(WebUIContext);
+  const { background, headerType, isPortfolio, isSettingPage, setSidebarCollapsed, showBackButtonOnHeader, showSidebar, sidebarCollapsed, title } = useContext(WebUIContext);
   const { goBack } = useDefaultNavigate();
 
   const headerTitle = useMemo(() => {
@@ -162,7 +162,10 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
         className={CN('web-layout-background', `__background-${background}`)}
       />
       {showSidebar && <div className='web-layout-sidebar'>
-        <SideMenu />
+        <SideMenu
+          isCollapsed={sidebarCollapsed}
+          setCollapsed={setSidebarCollapsed}
+        />
       </div>}
 
       <div className={CN('web-layout-body', { 'setting-pages': isSettingPage })}>

@@ -32,6 +32,8 @@ type WebUIContext = {
   setTitle: (title: string | React.ReactNode) => void
   headerType: HeaderType
   showSidebar: boolean
+  sidebarCollapsed: boolean
+  setSidebarCollapsed: React.Dispatch<React.SetStateAction<boolean>>
   isSettingPage: boolean,
   isPortfolio: boolean
   showBackButtonOnHeader?: boolean
@@ -54,6 +56,7 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
   const [background, setBackground] = useState<BackgroundColorMap>(BackgroundColorMap.INFO);
   const [headerType, setHeaderType] = useState(HeaderType.NONE);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showBackButtonOnHeader, setShowBackButtonOnHeader] = useState<boolean | undefined>(undefined);
   const [title, setTitle] = useState<string | React.ReactNode>('');
   const pathname = useLocation().pathname;
@@ -97,6 +100,8 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
         setTitle,
         headerType,
         showSidebar,
+        sidebarCollapsed,
+        setSidebarCollapsed,
         isSettingPage,
         isPortfolio,
         showBackButtonOnHeader,

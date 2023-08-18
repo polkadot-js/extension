@@ -1,4 +1,4 @@
-     624	Jaco                          	Bump i18next (#1272)
+     625	Jaco                          	Bump deps (#1278)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

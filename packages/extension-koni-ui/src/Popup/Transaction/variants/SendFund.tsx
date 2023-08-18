@@ -14,7 +14,7 @@ import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInp
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
-import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckAction, useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useSelector, useSetCurrentPage, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -34,7 +34,6 @@ import { useIsFirstRender } from 'usehooks-ts';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
-import useWatchTransaction from '../../../hooks/transaction/useWatchTransaction';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 
 type Props = ThemeProps;
@@ -384,6 +383,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       if (part.from) {
         setForceUpdateMaxValue(undefined);
         form.resetFields(['asset']);
+        // Because cache data, so next data may be same with default data
+        form.setFields([{ name: 'asset', value: '' }]);
       }
 
       if (part.destChain) {
@@ -603,6 +604,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       setIsTransferAll(true);
     }
   }, [maxTransfer, transferAmount]);
+
+  useInitValidateTransaction(['value', 'to'], form, defaultData);
 
   return (
     <>

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, NFT_TRANSACTION, STAKE_TRANSACTION, TRANSFER_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, CURRENT_PAGE, NFT_TRANSACTION, STAKE_TRANSACTION, TRANSFER_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 
 import { removeStorage } from '../common';
 
@@ -38,4 +38,6 @@ export const removeTransactionPersist = (type?: ExtrinsicType) => {
   if (key) {
     removeStorage(key);
   }
+
+  window.localStorage.setItem(CURRENT_PAGE, '/home/tokens');
 };

@@ -11,7 +11,7 @@ import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/Transa
 import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, SendNftParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Image, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight } from 'phosphor-react';
@@ -190,6 +190,16 @@ const Component: React.FC = () => {
       navigate('/home/nfts/collections');
     }
   }, [collectionInfo, navigate, nftItem]);
+
+  // enable button at first time
+  useEffect(() => {
+    if (defaultData.to) {
+      // First time the form is empty, so need time out
+      setTimeout(() => {
+        form.validateFields().finally(noop);
+      }, 500);
+    }
+  }, [form, defaultData]);
 
   // Focus to the first field
   useFocusFormItem(form, 'to');

@@ -10,7 +10,7 @@ import { AccountSelector, AmountInput, HiddenInput, NominationSelector, PageWrap
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
-import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
@@ -229,15 +229,7 @@ const Component: React.FC = () => {
     }
   }, [form, amountChange, minValue, bondedValue, decimals]);
 
-  // enable button at first time
-  useEffect(() => {
-    if (defaultData.value) {
-      // First time the form is empty, so need time out
-      setTimeout(() => {
-        form.validateFields().finally(noop);
-      }, 500);
-    }
-  }, [form, defaultData]);
+  useInitValidateTransaction(['value'], form, defaultData);
 
   return (
     <>
@@ -353,7 +345,7 @@ const Wrapper: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper
-      className={className}
+      className={CN(className, 'page-wrapper')}
       resolve={dataContext.awaitStores(['staking'])}
     >
       <Component />
@@ -363,6 +355,11 @@ const Wrapper: React.FC<Props> = (props: Props) => {
 
 const Unbond = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
+    '&.page-wrapper': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
     '.bonded-balance, .free-balance': {
       marginBottom: token.margin
     },

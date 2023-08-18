@@ -178,7 +178,7 @@ const Transaction = styled(Component)(({ theme }) => {
     },
 
     '.transaction-content': {
-      flex: '1 1 400px',
+      flex: '1 1 370px',
       paddingLeft: token.padding,
       paddingRight: token.padding,
       overflow: 'auto'

@@ -78,9 +78,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const onSelectAccount = useCallback((account: AccountJson): () => void => {
     return () => {
-      setSelected(account.address);
-
       checkUnlock().then(() => {
+        setSelected(account.address);
         setTimeout(() => {
           deriveAccountV3({
             address: account.address

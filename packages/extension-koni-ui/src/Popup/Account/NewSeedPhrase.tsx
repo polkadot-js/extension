@@ -81,9 +81,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       return;
     }
 
-    setLoading(true);
-
     checkUnlock().then(() => {
+      setLoading(true);
       setTimeout(() => {
         createAccountSuriV2({
           name: accountName,

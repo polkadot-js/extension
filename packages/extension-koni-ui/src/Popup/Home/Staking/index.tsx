@@ -5,7 +5,7 @@ import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_STAKE_PARAMS, STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll, sortStakingByValue } from '@subwallet/extension-koni-ui/utils';
@@ -45,6 +45,7 @@ const reloadIcon = (
 );
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  useSetCurrentPage('/home/staking');
   const navigate = useNavigate();
   const { t } = useTranslation();
 

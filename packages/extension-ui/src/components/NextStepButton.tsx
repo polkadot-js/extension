@@ -1,6 +1,8 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { ButtonProps } from './Button.js';
+
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
@@ -8,9 +10,7 @@ import React from 'react';
 import { styled } from '../styled.js';
 import Button from './Button.js';
 
-export type Props = React.ComponentProps<typeof Button>;
-
-function NextStepButton ({ children, ...props }: Props): React.ReactElement<Props> {
+function NextStepButton ({ children, ...props }: ButtonProps): React.ReactElement<ButtonProps> {
   return (
     <Button {...props}>
       {children}
@@ -23,7 +23,7 @@ function NextStepButton ({ children, ...props }: Props): React.ReactElement<Prop
   );
 }
 
-export default styled(NextStepButton)<Props>`
+export default styled(NextStepButton)<ButtonProps>`
   .arrowRight{
     float: right;
     margin-top: 4px;

@@ -9,7 +9,7 @@ interface Props {
   withError?: boolean;
 }
 
-const TextInput = css(({ withError }: Props) => `
+const TextInput = css<Props>(({ withError }) => `
   background: var(--inputBackground);
   border-radius: var(--borderRadius);
   border: 1px solid var(--inputBorderColor);

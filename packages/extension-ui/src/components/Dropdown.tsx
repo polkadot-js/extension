@@ -8,8 +8,8 @@ import { styled } from '../styled.js';
 import Label from './Label.js';
 
 interface DropdownOption {
-  text: string;
-  value: string;
+  text: string | React.ReactNode;
+  value: string | number;
 }
 
 interface Props {

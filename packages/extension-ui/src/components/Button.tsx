@@ -6,7 +6,7 @@ import React, { useCallback } from 'react';
 import { styled } from '../styled.js';
 import Spinner from './Spinner.js';
 
-interface Props {
+export interface ButtonProps {
   className?: string;
   children?: React.ReactNode;
   isBusy?: boolean;
@@ -16,7 +16,7 @@ interface Props {
   to?: string;
 }
 
-function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
+function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: ButtonProps): React.ReactElement<ButtonProps> {
   const _onClick = useCallback(
     (): void => {
       if (isBusy || isDisabled) {
@@ -45,7 +45,7 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: 
   );
 }
 
-export default styled(Button)<Props>(({ isDanger }) => `
+export default styled(Button)<ButtonProps>(({ isDanger }) => `
   background: ${isDanger ? 'var(--buttonBackgroundDanger)' : 'var(--theme.buttonBackground)'};
   cursor: pointer;
   display: block;

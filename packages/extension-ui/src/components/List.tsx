@@ -16,7 +16,7 @@ const List = ({ children, className }: Props) => (
   </ul>
 );
 
-export default styled(List)`
+export default styled(List)<Props>`
   list-style: none;
   padding-inline-start: 10px;
   padding-inline-end: 10px;

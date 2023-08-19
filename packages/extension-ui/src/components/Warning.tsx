@@ -26,7 +26,7 @@ function Warning ({ children, className = '', isBelowInput, isDanger }: Props): 
   );
 }
 
-export default React.memo(styled(Warning)<Props>(({ isDanger }: Props) => `
+export default React.memo(styled(Warning)<Props>(({ isDanger }) => `
   display: flex;
   flex-direction: row;
   padding-left: 18px;

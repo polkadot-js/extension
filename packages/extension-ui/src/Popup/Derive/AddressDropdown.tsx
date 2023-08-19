@@ -57,7 +57,7 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
   );
 }
 
-export default styled(AddressDropdown)`
+export default styled(AddressDropdown)<Props>`
   margin-bottom: 16px;
   cursor: pointer;
 

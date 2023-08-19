@@ -22,7 +22,7 @@ function Menu ({ children, className, reference }: Props): React.ReactElement<Pr
   );
 }
 
-export default styled(Menu)`
+export default styled(Menu)<Props>`
   background: var(--popupBackground);
   border-radius: 4px;
   border: 1px solid var(--boxBorderColor);

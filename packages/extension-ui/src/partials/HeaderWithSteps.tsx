@@ -39,7 +39,7 @@ function HeaderWithSteps ({ className, step, text }: Props): React.ReactElement<
   );
 }
 
-export default React.memo(styled(HeaderWithSteps)`
+export default React.memo(styled(HeaderWithSteps)<Props>`
   .current {
     font-size: var(--labelFontSize);
     line-height: var(--labelLineHeight);

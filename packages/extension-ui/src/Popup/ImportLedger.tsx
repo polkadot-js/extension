@@ -179,7 +179,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(ImportLedger)`
+export default styled(ImportLedger)<Props>`
   .refreshIcon {
     margin-right: 0.3rem;
   }

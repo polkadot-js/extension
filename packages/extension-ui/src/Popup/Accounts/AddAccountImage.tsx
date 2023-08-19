@@ -83,7 +83,7 @@ function AddAccountImage ({ className, onClick }: Props): React.ReactElement<Pro
   );
 }
 
-export default React.memo(styled(AddAccountImage)`
+export default React.memo(styled(AddAccountImage)<Props>`
   circle, path {
     cursor: pointer;
   }

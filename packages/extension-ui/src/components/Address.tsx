@@ -304,7 +304,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   );
 }
 
-export default styled(Address)`
+export default styled(Address)<Props>`
   background: var(--boxBackground);
   border: 1px solid var(--boxBorderColor);
   box-sizing: border-box;

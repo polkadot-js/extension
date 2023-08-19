@@ -52,7 +52,7 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
   );
 }
 
-export default styled(InputFilter)`
+export default styled(InputFilter)<Props>`
   padding-left: 1rem !important;
   padding-right: 1rem !important;
   position: relative;

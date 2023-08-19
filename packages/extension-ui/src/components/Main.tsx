@@ -18,7 +18,7 @@ function Main ({ children, className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Main)`
+export default styled(Main)<Props>`
   display: flex;
   flex-direction: column;
   height: calc(100vh - 2px);

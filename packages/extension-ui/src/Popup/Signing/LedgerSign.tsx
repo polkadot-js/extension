@@ -93,7 +93,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
   );
 }
 
-export default styled(LedgerSign)`
+export default styled(LedgerSign)<Props>`
   flex-direction: column;
   padding: 6px 24px;
 

@@ -20,7 +20,7 @@ function Label ({ children, className, label }: Props): React.ReactElement<Props
   );
 }
 
-export default styled(Label)`
+export default styled(Label)<Props>`
   color: var(--textColor);
 
   label {

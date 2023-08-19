@@ -69,7 +69,7 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(AccountManagement)`
+export default styled(AccountManagement)<Props>`
   .accountSelection{
     .accountList{
       height: 390px;

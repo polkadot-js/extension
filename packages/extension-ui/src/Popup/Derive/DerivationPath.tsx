@@ -70,7 +70,7 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
   );
 }
 
-export default React.memo(styled(DerivationPath)`
+export default React.memo(styled(DerivationPath)<Props>`
   > .container {
     display: flex;
     flex-direction: row;

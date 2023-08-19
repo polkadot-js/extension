@@ -130,7 +130,7 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
   );
 }
 
-export default styled(SeedAndPath)`
+export default styled(SeedAndPath)<Props>`
   .advancedToggle {
     color: var(--textColor);
     cursor: pointer;

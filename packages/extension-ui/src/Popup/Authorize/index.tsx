@@ -39,7 +39,7 @@ function Authorize ({ className = '' }: Props): React.ReactElement {
   );
 }
 
-export default styled(Authorize)`
+export default styled(Authorize)<Props>`
   overflow-y: auto;
 
   &.lastRequest {

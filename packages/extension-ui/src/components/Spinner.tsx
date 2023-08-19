@@ -20,7 +20,7 @@ function Spinner ({ className = '', size = 'normal' }: Props): React.ReactElemen
   );
 }
 
-export default React.memo(styled(Spinner)`
+export default React.memo(styled(Spinner)<Props>`
   bottom: 0rem;
   height: 3rem;
   left: 50%;

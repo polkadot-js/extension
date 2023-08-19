@@ -23,7 +23,7 @@ function RemoveAuth ({ className, onRemove }: Props): React.ReactElement {
   );
 }
 
-export default styled(RemoveAuth)`
+export default styled(RemoveAuth)<Props>`
   cursor: pointer;
   color: var(--labelColor);
   margin-right: 1rem;

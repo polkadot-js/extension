@@ -36,7 +36,7 @@ function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }:
   );
 }
 
-export default styled(Switch)`
+export default styled(Switch)<Props>`
   label {
     position: relative;
     display: inline-block;

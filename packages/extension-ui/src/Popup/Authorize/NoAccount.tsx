@@ -35,7 +35,7 @@ function NoAccount ({ authId, className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(NoAccount)`
+export default styled(NoAccount)<Props>`
   .acceptButton {
     width: 90%;
     margin: 25px auto 0;

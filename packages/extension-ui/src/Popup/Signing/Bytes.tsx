@@ -40,7 +40,7 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Bytes)`
+export default styled(Bytes)<Props>`
   border: 0;
   display: block;
   font-size: 0.75rem;

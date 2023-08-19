@@ -21,7 +21,7 @@ function Table ({ children, className = '', isFull }: Props): React.ReactElement
   );
 }
 
-export default React.memo(styled(Table)`
+export default React.memo(styled(Table)<Props>`
   border: 0;
   display: block;
   font-size: var(--labelFontSize);

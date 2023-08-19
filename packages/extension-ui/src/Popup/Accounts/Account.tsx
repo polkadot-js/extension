@@ -50,7 +50,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
 
   const _onChangeGenesis = useCallback(
     (genesisHash?: HexString | null): void => {
-      tieAccount(address, genesisHash || null)
+      tieAccount(address, genesisHash ?? null)
         .catch(console.error);
     },
     [address]
@@ -160,7 +160,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
   );
 }
 
-export default styled(Account)`
+export default styled(Account)<Props>`
   .address {
     margin-bottom: 8px;
   }

@@ -174,7 +174,7 @@ function Upload ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(Upload)`
+export default styled(Upload)<Props>`
   .restoreButton {
     margin-top: 16px;
   }

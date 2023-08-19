@@ -49,7 +49,7 @@ function WebsiteEntry ({ className = '', info: { authorizedAccounts, isAllowed }
   );
 }
 
-export default styled(WebsiteEntry)`
+export default styled(WebsiteEntry)<Props>`
   display: flex;
   align-items: center;
   margin-top: .2rem;

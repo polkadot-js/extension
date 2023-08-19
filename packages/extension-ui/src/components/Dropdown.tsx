@@ -20,9 +20,10 @@ interface Props {
   isFocussed?: boolean;
   label: string;
   onBlur?: () => void;
-  onChange?: (value: string) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onChange?: (value: any) => void;
   options: DropdownOption[];
-  value?: string;
+  value?: string | null;
 }
 
 function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
@@ -44,7 +45,7 @@ function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onB
           disabled={isDisabled}
           onBlur={onBlur}
           onChange={_onChange}
-          value={value}
+          value={value ?? undefined}
         >
           {options.map(({ text, value }): React.ReactNode => (
             <option

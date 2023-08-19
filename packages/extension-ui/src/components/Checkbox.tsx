@@ -51,7 +51,7 @@ function Checkbox ({ checked, className, indeterminate, label, onChange, onClick
   );
 }
 
-export default styled(Checkbox)`
+export default styled(Checkbox)<Props>`
   margin: var(--boxMargin);
 
   label {

@@ -91,7 +91,7 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
   );
 }
 
-export default styled(Request)`
+export default styled(Request)<Props>`
   .btnAccept {
     margin: 25px auto 0;
     width: 90%;

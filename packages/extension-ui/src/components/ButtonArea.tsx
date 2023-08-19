@@ -18,7 +18,7 @@ function ButtonArea ({ children, className }: Props): React.ReactElement<Props> 
   );
 }
 
-export default styled(ButtonArea)`
+export default styled(ButtonArea)<Props>`
   display: flex;
   flex-direction: row;
   background: var(--highlightedAreaBackground);

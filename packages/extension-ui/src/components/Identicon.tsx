@@ -33,7 +33,7 @@ function Identicon ({ className, iconTheme, onCopy, prefix, value }: Props): Rea
   );
 }
 
-export default styled(Identicon)`
+export default styled(Identicon)<Props>`
   background: rgba(192, 192, 292, 0.25);
   border-radius: 50%;
   display: flex;

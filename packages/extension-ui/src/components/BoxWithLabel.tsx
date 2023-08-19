@@ -25,7 +25,7 @@ function BoxWithLabel ({ className, label, value }: Props): React.ReactElement<P
   );
 }
 
-export default styled(BoxWithLabel)`
+export default styled(BoxWithLabel)<Props>`
   .seedBox {
     background: var(--readonlyInputBackground);
     box-shadow: none;

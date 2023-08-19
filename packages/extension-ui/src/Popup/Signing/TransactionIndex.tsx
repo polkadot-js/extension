@@ -57,7 +57,7 @@ function TransactionIndex ({ className, index, onNextClick, onPreviousClick, tot
   );
 }
 
-export default styled(TransactionIndex)`
+export default styled(TransactionIndex)<Props>`
   align-items: center;
   display: flex;
   justify-content: space-between;

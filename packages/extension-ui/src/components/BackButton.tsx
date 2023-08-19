@@ -28,7 +28,7 @@ function BackButton ({ className, onClick }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(BackButton)`
+export default styled(BackButton)<Props>`
   background: var(--backButtonBackground);
   margin-right: 11px;
   width: 42px;

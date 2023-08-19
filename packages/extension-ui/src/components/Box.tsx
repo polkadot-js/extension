@@ -20,7 +20,7 @@ function Box ({ banner, children, className }: Props): React.ReactElement<Props>
   );
 }
 
-export default styled(Box)`
+export default styled(Box)<Props>`
   background: var(--readonlyInputBackground);
   border: 1px solid var(--inputBorderColor);
   border-radius: var(--borderRadius);

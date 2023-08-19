@@ -12,7 +12,7 @@ interface Props {
 
 const Svg = ({ className }: Props) => <span className={className} />;
 
-export default styled(Svg)(({ src }: Props) => `
+export default styled(Svg)<Props>(({ src }) => `
   background: var(--textColor);
   display: inline-block;
   mask: url(${src});

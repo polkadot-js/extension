@@ -84,7 +84,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
   );
 }
 
-export default styled(Request)`
+export default styled(Request)<Props>`
   .acceptButton {
     width: 90%;
     margin: .5rem auto 0;

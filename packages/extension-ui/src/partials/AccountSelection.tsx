@@ -90,7 +90,7 @@ function AccounSelection ({ className, origin, showHidden = false, url, withWarn
   );
 }
 
-export default styled(AccounSelection)`
+export default styled(AccounSelection)<Props>`
   .accountList {
     overflow-y: auto;
     height: 270px;

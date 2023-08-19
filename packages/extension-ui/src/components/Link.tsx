@@ -51,7 +51,7 @@ function Link ({ children, className = '', isDisabled, onClick, title, to }: Pro
     );
 }
 
-export default styled(Link)(({ isDanger }: Props) => `
+export default styled(Link)<Props>(({ isDanger }) => `
   align-items: center;
   color: ${isDanger ? 'var(--textColorDanger)' : 'var(--textColor)'};
   display: flex;

@@ -43,7 +43,7 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
   );
 }
 
-export default styled(MnemonicSeed)`
+export default styled(MnemonicSeed)<Props>`
   margin-bottom: 21px;
 
   .buttonsRow {

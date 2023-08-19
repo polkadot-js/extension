@@ -28,7 +28,7 @@ function ActionText ({ className, icon, onClick, text }: Props): React.ReactElem
   );
 }
 
-export default styled(ActionText)`
+export default styled(ActionText)<Props>`
   cursor: pointer;
 
   span {

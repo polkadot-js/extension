@@ -170,7 +170,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   );
 }
 
-export default React.memo(styled(MenuSettings)`
+export default React.memo(styled(MenuSettings)<Props>`
   margin-top: 50px;
   right: 24px;
   user-select: none;

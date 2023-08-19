@@ -42,7 +42,7 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(PhishingDetected)`
+export default styled(PhishingDetected)<Props>`
   p {
     color: var(--subTextColor);
     margin-bottom: 1rem;

@@ -126,7 +126,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(MenuAdd)`
+export default React.memo(styled(MenuAdd)<Props>`
   margin-top: 50px;
   right: 50px; // 24 + 18 + 8
   user-select: none;

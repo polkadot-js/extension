@@ -46,7 +46,7 @@ function Welcome ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Welcome)`
+export default styled(Welcome)<Props>`
   p {
     color: var(--subTextColor);
     margin-bottom: 6px;

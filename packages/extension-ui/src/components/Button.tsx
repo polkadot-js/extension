@@ -45,7 +45,7 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: 
   );
 }
 
-export default styled(Button)(({ isDanger }: Props) => `
+export default styled(Button)<Props>(({ isDanger }) => `
   background: ${isDanger ? 'var(--buttonBackgroundDanger)' : 'var(--theme.buttonBackground)'};
   cursor: pointer;
   display: block;

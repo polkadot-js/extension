@@ -185,7 +185,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
   );
 }
 
-export default React.memo(styled(Header)`
+export default React.memo(styled(Header)<Props>`
   max-width: 100%;
   box-sizing: border-box;
   font-weight: normal;

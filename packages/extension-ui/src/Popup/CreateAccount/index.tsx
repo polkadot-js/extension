@@ -132,7 +132,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(CreateAccount)`
+export default styled(CreateAccount)<Props>`
   margin-bottom: 16px;
 
   label::after {

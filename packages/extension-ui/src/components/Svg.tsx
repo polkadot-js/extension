@@ -10,7 +10,7 @@ interface Props {
   src: string;
 }
 
-const Svg = ({ className }: Props) => <span className={className} />;
+const Svg = ({ className }: Props) => <span className={`Comp--Svg ${className}`} />;
 
 export default styled(Svg)<Props>(({ src }) => `
   background: var(--textColor);

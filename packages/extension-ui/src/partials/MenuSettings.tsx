@@ -3,11 +3,10 @@
 
 import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { ThemeContext } from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
-import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, ThemeSwitchContext } from '../components/index.js';
+import { ActionContext, ActionText, Checkbox, chooseTheme, Dropdown, Menu, MenuDivider, MenuItem, Switch, ThemeSwitchContext } from '../components/index.js';
 import { useIsPopup, useTranslation } from '../hooks/index.js';
 import { setNotification, windowOpen } from '../messaging.js';
 import { styled } from '../styled.js';
@@ -35,8 +34,8 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const [notification, updateNotification] = useState(settings.notification);
-  const themeContext = useContext(ThemeContext);
-  const setTheme = useContext(ThemeSwitchContext);
+  const [theme, setTheme] = useState(chooseTheme());
+  const setThemeContext = useContext(ThemeSwitchContext);
   const isPopup = useIsPopup();
   const languageOptions = useMemo(() => getLanguageOptions(), []);
   const onAction = useContext(ActionContext);
@@ -61,9 +60,14 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     }, []
   );
 
-  const _onChangeTheme = useCallback(
-    (checked: boolean): void => setTheme(checked ? 'dark' : 'light'),
-    [setTheme]
+  const _onSetTheme = useCallback(
+    (checked: boolean): void => {
+      const theme = checked ? 'dark' : 'light';
+
+      setThemeContext(theme);
+      setTheme(theme);
+    },
+    [setThemeContext]
   );
 
   const _onWindowOpen = useCallback(
@@ -94,9 +98,9 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
         title='Theme'
       >
         <Switch
-          checked={themeContext?.['id'] === 'dark'}
+          checked={theme === 'dark'}
           checkedLabel={t('Dark')}
-          onChange={_onChangeTheme}
+          onChange={_onSetTheme}
           uncheckedLabel={t('Light')}
         />
       </MenuItem>
@@ -184,7 +188,7 @@ export default React.memo(styled(MenuSettings)<Props>`
       vertical-align: middle;
     }
 
-    ${Svg} {
+    .Comp--Svg {
       background: var(--textColor);
       height: 20px;
       top: 4px;

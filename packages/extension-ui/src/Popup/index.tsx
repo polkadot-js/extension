@@ -66,10 +66,6 @@ function initAccountContext ({ accounts, selectedAccounts, setSelectedAccounts }
   };
 }
 
-function setTheme (isDark: boolean): void {
-  document?.documentElement?.setAttribute('data-theme', isDark ? 'dark' : 'light');
-}
-
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
@@ -110,7 +106,6 @@ export default function Popup (): React.ReactElement {
     ]).catch(console.error);
 
     uiSettings.on('change', (settings): void => {
-      setTheme(settings.uiTheme === 'dark');
       setSettingsCtx(settings);
       setCameraOn(settings.camera === 'on');
     });

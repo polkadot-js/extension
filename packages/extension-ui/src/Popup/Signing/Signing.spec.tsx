@@ -13,9 +13,8 @@ import enzyme from 'enzyme';
 import { EventEmitter } from 'events';
 import React, { useState } from 'react';
 import { act } from 'react-dom/test-utils';
-import { ThemeProvider } from 'styled-components';
 
-import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '../../components/index.js';
+import { ActionContext, Address, Button, Input, SigningReqContext } from '../../components/index.js';
 import * as messaging from '../../messaging.js';
 import * as MetadataCache from '../../MetadataCache.js';
 import { flushAllPromises } from '../../testHelpers.js';
@@ -69,9 +68,7 @@ describe('Signing requests', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     wrapper = mount(
       <ActionContext.Provider value={onActionStub}>
-        <ThemeProvider theme={themes.dark}>
-          <MockRequestsProvider />
-        </ThemeProvider>
+        <MockRequestsProvider />
       </ActionContext.Provider>
     );
     await act(flushAllPromises);

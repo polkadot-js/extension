@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
-import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext, useEffect } from 'react';
 
@@ -13,7 +12,7 @@ import { AccountSelection } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 import NoAccount from './NoAccount.js';
 
-interface Props extends ThemeProps {
+interface Props{
   authId: string;
   className?: string;
   isFirst: boolean;

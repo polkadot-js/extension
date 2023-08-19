@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types.js';
-
 import React from 'react';
 import { Trans } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -11,7 +9,7 @@ import { useTranslation } from '../hooks/index.js';
 import { Header } from '../partials/index.js';
 import { styled } from '../styled.js';
 
-interface Props extends ThemeProps {
+interface Props{
   className?: string;
 }
 

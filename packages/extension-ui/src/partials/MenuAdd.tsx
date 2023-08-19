@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types.js';
-
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -13,7 +11,7 @@ import { useIsPopup, useLedger, useTranslation } from '../hooks/index.js';
 import { windowOpen } from '../messaging.js';
 import { styled } from '../styled.js';
 
-interface Props extends ThemeProps {
+interface Props{
   className?: string;
   reference: React.MutableRefObject<null>;
 }

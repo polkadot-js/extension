@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/types';
-import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -13,7 +12,7 @@ import { Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 import WebsiteEntry from './WebsiteEntry.js';
 
-interface Props extends ThemeProps {
+interface Props{
   className?: string;
 }
 

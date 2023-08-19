@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { RouteComponentProps } from 'react-router';
-import type { ThemeProps } from '../types.js';
 
 import React, { useCallback, useContext, useState } from 'react';
 import { withRouter } from 'react-router';
@@ -13,7 +12,7 @@ import { forgetAccount } from '../messaging.js';
 import { Header } from '../partials/index.js';
 import { styled } from '../styled.js';
 
-interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
+interface Props extends RouteComponentProps<{ address: string }> {
   className?: string;
 }
 

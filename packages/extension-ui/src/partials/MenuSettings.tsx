@@ -1,15 +1,13 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Theme, ThemeProps } from '../types.js';
-
 import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ThemeContext } from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
-import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components/index.js';
+import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, ThemeSwitchContext } from '../components/index.js';
 import { useIsPopup, useTranslation } from '../hooks/index.js';
 import { setNotification, windowOpen } from '../messaging.js';
 import { styled } from '../styled.js';
@@ -20,7 +18,7 @@ interface Option {
   value: string;
 }
 
-interface Props extends ThemeProps {
+interface Props{
   className?: string;
   reference: React.MutableRefObject<null>;
 }
@@ -37,7 +35,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const [notification, updateNotification] = useState(settings.notification);
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
+  const themeContext = useContext(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
   const isPopup = useIsPopup();
   const languageOptions = useMemo(() => getLanguageOptions(), []);
@@ -96,7 +94,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
         title='Theme'
       >
         <Switch
-          checked={themeContext.id === themes.dark.id}
+          checked={themeContext?.['id'] === 'dark'}
           checkedLabel={t('Dark')}
           onChange={_onChangeTheme}
           uncheckedLabel={t('Light')}

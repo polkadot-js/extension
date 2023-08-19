@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types.js';
-
 import React, { useMemo } from 'react';
 
 import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';

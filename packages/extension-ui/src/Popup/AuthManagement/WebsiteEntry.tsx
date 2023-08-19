@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AuthUrlInfo } from '@polkadot/extension-base/background/types';
-import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -11,7 +10,7 @@ import RemoveAuth from '../../components/RemoveAuth.js';
 import { useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
-interface Props extends ThemeProps {
+interface Props{
   className?: string;
   info: AuthUrlInfo;
   removeAuth: (url: string) => void;

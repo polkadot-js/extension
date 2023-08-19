@@ -3,7 +3,6 @@
 
 import type { AccountJson } from '@polkadot/extension-base/background/types';
 import type { HexString } from '@polkadot/util/types';
-import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 

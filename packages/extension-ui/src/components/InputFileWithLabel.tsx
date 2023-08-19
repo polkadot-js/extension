@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { DropzoneRef } from 'react-dropzone';
-import type { ThemeProps } from '../types.js';
 
 import React, { createRef, useCallback, useState } from 'react';
 import Dropzone from 'react-dropzone';

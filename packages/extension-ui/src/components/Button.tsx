@@ -1,14 +1,12 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types.js';
-
 import React, { useCallback } from 'react';
 
 import { styled } from '../styled.js';
 import Spinner from './Spinner.js';
 
-interface Props extends ThemeProps {
+interface Props{
   className?: string;
   children?: React.ReactNode;
   isBusy?: boolean;

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MouseEventHandler } from 'react';
-import type { ThemeProps } from '../types.js';
 
 import { faCopy } from '@fortawesome/free-regular-svg-icons';
 import React from 'react';

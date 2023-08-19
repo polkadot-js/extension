@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { RouteComponentProps } from 'react-router';
-import type { ThemeProps } from '../types.js';
 
 import fileSaver from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
@@ -16,7 +15,7 @@ import { styled } from '../styled.js';
 
 const MIN_LENGTH = 6;
 
-interface Props extends RouteComponentProps, ThemeProps {
+interface Props extends RouteComponentProps {
   className?: string;
 }
 

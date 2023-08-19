@@ -1,8 +1,6 @@
 // Copyright 2017-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types.js';
-
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useRef } from 'react';
@@ -10,7 +8,7 @@ import React, { useCallback, useRef } from 'react';
 import { styled } from '../styled.js';
 import { Input } from './TextInputs.js';
 
-interface Props extends ThemeProps {
+interface Props{
   className?: string;
   onChange: (filter: string) => void;
   placeholder: string;

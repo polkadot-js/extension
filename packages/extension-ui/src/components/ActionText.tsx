@@ -3,7 +3,6 @@
 
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import type { MouseEventHandler } from 'react';
-import type { ThemeProps } from '../types.js';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';

@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types.js';
-
 import React, { useCallback } from 'react';
 
 import arrow from '../assets/arrow-down.svg';
@@ -14,7 +12,7 @@ interface DropdownOption {
   value: string;
 }
 
-interface Props extends ThemeProps {
+interface Props{
   className?: string;
   defaultValue?: string | null;
   isDisabled?: boolean
@@ -62,7 +60,7 @@ function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onB
   );
 }
 
-export default React.memo(styled(Dropdown)(({ isError, label }: Props) => `
+export default React.memo(styled(Dropdown)<Props>(({ isError, label }) => `
   position: relative;
 
   select {

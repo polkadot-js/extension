@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { ThemeProps } from '../../types.js';
 import type { AccountInfo } from './index.js';
 
 import { faCaretDown, faCaretRight } from '@fortawesome/free-solid-svg-icons';

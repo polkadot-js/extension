@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IconTheme } from '@polkadot/react-identicon/types';
-import type { ThemeProps } from '../types.js';
 
 import React from 'react';
 

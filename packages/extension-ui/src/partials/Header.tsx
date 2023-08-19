@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types.js';
-
 import { faArrowLeft, faCog, faPlusCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -17,7 +15,7 @@ import { styled } from '../styled.js';
 import MenuAdd from './MenuAdd.js';
 import MenuSettings from './MenuSettings.js';
 
-interface Props extends ThemeProps {
+interface Props{
   children?: React.ReactNode;
   className?: string;
   onFilter?: (filter: string) => void;

@@ -6,7 +6,6 @@ import type { Chain } from '@polkadot/extension-chains/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { ThemeProps } from '../types.js';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';

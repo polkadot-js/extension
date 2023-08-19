@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
-import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext } from 'react';
 

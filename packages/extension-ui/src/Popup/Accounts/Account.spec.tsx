@@ -35,7 +35,7 @@ describe('Account component', () => {
   let wrapper: ReactWrapper;
   const VALID_ADDRESS = 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5';
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  const mountAccountComponent = (additionalAccountProperties: Record<string, unknown>,): ReactWrapper => mount(
+  const mountAccountComponent = (additionalAccountProperties: Record<string, unknown>): ReactWrapper => mount(
     <MemoryRouter>
       <Account
         {...{ address: VALID_ADDRESS, ...additionalAccountProperties }}

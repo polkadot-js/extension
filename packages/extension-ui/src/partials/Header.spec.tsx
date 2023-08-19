@@ -25,7 +25,7 @@ describe('Header component', () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   const mountHeader = (props: React.ComponentProps<typeof Header> = {}): ReactWrapper => mount(
     <MemoryRouter>
-      <Header {...props}>
+      <Header {...props} />
     </MemoryRouter>);
 
   it('gear icon is not highlighted when settings are hidden', () => {

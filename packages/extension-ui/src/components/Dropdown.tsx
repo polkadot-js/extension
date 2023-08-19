@@ -9,7 +9,7 @@ import Label from './Label.js';
 
 interface DropdownOption {
   text: string | React.ReactNode;
-  value: string | number;
+  value?: string | number | null;
 }
 
 interface Props {
@@ -23,7 +23,7 @@ interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onChange?: (value: any) => void;
   options: DropdownOption[];
-  value?: string | null;
+  value?: number | string | null;
 }
 
 function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
@@ -50,7 +50,7 @@ function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onB
           {options.map(({ text, value }): React.ReactNode => (
             <option
               key={value}
-              value={value}
+              value={value ?? undefined}
             >
               {text}
             </option>

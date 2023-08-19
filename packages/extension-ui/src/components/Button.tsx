@@ -12,7 +12,7 @@ export interface ButtonProps {
   isBusy?: boolean;
   isDanger?: boolean;
   isDisabled?: boolean;
-  onClick?: () => void | Promise<void | boolean>;
+  onClick?: () => void | Promise<void | boolean> | null;
   to?: string;
 }
 

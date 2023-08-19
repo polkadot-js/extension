@@ -18,7 +18,7 @@ interface Option {
   value: string;
 }
 
-interface Props{
+interface Props {
   className?: string;
   reference: React.MutableRefObject<null>;
 }

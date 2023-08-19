@@ -8,7 +8,7 @@ import React, { useCallback, useRef } from 'react';
 import { styled } from '../styled.js';
 import { Input } from './TextInputs.js';
 
-interface Props{
+interface Props {
   className?: string;
   onChange: (filter: string) => void;
   placeholder: string;

@@ -7,7 +7,7 @@ import { ActionContext, ActionText } from '../components/index.js';
 import { styled } from '../styled.js';
 import Header from './Header.js';
 
-interface Props{
+interface Props {
   className?: string;
   step: number;
   text: string;

@@ -12,7 +12,7 @@ import { AccountSelection } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 import NoAccount from './NoAccount.js';
 
-interface Props{
+interface Props {
   authId: string;
   className?: string;
   isFirst: boolean;

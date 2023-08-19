@@ -15,7 +15,7 @@ import { styled } from '../styled.js';
 import MenuAdd from './MenuAdd.js';
 import MenuSettings from './MenuSettings.js';
 
-interface Props{
+interface Props {
   children?: React.ReactNode;
   className?: string;
   onFilter?: (filter: string) => void;

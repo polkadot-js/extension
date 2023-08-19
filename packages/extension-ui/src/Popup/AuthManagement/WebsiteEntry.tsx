@@ -10,7 +10,7 @@ import RemoveAuth from '../../components/RemoveAuth.js';
 import { useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
-interface Props{
+interface Props {
   className?: string;
   info: AuthUrlInfo;
   removeAuth: (url: string) => void;

@@ -9,7 +9,7 @@ import { useTranslation } from '../hooks/index.js';
 import AccountsTree from '../Popup/Accounts/AccountsTree.js';
 import { styled } from '../styled.js';
 
-interface Props{
+interface Props {
   className?: string;
   url: string;
   origin: string;

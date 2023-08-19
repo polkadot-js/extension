@@ -6,7 +6,7 @@ import React from 'react';
 import spinnerSrc from '../assets/spinner.png';
 import { styled } from '../styled.js';
 
-interface Props{
+interface Props {
   className?: string;
   size?: 'normal';
 }

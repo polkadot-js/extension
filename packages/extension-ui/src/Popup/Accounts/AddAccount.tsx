@@ -9,7 +9,7 @@ import Header from '../../partials/Header.js';
 import { styled } from '../../styled.js';
 import AddAccountImage from './AddAccountImage.js';
 
-interface Props{
+interface Props {
   className?: string;
 }
 

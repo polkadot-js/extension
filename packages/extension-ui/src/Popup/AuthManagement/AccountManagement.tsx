@@ -10,7 +10,7 @@ import { getAuthList, updateAuthorization } from '../../messaging.js';
 import { AccountSelection, Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 
-interface Props{
+interface Props {
   className?: string;
 }
 

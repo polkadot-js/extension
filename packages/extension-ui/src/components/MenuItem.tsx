@@ -5,7 +5,7 @@ import React from 'react';
 
 import { styled } from '../styled.js';
 
-interface Props{
+interface Props {
   children: React.ReactNode;
   className?: string;
   noBorder?: boolean;

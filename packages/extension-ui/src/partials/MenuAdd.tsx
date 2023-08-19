@@ -11,7 +11,7 @@ import { useIsPopup, useLedger, useTranslation } from '../hooks/index.js';
 import { windowOpen } from '../messaging.js';
 import { styled } from '../styled.js';
 
-interface Props{
+interface Props {
   className?: string;
   reference: React.MutableRefObject<null>;
 }

@@ -9,7 +9,7 @@ import { Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 import Request from './Request.js';
 
-interface Props{
+interface Props {
   className?: string;
 }
 

@@ -8,7 +8,7 @@ import { useTranslation } from '../hooks/index.js';
 import { Header } from '../partials/index.js';
 import { styled } from '../styled.js';
 
-interface Props{
+interface Props {
   className?: string;
 }
 

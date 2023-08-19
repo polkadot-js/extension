@@ -9,7 +9,7 @@ import { Button, Warning } from '../../components/index.js';
 import { deleteAuthRequest } from '../../messaging.js';
 import { styled } from '../../styled.js';
 
-interface Props{
+interface Props {
   authId: string;
   className?: string;
 }

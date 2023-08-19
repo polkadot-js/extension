@@ -11,7 +11,7 @@ import React from 'react';
 
 import { styled } from '../../styled.js';
 
-interface Props{
+interface Props {
   className?: string;
   onClick: () => void;
 }

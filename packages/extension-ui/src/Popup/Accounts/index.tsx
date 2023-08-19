@@ -14,7 +14,7 @@ import { styled } from '../../styled.js';
 import AccountsTree from './AccountsTree.js';
 import AddAccount from './AddAccount.js';
 
-interface Props{
+interface Props {
   className?: string;
 }
 

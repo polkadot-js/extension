@@ -12,7 +12,7 @@ interface DropdownOption {
   value: string;
 }
 
-interface Props{
+interface Props {
   className?: string;
   defaultValue?: string | null;
   isDisabled?: boolean

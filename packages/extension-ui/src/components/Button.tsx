@@ -6,7 +6,7 @@ import React, { useCallback } from 'react';
 import { styled } from '../styled.js';
 import Spinner from './Spinner.js';
 
-interface Props{
+interface Props {
   className?: string;
   children?: React.ReactNode;
   isBusy?: boolean;

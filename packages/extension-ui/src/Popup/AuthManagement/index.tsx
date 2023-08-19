@@ -12,7 +12,7 @@ import { Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 import WebsiteEntry from './WebsiteEntry.js';
 
-interface Props{
+interface Props {
   className?: string;
 }
 

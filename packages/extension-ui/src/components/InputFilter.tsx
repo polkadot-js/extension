@@ -54,7 +54,7 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
   );
 }
 
-export default styled(InputFilter)(({ theme }: Props) => `
+export default styled(InputFilter)`
   padding-left: 1rem !important;
   padding-right: 1rem !important;
   position: relative;
@@ -63,7 +63,7 @@ export default styled(InputFilter)(({ theme }: Props) => `
     position: absolute;
     right: 28px;
     top: 12px;
-    color: ${theme.iconNeutralColor};
+    color: var(--iconNeutralColor);
     cursor: pointer;
   }
-`);
+`;

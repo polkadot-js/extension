@@ -128,7 +128,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(MenuAdd)(({ theme }: Props) => `
+export default React.memo(styled(MenuAdd)`
   margin-top: 50px;
   right: 50px; // 24 + 18 + 8
   user-select: none;
@@ -146,9 +146,9 @@ export default React.memo(styled(MenuAdd)(({ theme }: Props) => `
     }
 
     .svg-inline--fa {
-      color: ${theme.iconNeutralColor};
+      color: var(--iconNeutralColor);
       margin-right: 0.3rem;
       width: 0.875em;
     }
   }
-`));
+`);

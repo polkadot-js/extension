@@ -161,7 +161,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
   );
 }
 
-export default styled(Account)(({ theme }: ThemeProps) => `
+export default styled(Account)`
   .address {
     margin-bottom: 8px;
   }
@@ -174,7 +174,7 @@ export default styled(Account)(({ theme }: ThemeProps) => `
     width: 350px;
 
     .danger {
-      background-color: ${theme.bodyColor};
+      background-color: var(--bodyColor);
       margin-top: -13px;
       width: 330px;
     }
@@ -202,4 +202,4 @@ export default styled(Account)(({ theme }: ThemeProps) => `
       margin: 0;
     }
   }
-`);
+`;

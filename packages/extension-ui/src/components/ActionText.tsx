@@ -29,21 +29,21 @@ function ActionText ({ className, icon, onClick, text }: Props): React.ReactElem
   );
 }
 
-export default styled(ActionText)(({ theme }: ThemeProps) => `
+export default styled(ActionText)`
   cursor: pointer;
 
   span {
-    color: ${theme.labelColor}
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
+    color: var(--labelColor)
+    font-size: var(--labelFontSize);
+    line-height: var(--labelLineHeight);
     text-decoration-line: underline;
   }
 
   .svg-inline--fa {
-    color: ${theme.iconNeutralColor};
+    color: var(--iconNeutralColor);
     display: inline-block;
     margin-right: 0.3rem;
     position: relative;
     top: 2px;
   }
-`);
+`;

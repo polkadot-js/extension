@@ -47,16 +47,16 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: 
   );
 }
 
-export default styled(Button)(({ isDanger, theme }: Props) => `
-  background: ${isDanger ? theme.buttonBackgroundDanger : theme.buttonBackground};
+export default styled(Button)(({ isDanger }: Props) => `
+  background: ${isDanger ? 'var(--buttonBackgroundDanger)' : 'var(--theme.buttonBackground)'};
   cursor: pointer;
   display: block;
   width: 100%;
   height: ${isDanger ? '40px' : '48px'};
   box-sizing: border-box;
   border: none;
-  border-radius: ${theme.borderRadius};
-  color: ${theme.buttonTextColor};
+  border-radius: var(--borderRadius);
+  color: var(--buttonTextColor);
   font-size: 15px;
   line-height: 20px;
   padding: 0 1rem;
@@ -68,7 +68,7 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   }
 
   &:not(:disabled):hover {
-    background: ${isDanger ? theme.buttonBackgroundDangerHover : theme.buttonBackgroundHover};
+    background: ${isDanger ? 'var(--buttonBackgroundDangerHover)' : 'var(--buttonBackgroundHover)'};
   }
 
   .busyOverlay,
@@ -78,7 +78,7 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
 
   .disabledOverlay {
     background: rgba(96,96,96,0.75);
-    border-radius: ${theme.borderRadius};
+    border-radius: var(--borderRadius);
     bottom: 0;
     left: 0;
     position: absolute;

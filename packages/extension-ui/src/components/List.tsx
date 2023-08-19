@@ -18,7 +18,7 @@ const List = ({ children, className }: Props) => (
   </ul>
 );
 
-export default styled(List)(({ theme }: ThemeProps) => `
+export default styled(List)`
   list-style: none;
   padding-inline-start: 10px;
   padding-inline-end: 10px;
@@ -31,10 +31,10 @@ export default styled(List)(({ theme }: ThemeProps) => `
 
   li::before {
     content: '\\2022';
-    color: ${theme.primaryColor};
+    color: var(--primaryColor);
     font-size: 30px;
     font-weight: bold;
     margin-right: 10px;
     vertical-align: -20%;
   }
-`);
+`;

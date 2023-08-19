@@ -85,17 +85,17 @@ function AddAccountImage ({ className, onClick }: Props): React.ReactElement<Pro
   );
 }
 
-export default React.memo(styled(AddAccountImage)(({ theme }: Props) => `
+export default React.memo(styled(AddAccountImage)`
   circle, path {
     cursor: pointer;
   }
 
   path {
-    fill: ${theme.textColor};
+    fill: var(--textColor);
   }
 
   & > g > circle {
-    stroke: ${theme.inputBorderColor};
-    fill: ${theme.addAccountImageBackground};
+    stroke: var(--inputBorderColor);
+    fill: var(--addAccountImageBackground);
   }
-`));
+`);

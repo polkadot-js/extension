@@ -44,14 +44,14 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(PhishingDetected)(({ theme }: Props) => `
+export default styled(PhishingDetected)`
   p {
-    color: ${theme.subTextColor};
+    color: var(--subTextColor);
     margin-bottom: 1rem;
     margin-top: 0;
 
     a {
-      color: ${theme.subTextColor};
+      color: var(--subTextColor);
     }
 
     &.websiteAddress {
@@ -59,4 +59,4 @@ export default styled(PhishingDetected)(({ theme }: Props) => `
       text-align: center;
     }
   }
-`);
+`;

@@ -30,18 +30,18 @@ function BackButton ({ className, onClick }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(BackButton)(({ theme }: ThemeProps) => `
-  background: ${theme.backButtonBackground};
+export default styled(BackButton)`
+  background: var(--backButtonBackground);
   margin-right: 11px;
   width: 42px;
 
   .arrowLeft {
-    color: ${theme.backButtonTextColor};
+    color: var(--backButtonTextColor);
     display: block;
     margin: auto;
   }
 
   &:not(:disabled):hover {
-    background: ${theme.backButtonBackgroundHover};
+    background: var(--backButtonBackgroundHover);
   }
-`);
+`;

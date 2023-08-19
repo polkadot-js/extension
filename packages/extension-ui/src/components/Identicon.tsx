@@ -34,7 +34,7 @@ function Identicon ({ className, iconTheme, onCopy, prefix, value }: Props): Rea
   );
 }
 
-export default styled(Identicon)(({ theme }: ThemeProps) => `
+export default styled(Identicon)`
   background: rgba(192, 192, 292, 0.25);
   border-radius: 50%;
   display: flex;
@@ -42,7 +42,7 @@ export default styled(Identicon)(({ theme }: ThemeProps) => `
 
   .container:before {
     box-shadow: none;
-    background: ${theme.identiconBackground};
+    background: var(--identiconBackground);
   }
 
   svg {
@@ -50,4 +50,4 @@ export default styled(Identicon)(({ theme }: ThemeProps) => `
       display: none;
     }
   }
-`);
+`;

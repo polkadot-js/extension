@@ -172,22 +172,22 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   );
 }
 
-export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
+export default React.memo(styled(MenuSettings)`
   margin-top: 50px;
   right: 24px;
   user-select: none;
 
   .openWindow, .manageWebsiteAccess{
     span {
-      color: ${theme.textColor};
-      font-size: ${theme.fontSize};
-      line-height: ${theme.lineHeight};
+      color: var(--textColor);
+      font-size: var(--fontSize);
+      line-height: var(--lineHeight);
       text-decoration: none;
       vertical-align: middle;
     }
 
     ${Svg} {
-      background: ${theme.textColor};
+      background: var(--textColor);
       height: 20px;
       top: 4px;
       width: 20px;
@@ -196,7 +196,7 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
 
   > .setting {
     > .checkbox {
-      color: ${theme.textColor};
+      color: var(--textColor);
       line-height: 20px;
       font-size: 15px;
       margin-bottom: 0;
@@ -206,16 +206,16 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
       }
 
       label {
-        color: ${theme.textColor};
+        color: var(--textColor);
       }
     }
 
     > .dropdown {
-      background: ${theme.background};
+      background: var(--background);
       margin-bottom: 0;
       margin-top: 9px;
       margin-right: 0;
       width: 100%;
     }
   }
-`));
+`);

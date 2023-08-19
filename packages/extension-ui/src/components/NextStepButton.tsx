@@ -25,11 +25,11 @@ function NextStepButton ({ children, ...props }: Props): React.ReactElement<Prop
   );
 }
 
-export default styled(NextStepButton)(({ theme }: ThemeProps) => `
+export default styled(NextStepButton)`
   .arrowRight{
     float: right;
     margin-top: 4px;
     margin-right: 1px;
-    color: ${theme.buttonTextColor};
+    color: var(--buttonTextColor);
   }
-`);
+`;

@@ -131,11 +131,11 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
     : dropZone;
 }
 
-export default React.memo(styled(InputFile)(({ isError, theme }: InputFileProps & ThemeProps) => `
-  border: 1px solid ${isError ? theme.errorBorderColor : theme.inputBorderColor};
-  background: ${theme.inputBackground};
-  border-radius: ${theme.borderRadius};
-  color: ${isError ? theme.errorBorderColor : theme.textColor};
+export default React.memo(styled(InputFile)(({ isError }: InputFileProps) => `
+  border: 1px solid ${isError ? 'var(--errorBorderColor)' : 'var(--inputBorderColor)'};
+  background: var(--inputBackground);
+  border-radius: var(--borderRadius);
+  color: ${isError ? 'var(--errorBorderColor)' : 'var(--textColor)'};
   font-size: 1rem;
   margin: 0.25rem 0;
   overflow-wrap: anywhere;

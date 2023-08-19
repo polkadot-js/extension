@@ -25,12 +25,12 @@ function RemoveAuth ({ className, onRemove }: Props): React.ReactElement {
   );
 }
 
-export default styled(RemoveAuth)(({ theme }: ThemeProps) => `
+export default styled(RemoveAuth)`
   cursor: pointer;
-  color: ${theme.labelColor};
+  color: var(--labelColor);
   margin-right: 1rem;
 
   &.selected {
-    color: ${theme.primaryColor};
+    color: var(--primaryColor);
   }
-`);
+`;

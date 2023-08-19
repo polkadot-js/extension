@@ -72,7 +72,7 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
   );
 }
 
-export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
+export default React.memo(styled(DerivationPath)`
   > .container {
     display: flex;
     flex-direction: row;
@@ -99,7 +99,7 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
   }
 
   .lockIcon {
-    color: ${theme.iconNeutralColor}
+    color: var(--iconNeutralColor)
   }
 
   .pathInput {
@@ -109,4 +109,4 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
       opacity: 50%;
     }
   }
-`));
+`);

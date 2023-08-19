@@ -48,10 +48,10 @@ function Welcome ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Welcome)(({ theme }: Props) => `
+export default styled(Welcome)`
   p {
-    color: ${theme.subTextColor};
+    color: var(--subTextColor);
     margin-bottom: 6px;
     margin-top: 0;
   }
-`);
+`;

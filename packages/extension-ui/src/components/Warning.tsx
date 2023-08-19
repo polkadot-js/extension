@@ -28,18 +28,18 @@ function Warning ({ children, className = '', isBelowInput, isDanger }: Props): 
   );
 }
 
-export default React.memo(styled(Warning)<Props>(({ isDanger, theme }: Props) => `
+export default React.memo(styled(Warning)<Props>(({ isDanger }: Props) => `
   display: flex;
   flex-direction: row;
   padding-left: 18px;
-  color: ${theme.subTextColor};
+  color: var(--subTextColor);
   margin-right: 20px;
   margin-top: 6px;
-  border-left: ${`0.25rem solid ${theme.iconWarningColor}`};
+  border-left: 0.25rem solid var(--iconWarningColor);
 
   &.belowInput {
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
+    font-size: var(--labelFontSize);
+    line-height: var(--labelLineHeight);
 
     &.danger {
       margin-top: -10px;
@@ -47,7 +47,7 @@ export default React.memo(styled(Warning)<Props>(({ isDanger, theme }: Props) =>
   }
 
   &.danger {
-    border-left-color: ${theme.buttonBackgroundDanger};
+    border-left-color: var(--buttonBackgroundDanger);
   }
 
   .warning-message {
@@ -57,6 +57,6 @@ export default React.memo(styled(Warning)<Props>(({ isDanger, theme }: Props) =>
 
   .warningImage {
     margin: 5px 10px 5px 0;
-    color: ${isDanger ? theme.iconDangerColor : theme.iconWarningColor};
+    color: ${isDanger ? 'var(--iconDangerColor)' : 'var(--iconWarningColor)'};
   }
 `));

@@ -62,23 +62,23 @@ function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onB
   );
 }
 
-export default React.memo(styled(Dropdown)(({ isError, label, theme }: Props) => `
+export default React.memo(styled(Dropdown)(({ isError, label }: Props) => `
   position: relative;
 
   select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: ${theme.readonlyInputBackground};
-    border-color: ${isError ? theme.errorBorderColor : theme.inputBorderColor};
-    border-radius: ${theme.borderRadius};
+    background: var(--readonlyInputBackground);
+    border-color: ${isError ? 'var(--errorBorderColor)' : 'var(--inputBorderColor)'};
+    border-radius: var(--borderRadius);
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
-    color: ${isError ? theme.errorBorderColor : theme.textColor};
+    color: ${isError ? 'var(--errorBorderColor)' : 'var(--textColor)'};
     display: block;
-    font-family: ${theme.fontFamily};
-    font-size: ${theme.fontSize};
+    font-family: var(--fontFamily);
+    font-size: var(--fontSize);
     padding: 0.5rem 0.75rem;
     width: 100%;
     cursor: pointer;

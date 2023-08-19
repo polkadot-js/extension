@@ -25,7 +25,7 @@ function MenuItem ({ children, className = '', title }: Props): React.ReactEleme
   );
 }
 
-export default styled(MenuItem)(({ theme }: ThemeProps) => `
+export default styled(MenuItem)`
   min-width: 13rem;
   padding: 0 16px;
   max-width: 100%;
@@ -33,15 +33,15 @@ export default styled(MenuItem)(({ theme }: ThemeProps) => `
   > .itemTitle {
     margin: 0;
     width: 100%;
-    font-size: ${theme.inputLabelFontSize};
+    font-size: var(--inputLabelFontSize);
     line-height: 14px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: ${theme.textColor};
+    color: var(--textColor);
     opacity: 0.65;
   }
 
   &+&.isTitled {
     margin-top: 16px;
   }
-`);
+`;

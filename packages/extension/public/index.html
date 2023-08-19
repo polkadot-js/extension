@@ -21,6 +21,88 @@
         text-align: left;
         width: 560px;
       }
+
+      :root {
+        --borderRadius: 4px;
+        --boxLineHeight: 1rem;
+        --boxMargin: 0.75rem 0;
+        --boxPadding: 0 0.25rem;
+        --fontFamily: Nunito, sans-serif;
+        --fontSize: 16px;
+        --inputLabelFontSize: 10px;
+        --labelFontSize: 13px;
+        --labelLineHeight: 18px;
+        --lineHeight: 26px;
+      }
+
+      :root {
+        --accountDotsIconColor: #8E8E8E;
+        --addAccountImageBackground: #1A1B20;
+        --backButtonBackground: #3A3B41;
+        --backButtonBackgroundHover: #3a3b41ad;
+        --backButtonTextColor: #FFFFFF;
+        --background: #26272C;
+        --bodyColor: #20222A;
+        --boxBackground: #1A1B20;
+        --boxBorderColor: #303030;
+        --boxShadow: rgba(0, 0, 0, 0.86);
+        --buttonBackground: #E86F00;
+        --buttonBackgroundDanger: #AF1111;
+        --buttonBackgroundDangerHover: #D93B3B;
+        --buttonBackgroundHover: #ED9329;
+        --buttonTextColor: #FFFFFF;
+        --connectedDotColor: seagreen;
+        --errorBorderColor: #7E3530;
+        --errorColor: #E42F2F;
+        --highlightedAreaBackground: #212226;
+        --iconDangerColor: #AF1111;
+        --iconNeutralColor: #8E8E8E;
+        --iconWarningColor: #FF7D01;
+        --identiconBackground: #F4F5F8;
+        --inputBackground: #111218;
+        --inputBorderColor: #43444B;
+        --labelColor: #9F9E99;
+        --parentLabelColor: #4A7463;
+        --popupBackground: #38393F;
+        --primaryColor: #FF7D01;
+        --readonlyInputBackground: #1A1B20;
+        --subTextColor: #DDD;
+        --textColor: #FFFFFF;
+        --textColorDanger: #FF8686;
+      }
+
+      [data-theme="dark"] {
+        /* Just uses the base vars */
+        --id: 'dark';
+      }
+
+      [data-theme="light"] {
+        /* Extends the dark theme */
+        --id: 'light';
+        --addAccountImageBackground: #FFF;
+        --backButtonBackground: #D7D7D7;
+        --backButtonBackgroundHover: #d7d7d7ad;
+        --backButtonTextColor: #454545;
+        --background: #FAFAFA;
+        --bodyColor: #FFFFFF;
+        --boxBackground: #FFFFFF;
+        --boxBorderColor: #DADFEA;
+        --boxShadow: rgba(0, 0, 0, 0.3);
+        --buttonBackgroundDanger: #DC2222;
+        --errorBorderColor: #E42F2F;
+        --highlightedAreaBackground: #EFEFEF;
+        --iconDangerColor: #DC2222;
+        --iconNeutralColor: #939CB1;
+        --inputBackground: #FFFFFF;
+        --inputBorderColor: #DDE1EB;
+        --labelColor: #333333;
+        --parentLabelColor: #215B4F;
+        --popupBackground: #FFFFFF;
+        --readonlyInputBackground: #FFF;
+        --subTextColor: #454545;
+        --textColor: #242529;
+        --textColorDanger: #F24A4A;
+      }
     </style>
   </head>
   <body>

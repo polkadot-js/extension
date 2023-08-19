@@ -11,16 +11,16 @@ interface Props extends ThemeProps {
   withError?: boolean;
 }
 
-const TextInput = css(({ theme, withError }: Props) => `
-  background: ${theme.inputBackground};
-  border-radius: ${theme.borderRadius};
-  border: 1px solid ${theme.inputBorderColor};
-  border-color: ${withError ? theme.errorBorderColor : theme.inputBorderColor};
+const TextInput = css(({ withError }: Props) => `
+  background: var(--inputBackground);
+  border-radius: var(--borderRadius);
+  border: 1px solid var(--inputBorderColor);
+  border-color: ${withError ? 'var(--errorBorderColor)' : 'var(--inputBorderColor)'};
   box-sizing: border-box;
-  color: ${withError ? theme.errorColor : theme.textColor};
+  color: ${withError ? 'var(--errorColor)' : 'var(--textColor)'};
   display: block;
-  font-family: ${theme.fontFamily};
-  font-size: ${theme.fontSize};
+  font-family: var(--fontFamily);
+  font-size: var(--fontSize);
   height: 40px;
   outline: none;
   padding: 0.5rem 0.75rem;
@@ -28,7 +28,7 @@ const TextInput = css(({ theme, withError }: Props) => `
   width: 100%;
 
   &:read-only {
-    background: ${theme.readonlyInputBackground};
+    background: var(--readonlyInputBackground);
     box-shadow: none;
     outline: none;
   }

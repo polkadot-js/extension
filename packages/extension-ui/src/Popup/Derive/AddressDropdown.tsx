@@ -59,7 +59,7 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
   );
 }
 
-export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
+export default styled(AddressDropdown)`
   margin-bottom: 16px;
   cursor: pointer;
 
@@ -72,10 +72,10 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     width: 30px;
     height: 30px;
     background: url(${arrow}) center no-repeat;
-    background-color: ${theme.inputBackground};
+    background-color: var(--inputBackground);
     pointer-events: none;
     border-radius: 4px;
-    border: 1px solid ${theme.boxBorderColor};
+    border: 1px solid var(--boxBorderColor);
   }
 
   .address .copyIcon {
@@ -87,11 +87,11 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     visibility: hidden;
     width: 510px;
     z-index: 100;
-    background: ${theme.bodyColor};
+    background: var(--bodyColor);
     max-height: 0;
     overflow: auto;
     padding: 5px;
-    border: 1px solid ${theme.boxBorderColor};
+    border: 1px solid var(--boxBorderColor);
     box-sizing: border-box;
     border-radius: 4px;
     margin-top: -8px;
@@ -105,4 +105,4 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
       cursor: pointer;
     }
   }
-`);
+`;

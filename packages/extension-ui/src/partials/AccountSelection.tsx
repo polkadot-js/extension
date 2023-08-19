@@ -92,7 +92,7 @@ function AccounSelection ({ className, origin, showHidden = false, url, withWarn
   );
 }
 
-export default styled(AccounSelection)(({ theme }: Props) => `
+export default styled(AccounSelection)`
   .accountList {
     overflow-y: auto;
     height: 270px;
@@ -100,7 +100,7 @@ export default styled(AccounSelection)(({ theme }: Props) => `
 
   .tab-name,
   .tab-url {
-    color: ${theme.textColor};
+    color: var(--textColor);
     display: inline-block;
     max-height: 10rem;
     width: 100%;
@@ -120,4 +120,4 @@ export default styled(AccounSelection)(({ theme }: Props) => `
       width: 100%
     }
   }
-`);
+`;

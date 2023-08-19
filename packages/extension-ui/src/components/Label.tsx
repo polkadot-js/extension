@@ -22,15 +22,15 @@ function Label ({ children, className, label }: Props): React.ReactElement<Props
   );
 }
 
-export default styled(Label)(({ theme }: ThemeProps) => `
-  color: ${theme.textColor};
+export default styled(Label)`
+  color: var(--textColor);
 
   label {
-    font-size: ${theme.inputLabelFontSize};
+    font-size: var(--inputLabelFontSize);
     line-height: 14px;
     letter-spacing: 0.04em;
     opacity: 0.65;
     margin-bottom: 12px;
     text-transform: uppercase;
   }
-`);
+`;

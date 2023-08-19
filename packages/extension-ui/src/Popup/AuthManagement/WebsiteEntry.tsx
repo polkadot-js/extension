@@ -50,7 +50,7 @@ function WebsiteEntry ({ className = '', info: { authorizedAccounts, isAllowed }
   );
 }
 
-export default styled(WebsiteEntry)(({ theme }: Props) => `
+export default styled(WebsiteEntry)`
   display: flex;
   align-items: center;
   margin-top: .2rem;
@@ -61,11 +61,11 @@ export default styled(WebsiteEntry)(({ theme }: Props) => `
 
   .connectedAccounts{
     margin-left: .5rem;
-    background-color: ${theme.primaryColor};
+    background-color: var(--primaryColor);
     color: white;
     cursor: pointer;
     padding: 0 0.5rem;
     border-radius: 4px;
     text-decoration: none;
   }
-`);
+`;

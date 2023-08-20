@@ -130,7 +130,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   );
 }
 
-export default styled(SignArea)`
+export default styled(SignArea)<Props>`
   flex-direction: column;
   padding: 6px 24px;
 

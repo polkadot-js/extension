@@ -44,7 +44,7 @@ function AccountsTree ({ className, parentName, showHidden = true, suri, withChe
   );
 }
 
-export default styled(AccountsTree)`
+export default styled(AccountsTree)<Props>`
   .accountWichCheckbox {
     display: flex;
     align-items: center;

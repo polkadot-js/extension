@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountWithChildren } from '@polkadot/extension-base/background/types';
-import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
@@ -15,7 +14,7 @@ import { styled } from '../../styled.js';
 import AccountsTree from './AccountsTree.js';
 import AddAccount from './AddAccount.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
 }
 
@@ -71,7 +70,7 @@ function Accounts ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(Accounts)`
+export default styled(Accounts)<Props>`
   height: calc(100vh - 2px);
   overflow-y: scroll;
   margin-top: -25px;

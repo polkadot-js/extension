@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types.js';
-
 import React from 'react';
 import styled from 'styled-components';
 
@@ -27,18 +25,18 @@ function BoxWithLabel ({ className, label, value }: Props): React.ReactElement<P
   );
 }
 
-export default styled(BoxWithLabel)(({ theme }: ThemeProps) => `
+export default styled(BoxWithLabel)<Props>`
   .seedBox {
-    background: ${theme.readonlyInputBackground};
+    background: var(--readonlyInputBackground);
     box-shadow: none;
-    border-radius: ${theme.borderRadius};
-    border: 1px solid ${theme.inputBorderColor};
-    border-color: ${theme.inputBorderColor};
+    border-radius: var(--borderRadius);
+    border: 1px solid var(--inputBorderColor);
+    border-color: var(--inputBorderColor);
     box-sizing: border-box;
     display: block;
-    font-family: ${theme.fontFamily};
+    font-family: var(--fontFamily);
     outline: none;
     resize: none;
     width: 100%;
   }
-`);
+`;

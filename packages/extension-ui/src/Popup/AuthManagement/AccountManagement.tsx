@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types.js';
-
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useParams } from 'react-router';
 
@@ -12,7 +10,7 @@ import { getAuthList, updateAuthorization } from '../../messaging.js';
 import { AccountSelection, Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
 }
 
@@ -71,7 +69,7 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(AccountManagement)`
+export default styled(AccountManagement)<Props>`
   .accountSelection{
     .accountList{
       height: 390px;

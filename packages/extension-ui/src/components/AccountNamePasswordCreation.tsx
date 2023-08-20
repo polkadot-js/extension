@@ -20,7 +20,13 @@ function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCrea
   const [password, setPassword] = useState<string | null>(null);
 
   const _onCreate = useCallback(
-    () => name && password && onCreate(name, password),
+    (): void => {
+      if (name && password) {
+        Promise
+          .resolve(onCreate(name, password))
+          .catch(console.error);
+      }
+    },
     [name, password, onCreate]
   );
 

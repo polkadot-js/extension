@@ -1,15 +1,12 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Theme, ThemeProps } from '../types.js';
-
 import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { ThemeContext } from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
-import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components/index.js';
+import { ActionContext, ActionText, Checkbox, chooseTheme, Dropdown, Menu, MenuDivider, MenuItem, Switch, ThemeSwitchContext } from '../components/index.js';
 import { useIsPopup, useTranslation } from '../hooks/index.js';
 import { setNotification, windowOpen } from '../messaging.js';
 import { styled } from '../styled.js';
@@ -20,7 +17,7 @@ interface Option {
   value: string;
 }
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   reference: React.MutableRefObject<null>;
 }
@@ -37,8 +34,8 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const [notification, updateNotification] = useState(settings.notification);
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const setTheme = useContext(ThemeSwitchContext);
+  const [theme, setTheme] = useState(chooseTheme());
+  const setThemeContext = useContext(ThemeSwitchContext);
   const isPopup = useIsPopup();
   const languageOptions = useMemo(() => getLanguageOptions(), []);
   const onAction = useContext(ActionContext);
@@ -63,9 +60,14 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     }, []
   );
 
-  const _onChangeTheme = useCallback(
-    (checked: boolean): void => setTheme(checked ? 'dark' : 'light'),
-    [setTheme]
+  const _onSetTheme = useCallback(
+    (checked: boolean): void => {
+      const theme = checked ? 'dark' : 'light';
+
+      setThemeContext(theme);
+      setTheme(theme);
+    },
+    [setThemeContext]
   );
 
   const _onWindowOpen = useCallback(
@@ -96,9 +98,9 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
         title='Theme'
       >
         <Switch
-          checked={themeContext.id === themes.dark.id}
+          checked={theme === 'dark'}
           checkedLabel={t('Dark')}
-          onChange={_onChangeTheme}
+          onChange={_onSetTheme}
           uncheckedLabel={t('Light')}
         />
       </MenuItem>
@@ -172,22 +174,22 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   );
 }
 
-export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
+export default React.memo(styled(MenuSettings)<Props>`
   margin-top: 50px;
   right: 24px;
   user-select: none;
 
   .openWindow, .manageWebsiteAccess{
     span {
-      color: ${theme.textColor};
-      font-size: ${theme.fontSize};
-      line-height: ${theme.lineHeight};
+      color: var(--textColor);
+      font-size: var(--fontSize);
+      line-height: var(--lineHeight);
       text-decoration: none;
       vertical-align: middle;
     }
 
-    ${Svg} {
-      background: ${theme.textColor};
+    .Comp--Svg {
+      background: var(--textColor);
       height: 20px;
       top: 4px;
       width: 20px;
@@ -196,7 +198,7 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
 
   > .setting {
     > .checkbox {
-      color: ${theme.textColor};
+      color: var(--textColor);
       line-height: 20px;
       font-size: 15px;
       margin-bottom: 0;
@@ -206,16 +208,16 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
       }
 
       label {
-        color: ${theme.textColor};
+        color: var(--textColor);
       }
     }
 
     > .dropdown {
-      background: ${theme.background};
+      background: var(--background);
       margin-bottom: 0;
       margin-top: 9px;
       margin-right: 0;
       width: 100%;
     }
   }
-`));
+`);

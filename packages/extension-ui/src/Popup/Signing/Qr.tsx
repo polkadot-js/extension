@@ -85,7 +85,7 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
   );
 }
 
-export default styled(Qr)`
+export default styled(Qr)<Props>`
   height: 100%;
 
   .qrContainer {

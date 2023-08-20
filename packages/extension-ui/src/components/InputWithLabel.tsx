@@ -80,7 +80,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
   );
 }
 
-export default styled(InputWithLabel)`
+export default styled(InputWithLabel)<Props>`
   margin-bottom: 16px;
 
   &.withoutMargin {

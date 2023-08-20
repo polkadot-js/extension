@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types.js';
-
 import React, { useContext } from 'react';
 
 import { AuthorizeReqContext } from '../../components/index.js';
@@ -11,7 +9,7 @@ import { Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 import Request from './Request.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
 }
 
@@ -41,7 +39,7 @@ function Authorize ({ className = '' }: Props): React.ReactElement {
   );
 }
 
-export default styled(Authorize)`
+export default styled(Authorize)<Props>`
   overflow-y: auto;
 
   &.lastRequest {

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
-import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext } from 'react';
 
@@ -92,7 +91,7 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
   );
 }
 
-export default styled(Request)(({ theme }: ThemeProps) => `
+export default styled(Request)<Props>`
   .btnAccept {
     margin: 25px auto 0;
     width: 90%;
@@ -104,7 +103,7 @@ export default styled(Request)(({ theme }: ThemeProps) => `
   }
 
   .icon {
-    background: ${theme.buttonBackgroundDanger};
+    background: var(--buttonBackgroundDanger);
     color: white;
     min-width: 18px;
     width: 14px;
@@ -118,7 +117,7 @@ export default styled(Request)(({ theme }: ThemeProps) => `
 
   .requestInfo {
     align-items: center;
-    background: ${theme.highlightedAreaBackground};
+    background: var(--highlightedAreaBackground);
     display: flex;
     flex-direction: column;
     margin-bottom: 8px;
@@ -127,4 +126,4 @@ export default styled(Request)(({ theme }: ThemeProps) => `
   .requestWarning {
     margin: 24px 24px 0 1.45rem;
   }
-`);
+`;

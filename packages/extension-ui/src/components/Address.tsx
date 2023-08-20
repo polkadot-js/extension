@@ -6,7 +6,6 @@ import type { Chain } from '@polkadot/extension-chains/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { ThemeProps } from '../types.js';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
@@ -305,9 +304,9 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   );
 }
 
-export default styled(Address)(({ theme }: ThemeProps) => `
-  background: ${theme.boxBackground};
-  border: 1px solid ${theme.boxBorderColor};
+export default styled(Address)<Props>`
+  background: var(--boxBackground);
+  border: 1px solid var(--boxBorderColor);
   box-sizing: border-box;
   border-radius: 4px;
   margin-bottom: 8px;
@@ -320,7 +319,7 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     top: 0;
 
     &.chain {
-      background: ${theme.primaryColor};
+      background: var(--primaryColor);
       border-radius: 0 0 0 10px;
       color: white;
       padding: 0.1rem 0.5rem 0.1rem 0.75rem;
@@ -338,9 +337,9 @@ export default styled(Address)(({ theme }: ThemeProps) => `
       width: 14px;
       height: 14px;
       margin-right: 10px;
-      color: ${theme.accountDotsIconColor};
+      color: var(--accountDotsIconColor);
       &:hover {
-        color: ${theme.labelColor};
+        color: var(--labelColor);
         cursor: pointer;
       }
     }
@@ -352,16 +351,16 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     }
 
     .hiddenIcon {
-      color: ${theme.errorColor};
+      color: var(--errorColor);
       &:hover {
-        color: ${theme.accountDotsIconColor};
+        color: var(--accountDotsIconColor);
       }
     }
   }
 
   .externalIcon, .hardwareIcon {
     margin-right: 0.3rem;
-    color: ${theme.labelColor};
+    color: var(--labelColor);
     width: 0.875em;
   }
 
@@ -409,8 +408,8 @@ export default styled(Address)(({ theme }: ThemeProps) => `
   }
 
   .parentName {
-    color: ${theme.labelColor};
-    font-size: ${theme.inputLabelFontSize};
+    color: var(--labelColor);
+    font-size: var(--inputLabelFontSize);
     line-height: 14px;
     overflow: hidden;
     padding: 0.25rem 0 0 0.8rem;
@@ -422,23 +421,23 @@ export default styled(Address)(({ theme }: ThemeProps) => `
   .fullAddress {
     overflow: hidden;
     text-overflow: ellipsis;
-    color: ${theme.labelColor};
+    color: var(--labelColor);
     font-size: 12px;
     line-height: 16px;
   }
 
   .detailsIcon {
-    background: ${theme.accountDotsIconColor};
+    background: var(--accountDotsIconColor);
     width: 3px;
     height: 19px;
 
     &.active {
-      background: ${theme.primaryColor};
+      background: var(--primaryColor);
     }
   }
 
   .deriveIcon {
-    color: ${theme.labelColor};
+    color: var(--labelColor);
     position: absolute;
     top: 5px;
     width: 9px;
@@ -471,12 +470,12 @@ export default styled(Address)(({ theme }: ThemeProps) => `
       top: 25%;
       bottom: 25%;
       width: 1px;
-      background: ${theme.boxBorderColor};
+      background: var(--boxBorderColor);
     }
 
     &:hover {
       cursor: pointer;
-      background: ${theme.readonlyInputBackground};
+      background: var(--readonlyInputBackground);
     }
   }
-`);
+`;

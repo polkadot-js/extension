@@ -3,7 +3,6 @@
 
 import type { AccountJson } from '@polkadot/extension-base/background/types';
 import type { HexString } from '@polkadot/util/types';
-import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
@@ -51,7 +50,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
 
   const _onChangeGenesis = useCallback(
     (genesisHash?: HexString | null): void => {
-      tieAccount(address, genesisHash || null)
+      tieAccount(address, genesisHash ?? null)
         .catch(console.error);
     },
     [address]
@@ -161,7 +160,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
   );
 }
 
-export default styled(Account)(({ theme }: ThemeProps) => `
+export default styled(Account)<Props>`
   .address {
     margin-bottom: 8px;
   }
@@ -174,7 +173,7 @@ export default styled(Account)(({ theme }: ThemeProps) => `
     width: 350px;
 
     .danger {
-      background-color: ${theme.bodyColor};
+      background-color: var(--bodyColor);
       margin-top: -13px;
       width: 330px;
     }
@@ -202,4 +201,4 @@ export default styled(Account)(({ theme }: ThemeProps) => `
       margin: 0;
     }
   }
-`);
+`;

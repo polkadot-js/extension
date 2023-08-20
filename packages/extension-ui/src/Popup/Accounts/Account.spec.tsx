@@ -6,16 +6,13 @@
 import '@polkadot/extension-mocks/chrome';
 
 import type { ReactWrapper } from 'enzyme';
-import type { Theme } from '../../components/index.js';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import enzyme from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
-import { ThemeProvider } from 'styled-components';
 
-import { themes } from '../../components/index.js';
 import * as messaging from '../../messaging.js';
 import { flushAllPromises } from '../../testHelpers.js';
 import Account from './Account.js';
@@ -38,14 +35,11 @@ describe('Account component', () => {
   let wrapper: ReactWrapper;
   const VALID_ADDRESS = 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5';
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  const mountAccountComponent = (additionalAccountProperties: Record<string, unknown>, theme: Theme = themes.dark): ReactWrapper => mount(
+  const mountAccountComponent = (additionalAccountProperties: Record<string, unknown>): ReactWrapper => mount(
     <MemoryRouter>
-      <ThemeProvider theme={theme}>
-        <Account
-          {...{ address: VALID_ADDRESS, ...additionalAccountProperties }}
-        >
-        </Account>
-      </ThemeProvider>
+      <Account
+        {...{ address: VALID_ADDRESS, ...additionalAccountProperties }}
+      />
     </MemoryRouter>);
 
   it('shows Export option if account is not external', async () => {

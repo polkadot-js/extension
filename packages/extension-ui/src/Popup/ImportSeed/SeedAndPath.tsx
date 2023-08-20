@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { ThemeProps } from '../../types.js';
 import type { AccountInfo } from './index.js';
 
 import { faCaretDown, faCaretRight } from '@fortawesome/free-solid-svg-icons';
@@ -131,28 +130,28 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
   );
 }
 
-export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
+export default styled(SeedAndPath)<Props>`
   .advancedToggle {
-    color: ${theme.textColor};
+    color: var(--textColor);
     cursor: pointer;
-    line-height: ${theme.lineHeight};
+    line-height: var(--lineHeight);
     letter-spacing: 0.04em;
     opacity: 0.65;
     text-transform: uppercase;
 
     > span {
-      font-size: ${theme.inputLabelFontSize};
+      font-size: var(--inputLabelFontSize);
       margin-left: .5rem;
       vertical-align: middle;
     }
   }
 
   .genesisSelection {
-    margin-bottom: ${theme.fontSize};
+    margin-bottom: var(--fontSize);
   }
 
   .seedInput {
-    margin-bottom: ${theme.fontSize};
+    margin-bottom: var(--fontSize);
     textarea {
       height: unset;
     }
@@ -161,4 +160,4 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   .seedError {
     margin-bottom: 1rem;
   }
-`);
+`;

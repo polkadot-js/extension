@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types.js';
-
 import React, { useMemo } from 'react';
 
 import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
@@ -42,7 +40,7 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Bytes)(({ theme }: ThemeProps) => `
+export default styled(Bytes)<Props>`
   border: 0;
   display: block;
   font-size: 0.75rem;
@@ -68,10 +66,10 @@ export default styled(Bytes)(({ theme }: ThemeProps) => `
         white-space: pre;
         overflow: auto;
         max-height: calc(100vh - 480px);
-        min-height: ${theme.boxLineHeight};
-        border: 1px solid ${theme.boxBorderColor};
-        background: ${theme.boxBackground};
-        line-height: ${theme.boxLineHeight};
+        min-height: var(--boxLineHeight);
+        border: 1px solid var(--boxBorderColor);
+        background: var(--boxBackground);
+        line-height: var(--boxLineHeight);
       }
     }
   }
@@ -83,4 +81,4 @@ export default styled(Bytes)(({ theme }: ThemeProps) => `
     vertical-align: middle;
     white-space: nowrap;
   }
-`);
+`;

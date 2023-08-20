@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types.js';
-
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -13,7 +11,7 @@ import { useIsPopup, useLedger, useTranslation } from '../hooks/index.js';
 import { windowOpen } from '../messaging.js';
 import { styled } from '../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   reference: React.MutableRefObject<null>;
 }
@@ -128,7 +126,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(MenuAdd)(({ theme }: Props) => `
+export default React.memo(styled(MenuAdd)<Props>`
   margin-top: 50px;
   right: 50px; // 24 + 18 + 8
   user-select: none;
@@ -146,9 +144,9 @@ export default React.memo(styled(MenuAdd)(({ theme }: Props) => `
     }
 
     .svg-inline--fa {
-      color: ${theme.iconNeutralColor};
+      color: var(--iconNeutralColor);
       margin-right: 0.3rem;
       width: 0.875em;
     }
   }
-`));
+`);

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { HexString } from '@polkadot/util/types';
-import type { ThemeProps } from '../types.js';
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -29,7 +28,7 @@ interface NetworkOption {
 
 const AVAIL: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
 }
 
@@ -180,7 +179,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(ImportLedger)`
+export default styled(ImportLedger)<Props>`
   .refreshIcon {
     margin-right: 0.3rem;
   }

@@ -18,7 +18,7 @@ function ActionBar ({ children, className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(ActionBar)`
+export default styled(ActionBar)<Props>`
   align-content: flex-end;
   display: flex;
   justify-content: space-between;

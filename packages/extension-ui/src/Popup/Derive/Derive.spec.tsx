@@ -13,9 +13,8 @@ import enzyme from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter, Route } from 'react-router';
-import { ThemeProvider } from 'styled-components';
 
-import { AccountContext, ActionContext, themes } from '../../components/index.js';
+import { AccountContext, ActionContext } from '../../components/index.js';
 import * as messaging from '../../messaging.js';
 import { flushAllPromises } from '../../testHelpers.js';
 import { buildHierarchy } from '../../util/buildHierarchy.js';
@@ -68,11 +67,9 @@ describe('Derive', () => {
               hierarchy: buildHierarchy(accounts)
             }}
           >
-            <ThemeProvider theme={themes.dark}>
-              <Route path='/account/derive/:address'>
-                <Derive isLocked={locked} />
-              </Route>
-            </ThemeProvider>
+            <Route path='/account/derive/:address'>
+              <Derive isLocked={locked} />
+            </Route>
           </AccountContext.Provider>
         </ActionContext.Provider>
       </MemoryRouter>

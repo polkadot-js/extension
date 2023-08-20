@@ -13,6 +13,6 @@ function VerticalSpace ({ className }: Props): React.ReactElement<Props> {
   return <div className={className} />;
 }
 
-export default styled(VerticalSpace)`
+export default styled(VerticalSpace)<Props>`
   height: 100%;
 `;

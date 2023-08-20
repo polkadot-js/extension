@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types.js';
-
 import React, { useCallback, useContext } from 'react';
 
 import { ActionContext } from '../../components/index.js';
@@ -11,7 +9,7 @@ import Header from '../../partials/Header.js';
 import { styled } from '../../styled.js';
 import AddAccountImage from './AddAccountImage.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
 }
 
@@ -42,12 +40,12 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(AddAccount)(({ theme }: Props) => `
-  color: ${theme.textColor};
+export default React.memo(styled(AddAccount)<Props>`
+  color: var(--textColor);
   height: 100%;
 
   h3 {
-    color: ${theme.textColor};
+    color: var(--textColor);
     margin-top: 0;
     font-weight: normal;
     font-size: 24px;
@@ -65,6 +63,6 @@ export default React.memo(styled(AddAccount)(({ theme }: Props) => `
     font-size: 16px;
     line-height: 26px;
     margin: 0 30px;
-    color: ${theme.subTextColor};
+    color: var(--subTextColor);
   }
-`));
+`);

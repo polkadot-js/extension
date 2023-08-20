@@ -32,7 +32,7 @@ export default styled(ActionText)<Props>`
   cursor: pointer;
 
   span {
-    color: var(--labelColor)
+    color: var(--labelColor);
     font-size: var(--labelFontSize);
     line-height: var(--labelLineHeight);
     text-decoration-line: underline;

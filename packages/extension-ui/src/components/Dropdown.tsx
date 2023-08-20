@@ -69,12 +69,12 @@ export default React.memo(styled(Dropdown)<Props>(({ isError, label }) => `
     -moz-appearance: none;
     appearance: none;
     background: var(--readonlyInputBackground);
-    border-color: ${isError ? 'var(--errorBorderColor)' : 'var(--inputBorderColor)'};
+    border-color: var(${isError ? '--errorBorderColor' : '--inputBorderColor'});
     border-radius: var(--borderRadius);
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
-    color: ${isError ? 'var(--errorBorderColor)' : 'var(--textColor)'};
+    color: var(${isError ? '--errorBorderColor' : '--textColor'});
     display: block;
     font-family: var(--fontFamily);
     font-size: var(--fontSize);

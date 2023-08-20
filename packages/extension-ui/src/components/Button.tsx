@@ -46,7 +46,7 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: 
 }
 
 export default styled(Button)<ButtonProps>(({ isDanger }) => `
-  background: ${isDanger ? 'var(--buttonBackgroundDanger)' : 'var(--buttonBackground)'};
+  background: var(${isDanger ? '--buttonBackgroundDanger' : '--buttonBackground'});
   cursor: pointer;
   display: block;
   width: 100%;
@@ -66,7 +66,7 @@ export default styled(Button)<ButtonProps>(({ isDanger }) => `
   }
 
   &:not(:disabled):hover {
-    background: ${isDanger ? 'var(--buttonBackgroundDangerHover)' : 'var(--buttonBackgroundHover)'};
+    background: var(${isDanger ? '--buttonBackgroundDangerHover' : '--buttonBackgroundHover'});
   }
 
   .busyOverlay,

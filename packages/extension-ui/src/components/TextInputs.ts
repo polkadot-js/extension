@@ -13,9 +13,9 @@ const TextInput = css<Props>(({ withError }) => `
   background: var(--inputBackground);
   border-radius: var(--borderRadius);
   border: 1px solid var(--inputBorderColor);
-  border-color: ${withError ? 'var(--errorBorderColor)' : 'var(--inputBorderColor)'};
+  border-color: var(${withError ? '--errorBorderColor' : '--inputBorderColor'});
   box-sizing: border-box;
-  color: ${withError ? 'var(--errorColor)' : 'var(--textColor)'};
+  color: var(${withError ? '--errorColor' : '--textColor'});
   display: block;
   font-family: var(--fontFamily);
   font-size: var(--fontSize);

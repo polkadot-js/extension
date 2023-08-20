@@ -53,19 +53,19 @@ function Link ({ children, className = '', isDisabled, onClick, title, to }: Pro
 
 export default styled(Link)<Props>(({ isDanger }) => `
   align-items: center;
-  color: ${isDanger ? 'var(--textColorDanger)' : 'var(--textColor)'};
+  color: var(${isDanger ? '--textColorDanger' : '--textColor'});
   display: flex;
   opacity: 0.85;
   text-decoration: none;
   vertical-align: middle;
 
   &:hover {
-    color: ${isDanger ? 'var(--textColorDanger)' : 'var(--textColor)'};
+    color: var(${isDanger ? '--textColorDanger' : '--textColor'});
     opacity: 1.0;
   }
 
   &:visited {
-    color: ${isDanger ? 'var(--textColorDanger)' : 'var(--textColor)'};
+    color: var(${isDanger ? '--textColorDanger' : '--textColor'});
   }
 
   &.isDisabled {

@@ -131,10 +131,10 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
 }
 
 export default React.memo(styled(InputFile)<InputFileProps>(({ isError }) => `
-  border: 1px solid ${isError ? 'var(--errorBorderColor)' : 'var(--inputBorderColor)'};
+  border: 1px solid var(${isError ? '--errorBorderColor' : '--inputBorderColor'});
   background: var(--inputBackground);
   border-radius: var(--borderRadius);
-  color: ${isError ? 'var(--errorBorderColor)' : 'var(--textColor)'};
+  color: var(${isError ? '--errorBorderColor' : '--textColor'});
   font-size: 1rem;
   margin: 0.25rem 0;
   overflow-wrap: anywhere;

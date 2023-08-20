@@ -55,6 +55,6 @@ export default React.memo(styled(Warning)<Props>(({ isDanger }) => `
 
   .warningImage {
     margin: 5px 10px 5px 0;
-    color: ${isDanger ? 'var(--iconDangerColor)' : 'var(--iconWarningColor)'};
+    color: var(${isDanger ? '--iconDangerColor' : '--iconWarningColor'});
   }
 `));

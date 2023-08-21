@@ -180,9 +180,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azns/resolver-core@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@azns/resolver-core@npm:1.2.0"
+"@azns/resolver-core@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@azns/resolver-core@npm:1.4.0"
   peerDependencies:
     "@polkadot/api": ">=10"
     "@polkadot/api-contract": ">=10"
@@ -192,7 +192,7 @@ __metadata:
     bufferutil: ">=4.0.1"
     loglevel: ">=1.8"
     utf-8-validate: ">=6"
-  checksum: 2970758dca79d86602de034a9e39cd00c1d51dac1f1b5d55e05fc4e46b2fb3eb02a9e719a8fb1d0f22f57c0bf23cff8223fd545fa69bfc3f1846d570f69d482f
+  checksum: 45e1a43e5258c48c96c5c34a13e7ff58986f78e3d3d1659a2bae97b40232d3c548507dfd1cddcab4135ccedea563c3e0a421aaa9199a2d85c142ffb56cffad1c
   languageName: node
   linkType: hard
 
@@ -5859,7 +5859,7 @@ __metadata:
   dependencies:
     "@acala-network/api": ^5.0.2
     "@apollo/client": ^3.7.14
-    "@azns/resolver-core": ^1.2.0
+    "@azns/resolver-core": ^1.4.0
     "@equilab/api": ^1.14.25
     "@ethereumjs/common": ^2.6.5
     "@ethereumjs/tx": ^4.0.2

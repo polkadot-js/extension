@@ -21,6 +21,11 @@ export const CHAINS_SUPPORTED_DOMAIN = [
   'alephTest'
 ];
 
+export const AZERO_DOMAIN_CONTRACTS = [
+  '5FsB91tXSEuMj6akzdPczAtmBaVKToqHmtAwSUzXh49AYzaD',
+  '5CTQBfBC9SfdrCDBJdfLiyW2pg9z5W6C6Es8sK313BLnFgDf'
+];
+
 export async function resolveAzeroDomainToAddress (domain: string, chain: string, api: ApiPromise): Promise<string | undefined> {
   let chainId: SupportedChainId = SupportedChainId.AlephZero;
 

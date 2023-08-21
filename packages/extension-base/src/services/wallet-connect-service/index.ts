@@ -217,20 +217,28 @@ export default class WalletConnectService {
     const sessions = this.#client?.session.values || [];
 
     for (const session of sessions) {
-      this.#client?.disconnect({
-        topic: session.topic,
-        reason: getSdkError('USER_DISCONNECTED')
-      }).catch(console.error);
+      try {
+        await this.#client?.disconnect({
+          topic: session.topic,
+          reason: getSdkError('USER_DISCONNECTED')
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     // Disconnect pair
     const pairs = this.#client?.pairing.values || [];
 
     for (const pair of pairs) {
-      this.#client?.disconnect({
-        topic: pair.topic,
-        reason: getSdkError('USER_DISCONNECTED')
-      }).catch(console.error);
+      try {
+        await this.#client?.disconnect({
+          topic: pair.topic,
+          reason: getSdkError('USER_DISCONNECTED')
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     const keys: string[] = await this.#client?.core.storage.getKeys() || [];

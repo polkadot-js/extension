@@ -12,7 +12,7 @@ import { Theme, ThemeProps, TransactionFormBaseProps } from '@subwallet/extensio
 import { detectTransactionPersistKey } from '@subwallet/extension-koni-ui/utils';
 import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -62,6 +62,12 @@ function Component ({ className }: Props) {
 
   const [storage, setStorage] = useLocalStorage<TransactionFormBaseProps>(storageKey, DEFAULT_TRANSACTION_PARAMS);
 
+  const cacheStorage = useDeferredValue(storage);
+
+  const needPersistData = useMemo(() => {
+    return JSON.stringify(cacheStorage) === JSON.stringify(DEFAULT_TRANSACTION_PARAMS);
+  }, [cacheStorage]);
+
   const [defaultData] = useState(storage);
   const { chain, from } = storage;
 
@@ -106,6 +112,10 @@ function Component ({ className }: Props) {
     navigate(homePath);
   }, [homePath, navigate]);
 
+  const persistData = useCallback((value: TransactionFormBaseProps) => {
+    setStorage(value);
+  }, [setStorage]);
+
   // Navigate to finish page
   const onDone = useCallback(
     (extrinsicHash: string) => {
@@ -143,7 +153,7 @@ function Component ({ className }: Props) {
       showFilterIcon
       showTabBar={false}
     >
-      <TransactionContext.Provider value={{ defaultData, persistData: setStorage, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
+      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader

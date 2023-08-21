@@ -13,8 +13,7 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
-import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useSelector, useSetCurrentPage, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -26,7 +25,7 @@ import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PaperPlaneRight, PaperPlaneTilt } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useIsFirstRender } from 'usehooks-ts';
@@ -217,8 +216,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { t } = useTranslation();
   const notification = useNotification();
 
-  const { onDone, persistData } = useContext(TransactionContext);
-  const defaultData = useContext(TransactionContext).defaultData as TransferParams;
+  const { defaultData, needPersistData, onDone, persistData } = useTransactionContext<TransferParams>();
   const { defaultSlug: sendFundSlug } = defaultData;
   const isFirstRender = useIsFirstRender();
 
@@ -604,6 +602,12 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       setIsTransferAll(true);
     }
   }, [maxTransfer, transferAmount]);
+
+  useEffect(() => {
+    if (needPersistData) {
+      persistData(form.getFieldsValue());
+    }
+  }, [form, needPersistData, persistData]);
 
   useInitValidateTransaction(['value', 'to'], form, defaultData);
 

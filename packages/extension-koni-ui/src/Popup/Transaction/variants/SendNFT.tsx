@@ -7,8 +7,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
-import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, SendNftParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -46,8 +45,8 @@ const Component: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { onDone, persistData } = useContext(TransactionContext);
-  const defaultData = useContext(TransactionContext).defaultData as SendNftParams;
+  const { defaultData, needPersistData, onDone, persistData } = useTransactionContext<SendNftParams>();
+
   const { collectionId, itemId } = defaultData;
 
   const [form] = Form.useForm<SendNftParams>();
@@ -200,6 +199,12 @@ const Component: React.FC = () => {
       }, 500);
     }
   }, [form, defaultData]);
+
+  useEffect(() => {
+    if (needPersistData) {
+      persistData(form.getFieldsValue());
+    }
+  }, [form, needPersistData, persistData]);
 
   // Focus to the first field
   useFocusFormItem(form, 'to');

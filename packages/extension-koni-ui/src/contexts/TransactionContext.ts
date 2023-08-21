@@ -7,6 +7,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 export interface TransactionContextProps{
   defaultData: TransactionFormBaseProps;
   persistData: (value: TransactionFormBaseProps) => void;
+  needPersistData: boolean;
   onDone: (extrinsicHash: string) => void;
   onClickRightBtn: () => void;
   setShowRightBtn: Dispatch<SetStateAction<boolean>>;
@@ -15,6 +16,7 @@ export interface TransactionContextProps{
 
 export const TransactionContext = React.createContext<TransactionContextProps>({
   defaultData: { from: '', chain: '', asset: '' },
+  needPersistData: false,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   persistData: (value) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function

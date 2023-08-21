@@ -180,9 +180,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azns/resolver-core@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@azns/resolver-core@npm:1.2.0"
+"@azns/resolver-core@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@azns/resolver-core@npm:1.4.0"
   peerDependencies:
     "@polkadot/api": ">=10"
     "@polkadot/api-contract": ">=10"
@@ -192,7 +192,7 @@ __metadata:
     bufferutil: ">=4.0.1"
     loglevel: ">=1.8"
     utf-8-validate: ">=6"
-  checksum: 2970758dca79d86602de034a9e39cd00c1d51dac1f1b5d55e05fc4e46b2fb3eb02a9e719a8fb1d0f22f57c0bf23cff8223fd545fa69bfc3f1846d570f69d482f
+  checksum: 45e1a43e5258c48c96c5c34a13e7ff58986f78e3d3d1659a2bae97b40232d3c548507dfd1cddcab4135ccedea563c3e0a421aaa9199a2d85c142ffb56cffad1c
   languageName: node
   linkType: hard
 
@@ -1793,15 +1793,6 @@ __metadata:
     "@babel/helper-validator-identifier": ^7.19.1
     to-fast-properties: ^2.0.0
   checksum: b39af241f0b72bba67fd6d0d23914f6faec8c0eba8015c181cbd5ea92e59fc91a52a1ab490d3520c7dbd19ddb9ebb76c476308f6388764f16d8201e37fae6811
-  languageName: node
-  linkType: hard
-
-"@banxa-global/js-sdk@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "@banxa-global/js-sdk@npm:1.0.2"
-  dependencies:
-    axios: ^0.24.0
-  checksum: 5709401911a9e083f95bed0d89320e35013c839978f7e1405e1ff32ef201b2b77cf0392a66734052152aa08553dbf174b9bdb2c9fb560b65e6688fa2fdba590d
   languageName: node
   linkType: hard
 
@@ -5851,14 +5842,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.10":
-  version: 0.2.10
-  resolution: "@subwallet/chain-list@npm:0.2.10"
+"@subwallet/chain-list@npm:0.2.11-beta.0":
+  version: 0.2.11-beta.0
+  resolution: "@subwallet/chain-list@npm:0.2.11-beta.0"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: 38751e62f353e5ad3971e2692d2e177169073295bcdb7fedde5d8b6a8f6698db301e8ede3e8e66754477d34cc746129379188942391cf418d5c458b39cadb288
+  checksum: e75e3393ac7e9f559322562725b4dd36fd0526ab2f519b0c1249d00411cb40c5b67868e6a854170ce9736d82461ed5ebfe493f694d437ed008e3c2253c4023b5
   languageName: node
   linkType: hard
 
@@ -5868,7 +5859,7 @@ __metadata:
   dependencies:
     "@acala-network/api": ^5.0.2
     "@apollo/client": ^3.7.14
-    "@azns/resolver-core": ^1.2.0
+    "@azns/resolver-core": ^1.4.0
     "@equilab/api": ^1.14.25
     "@ethereumjs/common": ^2.6.5
     "@ethereumjs/tx": ^4.0.2
@@ -5893,7 +5884,7 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.2.10
+    "@subwallet/chain-list": 0.2.11-beta.0
     "@subwallet/extension-base": ^1.1.8-0
     "@subwallet/extension-chains": ^1.1.8-0
     "@subwallet/extension-dapp": ^1.1.8-0
@@ -6003,7 +5994,6 @@ __metadata:
   resolution: "@subwallet/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
     "@babel/runtime": ^7.20.6
-    "@banxa-global/js-sdk": ^1.0.2
     "@fortawesome/fontawesome-svg-core": ^6.2.1
     "@fortawesome/free-brands-svg-icons": ^6.2.1
     "@fortawesome/free-regular-svg-icons": ^6.2.1
@@ -6020,7 +6010,7 @@ __metadata:
     "@polkadot/util-crypto": ^12.3.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.10
+    "@subwallet/chain-list": 0.2.11-beta.0
     "@subwallet/extension-base": ^1.1.8-0
     "@subwallet/extension-chains": ^1.1.8-0
     "@subwallet/extension-dapp": ^1.1.8-0
@@ -8721,15 +8711,6 @@ __metadata:
   version: 1.11.0
   resolution: "aws4@npm:1.11.0"
   checksum: 5a00d045fd0385926d20ebebcfba5ec79d4482fe706f63c27b324d489a04c68edb0db99ed991e19eda09cb8c97dc2452059a34d97545cebf591d7a2b5a10999f
-  languageName: node
-  linkType: hard
-
-"axios@npm:^0.24.0":
-  version: 0.24.0
-  resolution: "axios@npm:0.24.0"
-  dependencies:
-    follow-redirects: ^1.14.4
-  checksum: 468cf496c08a6aadfb7e699bebdac02851e3043d4e7d282350804ea8900e30d368daa6e3cd4ab83b8ddb5a3b1e17a5a21ada13fc9cebd27b74828f47a4236316
   languageName: node
   linkType: hard
 
@@ -13655,7 +13636,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.14.4, follow-redirects@npm:^1.15.0":
+"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.15.0":
   version: 1.15.2
   resolution: "follow-redirects@npm:1.15.2"
   peerDependenciesMeta:

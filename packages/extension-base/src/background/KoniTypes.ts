@@ -411,7 +411,8 @@ export type LanguageType = 'en'
 |'th'
 |'ur'
 |'vi'
-|'ja';
+|'ja'
+|'ru';
 
 export type LanguageOptionType = {
   text: string;

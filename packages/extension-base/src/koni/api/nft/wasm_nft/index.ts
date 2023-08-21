@@ -3,6 +3,7 @@
 
 import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AZERO_DOMAIN_CONTRACTS } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { collectionApiFromArtZero, collectionDetailApiFromArtZero, externalUrlOnArtZero, ipfsApiFromArtZero, itemImageApiFromArtZero } from '@subwallet/extension-base/koni/api/nft/wasm_nft/utils';
 import { getPSP34ContractPromise, isAzeroDomainNft, isPinkRoboNft } from '@subwallet/extension-base/koni/api/tokens/wasm';
@@ -297,6 +298,7 @@ export class WasmNftApi extends BaseNftApi {
 
   private async processOffChainMetadata (contractPromise: ContractPromise, address: string, tokenId: string, isFeatured: boolean): Promise<NftItem> {
     const nftItem: NftItem = { chain: '', collectionId: '', id: '', owner: '', name: tokenId };
+    const _isFeatured = isFeatured && !AZERO_DOMAIN_CONTRACTS.includes(contractPromise.address.toString());
 
     const _tokenUri = await contractPromise.query[isPinkRoboNft(contractPromise.address.toString()) ? 'pinkMint::tokenUri' : 'psp34Traits::tokenUri'](
       address,
@@ -310,13 +312,13 @@ export class WasmNftApi extends BaseNftApi {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const tokenUri = isPinkRoboNft(contractPromise.address.toString()) ? _tokenUriObj.ok.ok as string : (_tokenUriObj.Ok || _tokenUriObj.ok) as string;
 
-      if (isFeatured) {
+      if (_isFeatured) {
         const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri);
 
         if (parsedTokenUri) {
           const resp = await fetch(`${ipfsApiFromArtZero(this.chain)}?input=${parsedTokenUri}`);
 
-          itemDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
+          itemDetail = (resp && resp.ok && await resp.json()) as Record<string, any>;
         }
       } else {
         const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri);
@@ -326,6 +328,11 @@ export class WasmNftApi extends BaseNftApi {
           const resp = await fetch(detailUrl);
 
           itemDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
+
+          if (AZERO_DOMAIN_CONTRACTS.includes(contractPromise.address.toString())) {
+            // @ts-ignore
+            itemDetail = itemDetail?.metadata as Record<string, any>;
+          }
         }
       }
 
@@ -339,7 +346,7 @@ export class WasmNftApi extends BaseNftApi {
 
       const rawImageSrc = itemDetail.image ? itemDetail.image as string : itemDetail.image_url as string;
 
-      if (isFeatured) {
+      if (_isFeatured) {
         nftItem.image = await this.parseFeaturedNftImage(rawImageSrc);
         nftItem.externalUrl = externalUrlOnArtZero(this.chain);
       } else {
@@ -347,7 +354,7 @@ export class WasmNftApi extends BaseNftApi {
       }
 
       const propertiesMap: Record<string, any> = {};
-      const traitList = itemDetail.attributes ? itemDetail.attributes as Record<string, any>[] : itemDetail.traits as Record<string, any>[];
+      const traitList = (itemDetail.attributes || itemDetail.traits) as Record<string, any>[];
 
       if (traitList) {
         traitList.forEach((traitMap) => {

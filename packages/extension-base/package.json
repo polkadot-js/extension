@@ -22,7 +22,7 @@
   "dependencies": {
     "@acala-network/api": "^5.0.2",
     "@apollo/client": "^3.7.14",
-    "@azns/resolver-core": "^1.2.0",
+    "@azns/resolver-core": "^1.4.0",
     "@equilab/api": "^1.14.25",
     "@ethereumjs/common": "^2.6.5",
     "@ethereumjs/tx": "^4.0.2",
@@ -47,7 +47,7 @@
     "@reduxjs/toolkit": "^1.9.1",
     "@sora-substrate/type-definitions": "^1.17.7",
     "@substrate/connect": "^0.7.26",
-    "@subwallet/chain-list": "0.2.10",
+    "@subwallet/chain-list": "0.2.11-beta.0",
     "@subwallet/extension-base": "^1.1.8-0",
     "@subwallet/extension-chains": "^1.1.8-0",
     "@subwallet/extension-dapp": "^1.1.8-0",

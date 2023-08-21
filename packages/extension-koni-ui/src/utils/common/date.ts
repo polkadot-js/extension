@@ -94,6 +94,7 @@ const DEFAULT_LANGUAGE_TIME_DEFINE: Record<LanguageType, TimeDefine> = {
     }
   }),
   ja: mergeTimeDefine({}),
+  ru: mergeTimeDefine({}),
   th: mergeTimeDefine({}),
   ur: mergeTimeDefine({}),
   tr: mergeTimeDefine({}),

@@ -40,6 +40,14 @@ const packages = [
 ];
 
 module.exports = (entry, alias = {}, useSplitChunk = false) => {
+  const canAddEnv = !Object.keys(entry).includes('content');
+
+  const additionEnv = canAddEnv ? {
+    TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
+    TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
+    BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
+  } : {}
+
   const result = {
     context: __dirname,
     devtool: false,
@@ -96,11 +104,7 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
           TARGET_ENV: JSON.stringify('extension'),
-          TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
-          TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
-          BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
-          BANXA_SANDBOX_API_KEY: JSON.stringify(process.env.BANXA_SANDBOX_API_KEY),
-          BANXA_SANBOX_API_SECRET: JSON.stringify(process.env.BANXA_SANBOX_API_SECRET)
+          ...additionEnv
         }
       }),
       new CopyPlugin({

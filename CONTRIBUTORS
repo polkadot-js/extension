@@ -1,4 +1,4 @@
-     626	Jaco                          	Adjust styles for styled-components 6.x (#1279)
+     627	Jaco                          	Bump UI, fix popup theming (#1280)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

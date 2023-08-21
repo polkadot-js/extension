@@ -42,11 +42,13 @@ const packages = [
 module.exports = (entry, alias = {}, useSplitChunk = false) => {
   const canAddEnv = !Object.keys(entry).includes('content');
 
-  const additionEnv = canAddEnv ? {
-    TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
-    TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
-    BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
-  } : {}
+  const additionEnv = canAddEnv
+    ? {
+      TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
+      TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
+      BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true)
+    }
+    : {};
 
   const result = {
     context: __dirname,

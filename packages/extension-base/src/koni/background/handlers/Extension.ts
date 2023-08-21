@@ -2866,7 +2866,7 @@ export default class KoniExtension {
       console.error(e);
 
       return {
-        errors: [(e as Error).message],
+        errors: [t((e as Error).message)],
         status: false
       };
     }

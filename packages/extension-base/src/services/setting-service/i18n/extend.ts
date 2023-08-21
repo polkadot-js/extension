@@ -4,6 +4,7 @@
 import { detectTranslate } from '@subwallet/extension-base/utils';
 
 export const ExternalTranslation: string[] = [
+  // Case change password
   detectTranslate('Invalid master password')
 ];
 

@@ -31,6 +31,7 @@ const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
     marginTop: 'auto',
     marginBottom: 'auto',
     zIndex: 100,
+    opacity: 0,
 
     '.anticon': {
       borderRadius: '100%',
@@ -150,6 +151,12 @@ const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       paddingRight: 0,
       overflow: 'hidden',
       width: 52
+    }
+  },
+
+  '&:hover': {
+    '.__sidebar-collapse-trigger': {
+      opacity: 1
     }
   }
 }));

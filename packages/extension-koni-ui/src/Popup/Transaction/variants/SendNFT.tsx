@@ -7,7 +7,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, SendNftParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -39,13 +39,14 @@ const DEFAULT_ITEM: NftItem = {
 };
 
 const hiddenFields: Array<keyof SendNftParams> = ['from', 'chain', 'asset', 'itemId', 'collectionId'];
+const validateFields: Array<keyof SendNftParams> = ['to'];
 
 const Component: React.FC = () => {
   useSetCurrentPage('/transaction/send-nft');
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { defaultData, needPersistData, onDone, persistData } = useTransactionContext<SendNftParams>();
+  const { defaultData, onDone, persistData } = useTransactionContext<SendNftParams>();
 
   const { collectionId, itemId } = defaultData;
 
@@ -200,14 +201,10 @@ const Component: React.FC = () => {
     }
   }, [form, defaultData]);
 
-  useEffect(() => {
-    if (needPersistData) {
-      persistData(form.getFieldsValue());
-    }
-  }, [form, needPersistData, persistData]);
-
   // Focus to the first field
   useFocusFormItem(form, 'to');
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
 
   const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
 

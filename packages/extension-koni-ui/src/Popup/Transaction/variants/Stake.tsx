@@ -9,7 +9,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, HiddenInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainAssetInfo';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, StakeParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -31,11 +31,12 @@ import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 type Props = ThemeProps;
 
 const hiddenFields: Array<keyof StakeParams> = ['chain', 'defaultChain', 'defaultType'];
+const validateFields: Array<keyof StakeParams> = ['value'];
 
 const Component: React.FC = () => {
   const { t } = useTranslation();
 
-  const { defaultData, needPersistData, onDone, persistData, setDisabledRightBtn, setShowRightBtn } = useTransactionContext<StakeParams>();
+  const { defaultData, onDone, persistData, setDisabledRightBtn, setShowRightBtn } = useTransactionContext<StakeParams>();
   const { defaultChain: stakingChain, defaultType: _stakingType } = defaultData;
 
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
@@ -368,11 +369,8 @@ const Component: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, nativeTokenBalance.value]);
 
-  useEffect(() => {
-    if (needPersistData) {
-      persistData(form.getFieldsValue());
-    }
-  }, [form, needPersistData, persistData]);
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
 
   return (
     <>

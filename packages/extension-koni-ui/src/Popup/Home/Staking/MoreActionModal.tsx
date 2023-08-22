@@ -124,9 +124,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
     if (nominatorMetadata.type === StakingType.POOLED || isAllAccount) {
       setSelected(undefined);
+      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
       setClaimRewardStorage({
         ...DEFAULT_CLAIM_REWARD_PARAMS,
+        from: address,
         type: nominatorMetadata.type,
         chain: nominatorMetadata.chain
       });
@@ -146,7 +148,7 @@ const Component: React.FC<Props> = (props: Props) => {
       .finally(() => {
         setSelected(undefined);
       });
-  }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward, setClaimRewardStorage]);
+  }, [currentAccount, isAllAccount, navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward, setClaimRewardStorage]);
 
   const availableActions = useMemo(() => {
     if (!nominatorMetadata) {

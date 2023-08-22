@@ -6,13 +6,13 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, CancelUnstakeSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { CancelUnStakeParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -23,6 +23,7 @@ import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 type Props = ThemeProps;
 
 const hideFields: Array<keyof CancelUnStakeParams> = ['type', 'chain', 'asset'];
+const validateFields: Array<keyof CancelUnStakeParams> = ['from'];
 
 const Component: React.FC<Props> = (props: Props) => {
   useSetCurrentPage('/transaction/cancel-unstake');
@@ -32,7 +33,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
 
   const dataContext = useContext(DataContext);
-  const { defaultData, needPersistData, onDone, persistData } = useTransactionContext<CancelUnStakeParams>();
+  const { defaultData, onDone, persistData } = useTransactionContext<CancelUnStakeParams>();
   const { chain, type } = defaultData;
 
   const [form] = Form.useForm<CancelUnStakeParams>();
@@ -108,11 +109,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onPreCheck = usePreCheckAction(from);
 
-  useEffect(() => {
-    if (needPersistData) {
-      persistData(form.getFieldsValue());
-    }
-  }, [form, needPersistData, persistData]);
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
 
   return (
     <>

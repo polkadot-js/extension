@@ -9,7 +9,7 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { AccountSelector, AmountInput, HiddenInput, NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
@@ -40,11 +40,12 @@ const _accountFilterFunc = (
 };
 
 const hideFields: Array<keyof UnStakeParams> = ['chain', 'asset', 'type'];
+const validateFields: Array<keyof UnStakeParams> = ['value'];
 
 const Component: React.FC = () => {
   const { t } = useTranslation();
 
-  const { defaultData, needPersistData, onDone, persistData } = useTransactionContext<UnStakeParams>();
+  const { defaultData, onDone, persistData } = useTransactionContext<UnStakeParams>();
   const { chain, type } = defaultData;
 
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
@@ -227,13 +228,8 @@ const Component: React.FC = () => {
     }
   }, [form, amountChange, minValue, bondedValue, decimals]);
 
-  useEffect(() => {
-    if (needPersistData) {
-      persistData(form.getFieldsValue());
-    }
-  }, [form, needPersistData, persistData]);
-
-  useInitValidateTransaction(['value'], form, defaultData);
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
 
   return (
     <>

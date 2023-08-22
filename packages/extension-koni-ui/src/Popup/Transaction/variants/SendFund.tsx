@@ -13,7 +13,7 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -210,13 +210,14 @@ const filterAccountFunc = (
 };
 
 const hiddenFields: Array<keyof TransferParams> = ['chain'];
+const validateFields: Array<keyof TransferParams> = ['value', 'to'];
 
 const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   useSetCurrentPage('/transaction/send-fund');
   const { t } = useTranslation();
   const notification = useNotification();
 
-  const { defaultData, needPersistData, onDone, persistData } = useTransactionContext<TransferParams>();
+  const { defaultData, onDone, persistData } = useTransactionContext<TransferParams>();
   const { defaultSlug: sendFundSlug } = defaultData;
   const isFirstRender = useIsFirstRender();
 
@@ -603,13 +604,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
   }, [maxTransfer, transferAmount]);
 
-  useEffect(() => {
-    if (needPersistData) {
-      persistData(form.getFieldsValue());
-    }
-  }, [form, needPersistData, persistData]);
-
-  useInitValidateTransaction(['value', 'to'], form, defaultData);
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
 
   return (
     <>

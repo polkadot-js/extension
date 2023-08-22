@@ -8,14 +8,14 @@ import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/exte
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { ClaimRewardParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Checkbox, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -28,6 +28,7 @@ import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 type Props = ThemeProps;
 
 const hideFields: Array<keyof ClaimRewardParams> = ['chain', 'type', 'asset'];
+const validateFields: Array<keyof ClaimRewardParams> = ['from'];
 
 const Component: React.FC<Props> = (props: Props) => {
   useSetCurrentPage('/transaction/claim-reward');
@@ -36,7 +37,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
 
   const dataContext = useContext(DataContext);
-  const { defaultData, needPersistData, onDone, persistData } = useTransactionContext<ClaimRewardParams>();
+  const { defaultData, onDone, persistData } = useTransactionContext<ClaimRewardParams>();
   const { chain, type } = defaultData;
 
   const [form] = Form.useForm<ClaimRewardParams>();
@@ -144,13 +145,8 @@ const Component: React.FC<Props> = (props: Props) => {
     return ((type === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) || (isAstarNetwork && !!nominatorMetadata.nominations.length);
   }, [allNominatorInfo, chainInfoMap, rewardList, chain, type]);
 
-  useEffect(() => {
-    if (needPersistData) {
-      persistData(form.getFieldsValue());
-    }
-  }, [form, needPersistData, persistData]);
-
-  useInitValidateTransaction(['from'], form, defaultData);
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
 
   return (
     <>

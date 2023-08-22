@@ -9,14 +9,14 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { accountFilterFunc } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { FormCallbacks, FormFieldData, ThemeProps, WithdrawParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -26,6 +26,7 @@ import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 type Props = ThemeProps;
 
 const hideFields: Array<keyof WithdrawParams> = ['chain', 'asset', 'type'];
+const validateFields: Array<keyof WithdrawParams> = ['from'];
 
 const Component: React.FC<Props> = (props: Props) => {
   useSetCurrentPage('/transaction/withdraw');
@@ -35,7 +36,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
 
   const dataContext = useContext(DataContext);
-  const { defaultData, needPersistData, onDone, persistData } = useTransactionContext<WithdrawParams>();
+  const { defaultData, onDone, persistData } = useTransactionContext<WithdrawParams>();
   const { chain, type } = defaultData;
 
   const [form] = Form.useForm<WithdrawParams>();
@@ -121,13 +122,8 @@ const Component: React.FC<Props> = (props: Props) => {
     return (nomination ? nomination.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE).length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
   }, [chainInfoMap, allNominatorInfo, chain, type]);
 
-  useEffect(() => {
-    if (needPersistData) {
-      persistData(form.getFieldsValue());
-    }
-  }, [form, needPersistData, persistData]);
-
-  useInitValidateTransaction(['from'], form, defaultData);
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
 
   return (
     <>

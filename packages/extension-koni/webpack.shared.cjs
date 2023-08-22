@@ -26,7 +26,7 @@ if (args) {
 
 const envPath = mode === 'production' ? '.env' : '.env.local';
 
-dotenv.config({path: `../../${envPath}`});
+dotenv.config({ path: `../../${envPath}` });
 
 console.log('You are using ' + mode + ' mode.');
 
@@ -39,10 +39,9 @@ const packages = [
   'extension-koni-ui'
 ];
 
-
 const _additionalEnv = {
   TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY)
-}
+};
 
 const additionalEnvDict = {
   extension: _additionalEnv
@@ -50,6 +49,7 @@ const additionalEnvDict = {
 
 module.exports = (entry, alias = {}, useSplitChunk = false) => {
   const additionalEnv = {};
+
   Object.keys(entry).forEach((key) => {
     Object.assign(additionalEnv, additionalEnvDict[key] || {});
   });

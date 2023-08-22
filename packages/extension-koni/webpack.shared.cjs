@@ -40,7 +40,9 @@ const packages = [
 ];
 
 const _additionalEnv = {
-  TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY)
+  TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
+  TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
+  BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true)
 };
 
 const additionalEnvDict = {

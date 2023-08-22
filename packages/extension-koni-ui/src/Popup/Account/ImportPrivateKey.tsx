@@ -46,6 +46,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const timeOutRef = useRef<NodeJS.Timer>();
 
+  // TODO: Change way validate
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [validating, setValidating] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -181,7 +182,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               name={fieldName}
               validateStatus={validateState.status}
             >
-              <Input.TextArea
+              <Input
                 className='private-key-input'
                 placeholder={t('Enter private key')}
                 statusHelp={validateState.message}

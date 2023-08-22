@@ -3,3 +3,5 @@
 
 export const THEME_BACKGROUND_COLOR = 'theme-background-color';
 export const LANGUAGE = 'current-language';
+
+export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';

@@ -67,6 +67,7 @@ const Component: React.ForwardRefRenderFunction<InputRef, Props> = (props: Props
       className={CN(className)}
       {...restProps}
       onChange={_onChange}
+      prefix={<span>{String(index + 1).padStart(2, '0')}</span>}
     />
   );
 };

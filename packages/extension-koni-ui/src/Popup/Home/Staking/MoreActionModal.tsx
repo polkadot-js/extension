@@ -3,12 +3,13 @@
 
 import { ChainStakingMetadata, ExtrinsicType, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
+import { ActivityIndicator, BackgroundIcon, ModalContext, SettingItem } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowArcLeft, ArrowCircleDown, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -274,7 +275,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <SwModal
+    <BaseModal
       closable={true}
       id={MORE_ACTION_MODAL}
       maskClosable={true}
@@ -282,7 +283,7 @@ const Component: React.FC<Props> = (props: Props) => {
       title={t('Actions')}
     >
       {modalContent}
-    </SwModal>
+    </BaseModal>
   );
 };
 

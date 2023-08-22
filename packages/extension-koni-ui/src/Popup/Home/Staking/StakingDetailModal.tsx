@@ -9,6 +9,7 @@ import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
 import { useGetAccountByAddress, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
@@ -17,7 +18,7 @@ import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staki
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
@@ -204,7 +205,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   }, [decimals, getStakingStatus, networkPrefix, showingOption, staking.nativeToken, t, unstakings]);
 
   return (
-    <SwModal
+    <BaseModal
       className={className}
       closable={true}
       footer={footer()}
@@ -421,7 +422,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </>
         }
       </>}
-    </SwModal>
+    </BaseModal>
   );
 };
 

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { CustomModal, EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -243,7 +244,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         </Button>
       </Layout.Base>
 
-      <CustomModal
+      <BaseModal
         className={CN('import-nft-modal', className)}
         id={IMPORT_NFT_MODAL}
         onCancel={closeImportModal}
@@ -254,7 +255,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           modalContent
           onSubmitCallback={closeImportModal}
         />
-      </CustomModal>
+      </BaseModal>
     </PageWrapper>
   );
 }

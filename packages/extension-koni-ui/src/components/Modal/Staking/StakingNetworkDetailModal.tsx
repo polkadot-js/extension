@@ -4,10 +4,11 @@
 import { AmountData, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ModalContext, Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
+import { ModalContext, Number, SwNumberProps } from '@subwallet/react-ui';
 import { BigNumber } from 'bignumber.js';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
@@ -40,7 +41,7 @@ function Component ({ activeNominators,
   }, [inactiveModal]);
 
   return (
-    <SwModal
+    <BaseModal
       className={className}
       id={StakingNetworkDetailModalId}
       onCancel={onCancel}
@@ -126,7 +127,7 @@ function Component ({ activeNominators,
           <span>{getUnstakingPeriod(t, unstakingPeriod)}</span>
         </MetaInfo.Default>}
       </MetaInfo>
-    </SwModal>
+    </BaseModal>
   );
 }
 

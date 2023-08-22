@@ -4,6 +4,7 @@
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
 import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL, SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -13,7 +14,7 @@ import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchMo
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { setSelectedAccountTypes } from '@subwallet/extension-koni-ui/utils';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
-import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -61,7 +62,7 @@ const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
   }, [isActive]);
 
   return (
-    <SwModal
+    <BaseModal
       className={CN(className)}
       closeIcon={(<BackIcon />)}
       id={modalId}
@@ -73,36 +74,34 @@ const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
       }}
       title={t<string>('Select account type')}
     >
-      <div className='items-container'>
+      <div className='__select-account-type'>
         <SelectAccountType
           selectedItems={selectedItems}
           setSelectedItems={setSelectedItems}
         />
-        <Button
-          block={true}
-          disabled={!selectedItems.length}
-          icon={(
-            <Icon
-              className={'icon-submit'}
-              phosphorIcon={CheckCircle}
-              weight='fill'
-            />
-          )}
-          onClick={onSubmit}
-        >
-          {t('Confirm')}
-        </Button>
       </div>
-    </SwModal>
+      <Button
+        block={true}
+        disabled={!selectedItems.length}
+        icon={(
+          <Icon
+            className={'icon-submit'}
+            phosphorIcon={CheckCircle}
+            weight='fill'
+          />
+        )}
+        onClick={onSubmit}
+      >
+        {t('Confirm')}
+      </Button>
+    </BaseModal>
   );
 };
 
 const CreateAccountModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.items-container': {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: token.sizeXS
+    '.__select-account-type': {
+      marginBottom: token.size
     }
   };
 });

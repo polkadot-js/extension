@@ -5,12 +5,13 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { ModalContext, SwList } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import GeneralEmptyList from '../GeneralEmptyList';
+import { BaseModal } from './BaseModal';
 
 interface Props extends ThemeProps {
   id?: string,
@@ -71,7 +72,7 @@ function Component ({ className = '', id = AccountSelectorModalId, items, onSele
   }, [_onSelectItem]);
 
   return (
-    <SwModal
+    <BaseModal
       className={`${className} account-selector-modal`}
       id={id}
       onCancel={onCancel}
@@ -87,7 +88,7 @@ function Component ({ className = '', id = AccountSelectorModalId, items, onSele
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Search account')}
       />
-    </SwModal>
+    </BaseModal>
   );
 }
 

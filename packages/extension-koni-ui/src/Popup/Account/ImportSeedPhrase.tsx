@@ -5,11 +5,12 @@ import { CloseIcon, Layout, PageWrapper, PhraseNumberSelector, SeedPhraseInput }
 import { DEFAULT_ACCOUNT_TYPES, IMPORT_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useFocusFormItem, useGetDefaultAccountName, useGoBackFromCreateAccount, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
-import { FormCallbacks, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Form, Icon } from '@subwallet/react-ui';
+import { FormCallbacks, FormFieldData, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertFieldToObject, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { wordlists } from 'bip39';
 import CN from 'classnames';
-import { FileArrowDown } from 'phosphor-react';
+import { Eye, EyeSlash, FileArrowDown } from 'phosphor-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -28,6 +29,7 @@ const fieldNamePrefix = 'seed-phrase-';
 
 interface FormState extends Record<`seed-phrase-${number}`, string> {
   phraseNumber: string;
+  trigger: string; // Use for trigger validate when change phraseNumber
 }
 
 const words = wordlists.english;
@@ -53,14 +55,30 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const [keyTypes] = useState(storage);
 
+  const [disabled, setDisabled] = useState(true);
+  const [showSeed, setShowSeed] = useState(true);
+
   const phraseNumberItems = useMemo(() => [12, 24].map((value) => ({
     label: t('{{number}} words', { replace: { number: value } }),
     value: String(value)
   })), [t]);
 
   const formDefault: FormState = useMemo(() => ({
-    phraseNumber: '12'
+    phraseNumber: '12',
+    trigger: 'trigger'
   }), []);
+
+  const onFieldsChange: FormCallbacks<FormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+    const { empty, error } = simpleCheckForm(allFields);
+
+    const { phraseNumber } = convertFieldToObject<FormState>(changedFields);
+
+    if (phraseNumber) {
+      form.validateFields(['trigger']).finally(noop);
+    }
+
+    setDisabled(empty || error);
+  }, [form]);
 
   const onFinish: FormCallbacks<FormState>['onFinish'] = useCallback((values: FormState) => {
     const { phraseNumber: _phraseNumber } = values;
@@ -117,12 +135,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       }
 
       if (!words.includes(value)) {
-        reject(new Error(t('Word is invalid')));
+        reject(new Error(t('Invalid word')));
       }
 
       resolve();
     });
   }, [t]);
+
+  const toggleShow = useCallback(() => {
+    setShowSeed((value) => !value);
+  }, []);
 
   useFocusFormItem(form, `${fieldNamePrefix}0`);
 
@@ -134,6 +156,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           children: t('Import account'),
           icon: FooterIcon,
           onClick: form.submit,
+          disabled: disabled,
           loading: submitting
         }}
         subHeaderIcons={[
@@ -149,10 +172,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             {t('To import an existing account, please enter seed phrase')}
           </div>
           <Form
-            className='form-container'
+            className='form-container form-space-xs'
             form={form}
             initialValues={formDefault}
             name={formName}
+            onFieldsChange={onFieldsChange}
             onFinish={onFinish}
           >
             <Form.Item name={'phraseNumber'}>
@@ -160,30 +184,53 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 items={phraseNumberItems}
               />
             </Form.Item>
-            <div className='seed-container'>
-              {
-                new Array(parseInt(phraseNumber || '12')).fill(null).map((value, index) => {
-                  const name = fieldNamePrefix + String(index);
+            <Form.Item
+              hidden={true}
+              name='trigger'
+            >
+              <Input />
+            </Form.Item>
+            <div className='content-container'>
+              <div className='button-container'>
+                <Button
+                  icon={(
+                    <Icon
+                      phosphorIcon={showSeed ? EyeSlash : Eye}
+                    />
+                  )}
+                  onClick={toggleShow}
+                  type='ghost'
+                >
+                  {showSeed ? t('Hide seed phrase') : t('Show seed phrase')}
+                </Button>
+              </div>
+              <div className='seed-container'>
+                {
+                  new Array(parseInt(phraseNumber || '12')).fill(null).map((value, index) => {
+                    const name = fieldNamePrefix + String(index);
 
-                  return (
-                    <Form.Item
-                      key={index}
-                      name={name}
-                      rules={[{
-                        validator: seedValidator
-                      }]}
-                      statusHelpAsTooltip={true}
-                    >
-                      <SeedPhraseInput
-                        form={form}
-                        formName={formName}
-                        index={index}
-                        prefix={fieldNamePrefix}
-                      />
-                    </Form.Item>
-                  );
-                })
-              }
+                    return (
+                      <Form.Item
+                        key={index}
+                        name={name}
+                        rules={[{
+                          validator: seedValidator
+                        }]}
+                        statusHelpAsTooltip={true}
+                        validateTrigger={['onChange', 'onBlur']}
+                      >
+                        <SeedPhraseInput
+                          form={form}
+                          formName={formName}
+                          hideText={!showSeed}
+                          index={index}
+                          prefix={fieldNamePrefix}
+                        />
+                      </Form.Item>
+                    );
+                  })
+                }
+              </div>
             </div>
           </Form>
         </div>
@@ -214,20 +261,30 @@ const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) 
       marginTop: token.margin
     },
 
-    '.seed-phrase-input': {
-      textarea: {
-        resize: 'none',
-        height: `${token.sizeLG * 6}px !important`
-      }
+    '.content-container': {
+      padding: token.paddingXS,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.sizeXS,
+      backgroundColor: token.colorBgSecondary,
+      borderRadius: token.borderRadiusLG
+    },
+
+    '.button-container': {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center'
     },
 
     '.seed-container': {
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)',
-      columnGap: token.size,
+      gap: token.sizeXS,
 
       '.ant-form-item': {
-        minWidth: 0
+        minWidth: 0,
+        marginBottom: 0
       }
     }
   };

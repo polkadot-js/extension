@@ -9,4 +9,4 @@ module.exports = [createConfig({
 }), createConfig({
   background: ['./src/installation.ts', './src/background.ts'],
   extension: './src/extension.ts'
-}, [], true)];
+}, {}, true)];

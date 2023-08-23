@@ -25,5 +25,6 @@ export enum AccountSignMode {
   LEDGER = 'ledger',
   READ_ONLY = 'readonly',
   ALL_ACCOUNT = 'all',
+  INJECTED = 'injected',
   UNKNOWN = 'unknown'
 }

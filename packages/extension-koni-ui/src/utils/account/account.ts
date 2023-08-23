@@ -63,6 +63,10 @@ export const getSignMode = (account: AccountJson | null | undefined): AccountSig
     if (account.address === ALL_ACCOUNT_KEY) {
       return AccountSignMode.ALL_ACCOUNT;
     } else {
+      if (account.isInjected) {
+        return AccountSignMode.INJECTED;
+      }
+
       if (account.isExternal) {
         if (account.isHardware) {
           return AccountSignMode.LEDGER;

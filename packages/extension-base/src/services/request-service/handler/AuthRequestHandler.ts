@@ -8,7 +8,7 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
-import { PREDEFINED_CHAIN_DAPP_CHAIN_MAP } from '@subwallet/extension-base/services/request-service/constants';
+import { PREDEFINED_CHAIN_DAPP_CHAIN_MAP, WEB_APP_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
 import { getDomainFromUrl, stripUrl } from '@subwallet/extension-base/utils';
@@ -260,6 +260,28 @@ export default class AuthRequestHandler {
       if (!confirmAnotherType && !request.reConfirm && allowedListByRequestType.length !== 0) {
         // Prevent appear confirmation popup
         return false;
+      }
+    } else {
+      // Auto auth for web app
+
+      const isWhiteList = WEB_APP_URL.some((url) => idStr.includes(url));
+
+      if (isWhiteList) {
+        const isAllowedMap = this.getAddressList(true);
+
+        authList[stripUrl(url)] = {
+          count: 0,
+          id: idStr,
+          isAllowed: true,
+          isAllowedMap,
+          origin,
+          url,
+          accountAuthType: 'both'
+        };
+
+        this.setAuthorize(authList);
+
+        return true;
       }
     }
 

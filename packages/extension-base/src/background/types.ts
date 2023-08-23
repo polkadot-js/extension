@@ -42,17 +42,19 @@ export interface AbstractAddressJson extends KeyringPair$Meta {
 export interface AccountJson extends AbstractAddressJson {
   accountIndex?: number;
   addressOffset?: number;
+  availableGenesisHashes?: string[];
   genesisHash?: string | null;
   isExternal?: boolean;
   isHardware?: boolean;
   isHidden?: boolean;
+  isInjected?: boolean;
   isMasterAccount?: boolean;
   isMasterPassword?: boolean;
   isReadOnly?: boolean;
-  parentAddress?: string;
-  suri?: string;
   originGenesisHash?: string | null;
-  availableGenesisHashes?: string[];
+  parentAddress?: string;
+  source?: string;
+  suri?: string;
 }
 
 export interface AddressJson extends AbstractAddressJson {

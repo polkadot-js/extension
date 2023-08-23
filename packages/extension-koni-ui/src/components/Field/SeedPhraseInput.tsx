@@ -5,7 +5,7 @@ import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components';
 import { FormInstance, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Input, InputRef } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { ChangeEventHandler, ClipboardEventHandler, FocusEventHandler, ForwardedRef, forwardRef, useCallback, useState } from 'react';
+import React, { ChangeEventHandler, FocusEventHandler, ForwardedRef, forwardRef, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends BasicInputWrapper, ThemeProps {
@@ -28,7 +28,7 @@ const Component: React.ForwardRefRenderFunction<InputRef, Props> = (props: Props
 
     const result: Record<string, string> = {};
 
-    const start = index;
+    const start = data.length > 1 ? 0 : index;
 
     const validates: string[] = [];
 
@@ -51,37 +51,17 @@ const Component: React.ForwardRefRenderFunction<InputRef, Props> = (props: Props
       element?.focus?.();
     };
 
-    if (value.includes(' ')) {
-      focusField(start + 1);
+    if (data.length > 1) {
+      // Not focus
+    } else {
+      // Case press space
+      if (value.includes(' ')) {
+        focusField(start + 1);
+      }
     }
 
     form.validateFields(validates).catch(console.error);
   }, [form, formName, index, prefix]);
-
-  const onPaste: ClipboardEventHandler<HTMLInputElement> = useCallback((event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const value = event.clipboardData.getData('text');
-
-    // Trim to prevent press 'space' character will reset next value
-    const data = value.trim().split(' ');
-
-    const result: Record<string, string> = {};
-
-    const validates: string[] = [];
-
-    data.forEach((value, index) => {
-      const name = prefix + String(index);
-
-      result[name] = value;
-      validates.push(name);
-    });
-
-    form.setFieldsValue(result);
-
-    form.validateFields(validates).catch(console.error);
-  }, [form, prefix]);
 
   const _onFocus: FocusEventHandler<HTMLInputElement> = useCallback((event) => {
     setFocus(true);
@@ -103,7 +83,6 @@ const Component: React.ForwardRefRenderFunction<InputRef, Props> = (props: Props
       onBlur={_onBlur}
       onChange={_onChange}
       onFocus={_onFocus}
-      onPaste={onPaste}
       prefix={<span className='prefix'>{String(index + 1).padStart(2, '0')}</span>}
     />
   );
@@ -128,6 +107,7 @@ const SeedPhraseInput = styled(forwardRef(Component))<Props>(({ theme: { token }
     '.ant-input': {
       paddingTop: token.paddingXS + 2,
       paddingBottom: token.paddingXS + 2,
+      paddingRight: token.paddingXS + 2,
       height: token.controlHeightLG,
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM

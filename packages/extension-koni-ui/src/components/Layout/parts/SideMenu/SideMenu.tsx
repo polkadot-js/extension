@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CONTACT_US, FAQS_URL, TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Image, Menu } from '@subwallet/react-ui';
@@ -120,6 +121,7 @@ function Component ({ className,
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const { t } = useTranslation();
   // animate sidebar
   // const [isHovered, setHovered] = useState<boolean>(true);
 
@@ -211,6 +213,7 @@ function Component ({ className,
           }
           onClick={onToggleCollapse}
           size={'xs'}
+          tooltip={isCollapsed ? t('Expanse') : t('Collapse')}
           type='ghost'
         />
       </div>

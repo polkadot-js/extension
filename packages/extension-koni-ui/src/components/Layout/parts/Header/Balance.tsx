@@ -201,11 +201,12 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             className='__balance-visibility-toggle'
             icon={
               <Icon
-                phosphorIcon={isShowBalance ? Eye : EyeSlash}
+                phosphorIcon={!isShowBalance ? Eye : EyeSlash}
               />
             }
             onClick={onChangeShowBalance}
             size={'xs'}
+            tooltip={isShowBalance ? t('Hide balance') : t('Show balance')}
             type='ghost'
           />
         </div>

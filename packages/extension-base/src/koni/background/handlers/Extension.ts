@@ -2852,17 +2852,19 @@ export default class KoniExtension {
         const pairs = keyring.getPairs();
 
         for (const pair of pairs) {
-          const meta: KeyringPair$Meta = {
-            ...pair.meta,
-            isMasterPassword: false
-          };
-
-          if (!meta.originGenesisHash) {
-            meta.genesisHash = '';
+          if (pair.meta.isInjected) {
+            // Empty
+          } else {
+            const meta: KeyringPair$Meta = {
+              ...pair.meta,
+              isMasterPassword: false
+            };
+            if (!meta.originGenesisHash) {
+              meta.genesisHash = '';
+            }
+            pair.setMeta(meta);
+            keyring.saveAccountMeta(pair, pair.meta);
           }
-
-          pair.setMeta(meta);
-          keyring.saveAccountMeta(pair, pair.meta);
         }
       }
 
@@ -2963,7 +2965,7 @@ export default class KoniExtension {
     }
   }
 
-  /// Signing external request
+  /// Signing substrate request
   private signingApprovePasswordV2 ({ id }: RequestSigningApprovePasswordV2): boolean {
     const queued = this.#koniState.getSignRequest(id);
 

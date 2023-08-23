@@ -24,7 +24,7 @@
     "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.76.17",
+    "@polkadot/dev": "^0.76.18",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",

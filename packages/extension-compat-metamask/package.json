@@ -24,7 +24,7 @@
     "@metamask/detect-provider": "^2.0.0",
     "@polkadot/extension-inject": "0.46.6-5-x",
     "@polkadot/types": "^10.9.1",
-    "@polkadot/util": "^12.4.1",
+    "@polkadot/util": "^12.4.2",
     "tslib": "^2.6.2",
     "web3": "^1.10.1"
   },

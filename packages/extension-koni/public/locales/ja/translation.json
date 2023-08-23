@@ -277,10 +277,7 @@
   "Scan QR": "QRをスキャン",
   "Please make sure that you have granted SubWallet the access to your device's camera.": "デバイスのカメラへのアクセスをSubWallet に許可していることを確認してください。",
   "Click the \"Scan QR\" button, or read": "\"スキャン QR\"ボタンをクリックするか、読み取ります",
-  "Invalid mnemonic seed": "無効なニーモニックシード",
-  "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "ニーモニックは12、15、18、21、24語を含める必要があります",
   "To import an existing account, please enter seed phrase": "既存のアカウントをインポートするには、シードフレーズを入力してください",
-  "Seed phrase": "シードフレーズ",
   "I have kept it somewhere safe": "私はそれをどこかに安全に保管してあります。",
   "Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.": "回復フレーズを安全な場所に保管し、決して開示しないでください。このフレーズを持っている人なら誰でもあなたの資産を制御できます。",
   "Import by JSON file": "JSONファイルによるインポート",
@@ -740,5 +737,13 @@
   "Terms of Service": "",
   "Privacy Policy": "",
   "support site": "",
-  "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": ""
+  "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": "",
+  "Phrase number": "",
+  "Select phrase number": "",
+  "Hover here to view the Phrase": "",
+  "{{number}} words": "",
+  "This field is required": "",
+  "Invalid word": "",
+  "Hide seed phrase": "",
+  "Show seed phrase": ""
 }

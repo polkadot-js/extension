@@ -142,7 +142,7 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
   const { background, headerType, isPortfolio, isSettingPage, setSidebarCollapsed, showBackButtonOnHeader, showSidebar, sidebarCollapsed, title } = useContext(WebUIContext);
-  const { goBack } = useDefaultNavigate();
+  const { goBack, goHome } = useDefaultNavigate();
 
   const headerTitle = useMemo(() => {
     if (isPortfolio) {
@@ -155,6 +155,8 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   if (!isWebUI) {
     return <>{children}</>;
   }
+
+  const isHeaderTypeCommon = [HeaderType.COMMON, HeaderType.COMMON_BACK, HeaderType.COMMON_BACK_TO_HOME].includes(headerType);
 
   return (
     <StyledLayout className={CN('web-layout-container', `header-type-${headerType}`)}>
@@ -169,16 +171,15 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
       </div>}
 
       <div className={CN('web-layout-body', { 'setting-pages': isSettingPage })}>
-        {headerType === HeaderType.COMMON && <div className={'web-layout-header'}>
-          <Headers.Controller title={headerTitle} />
-        </div>}
-        {headerType === HeaderType.COMMON_BACK && <div className={'web-layout-header'}>
-          <Headers.Controller
-            onBack={goBack}
-            showBackButton={true}
-            title={headerTitle}
-          />
-        </div>}
+        {
+          isHeaderTypeCommon && <div className={'web-layout-header'}>
+            <Headers.Controller
+              { ...(headerType === HeaderType.COMMON_BACK ? { onBack: goBack, showBackButton: true } : {}) }
+              { ...(headerType === HeaderType.COMMON_BACK_TO_HOME ? { onBack: goHome, showBackButton: true } : {}) }
+              title={headerTitle}
+            />
+          </div>
+        }
         {headerType === HeaderType.SIMPLE && <div className={'web-layout-header-simple'}>
           <Headers.Simple
             showBackButton={showBackButtonOnHeader}

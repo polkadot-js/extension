@@ -257,7 +257,7 @@ const EditContactModal = styled(Component)<Props>(({ theme: { token } }: Props) 
 
     '.button-container': {
       marginTop: token.margin
-    },
+    }
   };
 });
 

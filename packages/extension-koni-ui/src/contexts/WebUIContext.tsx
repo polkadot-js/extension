@@ -22,6 +22,7 @@ export enum HeaderType {
   NONE= 'none',
   COMMON= 'common',
   COMMON_BACK= 'common-back',
+  COMMON_BACK_TO_HOME= 'common-back-to-home',
   SIMPLE= 'simple',
 }
 
@@ -78,6 +79,8 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
 
       if (pathName.startsWith('/home') || pathName === '/settings' || pathName === '/settings/list') {
         setHeaderType(HeaderType.COMMON);
+      } else if (pathName.startsWith('/transaction-done')) {
+        setHeaderType(HeaderType.COMMON_BACK_TO_HOME);
       } else if (pathName.startsWith('/transaction')) {
         setHeaderType(HeaderType.COMMON_BACK);
       } else {

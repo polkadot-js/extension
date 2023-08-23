@@ -3,21 +3,12 @@
 
 import { WordItem } from '@subwallet/extension-koni-ui/types/account';
 
-export const convertToWords = (seedPhrase: string): Array<Array<WordItem>> => {
+export const convertToWords = (seedPhrase: string): Array<WordItem> => {
   const raw = seedPhrase.split(' ');
-  const result: Array<Array<WordItem>> = [];
-  let count = 0;
-  let temp: Array<WordItem> = [];
+  const result: Array<WordItem> = [];
 
   raw.forEach((item, index) => {
-    temp.push({ index: index + 1, label: item });
-    count++;
-
-    if (count === 3 || index === raw.length - 1) {
-      result.push(temp);
-      count = 0;
-      temp = [];
-    }
+    result.push({ index: index + 1, label: item });
   });
 
   return result;

@@ -1,4 +1,4 @@
-     627	Jaco                          	Bump UI, fix popup theming (#1280)
+     628	Jaco                          	Bump deps (#1281)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

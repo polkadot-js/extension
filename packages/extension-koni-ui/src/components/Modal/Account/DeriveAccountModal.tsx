@@ -5,6 +5,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { CREATE_ACCOUNT_MODAL, DERIVE_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -17,7 +18,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/utils/account/account';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
-import { ActivityIndicator, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { ActivityIndicator, ModalContext, SwList } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
@@ -122,7 +123,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL, clearSearch);
 
   return (
-    <SwModal
+    <BaseModal
       className={className}
       closeIcon={(<BackIcon />)}
       id={modalId}
@@ -141,7 +142,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         searchFunction={searchAccountFunction}
         searchPlaceholder={t<string>('Account name')}
       />
-    </SwModal>
+    </BaseModal>
   );
 };
 

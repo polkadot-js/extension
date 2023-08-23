@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomModal, ReceiveQrModal, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal';
+import { ReceiveQrModal, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { PREDEFINED_BUY_TOKEN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
@@ -200,11 +201,12 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             className='__balance-visibility-toggle'
             icon={
               <Icon
-                phosphorIcon={isShowBalance ? Eye : EyeSlash}
+                phosphorIcon={!isShowBalance ? Eye : EyeSlash}
               />
             }
             onClick={onChangeShowBalance}
             size={'xs'}
+            tooltip={isShowBalance ? t('Hide balance') : t('Show balance')}
             type='ghost'
           />
         </div>
@@ -326,7 +328,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </div>
       </div>
 
-      <CustomModal
+      <BaseModal
+        className={'right-side-modal'}
         id={TRANSFER_FUND_MODAL}
         onCancel={handleCancelTransfer}
         title={t('Transfer')}
@@ -340,9 +343,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             tokenGroupSlug={_tokenGroupSlug}
           />
         </Transaction>
-      </CustomModal>
+      </BaseModal>
 
-      <CustomModal
+      <BaseModal
+        className={'right-side-modal'}
         id={BUY_TOKEN_MODAL}
         onCancel={handleCancelBuy}
         title={t('Buy token')}
@@ -352,7 +356,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           modalContent
           slug={buyTokenSymbol}
         />
-      </CustomModal>
+      </BaseModal>
 
       <AccountSelectorModal
         items={accountSelectorItems}

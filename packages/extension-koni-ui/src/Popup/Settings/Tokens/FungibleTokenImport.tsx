@@ -3,15 +3,15 @@
 
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
-import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
+import { isValidSubstrateAddress, reformatAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainChecker, useDefaultNavigate, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
-import { reformatAddress } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SelectModal, SettingItem } from '@subwallet/react-ui';
+import { BackgroundIcon, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SettingItem } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
@@ -355,7 +355,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name={'chain'}
             >
-              <SelectModal
+              <BaseSelectModal
                 className={className}
                 id='import-nft-select-chain'
                 itemKey={'slug'}
@@ -378,7 +378,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name={'type'}
             >
-              <SelectModal
+              <BaseSelectModal
                 className={className}
                 disabled={selectedChain === ''}
                 id='import-token-select-type'

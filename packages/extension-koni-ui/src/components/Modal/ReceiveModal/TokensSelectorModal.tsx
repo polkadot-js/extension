@@ -3,13 +3,14 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
 import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { useGetZkAddress } from '@subwallet/extension-koni-ui/hooks/account/useGetZkAddress';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { ModalContext, SwList } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
@@ -90,7 +91,7 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
   }, [address, onClickQrBtn, zkAddress]);
 
   return (
-    <SwModal
+    <BaseModal
       className={`${className} chain-selector-modal`}
       id={modalId}
       onCancel={onCancel}
@@ -106,7 +107,7 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Search token')}
       />
-    </SwModal>
+    </BaseModal>
   );
 }
 

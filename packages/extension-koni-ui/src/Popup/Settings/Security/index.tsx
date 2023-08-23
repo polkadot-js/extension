@@ -3,6 +3,7 @@
 
 import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { EDIT_AUTO_LOCK_TIME_MODAL, EDIT_UNLOCK_TYPE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
@@ -12,7 +13,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
-import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockLaminated, LockLaminatedOpen, ShieldStar } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -315,7 +316,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
         </div>
-        <SwModal
+        <BaseModal
           className={className}
           id={editAutoLockTimeModalId}
           onCancel={onCloseAutoLockTimeModal}
@@ -351,8 +352,8 @@ const Component: React.FC<Props> = (props: Props) => {
               })
             }
           </div>
-        </SwModal>
-        <SwModal
+        </BaseModal>
+        <BaseModal
           className={className}
           id={editUnlockTypeModalId}
           onCancel={onCloseUnlockTypeModal}
@@ -400,7 +401,7 @@ const Component: React.FC<Props> = (props: Props) => {
               }
             />
           </div>
-        </SwModal>
+        </BaseModal>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );

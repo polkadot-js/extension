@@ -223,8 +223,17 @@ export default function useGetStakingList () {
 
     stakingMap.forEach((stakingItem) => {
       const chainInfo = chainInfoMap[stakingItem.chain];
+
+      if (!chainInfo) {
+        return;
+      }
+
       const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
       const chainAsset = assetRegistry[nativeTokenSlug];
+
+      if (!chainAsset) {
+        return;
+      }
 
       if (stakingItem.state === APIItemState.READY) {
         if (
@@ -246,6 +255,11 @@ export default function useGetStakingList () {
 
     for (const stakingItem of readyStakingItems) {
       const chainInfo = chainInfoMap[stakingItem.chain];
+
+      if (!chainInfo) {
+        continue;
+      }
+
       const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
       const stakingDataType: StakingDataType = {
         staking: stakingItem,

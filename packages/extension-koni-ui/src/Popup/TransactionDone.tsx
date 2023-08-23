@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { useDefaultNavigate } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, PageIcon } from '@subwallet/react-ui';
+import { Button, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, X } from 'phosphor-react';
+import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -38,7 +39,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 
   return (
-    <Layout.Base
+    <Layout.WithSubHeaderOnly
       {...(!isWebUI
         ? {
           leftFooterButton: {
@@ -51,19 +52,9 @@ const Component: React.FC<Props> = (props: Props) => {
             onClick: goHome,
             children: t('Back to home')
           },
-          showBackButton: true,
-          subHeaderPaddingVertical: true,
-          showSubHeader: true,
-          subHeaderCenter: true,
-          subHeaderBackground: 'transparent'
+          subHeaderLeft: <CloseIcon />
         }
-        : {})}
-      showBackButton={true}
-      subHeaderLeft={(
-        <Icon
-          phosphorIcon={X}
-          size='md'
-        />
+        : {}
       )}
       title={t('Successful')}
     >
@@ -114,7 +105,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
         )}
       </div>
-    </Layout.Base>
+    </Layout.WithSubHeaderOnly>
   );
 };
 

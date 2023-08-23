@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, SettingItem, SwIconProps, SwModal } from '@subwallet/react-ui';
+import { BackgroundIcon, SettingItem, SwIconProps } from '@subwallet/react-ui';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -23,7 +24,7 @@ type Props = ThemeProps & {
 
 function Component ({ actions, className = '', id, onCancel, title }: Props): React.ReactElement<Props> {
   return (
-    <SwModal
+    <BaseModal
       className={className}
       id={id}
       onCancel={onCancel}
@@ -50,7 +51,7 @@ function Component ({ actions, className = '', id, onCancel, title }: Props): Re
           ))
         }
       </div>
-    </SwModal>
+    </BaseModal>
   );
 }
 

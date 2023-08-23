@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React from 'react';
 import { useSelector } from 'react-redux';
@@ -19,7 +19,7 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
 
   return (
-    <SwModal
+    <BaseModal
       className={CN('confirmation-modal', className)}
       closable={false}
       id={id}
@@ -28,7 +28,7 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
       wrapClassName={CN({ hidden: !hasConfirmations })}
     >
       <Confirmations className={'confirmation-content-wrapper'} />
-    </SwModal>
+    </BaseModal>
   );
 }
 

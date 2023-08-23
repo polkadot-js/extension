@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { CONFIRMATION_QR_MODAL, CONFIRMATION_SCAN_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
@@ -40,7 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   if (isWebUI) {
     return (
-      <SwModal
+      <BaseModal
         className={CN(className, '-web-ui')}
         closable={false}
         destroyOnClose={true}
@@ -79,7 +80,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {t('Scan QR')}
           </Button>
         </div>
-      </SwModal>
+      </BaseModal>
     );
   }
 

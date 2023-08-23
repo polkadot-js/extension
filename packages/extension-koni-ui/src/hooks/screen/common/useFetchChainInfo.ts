@@ -8,5 +8,5 @@ import { useSelector } from 'react-redux';
 export default function useFetchChainInfo (key: string) {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
 
-  return useMemo(() => key ? chainInfoMap[key] : undefined, [chainInfoMap, key]);
+  return useMemo(() => chainInfoMap[key], [chainInfoMap, key]);
 }

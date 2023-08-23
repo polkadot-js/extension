@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
-import { CustomModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { CAMERA_CONTROLS_MODEL_VIEWER_PROPS, DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -16,7 +17,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
-import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, Logo, ModalContext, SwModal } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, Logo, ModalContext } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
@@ -369,7 +370,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           )}
         </div>
 
-        <CustomModal
+        <BaseModal
           id={TRANSFER_NFT_MODAL}
           onCancel={handleCancelModal}
           title={t('Transfer')}
@@ -383,9 +384,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               nftDetail={nftItem}
             />
           </Transaction>
-        </CustomModal>
+        </BaseModal>
 
-        <SwModal
+        <BaseModal
           className={CN('nft_item_detail__description_modal')}
           closeIcon={modalCloseButton}
           id={'nftItemDescription'}
@@ -411,7 +412,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               </div>
             </div>
           </div>
-        </SwModal>
+        </BaseModal>
       </Layout.Base>
     </PageWrapper>
   );

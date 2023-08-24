@@ -90,7 +90,7 @@ const Component: React.FC<Props> = (props: Props) => {
     {
       icon: LockLaminatedOpen,
       key: SecurityType.UNLOCK_TYPE,
-      title: t('Wallet unlock type'),
+      title: t('Authenticate with password'),
       url: '',
       disabled: false
     }
@@ -319,7 +319,7 @@ const Component: React.FC<Props> = (props: Props) => {
           className={className}
           id={editAutoLockTimeModalId}
           onCancel={onCloseAutoLockTimeModal}
-          title={t('Wallet unlock type')}
+          title={t('Authenticate with password')}
         >
           <div className='modal-body-container'>
             {
@@ -356,7 +356,7 @@ const Component: React.FC<Props> = (props: Props) => {
           className={className}
           id={editUnlockTypeModalId}
           onCancel={onCloseUnlockTypeModal}
-          title={t('Wallet unlock type')}
+          title={t('Authenticate with password')}
         >
           <div className='modal-body-container'>
             <SettingItem

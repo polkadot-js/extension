@@ -3,16 +3,18 @@
 
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import { createAccountSuriV2, createSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
-import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -33,6 +35,7 @@ const Component: React.FC<Props> = ({ accountTypes, className, modalId, onBack, 
   const isActive = checkActive(modalId);
   const notify = useNotification();
   const accountName = useGetDefaultAccountName();
+  const checkUnlock = useUnlockChecker();
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);
@@ -65,35 +68,39 @@ const Component: React.FC<Props> = ({ accountTypes, className, modalId, onBack, 
       return;
     }
 
-    setLoading(true);
+    checkUnlock().then(() => {
+      setLoading(true);
 
-    setTimeout(() => {
-      createAccountSuriV2({
-        name: accountName,
-        suri: seedPhrase,
-        types: accountTypes,
-        isAllowed: true
-      })
-        .then(() => {
-          onSubmitSuccess?.();
+      setTimeout(() => {
+        createAccountSuriV2({
+          name: accountName,
+          suri: seedPhrase,
+          types: accountTypes,
+          isAllowed: true
         })
-        .catch((error: Error): void => {
-          notify({
-            message: error.message,
-            type: 'error'
+          .then(() => {
+            onSubmitSuccess?.();
+          })
+          .catch((error: Error): void => {
+            notify({
+              message: error.message,
+              type: 'error'
+            });
+          })
+          .finally(() => {
+            setLoading(false);
+            onCancel();
           });
-        })
-        .finally(() => {
-          setLoading(false);
-          onCancel();
-        });
-    }, 500);
-  }, [seedPhrase, accountName, accountTypes, onSubmitSuccess, notify, onCancel]);
+      }, 500);
+    }).catch(() => {
+      // User cancel unlock
+    });
+  }, [seedPhrase, checkUnlock, accountName, accountTypes, onSubmitSuccess, notify, onCancel]);
 
   useClickOutSide(isActive, renderModalSelector(className), onCancel);
 
   return (
-    <SwModal
+    <BaseModal
       className={CN(className)}
       closeIcon={!!onBack && (<BackIcon />)}
       id={modalId}
@@ -131,7 +138,7 @@ const Component: React.FC<Props> = ({ accountTypes, className, modalId, onBack, 
           {t('I have saved it somewhere safe')}
         </Button>
       </div>
-    </SwModal>
+    </BaseModal>
   );
 };
 

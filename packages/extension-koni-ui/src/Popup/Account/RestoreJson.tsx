@@ -6,6 +6,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
@@ -18,7 +19,7 @@ import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/ex
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { isKeyringPairs$Json } from '@subwallet/extension-koni-ui/utils/account/typeGuards';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
-import { Button, Form, Icon, Input, ModalContext, SettingItem, SwList, SwModal, Upload } from '@subwallet/react-ui';
+import { Button, Form, Icon, Input, ModalContext, SettingItem, SwList, Upload } from '@subwallet/react-ui';
 import { UploadChangeParam, UploadFile } from '@subwallet/react-ui/es/upload/interface';
 import AccountCard from '@subwallet/react-ui/es/web3-block/account-card';
 import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
@@ -399,7 +400,7 @@ function Component ({ className }: Props): JSX.Element {
                 />
               )}
             </Form>
-            <SwModal
+            <BaseModal
               className={className}
               id={modalId}
               onCancel={closeModal}
@@ -411,7 +412,7 @@ function Component ({ className }: Props): JSX.Element {
                 renderItem={renderItem}
                 rowGap='var(--row-gap)'
               />
-            </SwModal>
+            </BaseModal>
           </div>
 
           {isWebUI && (

@@ -4,6 +4,7 @@
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { ACCOUNT_EXPORT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
@@ -15,7 +16,7 @@ import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, PageIcon, SettingItem, SwModal, SwQRCode } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, PageIcon, SettingItem, SwQRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { saveAs } from 'file-saver';
 import { CheckCircle, CopySimple, DownloadSimple, FileJs, Leaf, QrCode, Wallet } from 'phosphor-react';
@@ -548,14 +549,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
   if (isModalMode) {
     return (
-      <SwModal
+      <BaseModal
         className={CN(className, '-modal-container')}
         closable={false}
         id={ACCOUNT_EXPORT_MODAL}
         onCancel={onCancel}
       >
         {contentBlock}
-      </SwModal>
+      </BaseModal>
     );
   }
 

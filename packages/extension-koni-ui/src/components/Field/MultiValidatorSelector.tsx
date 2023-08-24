@@ -19,7 +19,7 @@ import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staki
 import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getValidatorKey } from '@subwallet/extension-koni-ui/utils/transaction/stake';
-import { Badge, Button, Icon, InputRef, ModalContext, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
+import { Badge, Button, Icon, InputRef, ModalContext, SwList, useExcludeModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import BigN from 'bignumber.js';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
@@ -27,6 +27,7 @@ import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContex
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { BaseModal } from '../Modal/BaseModal';
 import SelectValidatorInput from '../SelectValidatorInput';
 
 interface Props extends ThemeProps, BasicInputWrapper {
@@ -289,7 +290,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         onClick={onActiveValidatorSelector}
         value={value || ''}
       />
-      <SwModal
+      <BaseModal
         className={className}
         closeIcon={(
           <Icon
@@ -340,7 +341,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain).toLowerCase()}`)}
           // showActionBtn
         />
-      </SwModal>
+      </BaseModal>
 
       <FilterModal
         id={FILTER_MODAL_ID}

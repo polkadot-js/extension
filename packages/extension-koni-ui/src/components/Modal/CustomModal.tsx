@@ -3,29 +3,18 @@
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwModal } from '@subwallet/react-ui';
+import { SwModalProps } from '@subwallet/react-ui/es/sw-modal/SwModal';
 import React from 'react';
 import styled from 'styled-components';
 
-interface Props extends ThemeProps {
-  id: string;
-  onCancel: () => void;
-  title?: string | React.ReactNode;
-  closeIcon?: React.ReactNode;
+type Props = ThemeProps & SwModalProps & {
   children: React.ReactElement
-  footer?: React.ReactNode;
 }
 
-function Component (props: Props): React.ReactElement<Props> {
-  const { children, className = '', closeIcon, footer, id, onCancel, title } = props;
-
+function Component ({ children, ...props }: Props): React.ReactElement<Props> {
   return (
     <SwModal
-      className={className}
-      closeIcon={closeIcon}
-      footer={footer}
-      id={id}
-      onCancel={onCancel}
-      title={title}
+      {...props}
     >
       {children}
     </SwModal>

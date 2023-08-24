@@ -58,9 +58,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         .then((data) => {
           if (!data.status) {
             onError(data.errors[0]);
+          } else {
+            unlock();
           }
-
-          unlock();
         })
         .catch((e: Error) => {
           onError(e.message);

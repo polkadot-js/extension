@@ -4,10 +4,11 @@
 import { UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { GeneralEmptyList, StakingUnstakeItem } from '@subwallet/extension-koni-ui/components';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
+import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, InputRef, Number, SelectModal } from '@subwallet/react-ui';
+import { Icon, InputRef, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, Spinner } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
@@ -85,7 +86,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   return (
     <>
-      <SelectModal
+      <BaseSelectModal
         className={className}
         disabled={disabled}
         id={id}

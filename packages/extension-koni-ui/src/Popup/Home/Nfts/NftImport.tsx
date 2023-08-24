@@ -3,10 +3,10 @@
 
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getNftTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
-import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
+import { isValidSubstrateAddress, reformatAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, Layout, PageWrapper, TokenTypeSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useChainChecker, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useChainChecker, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToError, convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -70,6 +70,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
   const collectionName = Form.useWatch('collectionName', form);
 
   const chains = useMemo(() => Object.values(chainInfoMap), [chainInfoMap]);
+  const chainNetworkPrefix = useGetChainPrefixBySlug(selectedChain);
 
   const [loading, setLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
@@ -127,6 +128,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
   const onSubmit: FormCallbacks<NftImportFormType>['onFinish'] = useCallback((formValues: NftImportFormType) => {
     const { chain, contractAddress, symbol, type } = formValues;
     const formattedCollectionName = collectionName.replaceAll(' ', '').toUpperCase();
+    const reformattedAddress = reformatAddress(contractAddress, chainNetworkPrefix);
 
     setLoading(true);
 
@@ -140,7 +142,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
         priceId: null,
         minAmount: null,
         assetType: type,
-        metadata: _parseMetadataForSmartContractAsset(contractAddress),
+        metadata: _parseMetadataForSmartContractAsset(reformattedAddress),
         multiChainAsset: null,
         hasValue: _isChainTestNet(chainInfoMap[chain]),
         icon: ''
@@ -166,7 +168,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
           setLoading(false);
         });
     }, 300);
-  }, [collectionName, chainInfoMap, showNotification, t, goBack]);
+  }, [collectionName, chainNetworkPrefix, chainInfoMap, showNotification, t, goBack]);
 
   const collectionNameValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -187,11 +189,12 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
       } else {
         const isValidEvmContract = [_AssetType.ERC721].includes(selectedNftType) && isEthereumAddress(contractAddress);
         const isValidWasmContract = [_AssetType.PSP34].includes(selectedNftType) && isValidSubstrateAddress(contractAddress);
+        const reformattedAddress = reformatAddress(contractAddress, chainNetworkPrefix);
 
         if (isValidEvmContract || isValidWasmContract) {
           setLoading(true);
           validateCustomToken({
-            contractAddress: contractAddress,
+            contractAddress: reformattedAddress,
             originChain: selectedChain,
             type: selectedNftType
           })
@@ -221,7 +224,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
         }
       }
     });
-  }, [form, selectedChain, selectedNftType, t]);
+  }, [chainNetworkPrefix, form, selectedChain, selectedNftType, t]);
 
   useEffect(() => {
     selectedChain && checkChain(selectedChain);
@@ -301,6 +304,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
               statusHelpAsTooltip={true}
             >
               <AddressInput
+                addressPrefix={chainNetworkPrefix}
                 disabled={!selectedNftType}
                 label={t<string>('Contract address')}
                 placeholder={t('Enter or paste an address')}

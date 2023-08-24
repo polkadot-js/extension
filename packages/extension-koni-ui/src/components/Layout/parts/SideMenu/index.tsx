@@ -6,91 +6,157 @@ import styled from 'styled-components';
 import Component, { Props } from './SideMenu';
 
 const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
-  '&.__expanded': {
-    width: 250,
-
-    '.ant-menu-item': {
-      padding: '16px 26px',
-
-      '.ant-menu-item-icon': {
-        marginRight: 0
-      }
-    },
-
-    '.logo-container': {
-      '& > svg': {
-        width: 50,
-        height: 70
-      }
-    },
-
-    '.menu-wrapper': {
-      marginTop: 47
-    }
-  },
-
+  backgroundColor: token.colorBgSecondary,
   height: '100%',
-  display: 'flex',
+  width: 248,
   flexDirection: 'column',
-  background: '#1A1A1A',
-  transition: 'width .8s',
-  width: 50,
+  display: 'flex',
+  transition: `width ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1)`,
 
-  '.flex-col': {
-    display: 'flex',
-    flexDirection: 'column'
-  },
-
-  '.logo-container': {
-    paddingTop: `${token.paddingXXL - 8}px`,
+  '.__logo-container': {
+    width: '100%',
+    height: 156,
     display: 'flex',
     justifyContent: 'center',
+    position: 'relative',
+    transition: `width ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1), padding ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1)`
+  },
 
-    '& > svg': {
-      transition: 'width .8s, height .8s',
-      width: 20,
-      height: 30
+  '.__sidebar-collapse-trigger': {
+    color: token.colorTextLight1,
+    position: 'absolute',
+    right: -20,
+    top: 0,
+    bottom: 0,
+    marginTop: 'auto',
+    marginBottom: 'auto',
+    zIndex: 100,
+    opacity: 0,
+
+    '.anticon': {
+      borderRadius: '100%',
+      backgroundColor: token.colorBgInput
     }
   },
 
-  '.menu-wrapper': {
-    marginTop: 65,
-    justifyContent: 'space-between',
-    height: '100%',
-    transition: 'margin .8s',
+  '.__menu-container': {
+    flex: 1,
+    flexDirection: 'column',
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
 
-    '.ant-menu': {
-      background: '#1A1A1A'
-    },
-    '.ant-menu-item': {
-      backgroundColor: '#1A1A1A',
+  '.ant-image': {
+    transition: `height ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1),border-color ${token.motionDurationSlow}`
+  },
+
+  '.ant-image-img': {
+    maxHeight: '100%'
+  },
+
+  '.ant-menu.ant-menu': {
+    backgroundColor: 'transparent'
+  },
+
+  '.ant-menu-item': {
+    borderRight: '4px solid transparent',
+    margin: 0,
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    borderRadius: 0,
+
+    '.ant-menu-item-icon': {
+      fontSize: 24,
+      height: 40,
+      width: 40,
+      minWidth: 40,
       display: 'flex',
       alignItems: 'center',
-      width: '100%',
-      padding: 16,
-      height: 52,
-      margin: 0,
-      opacity: 0.65,
-      borderRadius: 0,
+      justifyContent: 'center',
+      color: token.colorTextLight3
+    }
+  },
 
-      '.ant-menu-item-icon': {
-        minHeight: 24,
-        minWidth: 24,
-        marginRight: 5
-      }
+  '.ant-menu-vertical >.ant-menu-item': {
+    height: 52
+  },
+
+  '.ant-menu-item.ant-menu-item': {
+    overflow: 'hidden',
+    transition: `width ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1),border-color ${token.motionDurationSlow},background ${token.motionDurationSlow},padding ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1)`
+  },
+
+  '.ant-menu-title-content.ant-menu-title-content': {
+    lineHeight: token.lineHeight,
+    fontWeight: token.headingFontWeight,
+    marginLeft: token.marginXS,
+    color: token.colorTextLight3
+  },
+
+  '.ant-menu-item:not(.ant-menu-item-selected):hover': {
+    backgroundColor: token.colorBgInput,
+
+    '.ant-menu-item-icon': {
+      color: token.colorTextLight1
     },
 
-    '.ant-menu-item-selected': {
-      borderRight: `4px solid ${token.colorPrimary}`,
+    '.ant-menu-title-content.ant-menu-title-content': {
+      color: token.colorTextLight1
+    }
+  },
 
-      '.ant-menu-item-icon': {
-        color: token.colorPrimary
-      },
+  '.ant-menu-item.ant-menu-item-selected': {
+    backgroundColor: 'transparent',
+    borderRightColor: token.colorPrimary,
 
-      '.ant-menu-title-content': {
-        color: 'white',
-        background: 'transparent'
-      }
+    '.ant-menu-item-icon': {
+      color: token.colorPrimary
+    },
+
+    '.ant-menu-title-content.ant-menu-title-content': {
+      color: token.colorTextLight1
+    }
+  },
+
+  '&, &.-expanded': {
+    width: 248,
+
+    '.__logo-container': {
+      paddingTop: 39
+    },
+
+    '.ant-image': {
+      height: 69
+    },
+
+    '.ant-menu-item.ant-menu-item': {
+      width: 248
+    }
+  },
+
+  '&.-collapsed': {
+    width: 52,
+
+    '.__logo-container': {
+      paddingTop: 24
+    },
+
+    '.ant-image': {
+      height: 32
+    },
+
+    '.ant-menu-item.ant-menu-item': {
+      paddingLeft: 6,
+      paddingRight: 0,
+      overflow: 'hidden',
+      width: 52
+    }
+  },
+
+  '&:hover': {
+    '.__sidebar-collapse-trigger': {
+      opacity: 1
     }
   }
 }));

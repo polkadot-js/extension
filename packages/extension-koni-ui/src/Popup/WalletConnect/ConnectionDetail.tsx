@@ -4,13 +4,14 @@
 import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
 import { stripUrl } from '@subwallet/extension-base/utils';
 import { AccountItemWithName, EmptyList, GeneralEmptyList, Layout, MetaInfo, PageWrapper, WCNetworkAvatarGroup } from '@subwallet/extension-koni-ui/components';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useConfirmModal, useNotification, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { disconnectWalletConnectConnection } from '@subwallet/extension-koni-ui/messaging';
 import { ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 import { Theme, ThemeProps, WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
 import { chainsToWalletConnectChainInfos, getWCAccountList, noop } from '@subwallet/extension-koni-ui/utils';
-import { Icon, Image, ModalContext, NetworkItem, SwList, SwModal, SwModalFuncProps } from '@subwallet/react-ui';
+import { Icon, Image, ModalContext, NetworkItem, SwList, SwModalFuncProps } from '@subwallet/react-ui';
 import { SessionTypes } from '@walletconnect/types';
 import CN from 'classnames';
 import { Info, MagnifyingGlass, Plugs } from 'phosphor-react';
@@ -223,7 +224,7 @@ const Component: React.FC<ComponentProps> = (props) => {
           renderWhenEmpty={renderAccountEmpty}
           rowGap='var(--row-gap)'
         />
-        <SwModal
+        <BaseModal
           className={CN(className, 'network-modal')}
           id={networkModalId}
           onCancel={closeNetworkModal}
@@ -240,7 +241,7 @@ const Component: React.FC<ComponentProps> = (props) => {
             searchFunction={searchFunction}
             searchPlaceholder={t<string>('Network name')}
           />
-        </SwModal>
+        </BaseModal>
       </div>
     </Layout.WithSubHeaderOnly>
   );

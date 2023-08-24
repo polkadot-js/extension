@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { Number, SwModal } from '@subwallet/react-ui';
+import { Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import React from 'react';
 import styled from 'styled-components';
@@ -50,7 +51,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
   })();
 
   return (
-    <SwModal
+    <BaseModal
       className={className}
       id={id}
       onCancel={onCancel}
@@ -77,7 +78,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
           </div>
         ))}
       </div>
-    </SwModal>
+    </BaseModal>
   );
 }
 

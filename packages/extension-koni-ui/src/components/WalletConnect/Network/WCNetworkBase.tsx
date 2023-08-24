@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { ThemeProps, WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
-import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
@@ -56,7 +57,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onClick={onOpenModal}
       />
 
-      <SwModal
+      <BaseModal
         className={CN(className, 'network-modal')}
         id={id}
         onCancel={onCloseModal}
@@ -73,7 +74,7 @@ const Component: React.FC<Props> = (props: Props) => {
             rowGap='var(--row-gap)'
           />
         </>
-      </SwModal>
+      </BaseModal>
     </div>
   );
 };

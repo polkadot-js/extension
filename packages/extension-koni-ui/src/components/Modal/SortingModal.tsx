@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Icon, ModalContext } from '@subwallet/react-ui';
 import { ArrowsClockwise, SortAscending, SortDescending } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -50,7 +51,7 @@ function Component (props: Props): React.ReactElement<Props> {
   }, [id, inactiveModal, onReset]);
 
   return (
-    <SwModal
+    <BaseModal
       className={className}
       id={id}
       onCancel={_onCancel}
@@ -79,6 +80,7 @@ function Component (props: Props): React.ReactElement<Props> {
           onReset && (
             <Button
               block={true}
+              className={'__button'}
               icon={(
                 <Icon
                   phosphorIcon={ArrowsClockwise}
@@ -91,7 +93,7 @@ function Component (props: Props): React.ReactElement<Props> {
           )
         }
       </div>
-    </SwModal>
+    </BaseModal>
   );
 }
 
@@ -103,6 +105,10 @@ export const SortingModal = styled(Component)<Props>(({ theme: { token } }: Prop
 
     '.sorting-item:not(:last-child)': {
       marginBottom: token.marginXS
+    },
+
+    '.__button': {
+      marginTop: token.marginXS
     }
   });
 });

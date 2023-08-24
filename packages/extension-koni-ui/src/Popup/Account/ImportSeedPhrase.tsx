@@ -56,7 +56,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [keyTypes] = useState(storage);
 
   const [disabled, setDisabled] = useState(true);
-  const [showSeed, setShowSeed] = useState(true);
+  const [showSeed, setShowSeed] = useState(false);
 
   const phraseNumberItems = useMemo(() => [12, 24].map((value) => ({
     label: t('{{number}} words', { replace: { number: value } }),
@@ -169,7 +169,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       >
         <div className='container'>
           <div className='description'>
-            {t('To import an existing account, please enter seed phrase')}
+            {t('To import an existing account,\n please enter seed phrase.')}
           </div>
           <Form
             className='form-container form-space-xs'
@@ -196,9 +196,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   icon={(
                     <Icon
                       phosphorIcon={showSeed ? EyeSlash : Eye}
+                      size='sm'
                     />
                   )}
                   onClick={toggleShow}
+                  size='xs'
                   type='ghost'
                 >
                   {showSeed ? t('Hide seed phrase') : t('Show seed phrase')}
@@ -254,7 +256,8 @@ const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) 
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
       color: token.colorTextDescription,
-      textAlign: 'center'
+      textAlign: 'center',
+      whiteSpaceCollapse: 'break-spaces'
     },
 
     '.form-container': {

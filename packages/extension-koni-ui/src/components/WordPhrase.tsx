@@ -63,7 +63,7 @@ const Component: React.FC<Props> = (props: Props) => {
             customSize='28px'
             phosphorIcon={EyeSlash}
           />
-          <span>{t('Hover here to view the Phrase')}</span>
+          <span>{t('Hover to view seed phrase')}</span>
         </div>
       </div>
       <Button

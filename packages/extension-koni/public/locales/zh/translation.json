@@ -277,7 +277,7 @@
   "Scan QR": "扫描二维码",
   "Please make sure that you have granted SubWallet the access to your device's camera.": "请确保你已授予SubWallet访问设备相机的权限。",
   "Click the \"Scan QR\" button, or read": "点击\\“扫描二维码”\\按钮，或阅读",
-  "To import an existing account, please enter seed phrase": "如需导入已存在的钱包，请输入助记词",
+  "To import an existing account,\n please enter seed phrase.": "如需导入已存在的钱包，\n请输入助记词。",
   "I have kept it somewhere safe": "我已将其保存在安全的地方",
   "Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.": "请将你的助记词保存于安全地方且切勿泄露。持有该助记词的人能够控制你的资产。",
   "Import by JSON file": "通过JSON文件导入",
@@ -740,10 +740,10 @@
   "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": "",
   "Phrase number": "",
   "Select phrase number": "",
-  "Hover here to view the Phrase": "",
   "{{number}} words": "",
   "This field is required": "",
   "Invalid word": "单词无效",
   "Hide seed phrase": "",
-  "Show seed phrase": ""
+  "Show seed phrase": "",
+  "Hover to view seed phrase": "请悬停将查看助记词"
 }

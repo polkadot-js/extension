@@ -277,7 +277,7 @@
   "Scan QR": "Quét mã QR",
   "Please make sure that you have granted SubWallet the access to your device's camera.": "Hãy đảm bảo rằng bạn đã cấp cho SubWallet quyền truy cập vào máy ảnh thiết bị của bạn.",
   "Click the \"Scan QR\" button, or read": "Nhấp vào nút \"Quét QR\" hoặc đọc",
-  "To import an existing account, please enter seed phrase": "Để nhập một tài khoản có sẵn, vui lòng nhập seed phrase",
+  "To import an existing account,\n please enter seed phrase.": "Để nhập một tài khoản có sẵn,\n vui lòng nhập seed phrase.",
   "I have kept it somewhere safe": "Tôi đã lưu trữ seed phrase an toàn",
   "Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.": "Lưu trữ seed phrase của bạn ở nơi an toàn và bí mật. Bất kỳ ai có được seed phrase sẽ nắm toàn quyền kiểm soát tài sản của bạn.",
   "Import by JSON file": "Nhập bằng tệp JSON",
@@ -740,10 +740,10 @@
   "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": "",
   "Phrase number": "",
   "Select phrase number": "",
-  "Hover here to view the Phrase": "",
   "{{number}} words": "",
   "This field is required": "",
   "Invalid word": "Từ không hợp lệ",
   "Hide seed phrase": "",
-  "Show seed phrase": ""
+  "Show seed phrase": "",
+  "Hover to view seed phrase": "Di chuột để xem seed phrase"
 }

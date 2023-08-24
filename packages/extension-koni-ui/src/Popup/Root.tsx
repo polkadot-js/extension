@@ -2,22 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BackgroundExpandView, PageWrapper } from '@subwallet/extension-koni-ui/components';
+// Special
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import { DEFAULT_ROUTER_PATH, TRANSACTION_STORAGES } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
-import { useDefaultNavigate, useNotification, useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
+import { useDefaultNavigate, useGetCurrentPage, useNotification, useSelector, useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
+import { isNoAccount, removeStorage } from '@subwallet/extension-koni-ui/utils';
 import { changeHeaderLogo } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
-import React, { useContext, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useIsFirstRender } from 'usehooks-ts';
 
 changeHeaderLogo(<Logo2D />);
 
@@ -44,11 +45,16 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const { goBack, goHome } = useDefaultNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
   const notify = useNotification();
+  const currentPage = useGetCurrentPage();
+  const isFirstRender = useIsFirstRender();
+  const atRoot = location.pathname === '/';
 
   useSubscribeLanguage();
 
-  const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
-  const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
+  const { hasConfirmations, hasInternalConfirmations } = useSelector((state) => state.requestState);
+  const { accounts, currentAccount, hasMasterPassword, isLocked } = useSelector((state) => state.accountState);
+
+  const [initAccount, setInitAccount] = useState(currentAccount);
 
   const needMigrate = useMemo(
     () => !!accounts
@@ -134,7 +140,38 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
       openPModal(null);
     }
-  }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
+  }, [
+    accounts,
+    currentPage,
+    goBack,
+    goHome,
+    hasConfirmations,
+    hasInternalConfirmations,
+    hasMasterPassword,
+    isLocked,
+    isOpenPModal,
+    location.pathname,
+    navigate,
+    needMigrate,
+    openPModal
+  ]);
+
+  useEffect(() => {
+    if (currentPage && isFirstRender && atRoot && !hasConfirmations) {
+      navigate(currentPage);
+    }
+  }, [currentPage, navigate, isFirstRender, atRoot, hasConfirmations]);
+
+  // Remove transaction persist state
+  useEffect(() => {
+    if (!isSameAddress(initAccount?.address || '', currentAccount?.address || '')) {
+      for (const key of TRANSACTION_STORAGES) {
+        removeStorage(key);
+      }
+
+      setInitAccount(currentAccount);
+    }
+  }, [currentAccount, initAccount]);
 
   return <>
     {children}

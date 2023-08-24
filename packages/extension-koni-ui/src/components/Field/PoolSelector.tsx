@@ -55,7 +55,7 @@ const FILTER_MODAL_ID = 'pool-filter-modal';
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, from, id = 'pool-selector', label, loading, onChange, onClickBookBtn, placeholder, setForceFetchValidator, statusHelp, value } = props;
+  const { chain, className = '', defaultValue, disabled, from, id = 'pool-selector', label, loading, onChange, onClickBookBtn, placeholder, setForceFetchValidator, statusHelp, value } = props;
 
   useExcludeModal(id);
 
@@ -215,7 +215,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [inactiveModal]);
 
   useEffect(() => {
-    const selectedPool = nominationPoolValueList[0] || String(PREDEFINED_STAKING_POOL[chain] || '');
+    const selectedPool = defaultValue || nominationPoolValueList[0] || String(PREDEFINED_STAKING_POOL[chain] || '');
 
     onChange && onChange({ target: { value: selectedPool } });
     // eslint-disable-next-line react-hooks/exhaustive-deps

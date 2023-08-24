@@ -10,6 +10,8 @@ import { keyring } from '@subwallet/ui-keyring';
 import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import { BehaviorSubject } from 'rxjs';
 
+import { stringShorten } from '@polkadot/util';
+
 export class KeyringService {
   private readonly currentAccountStore = new CurrentAccountStore();
   readonly currentAccountSubject = new BehaviorSubject<CurrentAccountInfo>({ address: '', currentGenesisHash: null });
@@ -98,7 +100,7 @@ export class KeyringService {
       ...account,
       meta: {
         ...account.meta,
-        name: `${account.meta.name || String(index)} (${account.meta.source})`
+        name: `${account.meta.name || stringShorten(account.address)} (${account.meta.source})`
       }
     })));
   }

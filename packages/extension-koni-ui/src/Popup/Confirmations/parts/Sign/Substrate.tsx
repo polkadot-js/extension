@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountJson } from '@subwallet/extension-base/background/types';
+import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { useNotification } from '@subwallet/extension-koni-ui/hooks';
+import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
+import { useNotification, useParseSubstrateRequestPayload } from '@subwallet/extension-koni-ui/hooks';
 import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
 import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
@@ -15,20 +16,21 @@ import { isSubstrateMessage } from '@subwallet/extension-koni-ui/utils';
 import { getSignMode } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, QrCode, Swatches, XCircle } from 'phosphor-react';
+import { CheckCircle, QrCode, Swatches, Wallet, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { ExtrinsicPayload } from '@polkadot/types/interfaces';
+import { SignerResult } from '@polkadot/types/types';
+import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 
 import { DisplayPayloadModal, ScanSignature, SubstrateQr } from '../Qr';
 
 interface Props extends ThemeProps {
   account: AccountJson;
   id: string;
-  payload: ExtrinsicPayload | string;
+  request: RequestSign;
 }
 
 const handleConfirm = async (id: string) => await approveSignPasswordV2({ id });
@@ -40,15 +42,18 @@ const handleSignature = async (id: string, { signature }: SigData) => await appr
 const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD];
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { account, className, id, payload } = props;
+  const { account, className, id, request } = props;
 
   const { t } = useTranslation();
   const notify = useNotification();
   const checkUnlock = useUnlockChecker();
 
   const { activeModal } = useContext(ModalContext);
+  const { substrateWallet } = useContext(InjectContext);
 
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+
+  const payload = useParseSubstrateRequestPayload(request);
 
   const [loading, setLoading] = useState(false);
 
@@ -63,6 +68,8 @@ const Component: React.FC<Props> = (props: Props) => {
         return QrCode;
       case AccountSignMode.LEDGER:
         return Swatches;
+      case AccountSignMode.INJECTED:
+        return Wallet;
       default:
         return CheckCircle;
     }
@@ -168,6 +175,38 @@ const Component: React.FC<Props> = (props: Props) => {
     refreshLedger
   ]);
 
+  const onConfirmInject = useCallback(() => {
+    if (substrateWallet) {
+      let promise: Promise<SignerResult>;
+
+      if (isMessage) {
+        if (substrateWallet.signer.signRaw) {
+          promise = substrateWallet.signer.signRaw({ address: account.address, type: 'bytes', data: payload });
+        } else {
+          return;
+        }
+      } else {
+        if (substrateWallet.signer.signPayload) {
+          promise = substrateWallet.signer.signPayload(request.payload as SignerPayloadJSON);
+        } else {
+          return;
+        }
+      }
+
+      setLoading(true);
+      promise
+        .then(({ signature }) => {
+          onApproveSignature({ signature });
+        })
+        .catch((e) => {
+          console.error(e);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [account.address, isMessage, onApproveSignature, payload, request.payload, substrateWallet]);
+
   const onConfirm = useCallback(() => {
     switch (signMode) {
       case AccountSignMode.QR:
@@ -176,6 +215,9 @@ const Component: React.FC<Props> = (props: Props) => {
       case AccountSignMode.LEDGER:
         onConfirmLedger();
         break;
+      case AccountSignMode.INJECTED:
+        onConfirmInject();
+        break;
       default:
         checkUnlock().then(() => {
           onApprovePassword();
@@ -183,7 +225,7 @@ const Component: React.FC<Props> = (props: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [checkUnlock, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
+  }, [checkUnlock, onApprovePassword, onConfirmInject, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
     !!ledgerError && notify({

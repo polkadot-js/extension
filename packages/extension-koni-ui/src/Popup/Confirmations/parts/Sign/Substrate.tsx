@@ -10,8 +10,7 @@ import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/cha
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
+import { AccountSignMode, PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isSubstrateMessage, removeTransactionPersist } from '@subwallet/extension-koni-ui/utils';
 import { getSignMode } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
@@ -40,7 +39,7 @@ const handleCancel = async (id: string) => await cancelSignRequest(id);
 
 const handleSignature = async (id: string, { signature }: SigData) => await approveSignSignature(id, signature);
 
-const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD];
+const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD, AccountSignMode.INJECTED];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { account, className, extrinsicType, id, request } = props;

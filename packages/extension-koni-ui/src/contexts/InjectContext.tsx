@@ -46,7 +46,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const _accounts = useDeferredValue(accounts);
 
   useEffect(() => {
-    const wallet = win.injectedWeb3['subwallet-js'];
+    const wallet = win.injectedWeb3?.['subwallet-js'];
 
     if (wallet) {
       wallet.enable('web-app')

@@ -23,3 +23,7 @@ export const isFirefox = (): boolean => {
 export const setSelectedAccountTypes = (keypairTypes: KeypairType[]) => {
   localStorage.setItem(SELECTED_CREATE_ACCOUNT_TYPE_KEY, JSON.stringify(keypairTypes));
 };
+
+export const removeStorage = (key: string) => {
+  localStorage.removeItem(key);
+};

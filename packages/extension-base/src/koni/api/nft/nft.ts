@@ -89,6 +89,10 @@ export abstract class BaseNftApi {
       return undefined;
     }
 
+    if (isUrl(input)) {
+      return input;
+    }
+
     if (isUrl(input) || input.includes('https://') || input.includes('http')) {
       return input;
     }

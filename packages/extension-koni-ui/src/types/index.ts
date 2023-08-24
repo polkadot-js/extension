@@ -104,4 +104,5 @@ export * from './history';
 export * from './ledger';
 export * from './navigation';
 export * from './staking';
+export * from './transaction';
 export * from './walletConnect';

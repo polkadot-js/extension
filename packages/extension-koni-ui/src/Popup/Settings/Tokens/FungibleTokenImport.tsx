@@ -6,10 +6,11 @@ import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmart
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useChainChecker, useDefaultNavigate, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useChainChecker, useDefaultNavigate, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
+import { reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
@@ -79,6 +80,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [decimals, setDecimals] = useState(-1);
+  const chainNetworkPrefix = useGetChainPrefixBySlug(selectedChain);
 
   const tokenTypeOptions = useMemo(() => {
     return getTokenTypeSupported(chainInfoMap[selectedChain]);
@@ -86,6 +88,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const onSubmit = useCallback(() => {
     const formValues = formRef.current?.getFieldsValue() as TokenImportFormType;
+    const reformattedAddress = reformatAddress(formValues.contractAddress, chainNetworkPrefix);
 
     setLoading(true);
 
@@ -98,7 +101,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       priceId: formValues.priceId || null,
       minAmount: null,
       assetType: formValues.type,
-      metadata: _parseMetadataForSmartContractAsset(formValues.contractAddress),
+      metadata: _parseMetadataForSmartContractAsset(reformattedAddress),
       multiChainAsset: null,
       hasValue: _isChainTestNet(chainInfoMap[formValues.chain]),
       icon: 'default.png'
@@ -122,7 +125,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           message: t('An error occurred, please try again')
         });
       });
-  }, [name, symbol, decimals, chainInfoMap, showNotification, t, goBack]);
+  }, [chainNetworkPrefix, name, symbol, decimals, chainInfoMap, showNotification, t, goBack]);
 
   const isSubmitDisabled = useCallback(() => {
     return contractValidation.status === '' || contractValidation.status === 'error';
@@ -132,11 +135,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return new Promise((resolve, reject) => {
       const isValidEvmContract = [_AssetType.ERC20].includes(selectedTokenType as _AssetType) && isEthereumAddress(contractAddress);
       const isValidWasmContract = [_AssetType.PSP22].includes(selectedTokenType as _AssetType) && isValidSubstrateAddress(contractAddress);
+      const reformattedAddress = reformatAddress(contractAddress, chainNetworkPrefix);
 
       if (isValidEvmContract || isValidWasmContract) {
         setLoading(true);
         validateCustomToken({
-          contractAddress,
+          contractAddress: reformattedAddress,
           originChain: selectedChain,
           type: selectedTokenType as _AssetType
         })
@@ -184,7 +188,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         reject(t('Invalid contract address'));
       }
     });
-  }, [selectedChain, selectedTokenType, t]);
+  }, [chainNetworkPrefix, selectedChain, selectedTokenType, t]);
 
   const originChainLogo = useCallback(() => {
     return (
@@ -406,6 +410,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       : {}
                   )
                 }
+                addressPrefix={chainNetworkPrefix}
                 disabled={selectedTokenType === ''}
                 label={t('Contract address')}
                 showScanner={true}

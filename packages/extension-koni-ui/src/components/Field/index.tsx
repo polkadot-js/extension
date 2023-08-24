@@ -4,6 +4,7 @@
 export type { BasicInputWrapper, BasicOnChangeFunction, BasicInputEvent } from './Base';
 
 export { default as AmountInput } from './AmountInput';
+export { default as HiddenInput } from './HiddenInput';
 export { default as MultiValidatorSelector } from './MultiValidatorSelector';
 export { default as PoolSelector } from './PoolSelector';
 export { default as NominationSelector } from './NominationSelector';

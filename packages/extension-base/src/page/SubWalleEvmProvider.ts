@@ -69,7 +69,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   }
 
   public async enable () {
-    return this.request({ method: 'eth_requestAccounts' });
+    return this.request<string[]>({ method: 'eth_requestAccounts' });
   }
 
   public override on (eventName: string | symbol, listener: (...args: any[]) => void): this {

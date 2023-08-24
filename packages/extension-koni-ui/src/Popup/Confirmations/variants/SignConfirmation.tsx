@@ -61,7 +61,7 @@ function Component ({ className, request }: Props) {
       <SubstrateSignArea
         account={account}
         id={request.id}
-        payload={payload}
+        request={request.request}
       />
       <BaseDetailModal
         title={isMessage ? t('Message details') : t('Transaction details')}

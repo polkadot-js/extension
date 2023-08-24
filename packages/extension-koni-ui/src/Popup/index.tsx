@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DataContextProvider } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { InjectContextProvider } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { ScannerContextProvider } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
 import { ThemeProvider } from '@subwallet/extension-koni-ui/contexts/ThemeContext';
 import { ModalContextProvider } from '@subwallet/react-ui';
@@ -19,10 +20,12 @@ export default function Popup (): React.ReactElement {
         <ModalContextProvider>
           <ScannerContextProvider>
             <NotificationProvider>
-              <RouterProvider
-                fallbackElement={<LoadingScreen className='root-loading' />}
-                router={router}
-              />
+              <InjectContextProvider>
+                <RouterProvider
+                  fallbackElement={<LoadingScreen className='root-loading' />}
+                  router={router}
+                />
+              </InjectContextProvider>
             </NotificationProvider>
           </ScannerContextProvider>
         </ModalContextProvider>

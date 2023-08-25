@@ -20,7 +20,7 @@ type Props = ThemeProps;
 const FooterIcon = (
   <Icon
     phosphorIcon={FileArrowDown}
-    weight="fill"
+    weight='fill'
   />
 );
 
@@ -167,18 +167,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: <CloseIcon/>,
+            icon: <CloseIcon />,
             onClick: goHome
           }
         ]}
         title={t<string>('Import from seed phrase')}
       >
-        <div className="container">
-          <div className="description">
+        <div className='container'>
+          <div className='description'>
             {t('To import an existing account,\n please enter seed phrase.')}
           </div>
           <Form
-            className="form-container form-space-xs"
+            className='form-container form-space-xs'
             form={form}
             initialValues={formDefault}
             name={formName}
@@ -192,27 +192,27 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             </Form.Item>
             <Form.Item
               hidden={true}
-              name="trigger"
+              name='trigger'
             >
-              <Input/>
+              <Input />
             </Form.Item>
-            <div className="content-container">
-              <div className="button-container">
+            <div className='content-container'>
+              <div className='button-container'>
                 <Button
                   icon={(
                     <Icon
                       phosphorIcon={showSeed ? EyeSlash : Eye}
-                      size="sm"
+                      size='sm'
                     />
                   )}
                   onClick={toggleShow}
-                  size="xs"
-                  type="ghost"
+                  size='xs'
+                  type='ghost'
                 >
                   {showSeed ? t('Hide seed phrase') : t('Show seed phrase')}
                 </Button>
               </div>
-              <div className="seed-container">
+              <div className='seed-container'>
                 {
                   new Array(parseInt(phraseNumber || '12')).fill(null).map((value, index) => {
                     const name = fieldNamePrefix + String(index);

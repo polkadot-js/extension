@@ -9,6 +9,7 @@ import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account
 import { CREATE_ACCOUNT_MODAL, DERIVE_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
 import { deriveAccountV3 } from '@subwallet/extension-koni-ui/messaging';
@@ -49,6 +50,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const sectionRef = useRef<SwListSectionRef>(null);
 
   const { checkActive, inactiveModal } = useContext(ModalContext);
+  const checkUnlock = useUnlockChecker();
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
@@ -76,25 +78,28 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const onSelectAccount = useCallback((account: AccountJson): () => void => {
     return () => {
-      setSelected(account.address);
-
-      setTimeout(() => {
-        deriveAccountV3({
-          address: account.address
-        }).then(() => {
-          inactiveModal(modalId);
-          clearSearch();
-        }).catch((e: Error) => {
-          notify({
-            message: e.message,
-            type: 'error'
+      checkUnlock().then(() => {
+        setSelected(account.address);
+        setTimeout(() => {
+          deriveAccountV3({
+            address: account.address
+          }).then(() => {
+            inactiveModal(modalId);
+            clearSearch();
+          }).catch((e: Error) => {
+            notify({
+              message: e.message,
+              type: 'error'
+            });
+          }).finally(() => {
+            setSelected('');
           });
-        }).finally(() => {
-          setSelected('');
-        });
-      }, 500);
+        }, 500);
+      }).catch(() => {
+        // User cancel unlock
+      });
     };
-  }, [clearSearch, inactiveModal, notify]);
+  }, [checkUnlock, clearSearch, inactiveModal, notify]);
 
   const renderItem = useCallback((account: AccountJson): React.ReactNode => {
     const disabled = !!selected;

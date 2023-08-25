@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BackgroundExpandView, PageWrapper } from '@subwallet/extension-koni-ui/components';
@@ -10,7 +11,9 @@ import { DEFAULT_ROUTER_PATH, TRANSACTION_STORAGES } from '@subwallet/extension-
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import { useDefaultNavigate, useGetCurrentPage, useNotification, useSelector, useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
+import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount, removeStorage } from '@subwallet/extension-koni-ui/utils';
 import { changeHeaderLogo } from '@subwallet/react-ui';
@@ -51,10 +54,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   useSubscribeLanguage();
 
-  const { hasConfirmations, hasInternalConfirmations } = useSelector((state) => state.requestState);
-  const { accounts, currentAccount, hasMasterPassword, isLocked } = useSelector((state) => state.accountState);
-
+  const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
+  const { accounts, currentAccount, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
   const [initAccount, setInitAccount] = useState(currentAccount);
+
+  const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
+  const { unlockType } = useSelector((state: RootState) => state.settings);
+  const { isUILocked } = useUILock();
+  const needUnlock = isUILocked || (isLocked && unlockType === WalletUnlockType.ALWAYS_REQUIRED);
 
   const needMigrate = useMemo(
     () => !!accounts
@@ -105,23 +112,23 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   useEffect(() => {
     const pathName = location.pathname;
 
-    if (needMigrate && hasMasterPassword && !isLocked) {
+    if (needMigrate && hasMasterPassword && !needUnlock) {
       if (pathName !== migratePasswordUrl) {
         navigate(migratePasswordUrl);
       }
-    } else if (hasMasterPassword && isLocked) {
+    } else if (hasMasterPassword && needUnlock) {
       if (pathName !== loginUrl) {
         navigate(loginUrl);
       }
     } else if (!hasMasterPassword) {
-      if (isNoAccount(accounts)) {
+      if (noAccount) {
         if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
           navigate(welcomeUrl);
         }
       } else {
         navigate(createPasswordUrl);
       }
-    } else if (isNoAccount(accounts)) {
+    } else if (noAccount) {
       if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
         navigate(welcomeUrl);
       }
@@ -131,9 +138,9 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       } else {
         navigate(tokenUrl);
       }
-    } else if (pathName === loginUrl && !isLocked) {
+    } else if (pathName === loginUrl && !needUnlock) {
       goHome();
-    } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {
+    } else if (pathName === welcomeUrl && !noAccount) {
       goHome();
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');
@@ -152,6 +159,8 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     isOpenPModal,
     location.pathname,
     navigate,
+    noAccount,
+    needUnlock,
     needMigrate,
     openPModal
   ]);

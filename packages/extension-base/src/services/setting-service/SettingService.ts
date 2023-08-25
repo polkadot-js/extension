@@ -18,11 +18,10 @@ export default class SettingService {
 
   public getSettings (update: (value: RequestSettingsType) => void): void {
     this.settingsStore.get('Settings', (value) => {
-      if (!value) {
-        update(DEFAULT_SETTING);
-      } else {
-        update(value);
-      }
+      update({
+        ...DEFAULT_SETTING,
+        ...(value || {})
+      });
     });
   }
 

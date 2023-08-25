@@ -4,6 +4,7 @@
 import { ConfirmationDefinitions, ConfirmationResult, EvmSendTransactionRequest, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { useGetChainInfoByChainId, useLedger, useNotification } from '@subwallet/extension-koni-ui/hooks';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
@@ -61,6 +62,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { activeModal } = useContext(ModalContext);
 
   const chain = useGetChainInfoByChainId(chainId);
+  const checkUnlock = useUnlockChecker();
 
   const signMode = useMemo(() => getSignMode(account), [account]);
   const isLedger = useMemo(() => signMode === AccountSignMode.LEDGER, [signMode]);
@@ -167,9 +169,13 @@ const Component: React.FC<Props> = (props: Props) => {
         onConfirmLedger();
         break;
       default:
-        onApprovePassword();
+        checkUnlock().then(() => {
+          onApprovePassword();
+        }).catch(() => {
+          // Unlock is cancelled
+        });
     }
-  }, [extrinsicType, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
+  }, [checkUnlock, extrinsicType, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
     !!ledgerError && notify({

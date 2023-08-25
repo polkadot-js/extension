@@ -5,8 +5,7 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
-import { useNotification, useParseSubstrateRequestPayload } from '@subwallet/extension-koni-ui/hooks';
-import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
+import { useGetChainInfoByGenesisHash, useNotification, useParseSubstrateRequestPayload, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -46,6 +45,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const notify = useNotification();
+  const checkUnlock = useUnlockChecker();
 
   const { activeModal } = useContext(ModalContext);
   const { substrateWallet } = useContext(InjectContext);
@@ -220,9 +220,13 @@ const Component: React.FC<Props> = (props: Props) => {
         onConfirmInject();
         break;
       default:
-        onApprovePassword();
+        checkUnlock().then(() => {
+          onApprovePassword();
+        }).catch(() => {
+          // Unlock is cancelled
+        });
     }
-  }, [extrinsicType, onApprovePassword, onConfirmInject, onConfirmLedger, onConfirmQr, signMode]);
+  }, [checkUnlock, extrinsicType, onApprovePassword, onConfirmInject, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
     !!ledgerError && notify({

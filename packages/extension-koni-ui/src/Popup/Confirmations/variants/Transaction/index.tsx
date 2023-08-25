@@ -78,12 +78,12 @@ const Component: React.FC<Props> = (props: Props) => {
         )
       }
       {
-        type === 'evmSendTransactionRequest' && (
+        (type === 'evmSendTransactionRequest' || type === 'evmWatchTransactionRequest') && (
           <EvmSignArea
             extrinsicType={transaction.extrinsicType}
             id={item.id}
-            payload={(item as ConfirmationDefinitions['evmSendTransactionRequest'][0])}
-            type='evmSendTransactionRequest'
+            payload={(item as ConfirmationDefinitions['evmSendTransactionRequest' | 'evmWatchTransactionRequest'][0])}
+            type={type}
           />
         )
       }

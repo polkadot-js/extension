@@ -33,7 +33,9 @@ import { addHexPrefix } from 'ethereumjs-util';
 import { ethers, TransactionLike } from 'ethers';
 import EventEmitter from 'eventemitter3';
 import { BehaviorSubject } from 'rxjs';
-import { TransactionConfig } from 'web3-core';
+import { TransactionConfig, TransactionReceipt } from 'web3-core';
+import { Subscription } from 'web3-core-subscriptions';
+import { BlockHeader } from 'web3-eth';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Signer, SignerResult } from '@polkadot/api/types';
@@ -51,6 +53,8 @@ export default class TransactionService {
   private readonly historyService: HistoryService;
   private readonly notificationService: NotificationService;
   private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
+
+  private readonly watchTransactionSubscribes: Record<string, Promise<void>> = {};
 
   private get transactions (): Record<string, SWTransaction> {
     return this.transactionSubject.getValue();
@@ -731,6 +735,7 @@ export default class TransactionService {
     }
 
     const isExternal = !!account.isExternal;
+    const isInjected = !!account.isInjected;
 
     // generate hashPayload for EVM transaction
     payload.hashPayload = this.generateHashPayload(chain, payload);
@@ -755,72 +760,146 @@ export default class TransactionService {
       extrinsicHash: id
     };
 
-    this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
-      .then(async ({ isApproved, payload }) => {
-        if (isApproved) {
-          let signedTransaction: string | undefined;
-
-          if (!payload) {
-            throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
-          }
-
-          const web3Api = this.chainService.getEvmApi(chain).api;
-
-          if (!isExternal) {
-            signedTransaction = payload;
-          } else {
-            const signed = mergeTransactionAndSignature(txObject, payload as `0x${string}`);
-
-            const recover = web3Api.eth.accounts.recoverTransaction(signed);
-
-            if (recover.toLowerCase() !== account.address.toLowerCase()) {
+    if (isInjected) {
+      this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmWatchTransactionRequest', payload, {})
+        .then(async ({ isApproved, payload }) => {
+          if (isApproved) {
+            if (!payload) {
               throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
             }
 
-            signedTransaction = signed;
-          }
+            const web3Api = this.chainService.getEvmApi(chain).api;
 
-          // Emit signed event
-          emitter.emit('signed', eventData);
+            // Emit signed event
+            emitter.emit('signed', eventData);
 
-          // Send transaction
-          this.handleTransactionTimeout(emitter, eventData);
+            eventData.nonce = txObject.nonce;
+            eventData.startBlock = await web3Api.eth.getBlockNumber() - 3;
+            // Add start info
+            emitter.emit('send', eventData); // This event is needed after sending transaction with queue
 
-          // Add start info
-          eventData.nonce = txObject.nonce;
-          eventData.startBlock = await web3Api.eth.getBlockNumber();
-          emitter.emit('send', eventData); // This event is needed after sending transaction with queue
-          signedTransaction && web3Api.eth.sendSignedTransaction(signedTransaction)
-            .once('transactionHash', (hash) => {
-              eventData.extrinsicHash = hash;
-              emitter.emit('extrinsicHash', eventData);
-            })
-            .once('receipt', (rs) => {
-              eventData.extrinsicHash = rs.transactionHash;
-              eventData.blockHash = rs.blockHash;
-              eventData.blockNumber = rs.blockNumber;
-              emitter.emit('success', eventData);
-            })
-            .once('error', (e) => {
-              eventData.errors.push(new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, e.message));
-              emitter.emit('error', eventData);
-            })
-            .catch((e: Error) => {
-              eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, e.message));
-              emitter.emit('error', eventData);
+            const txHash = payload;
+
+            eventData.extrinsicHash = txHash;
+            emitter.emit('extrinsicHash', eventData);
+
+            this.watchTransactionSubscribes[id] = new Promise<void>((resolve, reject) => {
+              // eslint-disable-next-line prefer-const
+              let subscribe: Subscription<BlockHeader>;
+
+              const onComplete = () => {
+                subscribe?.unsubscribe?.()?.then(console.debug).catch(console.debug);
+                delete this.watchTransactionSubscribes[id];
+              };
+
+              const onSuccess = (rs: TransactionReceipt) => {
+                if (rs) {
+                  eventData.extrinsicHash = rs.transactionHash;
+                  eventData.blockHash = rs.blockHash;
+                  eventData.blockNumber = rs.blockNumber;
+                  emitter.emit('success', eventData);
+                  onComplete();
+                  resolve();
+                }
+              };
+
+              const onError = (error: Error) => {
+                if (error) {
+                  // TODO: Change type and message
+                  eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, error.message));
+                  emitter.emit('error', eventData);
+                  onComplete();
+                  reject(error);
+                }
+              };
+
+              const onCheck = () => {
+                web3Api.eth.getTransactionReceipt(txHash).then(onSuccess).catch(onError);
+              };
+
+              subscribe = web3Api.eth.subscribe('newBlockHeaders', onCheck);
             });
-        } else {
+          } else {
+            this.removeTransaction(id);
+            eventData.errors.push(new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST));
+            emitter.emit('error', eventData);
+          }
+        })
+        .catch((e: Error) => {
           this.removeTransaction(id);
-          eventData.errors.push(new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST));
-          emitter.emit('error', eventData);
-        }
-      })
-      .catch((e: Error) => {
-        this.removeTransaction(id);
-        eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SIGN, e.message));
+          // TODO: Change type
+          eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SIGN, e.message));
 
-        emitter.emit('error', eventData);
-      });
+          emitter.emit('error', eventData);
+        });
+    } else {
+      this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
+        .then(async ({ isApproved, payload }) => {
+          if (isApproved) {
+            let signedTransaction: string | undefined;
+
+            if (!payload) {
+              throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
+            }
+
+            const web3Api = this.chainService.getEvmApi(chain).api;
+
+            if (!isExternal) {
+              signedTransaction = payload;
+            } else {
+              const signed = mergeTransactionAndSignature(txObject, payload as `0x${string}`);
+
+              const recover = web3Api.eth.accounts.recoverTransaction(signed);
+
+              if (recover.toLowerCase() !== account.address.toLowerCase()) {
+                throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
+              }
+
+              signedTransaction = signed;
+            }
+
+            // Emit signed event
+            emitter.emit('signed', eventData);
+
+            // Send transaction
+            this.handleTransactionTimeout(emitter, eventData);
+
+            // Add start info
+            eventData.nonce = txObject.nonce;
+            eventData.startBlock = await web3Api.eth.getBlockNumber();
+            emitter.emit('send', eventData); // This event is needed after sending transaction with queue
+            signedTransaction && web3Api.eth.sendSignedTransaction(signedTransaction)
+              .once('transactionHash', (hash) => {
+                eventData.extrinsicHash = hash;
+                emitter.emit('extrinsicHash', eventData);
+              })
+              .once('receipt', (rs) => {
+                eventData.extrinsicHash = rs.transactionHash;
+                eventData.blockHash = rs.blockHash;
+                eventData.blockNumber = rs.blockNumber;
+                emitter.emit('success', eventData);
+              })
+              .once('error', (e) => {
+                eventData.errors.push(new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, e.message));
+                emitter.emit('error', eventData);
+              })
+              .catch((e: Error) => {
+                eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, e.message));
+                emitter.emit('error', eventData);
+              });
+          } else {
+            this.removeTransaction(id);
+            eventData.errors.push(new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST));
+            emitter.emit('error', eventData);
+          }
+        })
+        .catch((e: Error) => {
+          this.removeTransaction(id);
+          eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SIGN, e.message));
+
+          emitter.emit('error', eventData);
+        });
+    }
 
     return emitter;
   }

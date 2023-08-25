@@ -1198,6 +1198,8 @@ export interface EvmSendTransactionRequest extends TransactionConfig, EvmSignReq
   isToContract: boolean;
 }
 
+export type EvmWatchTransactionRequest = EvmSendTransactionRequest;
+
 export interface ConfirmationsQueueItemOptions {
   requiredPassword?: boolean;
   address?: string;
@@ -1262,6 +1264,7 @@ export interface ConfirmationDefinitions {
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<string>]
+  evmWatchTransactionRequest: [ConfirmationsQueueItem<EvmWatchTransactionRequest>, ConfirmationResult<string>]
 }
 
 export type ConfirmationType = keyof ConfirmationDefinitions;

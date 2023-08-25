@@ -46,4 +46,4 @@ export const languageOptions: LanguageOptionType[] = [
   }
 ];
 
-export const ENABLE_LANGUAGES: LanguageType[] = ['en', 'vi', 'zh', 'ja', 'ru'];
+export const ENABLE_LANGUAGES: LanguageType[] = ['en', 'vi', 'zh', 'ja'];

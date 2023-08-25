@@ -479,7 +479,7 @@
   "Send tokens": "トークンを送信",
   "Manage tokens": "トークンを管理",
   "You have successfully updated master password to all accounts": "すべてのアカウントのマスターパスワードが更新されました。",
-  "Apply master password now": "今すぐマスターパスワードを適用してください",
+  "Apply master password now": "マスターパスワードを適用",
   "Next": "次",
   "Current password": "現在のパスワード",
   "Remove this account": "このアカウントを削除",
@@ -825,7 +825,7 @@
   "Authenticate with password": "",
   "Always required": "",
   "When needed": "",
-  "The recipient address must be EVM type": "",
-  "The recipient address must be Substrate type": "",
+  "The recipient address must be EVM type": "受信者アドレスはEVMタイプでなければなりません",
+  "The recipient address must be Substrate type": "受信者アドレスはSubstrateタイプでなければなりません",
   "Please <highlight>reload</highlight>": ""
 }

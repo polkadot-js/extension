@@ -825,7 +825,7 @@
   "Authenticate with password": "",
   "Always required": "",
   "When needed": "",
-  "The recipient address must be EVM type": "",
-  "The recipient address must be Substrate type": "",
+  "The recipient address must be EVM type": "Địa chỉ nhận phải là loại EVM",
+  "The recipient address must be Substrate type": "Địa chỉ nhận phải là loại Substrate",
   "Please <highlight>reload</highlight>": "Vui lòng <highlight>tải lại</highlight>"
 }

@@ -825,7 +825,7 @@
   "Authenticate with password": "",
   "Always required": "",
   "When needed": "",
-  "The recipient address must be EVM type": "",
-  "The recipient address must be Substrate type": "",
+  "The recipient address must be EVM type": "接收者地址必须是EVM类型",
+  "The recipient address must be Substrate type": "接收者地址必须是Substrate类型",
   "Please <highlight>reload</highlight>": "请<highlight>重新加载</highlight>"
 }

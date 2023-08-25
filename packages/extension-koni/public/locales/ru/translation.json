@@ -825,7 +825,7 @@
   "Authenticate with password": "",
   "Always required": "",
   "When needed": "",
-  "The recipient address must be EVM type": "",
-  "The recipient address must be Substrate type": "",
+  "The recipient address must be EVM type": "Адрес получателя должен быть типа EVM",
+  "The recipient address must be Substrate type": "Адрес получателя должен быть типа Субстрат",
   "Please <highlight>reload</highlight>": ""
 }

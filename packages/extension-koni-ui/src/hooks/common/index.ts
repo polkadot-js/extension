@@ -9,6 +9,8 @@ export { default as useNotification } from './useNotification';
 export { default as useSetCurrentPage } from './useSetCurrentPage';
 export { default as useSubscribeLanguage } from './useSubscribeLanguage';
 export { default as useTranslation } from './useTranslation';
+export { default as useUILock } from './useUILock';
+export { default as useUnlockChecker } from './useUnlockChecker';
 
 export * from './useSelector';
 export * from './useLazyList';

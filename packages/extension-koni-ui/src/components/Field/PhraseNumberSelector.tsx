@@ -69,7 +69,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       renderWhenEmpty={renderEmpty}
       selected={value || ''}
       statusHelp={statusHelp}
-      title={title || label || placeholder || t('Select phrase number')}
+      title={title || label || placeholder || t('Select type')}
       tooltip={tooltip}
     />
   );

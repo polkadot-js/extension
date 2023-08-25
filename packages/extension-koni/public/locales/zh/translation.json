@@ -625,7 +625,6 @@
   "This feature is not available for Ledger account": "此功能不适用于Ledger账本账户",
   "You are performing a transfer of a fungible token": "你正在执行可替代通证的转移",
   "Select destination chain": "选择目的链",
-  "value": "价值",
   "Transfer all": "转移全部",
   "The recipient address is required": "必须填写接受者地址",
   "Invalid recipient address": "接收者地址无效",
@@ -739,11 +738,15 @@
   "support site": "",
   "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": "",
   "Phrase number": "",
-  "Select phrase number": "",
-  "{{number}} words": "",
+  "{{number}} words": "{{number}}个单词",
   "This field is required": "",
   "Invalid word": "单词无效",
-  "Hide seed phrase": "",
-  "Show seed phrase": "",
-  "Hover to view seed phrase": "请悬停将查看助记词"
+  "Hide seed phrase": "显示助记词",
+  "Show seed phrase": "显示助记词",
+  "Hover to view seed phrase": "请悬停将查看助记词",
+  "Select type": "选择类型",
+  "Enter Password": "",
+  "Authenticate with password": "",
+  "Always required": "",
+  "When needed": ""
 }

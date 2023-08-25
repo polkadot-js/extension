@@ -138,7 +138,6 @@ const SeedPhraseInput = styled(forwardRef(Component))<Props>(({ theme: { token }
     '.ant-input': {
       paddingTop: token.paddingXS + 2,
       paddingBottom: token.paddingXS + 2,
-      paddingRight: token.paddingXS + 2,
       height: token.controlHeightLG,
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM

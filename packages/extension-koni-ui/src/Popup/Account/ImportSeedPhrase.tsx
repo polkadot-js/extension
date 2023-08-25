@@ -225,7 +225,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                           validator: seedValidator
                         }]}
                         statusHelpAsTooltip={true}
-                        validateTrigger={['onChange', 'onBlur']}
+                        validateTrigger={['onChange']}
                       >
                         <SeedPhraseInput
                           form={form}

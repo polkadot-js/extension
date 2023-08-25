@@ -65,8 +65,8 @@ const Component = function ({ className }: Props) {
         account = request.account;
         canSign = !_isMessage || !account.isHardware;
         isMessage = _isMessage;
-      } else if (confirmation.type === 'evmSignatureRequest' || confirmation.type === 'evmSendTransactionRequest') {
-        const request = confirmation.item as ConfirmationDefinitions['evmSignatureRequest' | 'evmSendTransactionRequest'][0];
+      } else if (['evmSignatureRequest', 'evmSendTransactionRequest', 'evmWatchTransactionRequest'].includes(confirmation.type)) {
+        const request = confirmation.item as ConfirmationDefinitions['evmSignatureRequest' | 'evmSendTransactionRequest' | 'evmWatchTransactionRequest'][0];
 
         account = request.payload.account;
         canSign = request.payload.canSign;

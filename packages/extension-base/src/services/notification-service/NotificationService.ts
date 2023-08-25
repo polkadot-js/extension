@@ -27,7 +27,7 @@ export default class NotificationService {
 
   // Create a new chrome notification with link
   public static createBrowserNotification (title: string, message: string, link?: string): void {
-    chrome.notifications.create({
+    chrome?.notifications?.create({
       type: 'basic',
       title,
       message,

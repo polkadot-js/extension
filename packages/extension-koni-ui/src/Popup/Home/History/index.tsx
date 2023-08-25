@@ -7,7 +7,7 @@ import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/add
 import { EmptyList, FilterModal, HistoryItem, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
@@ -125,6 +125,7 @@ function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'addres
 const modalId = HISTORY_DETAIL_MODAL;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  useSetCurrentPage('/home/history');
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);

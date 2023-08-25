@@ -10,6 +10,7 @@ import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -56,6 +57,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [submitting, setSubmitting] = useState(false);
   const [changed, setChanged] = useState(false);
   const [seedPhrase, setSeedPhrase] = useState('');
+  const checkUnlock = useUnlockChecker();
 
   const onChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback((event) => {
     setChanged(true);
@@ -68,29 +70,33 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     const seed = seedPhrase.trimStart().trimEnd();
 
     if (seed) {
-      setSubmitting(true);
-      setTimeout(() => {
-        createAccountSuriV2({
-          name: accountName,
-          suri: seed,
-          isAllowed: true,
-          types: keyTypes
-        })
-          .then(() => {
-            onComplete();
+      checkUnlock().then(() => {
+        setSubmitting(true);
+        setTimeout(() => {
+          createAccountSuriV2({
+            name: accountName,
+            suri: seed,
+            isAllowed: true,
+            types: keyTypes
           })
-          .catch((error: Error): void => {
-            setValidateState({
-              status: 'error',
-              message: error.message
+            .then(() => {
+              onComplete();
+            })
+            .catch((error: Error): void => {
+              setValidateState({
+                status: 'error',
+                message: error.message
+              });
+            })
+            .finally(() => {
+              setSubmitting(false);
             });
-          })
-          .finally(() => {
-            setSubmitting(false);
-          });
-      }, 300);
+        }, 300);
+      }).catch(() => {
+        // Unlock is cancelled
+      });
     }
-  }, [seedPhrase, accountName, keyTypes, onComplete]);
+  }, [seedPhrase, checkUnlock, accountName, keyTypes, onComplete]);
 
   useEffect(() => {
     let amount = true;

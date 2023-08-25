@@ -29,7 +29,7 @@ const Icon: React.FC<IconProps> = (props: IconProps) => {
   );
 };
 
-const specialLanguages: LanguageType[] = ['ja']
+const specialLanguages: LanguageType[] = ['ja'];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;

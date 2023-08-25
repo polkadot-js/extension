@@ -620,8 +620,8 @@ export default class TransactionService {
 
     this.notificationService.notify({
       type: NotificationType.SUCCESS,
-      title: 'Transaction completed',
-      message: `Transaction ${info} completed`,
+      title: t('Transaction completed'),
+      message: t('Transaction {{info}} completed', { replace: { info } }),
       action: { url: this.getTransactionLink(id) },
       notifyViaBrowser: true
     });
@@ -648,8 +648,8 @@ export default class TransactionService {
 
       this.notificationService.notify({
         type: NotificationType.ERROR,
-        title: 'Transaction failed',
-        message: `Transaction ${info} failed`,
+        title: t('Transaction failed'),
+        message: t('Transaction {{info}} failed', { replace: { info } }),
         action: { url: this.getTransactionLink(id) },
         notifyViaBrowser: true
       });

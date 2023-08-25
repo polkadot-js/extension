@@ -195,6 +195,15 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       '.ant-tooltip-arrow': {
         top: 1
       }
+    },
+
+    '.ant-select-modal-input-content': {
+      '.ant-select-modal-input-placeholder': {
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        textWrap: 'nowrap',
+        display: 'block'
+      }
     }
   });
 });

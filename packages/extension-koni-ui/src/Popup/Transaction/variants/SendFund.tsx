@@ -339,7 +339,11 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
       if (isDestChainEvmCompatible !== isEthereumAddress(to)) {
         // todo: change message later
-        return Promise.reject(t(`The recipient address must be ${isDestChainEvmCompatible ? 'EVM' : 'substrate'} type`));
+        if (isDestChainEvmCompatible) {
+          return Promise.reject(t('The recipient address must be EVM type'));
+        } else {
+          return Promise.reject(t('The recipient address must be Substrate type'));
+        }
       }
     }
 

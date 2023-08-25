@@ -391,7 +391,7 @@ const Component: React.FC<Props> = (props: Props) => {
               });
             }
 
-            dispatchMantaPayState({ type: MantaPayReducerActionType.SET_ERROR_MESSAGE, payload: getZkErrorMessage(result.message) });
+            dispatchMantaPayState({ type: MantaPayReducerActionType.SET_ERROR_MESSAGE, payload: t(getZkErrorMessage(result.message)) });
           }
         })
         .catch((e) => {

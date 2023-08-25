@@ -11,6 +11,8 @@ import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
+import { UnlockModal } from '../components/Modal/UnlockModal';
+
 interface Props {
   children: React.ReactNode;
 }
@@ -106,5 +108,6 @@ export const WalletModalContext = ({ children }: Props) => {
     <RequestCreatePasswordModal />
     <RequestCameraAccessModal />
     <CustomizeModal />
+    <UnlockModal />
   </>;
 };

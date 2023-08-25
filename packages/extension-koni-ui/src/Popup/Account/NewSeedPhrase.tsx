@@ -3,7 +3,7 @@
 
 import { CloseIcon, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
-import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetDefaultAccountName, useIsPopup, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetDefaultAccountName, useIsPopup, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -34,6 +34,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { goHome } = useDefaultNavigate();
   const { activeModal } = useContext(ModalContext);
+  const checkUnlock = useUnlockChecker();
 
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
@@ -65,29 +66,32 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       return;
     }
 
-    setLoading(true);
-
-    setTimeout(() => {
-      createAccountSuriV2({
-        name: accountName,
-        suri: seedPhrase,
-        types: accountTypes,
-        isAllowed: true
-      })
-        .then(() => {
-          onComplete();
+    checkUnlock().then(() => {
+      setLoading(true);
+      setTimeout(() => {
+        createAccountSuriV2({
+          name: accountName,
+          suri: seedPhrase,
+          types: accountTypes,
+          isAllowed: true
         })
-        .catch((error: Error): void => {
-          notify({
-            message: error.message,
-            type: 'error'
+          .then(() => {
+            onComplete();
+          })
+          .catch((error: Error): void => {
+            notify({
+              message: error.message,
+              type: 'error'
+            });
+          })
+          .finally(() => {
+            setLoading(false);
           });
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }, 500);
-  }, [seedPhrase, accountName, accountTypes, onComplete, notify]);
+      }, 500);
+    }).catch(() => {
+      // User cancel unlock
+    });
+  }, [seedPhrase, checkUnlock, accountName, accountTypes, onComplete, notify]);
 
   useEffect(() => {
     createSeedV2(undefined, undefined, DEFAULT_ACCOUNT_TYPES)

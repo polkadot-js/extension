@@ -420,6 +420,11 @@ export type LanguageOptionType = {
 
 export type BrowserConfirmationType = 'extension'|'popup'|'window';
 
+export enum WalletUnlockType {
+  ALWAYS_REQUIRED = 'always_required',
+  WHEN_NEEDED = 'when_needed',
+}
+
 export interface UiSettings {
   language: LanguageType,
   browserConfirmationType: BrowserConfirmationType;
@@ -429,6 +434,7 @@ export interface UiSettings {
   theme: ThemeNames;
   camera: boolean;
   timeAutoLock: number;
+  unlockType: WalletUnlockType;
   enableChainPatrol: boolean;
   // On-ramp service account reference
   walletReference: string;
@@ -439,6 +445,8 @@ export type RequestSettingsType = UiSettings;
 export type RequestCameraSettings = { camera: boolean };
 
 export type RequestChangeTimeAutoLock = { autoLockTime: number };
+
+export type RequestUnlockType = { unlockType: WalletUnlockType };
 
 export type RequestChangeEnableChainPatrol = { enable: boolean };
 
@@ -1751,6 +1759,10 @@ export interface KeyringState {
   isLocked: boolean;
 }
 
+export interface UIViewState {
+  isUILocked: boolean;
+}
+
 export interface AddressBookState {
   contacts: AddressJson[];
   recent: AddressJson[];
@@ -2132,6 +2144,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
   'pri(settings.saveAutoLockTime)': [RequestChangeTimeAutoLock, boolean];
+  'pri(settings.saveUnlockType)': [RequestUnlockType, boolean];
   'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.saveLanguage)': [RequestChangeLanguage, boolean];
   'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];

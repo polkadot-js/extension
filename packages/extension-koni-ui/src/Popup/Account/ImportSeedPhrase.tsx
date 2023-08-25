@@ -3,7 +3,7 @@
 
 import { CloseIcon, Layout, PageWrapper, PhraseNumberSelector, SeedPhraseInput } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ACCOUNT_TYPES, IMPORT_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
-import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useFocusFormItem, useGetDefaultAccountName, useGoBackFromCreateAccount, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useFocusFormItem, useGetDefaultAccountName, useGoBackFromCreateAccount, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -20,7 +20,7 @@ type Props = ThemeProps;
 const FooterIcon = (
   <Icon
     phosphorIcon={FileArrowDown}
-    weight='fill'
+    weight="fill"
   />
 );
 
@@ -57,6 +57,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const [disabled, setDisabled] = useState(true);
   const [showSeed, setShowSeed] = useState(false);
+  const checkUnlock = useUnlockChecker();
 
   const phraseNumberItems = useMemo(() => [12, 24].map((value) => ({
     label: t('{{number}} words', { replace: { number: value } }),
@@ -102,31 +103,36 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     const seed = seeds.join(' ');
 
     if (seed) {
-      setSubmitting(true);
-
-      validateSeedV2(seed, DEFAULT_ACCOUNT_TYPES)
+      checkUnlock()
         .then(() => {
-          return createAccountSuriV2({
-            name: accountName,
-            suri: seed,
-            isAllowed: true,
-            types: keyTypes
-          });
+          setSubmitting(true);
+          validateSeedV2(seed, DEFAULT_ACCOUNT_TYPES)
+            .then(() => {
+              return createAccountSuriV2({
+                name: accountName,
+                suri: seed,
+                isAllowed: true,
+                types: keyTypes
+              });
+            })
+            .then(() => {
+              onComplete();
+            })
+            .catch((error: Error): void => {
+              notification({
+                type: 'error',
+                message: error.message
+              });
+            })
+            .finally(() => {
+              setSubmitting(false);
+            });
         })
-        .then(() => {
-          onComplete();
-        })
-        .catch((error: Error): void => {
-          notification({
-            type: 'error',
-            message: error.message
-          });
-        })
-        .finally(() => {
-          setSubmitting(false);
+        .catch(() => {
+          // Unlock is cancelled
         });
     }
-  }, [accountName, keyTypes, notification, onComplete]);
+  }, [checkUnlock, accountName, keyTypes, notification, onComplete]);
 
   const seedValidator = useCallback((rule: FormRule, value: string) => {
     return new Promise<void>((resolve, reject) => {
@@ -161,18 +167,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: <CloseIcon />,
+            icon: <CloseIcon/>,
             onClick: goHome
           }
         ]}
         title={t<string>('Import from seed phrase')}
       >
-        <div className='container'>
-          <div className='description'>
+        <div className="container">
+          <div className="description">
             {t('To import an existing account,\n please enter seed phrase.')}
           </div>
           <Form
-            className='form-container form-space-xs'
+            className="form-container form-space-xs"
             form={form}
             initialValues={formDefault}
             name={formName}
@@ -186,27 +192,27 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             </Form.Item>
             <Form.Item
               hidden={true}
-              name='trigger'
+              name="trigger"
             >
-              <Input />
+              <Input/>
             </Form.Item>
-            <div className='content-container'>
-              <div className='button-container'>
+            <div className="content-container">
+              <div className="button-container">
                 <Button
                   icon={(
                     <Icon
                       phosphorIcon={showSeed ? EyeSlash : Eye}
-                      size='sm'
+                      size="sm"
                     />
                   )}
                   onClick={toggleShow}
-                  size='xs'
-                  type='ghost'
+                  size="xs"
+                  type="ghost"
                 >
                   {showSeed ? t('Hide seed phrase') : t('Show seed phrase')}
                 </Button>
               </div>
-              <div className='seed-container'>
+              <div className="seed-container">
                 {
                   new Array(parseInt(phraseNumber || '12')).fill(null).map((value, index) => {
                     const name = fieldNamePrefix + String(index);

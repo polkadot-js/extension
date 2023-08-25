@@ -1,16 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import { CloseIcon, Layout, PageWrapper, PrivateKeyInput } from '@subwallet/extension-koni-ui/components';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useFocusFormItem, useGetDefaultAccountName, useGoBackFromCreateAccount, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
-import { Form, Icon, Input } from '@subwallet/react-ui';
+import { Button, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { FileArrowDown } from 'phosphor-react';
+import { Eye, EyeSlash, FileArrowDown } from 'phosphor-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -44,6 +43,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [validating, setValidating] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [show, setShow] = useState(false);
   const [changed, setChanged] = useState(false);
   const [form] = Form.useForm<FormState>();
   const checkUnlock = useUnlockChecker();
@@ -147,6 +147,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, []);
 
+  const toggleShow = useCallback(() => {
+    setShow((value) => !value);
+  }, []);
+
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
@@ -182,12 +186,29 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               name={fieldName}
               validateStatus={validateState.status}
             >
-              <Input
+              <PrivateKeyInput
                 className='private-key-input'
+                hideText={!show}
+                label={'Private key'}
                 placeholder={t('Enter private key')}
                 statusHelp={validateState.message}
               />
             </Form.Item>
+            <div className='button-container'>
+              <Button
+                icon={(
+                  <Icon
+                    phosphorIcon={show ? EyeSlash : Eye}
+                    size='sm'
+                  />
+                )}
+                onClick={toggleShow}
+                size='xs'
+                type='ghost'
+              >
+                {show ? t('Hide private key') : t('Show private key')}
+              </Button>
+            </div>
           </Form>
         </div>
       </Layout.WithSubHeaderOnly>
@@ -211,6 +232,13 @@ const ImportPrivateKey = styled(Component)<Props>(({ theme: { token } }: Props) 
 
     '.form-container': {
       marginTop: token.margin
+    },
+
+    '.button-container': {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center'
     }
   };
 });

@@ -1,12 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { useNotification } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, PageIcon } from '@subwallet/react-ui';
 import { MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -52,11 +53,17 @@ const Component: React.FC<Props> = ({ className, isDataEmpty, onClickReload, val
                 {t('Unable to fetch {{value}} information', { replace: { value: validatorTitle } })}
               </div>
               <div className={'description'}>
-                <span> {t('Please')}</span>
-                <span
-                  className={'reload-text'}
-                  onClick={handleReload}
-                >{t(' reload')}</span>
+                <Trans
+                  components={{
+                    highlight: (
+                      <span
+                        className={'reload-text'}
+                        onClick={handleReload}
+                      />
+                    )
+                  }}
+                  i18nKey={detectTranslate('Please <highlight>reload</highlight>')}
+                />
               </div>
             </div>
           )

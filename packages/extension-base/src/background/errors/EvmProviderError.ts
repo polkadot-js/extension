@@ -3,34 +3,36 @@
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { EvmProviderErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { detectTranslate } from '@subwallet/extension-base/utils';
+import { t } from 'i18next';
 
 const defaultErrorMap: Record<EvmProviderErrorType, { message: string, code?: number }> = {
   USER_REJECTED_REQUEST: {
-    message: 'User Rejected Request',
+    message: detectTranslate('User Rejected Request'),
     code: 4001
   },
   UNAUTHORIZED: {
-    message: 'Unauthorized',
+    message: detectTranslate('Failed to sign'),
     code: 4100
   },
   UNSUPPORTED_METHOD: {
-    message: 'Unsupported Method',
+    message: detectTranslate('Unsupported Method'),
     code: 4200
   },
   DISCONNECTED: {
-    message: 'Disconnected',
+    message: detectTranslate('Network is disconnected'),
     code: 4900
   },
   CHAIN_DISCONNECTED: {
-    message: 'Chain Disconnected',
+    message: detectTranslate('Network is disconnected'),
     code: 4901
   },
   INVALID_PARAMS: {
-    message: 'Invalid Params',
+    message: detectTranslate('Undefined error. Please contact SubWallet support'),
     code: -32602
   },
   INTERNAL_ERROR: {
-    message: 'Internal Error',
+    message: detectTranslate('Undefined error. Please contact SubWallet support'),
     code: -32603
   }
 };
@@ -40,7 +42,7 @@ export class EvmProviderError extends SWError {
 
   constructor (errorType: EvmProviderErrorType, errMessage?: string, data?: unknown) {
     const { code, message } = defaultErrorMap[errorType];
-    const finalMessage = errMessage ? `${message}: ${errMessage}` : message;
+    const finalMessage = errMessage || t(message || '') || errorType;
 
     super(errorType, finalMessage, code, data);
     this.errorType = errorType;

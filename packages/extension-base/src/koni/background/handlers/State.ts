@@ -39,6 +39,7 @@ import { decodePair } from '@subwallet/keyring/pair/decode';
 import { keyring } from '@subwallet/ui-keyring';
 import { Subscription } from 'dexie';
 import SimpleKeyring from 'eth-simple-keyring';
+import { t } from 'i18next';
 import { interfaces } from 'manta-extension-sdk';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
@@ -202,7 +203,7 @@ export default class KoniState {
 
   // Start a provider, return its meta
   public rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
-    assert(Object.keys(this.providers).includes(key), `Provider ${key} is not exposed by extension`);
+    assert(Object.keys(this.providers).includes(key), 'Provider cannot be found.');
 
     if (this.injectedProviders.get(port)) {
       return Promise.resolve(this.providers[key].meta);
@@ -643,7 +644,7 @@ export default class KoniState {
     if (address !== ALL_ACCOUNT_KEY) {
       const pair = keyring.getPair(address);
 
-      assert(pair, 'Unable to find pair');
+      assert(pair, t('Unable to find account'));
 
       keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash });
     }
@@ -672,7 +673,7 @@ export default class KoniState {
       authUrls[shortenUrl].currentEvmNetworkKey = networkKey;
       this.setAuthorize(authUrls);
     } else {
-      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, `Not found ${shortenUrl} in auth list`);
+      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, t('Not found {{shortenUrl}} in auth list', { replace: { shortenUrl } }));
     }
   }
 
@@ -696,7 +697,7 @@ export default class KoniState {
           if (useAddress !== ALL_ACCOUNT_KEY) {
             const pair = keyring.getPair(useAddress);
 
-            assert(pair, 'Unable to find pair');
+            assert(pair, t('Unable to find account'));
 
             keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: _getSubstrateGenesisHash(chainInfo) });
           }
@@ -1378,11 +1379,11 @@ export default class KoniState {
     }
 
     if (address === '' || !payload) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found address or payload to sign');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Not found address or payload to sign'));
     }
 
     if (['eth_sign', 'personal_sign', 'eth_signTypedData', 'eth_signTypedData_v1', 'eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) < 0) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found sign method');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unsupported action'));
     }
 
     if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
@@ -1392,13 +1393,13 @@ export default class KoniState {
 
     // Check sign abiblity
     if (!allowedAccounts.find((acc) => (acc.toLowerCase() === address.toLowerCase()))) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Account ' + address + ' not in allowed list');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('You have rescinded allowance for this account in wallet'));
     }
 
     const pair = keyring.getPair(address);
 
     if (!pair) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Cannot find pair with address: ' + address);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unable to find account'));
     }
 
     const account: AccountJson = { address: pair.address, ...pair.meta };
@@ -1422,7 +1423,7 @@ export default class KoniState {
 
         break;
       default:
-        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found sign method');
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unsupported action'));
     }
 
     const signPayload: EvmSignatureRequest = {
@@ -1443,7 +1444,7 @@ export default class KoniState {
           if (payload) {
             return payload;
           } else {
-            throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found signature');
+            throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Not found signature'));
           }
         } else {
           throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
@@ -1467,7 +1468,7 @@ export default class KoniState {
     };
 
     if (transactionParams.from === transactionParams.to) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'From address and to address must not be the same');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Receiving address must be different from sending address'));
     }
 
     const transaction: TransactionConfig = {
@@ -1499,13 +1500,13 @@ export default class KoniState {
     const fromAddress = allowedAccounts.find((account) => (account.toLowerCase() === (transaction.from as string).toLowerCase()));
 
     if (!fromAddress) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'From address is not in available for ' + url);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('You have rescinded allowance for this account in wallet'));
     }
 
     const pair = keyring.getPair(fromAddress);
 
     if (!pair) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Cannot find pair with address: ' + fromAddress);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unable to find account'));
     }
 
     const account: AccountJson = { address: pair.address, ...pair.meta };
@@ -1514,7 +1515,7 @@ export default class KoniState {
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
 
     if (balance.lt(new BN(gasPrice.toString()).mul(new BN(transaction.gas)).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Balance can be not enough to send transaction');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Insufficient balance'));
     }
 
     transaction.nonce = await web3.eth.getTransactionCount(fromAddress);

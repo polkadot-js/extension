@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
+import { LANGUAGE } from '@subwallet/extension-base/constants';
 import i18next from 'i18next';
 import { useEffect, useMemo, useState } from 'react';
 

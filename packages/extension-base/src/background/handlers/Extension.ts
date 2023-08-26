@@ -80,7 +80,7 @@ export default class Extension {
   private accountsChangePassword ({ address, newPass, oldPass }: RequestAccountChangePassword): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, 'Unable to find account');
 
     try {
       if (!pair.isLocked) {
@@ -89,7 +89,7 @@ export default class Extension {
 
       pair.decodePkcs8(oldPass);
     } catch (error) {
-      throw new Error('oldPass is invalid');
+      throw new Error('Wrong password');
     }
 
     keyring.encryptAccount(pair, newPass);
@@ -100,7 +100,7 @@ export default class Extension {
   private accountsEdit ({ address, name }: RequestAccountEdit): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, 'Unable to find account');
 
     keyring.saveAccountMeta(pair, { ...pair.meta, name });
 
@@ -142,7 +142,7 @@ export default class Extension {
   private accountsShow ({ address, isShowing }: RequestAccountShow): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, 'Unable to find account');
 
     keyring.saveAccountMeta(pair, { ...pair.meta, isHidden: !isShowing });
 
@@ -152,7 +152,7 @@ export default class Extension {
   private accountsTie ({ address, genesisHash }: RequestAccountTie): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, 'Unable to find account');
 
     keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash });
 
@@ -187,7 +187,7 @@ export default class Extension {
   private authorizeApprove ({ id }: RequestAuthorizeApprove): boolean {
     const queued = this.#state.getAuthRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, 'Unable to proceed. Please try again');
 
     const { resolve } = queued;
 
@@ -203,7 +203,7 @@ export default class Extension {
   private authorizeReject ({ id }: RequestAuthorizeReject): boolean {
     const queued = this.#state.getAuthRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, 'Unable to proceed. Please try again');
 
     const { reject } = queued;
 
@@ -230,7 +230,7 @@ export default class Extension {
   private metadataApprove ({ id }: RequestMetadataApprove): boolean {
     const queued = this.#state.getMetaRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, 'Unable to proceed. Please try again');
 
     const { request, resolve } = queued;
 
@@ -252,7 +252,7 @@ export default class Extension {
   private metadataReject ({ id }: RequestMetadataReject): boolean {
     const queued = this.#state.getMetaRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, 'Unable to proceed. Please try again');
 
     const { reject } = queued;
 
@@ -320,11 +320,11 @@ export default class Extension {
     const { phrase } = keyExtractSuri(suri);
 
     if (isHex(phrase)) {
-      assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
+      assert(isHex(phrase, 256), 'Invalid seed phrase. Please try again.');
     } else {
       // sadly isHex detects as string, so we need a cast here
       assert(SEED_LENGTHS.includes((phrase).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
-      assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
+      assert(mnemonicValidate(phrase), 'Invalid seed phrase. Please try again.');
     }
 
     return {
@@ -336,7 +336,7 @@ export default class Extension {
   private signingApprovePassword ({ id, password, savePass }: RequestSigningApprovePassword): boolean {
     const queued = this.#state.getSignRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, 'Unable to proceed. Please try again');
 
     const { reject, request, resolve } = queued;
     const pair = keyring.getPair(queued.account.address);
@@ -347,7 +347,7 @@ export default class Extension {
     const { address } = pair;
 
     if (!pair) {
-      reject(new Error('Unable to find pair'));
+      reject(new Error('Unable to find account'));
 
       return false;
     }
@@ -397,7 +397,7 @@ export default class Extension {
   private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
     const queued = this.#state.getSignRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, 'Unable to proceed. Please try again');
 
     const { resolve } = queued;
 
@@ -409,7 +409,7 @@ export default class Extension {
   private signingCancel ({ id }: RequestSigningCancel): boolean {
     const queued = this.#state.getSignRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, 'Unable to proceed. Please try again');
 
     const { reject } = queued;
 
@@ -421,12 +421,12 @@ export default class Extension {
   private signingIsLocked ({ id }: RequestSigningIsLocked): ResponseSigningIsLocked {
     const queued = this.#state.getSignRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, 'Unable to proceed. Please try again');
 
     const address = queued.request.payload.address;
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, 'Unable to find account');
 
     const remainingTime = this.refreshAccountPasswordCache(pair);
 
@@ -487,7 +487,7 @@ export default class Extension {
     try {
       parentPair.decodePkcs8(password);
     } catch (e) {
-      throw new Error('invalid password');
+      throw new Error('Wrong password');
     }
 
     try {

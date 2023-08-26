@@ -87,7 +87,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     const phraseNumber = parseInt(_phraseNumber);
 
     if (![12, 15, 18, 21, 24].includes(seedKeys.length)) {
-      throw Error('Mnemonic needs to contain 12, 15, 18, 21, 24 words');
+      throw Error(t('Mnemonic needs to contain 12, 15, 18, 21, 24 words'));
     }
 
     const seeds: string[] = [];
@@ -97,7 +97,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
 
     if (seeds.some((value) => !value)) {
-      throw Error('Mnemonic needs to contain 12, 15, 18, 21, 24 words');
+      throw Error(t('Mnemonic needs to contain 12, 15, 18, 21, 24 words'));
     }
 
     const seed = seeds.join(' ');
@@ -132,7 +132,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [checkUnlock, accountName, keyTypes, notification, onComplete]);
+  }, [t, checkUnlock, accountName, keyTypes, onComplete, notification]);
 
   const seedValidator = useCallback((rule: FormRule, value: string) => {
     return new Promise<void>((resolve, reject) => {

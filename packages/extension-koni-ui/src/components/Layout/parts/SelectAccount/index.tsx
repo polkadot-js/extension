@@ -119,10 +119,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             }
           }
         }).catch((e) => {
-          console.error('There is a problem when set Current Account', e);
+          console.error('Failed to switch account', e);
         });
       } else {
-        console.error('There is a problem when change account');
+        console.error('Failed to switch account');
       }
     }
   }, [accounts, location.pathname, navigate, goHome]);

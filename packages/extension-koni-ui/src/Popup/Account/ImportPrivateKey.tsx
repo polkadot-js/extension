@@ -189,7 +189,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               <PrivateKeyInput
                 className='private-key-input'
                 hideText={!show}
-                label={'Private key'}
+                label={t('Private key')}
                 placeholder={t('Enter private key')}
                 statusHelp={validateState.message}
               />

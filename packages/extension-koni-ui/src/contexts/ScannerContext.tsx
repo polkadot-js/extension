@@ -5,6 +5,7 @@ import { ResponseParseTransactionSubstrate, ResponseQrParseRLP, SignerDataType }
 import { _isChainEnabled } from '@subwallet/extension-base/services/chain-service/utils';
 import { createTransactionFromRLP, Transaction } from '@subwallet/extension-base/utils/eth';
 import { MULTIPART, SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { parseEVMTransaction, parseSubstrateTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CompletedParsedData, EthereumParsedData, MessageQRInfo, MultiFramesInfo, QrInfo, SubstrateCompletedParsedData, SubstrateMessageParsedData, SubstrateTransactionParsedData, TxQRInfo } from '@subwallet/extension-koni-ui/types/scanner';
@@ -95,7 +96,9 @@ const reducer = (state: ScannerStoreState,
   return Object.assign({}, state, delta);
 };
 
-export function ScannerContextProvider ({ children }: ScannerContextProviderProps): React.ReactElement {
+export const ScannerContextProvider = ({ children }: ScannerContextProviderProps): React.ReactElement => {
+  const { t } = useTranslation();
+
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const { chainInfoMap, chainStateMap } = useSelector((state: RootState) => state.chainStore);
 
@@ -113,7 +116,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     // concatenate all the parts into one binary blob
     let concatMultipartData = multipartData.reduce((acc: Uint8Array, part: Uint8Array | null): Uint8Array => {
       if (part === null) {
-        throw new Error('part data is not completed');
+        throw new Error(t('Incomplete. Please continue scanning'));
       }
 
       const c = new Uint8Array(acc.length + part.length);
@@ -133,7 +136,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     concatMultipartData = u8aConcat(frameInfo, concatMultipartData);
 
     return (constructDataFromBytes(concatMultipartData, true, chainInfoMap, chainStateMap, accounts)) as SubstrateCompletedParsedData;
-  }, [chainInfoMap, chainStateMap, accounts]);
+  }, [t, chainInfoMap, chainStateMap, accounts]);
 
   const setPartData = useCallback((currentFrame: number, frameCount: number, partData: string): MultiFramesInfo | SubstrateCompletedParsedData => {
     const newArray = Array.from({ length: frameCount }, () => null);
@@ -150,7 +153,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
     if (currentFrame === 0 && (partDataAsBytes[0] === new Uint8Array([0x00])[0] || partDataAsBytes[0] === new Uint8Array([0x7b])[0])) {
       // part_data for frame 0 MUST NOT begin with byte 00 or byte 7B.
-      throw new Error('Error decoding invalid part data.');
+      throw new Error(t('Failed to decrypt data'));
     }
 
     if (completedFramesCount < totalFrameCount) {
@@ -196,7 +199,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       missedFrames: [],
       totalFrameCount
     };
-  }, [_integrateMultiPartData, state]);
+  }, [_integrateMultiPartData, state, t]);
 
   const setReady = useCallback((): void => {
     setState({ busy: false });
@@ -287,7 +290,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
 
     if (isSubstrateMessageParsedData(signRequest)) {
       if (signRequest.data.crypto !== 'sr25519') {
-        throw new Error('Subwallet only supports accounts using sr25519 crypto');
+        throw new Error(t('SubWallet only supports accounts using sr25519 crypto'));
       }
 
       isHash = signRequest.isHash;
@@ -303,7 +306,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const sender = findAccountByAddress(accounts, address);
 
     if (!sender) {
-      throw new Error(`No account found in Subwallet for: ${address}.`);
+      throw new Error(t('Unable to find account'));
     }
 
     const qrInfo: MessageQRInfo = {
@@ -322,7 +325,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     });
 
     return qrInfo;
-  }, [accounts, setBusy]);
+  }, [t, accounts, setBusy]);
 
   const setData = useCallback((unsignedData: CompletedParsedData): QrInfo => {
     if (unsignedData !== null) {
@@ -332,12 +335,12 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         case 'signData':
           return _setDataToSign(unsignedData);
         default:
-          throw new Error('Scanned QR should contain either extrinsic or a message to sign');
+          throw new Error(t('Invalid QR code'));
       }
     } else {
-      throw new Error('Scanned QR should contain either extrinsic or a message to sign');
+      throw new Error(t('Invalid QR code'));
     }
-  }, [_setDataToSign, _setTXRequest]);
+  }, [t, _setDataToSign, _setTXRequest]);
 
   // signing data with legacy account.
   const signDataLegacy = useCallback(async (): Promise<void> => {
@@ -348,19 +351,19 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const senderNetworkState = chainStateMap[senderNetwork?.slug || ''];
 
     if (!senderNetwork) {
-      throw new Error('Signing Error: network could not be found.');
+      throw new Error('Failed to sign. Network not found');
     }
 
     if (!_isChainEnabled(senderNetworkState)) {
-      throw new Error(`Inactive network. Please activate ${senderNetwork.name?.replace(' Relay Chain', '')} on this device and try again.`);
+      throw new Error(t('Inactive network. Please enable {{networkName}} on this device and try again', { replace: { networkName: senderNetwork.name?.replace(' Relay Chain', '') } }));
     }
 
     if (!sender) {
-      throw new Error('Signing Error: sender could not be found.');
+      throw new Error(t('Failed to sign. Sender account not found'));
     }
 
     if (!type) {
-      throw new Error('Signing Error: type could not be found.');
+      throw new Error(t('Failed to sign. Unable to detect type'));
     }
 
     const signData = async (): Promise<string> => {
@@ -376,7 +379,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         } else if (isHash) {
           signable = dataToSign;
         } else {
-          throw new Error('Signing Error: cannot signing message');
+          throw new Error(t('Failed to sign. Invalid message type'));
         }
 
         const { signature } = await qrSignEvm({
@@ -397,7 +400,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         } else if (isAscii(dataToSign) || isHash) {
           signable = dataToSign;
         } else {
-          throw new Error('Signing Error: cannot signing message');
+          throw new Error(t('Failed to sign. Invalid message type'));
         }
 
         try {
@@ -446,7 +449,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
     const [signedData, parsedTx] = await Promise.all([signData(), parseTransaction()]);
 
     setState({ signedData, parsedTx, step: SCANNER_QR_STEP.FINAL_STEP });
-  }, [accounts, chainInfoMap, chainStateMap, state]);
+  }, [t, accounts, chainInfoMap, chainStateMap, state]);
 
   const clearMultipartProgress = useCallback((): void => {
     setState({
@@ -480,4 +483,4 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
       {children}
     </ScannerContext.Provider>
   );
-}
+};

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MantaPayEnableMessage } from '@subwallet/extension-base/background/KoniTypes';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { CloseIcon, Layout, PageWrapper, ZkModeFooter } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -121,12 +122,12 @@ const zkModeConfirmationId = 'zkModeConfirmation';
 
 function getZkErrorMessage (error: MantaPayEnableMessage) {
   if (error === MantaPayEnableMessage.WRONG_PASSWORD) {
-    return 'Wrong password';
+    return detectTranslate('Wrong password');
   } else if (error === MantaPayEnableMessage.CHAIN_DISCONNECTED) {
-    return 'Chain disconnected';
+    return detectTranslate('Network is disconnected');
   }
 
-  return 'Some errors occurred. Please try again later';
+  return detectTranslate('Some errors occurred. Please try again later');
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -390,7 +391,7 @@ const Component: React.FC<Props> = (props: Props) => {
               });
             }
 
-            dispatchMantaPayState({ type: MantaPayReducerActionType.SET_ERROR_MESSAGE, payload: getZkErrorMessage(result.message) });
+            dispatchMantaPayState({ type: MantaPayReducerActionType.SET_ERROR_MESSAGE, payload: t(getZkErrorMessage(result.message)) });
           }
         })
         .catch((e) => {

@@ -29,7 +29,6 @@ export default class PolkadotRequestHandler {
   }
 
   #handleError (topic: string, id: number, e: unknown) {
-    console.log(e);
     let message = (e as Error).message;
 
     if (message.includes('User Rejected Request')) {

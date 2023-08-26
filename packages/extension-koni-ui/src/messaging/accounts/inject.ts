@@ -4,6 +4,10 @@
 import { InjectedAccountWithMeta } from '@subwallet/extension-inject/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
 
-export async function loadInjects (accounts: InjectedAccountWithMeta[]): Promise<boolean> {
-  return sendMessage('pri(accounts.inject.load)', { accounts });
+export async function addInjects (accounts: InjectedAccountWithMeta[]): Promise<boolean> {
+  return sendMessage('pri(accounts.inject.add)', { accounts });
+}
+
+export async function removeInjects (addresses: string[]): Promise<boolean> {
+  return sendMessage('pri(accounts.inject.remove)', { addresses });
 }

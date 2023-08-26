@@ -906,10 +906,12 @@ export interface RequestDeleteContactAccount {
 
 // Inject account
 
-// Load injected
-
-export interface RequestLoadInjectedAccounts {
+export interface RequestAddInjectedAccounts {
   accounts: InjectedAccountWithMeta[];
+}
+
+export interface RequestRemoveInjectedAccounts {
+  addresses: string[];
 }
 
 /// Sign Transaction
@@ -2136,7 +2138,8 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
 
   // Inject account
-  'pri(accounts.inject.load)': [RequestLoadInjectedAccounts, boolean];
+  'pri(accounts.inject.add)': [RequestAddInjectedAccounts, boolean];
+  'pri(accounts.inject.remove)': [RequestRemoveInjectedAccounts, boolean];
 
   // Derive
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean]; // Substrate

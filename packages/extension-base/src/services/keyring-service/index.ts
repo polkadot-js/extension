@@ -95,14 +95,18 @@ export class KeyringService {
     return this.currentAccountSubject.value;
   }
 
-  public injectAccounts (accounts: InjectedAccountWithMeta[]) {
-    keyring.loadInjects(accounts.map((account, index) => ({
+  public addInjectAccounts (accounts: InjectedAccountWithMeta[]) {
+    keyring.addInjects(accounts.map((account, index) => ({
       ...account,
       meta: {
         ...account.meta,
         name: `${account.meta.name || stringShorten(account.address)} (${account.meta.source})`
       }
     })));
+  }
+
+  public removeInjectAccounts (addresses: string[]) {
+    keyring.removeInjects(addresses);
   }
 
   setCurrentAccount (currentAccountData: CurrentAccountInfo) {

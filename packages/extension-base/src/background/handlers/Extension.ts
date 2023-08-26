@@ -320,11 +320,11 @@ export default class Extension {
     const { phrase } = keyExtractSuri(suri);
 
     if (isHex(phrase)) {
-      assert(isHex(phrase, 256), 'Invalid seed phrase');
+      assert(isHex(phrase, 256), 'Invalid seed phrase. Please try again.');
     } else {
       // sadly isHex detects as string, so we need a cast here
       assert(SEED_LENGTHS.includes((phrase).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
-      assert(mnemonicValidate(phrase), 'Invalid seed phrase');
+      assert(mnemonicValidate(phrase), 'Invalid seed phrase. Please try again.');
     }
 
     return {

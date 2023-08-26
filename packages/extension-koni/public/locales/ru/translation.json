@@ -735,7 +735,6 @@
   "You can unstake from a collator once": "",
   "Invalid. If you unstake this amount your active stake would fall below minimum active threshold": "",
   "Invalid. Inactive nomination pool": "",
-  "Invalid seed phrase": "",
   "Seed phrase needs to contain {{x}} words": "",
   "Wrong password": "Неправильный пароль",
   "Transfer amount is required": "",
@@ -761,7 +760,6 @@
   "Unable to find account": "",
   "\"{{suri}}\" is not a valid derivation path": "",
   "The password of each account is needed to set up master password": "",
-  "This is not a private key": "",
   "Not found token from registry": "",
   "Not found ERC20 address for this token": "",
   "Cannot create account": "",
@@ -837,5 +835,7 @@
   "Invalid word": "",
   "Hide seed phrase": "",
   "Show seed phrase": "",
-  "Private key": ""
+  "Private key": "",
+  "Invalid seed phrase. Please try again.": "",
+  "Invalid private key. Please try again.": ""
 }

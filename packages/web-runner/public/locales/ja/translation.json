@@ -735,7 +735,7 @@
   "You can unstake from a collator once": "コレーターから一度アンステークできます",
   "Invalid. If you unstake this amount your active stake would fall below minimum active threshold": "無効です。この額をアンステークした場合、アクティブなステークは最低アクティブ基準額を下回ることになります",
   "Invalid. Inactive nomination pool": "無効です。無効なノミネーションプール",
-  "Invalid seed phrase": "無効なシードフレーズ",
+  "Invalid seed phrase. Please try again.": "無効なシードフレーズ。もう一度お試しください。",
   "Seed phrase needs to contain {{x}} words": "シードフレーズは{{x}}語を含む必要がある",
   "Wrong password": "間違ったパスワード",
   "Transfer amount is required": "転送額が必要です",
@@ -761,7 +761,6 @@
   "Unable to find account": "アカウントが見つかりません。",
   "\"{{suri}}\" is not a valid derivation path": "",
   "The password of each account is needed to set up master password": "マスターパスワードの設定には、各アカウントのパスワードが必要です。",
-  "This is not a private key": "これは秘密鍵ではありません",
   "Not found token from registry": "レジストリからトークンが見つかりません",
   "Not found ERC20 address for this token": "このトークンのERC20アドレスが見つかりません",
   "Cannot create account": "アカウントを作成できません",
@@ -837,5 +836,6 @@
   "When needed": "",
   "Hide private key": "",
   "Show private key": "",
-  "Private key": "秘密鍵"
+  "Private key": "秘密鍵",
+  "Invalid private key. Please try again.": ""
 }

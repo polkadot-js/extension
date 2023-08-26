@@ -735,7 +735,7 @@
   "You can unstake from a collator once": "",
   "Invalid. If you unstake this amount your active stake would fall below minimum active threshold": "",
   "Invalid. Inactive nomination pool": "",
-  "Invalid seed phrase": "",
+  "Invalid seed phrase. Please try again.": "助记词无效。请重试。",
   "Seed phrase needs to contain {{x}} words": "",
   "Wrong password": "",
   "Transfer amount is required": "",
@@ -761,7 +761,6 @@
   "Unable to find account": "",
   "\"{{suri}}\" is not a valid derivation path": "",
   "The password of each account is needed to set up master password": "",
-  "This is not a private key": "",
   "Not found token from registry": "",
   "Not found ERC20 address for this token": "",
   "Cannot create account": "",
@@ -832,10 +831,11 @@
   "Hover to view seed phrase": "请悬停将查看助记词",
   "Select type": "选择类型",
   "Enter Password": "",
-  "Authenticate with password": "",
-  "Always required": "",
-  "When needed": "",
+  "Authenticate with password": "使用密码批准",
+  "Always required": "始终需要",
+  "When needed": "仅必要时",
   "Hide private key": "隐藏私钥",
   "Show private key": "显示私钥",
-  "Private key": "私钥"
+  "Private key": "私钥",
+  "Invalid private key. Please try again.": "私钥无效。请重试。"
 }

@@ -735,7 +735,7 @@
   "You can unstake from a collator once": "",
   "Invalid. If you unstake this amount your active stake would fall below minimum active threshold": "",
   "Invalid. Inactive nomination pool": "",
-  "Invalid seed phrase": "",
+  "Invalid seed phrase. Please try again.": "Seed phrase không hợp lệ. Vui lòng thử lại.",
   "Seed phrase needs to contain {{x}} words": "",
   "Wrong password": "",
   "Transfer amount is required": "",
@@ -761,7 +761,6 @@
   "Unable to find account": "",
   "\"{{suri}}\" is not a valid derivation path": "",
   "The password of each account is needed to set up master password": "",
-  "This is not a private key": "",
   "Not found token from registry": "",
   "Not found ERC20 address for this token": "",
   "Cannot create account": "",
@@ -832,10 +831,11 @@
   "Hover to view seed phrase": "Di chuột để xem seed phrase",
   "Select type": "Chọn loại",
   "Enter Password": "",
-  "Authenticate with password": "",
-  "Always required": "",
-  "When needed": "",
+  "Authenticate with password": "Phê duyệt bằng mật khẩu",
+  "Always required": "Luôn yêu cầu",
+  "When needed": "Chỉ khi cần",
   "Hide private key": "Ẩn private key",
   "Show private key": "Hiện private key",
-  "Private key": "Private key"
+  "Private key": "Private key",
+  "Invalid private key. Please try again.": "Private key không hợp lệ. Vui lòng thử lại."
 }

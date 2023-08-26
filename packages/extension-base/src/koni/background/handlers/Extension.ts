@@ -292,11 +292,11 @@ export default class KoniExtension {
     const { phrase } = keyExtractSuri(suri);
 
     if (isHex(phrase)) {
-      assert(isHex(phrase, 256), t('Invalid seed phrase'));
+      assert(isHex(phrase, 256), t('Invalid seed phrase. Please try again.'));
     } else {
       // sadly isHex detects as string, so we need a cast here
       assert(SEED_LENGTHS.includes((phrase).split(' ').length), t('Seed phrase needs to contain {{x}} words', { replace: { x: SEED_LENGTHS.join(', ') } }));
-      assert(mnemonicValidate(phrase), t('Invalid seed phrase'));
+      assert(mnemonicValidate(phrase), t('Invalid seed phrase. Please try again.'));
     }
 
     return {
@@ -1322,11 +1322,11 @@ export default class KoniExtension {
     const { phrase } = keyExtractSuri(suri);
 
     if (isHex(phrase)) {
-      assert(isHex(phrase, 256), t('Invalid seed phrase'));
+      assert(isHex(phrase, 256), t('Invalid seed phrase. Please try again.'));
     } else {
       // sadly isHex detects as string, so we need a cast here
       assert(SEED_LENGTHS.includes((phrase).split(' ').length), t('Seed phrase needs to contain {{x}} words', { replace: { x: SEED_LENGTHS.join(', ') } }));
-      assert(mnemonicValidate(phrase), t('Invalid seed phrase'));
+      assert(mnemonicValidate(phrase), t('Invalid seed phrase. Please try again.'));
     }
 
     const rs = { seed: suri, addressMap: {} } as ResponseSeedValidateV2;
@@ -1354,7 +1354,7 @@ export default class KoniExtension {
       });
     } else {
       rs.autoAddPrefix = false;
-      assert(false, t('This is not a private key'));
+      assert(false, t('Invalid private key. Please try again.'));
     }
 
     return rs;

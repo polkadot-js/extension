@@ -98,9 +98,11 @@ export const MenuItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       'white-space': 'nowrap'
     },
 
-    '&:not(.-activated):hover': {
-      backgroundColor: token.colorBgInput,
+    '&:hover': {
+      backgroundColor: token.colorBgInput
+    },
 
+    '&:not(.-activated):hover': {
       '.__icon': {
         color: token.colorTextLight1
       },
@@ -111,7 +113,6 @@ export const MenuItem = styled(Component)<Props>(({ theme: { token } }: Props) =
     },
 
     '&.-activated': {
-      backgroundColor: 'transparent',
       borderRightColor: token.colorPrimary,
 
       '.__icon': {

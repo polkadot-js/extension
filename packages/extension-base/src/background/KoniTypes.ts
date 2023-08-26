@@ -2019,6 +2019,33 @@ export interface ResolveAddressToDomainRequest {
   address: string
 }
 
+export enum YieldPoolType {
+  LIQUID_STAKING = 'LIQUID_STAKING',
+  LENDING = 'LENDING',
+  SINGLE_FARMING = 'SINGLE_FARMING',
+  NOMINATION_POOL = 'NOMINATION_POOL',
+  NATIVE_STAKING = 'NATIVE_STAKING'
+}
+
+export interface YieldWithdrawalMethod {
+  name: string,
+  description: string,
+  waitingTime: number, // 0 means immediately (in hours)
+}
+
+export interface YieldPoolInfo {
+  // apy: number, // in percentage, annually
+  // tvl: string, // in tokens
+  slug: string,
+  chain: string,
+  inputAssets: string[], // slug
+  rewardAssets: string[], // slug
+  withdrawalMethods: YieldWithdrawalMethod[],
+  description: string,
+  name: string,
+  type: YieldPoolType
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions

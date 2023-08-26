@@ -17,6 +17,114 @@ export type Props = ThemeProps & {
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>
 };
 
+type SideMenuItemType = MenuItemType;
+const menuItems: SideMenuItemType[] = [
+  {
+    label: 'Portfolio',
+    key: '/home',
+    icon: (
+      <Icon
+        phosphorIcon={Wallet}
+        weight='fill'
+      />
+    )
+  },
+  {
+    label: 'Crowdloans',
+    key: '/home/crowdloans',
+    icon: (
+      <Icon
+        phosphorIcon={Rocket}
+        weight='fill'
+      />
+    )
+  },
+  {
+    label: 'Staking',
+    key: '/home/staking',
+    icon: (
+      <Icon
+        phosphorIcon={Database}
+        weight='fill'
+      />
+    )
+  },
+  {
+    label: 'Earning',
+    key: '/home/earning',
+    icon: (
+      <Icon
+        phosphorIcon={Database}
+        weight='fill'
+      />
+    )
+  },
+  // {
+  //   label: 'DApps',
+  //   key: '/home/dapps',
+  //   icon: (
+  //     <Globe
+  //       height={20}
+  //       weight='fill'
+  //       width={20}
+  //     />
+  //   )
+  // },
+  {
+    label: 'History',
+    key: '/home/history',
+    icon: (
+      <Icon
+        phosphorIcon={Clock}
+        weight='fill'
+      />
+    )
+  },
+  {
+    label: 'Settings',
+    key: '/settings',
+    icon: (
+      <Icon
+        phosphorIcon={Gear}
+        weight='fill'
+      />
+    )
+  }
+];
+
+const staticMenuItems: SideMenuItemType[] = [
+  {
+    label: 'FAQs',
+    key: 'faqs',
+    icon: (
+      <Icon
+        phosphorIcon={Info}
+        weight='fill'
+      />
+    )
+  },
+  {
+    label: 'Contact',
+    key: 'contact',
+    icon: (
+      <Icon
+        phosphorIcon={MessengerLogo}
+        weight='fill'
+      />
+    )
+  },
+  {
+    label: 'Terms of services',
+    key: 'tos',
+    icon: (
+      <Icon
+        phosphorIcon={ArrowSquareUpRight}
+        weight='fill'
+      />
+    )
+  }
+];
+
 function Component ({ className,
   isCollapsed,
   setCollapsed }: Props): React.ReactElement<Props> {

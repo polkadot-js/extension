@@ -115,6 +115,8 @@ const ConnectWalletConnect = new LazyLoader(() => import('@subwallet/extension-k
 const ConnectionList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
 const ConnectionDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
+const Earning = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Earning'));
+
 // A Placeholder page
 export function Example () {
   const location = useLocation();
@@ -154,6 +156,7 @@ export const router = createBrowserRouter([
           },
           Crowdloans.generateRouterObject('crowdloans', true),
           Staking.generateRouterObject('staking', true),
+          Earning.generateRouterObject('earning', true),
           History.generateRouterObject('history', true),
           History.generateRouterObject('history/:chain/:extrinsicHashOrId', true),
           {

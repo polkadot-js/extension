@@ -6,12 +6,15 @@ import { ValidateState } from '@subwallet/extension-koni-ui/types';
 import { QrAccount, ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
 import { useCallback, useMemo } from 'react';
 
+import { useTranslation } from '../common';
+
 const useScanAccountQr = (
   modalId: string,
   convertResult: (data: string) => QrAccount | null,
   setValidateState: (state: ValidateState) => void,
   onSubmit: (_account: QrAccount) => void
 ) => {
+  const { t } = useTranslation();
   const onOpen = useOpenQrScanner(modalId);
 
   const handleResult = useCallback((val: string): QrAccount | null => {
@@ -21,13 +24,13 @@ const useScanAccountQr = (
       return result;
     } else {
       setValidateState({
-        message: 'Invalid QR',
+        message: t('Invalid QR code'),
         status: 'error'
       });
 
       return null;
     }
-  }, [convertResult, setValidateState]);
+  }, [t, convertResult, setValidateState]);
 
   const openCamera = useCallback(() => {
     setValidateState({});

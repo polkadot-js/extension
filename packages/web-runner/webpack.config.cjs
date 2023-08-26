@@ -111,6 +111,16 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       }),
       new CopyPlugin({
         patterns: [{
+          from: 'public',
+          globOptions: {
+            ignore: [
+              '**/*.html'
+            ]
+          }
+        }]
+      }),
+      new CopyPlugin({
+        patterns: [{
           from: path.resolve(__dirname, './package.json'),
           to: path.resolve(__dirname, './build/package.json')
         }]

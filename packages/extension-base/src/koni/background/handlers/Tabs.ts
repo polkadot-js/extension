@@ -25,6 +25,7 @@ import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/ext
 import { KeyringPair } from '@subwallet/keyring/types';
 import keyring from '@subwallet/ui-keyring';
 import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
+import { t } from 'i18next';
 import { Subscription } from 'rxjs';
 import Web3 from 'web3';
 import { HttpProvider, RequestArguments, WebsocketProvider } from 'web3-core';
@@ -134,7 +135,7 @@ export default class KoniTabs {
   private getSigningPair (address: string): KeyringPair {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find keypair');
+    assert(pair, t('Unable to find account'));
 
     return pair;
   }
@@ -394,7 +395,7 @@ export default class KoniTabs {
 
       if (web3?.currentProvider instanceof Web3.providers.WebsocketProvider) {
         if (!web3.currentProvider.connected) {
-          console.log(`[Web3] ${slug} is disconnected, trying to connect...`);
+          console.log(`${slug} is disconnected, trying to connect...`);
           this.#koniState.refreshWeb3Api(slug);
           let checkingNum = 0;
 
@@ -402,7 +403,7 @@ export default class KoniTabs {
             checkingNum += 1;
 
             if ((web3.currentProvider as WebsocketProvider).connected) {
-              console.log(`Network [${slug}] is connected.`);
+              console.log(`${slug} is connected.`);
               resolve(true);
             } else {
               console.log(`Connecting to network [${slug}]`);
@@ -457,7 +458,7 @@ export default class KoniTabs {
     if (networkKey) {
       await this.#koniState.switchEvmNetworkByUrl(stripUrl(url), networkKey);
     } else {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, `Not found chainId ${chainId} in wallet`);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'This network is currently not supported');
     }
 
     return null;
@@ -477,18 +478,18 @@ export default class KoniTabs {
     const _tokenType = input?.type?.toLowerCase() || '';
 
     if (_tokenType !== 'erc20' && _tokenType !== 'erc721') {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, `Assets type ${_tokenType} is not supported`);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Assets type {{tokenType}} is not supported'.replace('{{tokenType}}', _tokenType));
     }
 
     if (!input?.options?.address || !input?.options?.symbol) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Assets params require address and symbol');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Unable to get contract address and token symbol');
     }
 
     const evmState = await this.getEvmState(url);
     const chain = evmState.networkKey;
 
     if (!chain) {
-      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current chain is not available');
+      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'The network on dApp is not supported in wallet. Please manually add the network to wallet');
     }
 
     const tokenType = _tokenType === 'erc20' ? _AssetType.ERC20 : _AssetType.ERC721;
@@ -587,7 +588,7 @@ export default class KoniTabs {
           });
 
           if (!filteredUrls.length) {
-            throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Currently HTTP provider for EVM network');
+            throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Currently support WSS provider for Substrate networks and HTTP provider for EVM network');
           }
 
           const provider = filteredUrls[0];
@@ -855,7 +856,7 @@ export default class KoniTabs {
     if (signResult) {
       return signResult;
     } else {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Have something wrong to sign message');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Failed to sign message');
     }
   }
 
@@ -866,11 +867,11 @@ export default class KoniTabs {
     const networkKey = evmState.networkKey;
 
     if (!canUseAccount) {
-      throw new Error('Account ' + (transactionParams.from) + ' not in allowed list');
+      throw new Error(t('You have rescinded allowance for this account in wallet'));
     }
 
     if (!networkKey) {
-      throw new Error('Empty current network key');
+      throw new Error('Network unavailable. Please switch network or manually add network to wallet');
     }
 
     const allowedAccounts = await this.getEvmCurrentAccount(url, true);
@@ -968,17 +969,17 @@ export default class KoniTabs {
     const _tokenType = input.type;
 
     if (_tokenType !== 'psp22' && _tokenType !== 'psp34') {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, `Assets type ${_tokenType} is not supported`);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Assets type {{tokenType}} is not supported'.replace('{{tokenType}}', _tokenType));
     }
 
     if (!input.address || !input.symbol) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Assets params require address and symbol');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Unable to get contract address and token symbol');
     }
 
     const [chain] = this.#koniState.findNetworkKeyByGenesisHash(genesisHash);
 
     if (!chain) {
-      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current chain is not available');
+      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'The network on dApp is not supported in wallet. Please manually add the network to wallet');
     }
 
     const state = this.#koniState.getChainStateByKey(chain);

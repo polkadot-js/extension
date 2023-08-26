@@ -108,7 +108,7 @@ const Component: React.FC = () => {
         }
 
         if (isEthereumAddress(_recipientAddress) !== isEthereumAddress(from)) {
-          const message = isEthereumAddress(from) ? t('Receive address must be of evm account.') : t('Receive address must be of substrate account.');
+          const message = isEthereumAddress(from) ? t('Receive address must be of EVM account.') : t('Receive address must be of Substrate account.');
 
           return Promise.reject(message);
         }

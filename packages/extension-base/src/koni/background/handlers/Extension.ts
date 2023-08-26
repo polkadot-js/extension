@@ -49,6 +49,7 @@ import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/sessio
 import { getSdkError } from '@walletconnect/utils';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
+import { t } from 'i18next';
 import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -131,7 +132,7 @@ export default class KoniExtension {
   private accountsChangePassword ({ address, newPass, oldPass }: RequestAccountChangePassword): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find account'));
 
     try {
       if (!pair.isLocked) {
@@ -140,7 +141,7 @@ export default class KoniExtension {
 
       pair.decodePkcs8(oldPass);
     } catch (error) {
-      throw new Error('oldPass is invalid');
+      throw new Error(t('Wrong password'));
     }
 
     keyring.encryptAccount(pair, newPass);
@@ -151,7 +152,7 @@ export default class KoniExtension {
   private accountsEdit ({ address, name }: RequestAccountEdit): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find account'));
 
     keyring.saveAccountMeta(pair, { ...pair.meta, name });
 
@@ -165,7 +166,7 @@ export default class KoniExtension {
   private accountsShow ({ address, isShowing }: RequestAccountShow): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find account'));
 
     keyring.saveAccountMeta(pair, { ...pair.meta, isHidden: !isShowing });
 
@@ -201,7 +202,7 @@ export default class KoniExtension {
   private metadataApprove ({ id }: RequestMetadataApprove): boolean {
     const queued = this.#koniState.getMetaRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { request, resolve } = queued;
 
@@ -223,7 +224,7 @@ export default class KoniExtension {
   private metadataReject ({ id }: RequestMetadataReject): boolean {
     const queued = this.#koniState.getMetaRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { reject } = queued;
 
@@ -291,11 +292,11 @@ export default class KoniExtension {
     const { phrase } = keyExtractSuri(suri);
 
     if (isHex(phrase)) {
-      assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
+      assert(isHex(phrase, 256), t('Invalid seed phrase. Please try again.'));
     } else {
       // sadly isHex detects as string, so we need a cast here
-      assert(SEED_LENGTHS.includes((phrase).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
-      assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
+      assert(SEED_LENGTHS.includes((phrase).split(' ').length), t('Seed phrase needs to contain {{x}} words', { replace: { x: SEED_LENGTHS.join(', ') } }));
+      assert(mnemonicValidate(phrase), t('Invalid seed phrase. Please try again.'));
     }
 
     return {
@@ -308,7 +309,7 @@ export default class KoniExtension {
   private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
     const queued = this.#koniState.getSignRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { resolve } = queued;
 
@@ -321,7 +322,7 @@ export default class KoniExtension {
   private signingCancel ({ id }: RequestSigningCancel): boolean {
     const queued = this.#koniState.getSignRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { reject } = queued;
 
@@ -381,13 +382,13 @@ export default class KoniExtension {
     try {
       parentPair.decodePkcs8(password);
     } catch (e) {
-      throw new Error('invalid password');
+      throw new Error(t('Wrong password'));
     }
 
     try {
       return parentPair.derive(suri, metadata);
     } catch (err) {
-      throw new Error(`"${suri}" is not a valid derivation path`);
+      throw new Error(t('"{{suri}}" is not a valid derivation path', { replace: { suri } }));
     }
   }
 
@@ -531,7 +532,7 @@ export default class KoniExtension {
 
       return account || contact || { ...keyring.saveRecent(address).json, publicKey: decodeAddress(address) };
     } else {
-      throw Error('Invalid address');
+      throw Error(t('This is not an address'));
     }
   }
 
@@ -543,7 +544,7 @@ export default class KoniExtension {
 
       return true;
     } else {
-      throw Error('Invalid address');
+      throw Error(t('This is not an address'));
     }
   }
 
@@ -555,7 +556,7 @@ export default class KoniExtension {
 
       return true;
     } else {
-      throw Error('Invalid address');
+      throw Error(t('This is not an address'));
     }
   }
 
@@ -614,7 +615,7 @@ export default class KoniExtension {
   private authorizeApproveV2 ({ accounts, id }: RequestAuthorizeApproveV2): boolean {
     const queued = this.#koniState.getAuthRequestV2(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { resolve } = queued;
 
@@ -626,7 +627,7 @@ export default class KoniExtension {
   private authorizeRejectV2 ({ id }: RequestAuthorizeReject): boolean {
     const queued = this.#koniState.getAuthRequestV2(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { reject } = queued;
 
@@ -638,7 +639,7 @@ export default class KoniExtension {
   private authorizeCancelV2 ({ id }: RequestAuthorizeCancel): boolean {
     const queued = this.#koniState.getAuthRequestV2(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { reject } = queued;
 
@@ -1222,7 +1223,7 @@ export default class KoniExtension {
 
     if (!hasMasterPassword) {
       if (!password) {
-        throw Error('Require password to set up master password');
+        throw Error(t('The password of each account is needed to set up master password'));
       } else {
         keyring.changeMasterPassword(password);
         this.#koniState.updateKeyringState();
@@ -1321,11 +1322,11 @@ export default class KoniExtension {
     const { phrase } = keyExtractSuri(suri);
 
     if (isHex(phrase)) {
-      assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
+      assert(isHex(phrase, 256), t('Invalid seed phrase. Please try again.'));
     } else {
       // sadly isHex detects as string, so we need a cast here
-      assert(SEED_LENGTHS.includes((phrase).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
-      assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
+      assert(SEED_LENGTHS.includes((phrase).split(' ').length), t('Seed phrase needs to contain {{x}} words', { replace: { x: SEED_LENGTHS.join(', ') } }));
+      assert(mnemonicValidate(phrase), t('Invalid seed phrase. Please try again.'));
     }
 
     const rs = { seed: suri, addressMap: {} } as ResponseSeedValidateV2;
@@ -1353,7 +1354,7 @@ export default class KoniExtension {
       });
     } else {
       rs.autoAddPrefix = false;
-      assert(false, 'Not valid private key');
+      assert(false, t('Invalid private key. Please try again.'));
     }
 
     return rs;
@@ -1379,7 +1380,7 @@ export default class KoniExtension {
     try {
       return parentPair.derive(suri, metadata);
     } catch (err) {
-      throw new Error(`"${suri}" is not a valid derivation path`);
+      throw new Error(t('"{{suri}}" is not a valid derivation path', { replace: { suri } }));
     }
   }
 
@@ -1418,7 +1419,7 @@ export default class KoniExtension {
         throw new Error((error as Error).message);
       }
     } else {
-      throw new Error('Unable to decode using the supplied passphrase');
+      throw new Error(t('Wrong password'));
     }
   }
 
@@ -1436,7 +1437,7 @@ export default class KoniExtension {
         throw new Error((error as Error).message);
       }
     } else {
-      throw new Error('Unable to decode using the supplied passphrase');
+      throw new Error(t('Wrong password'));
     }
   }
 
@@ -1570,7 +1571,7 @@ export default class KoniExtension {
 
     if (!transferAll) {
       if (value === undefined) {
-        errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Require transfer value'));
+        errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Transfer amount is required')));
       }
 
       if (value) {
@@ -1581,11 +1582,11 @@ export default class KoniExtension {
     const tokenInfo = this.#koniState.getAssetBySlug(tokenSlug);
 
     if (!tokenInfo) {
-      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Not found token from registry'));
+      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Not found token from registry')));
     }
 
     if (isEthereumAddress(from) && isEthereumAddress(to) && _isTokenEvmSmartContract(tokenInfo) && _getContractAddressOfToken(tokenInfo).length === 0) {
-      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Not found ERC20 address for this token'));
+      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Not found ERC20 address for this token')));
     }
 
     return [errors, keypair, transferValue, tokenInfo];
@@ -1649,7 +1650,7 @@ export default class KoniExtension {
       const error = e as Error;
 
       if (error.message.includes('transfer amount exceeds balance')) {
-        error.message = 'Not enough balance';
+        error.message = t('Insufficient balance');
       }
 
       throw error;
@@ -1667,7 +1668,7 @@ export default class KoniExtension {
         const { value: balance } = await this.getAddressFreeBalance({ address: from, networkKey, token: tokenSlug });
 
         if (new BigN(balance).minus(transferAmount.value).lt(minAmount)) {
-          inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+          inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
         }
       }
 
@@ -1679,7 +1680,7 @@ export default class KoniExtension {
 
         const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter);
 
-        inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${tokenInfo.symbol} to keep the destination account alive`));
+        inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}}{{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: tokenInfo.symbol } })));
       }
     };
 
@@ -1713,7 +1714,7 @@ export default class KoniExtension {
     const destinationTokenInfo = this.#koniState.getXcmEqualAssetByChain(destinationNetworkKey, sendingTokenSlug);
 
     if (!destinationTokenInfo) {
-      errors.push(new TransactionError(TransferTxErrorType.INVALID_TOKEN, 'Not found token from registry'));
+      errors.push(new TransactionError(TransferTxErrorType.INVALID_TOKEN, t('Not found token from registry')));
     }
 
     return [errors, keypair, transferValue, originTokenInfo, destinationTokenInfo];
@@ -1752,7 +1753,7 @@ export default class KoniExtension {
         if (new BigN(value).lt(atLeast)) {
           const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
 
-          inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${originTokenInfo.symbol} to keep the destination account alive`));
+          inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}}{{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: originTokenInfo.symbol } })));
         }
 
         const srcMinAmount = originTokenInfo.minAmount || '0';
@@ -1763,7 +1764,7 @@ export default class KoniExtension {
           const { value: balance } = await this.getAddressFreeBalance({ address: from, networkKey: originNetworkKey, token: originTokenInfo.slug });
 
           if (new BigN(balance).minus(value).lt(srcMinAmount)) {
-            inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+            inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
           }
         }
       };
@@ -1988,7 +1989,7 @@ export default class KoniExtension {
         }
       } catch (e) {
         estimatedFee = '0';
-        console.warn('Error estimating fee', e);
+        console.warn('Unable to estimate fee', e);
       }
 
       maxTransferable = maxTransferable.sub(new BN(estimatedFee));
@@ -2076,7 +2077,7 @@ export default class KoniExtension {
   private getAccountMeta ({ address }: RequestAccountMeta): ResponseAccountMeta {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find account'));
 
     return {
       meta: pair.meta
@@ -2101,7 +2102,7 @@ export default class KoniExtension {
 
         if (exists) {
           if (exists.type === (isEthereum ? 'ethereum' : 'sr25519')) {
-            return [{ code: AccountExternalErrorCode.INVALID_ADDRESS, message: 'Account exists' }];
+            return [{ code: AccountExternalErrorCode.INVALID_ADDRESS, message: t('Account exists') }];
           }
         }
       } catch (e) {
@@ -2193,7 +2194,7 @@ export default class KoniExtension {
     const addresses: string[] = [];
 
     if (!accounts.length) {
-      throw new Error('No accounts to import');
+      throw new Error(t("Can't find an account. Please try again"));
     }
 
     const slugMap: Record<string, string> = {};
@@ -2302,7 +2303,7 @@ export default class KoniExtension {
       if (!keyringPair) {
         return {
           success: false,
-          errors: [{ code: AccountExternalErrorCode.KEYRING_ERROR, message: 'Invalid keyring' }]
+          errors: [{ code: AccountExternalErrorCode.KEYRING_ERROR, message: t('Cannot create account') }]
         };
       }
 
@@ -2444,7 +2445,7 @@ export default class KoniExtension {
   private qrSignSubstrate ({ address, data, networkKey }: RequestQrSignSubstrate): ResponseQrSignSubstrate {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find account'));
 
     if (pair.isLocked) {
       keyring.unlockPair(pair.address);
@@ -2467,13 +2468,13 @@ export default class KoniExtension {
     const network: _ChainInfo | null = this.getNetworkJsonByChainId(chainId);
 
     if (!network) {
-      throw new Error('Cannot find network');
+      throw new Error(t('Cannot find network'));
     }
 
     const pair = keyring.getPair(address);
 
     if (!pair) {
-      throw Error('Unable to find pair');
+      throw Error(t('Unable to find account'));
     }
 
     if (pair.isLocked) {
@@ -2494,7 +2495,7 @@ export default class KoniExtension {
       const tx: QrTransaction | null = createTransactionFromRLP(message);
 
       if (!tx) {
-        throw new Error(`Cannot create tx from ${message}`);
+        throw new Error(t('Failed to decode data. Please use a valid QR code'));
       }
 
       const txObject: TransactionConfig = {
@@ -2875,7 +2876,7 @@ export default class KoniExtension {
       console.error(e);
 
       return {
-        errors: [(e as Error).message],
+        errors: [t((e as Error).message)],
         status: false
       };
     }
@@ -2971,7 +2972,7 @@ export default class KoniExtension {
   private signingApprovePasswordV2 ({ id }: RequestSigningApprovePasswordV2): boolean {
     const queued = this.#koniState.getSignRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { reject, request, resolve } = queued;
     const pair = keyring.getPair(queued.account.address);
@@ -2982,7 +2983,7 @@ export default class KoniExtension {
     const { address } = pair;
 
     if (!pair) {
-      reject(new Error('Unable to find pair'));
+      reject(new Error(t('Unable to find account')));
 
       return false;
     }
@@ -3070,7 +3071,7 @@ export default class KoniExtension {
         }
 
         if (!index) {
-          throw Error('Invalid derive path');
+          throw Error(t('Invalid derive path'));
         }
 
         meta.suri = `//${index}`;
@@ -3177,7 +3178,7 @@ export default class KoniExtension {
       }
 
       if (!index) {
-        throw Error('Invalid derive path');
+        throw Error(t('Invalid derive path'));
       }
 
       meta.suri = `//${index}`;

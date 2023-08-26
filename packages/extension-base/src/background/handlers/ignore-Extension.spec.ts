@@ -166,7 +166,7 @@ describe('Extension', () => {
         address,
         newPass,
         oldPass: wrongPass
-      }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('oldPass is invalid'));
+      }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('Wrong password'));
 
       await expect(extension.handle('id', 'pri(accounts.changePassword)', {
         address,
@@ -180,7 +180,7 @@ describe('Extension', () => {
 
       expect(() => {
         pair.decodePkcs8(password);
-      }).toThrowError('Unable to decode using the supplied passphrase');
+      }).toThrowError('Wrong password');
     });
   });
 

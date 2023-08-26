@@ -4,11 +4,12 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, PalletIdentityRegistration, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { reformatAddress } from '@subwallet/extension-base/utils';
+import { t } from 'i18next';
 
 import { Bytes } from '@polkadot/types';
 import { Codec } from '@polkadot/types/types';
@@ -46,7 +47,7 @@ export function validateRelayUnbondingCondition (amount: string, chainStakingMet
   }
 
   if (nominatorMetadata.unstakings.length > chainStakingMetadata.maxWithdrawalRequestPerValidator) {
-    errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_UNSTAKING));
+    errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_UNSTAKING, t('You cannot unstake more than {{number}} times', { replace: { number: chainStakingMetadata.maxWithdrawalRequestPerValidator } })));
   }
 
   return errors;
@@ -58,6 +59,8 @@ export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: str
   const errors: TransactionError[] = [];
   let bnTotalStake = new BN(amount);
   const bnMinStake = new BN(chainStakingMetadata.minJoinNominationPool || '0');
+  const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
+  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, true);
 
   if (selectedPool.state !== 'Open') {
     errors.push(new TransactionError(StakingTxErrorType.INACTIVE_NOMINATION_POOL));
@@ -69,12 +72,12 @@ export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: str
     bnTotalStake = bnTotalStake.add(bnCurrentActiveStake);
 
     if (nominatorMetadata.unstakings.length > 0 && bnCurrentActiveStake.isZero()) {
-      errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
+      errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST, existUnstakeErrorMessage));
     }
   }
 
   if (!bnTotalStake.gte(bnMinStake)) {
-    errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+    errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
   }
 
   return errors;
@@ -84,14 +87,16 @@ export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: st
   const errors: TransactionError[] = [];
   let bnTotalStake = new BN(amount);
   const bnMinStake = new BN(chainStakingMetadata.minStake);
+  const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
+  const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, chainStakingMetadata.maxValidatorPerNominator);
 
   if (!nominatorMetadata || nominatorMetadata.status === StakingStatus.NOT_STAKING) {
     if (!bnTotalStake.gte(bnMinStake)) {
-      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
     }
 
     if (selectedValidators.length > chainStakingMetadata.maxValidatorPerNominator) {
-      errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS));
+      errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS, maxValidatorErrorMessage));
     }
 
     return errors;
@@ -102,11 +107,11 @@ export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: st
   bnTotalStake = bnTotalStake.add(bnCurrentActiveStake);
 
   if (!bnTotalStake.gte(bnMinStake)) {
-    errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+    errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
   }
 
   if (selectedValidators.length > chainStakingMetadata.maxValidatorPerNominator) {
-    errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS));
+    errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS, maxValidatorErrorMessage));
   }
 
   return errors;

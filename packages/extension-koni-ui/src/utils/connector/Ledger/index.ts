@@ -62,7 +62,7 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string, ex
   ) {
     return {
       status: 'error',
-      message: t('User rejected request')
+      message: t('Rejected by user')
     };
   }
 

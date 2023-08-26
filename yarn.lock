@@ -5842,14 +5842,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.11":
-  version: 0.2.11
-  resolution: "@subwallet/chain-list@npm:0.2.11"
+"@subwallet/chain-list@npm:0.2.12-beta.0":
+  version: 0.2.12-beta.0
+  resolution: "@subwallet/chain-list@npm:0.2.12-beta.0"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: 425e4809979de47af7c2513d3239291f98aab118f65eb725a7882dd45c14a478bf3ac82469574aa987ed517d53d22eedf778aa099eafc0024686c5f94bf8055e
+  checksum: 1e0a0fd1a476a794e38a38004ade335bf515e90d822b9aa1d5dc8315a72867ce2a2423bd5ca12d1304f525702424d051cbb644927b2ef5ffb4d5ce42c50d7eec
   languageName: node
   linkType: hard
 
@@ -5884,7 +5884,7 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.2.11
+    "@subwallet/chain-list": 0.2.12-beta.0
     "@subwallet/extension-base": ^1.1.9-0
     "@subwallet/extension-chains": ^1.1.9-0
     "@subwallet/extension-dapp": ^1.1.9-0
@@ -6012,7 +6012,7 @@ __metadata:
     "@polkadot/util-crypto": ^12.3.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.11
+    "@subwallet/chain-list": 0.2.12-beta.0
     "@subwallet/extension-base": ^1.1.9-0
     "@subwallet/extension-chains": ^1.1.9-0
     "@subwallet/extension-dapp": ^1.1.9-0
@@ -6034,6 +6034,7 @@ __metadata:
     "@types/styled-components": ^5.1.26
     "@walletconnect/types": ^2.8.4
     "@wojtekmaj/enzyme-adapter-react-17": ^0.8.0
+    bip39: ^3.1.0
     boring-avatars: ^1.7.0
     bowser: ^2.11.0
     classnames: ^2.3.2
@@ -9696,7 +9697,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip39@npm:^3.0.4":
+"bip39@npm:^3.0.4, bip39@npm:^3.1.0":
   version: 3.1.0
   resolution: "bip39@npm:3.1.0"
   dependencies:
@@ -22178,6 +22179,7 @@ __metadata:
     typescript: ^4.5.4
   bin:
     koni-ci-build-dev: ./scripts/koni-ci-build-dev.mjs
+    koni-ci-build-i18n: ./scripts/koni-ci-build-i18n.mjs
     koni-ci-ghact-build: ./scripts/koni-ci-ghact-build.mjs
     koni-dev-build-ts: ./scripts/koni-dev-build-ts.mjs
   languageName: unknown

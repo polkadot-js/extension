@@ -7,7 +7,7 @@ import { convertToWords } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { saveAs } from 'file-saver';
-import { CopySimple } from 'phosphor-react';
+import { CopySimple, EyeSlash } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -22,7 +22,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
 
-  const words: Array<Array<WordItem>> = useMemo(() => convertToWords(seedPhrase), [seedPhrase]);
+  const words: Array<WordItem> = useMemo(() => convertToWords(seedPhrase), [seedPhrase]);
 
   const onCopy = useCopy(seedPhrase);
 
@@ -42,31 +42,29 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div className={CN(className)}>
-      <div className='word-container'>
-        {
-          words.map((arr, _index) => {
-            return (
-              <div
-                className='word-row'
-                key={_index}
-              >
-                {
-                  arr.map((item) => {
-                    return (
-                      <div
-                        className='word-item'
-                        key={item.label}
-                      >
-                        <div className='word-index'>{item.index}</div>
-                        <div className='word-content'>{item.label}</div>
-                      </div>
-                    );
-                  })
-                }
-              </div>
-            );
-          })
-        }
+      <div className='content-container'>
+        <div className='word-container'>
+          {
+            words.map((item) => {
+              return (
+                <div
+                  className='word-item'
+                  key={item.label}
+                >
+                  <div className='word-index'>{item.index}</div>
+                  <div className='word-content'>{item.label}</div>
+                </div>
+              );
+            })
+          }
+        </div>
+        <div className='hover-noti'>
+          <Icon
+            customSize='28px'
+            phosphorIcon={EyeSlash}
+          />
+          <span>{t('Hover to view seed phrase')}</span>
+        </div>
       </div>
       <Button
         icon={(
@@ -88,39 +86,73 @@ const WordPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
     gap: token.size,
     alignItems: 'center',
 
-    '.word-container': {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: token.sizeXS,
+    '.content-container': {
+      width: '100%',
+      position: 'relative',
 
-      '.word-row': {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: token.sizeXS,
+      '&:hover': {
+        '.word-container': {
+          filter: 'unset'
+        },
 
-        '.word-item': {
-          display: 'flex',
-          flexDirection: 'row',
-          gap: token.sizeXXS,
-          alignItems: 'center',
-          padding: `${token.paddingXS}px ${token.padding}px`,
-          borderRadius: token.borderRadiusLG,
-          backgroundColor: token.colorBgInput,
-          fontSize: token.fontSizeHeading6,
-          lineHeight: token.lineHeightHeading6,
-
-          '.word-index': {
-            color: token.colorTextDescription
-          },
-
-          '.word-content': {
-            color: token.colorTextBase
-          }
+        '.hover-noti': {
+          opacity: 0,
+          zIndex: -1,
+          transition: 'all 0.3s ease-in-out'
         }
       }
+    },
+
+    '.word-container': {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: token.sizeXS,
+      width: '100%',
+      padding: token.paddingXS,
+      borderRadius: token.borderRadiusLG,
+      filter: 'blur(4.5px)',
+      transition: 'all 0.3s ease-in-out',
+
+      '.word-item': {
+        display: 'flex',
+        flexDirection: 'row',
+        gap: token.sizeXXS / 2,
+        alignItems: 'center',
+        padding: `${token.paddingSM}px ${token.paddingSM - 2}px`,
+        borderRadius: token.borderRadiusLG,
+        backgroundColor: token.colorBgInput,
+        height: token.controlHeightLG,
+        fontSize: token.fontSizeSM,
+        lineHeight: token.lineHeightSM,
+
+        '.word-index': {
+          color: token.colorTextDescription,
+          width: token.sizeMD - 2
+        },
+
+        '.word-content': {
+          color: token.colorTextBase
+        }
+      }
+    },
+
+    '.hover-noti': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 10,
+      transition: 'all 0.3s ease-in-out',
+      color: token.colorWhite,
+      fontStyle: 'normal',
+      fontWeight: 600,
+      gap: token.sizeXS,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6
     }
   };
 });

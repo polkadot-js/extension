@@ -3,23 +3,25 @@
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { BalanceErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { detectTranslate } from '@subwallet/extension-base/utils';
+import { t } from 'i18next';
 
 // Todo: finish this map in the future
 const defaultErrorMap: Record<BalanceErrorType, { message: string, code?: number }> = {
   [BalanceErrorType.NETWORK_ERROR]: {
-    message: 'Chain is inactive or disconnected',
+    message: detectTranslate('Network is inactive. Please enable network'),
     code: undefined
   },
   [BalanceErrorType.TOKEN_ERROR]: {
-    message: 'Token is not supported',
+    message: detectTranslate('Token is not supported'),
     code: undefined
   },
   [BalanceErrorType.TIMEOUT]: {
-    message: 'Get balance timeout',
+    message: detectTranslate('Unable to get balance. Please re-enable the network'),
     code: undefined
   },
   [BalanceErrorType.GET_BALANCE_ERROR]: {
-    message: 'Get balance error',
+    message: detectTranslate('Unable to get balance. Please re-enable the network'),
     code: undefined
   }
 };
@@ -29,7 +31,7 @@ export class BalanceError extends SWError {
 
   constructor (errorType: BalanceErrorType, errMessage?: string, data?: unknown) {
     const defaultErr = defaultErrorMap[errorType];
-    const message = errMessage || defaultErr?.message || errorType;
+    const message = errMessage || t(defaultErr?.message || '') || errorType;
 
     super(errorType, message, defaultErr?.code, data);
     this.errorType = errorType;

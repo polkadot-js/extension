@@ -3,7 +3,9 @@
 
 export const THEME_BACKGROUND_COLOR = 'theme-background-color';
 export const LANGUAGE = 'current-language';
+
 export const CURRENT_PAGE = 'page.current';
+
 export const TRANSFER_TRANSACTION = 'transaction.transfer';
 export const NFT_TRANSACTION = 'transaction.nft';
 export const STAKE_TRANSACTION = 'transaction.stake';
@@ -13,3 +15,5 @@ export const WITHDRAW_TRANSACTION = 'transaction.withdraw';
 export const CLAIM_REWARD_TRANSACTION = 'transaction.claim-reward';
 
 export const TRANSACTION_STORAGES = [TRANSFER_TRANSACTION, NFT_TRANSACTION, STAKE_TRANSACTION, UN_STAKE_TRANSACTION, CANCEL_UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION, CLAIM_REWARD_TRANSACTION];
+
+export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';

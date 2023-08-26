@@ -17,7 +17,7 @@ export function removeLazy (key: string) {
 }
 
 // Add or update new lazy thread
-export function addLazy (key: string, callback: () => void, lazyTime = 300, maxLazyTime = 3000) {
+export function addLazy (key: string, callback: () => void, lazyTime = 300, maxLazyTime = 3000, fireOnFirst = true) {
   const existed = lazyMap[key];
   const now = new Date().getTime();
 
@@ -41,11 +41,25 @@ export function addLazy (key: string, callback: () => void, lazyTime = 300, maxL
       }, lazyTime);
     }
   } else {
-    // Fire callback immediately in the first time
-    callback();
-    lazyMap[key] = {
-      callback,
-      lastFire: now
-    };
+    if (fireOnFirst) {
+      // Fire callback immediately in the first time
+      callback();
+      lazyMap[key] = {
+        callback,
+        lastFire: now
+      };
+    } else {
+      lazyMap[key] = {
+        callback,
+        lastFire: now
+      };
+
+      lazyMap[key].timeout = setTimeout(() => {
+        // This will be fire in the last call of lazy thread
+        callback();
+        lazyMap[key].lastFire = new Date().getTime();
+        removeLazy(key);
+      }, lazyTime);
+    }
   }
 }

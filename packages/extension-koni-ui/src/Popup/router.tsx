@@ -24,8 +24,6 @@ export class LazyLoader {
           resolve(module.default);
         }).catch(reject);
       });
-    } else {
-      console.log('hit cache!!!');
     }
 
     return this.loadPromise;
@@ -157,7 +155,7 @@ export const router = createBrowserRouter([
           Crowdloans.generateRouterObject('crowdloans', true),
           Staking.generateRouterObject('staking', true),
           History.generateRouterObject('history', true),
-          History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
+          History.generateRouterObject('history/:chain/:extrinsicHashOrId', true),
           {
             path: 'dapps',
             element: <Outlet />

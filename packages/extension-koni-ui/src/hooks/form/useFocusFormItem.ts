@@ -10,7 +10,7 @@ const useFocusFormItem = (form: FormInstance, fieldName: string, active = true, 
       setTimeout(() => {
         const elem = form.getFieldInstance(fieldName) as HTMLInputElement;
 
-        elem && elem.focus && elem.focus();
+        elem?.focus?.();
       }, timeOut);
     }
   }, [active, fieldName, form, timeOut]);

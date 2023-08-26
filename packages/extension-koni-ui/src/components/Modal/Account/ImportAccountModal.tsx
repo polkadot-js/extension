@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { IMPORT_ACCOUNT_MODAL, IMPORT_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useClickOutSide, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
@@ -34,7 +34,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
-  const { checkActive, inactiveModal } = useContext(ModalContext);
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const isActive = checkActive(modalId);
 
   const isPopup = useIsPopup();
@@ -62,13 +62,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, [inactiveModal, isPopup, navigate]);
 
+  const onClickSeed = useCallback(() => {
+    inactiveModal(modalId);
+    activeModal(IMPORT_SEED_MODAL);
+  }, [activeModal, inactiveModal]);
+
   const items = useMemo((): ImportAccountItem[] => [
     {
       backgroundColor: token['green-7'],
       icon: Leaf,
       key: 'import-seed-phrase',
       label: t('Import from seed phrase'),
-      onClick: onClickItem('/accounts/import-seed-phrase')
+      onClick: onClickSeed
     },
     {
       backgroundColor: token['orange-7'],
@@ -91,7 +96,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       label: t('Import by QR code'),
       onClick: onClickItem('/accounts/import-by-qr')
     }
-  ], [token, t, onClickItem, onClickJson]);
+  ], [token, t, onClickSeed, onClickJson, onClickItem]);
 
   const renderIcon = useCallback((item: ImportAccountItem) => {
     return (

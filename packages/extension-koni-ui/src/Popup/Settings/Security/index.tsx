@@ -319,7 +319,7 @@ const Component: React.FC<Props> = (props: Props) => {
           className={className}
           id={editAutoLockTimeModalId}
           onCancel={onCloseAutoLockTimeModal}
-          title={t('Authenticate with password')}
+          title={t('Wallet auto-lock')}
         >
           <div className='modal-body-container'>
             {

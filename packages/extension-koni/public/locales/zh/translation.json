@@ -273,8 +273,7 @@
   "Scan QR": "扫描二维码",
   "Please make sure that you have granted SubWallet the access to your device's camera.": "请确保你已授予SubWallet访问设备相机的权限。",
   "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "助记词需要包含12、15、18、21、24个字",
-  "To import an existing account, please enter seed phrase": "如需导入已存在的钱包，\n请输入助记词",
-  "Seed phrase": "助记词",
+  "To import an existing account,\n please enter seed phrase.": "如需导入已存在的钱包，\n请输入助记词.",
   "I have kept it somewhere safe": "我已将其保存在安全的地方",
   "Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.": "请将你的助记词保存于安全地方且切勿泄露。持有该助记词的人能够控制你的资产。",
   "Import by JSON file": "通过JSON文件导入",
@@ -835,5 +834,8 @@
   "Enter Password": "",
   "Authenticate with password": "",
   "Always required": "",
-  "When needed": ""
+  "When needed": "",
+  "Hide private key": "隐藏私钥",
+  "Show private key": "显示私钥",
+  "Private key": "私钥"
 }

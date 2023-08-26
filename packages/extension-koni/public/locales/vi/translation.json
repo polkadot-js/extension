@@ -273,8 +273,7 @@
   "Scan QR": "Quét mã QR",
   "Please make sure that you have granted SubWallet the access to your device's camera.": "Hãy đảm bảo rằng bạn đã cấp cho SubWallet quyền truy cập vào máy ảnh thiết bị của bạn.",
   "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "Seed phrase cần chứa 12, 15, 18, 21, hoặc 24 từ",
-  "To import an existing account,\n please enter seed phrase": "Để nhập một tài khoản có sẵn,\n vui lòng nhập seed phrase",
-  "Seed phrase": "Seed phrase",
+  "To import an existing account,\n please enter seed phrase.": "Để nhập một tài khoản có sẵn,\n vui lòng nhập seed phrase.",
   "I have kept it somewhere safe": "Tôi đã lưu trữ seed phrase an toàn",
   "Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.": "Lưu trữ seed phrase của bạn ở nơi an toàn và bí mật. Bất kỳ ai có được seed phrase sẽ nắm toàn quyền kiểm soát tài sản của bạn.",
   "Import by JSON file": "Nhập bằng tệp JSON",
@@ -835,5 +834,8 @@
   "Enter Password": "",
   "Authenticate with password": "",
   "Always required": "",
-  "When needed": ""
+  "When needed": "",
+  "Hide private key": "Ẩn private key",
+  "Show private key": "Hiện private key",
+  "Private key": "Private key"
 }

@@ -273,8 +273,7 @@
   "Scan QR": "",
   "Please make sure that you have granted SubWallet the access to your device's camera.": "",
   "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "",
-  "To import an existing account,\n please enter seed phrase": "",
-  "Seed phrase": "",
+  "To import an existing account,\n please enter seed phrase.": "",
   "I have kept it somewhere safe": "",
   "Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.": "",
   "Import by JSON file": "",
@@ -835,5 +834,8 @@
   "Enter Password": "",
   "Authenticate with password": "",
   "Always required": "",
-  "When needed": ""
+  "When needed": "",
+  "Hide private key": "",
+  "Show private key": "",
+  "Private key": ""
 }

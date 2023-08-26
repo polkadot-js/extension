@@ -273,8 +273,7 @@
   "Scan QR": "QRをスキャン",
   "Please make sure that you have granted SubWallet the access to your device's camera.": "デバイスのカメラへのアクセスをSubWallet に許可していることを確認してください。",
   "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "ニーモニックは12、15、18、21、24語を含める必要があります",
-  "To import an existing account,\n please enter seed phrase": "既存のアカウントをインポートするには、\nシードフレーズを入力してください",
-  "Seed phrase": "シードフレーズ",
+  "To import an existing account,\n please enter seed phrase.": "既存のアカウントをインポートするには、\nシードフレーズを入力してください.",
   "I have kept it somewhere safe": "私は安全に保管しました。",
   "Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.": "回復フレーズを安全な場所に保管し、決して開示しないでください。このフレーズを持っている人なら誰でもあなたの資産を制御できます。",
   "Import by JSON file": "JSONファイルによるインポート",
@@ -835,5 +834,8 @@
   "Enter Password": "",
   "Authenticate with password": "",
   "Always required": "",
-  "When needed": ""
+  "When needed": "",
+  "Hide private key": "",
+  "Show private key": "",
+  "Private key": "秘密鍵"
 }

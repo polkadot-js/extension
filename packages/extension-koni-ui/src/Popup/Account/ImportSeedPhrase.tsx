@@ -118,10 +118,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             .then(() => {
               onComplete();
             })
-            .catch((error): void => {
+            .catch((error: Error): void => {
               notification({
                 type: 'error',
-                message: t('Invalid seed phrase')
+                message: error.message
               });
             })
             .finally(() => {

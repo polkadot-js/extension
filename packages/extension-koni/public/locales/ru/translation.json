@@ -273,8 +273,7 @@
   "Scan QR": "Отсканировать QR",
   "Please make sure that you have granted SubWallet the access to your device's camera.": "Убедитесь, что вы предоставили SubWallet доступ к камере вашего устройства.",
   "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "Мнемоника должна содержать 12, 15, 18, 21, 24 слова.",
-  "To import an existing account, please enter seed phrase": "Чтобы импорт существующий аккаунт, введите сид-фразу",
-  "Seed phrase": "Сид-фраза",
+  "To import an existing account,\n please enter seed phrase.": "Чтобы импорт существующий аккаунт,\n введите сид-фразу.",
   "I have kept it somewhere safe": "Я её в надежном месте спрятал",
   "Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.": "Держите свою фразу восстановления в надежном месте и никогда не разглашайте ее. Любой с этой фразой может получить контроль над вашими активами.",
   "Import by JSON file": "Импорт JSON-файл",
@@ -827,5 +826,16 @@
   "When needed": "",
   "The recipient address must be EVM type": "Адрес получателя должен быть типа EVM",
   "The recipient address must be Substrate type": "Адрес получателя должен быть типа Субстрат",
-  "Please <highlight>reload</highlight>": ""
+  "Please <highlight>reload</highlight>": "",
+  "Phrase number": "",
+  "Select type": "",
+  "Hover to view seed phrase": "",
+  "Hide private key": "",
+  "Show private key": "",
+  "{{number}} words": "",
+  "This field is required": "",
+  "Invalid word": "",
+  "Hide seed phrase": "",
+  "Show seed phrase": "",
+  "Private key": ""
 }

@@ -5,10 +5,10 @@ import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvm
 import { addLazy } from '@subwallet/extension-base/utils';
 import { EvmProvider, Injected, InjectedAccountWithMeta, InjectedWindowProvider, Unsubcall } from '@subwallet/extension-inject/types';
 import { ENABLE_INJECT } from '@subwallet/extension-koni-ui/constants';
-import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
+import { addInjects, pingInject, removeInjects } from '@subwallet/extension-koni-ui/messaging';
 import { noop, toShort } from '@subwallet/extension-koni-ui/utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
+import { useIsFirstRender, useLocalStorage } from 'usehooks-ts';
 
 interface Props {
   children: React.ReactNode;
@@ -56,7 +56,7 @@ const parseAccountMap = (values: AccountArrayMap): InjectedAccountWithMeta[] => 
   return Object.values(result);
 };
 
-const updateInjected = (oldMap: AccountArrayMap, newMap: AccountArrayMap) => {
+const updateInjected = (oldMap: AccountArrayMap, newMap: AccountArrayMap, isFirst: boolean) => {
   const oldArray = parseAccountMap(oldMap);
   const newArray = parseAccountMap(newMap);
 
@@ -85,6 +85,10 @@ const updateInjected = (oldMap: AccountArrayMap, newMap: AccountArrayMap) => {
 
   const promises: Array<Promise<unknown>> = [];
 
+  if (!isFirst) {
+    promises.push(pingInject());
+  }
+
   if (addArray.length) {
     promises.push(addInjects(addArray));
   }
@@ -109,10 +113,12 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const [substrateWallet, setSubstrateWallet] = useState<Injected | undefined>();
   const [evmWallet, setEvmWallet] = useState<SubWalletEvmProvider | undefined>();
   const [enable, setEnable] = useLocalStorage<boolean>(ENABLE_INJECT, false);
+  const [initEnable] = useState(enable);
 
   const accountsRef = useRef<AccountArrayMap>({});
   const [cacheAccounts, setCacheAccounts] = useState<AccountArrayMap>(accountsRef.current);
   const previousRef = useRef<AccountArrayMap>({});
+  const isFirstRender = useIsFirstRender();
 
   const updateState = useCallback(() => {
     addLazy(updateStatePromiseKey, () => {
@@ -203,9 +209,15 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
 
   useEffect(() => {
     addLazy(injectPromiseKey, () => {
-      updateInjected(previousRef.current, cacheAccounts);
+      updateInjected(previousRef.current, cacheAccounts, isFirstRender);
     }, 500, 1000, false);
-  }, [cacheAccounts]);
+  }, [cacheAccounts, isFirstRender]);
+
+  useEffect(() => {
+    if (!initEnable || !injected) {
+      pingInject().catch(console.error);
+    }
+  }, [initEnable, injected]);
 
   return (
     <InjectContext.Provider

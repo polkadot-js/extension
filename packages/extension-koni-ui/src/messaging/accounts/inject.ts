@@ -11,3 +11,7 @@ export async function addInjects (accounts: InjectedAccountWithMeta[]): Promise<
 export async function removeInjects (addresses: string[]): Promise<boolean> {
   return sendMessage('pri(accounts.inject.remove)', { addresses });
 }
+
+export async function pingInject (): Promise<boolean> {
+  return sendMessage('pri(accounts.inject.ping)', null);
+}

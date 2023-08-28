@@ -3741,6 +3741,25 @@ export default class KoniExtension {
     return true;
   }
 
+  private pingInject (): boolean {
+    this.#koniState.keyringService.pingInject();
+
+    return true;
+  }
+
+  private async waitInject (): Promise<boolean> {
+    await new Promise<void>((resolve) => {
+      const sub = this.#koniState.keyringService.injectState.subscribe(({ injectDone }) => {
+        if (injectDone) {
+          resolve();
+          sub.unsubscribe();
+        }
+      });
+    });
+
+    return true;
+  }
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -3986,6 +4005,10 @@ export default class KoniExtension {
         return this.addInjects(request as RequestAddInjectedAccounts);
       case 'pri(accounts.inject.remove)':
         return this.removeInjects(request as RequestRemoveInjectedAccounts);
+      case 'pri(accounts.inject.wait)':
+        return this.waitInject();
+      case 'pri(accounts.inject.ping)':
+        return this.pingInject();
 
         /* Account management */
 

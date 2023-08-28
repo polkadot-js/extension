@@ -161,7 +161,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
         <PageWrapper
           animateOnce={true}
           className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}
-          resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay'])}
+          resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay', 'injectState'])}
         >
           <DefaultRoute>
             <main className={className}>

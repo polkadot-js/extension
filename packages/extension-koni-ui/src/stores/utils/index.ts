@@ -261,7 +261,8 @@ export const subscribeMantaPaySyncingState = lazySubscribeMessage('pri(mantaPay.
 //
 // export const subscribeChainValidators = lazySubscribeMessage('pri(bonding.getBondingOptions)', null, updateChainValidators, updateChainValidators);
 
-// Wallet connect
+/* Wallet connect */
+
 export const updateConnectWCRequests = (data: WalletConnectSessionRequest[]) => {
   // Convert data to object with key as id
   const requests = convertConfirmationToMap(data);
@@ -290,3 +291,13 @@ export const updateWCNotSupportRequests = (data: WalletConnectNotSupportRequest[
 };
 
 export const subscribeWCNotSupportRequests = lazySubscribeMessage('pri(walletConnect.requests.notSupport.subscribe)', null, updateWCNotSupportRequests, updateWCNotSupportRequests);
+
+/* Wallet connect */
+
+export const waitInject = (data: boolean) => {
+  store.dispatch({ type: 'injectState/waitInject', payload: data });
+};
+
+export const waitInjectRequest = lazySendMessage('pri(accounts.inject.wait)', null, waitInject);
+
+/* Inject */

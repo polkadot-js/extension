@@ -906,6 +906,10 @@ export interface RequestDeleteContactAccount {
 
 // Inject account
 
+export interface InjectState {
+  injectDone: boolean;
+}
+
 export interface RequestAddInjectedAccounts {
   accounts: InjectedAccountWithMeta[];
 }
@@ -2140,6 +2144,8 @@ export interface KoniRequestSignatures {
   // Inject account
   'pri(accounts.inject.add)': [RequestAddInjectedAccounts, boolean];
   'pri(accounts.inject.remove)': [RequestRemoveInjectedAccounts, boolean];
+  'pri(accounts.inject.ping)': [null, boolean];
+  'pri(accounts.inject.wait)': [null, boolean];
 
   // Derive
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean]; // Substrate

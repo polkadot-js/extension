@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { CurrentAccountInfo, KeyringState } from '@subwallet/extension-base/background/KoniTypes';
+import { CurrentAccountInfo, InjectState, KeyringState } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { CurrentAccountStore } from '@subwallet/extension-base/stores';
@@ -24,6 +24,10 @@ export class KeyringService {
     isReady: false,
     hasMasterPassword: false,
     isLocked: false
+  });
+
+  readonly injectStateSubject = new BehaviorSubject<InjectState>({
+    injectDone: false
   });
 
   constructor (private eventService: EventService) {
@@ -95,6 +99,14 @@ export class KeyringService {
     return this.currentAccountSubject.value;
   }
 
+  setCurrentAccount (currentAccountData: CurrentAccountInfo) {
+    this.currentAccountSubject.next(currentAccountData);
+    this.eventService.emit('account.updateCurrent', currentAccountData);
+    this.currentAccountStore.set('CurrentAccountInfo', currentAccountData);
+  }
+
+  /* Inject */
+
   public addInjectAccounts (accounts: InjectedAccountWithMeta[]) {
     keyring.addInjects(accounts.map((account, index) => ({
       ...account,
@@ -109,12 +121,17 @@ export class KeyringService {
     keyring.removeInjects(addresses);
   }
 
-  setCurrentAccount (currentAccountData: CurrentAccountInfo) {
-    this.currentAccountSubject.next(currentAccountData);
-    this.eventService.emit('account.updateCurrent', currentAccountData);
-    this.currentAccountStore.set('CurrentAccountInfo', currentAccountData);
+  get injectState () {
+    return this.injectStateSubject;
   }
 
+  public pingInject () {
+    this.injectStateSubject.next({ injectDone: true });
+  }
+
+  /* Inject */
+
+  /* Reset */
   resetWallet (resetAll: boolean) {
     keyring.resetWallet(resetAll);
     this.updateKeyringState();

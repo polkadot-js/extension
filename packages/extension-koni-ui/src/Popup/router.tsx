@@ -11,19 +11,36 @@ import { createBrowserRouter, IndexRouteObject, Outlet, useLocation, useOutletCo
 
 export class LazyLoader {
   private elemLoader;
+  private loadPromise: Promise<ComponentType<any>> | undefined;
 
-  constructor (promise: () => Promise<{ default: ComponentType<any> }>) {
-    this.elemLoader = promise;
+  constructor (promiseFunction: () => Promise<{ default: ComponentType<any> }>) {
+    this.elemLoader = promiseFunction;
   }
 
-  public generateRouterObject (path: string): Pick<IndexRouteObject, 'path' | 'lazy'> {
+  public loadElement () {
+    if (!this.loadPromise) {
+      this.loadPromise = new Promise<ComponentType<any>>((resolve, reject) => {
+        this.elemLoader().then((module) => {
+          resolve(module.default);
+        }).catch(reject);
+      });
+    }
+
+    return this.loadPromise;
+  }
+
+  public generateRouterObject (path: string, preload = false): Pick<IndexRouteObject, 'path' | 'lazy'> {
+    if (preload) {
+      this.loadElement().catch(console.error);
+    }
+
     return {
       path,
       lazy: async () => {
-        const Element = await this.elemLoader();
+        const Element = await this.loadElement();
 
         return {
-          element: <Element.default />
+          element: <Element />
         };
       }
     };
@@ -118,27 +135,27 @@ export const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorFallback />,
     children: [
-      Welcome.generateRouterObject('/welcome'),
+      Welcome.generateRouterObject('/welcome', true),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
       {
-        ...Home.generateRouterObject('/home'),
+        ...Home.generateRouterObject('/home', true),
         children: [
-          Tokens.generateRouterObject('tokens'),
+          Tokens.generateRouterObject('tokens', true),
           TokenDetailList.generateRouterObject('tokens/detail/:slug'),
           {
             path: 'nfts',
             element: <NestedOutlet />,
             children: [
-              NftCollections.generateRouterObject('collections'),
+              NftCollections.generateRouterObject('collections', true),
               NftCollectionDetail.generateRouterObject('collection-detail'),
               NftItemDetail.generateRouterObject('item-detail')
             ]
           },
-          Crowdloans.generateRouterObject('crowdloans'),
-          Staking.generateRouterObject('staking'),
-          History.generateRouterObject('history'),
-          History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
+          Crowdloans.generateRouterObject('crowdloans', true),
+          Staking.generateRouterObject('staking', true),
+          History.generateRouterObject('history', true),
+          History.generateRouterObject('history/:chain/:extrinsicHashOrId', true),
           {
             path: 'dapps',
             element: <Outlet />
@@ -168,7 +185,7 @@ export const router = createBrowserRouter([
         path: '/keyring',
         element: <Outlet />,
         children: [
-          Login.generateRouterObject('login'),
+          Login.generateRouterObject('login', true),
           CreatePassword.generateRouterObject('create-password'),
           ChangePassword.generateRouterObject('change-password'),
           ApplyMasterPassword.generateRouterObject('migrate-password')
@@ -177,8 +194,8 @@ export const router = createBrowserRouter([
       {
         path: '/settings',
         children: [
-          Settings.generateRouterObject('/settings'),
-          Settings.generateRouterObject('list'),
+          Settings.generateRouterObject('/settings', true),
+          Settings.generateRouterObject('list', true),
           GeneralSetting.generateRouterObject('general'),
           ManageAddressBook.generateRouterObject('address-book'),
           SecurityList.generateRouterObject('security'),

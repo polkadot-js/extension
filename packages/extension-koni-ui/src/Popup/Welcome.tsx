@@ -52,8 +52,13 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(false);
   const [isAttachAddressEthereum, setAttachAddressEthereum] = useState(false);
   const [isAttachReadonlyAccountButtonDisable, setIsAttachReadonlyAccountButtonDisable] = useState(true);
+  // use for trigger after enable inject
+  const [enInject, setEnInject] = useState({});
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
-  const [isAccountsEmpty] = useState(isNoAccount(accounts));
+  const isAccountsEmpty = useMemo(() => {
+    return isNoAccount(accounts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enInject]);
   const { goHome } = useDefaultNavigate();
 
   const formDefault: ReadOnlyAccountInput = {
@@ -180,7 +185,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     return () => {
       if (id === DOWNLOAD_EXTENSION) {
         if (injected) {
-          enableInject();
+          enableInject(() => setEnInject({}));
         } else {
           openInNewTab(EXTENSION_URL)();
         }

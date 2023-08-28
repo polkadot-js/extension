@@ -3,6 +3,7 @@
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenBalance, TokenItem, TokenPrice } from '@subwallet/extension-koni-ui/components';
+import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
@@ -30,6 +31,7 @@ type Props = ThemeProps
 const FILTER_MODAL_ID = 'staking-filter-modal';
 
 enum FilterValue {
+  ALL = 'ALL',
   NOMINATED = 'nominated',
   POOLED = 'pooled'
 }
@@ -77,6 +79,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
+  const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
 
   const items = useMemo<StakingItem[]>(() => {
     const result = stakingItems
@@ -195,10 +198,28 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const filteredList = useMemo(() => {
-    return items.filter(filterFunction).filter((item: StakingDataType) =>
-      searchFunction(item, searchInput)
-    );
-  }, [filterFunction, searchFunction, searchInput, items]);
+    const filterTabFunction = (_item: StakingDataType) => {
+      if (selectedFilterTab === FilterValue.ALL) {
+        return true;
+      }
+
+      if (selectedFilterTab === FilterValue.NOMINATED) {
+        return _item.staking.type === StakingType.NOMINATED;
+      }
+
+      if (selectedFilterTab === FilterValue.POOLED) {
+        return _item.staking.type === StakingType.POOLED;
+      }
+
+      return false;
+    };
+
+    const _filterFunction = (_item: StakingDataType) => {
+      return filterTabFunction(_item) && filterFunction(_item) && searchFunction(_item, searchInput);
+    };
+
+    return items.filter(_filterFunction);
+  }, [items, selectedFilterTab, filterFunction, searchFunction, searchInput]);
 
   const emptyStakingList = useCallback(() => {
     return (
@@ -231,9 +252,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
           return (
             <TokenItem
-              chainDisplayName={name || ''}
               logoKey={nativeToken}
               networkKey={chain}
+              subTitle={name || ''}
               symbol={nativeToken}
             />
           );
@@ -358,48 +379,78 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     preCheck(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`), ExtrinsicType.STAKING_BOND)();
   }, [navigate, preCheck]);
 
+  const filterTabItems = useMemo<FilterTabItemType[]>(() => {
+    return [
+      {
+        label: t('All'),
+        value: FilterValue.ALL
+      },
+      {
+        label: t('Pooled'),
+        value: FilterValue.POOLED
+      },
+      {
+        label: t('Nominated'),
+        value: FilterValue.NOMINATED
+      }
+    ];
+  }, [t]);
+
+  const onSelectFilterTab = useCallback((value: string) => {
+    setSelectedFilterTab(value);
+  }, []);
+
   const listSection = useMemo(() => {
     if (isWebUI) {
       return (
         <div className='web-list'>
-          <Search
-            actionBtnIcon={(
-              <Icon
-                phosphorIcon={FadersHorizontal}
-                size='sm'
-              />
-            )}
-            extraButton={
-              <>
-                <Button
-                  icon={(
-                    <Icon
-                      phosphorIcon={ArrowClockwise}
-                      size='sm'
-                    />
-                  )}
-                  onClick={onClickReload}
-                  type='ghost'
+          <div className='web-list-tool-area'>
+            <FilterTabs
+              className={'filter-tabs-container'}
+              items={filterTabItems}
+              onSelect={onSelectFilterTab}
+              selectedItem={selectedFilterTab}
+            />
+
+            <Search
+              actionBtnIcon={(
+                <Icon
+                  phosphorIcon={FadersHorizontal}
+                  size='sm'
                 />
-                <Button
-                  icon={(
-                    <Icon
-                      phosphorIcon={Plus}
-                      size='sm'
-                    />
-                  )}
-                  onClick={onClickStake}
-                  type='ghost'
-                />
-              </>
-            }
-            onClickActionBtn={onClickActionBtn}
-            onSearch={onSearch}
-            placeholder={'Token name'}
-            searchValue={searchInput}
-            showActionBtn
-            showExtraButton
-          />
+              )}
+              extraButton={
+                <>
+                  <Button
+                    icon={(
+                      <Icon
+                        phosphorIcon={ArrowClockwise}
+                        size='sm'
+                      />
+                    )}
+                    onClick={onClickReload}
+                    type='ghost'
+                  />
+                  <Button
+                    icon={(
+                      <Icon
+                        phosphorIcon={Plus}
+                        size='sm'
+                      />
+                    )}
+                    onClick={onClickStake}
+                    type='ghost'
+                  />
+                </>
+              }
+              onClickActionBtn={onClickActionBtn}
+              onSearch={onSearch}
+              placeholder={'Token name'}
+              searchValue={searchInput}
+              showActionBtn
+              showExtraButton
+            />
+          </div>
 
           { filteredList.length > 0
             ? (
@@ -438,7 +489,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [columns, emptyStakingList, filterFunction, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, renderItem, searchFunction, searchInput, t]);
+  }, [columns, emptyStakingList, filterFunction, filterTabItems, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, onSelectFilterTab, renderItem, searchFunction, searchInput, selectedFilterTab, t]);
 
   return (
     <PageWrapper
@@ -514,7 +565,11 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
         '.ant-sw-list': {
           flex: 1
         },
-        '.search-container': {
+
+        '.web-list-tool-area': {
+          display: 'flex',
+          gap: token.size,
+          alignItems: 'center',
           marginBottom: 24
         }
       },

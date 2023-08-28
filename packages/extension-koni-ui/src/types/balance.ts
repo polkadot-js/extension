@@ -25,4 +25,5 @@ export type TokenBalanceItemType = {
   locked: BalanceValueInfo,
   total: BalanceValueInfo,
   isReady: boolean,
+  relatedChains: string[],
 };

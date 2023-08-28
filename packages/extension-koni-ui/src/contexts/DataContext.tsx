@@ -26,15 +26,15 @@ export interface DataHandler {
 }
 
 export interface DataContextType {
-  handlerMap: Record<string, DataHandler>,
-  storeDependencies: Partial<Record<StoreName, string[]>>,
-  readyStoreMap: DataMap
+  handlerMap: Record<string, DataHandler>;
+  storeDependencies: Partial<Record<StoreName, string[]>>;
+  readyStoreMap: DataMap;
 
-  addHandler: (item: DataHandler) => () => void,
-  removeHandler: (name: string) => void,
-  awaitRequestsCache: Record<string, Promise<boolean>>,
-  awaitStores: (storeNames: StoreName[], renew?: boolean) => Promise<boolean>
-  awaitStartImmediately: () => Promise<boolean>
+  addHandler: (item: DataHandler) => () => void;
+  removeHandler: (name: string) => void;
+  awaitRequestsCache: Record<string, Promise<boolean>>;
+  awaitStores: (storeNames: StoreName[], renew?: boolean) => Promise<boolean>;
+  awaitStartImmediately: () => Promise<boolean>;
 }
 
 const _DataContext: DataContextType = {

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+export { default as LoadingInjectModal } from './LoadingInjectModal';
 export { default as RequestCameraAccessModal } from './RequestCameraAccessModal';
 export { default as RequestCreatePasswordModal } from './RequestCreatePasswordModal';
 export { default as ResetWalletModal } from './ResetWalletModal';

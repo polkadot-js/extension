@@ -5,11 +5,11 @@ import useAccountAvatarInfo from '@subwallet/extension-koni-ui/hooks/account/use
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
-import { Button, Icon, SwIconProps } from '@subwallet/react-ui';
+import { Button, Icon, Image } from '@subwallet/react-ui';
 import AccountCard, { AccountCardProps } from '@subwallet/react-ui/es/web3-block/account-card';
-import { Eye, PencilSimpleLine, QrCode, ShieldCheck, Swatches } from 'phosphor-react';
+import { Eye, PencilSimpleLine, QrCode, ShieldCheck, Swatches, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -22,44 +22,81 @@ export interface _AccountCardProps extends Omit<AccountCardProps, 'avatarIdentPr
   showMoreBtn?: boolean;
   onPressMoreBtn?: () => void;
   preventPrefix?: boolean;
+  source?: string;
 }
 
+interface AbstractIcon {
+  type: 'icon' | 'node',
+  value: PhosphorIcon | React.ReactNode
+}
+
+interface SwIconProps extends AbstractIcon {
+  type: 'icon',
+  value: PhosphorIcon
+}
+
+interface NodeIconProps extends AbstractIcon {
+  type: 'node',
+  value: React.ReactNode
+}
+
+type IconProps = SwIconProps | NodeIconProps;
+
 function Component (props: _AccountCardProps): React.ReactElement<_AccountCardProps> {
-  const { accountName, address, className, genesisHash, onPressMoreBtn, preventPrefix, showMoreBtn, type: givenType } = props;
+  const { accountName, address, className, genesisHash, onPressMoreBtn, preventPrefix, showMoreBtn, source, type: givenType } = props;
   const { address: avatarAddress, prefix } = useAccountAvatarInfo(address ?? '', preventPrefix, genesisHash, givenType);
   const avatarTheme = useAccountAvatarTheme(address || '');
 
   const signMode = useGetAccountSignModeByAddress(address);
   const isMantaPayEnabled = useIsMantaPayEnabled(address);
 
-  const iconProps: SwIconProps | undefined = useMemo((): SwIconProps | undefined => {
+  const iconProps: IconProps | undefined = useMemo((): IconProps | undefined => {
     switch (signMode) {
       case AccountSignMode.LEDGER:
         return {
-          type: 'phosphor',
-          phosphorIcon: Swatches
+          type: 'icon',
+          value: Swatches
         };
       case AccountSignMode.QR:
         return {
-          type: 'phosphor',
-          phosphorIcon: QrCode
+          type: 'icon',
+          value: QrCode
         };
       case AccountSignMode.READ_ONLY:
         return {
-          type: 'phosphor',
-          phosphorIcon: Eye
+          type: 'icon',
+          value: Eye
+        };
+      case AccountSignMode.INJECTED:
+        if (source === 'SubWallet') {
+          return {
+            type: 'node',
+            value: (
+              <Image
+                className='logo-image'
+                height='var(--height)'
+                shape='square'
+                src={'/images/subwallet/gradient-logo.png'}
+              />
+            )
+          };
+        }
+
+        return {
+          type: 'icon',
+          value: Wallet
         };
     }
 
     if (isMantaPayEnabled) {
       return {
-        type: 'phosphor',
-        phosphorIcon: ShieldCheck
+        type: 'icon',
+        value: ShieldCheck
       };
     }
 
     return undefined;
-  }, [isMantaPayEnabled, signMode]);
+  }, [isMantaPayEnabled, signMode, source]);
 
   const _onClickMore: React.MouseEventHandler<HTMLAnchorElement | HTMLButtonElement> = useCallback((event) => {
     event.stopPropagation();
@@ -74,10 +111,14 @@ function Component (props: _AccountCardProps): React.ReactElement<_AccountCardPr
           <Button
             className='account-type-icon'
             icon={
-              <Icon
-                { ...iconProps}
-                size='sm'
-              />
+              iconProps.type === 'icon'
+                ? (
+                  <Icon
+                    phosphorIcon={iconProps.value}
+                    size='sm'
+                  />
+                )
+                : iconProps.value
             }
             size='xs'
             type='ghost'
@@ -118,6 +159,10 @@ const AccountCardBase = styled(Component)<_AccountCardProps>(({ theme: { token }
   return {
     '.account-type-icon': {
       color: `${token['gray-4']} !important`
+    },
+
+    '.logo-image': {
+      '--height': `${token.sizeLG}px`
     }
   };
 });

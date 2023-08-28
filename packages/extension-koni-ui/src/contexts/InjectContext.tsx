@@ -4,9 +4,11 @@
 import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvmProvider';
 import { addLazy } from '@subwallet/extension-base/utils';
 import { EvmProvider, Injected, InjectedAccountWithMeta, InjectedWindowProvider, Unsubcall } from '@subwallet/extension-inject/types';
+import { ENABLE_INJECT } from '@subwallet/extension-koni-ui/constants';
 import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
 import { noop, toShort } from '@subwallet/extension-koni-ui/utils';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocalStorage } from 'usehooks-ts';
 
 interface Props {
   children: React.ReactNode;
@@ -21,6 +23,8 @@ export interface InjectedWindow extends This {
 interface InjectContextProps {
   substrateWallet?: Injected;
   evmWallet?: SubWalletEvmProvider;
+  enableInject: () => void;
+  injected: boolean;
 }
 
 type This = typeof globalThis;
@@ -52,14 +56,60 @@ const parseAccountMap = (values: AccountArrayMap): InjectedAccountWithMeta[] => 
   return Object.values(result);
 };
 
-export const InjectContext = React.createContext<InjectContextProps>({});
+const updateInjected = (oldMap: AccountArrayMap, newMap: AccountArrayMap) => {
+  const oldArray = parseAccountMap(oldMap);
+  const newArray = parseAccountMap(newMap);
+
+  const addArray: InjectedAccountWithMeta[] = [];
+  const removeArray: InjectedAccountWithMeta[] = [];
+
+  for (const account of newArray) {
+    const exists = oldArray.find((acc) => acc.address === account.address);
+
+    if (!exists) {
+      addArray.push(account);
+    } else {
+      if (exists.meta.source !== account.meta.source) {
+        addArray.push(account);
+      }
+    }
+  }
+
+  for (const account of oldArray) {
+    const exists = newArray.some((acc) => acc.address === account.address);
+
+    if (!exists) {
+      removeArray.push(account);
+    }
+  }
+
+  const promises: Array<Promise<unknown>> = [];
+
+  if (addArray.length) {
+    promises.push(addInjects(addArray));
+  }
+
+  if (removeArray.length) {
+    promises.push(removeInjects(removeArray.map((acc) => acc.address)));
+  }
+
+  Promise.all(promises).finally(noop);
+};
+
+export const InjectContext = React.createContext<InjectContextProps>({ enableInject: noop, injected: false });
 
 const updateStatePromiseKey = 'updateInjectState';
 const injectPromiseKey = 'injectAccount';
 
 export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
+  const injected = useMemo(() => {
+    return !!win.injectedWeb3?.['subwallet-js'] || !!win.SubWallet;
+  }, []);
+
   const [substrateWallet, setSubstrateWallet] = useState<Injected | undefined>();
   const [evmWallet, setEvmWallet] = useState<SubWalletEvmProvider | undefined>();
+  const [enable, setEnable] = useLocalStorage<boolean>(ENABLE_INJECT, false);
+
   const accountsRef = useRef<AccountArrayMap>({});
   const [cacheAccounts, setCacheAccounts] = useState<AccountArrayMap>(accountsRef.current);
   const previousRef = useRef<AccountArrayMap>({});
@@ -74,50 +124,14 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     }, 200, undefined, false);
   }, []);
 
-  const updateInjected = useCallback((oldMap: AccountArrayMap, newMap: AccountArrayMap) => {
-    const oldArray = parseAccountMap(oldMap);
-    const newArray = parseAccountMap(newMap);
-
-    const addArray: InjectedAccountWithMeta[] = [];
-    const removeArray: InjectedAccountWithMeta[] = [];
-
-    for (const account of newArray) {
-      const exists = oldArray.find((acc) => acc.address === account.address);
-
-      if (!exists) {
-        addArray.push(account);
-      } else {
-        if (exists.meta.source !== account.meta.source) {
-          addArray.push(account);
-        }
-      }
-    }
-
-    for (const account of oldArray) {
-      const exists = newArray.some((acc) => acc.address === account.address);
-
-      if (!exists) {
-        removeArray.push(account);
-      }
-    }
-
-    const promises: Array<Promise<unknown>> = [];
-
-    if (addArray.length) {
-      promises.push(addInjects(addArray));
-    }
-
-    if (removeArray.length) {
-      promises.push(removeInjects(removeArray.map((acc) => acc.address)));
-    }
-
-    Promise.all(promises).finally(noop);
-  }, []);
+  const enableInject = useCallback(() => {
+    setEnable(true);
+  }, [setEnable]);
 
   useEffect(() => {
     const wallet = win.injectedWeb3?.['subwallet-js'];
 
-    if (wallet) {
+    if (wallet && enable) {
       wallet.enable('web-app')
         .then((inject) => {
           setSubstrateWallet(inject);
@@ -125,12 +139,12 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
         .catch(console.warn)
       ;
     }
-  }, []);
+  }, [enable]);
 
   useEffect(() => {
     const wallet = win.SubWallet;
 
-    if (wallet) {
+    if (wallet && enable) {
       wallet.enable()
         .then(() => {
           setEvmWallet(wallet);
@@ -138,7 +152,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
         .catch(console.warn)
       ;
     }
-  }, []);
+  }, [enable]);
 
   useEffect(() => {
     let unsubscribe: Unsubcall | undefined;
@@ -191,13 +205,15 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     addLazy(injectPromiseKey, () => {
       updateInjected(previousRef.current, cacheAccounts);
     }, 500, 1000, false);
-  }, [cacheAccounts, updateInjected]);
+  }, [cacheAccounts]);
 
   return (
     <InjectContext.Provider
       value={{
+        injected,
         evmWallet,
-        substrateWallet
+        substrateWallet,
+        enableInject
       }}
     >
       {children}

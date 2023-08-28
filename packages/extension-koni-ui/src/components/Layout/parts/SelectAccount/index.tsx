@@ -149,6 +149,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       );
     }
 
+    const isInjected = !!item.isInjected;
+
     return (
       <AccountCardSelection
         accountName={item.name || ''}
@@ -157,7 +159,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         genesisHash={item.genesisHash}
         isSelected={_selected}
         isShowSubIcon
-        onPressMoreBtn={onClickDetailAccount(item.address)}
+        onPressMoreBtn={isInjected ? undefined : onClickDetailAccount(item.address)}
+        showMoreBtn={!isInjected}
+        source={item.source}
         subIcon={(
           <Logo
             network={isEthereumAddress(item.address) ? 'ethereum' : 'polkadot'}

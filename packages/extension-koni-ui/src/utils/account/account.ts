@@ -91,7 +91,7 @@ export const filterNotReadOnlyAccount = (accounts: AccountJson[]): AccountJson[]
 };
 
 export const isNoAccount = (accounts: AccountJson[] | null): boolean => {
-  return accounts ? !accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isInjected).length : false;
+  return accounts ? !accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).length : false;
 };
 
 export const searchAccountFunction = (item: AbstractAddressJson, searchText: string): boolean => {

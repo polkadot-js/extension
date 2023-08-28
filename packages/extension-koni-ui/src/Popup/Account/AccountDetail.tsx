@@ -21,7 +21,7 @@ import { copyToClipboard } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/form';
 import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, QRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, Swatches, TrashSimple, User } from 'phosphor-react';
+import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, Swatches, TrashSimple, User, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -110,6 +110,8 @@ const Component: React.FC<Props> = (props: Props) => {
         return QrCode;
       case AccountSignMode.READ_ONLY:
         return Eye;
+      case AccountSignMode.INJECTED:
+        return Wallet;
       default:
         return User;
     }
@@ -291,7 +293,7 @@ const Component: React.FC<Props> = (props: Props) => {
               >
                 <Input
                   className='account-name-input'
-                  disabled={deriving}
+                  disabled={deriving || account.isInjected}
                   label={t('Account name')}
                   onBlur={form.submit}
                   placeholder={t('Account name')}
@@ -342,7 +344,7 @@ const Component: React.FC<Props> = (props: Props) => {
               block={true}
               className={CN('account-button', `action-type-${ActionType.DERIVE}`)}
               contentAlign='left'
-              disabled={!canDerive}
+              disabled={!canDerive || account.isInjected}
               icon={(
                 <BackgroundIcon
                   backgroundColor='var(--icon-bg-color)'
@@ -361,7 +363,7 @@ const Component: React.FC<Props> = (props: Props) => {
               block={true}
               className={CN('account-button', `action-type-${ActionType.EXPORT}`)}
               contentAlign='left'
-              disabled={account.isExternal || deriving}
+              disabled={account.isExternal || deriving || account.isInjected}
               icon={(
                 <BackgroundIcon
                   backgroundColor='var(--icon-bg-color)'
@@ -379,7 +381,7 @@ const Component: React.FC<Props> = (props: Props) => {
               block={true}
               className={CN('account-button', `action-type-${ActionType.DELETE}`)}
               contentAlign='left'
-              disabled={deriving}
+              disabled={deriving || account.isInjected}
               icon={(
                 <BackgroundIcon
                   backgroundColor='var(--icon-bg-color)'

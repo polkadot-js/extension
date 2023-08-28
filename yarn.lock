@@ -1986,15 +1986,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@equilab/api@npm:^1.14.25":
-  version: 1.15.0
-  resolution: "@equilab/api@npm:1.15.0"
+"@equilab/api@npm:~1.14.25":
+  version: 1.14.25
+  resolution: "@equilab/api@npm:1.14.25"
   dependencies:
     "@equilab/definitions": 1.4.18
-    "@polkadot/api": 10.7.1
+    "@polkadot/api": 9.11.1
     abort-controller: ^3.0.0
     isomorphic-fetch: ^3.0.0
-  checksum: b8acfc4ecd75c07ec6ddb21ef6b17cb86e9f0d786a6562b1fca71b3766b1b0e985c5ab57cd302b89739749e03794d36e16b3d3a7c49f4bbad23baeabc53ebd4b
+  checksum: 77b52dcce7191e6b16fb483d04d17b933d09b2136ddea10eabbf46c12832c0a2dae15e4a362f1228a758d8d10a1a59c08e11d7b3a41bb4caf87759821bd33ae4
   languageName: node
   linkType: hard
 
@@ -5312,7 +5312,7 @@ __metadata:
     "@acala-network/api": ^5.0.2
     "@apollo/client": ^3.7.14
     "@azns/resolver-core": ^1.4.0
-    "@equilab/api": ^1.14.25
+    "@equilab/api": ~1.14.25
     "@ethereumjs/common": ^2.6.5
     "@ethereumjs/tx": ^4.0.2
     "@ethersproject/abi": ^5.7.0
@@ -5522,6 +5522,7 @@ __metadata:
     semantic-ui-react: ^2.1.4
     sinon-chrome: ^3.0.1
     styled-components: ^5.3.6
+    usehooks-ts: ^2.9.1
   languageName: unknown
   linkType: soft
 
@@ -23291,6 +23292,16 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: 5c639e0f8da3521d605f59ce5be9e094ca772bd44a4ce7322b055a6f58eeed8dda3c94cabd90c7a41fb6fa852210092008afe48f7038792fd47501f33299116a
+  languageName: node
+  linkType: hard
+
+"usehooks-ts@npm:^2.9.1":
+  version: 2.9.1
+  resolution: "usehooks-ts@npm:2.9.1"
+  peerDependencies:
+    react: ^16.8.0  || ^17.0.0 || ^18.0.0
+    react-dom: ^16.8.0  || ^17.0.0 || ^18.0.0
+  checksum: 36f1e4142ce23bc019b81d2e93aefd7f2c350abcf255598c21627114a69a2f2f116b35dc3a353375f09c6e4c9b704a04f104e3d10e98280545c097feca66c30a
   languageName: node
   linkType: hard
 

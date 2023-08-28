@@ -121,6 +121,8 @@ const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
       );
     }
 
+    const isInjected = !!item.isInjected;
+
     return (
       <div
         key={item.address}
@@ -132,7 +134,9 @@ const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
           genesisHash={item.genesisHash}
           isSelected={item.address === selectedAccount}
           isShowSubIcon
-          onPressMoreBtn={onClickDetailAccount(item.address)}
+          onPressMoreBtn={isInjected ? undefined : onClickDetailAccount(item.address)}
+          showMoreBtn={!isInjected}
+          source={item.source}
           subIcon={(
             <Logo
               network={isEthereumAddress(item.address) ? 'ethereum' : 'polkadot'}

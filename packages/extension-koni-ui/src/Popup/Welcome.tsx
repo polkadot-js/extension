@@ -4,6 +4,7 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ACCOUNT_TYPES, DOWNLOAD_EXTENSION } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -42,6 +43,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
+  const { enableInject, injected } = useContext(InjectContext);
   const navigate = useNavigate();
 
   const [form] = Form.useForm<ReadOnlyAccountInput>();
@@ -168,16 +170,20 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       icon: PuzzlePiece,
       id: DOWNLOAD_EXTENSION,
       schema: 'secondary',
-      title: t('Download SubWallet extension')
+      title: injected ? t('Use SubWallet extension') : t('Download SubWallet extension')
     }
-  ], [isWebUI, t]);
+  ], [injected, isWebUI, t]);
 
   const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI, items]);
 
   const openModal = useCallback((id: string) => {
     return () => {
       if (id === DOWNLOAD_EXTENSION) {
-        openInNewTab(EXTENSION_URL)();
+        if (injected) {
+          enableInject();
+        } else {
+          openInNewTab(EXTENSION_URL)();
+        }
 
         return;
       }
@@ -190,7 +196,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         activeModal(id);
       }
     };
-  }, [activeModal, inactiveModal, navigate]
+  }, [activeModal, enableInject, inactiveModal, injected, navigate]
   );
 
   useLayoutEffect(() => {

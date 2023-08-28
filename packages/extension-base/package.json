@@ -23,7 +23,7 @@
     "@acala-network/api": "^5.0.2",
     "@apollo/client": "^3.7.14",
     "@azns/resolver-core": "^1.4.0",
-    "@equilab/api": "^1.14.25",
+    "@equilab/api": "~1.14.25",
     "@ethereumjs/common": "^2.6.5",
     "@ethereumjs/tx": "^4.0.2",
     "@ethersproject/abi": "^5.7.0",

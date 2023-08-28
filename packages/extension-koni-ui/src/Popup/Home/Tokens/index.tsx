@@ -42,6 +42,7 @@ const searchFunc = (item: TokenBalanceItemType, searchText: string) => {
 
 const Component = (): React.ReactElement => {
   const { t } = useTranslation();
+  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const [isShrink, setIsShrink] = useState<boolean>(false);
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -211,6 +212,20 @@ const Component = (): React.ReactElement => {
     };
   }, [onClickItem]);
 
+  const getRowSubTitle = useCallback((row: TokenBalanceItemType) => {
+    const relatedChains = row.relatedChains;
+
+    if (relatedChains.length === 1) {
+      if (chainInfoMap[relatedChains[0]]) {
+        return chainInfoMap[relatedChains[0]].name?.replace(' Relay Chain', '') || '';
+      }
+    } else if (relatedChains.length > 1) {
+      return `${relatedChains.length}  ${t('networks')}`;
+    }
+
+    return '';
+  }, [chainInfoMap, t]);
+
   if (isWebUI) {
     const isTotalZero = totalBalanceInfo.convertedValue.eq(BN_0);
 
@@ -231,9 +246,9 @@ const Component = (): React.ReactElement => {
                     return (
                       <TokenItem
                         chain={row.chain}
-                        chainDisplayName={row.chainDisplayName || ''}
                         logoKey={row.logoKey}
                         slug={row.slug}
+                        subTitle={getRowSubTitle(row)}
                         symbol={row.symbol}
                       />
                     );

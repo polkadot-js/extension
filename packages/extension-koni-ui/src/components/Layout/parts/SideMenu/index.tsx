@@ -56,10 +56,10 @@ const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
 
   '.side-menu-item': {
     overflow: 'hidden',
-    transition: `width ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1),border-color ${token.motionDurationSlow},background-color ${token.motionDurationSlow},padding ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1)`,
+    transition: `width ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1),border-color ${token.motionDurationMid},background-color ${token.motionDurationMid},padding ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1)`,
 
     '.__icon, .__label': {
-      transition: `color ${token.motionDurationSlow}`
+      transition: `color ${token.motionDurationMid}`
     }
   },
 

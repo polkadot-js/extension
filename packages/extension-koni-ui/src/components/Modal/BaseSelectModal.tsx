@@ -11,10 +11,10 @@ import styled from 'styled-components';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Props = ThemeProps & SelectModalProps<any>;
 
-function Component ({ children, className, transitionName, ...props }: Props): React.ReactElement<Props> {
+function Component ({ children, className, motion, ...props }: Props): React.ReactElement<Props> {
   const { isWebUI } = useContext(ScreenContext);
 
-  const _transitionName = transitionName || (isWebUI ? 'animation-fade-to-left' : 'ant-slide-down');
+  const _motion = motion || (isWebUI ? 'move-right' : undefined);
 
   return (
     <>
@@ -24,7 +24,8 @@ function Component ({ children, className, transitionName, ...props }: Props): R
           '-web-ui': isWebUI,
           'animation-fade-to-left': isWebUI
         })}
-        transitionName={_transitionName}
+        motion={_motion}
+        width={'100%'}
       >
         {children}
       </SelectModal>
@@ -35,12 +36,23 @@ function Component ({ children, className, transitionName, ...props }: Props): R
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemeProps) => {
   return ({
+    maxWidth: 404,
+
+    '.ant-sw-modal-content': {
+      width: '100%'
+    },
+
     '&.-web-ui': {
       left: 'auto',
+      right: token.paddingLG,
+      bottom: token.paddingLG,
+      top: token.paddingLG,
 
       '.ant-sw-modal-content': {
         height: '100%',
-        maxHeight: '100%'
+        maxHeight: '100%',
+        paddingLeft: token.paddingLG,
+        paddingRight: token.paddingLG
       },
 
       '.ant-sw-list-section .ant-sw-list-wrapper': {

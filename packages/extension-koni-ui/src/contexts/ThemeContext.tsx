@@ -212,6 +212,29 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       '.ant-tooltip-arrow': {
         top: 1
       }
+    },
+
+    '.ant-sw-qr-scanner-camera-items-container.ant-select-modal': {
+      maxWidth: 404,
+      width: '100% !important',
+
+      '@media (min-width: 992px)': {
+        left: 'auto',
+        right: token.paddingLG,
+        bottom: token.paddingLG,
+        top: token.paddingLG,
+
+        '.ant-sw-modal-content': {
+          height: '100%',
+          maxHeight: '100%',
+          paddingLeft: token.paddingLG,
+          paddingRight: token.paddingLG
+        },
+
+        '.ant-sw-list-section .ant-sw-list-wrapper': {
+          flexBasis: 'auto'
+        }
+      }
     }
   });
 });

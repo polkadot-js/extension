@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, Layout, QrScannerErrorNotice, WalletConnect } from '@subwallet/extension-koni-ui/components';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useDefaultNavigate, useNotification, useOpenQrScanner } from '@subwallet/extension-koni-ui/hooks';
 import { addConnection } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -38,6 +39,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { goHome } = useDefaultNavigate();
 
   const { inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const [form] = Form.useForm<AddConnectionFormState>();
 
@@ -222,6 +224,7 @@ const Component: React.FC<Props> = (props: Props) => {
               onError={onScanError}
               onSuccess={onSuccess}
               overlay={scanError && <QrScannerErrorNotice message={scanError} />}
+              selectCameraMotion={isWebUI ? 'move-right' : undefined}
             />
           )
         }

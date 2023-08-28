@@ -223,6 +223,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onError={onError}
             onSuccess={onSuccess}
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
+            selectCameraMotion={isWebUI ? 'move-right' : undefined}
             title={t('Scan QR')}
           />
           {isWebUI && (

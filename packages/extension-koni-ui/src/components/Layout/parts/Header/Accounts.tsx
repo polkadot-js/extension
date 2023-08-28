@@ -60,6 +60,8 @@ const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
   }, [navigate]);
 
   const _onSelect = useCallback((address: string) => {
+    handleOpenChange(false);
+
     if (address) {
       const accountByAddress = findAccountByAddress(accounts, address);
 
@@ -94,7 +96,7 @@ const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
         console.error('There is a problem when change account');
       }
     }
-  }, [accounts, navigate, goHome]);
+  }, [handleOpenChange, accounts, navigate, goHome]);
 
   const clickSelect = useCallback((address: string) => {
     return () => {

@@ -638,28 +638,4 @@ div#popup-container {
     margin-inline-start: 12px;
 }
 
-/* animation */
 
-.animation-fade-to-left {
-  transition: opacity 300ms, transform 300ms;
-}
-
-.animation-fade-to-left-enter {
-  opacity: 0;
-  transform: translateX(100%);
-}
-
-.animation-fade-to-left-enter-active {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.animation-fade-to-left-leave {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.animation-fade-to-left-leave-active {
-  opacity: 0;
-  transform: translateX(100%);
-}

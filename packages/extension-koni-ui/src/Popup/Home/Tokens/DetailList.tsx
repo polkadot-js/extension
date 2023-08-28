@@ -369,9 +369,9 @@ function Component (): React.ReactElement {
                     return (
                       <TokenItem
                         chain={row.chain}
-                        chainDisplayName={row.chainDisplayName || ''}
                         logoKey={row.logoKey}
                         slug={row.slug}
+                        subTitle={row.chainDisplayName?.replace(' Relay Chain', '') || ''}
                         symbol={row.symbol}
                       />
                     );

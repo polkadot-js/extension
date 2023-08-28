@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { MenuItem, MenuItemType } from '@subwallet/extension-koni-ui/components/Layout/parts/SideMenu/MenuItem';
 import { CONTACT_US, FAQS_URL, TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, Image, Menu } from '@subwallet/react-ui';
-import { MenuItemType } from '@subwallet/react-ui/es/menu/hooks/useItems';
+import { Button, Icon, Image } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleLeft, ArrowCircleRight, ArrowSquareUpRight, Clock, Database, Gear, Info, MessengerLogo, Rocket, Wallet } from 'phosphor-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
 export type Props = ThemeProps & {
@@ -35,6 +35,16 @@ const menuItems: SideMenuItemType[] = [
     icon: (
       <Icon
         phosphorIcon={Rocket}
+        weight='fill'
+      />
+    )
+  },
+  {
+    label: 'Earning',
+    key: '/home/earning',
+    icon: (
+      <Icon
+        phosphorIcon={Database}
         weight='fill'
       />
     )
@@ -122,11 +132,59 @@ function Component ({ className,
   const navigate = useNavigate();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const { t } = useTranslation();
-  // animate sidebar
-  // const [isHovered, setHovered] = useState<boolean>(true);
 
-  const handleLinks = useCallback(({ key }: { key: string}) => {
-    switch (key) {
+  const menuItems = useMemo<MenuItemType[]>(() => {
+    return [
+      {
+        label: t('Portfolio'),
+        value: '/home',
+        icon: Wallet
+      },
+      {
+        label: t('Crowdloans'),
+        value: '/home/crowdloans',
+        icon: Rocket
+      },
+      {
+        label: t('Staking'),
+        value: '/home/staking',
+        icon: Database
+      },
+      {
+        label: t('History'),
+        value: '/home/history',
+        icon: Clock
+      },
+      {
+        label: t('Settings'),
+        value: '/settings',
+        icon: Gear
+      }
+    ];
+  }, [t]);
+
+  const staticMenuItems = useMemo<MenuItemType[]>(() => {
+    return [
+      {
+        label: t('FAQs'),
+        value: 'faqs',
+        icon: Info
+      },
+      {
+        label: t('Contact'),
+        value: 'contact',
+        icon: MessengerLogo
+      },
+      {
+        label: t('Terms of services'),
+        value: 'tos',
+        icon: ArrowSquareUpRight
+      }
+    ];
+  }, [t]);
+
+  const handleLink = useCallback((value: string) => {
+    switch (value) {
       case 'faqs':
         openInNewTab(FAQS_URL)();
         break;
@@ -140,10 +198,10 @@ function Component ({ className,
     }
   }, []);
 
-  const handleNavigate = useCallback(({ key }: {
-    key: string
-  }) => {
-    navigate(`${key}`);
+  const handleNavigate = useCallback((
+    value: string
+  ) => {
+    navigate(`${value}`);
   }, [navigate]);
 
   const getSelectedKeys = useCallback((pathname: string) => {
@@ -160,12 +218,12 @@ function Component ({ className,
     }
 
     const availableKey: string[] = [
-      ...menuItems.map((i) => i.key as string)
+      ...menuItems.map((i) => i.value)
     ];
     const current = availableKey.filter((i: string) => i !== '/home' && pathname.includes(i));
 
     return current.length ? current : (pathname.startsWith('/home') ? ['/home'] : undefined);
-  }, []);
+  }, [menuItems]);
 
   const onToggleCollapse = useCallback(() => {
     setCollapsed((prev) => !prev);
@@ -189,7 +247,7 @@ function Component ({ className,
 
   return (
     <div
-      className={CN(className, 'side-menu', {
+      className={CN(className, {
         '-expanded': !isCollapsed,
         '-collapsed': isCollapsed
       })}
@@ -213,21 +271,45 @@ function Component ({ className,
           }
           onClick={onToggleCollapse}
           size={'xs'}
-          tooltip={isCollapsed ? t('Expanse') : t('Collapse')}
+          tooltip={isCollapsed ? t('Expand') : t('Collapse')}
           type='ghost'
         />
       </div>
 
       <div className={CN('__menu-container')}>
-        <Menu
-          items={menuItems}
-          onClick={handleNavigate}
-          selectedKeys={selectedKeys}
-        />
-        <Menu
-          items={staticMenuItems}
-          onClick={handleLinks}
-        />
+        <div className={'side-menu'}>
+          {
+            menuItems.map((m) => (
+              <MenuItem
+                className={'side-menu-item'}
+                icon={m.icon}
+                isActivated={selectedKeys.includes(m.value)}
+                key={m.value}
+                label={m.label}
+                onClick={handleNavigate}
+                showToolTip={isCollapsed}
+                value={m.value}
+              />
+            ))
+          }
+        </div>
+
+        <div className={'side-menu'}>
+          {
+            staticMenuItems.map((m) => (
+              <MenuItem
+                className={'side-menu-item'}
+                icon={m.icon}
+                isActivated={false}
+                key={m.value}
+                label={m.label}
+                onClick={handleLink}
+                showToolTip={isCollapsed}
+                value={m.value}
+              />
+            ))
+          }
+        </div>
       </div>
     </div>
   );

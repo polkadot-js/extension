@@ -54,68 +54,12 @@ const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
     maxHeight: '100%'
   },
 
-  '.ant-menu.ant-menu': {
-    backgroundColor: 'transparent'
-  },
-
-  '.ant-menu-item': {
-    borderRight: '4px solid transparent',
-    margin: 0,
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    borderRadius: 0,
-
-    '.ant-menu-item-icon': {
-      fontSize: 24,
-      height: 40,
-      width: 40,
-      minWidth: 40,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: token.colorTextLight3
-    }
-  },
-
-  '.ant-menu-vertical >.ant-menu-item': {
-    height: 52
-  },
-
-  '.ant-menu-item.ant-menu-item': {
+  '.side-menu-item': {
     overflow: 'hidden',
-    transition: `width ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1),border-color ${token.motionDurationSlow},background ${token.motionDurationSlow},padding ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1)`
-  },
+    transition: `width ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1),border-color ${token.motionDurationMid},background-color ${token.motionDurationMid},padding ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1)`,
 
-  '.ant-menu-title-content.ant-menu-title-content': {
-    lineHeight: token.lineHeight,
-    fontWeight: token.headingFontWeight,
-    marginLeft: token.marginXS,
-    color: token.colorTextLight3
-  },
-
-  '.ant-menu-item:not(.ant-menu-item-selected):hover': {
-    backgroundColor: token.colorBgInput,
-
-    '.ant-menu-item-icon': {
-      color: token.colorTextLight1
-    },
-
-    '.ant-menu-title-content.ant-menu-title-content': {
-      color: token.colorTextLight1
-    }
-  },
-
-  '.ant-menu-item.ant-menu-item-selected': {
-    backgroundColor: 'transparent',
-    borderRightColor: token.colorPrimary,
-
-    '.ant-menu-item-icon': {
-      color: token.colorPrimary
-    },
-
-    '.ant-menu-title-content.ant-menu-title-content': {
-      color: token.colorTextLight1
+    '.__icon, .__label': {
+      transition: `color ${token.motionDurationMid}`
     }
   },
 
@@ -130,7 +74,7 @@ const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       height: 69
     },
 
-    '.ant-menu-item.ant-menu-item': {
+    '.side-menu-item': {
       width: 248
     }
   },
@@ -146,7 +90,7 @@ const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       height: 32
     },
 
-    '.ant-menu-item.ant-menu-item': {
+    '.side-menu-item': {
       paddingLeft: 6,
       paddingRight: 0,
       overflow: 'hidden',

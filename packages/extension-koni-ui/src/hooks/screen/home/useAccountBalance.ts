@@ -50,7 +50,8 @@ function getDefaultBalanceItem (
     priceValue: 0,
     logoKey,
     slug,
-    symbol
+    symbol,
+    relatedChains: []
   };
 }
 
@@ -134,6 +135,8 @@ function getAccountBalance (
       isTokenGroupBalanceReady = isTokenBalanceReady;
 
       tokenBalance.chain = originChain;
+      !tokenBalance.relatedChains.includes(originChain) && tokenBalance.relatedChains.push(originChain);
+      !tokenGroupBalance.relatedChains.includes(originChain) && tokenGroupBalance.relatedChains.push(originChain);
       tokenBalance.chainDisplayName = _getChainName(chainInfoMap[originChain]);
       tokenBalance.isTestnet = !_isAssetValuable(chainAsset);
 

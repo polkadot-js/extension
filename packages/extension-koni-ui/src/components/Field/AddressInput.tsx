@@ -5,6 +5,7 @@ import { AbstractAddressJson } from '@subwallet/extension-base/background/types'
 import { CHAINS_SUPPORTED_DOMAIN, isAzeroDomain } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { AddressBookModal } from '@subwallet/extension-koni-ui/components';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { resolveAddressToDomain, resolveDomainToAddress, saveRecentAccount } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -41,6 +42,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     onChange, onFocus, placeholder, readOnly, saveAddress, showAddressBook, showScanner, status,
     statusHelp, value } = props;
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
 
   const [domainName, setDomainName] = useState<string | undefined>(undefined);
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -261,6 +263,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
             onError={onScanError}
             onSuccess={onSuccess}
             overlay={scanError && <QrScannerErrorNotice message={scanError} />}
+            selectCameraMotion={isWebUI ? 'move-right' : undefined}
           />
         )
       }

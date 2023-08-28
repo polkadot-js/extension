@@ -11,22 +11,24 @@ type Props = ThemeProps & {
   onPressItem?: BalanceItemProps['onPressItem'],
   logoKey?: string,
   symbol: string,
-  chainDisplayName: string,
   chain?: string,
   networkKey?: string,
   subSymbol?: string,
   slug?: string,
+  subTitle?: string,
+  subContent?: React.ReactNode,
 } ;
 
 function Component (
   props: Props) {
   const { chain,
-    chainDisplayName,
     className = '',
     logoKey,
     networkKey,
     slug = '',
+    subContent,
     subSymbol,
+    subTitle,
     symbol } = props;
   // todo: Update BalanceItem in react-ui lib
   // - loading
@@ -52,9 +54,12 @@ function Component (
         <Typography.Text className='token-item-information__title'>
           {symbol}
         </Typography.Text>
-        <Typography.Text className='token-item-information__sub-title'>
-          {chainDisplayName?.replace(' Relay Chain', '')}
-        </Typography.Text>
+        { subTitle && (
+          <Typography.Text className='token-item-information__sub-title'>
+            {subTitle}
+          </Typography.Text>
+        )}
+        {subContent}
       </div>
     </div>
   );

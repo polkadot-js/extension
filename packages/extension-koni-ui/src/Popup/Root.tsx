@@ -21,7 +21,7 @@ import { NotificationProps } from '@subwallet/react-ui/es/notification/Notificat
 import CN from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { WebUIContextProvider } from '../contexts/WebUIContext';
@@ -38,7 +38,8 @@ const tokenUrl = '/home/tokens';
 const loginUrl = '/keyring/login';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
-const sercurityUrl = '/settings/security';
+const securityUrl = '/settings/security';
+const createDoneUrl = '/create-done';
 
 const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
@@ -77,6 +78,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const dataContext = useContext(DataContext);
   const screenContext = useContext(ScreenContext);
   const location = useLocation();
+  const navigate = useNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
   const notify = useNotification();
   const [rootLoading, setRootLoading] = useState(true);
@@ -154,23 +156,19 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     }
 
     if (needMigrate && hasMasterPassword && !needUnlock) {
-      if (pathName !== migratePasswordUrl) {
-        redirectTarget = migratePasswordUrl;
-      }
+      redirectTarget = migratePasswordUrl;
     } else if (hasMasterPassword && needUnlock) {
-      if (pathName !== loginUrl) {
-        redirectTarget = loginUrl;
-      }
+      redirectTarget = loginUrl;
     } else if (!hasMasterPassword) {
       if (noAccount) {
-        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
+        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
           redirectTarget = welcomeUrl;
         }
-      } else if (pathName !== createPasswordUrl) {
+      } else if (pathName !== createDoneUrl) {
         redirectTarget = createPasswordUrl;
       }
     } else if (noAccount) {
-      if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
+      if (![...allowImportAccountUrls, welcomeUrl, securityUrl].includes(pathName)) {
         redirectTarget = welcomeUrl;
       }
     } else if (hasConfirmations) {
@@ -194,20 +192,17 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       return false;
     });
 
-    if (redirectTarget !== pathName) {
+    if (redirectTarget && redirectTarget !== pathName) {
+      navigate(redirectTarget);
+
       return redirectTarget;
     } else {
       return null;
     }
-  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, rootLoading, openPModal]);
+  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, rootLoading, openPModal, navigate]);
 
-  if (rootLoading) {
+  if (rootLoading || redirectPath) {
     return <></>;
-  } else if (redirectPath) {
-    return <Navigate
-      replace={true}
-      to={redirectPath}
-    />;
   } else {
     return <MainWrapper className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
       {children}

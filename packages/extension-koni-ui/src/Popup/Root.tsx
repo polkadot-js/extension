@@ -3,7 +3,6 @@
 
 import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { LoadingScreen } from '@subwallet/extension-koni-ui/components';
 import BaseWeb from '@subwallet/extension-koni-ui/components/Layout/base/BaseWeb';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
@@ -45,6 +44,23 @@ const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
+
+function removeLoadingPlaceholder (): void {
+  const element = document.getElementById('loading-placeholder');
+
+  if (element) {
+    // Add transition effect
+    element.style.transition = 'opacity 0.3s';
+    // Set opacity to 0
+    element.style.opacity = '0';
+
+    // Callback after 1 second
+    setTimeout(() => {
+      // Remove element
+      element.parentNode?.removeChild(element);
+    }, 300);
+  }
+}
 
 function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
   const dataContext = useContext(DataContext);
@@ -159,7 +175,13 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     }
 
     // Remove loading on finished first compute
-    rootLoading && setRootLoading(false);
+    rootLoading && setRootLoading((val) => {
+      if (val) {
+        removeLoadingPlaceholder();
+      }
+
+      return false;
+    });
 
     if (redirectTarget !== pathName) {
       return redirectTarget;
@@ -169,7 +191,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, rootLoading, openPModal]);
 
   if (rootLoading) {
-    return <LoadingScreen />;
+    return <></>;
   } else if (redirectPath) {
     return <Navigate
       replace={true}

@@ -254,6 +254,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
           return (
             <TokenItem
+              chain={chain}
               logoKey={nativeToken}
               networkKey={chain}
               subTitle={name || ''}

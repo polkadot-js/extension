@@ -20,6 +20,7 @@ import PriceReducer from './feature/Price';
 import StakingReducer from './feature/Staking';
 import TransactionHistoryReducer from './feature/TransactionHistory';
 import WalletConnectReducer from './feature/WalletConnect';
+import YieldPoolInfoReducer from './feature/YieldPoolInfo';
 
 const persistConfig = {
   key: 'root',
@@ -46,6 +47,9 @@ const rootReducers = combineReducers({
   // common
   chainStore: ChainStoreReducer,
   assetRegistry: AssetRegistryReducer,
+
+  // yield
+  yieldPool: YieldPoolInfoReducer,
 
   // base
   requestState: RequestStateReducer,

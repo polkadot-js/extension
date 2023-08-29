@@ -3724,6 +3724,24 @@ export default class KoniExtension {
     return await resolveAzeroAddressToDomain(request.address, request.chain, chainApi.api);
   }
 
+  private subscribeYieldPoolInfo (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(yield.subscribePoolInfo)'>(id, port);
+
+    const yieldPoolSubscription = this.#koniState.subscribeYieldPoolInfo().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, yieldPoolSubscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.getYieldPoolInfo();
+  }
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -3899,6 +3917,10 @@ export default class KoniExtension {
         return this.subscribeStakingReward(id, port);
       case 'pri(transaction.history.getSubscription)':
         return await this.subscribeHistory(id, port);
+
+        // yield
+      case 'pri(yield.subscribePoolInfo)':
+        return this.subscribeYieldPoolInfo(id, port);
 
       /// Account management
       // Add account

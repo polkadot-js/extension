@@ -2024,7 +2024,8 @@ export enum YieldPoolType {
   LENDING = 'LENDING',
   SINGLE_FARMING = 'SINGLE_FARMING',
   NOMINATION_POOL = 'NOMINATION_POOL',
-  NATIVE_STAKING = 'NATIVE_STAKING'
+  NATIVE_STAKING = 'NATIVE_STAKING',
+  PARACHAIN_STAKING = 'PARACHAIN_STAKING'
 }
 
 export interface YieldWithdrawalMethod {
@@ -2034,8 +2035,6 @@ export interface YieldWithdrawalMethod {
 }
 
 export interface YieldPoolInfo {
-  // apy: number, // in percentage, annually
-  // tvl: string, // in tokens
   slug: string,
   chain: string,
   inputAssets: string[], // slug
@@ -2043,7 +2042,20 @@ export interface YieldPoolInfo {
   withdrawalMethods: YieldWithdrawalMethod[],
   description: string,
   name: string,
-  type: YieldPoolType
+  type: YieldPoolType,
+  stats?: YieldPoolStats
+}
+
+export interface YieldPoolStats {
+  minJoinPool: string,
+  minWithdrawal: string,
+  maxCandidatePerFarmer: number,
+  maxWithdrawalRequestPerFarmer: number,
+
+  farmerCount?: number,
+  apy?: number,
+  apr?: number,
+  tvl?: string // in $
 }
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value
@@ -2176,6 +2188,9 @@ export interface KoniRequestSignatures {
   'pri(settings.saveLanguage)': [RequestChangeLanguage, boolean];
   'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
   'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
+
+  // yield
+  'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

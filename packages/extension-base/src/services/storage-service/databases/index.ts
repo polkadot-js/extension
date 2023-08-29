@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceItem, ChainStakingMetadata, CrowdloanItem, MetadataItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem, ChainStakingMetadata, CrowdloanItem, MetadataItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import Dexie, { Table, Transaction } from 'dexie';
 
 const DEFAULT_DATABASE = 'SubWalletDB_v2';
@@ -55,6 +55,8 @@ export default class KoniDatabase extends Dexie {
   public chainStakingMetadata!: Table<ChainStakingMetadata, object>;
   public nominatorMetadata!: Table<NominatorMetadata, object>;
 
+  public yieldPoolInfo!: Table<YieldPoolInfo, object>;
+
   public mantaPay!: Table<IMantaPayLedger, object>;
 
   private schemaVersion: number;
@@ -88,6 +90,10 @@ export default class KoniDatabase extends Dexie {
 
     this.conditionalVersion(3, {
       mantaPay: 'key, chain'
+    });
+
+    this.conditionalVersion(4, {
+      yieldPoolInfo: 'slug, chain, type'
     });
   }
 

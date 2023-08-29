@@ -2,7 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  APIItemState,
+  BalanceItem,
+  ChainStakingMetadata,
+  CrowdloanItem,
+  MantaPayConfig,
+  NftCollection,
+  NftItem,
+  NominatorMetadata,
+  PriceJson,
+  StakingItem,
+  StakingType,
+  TransactionHistoryItem,
+  YieldPoolInfo
+} from '@subwallet/extension-base/background/KoniTypes';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MetadataStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
@@ -11,6 +25,7 @@ import ChainStakingMetadataStore from '@subwallet/extension-base/services/storag
 import MantaPayStore from '@subwallet/extension-base/services/storage-service/db-stores/MantaPay';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
+import YieldPoolStore from '@subwallet/extension-base/services/storage-service/db-stores/YieldPoolStore';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { Subscription } from 'dexie';
 
@@ -44,6 +59,9 @@ export default class DatabaseService {
       metadata: new MetadataStore(this._db.metadata),
       chain: new ChainStore(this._db.chain),
       asset: new AssetStore(this._db.asset),
+
+      // yield
+      yieldPoolInfo: new YieldPoolStore(this._db.yieldPoolInfo),
 
       // staking
       chainStakingMetadata: new ChainStakingMetadataStore(this._db.chainStakingMetadata),
@@ -324,5 +342,15 @@ export default class DatabaseService {
 
   async getMantaPayFirstConfig (chain: string) {
     return this.stores.mantaPay.getFirstConfig(chain);
+  }
+
+  async updateYieldPoolStore (data: YieldPoolInfo) {
+    await this.stores.yieldPoolInfo.upsert(data);
+  }
+
+  subscribeYieldPoolInfo (chains: string[], callback: (data: YieldPoolInfo[]) => void) {
+    this.stores.yieldPoolInfo.subscribeYieldPoolInfo(chains).subscribe(({
+      next: (data) => callback && callback(data)
+    }));
   }
 }

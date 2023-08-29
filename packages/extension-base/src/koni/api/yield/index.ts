@@ -1,38 +1,101 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { YieldPoolInfo, YieldPoolType, YieldWithdrawalMethod } from '@subwallet/extension-base/background/KoniTypes';
-import { _ChainBaseApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { calculateChainStakedReturn, calculateInflation } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+
+import { Codec } from '@polkadot/types/types';
+import { BN } from '@polkadot/util';
 
 // only apply for DOT right now, will need to scale up
 
-export async function getYieldPoolInfo (chain: string, type: YieldPoolType, chainApi: _ChainBaseApi): Promise<YieldPoolInfo> {
-  if (type.includes(YieldPoolType.NATIVE_STAKING)) {
-    return await getNativeStakingYieldInfo();
-  }
-
-  return {
-    apy: 0, // in percentage, annually
-    tvl: '0', // in tokens
-    inputAssets: [],
-    rewardAssets: [],
-    withdrawalMethods: [],
-    description: '',
-    name: '',
-    type: YieldPoolType.LENDING
-  } as YieldPoolInfo;
+export function getYieldPools (): YieldPoolInfo[] {
+  return Object.values(YIELD_POOLS_INFO);
 }
 
-export async function getNativeStakingYieldInfo (): Promise<YieldPoolInfo> {
-  return {
-    apy: 0, // in percentage, annually
-    tvl: '0', // in tokens
-    inputAssets: [],
-    rewardAssets: [],
-    withdrawalMethods: [],
-    description: '',
-    name: '',
-    type: YieldPoolType.LENDING
-  } as YieldPoolInfo;
+export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, substrateApi: _SubstrateApi, chainInfo: _ChainInfo, callback: (rs: YieldPoolInfo) => void) {
+  return substrateApi.api.query.staking.currentEra(async (_currentEra: Codec) => {
+    const currentEra = _currentEra.toString();
+    const maxNominations = substrateApi.api.consts.staking.maxNominations.toString();
+    const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
+
+    const [_totalEraStake, _totalIssuance, _auctionCounter, _minNominatorBond, _minPoolJoin, _minimumActiveStake] = await Promise.all([
+      substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
+      substrateApi.api.query.balances.totalIssuance(),
+      substrateApi.api.query.auctions?.auctionCounter(),
+      substrateApi.api.query.staking.minNominatorBond(),
+      substrateApi.api.query?.nominationPools?.minJoinBond(),
+      substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake()
+    ]);
+
+    const minActiveStake = _minimumActiveStake?.toString() || '0';
+    const minNominatorBond = _minNominatorBond.toString();
+
+    const bnMinActiveStake = new BN(minActiveStake);
+    const bnMinNominatorBond = new BN(minNominatorBond);
+
+    const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
+    const rawTotalEraStake = _totalEraStake.toString();
+    const rawTotalIssuance = _totalIssuance.toString();
+
+    const numAuctions = _auctionCounter ? _auctionCounter.toHuman() as number : 0;
+    const bnTotalEraStake = new BN(rawTotalEraStake);
+    const bnTotalIssuance = new BN(rawTotalIssuance);
+
+    const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
+    const minPoolJoin = _minPoolJoin?.toString() || undefined;
+    const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
+
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      ...poolInfo,
+      stats: {
+        maxCandidatePerFarmer: parseInt(maxNominations),
+        maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks),
+        minJoinPool: minStake.toString(),
+        minWithdrawal: '0',
+        apy: expectedReturn,
+        tvl: bnTotalEraStake.toString()
+      }
+    });
+
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      ...poolInfo,
+      stats: { // TODO
+        maxCandidatePerFarmer: parseInt(maxNominations),
+        maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks),
+        minJoinPool: minPoolJoin || '0',
+        minWithdrawal: '0',
+        apy: expectedReturn,
+        tvl: bnTotalEraStake.toString()
+      }
+    });
+  });
+}
+
+export function subscribeYieldPoolStats (substrateApiMap: Record<string, _SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, callback: (rs: YieldPoolInfo) => void) {
+  const unsubList: VoidFunction[] = [];
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  Object.values(YIELD_POOLS_INFO).forEach(async (poolInfo) => {
+    const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
+    const chainInfo = chainInfoMap[poolInfo.chain];
+
+    if (YieldPoolType.NATIVE_STAKING === poolInfo.type) {
+      const unsub = await subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
+
+      // @ts-ignore
+      unsubList.push(unsub);
+    }
+  });
+
+  return () => {
+    unsubList.forEach((unsub) => {
+      unsub && unsub();
+    });
+  };
 }

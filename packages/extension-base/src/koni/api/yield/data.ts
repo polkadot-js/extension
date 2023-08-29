@@ -3,8 +3,8 @@
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 
-export const YIELD_POOLS_INFO: YieldPoolInfo[] = [
-  {
+export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
+  DOT___native_staking: {
     slug: 'DOT___native_staking',
     chain: 'polkadot',
     name: 'Polkadot Native Staking',
@@ -24,7 +24,7 @@ export const YIELD_POOLS_INFO: YieldPoolInfo[] = [
       }
     ]
   },
-  {
+  DOT___nomination_pool: {
     slug: 'DOT___nomination_pool',
     chain: 'polkadot',
     name: 'Polkadot Nomination Pool',
@@ -44,7 +44,7 @@ export const YIELD_POOLS_INFO: YieldPoolInfo[] = [
       }
     ]
   },
-  {
+  DOT___acala_liquid_staking: {
     slug: 'DOT___acala_liquid_staking',
     chain: 'acala',
     name: 'Acala Liquid Staking',
@@ -69,7 +69,7 @@ export const YIELD_POOLS_INFO: YieldPoolInfo[] = [
       }
     ]
   },
-  {
+  DOT___bifrost_liquid_staking: {
     slug: 'DOT___bifrost_liquid_staking',
     chain: 'bifrost_dot',
     name: 'Bifrost Liquid Staking',
@@ -94,7 +94,7 @@ export const YIELD_POOLS_INFO: YieldPoolInfo[] = [
       }
     ]
   },
-  {
+  DOT___parallel_liquid_staking: {
     slug: 'DOT___parallel_liquid_staking',
     chain: 'parallel',
     name: 'Parallel Liquid Staking',
@@ -119,7 +119,7 @@ export const YIELD_POOLS_INFO: YieldPoolInfo[] = [
       }
     ]
   },
-  {
+  DOT___interlay_lending: {
     slug: 'DOT___interlay_lending',
     chain: 'interlay',
     name: 'Interlay Lending',
@@ -140,4 +140,4 @@ export const YIELD_POOLS_INFO: YieldPoolInfo[] = [
       }
     ]
   }
-];
+};

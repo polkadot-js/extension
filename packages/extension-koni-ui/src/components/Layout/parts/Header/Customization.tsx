@@ -37,7 +37,7 @@ const Component: React.FC = () => {
           />
         )}
         size={'xs'}
-        tooltip={t('Toggle zero balance')}
+        tooltip={t('Customize asset display')}
         type={'ghost'}
       />
     </div>

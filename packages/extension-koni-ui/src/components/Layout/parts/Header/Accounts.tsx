@@ -3,6 +3,7 @@
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import { AccountCardSelection, AccountItemWithName } from '@subwallet/extension-koni-ui/components/Account';
+import { BackgroundMask } from '@subwallet/extension-koni-ui/components/BackgroundMask';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
@@ -60,8 +61,6 @@ const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
   }, [navigate]);
 
   const _onSelect = useCallback((address: string) => {
-    handleOpenChange(false);
-
     if (address) {
       const accountByAddress = findAccountByAddress(accounts, address);
 
@@ -71,6 +70,7 @@ const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
         } as CurrentAccountInfo;
 
         saveCurrentAccountAddress(accountInfo).then(() => {
+          handleOpenChange(false);
           const pathName = location.pathname;
           const locationPaths = location.pathname.split('/');
 
@@ -216,21 +216,25 @@ const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
   }, [accountSelectorKey, accounts, className, handleOpenChange, noAllAccounts, renderItem, t]);
 
   return (
-    <Popover
-      content={popOverContent}
-      onOpenChange={handleOpenChange}
-      open={open}
-      overlayInnerStyle={{
-        padding: '0',
-        boxShadow: 'none',
-        backgroundColor: 'transparent'
-      }}
-      placement='bottomRight'
-      showArrow={false}
-      trigger='click'
-    >
-      <TriggerComponent />
-    </Popover>
+    <>
+      <Popover
+        content={popOverContent}
+        onOpenChange={handleOpenChange}
+        open={open}
+        overlayInnerStyle={{
+          padding: '0',
+          boxShadow: 'none',
+          backgroundColor: 'transparent'
+        }}
+        placement='bottomRight'
+        showArrow={false}
+        trigger='click'
+      >
+        <TriggerComponent />
+      </Popover>
+
+      <BackgroundMask visible={open} />
+    </>
   );
 };
 

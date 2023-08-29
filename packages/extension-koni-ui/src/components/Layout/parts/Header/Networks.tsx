@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BackgroundMask } from '@subwallet/extension-koni-ui/components/BackgroundMask';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import NetworkGroupItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/NetworkGroupItem';
 import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
@@ -120,21 +121,25 @@ const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
   ));
 
   return (
-    <Popover
-      content={popOverContent}
-      onOpenChange={handleOpenChange}
-      open={open}
-      overlayInnerStyle={{
-        padding: '0',
-        boxShadow: 'none',
-        backgroundColor: 'transparent'
-      }}
-      placement='bottomRight'
-      showArrow={false}
-      trigger='click'
-    >
-      <TriggerComponent />
-    </Popover>
+    <>
+      <Popover
+        content={popOverContent}
+        onOpenChange={handleOpenChange}
+        open={open}
+        overlayInnerStyle={{
+          padding: '0',
+          boxShadow: 'none',
+          backgroundColor: 'transparent'
+        }}
+        placement='bottomRight'
+        showArrow={false}
+        trigger='click'
+      >
+        <TriggerComponent />
+      </Popover>
+
+      <BackgroundMask visible={open} />
+    </>
   );
 };
 

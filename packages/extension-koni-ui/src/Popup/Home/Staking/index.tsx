@@ -3,6 +3,7 @@
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenBalance, TokenItem, TokenPrice } from '@subwallet/extension-koni-ui/components';
+import { BackgroundMask } from '@subwallet/extension-koni-ui/components/BackgroundMask';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
@@ -120,6 +121,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return false;
     };
   }, [selectedFilters]);
+
+  const [popoverOpen, setPopoverOpen] = useState<boolean>(false);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -241,6 +244,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [address, currentAccount?.address, inactiveModal, navigate]);
 
+  const handlePopoverVisibilityChange = useCallback((newOpen: boolean) => {
+    setPopoverOpen(newOpen);
+  }, []);
+
   const columns = useMemo(() => {
     return [
       {
@@ -338,6 +345,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     />
                   </div>
                 }
+                onOpenChange={handlePopoverVisibilityChange}
                 overlayInnerStyle={{
                   padding: '0',
                   boxShadow: 'none',
@@ -367,7 +375,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       }
     ];
-  }, [className, priceMap]);
+  }, [className, handlePopoverVisibilityChange, priceMap]);
 
   const onSearch = useCallback((value: string) => setSearchInput(value), []);
 
@@ -470,6 +478,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             : (
               <NoContent pageType={PAGE_TYPE.STAKING} />
             )}
+
+          <BackgroundMask visible={popoverOpen} />
         </div>
       );
     }
@@ -494,7 +504,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [columns, emptyStakingList, filterFunction, filterTabItems, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, onSelectFilterTab, renderItem, searchFunction, searchInput, selectedFilterTab, t]);
+  }, [columns, emptyStakingList, filterFunction, filterTabItems, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, onSelectFilterTab, popoverOpen, renderItem, searchFunction, searchInput, selectedFilterTab, t]);
 
   return (
     <PageWrapper

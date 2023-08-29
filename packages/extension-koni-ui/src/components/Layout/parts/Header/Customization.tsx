@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BackgroundMask } from '@subwallet/extension-koni-ui/components/BackgroundMask';
 import { CustomizeModalSetting } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModalSetting';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Popover } from '@subwallet/react-ui';
 import { FadersHorizontal } from 'phosphor-react';
-import React, { forwardRef, LegacyRef } from 'react';
+import React, { forwardRef, LegacyRef, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -16,6 +17,7 @@ const PopoverWrapper = styled.div<ThemeProps>(({ theme: { token } }: ThemeProps)
 
 const Component: React.FC = () => {
   const { t } = useTranslation();
+  const [open, setOpen] = useState<boolean>(false);
 
   // Remove ref error
   // eslint-disable-next-line react/display-name
@@ -41,18 +43,28 @@ const Component: React.FC = () => {
     </div>
   ));
 
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    setOpen(newOpen);
+  }, []);
+
   return (
-    <Popover
-      content={<PopoverWrapper><CustomizeModalSetting /></PopoverWrapper>}
-      overlayInnerStyle={{
-        padding: '16px 0'
-      }}
-      placement='bottomRight'
-      showArrow={false}
-      trigger='click'
-    >
-      <TriggerComponent />
-    </Popover>
+    <>
+      <Popover
+        content={<PopoverWrapper><CustomizeModalSetting /></PopoverWrapper>}
+        onOpenChange={handleOpenChange}
+        open={open}
+        overlayInnerStyle={{
+          padding: '16px 0'
+        }}
+        placement='bottomRight'
+        showArrow={false}
+        trigger='click'
+      >
+        <TriggerComponent />
+      </Popover>
+
+      <BackgroundMask visible={open} />
+    </>
   );
 };
 

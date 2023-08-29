@@ -167,13 +167,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       icon: reloadIcon,
       disabled: loading,
       size: 'sm',
-      onClick: onClickReload
+      onClick: onClickReload,
+      tooltip: t('Reload')
     },
     {
       icon: rightIcon,
-      onClick: preCheck(onClickStakeMore, ExtrinsicType.STAKING_BOND)
+      onClick: preCheck(onClickStakeMore, ExtrinsicType.STAKING_BOND),
+      tooltip: t('Add to bond')
     }
-  ]), [loading, onClickReload, preCheck, onClickStakeMore]);
+  ]), [loading, onClickReload, t, preCheck, onClickStakeMore]);
 
   const renderItem = useCallback((item: StakingDataType) => {
     return (
@@ -429,6 +431,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       />
                     )}
                     onClick={onClickReload}
+                    tooltip={t('Reload')}
                     type='ghost'
                   />
                   <Button
@@ -439,6 +442,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       />
                     )}
                     onClick={onClickStake}
+                    tooltip={t('Add to bond')}
                     type='ghost'
                   />
                 </>

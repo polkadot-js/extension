@@ -123,10 +123,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         ),
         onClick: () => {
           navigate('/settings/tokens/import-token', { state: { isExternalRequest: false } });
-        }
+        },
+        tooltip: t('Import token')
       }
     ];
-  }, [navigate]);
+  }, [navigate, t]);
 
   const openFilterModal = useCallback((e?: SyntheticEvent) => {
     e && e.stopPropagation();

@@ -6,6 +6,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Popover } from '@subwallet/react-ui';
 import { FadersHorizontal } from 'phosphor-react';
 import React, { forwardRef, LegacyRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 const PopoverWrapper = styled.div<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
@@ -14,6 +15,8 @@ const PopoverWrapper = styled.div<ThemeProps>(({ theme: { token } }: ThemeProps)
 }));
 
 const Component: React.FC = () => {
+  const { t } = useTranslation();
+
   // Remove ref error
   // eslint-disable-next-line react/display-name
   const TriggerComponent = forwardRef((props, ref) => (
@@ -32,6 +35,7 @@ const Component: React.FC = () => {
           />
         )}
         size={'xs'}
+        tooltip={t('Toggle zero balance')}
         type={'ghost'}
       />
     </div>

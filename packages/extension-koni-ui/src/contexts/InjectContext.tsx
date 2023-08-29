@@ -124,6 +124,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
 
   const [substrateWallet, setSubstrateWallet] = useState<Injected | undefined>();
   const [evmWallet, setEvmWallet] = useState<SubWalletEvmProvider | undefined>();
+  const [update, setUpdate] = useState({});
   const [enabled, setEnabled] = useLocalStorage<boolean>(ENABLE_INJECT, false);
   const [initEnable] = useState(enabled);
   const { injectDone } = useSelector((state) => state.injectState);
@@ -173,6 +174,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const enableInject = useCallback((callback?: VoidFunction) => {
     setEnabled(true);
     enablePromise.current = callback;
+    setUpdate({});
   }, [setEnabled]);
 
   const disableInject = useCallback(() => {
@@ -200,7 +202,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
         })
       ;
     }
-  }, [enabled]);
+  }, [enabled, update]);
 
   useEffect(() => {
     const wallet = win.SubWallet;
@@ -220,7 +222,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
         })
       ;
     }
-  }, [enabled]);
+  }, [enabled, update]);
 
   useEffect(() => {
     let unsubscribe: Unsubcall | undefined;

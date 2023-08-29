@@ -45,12 +45,23 @@ const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'impor
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
 
+export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
+  display: 'flex',
+  height: '100%',
+  flexDirection: 'column',
+  overflow: 'auto',
+
+  '.web-layout-container': {
+    height: '100%'
+  }
+}));
+
 function removeLoadingPlaceholder (): void {
   const element = document.getElementById('loading-placeholder');
 
   if (element) {
     // Add transition effect
-    element.style.transition = 'opacity 0.3s';
+    element.style.transition = 'opacity 0.3s ease-in-out';
     // Set opacity to 0
     element.style.opacity = '0';
 
@@ -198,37 +209,24 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       to={redirectPath}
     />;
   } else {
-    return <div className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
+    return <MainWrapper className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
       {children}
-    </div>;
+    </MainWrapper>;
   }
 }
 
-function _Root ({ className }: ThemeProps): React.ReactElement {
+export function Root (): React.ReactElement {
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
 
   return (
     <WebUIContextProvider>
       <WalletModalContext>
         <DefaultRoute>
-          <main className={className}>
-            <BaseWeb>
-              <Outlet />
-            </BaseWeb>
-          </main>
+          <BaseWeb>
+            <Outlet />
+          </BaseWeb>
         </DefaultRoute>
       </WalletModalContext>
     </WebUIContextProvider>
   );
 }
-
-export const Root = styled(_Root)<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
-  display: 'flex',
-  height: '100%',
-  flexDirection: 'column',
-  overflow: 'auto',
-
-  '.web-layout-container': {
-    height: '100%'
-  }
-}));

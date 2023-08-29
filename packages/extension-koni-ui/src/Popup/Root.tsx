@@ -3,7 +3,6 @@
 
 import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import BaseWeb from '@subwallet/extension-koni-ui/components/Layout/base/BaseWeb';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
@@ -13,7 +12,6 @@ import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-kon
 import { useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -21,7 +19,7 @@ import { isNoAccount } from '@subwallet/extension-koni-ui/utils';
 import { changeHeaderLogo } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import CN from 'classnames';
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -40,19 +38,52 @@ const tokenUrl = '/home/tokens';
 const loginUrl = '/keyring/login';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
-const sercurityUrl = '/settings/security';
+const securityUrl = '/settings/security';
+const createDoneUrl = '/create-done';
 
 const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
 
+export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
+  display: 'flex',
+  height: '100%',
+  flexDirection: 'column',
+  overflow: 'auto',
+
+  '.web-layout-container': {
+    height: '100%'
+  }
+}));
+
+function removeLoadingPlaceholder (): void {
+  const element = document.getElementById('loading-placeholder');
+
+  if (element) {
+    // Add transition effect
+    element.style.transition = 'opacity 0.3s ease-in-out';
+    // Set opacity to 0
+    element.style.opacity = '0';
+
+    // Callback after 1 second
+    setTimeout(() => {
+      // Remove element
+      element.parentNode?.removeChild(element);
+    }, 300);
+  }
+}
+
 function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
+  const dataContext = useContext(DataContext);
+  const screenContext = useContext(ScreenContext);
   const location = useLocation();
   const navigate = useNavigate();
-  const { goBack, goHome } = useDefaultNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
   const notify = useNotification();
+  const [rootLoading, setRootLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay']));
 
   useSubscribeLanguage();
 
@@ -70,6 +101,12 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       .length
     , [accounts]
   );
+
+  useEffect(() => {
+    initDataRef.current.then(() => {
+      setDataLoaded(true);
+    }).catch(console.error);
+  }, []);
 
   useEffect(() => {
     let cancel = false;
@@ -109,80 +146,82 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     RouteState.lastPathName = location.pathname;
   }, [location]);
 
-  useEffect(() => {
+  const redirectPath = useMemo<string | null>(() => {
     const pathName = location.pathname;
+    let redirectTarget: string | null = null;
+
+    // Wait until data loaded
+    if (!dataLoaded) {
+      return null;
+    }
 
     if (needMigrate && hasMasterPassword && !needUnlock) {
-      if (pathName !== migratePasswordUrl) {
-        navigate(migratePasswordUrl);
-      }
+      redirectTarget = migratePasswordUrl;
     } else if (hasMasterPassword && needUnlock) {
-      if (pathName !== loginUrl) {
-        navigate(loginUrl);
-      }
+      redirectTarget = loginUrl;
     } else if (!hasMasterPassword) {
       if (noAccount) {
-        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
-          navigate(welcomeUrl);
+        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
+          redirectTarget = welcomeUrl;
         }
-      } else if (pathName !== createPasswordUrl) {
-        navigate(createPasswordUrl);
+      } else if (pathName !== createDoneUrl) {
+        redirectTarget = createPasswordUrl;
       }
     } else if (noAccount) {
-      if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
-        navigate(welcomeUrl);
+      if (![...allowImportAccountUrls, welcomeUrl, securityUrl].includes(pathName)) {
+        redirectTarget = welcomeUrl;
       }
     } else if (hasConfirmations) {
       openPModal('confirmations');
     } else if (pathName === DEFAULT_ROUTER_PATH) {
-      navigate(tokenUrl);
+      redirectTarget = tokenUrl;
     } else if (pathName === loginUrl && !needUnlock) {
-      goHome();
+      redirectTarget = DEFAULT_ROUTER_PATH;
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');
     } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
       openPModal(null);
     }
-  }, [noAccount, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isOpenPModal, location.pathname, navigate, needMigrate, openPModal, needUnlock]);
 
-  return <>
-    {children}
-  </>;
+    // Remove loading on finished first compute
+    rootLoading && setRootLoading((val) => {
+      if (val) {
+        removeLoadingPlaceholder();
+      }
+
+      return false;
+    });
+
+    if (redirectTarget && redirectTarget !== pathName) {
+      navigate(redirectTarget);
+
+      return redirectTarget;
+    } else {
+      return null;
+    }
+  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, rootLoading, openPModal, navigate]);
+
+  if (rootLoading || redirectPath) {
+    return <></>;
+  } else {
+    return <MainWrapper className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
+      {children}
+    </MainWrapper>;
+  }
 }
 
-function _Root ({ className }: ThemeProps): React.ReactElement {
-  const dataContext = useContext(DataContext);
-  const screenContext = useContext(ScreenContext);
+export function Root (): React.ReactElement {
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
 
   return (
     <WebUIContextProvider>
       <WalletModalContext>
-        <PageWrapper
-          animateOnce={true}
-          className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}
-          resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay'])}
-        >
-          <DefaultRoute>
-            <main className={className}>
-              <BaseWeb>
-                <Outlet />
-              </BaseWeb>
-            </main>
-          </DefaultRoute>
-        </PageWrapper>
+        <DefaultRoute>
+          <BaseWeb>
+            <Outlet />
+          </BaseWeb>
+        </DefaultRoute>
       </WalletModalContext>
     </WebUIContextProvider>
   );
 }
-
-export const Root = styled(_Root)<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
-  display: 'flex',
-  height: '100%',
-  flexDirection: 'column',
-  overflow: 'auto',
-
-  '.web-layout-container': {
-    height: '100%'
-  }
-}));

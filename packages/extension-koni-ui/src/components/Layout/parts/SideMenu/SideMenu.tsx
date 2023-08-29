@@ -40,8 +40,8 @@ const menuItems: SideMenuItemType[] = [
     )
   },
   {
-    label: 'Earning',
-    key: '/home/earning',
+    label: 'Staking',
+    key: '/home/staking',
     icon: (
       <Icon
         phosphorIcon={Database}

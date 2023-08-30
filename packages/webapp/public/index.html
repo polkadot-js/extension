@@ -1,21 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
-  <title>SubWallet</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SubWallet - Comprehensive Polkadot, Substrate & Ethereum wallet</title>
+
+  <meta name="title" content="SubWallet - Comprehensive Polkadot, Substrate & Ethereum wallet">
+	<meta name="description"
+	      content="Empower blockchain usage with a one-stop-shop for the multichain. SubWallet helps you manage your assets with full control.">
+	<meta property="og:site_name"
+	      content="SubWallet - Comprehensive Polkadot, Substrate & Ethereum wallet">
+	<meta property="og:url" content="https://subwallet.app/">
+	<meta property="og:title"
+	      content="SubWallet - Comprehensive Polkadot, Substrate & Ethereum wallet">
+	<meta property="og:type" content="website">
+	<meta property="og:description"
+	      content="Empower blockchain usage with a one-stop-shop for the multichain. SubWallet helps you manage your assets with full control.">
+	<meta name="twitter:site" content="@https://">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title"
+	      content="SubWallet - Comprehensive Polkadot, Substrate & Ethereum wallet">
+	<meta name="twitter:description"
+	      content="Empower blockchain usage with a one-stop-shop for the multichain. SubWallet helps you manage your assets with full control.">
+	<meta property="og:image" content="/images/webapp-preview.png"/>
+	<meta property="og:image:secure_url" content="/images/webapp-preview.png"/>
+	<meta property="og:image:width" content="1200"/>
+	<meta property="og:image:height" content="600"/>
+	<meta name="copyright" content="SubWallet"/>
+
+  <link rel="canonical" href="https://web.subwallet.app/"/>
+
+  <!-- Favicon and App Icon -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <!-- Font injection -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Unbounded:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+		/* latin */
+		@font-face {
+		  font-family: 'Plus Jakarta Sans';
+		  font-style: normal;
+		  font-weight: 500;
+		  font-display: swap;
+		  src: url(https://fonts.gstatic.com/s/plusjakartasans/v8/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2) format('woff2');
+		  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+		}
+		/* latin */
+		@font-face {
+		  font-family: 'Plus Jakarta Sans';
+		  font-style: normal;
+		  font-weight: 600;
+		  font-display: swap;
+		  src: url(https://fonts.gstatic.com/s/plusjakartasans/v8/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2) format('woff2');
+		  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+		}
+	</style>
+
+  <!-- Import base CSS -->
   <link href="/fonts/lexend.css" rel="stylesheet">
   <link href="/assets/reset.css" rel="stylesheet">
-  <link rel="icon" href="./images/icon-32.png" type="image/x-icon">
+
+  <!-- Import main JS logic -->
   <script inline inline-asset="fallback.js$" inline-asset-delete></script>
   <script inline inline-asset="webapp.js$" inline-asset-delete></script>
 </head>
 
 <body style="background-color: rgb(12, 12, 12);">
   <div id="root"></div>
+  <div id="loading-placeholder" style="background-color: rgb(12, 12, 12); position:fixed; top: 0; left: 0; right: 0; bottom: 0">
+    <img src="/images/loading.svg" style="position: absolute; top: calc(50% - 50px); left: calc(50% - 50px)" alt="Loading">
+  </div>
 </body>
-
 </html>

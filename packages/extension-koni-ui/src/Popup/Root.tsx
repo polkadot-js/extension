@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
+    import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { LoadingScreen } from '@subwallet/extension-koni-ui/components';
 import BaseWeb from '@subwallet/extension-koni-ui/components/Layout/base/BaseWeb';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
@@ -22,7 +21,7 @@ import { NotificationProps } from '@subwallet/react-ui/es/notification/Notificat
 import CN from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { WebUIContextProvider } from '../contexts/WebUIContext';
@@ -39,17 +38,47 @@ const tokenUrl = '/home/tokens';
 const loginUrl = '/keyring/login';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
-const sercurityUrl = '/settings/security';
+const securityUrl = '/settings/security';
+const createDoneUrl = '/create-done';
 
 const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
 
+export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
+  display: 'flex',
+  height: '100%',
+  flexDirection: 'column',
+  overflow: 'auto',
+
+  '.web-layout-container': {
+    height: '100%'
+  }
+}));
+
+function removeLoadingPlaceholder (): void {
+  const element = document.getElementById('loading-placeholder');
+
+  if (element) {
+    // Add transition effect
+    element.style.transition = 'opacity 0.3s ease-in-out';
+    // Set opacity to 0
+    element.style.opacity = '0';
+
+    // Callback after 1 second
+    setTimeout(() => {
+      // Remove element
+      element.parentNode?.removeChild(element);
+    }, 300);
+  }
+}
+
 function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
   const dataContext = useContext(DataContext);
   const screenContext = useContext(ScreenContext);
   const location = useLocation();
+  const navigate = useNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
   const notify = useNotification();
   const [rootLoading, setRootLoading] = useState(true);
@@ -127,23 +156,19 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     }
 
     if (needMigrate && hasMasterPassword && !needUnlock) {
-      if (pathName !== migratePasswordUrl) {
-        redirectTarget = migratePasswordUrl;
-      }
+      redirectTarget = migratePasswordUrl;
     } else if (hasMasterPassword && needUnlock) {
-      if (pathName !== loginUrl) {
-        redirectTarget = loginUrl;
-      }
+      redirectTarget = loginUrl;
     } else if (!hasMasterPassword) {
       if (noAccount) {
-        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
+        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
           redirectTarget = welcomeUrl;
         }
-      } else if (pathName !== createPasswordUrl) {
+      } else if (pathName !== createDoneUrl) {
         redirectTarget = createPasswordUrl;
       }
     } else if (noAccount) {
-      if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
+      if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
         redirectTarget = welcomeUrl;
       }
     } else if (hasConfirmations) {
@@ -159,54 +184,44 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     }
 
     // Remove loading on finished first compute
-    rootLoading && setRootLoading(false);
+    rootLoading && setRootLoading((val) => {
+      if (val) {
+        removeLoadingPlaceholder();
+      }
 
-    if (redirectTarget !== pathName) {
+      return false;
+    });
+
+    if (redirectTarget && redirectTarget !== pathName) {
+      navigate(redirectTarget);
+
       return redirectTarget;
     } else {
       return null;
     }
-  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, rootLoading, openPModal]);
+  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, rootLoading, openPModal, navigate]);
 
-  if (rootLoading) {
-    return <LoadingScreen />;
-  } else if (redirectPath) {
-    return <Navigate
-      replace={true}
-      to={redirectPath}
-    />;
+  if (rootLoading || redirectPath) {
+    return <></>;
   } else {
-    return <div className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
+    return <MainWrapper className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
       {children}
-    </div>;
+    </MainWrapper>;
   }
 }
 
-function _Root ({ className }: ThemeProps): React.ReactElement {
+export function Root (): React.ReactElement {
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
 
   return (
     <WebUIContextProvider>
       <WalletModalContext>
         <DefaultRoute>
-          <main className={className}>
-            <BaseWeb>
-              <Outlet />
-            </BaseWeb>
-          </main>
+          <BaseWeb>
+            <Outlet />
+          </BaseWeb>
         </DefaultRoute>
       </WalletModalContext>
     </WebUIContextProvider>
   );
 }
-
-export const Root = styled(_Root)<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
-  display: 'flex',
-  height: '100%',
-  flexDirection: 'column',
-  overflow: 'auto',
-
-  '.web-layout-container': {
-    height: '100%'
-  }
-}));

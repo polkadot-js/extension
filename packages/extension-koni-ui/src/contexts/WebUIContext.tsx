@@ -3,7 +3,7 @@
 
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
@@ -61,12 +61,12 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
   const [showBackButtonOnHeader, setShowBackButtonOnHeader] = useState<boolean | undefined>(undefined);
   const [title, setTitle] = useState<string | React.ReactNode>('');
   const pathname = useLocation().pathname;
-  const [isSettingPage, setIsSettingPage] = useState(checkSettingPage(pathname));
-  const [isPortfolio, setIsPortfolio] = useState(checkPortfolioPage(pathname));
   const { accounts } = useSelector((state: RootState) => state.accountState);
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
+  const isSettingPage = useMemo(() => checkSettingPage(pathname), [pathname]);
+  const isPortfolio = useMemo(() => checkPortfolioPage(pathname), [pathname]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const pathName = pathname;
 
     if (simplePages.indexOf(pathName) !== -1 || noAccount) {
@@ -88,11 +88,6 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
       }
     }
   }, [isPortfolio, noAccount, pathname, setBackground, setHeaderType, setShowSidebar]);
-
-  useEffect(() => {
-    setIsSettingPage(checkSettingPage(pathname));
-    setIsPortfolio(checkPortfolioPage(pathname));
-  }, [pathname]);
 
   return (
     <WebUIContext.Provider

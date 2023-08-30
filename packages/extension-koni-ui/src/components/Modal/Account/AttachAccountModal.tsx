@@ -11,6 +11,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useGoBackSelectAccount from '@subwallet/extension-koni-ui/hooks/modal/useGoBackSelectAccount';
+import usePreloadView from '@subwallet/extension-koni-ui/hooks/router/usePreloadView';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -41,6 +42,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { token } = useTheme() as Theme;
   const isPopup = useIsPopup();
   const { isWebUI } = useContext(ScreenContext);
+
+  usePreloadView([
+    'AttachReadOnly',
+    'ConnectPolkadotVault',
+    'ConnectKeystone',
+    'ConnectLedger'
+  ]);
 
   const isActive = checkActive(modalId);
 

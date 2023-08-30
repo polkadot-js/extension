@@ -13,7 +13,7 @@ import { Button, ButtonProps, Form, Icon, Image, Input, ModalContext } from '@su
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -23,6 +23,7 @@ import { EXTENSION_URL } from '../constants';
 import { ScreenContext } from '../contexts/ScreenContext';
 import useGetDefaultAccountName from '../hooks/account/useGetDefaultAccountName';
 import useDefaultNavigate from '../hooks/router/useDefaultNavigate';
+import usePreloadView from '../hooks/router/usePreloadView';
 import { convertFieldToObject, isNoAccount, openInNewTab, readOnlyScan, setSelectedAccountTypes, simpleCheckForm } from '../utils';
 
 type Props = ThemeProps;
@@ -60,6 +61,12 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enInject]);
   const { goHome } = useDefaultNavigate();
+
+  usePreloadView([
+    'CreatePassword',
+    'CreateDone',
+    'NewSeedPhrase'
+  ]);
 
   const formDefault: ReadOnlyAccountInput = {
     address: ''

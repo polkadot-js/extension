@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import Customization from '@subwallet/extension-koni-ui/components/Layout/parts/Header/Customization';
 import LockStatus from '@subwallet/extension-koni-ui/components/Layout/parts/Header/LockStatus';
+import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -10,7 +10,6 @@ import { CaretLeft } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import Accounts from './Accounts';
 import Networks from './Networks';
 
 export type Props = ThemeProps & {
@@ -50,9 +49,10 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
           <Typography.Title className='page-name'>{title}</Typography.Title>
         </div>
         <div className='action-group'>
-          <Customization />
           <Networks />
-          <Accounts />
+          <div className={'trigger-container -select-account'}>
+            <SelectAccount />
+          </div>
           <LockStatus />
         </div>
       </div>
@@ -84,36 +84,28 @@ const Controller = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
+      gap: 8
+    },
+
+    '.trigger-container': {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      cursor: 'pointer',
+      padding: `0 ${token.padding}px`,
+      height: 40,
       gap: 8,
+      background: token.colorBgSecondary,
+      borderRadius: 32
+    },
 
-      '.trigger-container': {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        cursor: 'pointer',
-        padding: `0 ${token.padding}px`,
-        height: 40,
-        gap: 8,
-        background: token.colorBgSecondary,
-        borderRadius: 32,
+    '.trigger-container.-select-account': {
+      paddingLeft: token.paddingXXS,
+      paddingRight: 0,
 
-        '.ant-btn': {
-          height: 'fit-content',
-          minWidth: 'unset',
-          width: 'fit-content'
-        },
-
-        '.__account-item': {
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        },
-        '.__account-name': {
-          'white-space': 'nowrap',
-          maxWidth: 200,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis'
-        }
+      '.ant-select-modal-input-suffix .anticon': {
+        fontSize: 12,
+        color: token.colorTextLight3
       }
     }
   }

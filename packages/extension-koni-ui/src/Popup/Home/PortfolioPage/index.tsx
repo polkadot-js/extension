@@ -181,11 +181,7 @@ const PortfolioPage = styled(Component)<Props>(({ theme: { token } }: Props) => 
       display: 'flex',
       borderRadius: token.borderRadiusLG,
       margin: 0,
-      padding: 0,
-
-      '& > li': {
-        paddingBottom: '8px !important'
-      }
+      padding: 0
     },
 
     '.menu-bar': {
@@ -215,21 +211,23 @@ const PortfolioPage = styled(Component)<Props>(({ theme: { token } }: Props) => 
         outline: 'none',
         position: 'relative',
         listStyle: 'none',
-        fontSize: token.fontSize,
-        lineHeight: token.lineHeight,
-        fontWeight: token.fontWeightStrong,
+        fontSize: token.fontSizeLG,
+        lineHeight: token.lineHeightLG,
+        fontWeight: token.headingFontWeight,
         cursor: 'pointer',
         flex: 'unset',
-        opacity: 0.45,
         borderRadius: 0,
-        color: '#FFFFFF',
+        color: token.colorTextLight4,
         padding: 0,
         marginRight: 16,
+        paddingTop: 10,
+        paddingBottom: token.paddingXS,
+        borderBottom: '2px solid transparent',
 
         '&--selected': {
           background: 'transparent',
-          borderBottom: '2px solid #D9D9D9',
-          opacity: 1
+          color: token.colorTextLight2,
+          borderBottomColor: token.colorTextLight2
         }
       },
 

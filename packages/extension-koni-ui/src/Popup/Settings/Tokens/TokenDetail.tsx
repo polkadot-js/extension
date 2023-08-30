@@ -95,10 +95,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           weight={'light'}
         />,
         onClick: handleDeleteToken,
-        disabled: !tokenInfo || !(_isCustomAsset(tokenInfo.slug) && _isSmartContractToken(tokenInfo))
+        disabled: !(_isCustomAsset(tokenInfo.slug) && _isSmartContractToken(tokenInfo)),
+        tooltip: t('Delete token')
       }
     ];
-  }, [handleDeleteToken, token.fontSizeHeading3, tokenInfo]);
+  }, [handleDeleteToken, t, token.fontSizeHeading3, tokenInfo]);
 
   const contractAddressIcon = useCallback(() => {
     const contractAddress = _getContractAddressOfToken(tokenInfo);

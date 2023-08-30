@@ -4,6 +4,7 @@
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
+import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -25,10 +26,12 @@ import styled, { ThemeContext } from 'styled-components';
 type Props = ThemeProps;
 
 enum FilterValue {
+  ALL = 'all',
   POLKADOT_PARACHAIN = 'Polkadot parachain',
   KUSAMA_PARACHAIN = 'Kusama parachain',
   WINNER = 'completed',
-  FAIL = 'failed'
+  FAIL = 'failed',
+  ACTIVE = 'active'
 }
 
 function getTagColor (paraState?: CrowdloanParaState) {
@@ -90,6 +93,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const price24hMap = useSelector((state: RootState) => state.price.price24hMap);
+  const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
 
   const filterOptions = useMemo(() => [
     { label: t('Polkadot parachain'), value: FilterValue.POLKADOT_PARACHAIN },
@@ -146,8 +150,28 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const filteredItems = useMemo(() => {
-    return items.filter(filterFunction).filter((item: CrowdloanItemType) => searchFunction(item, searchInput));
-  }, [filterFunction, items, searchFunction, searchInput]);
+    const filterTabFunction = (item: CrowdloanItemType) => {
+      if (selectedFilterTab === FilterValue.ALL) {
+        return true;
+      }
+
+      if (selectedFilterTab === FilterValue.WINNER) {
+        return item.paraState === CrowdloanParaState.COMPLETED;
+      }
+
+      if (selectedFilterTab === FilterValue.ACTIVE) {
+        return item.paraState === CrowdloanParaState.ONGOING;
+      }
+
+      return false;
+    };
+
+    const _filterFunction = (_item: CrowdloanItemType) => {
+      return filterTabFunction(_item) && filterFunction(_item) && searchFunction(_item, searchInput);
+    };
+
+    return items.filter(_filterFunction);
+  }, [filterFunction, items, searchFunction, searchInput, selectedFilterTab]);
 
   // render item
   const getParaStateLabel = useCallback((paraState?: CrowdloanParaState) => {
@@ -156,7 +180,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     if (paraState.valueOf() === CrowdloanParaState.COMPLETED.valueOf()) {
-      return isWebUI ? t('Winner') : t('Win');
+      return t('Win');
     }
 
     if (paraState === CrowdloanParaState.FAILED.valueOf()) {
@@ -168,7 +192,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     return '';
-  }, [isWebUI, t]);
+  }, [t]);
 
   const renderItem = useCallback(
     (item: CrowdloanItemType) => {
@@ -350,23 +374,53 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [getParaStateLabel, isShowBalance, priceChangeMap, theme.token?.colorError, theme.token?.colorSuccess]);
 
+  const filterTabItems = useMemo<FilterTabItemType[]>(() => {
+    return [
+      {
+        label: t('All'),
+        value: FilterValue.ALL
+      },
+      {
+        label: t('Active'),
+        value: FilterValue.ACTIVE
+      },
+      {
+        label: t('Winner'),
+        value: FilterValue.WINNER
+      }
+    ];
+  }, [t]);
+
+  const onSelectFilterTab = useCallback((value: string) => {
+    setSelectedFilterTab(value);
+  }, []);
+
   const crowdloansContent = useMemo(() => {
     if (isWebUI) {
       return (
         <div className='web-list'>
-          <Search
-            actionBtnIcon={(
-              <Icon
-                phosphorIcon={FadersHorizontal}
-                size='sm'
-              />
-            )}
-            onClickActionBtn={onClickActionBtn}
-            onSearch={handleSearch}
-            placeholder={'Token name'}
-            searchValue={searchInput}
-            showActionBtn
-          />
+          <div className='web-list-tool-area'>
+            <FilterTabs
+              className={'filter-tabs-container'}
+              items={filterTabItems}
+              onSelect={onSelectFilterTab}
+              selectedItem={selectedFilterTab}
+            />
+
+            <Search
+              actionBtnIcon={(
+                <Icon
+                  phosphorIcon={FadersHorizontal}
+                  size='sm'
+                />
+              )}
+              onClickActionBtn={onClickActionBtn}
+              onSearch={handleSearch}
+              placeholder={'Token name'}
+              searchValue={searchInput}
+              showActionBtn
+            />
+          </div>
 
           <div className='web-container'>
             {filteredItems.length > 0
@@ -403,7 +457,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       />
 
     );
-  }, [handleSearch, searchInput, columns, filteredItems, emptyCrowdloanList, filterFunction, isWebUI, items, onClickActionBtn, renderItem, searchFunction, t]);
+  }, [isWebUI, filterFunction, items, onClickActionBtn, renderItem, emptyCrowdloanList, searchFunction, t, filterTabItems, onSelectFilterTab, selectedFilterTab, handleSearch, searchInput, filteredItems, columns]);
 
   return (
     <PageWrapper
@@ -447,6 +501,13 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
+
+      '.web-list-tool-area': {
+        display: 'flex',
+        gap: token.size,
+        alignItems: 'center'
+      },
+
       '.web-container': {
         height: '100%',
         marginTop: 24

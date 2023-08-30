@@ -135,8 +135,6 @@ function getAccountBalance (
       isTokenGroupBalanceReady = isTokenBalanceReady;
 
       tokenBalance.chain = originChain;
-      !tokenBalance.relatedChains.includes(originChain) && tokenBalance.relatedChains.push(originChain);
-      !tokenGroupBalance.relatedChains.includes(originChain) && tokenGroupBalance.relatedChains.push(originChain);
       tokenBalance.chainDisplayName = _getChainName(chainInfoMap[originChain]);
       tokenBalance.isTestnet = !_isAssetValuable(chainAsset);
 
@@ -149,8 +147,16 @@ function getAccountBalance (
 
         tokenBalance.total.value = tokenBalance.free.value.plus(tokenBalance.locked.value);
 
-        if (!isShowZeroBalance && tokenBalance.total.value.eq(BN_0)) {
-          return;
+        if (isShowZeroBalance) {
+          !tokenBalance.relatedChains.includes(originChain) && tokenBalance.relatedChains.push(originChain);
+          !tokenGroupBalance.relatedChains.includes(originChain) && tokenGroupBalance.relatedChains.push(originChain);
+        } else {
+          if (tokenBalance.total.value.eq(BN_0)) {
+            return;
+          }
+
+          !tokenBalance.relatedChains.includes(originChain) && tokenBalance.relatedChains.push(originChain);
+          !tokenGroupBalance.relatedChains.includes(originChain) && tokenGroupBalance.relatedChains.push(originChain);
         }
 
         tokenGroupBalance.total.value = tokenGroupBalance.total.value.plus(tokenBalance.total.value);

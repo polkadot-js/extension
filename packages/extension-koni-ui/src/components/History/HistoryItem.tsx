@@ -16,6 +16,7 @@ import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { ArrowSquareOut, CaretRight } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -43,6 +44,7 @@ function getLink (data: TransactionHistoryDisplayItem, chainInfoMap: Record<stri
 
 function Component (
   { className = '', item, onClick }: Props) {
+  const { t } = useTranslation();
   const displayData = item.displayData;
   const { isWebUI } = useContext(ScreenContext);
   const { isShowBalance } = useSelector((state) => state.settings);
@@ -206,6 +208,7 @@ function Component (
           }
           onClick={handleOnClick}
           size={'xs'}
+          tooltip={t('View on explorer')}
           type='ghost'
         />
       </div>

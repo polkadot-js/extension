@@ -311,8 +311,8 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
         alignItems: 'center',
 
         '.dapp-info-img': {
-          '--img-height': token.sizeLG,
-          '--img-width': token.sizeLG
+          '--img-height': `${token.sizeLG}px`,
+          '--img-width': `${token.sizeLG}px`
         },
 
         '.dapp-info-domain': {

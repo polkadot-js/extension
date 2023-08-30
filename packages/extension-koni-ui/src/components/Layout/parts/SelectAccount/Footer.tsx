@@ -5,17 +5,16 @@ import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELEC
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
-import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
+import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-type Props = ThemeProps & {
-  extraAction?: (value: boolean) => void;
-};
+type Props = ThemeProps;
 
-const Component: React.FC<Props> = ({ className, extraAction }: Props) => {
+const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+
   const openModal = useCallback((id: string) => {
     inactiveModal(SELECT_ACCOUNT_MODAL);
     activeModal(id);
@@ -23,18 +22,19 @@ const Component: React.FC<Props> = ({ className, extraAction }: Props) => {
 
   const openCreateAccount = useCallback(() => {
     openModal(CREATE_ACCOUNT_MODAL);
-    extraAction && extraAction(false);
-  }, [extraAction, openModal]);
+  }, [openModal]);
 
   const openImportAccount = useCallback(() => {
     openModal(IMPORT_ACCOUNT_MODAL);
-    extraAction && extraAction(false);
-  }, [extraAction, openModal]);
+  }, [openModal]);
 
   const openAttachAccount = useCallback(() => {
     openModal(ATTACH_ACCOUNT_MODAL);
-    extraAction && extraAction(false);
-  }, [extraAction, openModal]);
+  }, [openModal]);
+
+  const onConnectExtention = useCallback(() => {
+    // on connect extension
+  }, []);
 
   return (
     <div className={className}>
@@ -49,7 +49,7 @@ const Component: React.FC<Props> = ({ className, extraAction }: Props) => {
         onClick={openCreateAccount}
         schema='secondary'
       >
-        {t('Create a new account')}
+        {t('Create new')}
       </Button>
       <Button
         className='btn-min-width'
@@ -72,6 +72,18 @@ const Component: React.FC<Props> = ({ className, extraAction }: Props) => {
           />
         )}
         onClick={openAttachAccount}
+        schema='secondary'
+        tooltip={t('Attach account')}
+      />
+      <Button
+        className='btn-min-width'
+        icon={(
+          <Icon
+            phosphorIcon={PuzzlePiece}
+            weight={'fill'}
+          />
+        )}
+        onClick={onConnectExtention}
         schema='secondary'
         tooltip={t('Attach account')}
       />

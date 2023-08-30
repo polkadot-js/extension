@@ -144,9 +144,9 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
       onClick={_onPressItem}
     >
       <TokenItem
-        chainDisplayName={name || ''}
         logoKey={nativeToken}
         networkKey={chain}
+        subTitle={name || ''}
         symbol={nativeToken}
       />
 

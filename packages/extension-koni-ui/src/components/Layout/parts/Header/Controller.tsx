@@ -8,8 +8,7 @@ import { CaretLeft } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import Accounts from './Accounts';
-import Customization from './Customization';
+import SelectAccount from '../SelectAccount';
 import InjectStatus from './InjectStatus';
 import LockStatus from './LockStatus';
 import Networks from './Networks';
@@ -51,9 +50,10 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
           <Typography.Title className='page-name'>{title}</Typography.Title>
         </div>
         <div className='action-group'>
-          <Customization />
           <Networks />
-          <Accounts />
+          <div className={'trigger-container -select-account'}>
+            <SelectAccount />
+          </div>
           <LockStatus />
           <InjectStatus />
         </div>
@@ -86,36 +86,28 @@ const Controller = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
+      gap: 8
+    },
+
+    '.trigger-container': {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      cursor: 'pointer',
+      padding: `0 ${token.padding}px`,
+      height: 40,
       gap: 8,
+      background: token.colorBgSecondary,
+      borderRadius: 32
+    },
 
-      '.trigger-container': {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        cursor: 'pointer',
-        padding: `0 ${token.padding}px`,
-        height: 40,
-        gap: 8,
-        background: token.colorBgSecondary,
-        borderRadius: 32,
+    '.trigger-container.-select-account': {
+      paddingLeft: token.paddingXXS,
+      paddingRight: 0,
 
-        '.ant-btn': {
-          height: 'fit-content',
-          minWidth: 'unset',
-          width: 'fit-content'
-        },
-
-        '.__account-item': {
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        },
-        '.__account-name': {
-          'white-space': 'nowrap',
-          maxWidth: 200,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis'
-        }
+      '.ant-select-modal-input-suffix .anticon': {
+        fontSize: 12,
+        color: token.colorTextLight3
       }
     }
   }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { Avatar } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import useChainInfo from '@subwallet/extension-koni-ui/hooks/chain/useChainInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -24,7 +25,16 @@ const Component: React.FC<Props> = ({ account, className }: Props) => {
 
   return (
     <div className={className}>
-      {isAll && <AvatarGroup />}
+      {isAll
+        ? <AvatarGroup />
+        : (
+          <Avatar
+            className={'account-avatar'}
+            size={20}
+            value={address}
+          />
+        )
+      }
       <Typography.Text
         className='account-name'
         ellipsis={true}

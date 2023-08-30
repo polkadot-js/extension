@@ -10,6 +10,7 @@ export { SortingModal } from './SortingModal';
 export * from './Account';
 export * from './AddressBook';
 export * from './ActionModal';
+export * from './BaseSelectModal';
 export * from './Customize/CustomizeModal';
 export * from './FilterModal';
 export * from './GlobalSearchTokenModal';

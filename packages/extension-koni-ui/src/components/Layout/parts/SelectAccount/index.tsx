@@ -20,8 +20,8 @@ import styled from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { AccountBriefInfo, AccountCardSelection, AccountItemWithName } from '../../../Account';
-import { BaseSelectModal } from '../../../Modal/BaseSelectModal';
 import GeneralEmptyList from '../../../GeneralEmptyList';
+import { BaseSelectModal } from '../../../Modal';
 import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
 import SelectAccountFooter from '../SelectAccount/Footer';
 

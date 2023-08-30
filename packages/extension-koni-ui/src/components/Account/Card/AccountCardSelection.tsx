@@ -6,15 +6,13 @@ import React from 'react';
 import styled from 'styled-components';
 
 function Component (props: _AccountCardProps): React.ReactElement<_AccountCardProps> {
-  const { showMoreBtn = true, ...restProps } = props;
-
   return (
     <AccountCardBase
-      {...restProps}
+      {...props}
       addressPreLength={9}
       addressSufLength={9}
       preventPrefix
-      showMoreBtn={showMoreBtn}
+      showMoreBtn={true}
     />
   );
 }

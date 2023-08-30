@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-    import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
+import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import BaseWeb from '@subwallet/extension-koni-ui/components/Layout/base/BaseWeb';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';

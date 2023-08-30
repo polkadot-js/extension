@@ -38,13 +38,14 @@ interface WelcomeButtonItem {
   schema: ButtonProps['schema'];
   title: string;
   description: string;
+  loading: boolean;
 }
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { enableInject, injected } = useContext(InjectContext);
+  const { enableInject, initCallback, initEnable, injected, loadingInject } = useContext(InjectContext);
   const navigate = useNavigate();
 
   const [form] = Form.useForm<ReadOnlyAccountInput>();
@@ -161,30 +162,34 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       icon: PlusCircle,
       id: CREATE_ACCOUNT_MODAL,
       schema: isWebUI ? 'secondary' : 'primary',
-      title: t('Create a new account')
+      title: t('Create a new account'),
+      loading: false
     },
     {
       description: t('Import an existing account'),
       icon: FileArrowDown,
       id: IMPORT_ACCOUNT_MODAL,
       schema: 'secondary',
-      title: t('Import an account')
+      title: t('Import an account'),
+      loading: false
     },
     {
       description: t('Attach an account without private key'),
       icon: Swatches,
       id: ATTACH_ACCOUNT_MODAL,
       schema: 'secondary',
-      title: t('Attach an account')
+      title: t('Attach an account'),
+      loading: false
     },
     {
       description: 'For management of your account keys',
       icon: PuzzlePiece,
       id: DOWNLOAD_EXTENSION,
       schema: 'secondary',
-      title: injected ? t('Use SubWallet extension') : t('Download SubWallet extension')
+      title: injected ? t('Use SubWallet extension') : t('Download SubWallet extension'),
+      loading: loadingInject
     }
-  ], [injected, isWebUI, t]);
+  ], [injected, isWebUI, t, loadingInject]);
 
   const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI, items]);
 
@@ -216,6 +221,13 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       goHome();
     }
   }, [goHome, isAccountsEmpty]);
+
+  // Go root after inject
+  useEffect(() => {
+    if (initEnable) {
+      initCallback(() => setEnInject({}));
+    }
+  }, [initCallback, initEnable]);
 
   return (
     <Layout.Base
@@ -265,6 +277,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                   />
                 }
                 key={item.id}
+                loading={item.loading}
                 onClick={openModal(item.id)}
                 schema={item.schema}
               >

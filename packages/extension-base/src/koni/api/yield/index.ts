@@ -16,6 +16,29 @@ export function getYieldPools (): YieldPoolInfo[] {
   return Object.values(YIELD_POOLS_INFO);
 }
 
+export function subscribeYieldPoolStats (substrateApiMap: Record<string, _SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, callback: (rs: YieldPoolInfo) => void) {
+  const unsubList: VoidFunction[] = [];
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  Object.values(YIELD_POOLS_INFO).forEach(async (poolInfo) => {
+    const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
+    const chainInfo = chainInfoMap[poolInfo.chain];
+
+    if (YieldPoolType.NATIVE_STAKING === poolInfo.type) {
+      const unsub = await subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
+
+      // @ts-ignore
+      unsubList.push(unsub);
+    }
+  });
+
+  return () => {
+    unsubList.forEach((unsub) => {
+      unsub && unsub();
+    });
+  };
+}
+
 export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, substrateApi: _SubstrateApi, chainInfo: _ChainInfo, callback: (rs: YieldPoolInfo) => void) {
   return substrateApi.api.query.staking.currentEra(async (_currentEra: Codec) => {
     const currentEra = _currentEra.toString();
@@ -49,6 +72,8 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
     const minPoolJoin = _minPoolJoin?.toString() || undefined;
     const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
 
+    const apy = calculateAPY(expectedReturn);
+
     // eslint-disable-next-line node/no-callback-literal
     callback({
       ...poolInfo,
@@ -57,45 +82,33 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
         maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks),
         minJoinPool: minStake.toString(),
         minWithdrawal: '0',
-        apy: expectedReturn,
+        apy,
         tvl: bnTotalEraStake.toString()
       }
     });
 
     // eslint-disable-next-line node/no-callback-literal
-    callback({
-      ...poolInfo,
-      stats: { // TODO
+    callback({ // TODO
+      ...YIELD_POOLS_INFO.DOT___nomination_pool,
+      stats: {
         maxCandidatePerFarmer: parseInt(maxNominations),
         maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks),
         minJoinPool: minPoolJoin || '0',
         minWithdrawal: '0',
-        apy: expectedReturn,
+        apy,
         tvl: bnTotalEraStake.toString()
       }
     });
   });
 }
 
-export function subscribeYieldPoolStats (substrateApiMap: Record<string, _SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, callback: (rs: YieldPoolInfo) => void) {
-  const unsubList: VoidFunction[] = [];
+export function calculateAPY (apr: number, compoundingPeriod = 365) { // compounding daily by default
+  if (!apr) {
+    return 0;
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  Object.values(YIELD_POOLS_INFO).forEach(async (poolInfo) => {
-    const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
-    const chainInfo = chainInfoMap[poolInfo.chain];
+  const earningRatio = (apr / 100) / compoundingPeriod;
+  const apy = (1 + earningRatio) ** compoundingPeriod - 1;
 
-    if (YieldPoolType.NATIVE_STAKING === poolInfo.type) {
-      const unsub = await subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
-
-      // @ts-ignore
-      unsubList.push(unsub);
-    }
-  });
-
-  return () => {
-    unsubList.forEach((unsub) => {
-      unsub && unsub();
-    });
-  };
+  return apy * 100;
 }

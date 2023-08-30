@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { CurrentAccountInfo, InjectState, KeyringState } from '@subwallet/extension-base/background/KoniTypes';
+import { CurrentAccountInfo, KeyringState } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { CurrentAccountStore } from '@subwallet/extension-base/stores';
@@ -24,10 +24,6 @@ export class KeyringService {
     isReady: false,
     hasMasterPassword: false,
     isLocked: false
-  });
-
-  readonly injectStateSubject = new BehaviorSubject<InjectState>({
-    injectDone: false
   });
 
   constructor (private eventService: EventService) {
@@ -119,14 +115,6 @@ export class KeyringService {
 
   public removeInjectAccounts (addresses: string[]) {
     keyring.removeInjects(addresses);
-  }
-
-  get injectState () {
-    return this.injectStateSubject;
-  }
-
-  public pingInject () {
-    this.injectStateSubject.next({ injectDone: true });
   }
 
   /* Inject */

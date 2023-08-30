@@ -26,6 +26,5 @@ export const EDIT_UNLOCK_TYPE_MODAL = 'edit-unlock-type-modal';
 export const RESET_WALLET_MODAL = 'reset-wallet-modal';
 export const SEED_PHRASE_MODAL = 'seed-phrase-modal';
 export const ADD_CONNECTION_MODAL = 'add-connection-modal';
-export const LOAD_INJECT_MODAL = 'load-inject-modal';
 
 export const ACCOUNT_EXPORT_MODAL = 'account-export-modal';

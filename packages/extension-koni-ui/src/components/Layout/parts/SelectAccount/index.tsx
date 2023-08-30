@@ -5,6 +5,7 @@ import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/backg
 import AccountCardSelection from '@subwallet/extension-koni-ui/components/Account/Card/AccountCardSelection';
 import AccountBriefInfo from '@subwallet/extension-koni-ui/components/Account/Info/AccountBriefInfo';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
+import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import { SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/auth/useGetCurrentAuth';
 import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/auth/useGetCurrentTab';
@@ -17,9 +18,9 @@ import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/utils/account/account';
-import { BackgroundIcon, Logo, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, Logo, ModalContext, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Plug, Plugs, PlugsConnected } from 'phosphor-react';
+import { CaretDown, Plug, Plugs, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -300,7 +301,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </Tooltip>
       )}
 
-      <SelectModal
+      <BaseSelectModal
         background={'default'}
         className={className}
         footer={<SelectAccountFooter />}
@@ -319,6 +320,12 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         selected={currentAccount?.address || ''}
         shape='round'
         size='small'
+        suffix={
+          <Icon
+            phosphorIcon={CaretDown}
+            weight={'bold'}
+          />
+        }
         title={t('Select account')}
       />
 
@@ -359,7 +366,7 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
 
     '&.ant-sw-modal': {
       '.ant-sw-modal-body': {
-        height: 370,
+        minHeight: 370,
         marginBottom: 0
       },
 
@@ -368,7 +375,8 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       },
 
       '.ant-sw-modal-footer': {
-        marginTop: 0
+        marginTop: 0,
+        borderTopColor: 'rgba(33, 33, 33, 0.80)'
       },
 
       '.ant-account-card': {

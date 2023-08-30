@@ -21,14 +21,15 @@ export interface InjectedWindow extends This {
 }
 
 interface InjectContextProps {
-  substrateWallet?: Injected;
-  evmWallet?: SubWalletEvmProvider;
-  enableInject: (callback?: VoidFunction) => void;
   disableInject: () => void;
-  initEnable: boolean;
-  loadingInject: boolean;
+  enableInject: (callback?: VoidFunction) => void;
   enabled: boolean;
+  evmWallet?: SubWalletEvmProvider;
+  initCallback: (callback?: VoidFunction) => void;
+  initEnable: boolean;
   injected: boolean;
+  loadingInject: boolean;
+  substrateWallet?: Injected;
 }
 
 type This = typeof globalThis;
@@ -64,7 +65,7 @@ const parseAccountMap = (values: AccountArrayMap): InjectedAccountWithMeta[] => 
   return Object.values(result);
 };
 
-const updateInjected = (oldMap: AccountArrayMap, newMap: AccountArrayMap, callback?: VoidFunction) => {
+const updateInjected = (oldMap: AccountArrayMap, newMap: AccountArrayMap, callback: VoidFunction) => {
   const oldArray = parseAccountMap(oldMap);
   const newArray = parseAccountMap(newMap);
 
@@ -105,12 +106,13 @@ const updateInjected = (oldMap: AccountArrayMap, newMap: AccountArrayMap, callba
 };
 
 export const InjectContext = React.createContext<InjectContextProps>({
+  disableInject: noop,
   enableInject: noop,
-  initEnable: false,
-  loadingInject: false,
-  injected: false,
   enabled: false,
-  disableInject: noop
+  initCallback: noop,
+  initEnable: false,
+  injected: false,
+  loadingInject: false
 });
 
 export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
@@ -131,6 +133,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const enablePromise = useRef<VoidFunction | undefined>();
 
   const [loadingInject, setLoadingInject] = useState(initEnable);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const checkLoading = useCallback(() => {
     const values = promiseMapRef.current;
@@ -144,8 +147,6 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
       }
     }
   }, []);
-
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const updateState = useCallback(() => {
     addLazy(updateStatePromiseKey, () => {
@@ -171,6 +172,10 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     accountsRef.current = {};
     updateState();
   }, [setEnabled, updateState]);
+
+  const initCallback = useCallback((callback?: VoidFunction) => {
+    enablePromise.current = callback;
+  }, []);
 
   useEffect(() => {
     const wallet = win.injectedWeb3?.['subwallet-js'];
@@ -264,7 +269,12 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   useEffect(() => {
     if (!isFirstLoad) {
       addLazy(injectPromiseKey, () => {
-        updateInjected(previousRef.current, cacheAccounts, enablePromise.current);
+        const callback = () => {
+          enablePromise.current?.();
+          enablePromise.current = undefined;
+        };
+
+        updateInjected(previousRef.current, cacheAccounts, callback);
         checkLoading();
       }, 500, 1000, false);
     }
@@ -281,6 +291,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
         enableInject,
         enabled,
         evmWallet,
+        initCallback,
         initEnable,
         injected,
         loadingInject,

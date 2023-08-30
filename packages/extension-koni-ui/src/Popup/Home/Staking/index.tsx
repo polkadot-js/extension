@@ -3,7 +3,6 @@
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenBalance, TokenItem, TokenPrice } from '@subwallet/extension-koni-ui/components';
-import { BackgroundMask } from '@subwallet/extension-koni-ui/components/BackgroundMask';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
@@ -16,9 +15,8 @@ import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { sortStakingByValue, stopClickPropagation } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, Popover, SwList, Table, Tag } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList, Table, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
-import CN from 'classnames';
 import { ArrowClockwise, DotsThree, FadersHorizontal, Plus, Trophy, User, Users } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -121,8 +119,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return false;
     };
   }, [selectedFilters]);
-
-  const [popoverOpen, setPopoverOpen] = useState<boolean>(false);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -244,9 +240,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [address, currentAccount?.address, inactiveModal, navigate]);
 
-  const handlePopoverVisibilityChange = useCallback((newOpen: boolean) => {
-    setPopoverOpen(newOpen);
-  }, []);
+  const onClickRowMoreAction = useCallback((item: StakingDataType) => {
+    return (event: React.MouseEvent) => {
+      stopClickPropagation(event);
+      onClickRightIcon(item);
+    };
+  }, [onClickRightIcon]);
 
   const columns = useMemo(() => {
     return [
@@ -330,52 +329,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 value={balanceValue}
               />
 
-              <Popover
-                content={
-                  <div
-                    className={CN(className, 'popover')}
-                    onClick={stopClickPropagation}
-                  >
-                    <MoreActionModal
-                      chainStakingMetadata={row.chainStakingMetadata}
-                      nominatorMetadata={row.nominatorMetadata}
-                      reward={row.reward}
-                      showContentOnly={true}
-                      staking={row.staking}
-                    />
-                  </div>
-                }
-                onOpenChange={handlePopoverVisibilityChange}
-                overlayInnerStyle={{
-                  padding: '0',
-                  boxShadow: 'none',
-                  backgroundColor: 'transparent'
-                }}
-                placement='bottomRight'
-                showArrow={false}
-                trigger='click'
-              >
-                <Button
-                  className='extra-button'
-                  icon={(
-                    <Icon
-                      className={'right-icon'}
-                      customSize={'20px'}
-                      phosphorIcon={DotsThree}
-                      type='phosphor'
-                    />
-                  )}
-                  onClick={stopClickPropagation}
-                  size='xs'
-                  type='ghost'
-                />
-              </Popover>
+              <Button
+                className='extra-button'
+                icon={(
+                  <Icon
+                    className={'right-icon'}
+                    customSize={'20px'}
+                    phosphorIcon={DotsThree}
+                    type='phosphor'
+                  />
+                )}
+                onClick={onClickRowMoreAction(row)}
+                size='xs'
+                type='ghost'
+              />
             </div>
           );
         }
       }
     ];
-  }, [className, handlePopoverVisibilityChange, priceMap]);
+  }, [onClickRowMoreAction, priceMap]);
 
   const onSearch = useCallback((value: string) => setSearchInput(value), []);
 
@@ -478,8 +451,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             : (
               <NoContent pageType={PAGE_TYPE.STAKING} />
             )}
-
-          <BackgroundMask visible={popoverOpen} />
         </div>
       );
     }
@@ -504,7 +475,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [columns, emptyStakingList, filterFunction, filterTabItems, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, onSelectFilterTab, popoverOpen, renderItem, searchFunction, searchInput, selectedFilterTab, t]);
+  }, [columns, emptyStakingList, filterFunction, filterTabItems, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, onSelectFilterTab, renderItem, searchFunction, searchInput, selectedFilterTab, t]);
 
   return (
     <PageWrapper

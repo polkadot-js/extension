@@ -32,6 +32,11 @@ export const baseServiceItems: ServiceItem[] = [
     disabled: false
   },
   {
+    key: 'coinbase',
+    name: 'Coinbase',
+    disabled: false
+  },
+  {
     key: 'moonpay',
     name: 'MoonPay (Coming soon)',
     disabled: true

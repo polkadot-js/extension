@@ -8,6 +8,7 @@ const DEFAULT_BUY_SERVICE: BuyService = { symbol: '', network: '' };
 const DEFAULT_SERVICE_INFO: Record<SupportService, BuyService> = {
   transak: { ...DEFAULT_BUY_SERVICE },
   banxa: { ...DEFAULT_BUY_SERVICE },
+  coinbase: { ...DEFAULT_BUY_SERVICE },
   onramper: { ...DEFAULT_BUY_SERVICE },
   moonpay: { ...DEFAULT_BUY_SERVICE }
 };
@@ -105,13 +106,17 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       banxa: {
         network: 'ETH',
         symbol: 'ETH'
+      },
+      coinbase: {
+        network: 'ethereum',
+        symbol: 'ETH'
       }
     },
     network: 'ethereum',
     slug: 'ethereum-NATIVE-ETH',
     symbol: 'ETH',
     support: 'ETHEREUM',
-    services: ['transak', 'banxa']
+    services: ['transak', 'banxa', 'coinbase']
   },
   BNB: {
     serviceInfo: {

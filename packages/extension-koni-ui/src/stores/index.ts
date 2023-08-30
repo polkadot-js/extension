@@ -6,7 +6,6 @@ import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, R
 import storage from 'redux-persist/lib/storage';
 
 import AccountStateReducer from './base/AccountState';
-import InjectStateReducer from './base/InjectState';
 import RequestStateReducer from './base/RequestState';
 import SettingsReducer from './base/Settings';
 import UIViewStateReducer from './base/UIViewState';
@@ -53,7 +52,6 @@ const rootReducers = combineReducers({
   settings: SettingsReducer,
   accountState: AccountStateReducer,
   uiViewState: UIViewStateReducer,
-  injectState: InjectStateReducer,
 
   // wallet connect
   walletConnect: WalletConnectReducer

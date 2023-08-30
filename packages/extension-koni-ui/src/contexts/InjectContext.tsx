@@ -4,13 +4,10 @@
 import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvmProvider';
 import { addLazy } from '@subwallet/extension-base/utils';
 import { EvmProvider, Injected, InjectedAccountWithMeta, InjectedWindowProvider, Unsubcall } from '@subwallet/extension-inject/types';
-import { LoadingInjectModal } from '@subwallet/extension-koni-ui/components';
-import { ENABLE_INJECT, LOAD_INJECT_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { addInjects, pingInject, removeInjects } from '@subwallet/extension-koni-ui/messaging';
+import { ENABLE_INJECT } from '@subwallet/extension-koni-ui/constants';
+import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
 import { noop, toShort } from '@subwallet/extension-koni-ui/utils';
-import { ModalContext } from '@subwallet/react-ui';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
 interface Props {
@@ -28,6 +25,8 @@ interface InjectContextProps {
   evmWallet?: SubWalletEvmProvider;
   enableInject: (callback?: VoidFunction) => void;
   disableInject: () => void;
+  initEnable: boolean;
+  loadingInject: boolean;
   enabled: boolean;
   injected: boolean;
 }
@@ -41,7 +40,6 @@ type WalletPromiseMap = Record<string, WalletState>;
 const win = window as Window & InjectedWindow;
 const updateStatePromiseKey = 'updateInjectState';
 const injectPromiseKey = 'injectAccount';
-const waitInjectPromiseKey = 'waitInject';
 
 const evmConvertToInject = (address: string): InjectedAccountWithMeta => {
   return {
@@ -106,18 +104,16 @@ const updateInjected = (oldMap: AccountArrayMap, newMap: AccountArrayMap, callba
   Promise.all(promises).finally(callback);
 };
 
-const modalId = LOAD_INJECT_MODAL;
-
 export const InjectContext = React.createContext<InjectContextProps>({
   enableInject: noop,
+  initEnable: false,
+  loadingInject: false,
   injected: false,
   enabled: false,
   disableInject: noop
 });
 
 export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
-  const { activeModal, inactiveModal } = useContext(ModalContext);
-
   const injected = useMemo(() => {
     return !!win.injectedWeb3?.['subwallet-js'] || !!win.SubWallet;
   }, []);
@@ -127,37 +123,27 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const [update, setUpdate] = useState({});
   const [enabled, setEnabled] = useLocalStorage<boolean>(ENABLE_INJECT, false);
   const [initEnable] = useState(enabled);
-  const { injectDone } = useSelector((state) => state.injectState);
 
   const accountsRef = useRef<AccountArrayMap>({});
   const [cacheAccounts, setCacheAccounts] = useState<AccountArrayMap>(accountsRef.current);
   const previousRef = useRef<AccountArrayMap>({});
   const promiseMapRef = useRef<WalletPromiseMap>({});
-  const waitInject = useRef(false);
   const enablePromise = useRef<VoidFunction | undefined>();
 
-  const createCheckModal = useCallback((active: typeof activeModal, inactive: typeof inactiveModal, injectDone: boolean) => {
-    return (enable = true) => {
-      if (enable && waitInject.current) {
-        const values = promiseMapRef.current;
+  const [loadingInject, setLoadingInject] = useState(initEnable);
 
-        const hasDone = Object.values(values).some((v) => v === 'SUCCESS');
-        const allError = Object.values(values).every((v) => v === 'FAIL');
+  const checkLoading = useCallback(() => {
+    const values = promiseMapRef.current;
 
-        if (hasDone || allError || injectDone) {
-          inactive(modalId);
+    const hasDone = Object.values(values).some((v) => v === 'SUCCESS');
+    const allError = Object.values(values).every((v) => v === 'FAIL');
 
-          if (hasDone || allError) {
-            pingInject().catch(console.error);
-          }
-        } else {
-          active(modalId);
-        }
+    if (hasDone || allError) {
+      if (hasDone || allError) {
+        setLoadingInject(false);
       }
-    };
+    }
   }, []);
-
-  const checkModalRef = useRef(createCheckModal(activeModal, inactiveModal, injectDone));
 
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 
@@ -175,6 +161,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     setEnabled(true);
     enablePromise.current = callback;
     setUpdate({});
+    setLoadingInject(true);
   }, [setEnabled]);
 
   const disableInject = useCallback(() => {
@@ -190,7 +177,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
 
     if (wallet && enabled) {
       promiseMapRef.current = { ...promiseMapRef.current, 'subwallet-js': 'PENDING' };
-      checkModalRef.current();
+      checkLoading();
       wallet.enable('web-app')
         .then((inject) => {
           setSubstrateWallet(inject);
@@ -198,18 +185,18 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
         .catch((e) => {
           console.error(e);
           promiseMapRef.current = { ...promiseMapRef.current, 'subwallet-js': 'FAIL' };
-          checkModalRef.current();
+          checkLoading();
         })
       ;
     }
-  }, [enabled, update]);
+  }, [enabled, update, checkLoading]);
 
   useEffect(() => {
     const wallet = win.SubWallet;
 
     if (wallet && enabled) {
       promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'PENDING' };
-      checkModalRef.current();
+      checkLoading();
 
       wallet.enable()
         .then(() => {
@@ -218,11 +205,11 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
         .catch((e) => {
           console.error(e);
           promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'FAIL' };
-          checkModalRef.current();
+          checkLoading();
         })
       ;
     }
-  }, [enabled, update]);
+  }, [enabled, update, checkLoading]);
 
   useEffect(() => {
     let unsubscribe: Unsubcall | undefined;
@@ -278,47 +265,29 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     if (!isFirstLoad) {
       addLazy(injectPromiseKey, () => {
         updateInjected(previousRef.current, cacheAccounts, enablePromise.current);
-        checkModalRef.current();
+        checkLoading();
       }, 500, 1000, false);
     }
 
     return () => {
       setIsFirstLoad(false);
     };
-  }, [cacheAccounts, isFirstLoad]);
-
-  useEffect(() => {
-    if (!initEnable || !injected) {
-      pingInject().catch(console.error);
-    }
-  }, [initEnable, injected]);
-
-  useEffect(() => {
-    if (enabled) {
-      addLazy(waitInjectPromiseKey, () => {
-        waitInject.current = true;
-        checkModalRef.current();
-      }, 3000, undefined, false);
-    }
-  }, [enabled]);
-
-  useEffect(() => {
-    checkModalRef.current = createCheckModal(activeModal, inactiveModal, injectDone);
-  }, [activeModal, createCheckModal, inactiveModal, injectDone]);
+  }, [cacheAccounts, isFirstLoad, checkLoading]);
 
   return (
     <InjectContext.Provider
       value={{
-        injected,
+        disableInject,
+        enableInject,
         enabled,
         evmWallet,
-        substrateWallet,
-        enableInject,
-        disableInject
+        initEnable,
+        injected,
+        loadingInject,
+        substrateWallet
       }}
     >
       {children}
-      <LoadingInjectModal />
     </InjectContext.Provider>
   );
 };

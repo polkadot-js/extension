@@ -469,6 +469,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             key={listKey}
             list={historyList}
             renderItem={renderItem}
+            renderOnScroll={true}
             renderWhenEmpty={emptyList}
             searchBy={searchFunc}
             searchMinCharactersCount={2}
@@ -488,6 +489,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         list={historyList}
         onClickActionBtn={onClickActionBtn}
         renderItem={renderItem}
+        renderOnScroll={true}
         renderWhenEmpty={emptyList}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}
@@ -545,6 +547,7 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.web-list': {
       flex: 1,
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
 
@@ -555,6 +558,7 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
       },
 
       '.ant-sw-list': {
+        overflow: 'auto',
         marginTop: 24,
         flex: 1
       }

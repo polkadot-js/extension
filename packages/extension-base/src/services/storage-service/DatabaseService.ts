@@ -348,6 +348,10 @@ export default class DatabaseService {
     await this.stores.yieldPoolInfo.upsert(data);
   }
 
+  async getYieldPools () {
+    return this.stores.yieldPoolInfo.getAll();
+  }
+
   subscribeYieldPoolInfo (chains: string[], callback: (data: YieldPoolInfo[]) => void) {
     this.stores.yieldPoolInfo.subscribeYieldPoolInfo(chains).subscribe(({
       next: (data) => callback && callback(data)

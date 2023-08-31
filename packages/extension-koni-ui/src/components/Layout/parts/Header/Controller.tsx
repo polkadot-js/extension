@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import SelectAccount from '../SelectAccount';
-import InjectStatus from './InjectStatus';
 import LockStatus from './LockStatus';
 import Networks from './Networks';
 
@@ -55,7 +54,6 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
             <SelectAccount />
           </div>
           <LockStatus />
-          <InjectStatus />
         </div>
       </div>
     </div>
@@ -105,7 +103,7 @@ const Controller = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       paddingLeft: token.paddingXXS,
       paddingRight: 0,
 
-      '.ant-select-modal-input-suffix .anticon': {
+      '.input-suffix .anticon': {
         fontSize: 12,
         color: token.colorTextLight3
       }

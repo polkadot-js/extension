@@ -172,6 +172,16 @@ const AccountCardBase = styled(Component)<_AccountCardProps>(({ theme: { token }
 
     '.logo-image': {
       '--height': `${token.sizeLG}px`
+    },
+
+    '.ant-web3-block-middle-item': {
+      overflow: 'hidden'
+    },
+
+    '.ant-account-card-name': {
+      overflow: 'hidden',
+      textWrap: 'nowrap',
+      textOverflow: 'ellipsis'
     }
   };
 });

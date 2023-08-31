@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { Codec } from '@polkadot/types/types';
 import { BN } from '@polkadot/util';
@@ -72,17 +73,21 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
     const minPoolJoin = _minPoolJoin?.toString() || undefined;
     const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
 
-    const apy = calculateAPY(expectedReturn);
-
     // eslint-disable-next-line node/no-callback-literal
     callback({
       ...poolInfo,
       stats: {
+        assetEarning: [
+          {
+            slug: _getChainNativeTokenSlug(chainInfo),
+            apr: expectedReturn
+          }
+        ],
         maxCandidatePerFarmer: parseInt(maxNominations),
         maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks),
         minJoinPool: minStake.toString(),
         minWithdrawal: '0',
-        apy,
+        totalApr: expectedReturn,
         tvl: bnTotalEraStake.toString()
       }
     });
@@ -91,24 +96,37 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
     callback({ // TODO
       ...YIELD_POOLS_INFO.DOT___nomination_pool,
       stats: {
+        assetEarning: [
+          {
+            slug: _getChainNativeTokenSlug(chainInfo),
+            apr: expectedReturn
+          }
+        ],
         maxCandidatePerFarmer: parseInt(maxNominations),
         maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks),
         minJoinPool: minPoolJoin || '0',
         minWithdrawal: '0',
-        apy,
+        totalApr: expectedReturn,
         tvl: bnTotalEraStake.toString()
       }
     });
   });
 }
 
-export function calculateAPY (apr: number, compoundingPeriod = 365) { // compounding daily by default
+export function calculateReward (apr: number, amount = 0, compoundingPeriod = YieldCompoundingPeriod.YEARLY): YieldAssetExpectedEarning {
   if (!apr) {
-    return 0;
+    return {};
   }
 
-  const earningRatio = (apr / 100) / compoundingPeriod;
-  const apy = (1 + earningRatio) ** compoundingPeriod - 1;
+  const periodApr = apr / 365 * compoundingPeriod; // APR is always annually
 
-  return apy * 100;
+  const earningRatio = (periodApr / 100) / compoundingPeriod;
+  const periodApy = (1 + earningRatio) ** compoundingPeriod - 1;
+
+  const reward = periodApy * amount;
+
+  return {
+    apy: periodApy,
+    rewardInToken: reward
+  };
 }

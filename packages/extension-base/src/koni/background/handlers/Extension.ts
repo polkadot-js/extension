@@ -3739,7 +3739,7 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return this.#koniState.getYieldPoolInfo();
+    return [];
   }
 
   // --------------------------------------------------------------

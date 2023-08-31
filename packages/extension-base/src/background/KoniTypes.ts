@@ -2046,15 +2046,32 @@ export interface YieldPoolInfo {
   stats?: YieldPoolStats
 }
 
+export interface YieldAssetExpectedEarning {
+  apy?: number,
+  rewardInToken?: number
+}
+
+export enum YieldCompoundingPeriod {
+  DAILY = 1,
+  WEEKLY = 7,
+  MONTHLY = 30,
+  YEARLY = 365
+}
+
+export interface YieldAssetEarningStats {
+  slug: string
+  apr?: number
+}
+
 export interface YieldPoolStats {
   minJoinPool: string,
   minWithdrawal: string,
   maxCandidatePerFarmer: number,
   maxWithdrawalRequestPerFarmer: number,
 
+  assetEarning?: YieldAssetEarningStats[],
   farmerCount?: number,
-  apy?: number,
-  apr?: number,
+  totalApr?: number,
   tvl?: string // in $
 }
 

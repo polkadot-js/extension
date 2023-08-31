@@ -134,9 +134,7 @@ export class KoniSubscription {
   }
 
   initYieldPoolStatsSubscription (substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
-    console.log('running ok');
     const updateYieldPoolStats = (data: YieldPoolInfo) => {
-      console.log('run here', data);
       this.state.updateYieldPoolInfo(data);
     };
 
@@ -347,7 +345,7 @@ export class KoniSubscription {
   }
 
   async reloadStaking () {
-    const currentAddress = this.state.keyringService.currentAccount?.address;
+    // const currentAddress = this.state.keyringService.currentAccount?.address;
 
     this.subscribeYieldPoolStats(this.state.getSubstrateApiMap());
 

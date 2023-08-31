@@ -11,7 +11,6 @@ import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import { BehaviorSubject } from 'rxjs';
 
 import { stringShorten } from '@polkadot/util';
-import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 
 export class KeyringService {
   private readonly currentAccountStore = new CurrentAccountStore();

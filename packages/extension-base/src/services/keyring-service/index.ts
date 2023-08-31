@@ -104,13 +104,20 @@ export class KeyringService {
   /* Inject */
 
   public addInjectAccounts (accounts: InjectedAccountWithMeta[]) {
-    keyring.addInjects(accounts.map((account, index) => ({
-      ...account,
-      meta: {
-        ...account.meta,
-        name: `${account.meta.name || stringShorten(account.address)} (${account.meta.source})`
-      }
-    })));
+    keyring.addInjects(accounts.map((account) => {
+      const name = account.meta.name || stringShorten(account.address);
+
+      // TODO: Add if need
+      // name = name.concat(' (', account.meta.source, ')');
+
+      return {
+        ...account,
+        meta: {
+          ...account.meta,
+          name: name
+        }
+      };
+    }));
   }
 
   public removeInjectAccounts (addresses: string[]) {

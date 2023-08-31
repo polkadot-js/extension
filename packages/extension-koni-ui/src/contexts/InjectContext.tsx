@@ -42,6 +42,7 @@ type WalletPromiseMap = Record<string, WalletState>;
 const win = window as Window & InjectedWindow;
 const updateStatePromiseKey = 'updateInjectState';
 const injectPromiseKey = 'injectAccount';
+const enablePromiseKey = 'enableEvm';
 
 const evmConvertToInject = (address: string): InjectedAccountWithMeta => {
   return {
@@ -124,8 +125,8 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const [substrateWallet, setSubstrateWallet] = useState<Injected | undefined>();
   const [evmWallet, setEvmWallet] = useState<SubWalletEvmProvider | undefined>();
   const [update, setUpdate] = useState({});
-  const [enabled, setEnabled] = useLocalStorage<boolean>(ENABLE_INJECT, false);
-  const [initEnable] = useState(enabled);
+  const [storage, setStorage] = useLocalStorage<boolean>(ENABLE_INJECT, false);
+  const [initEnable] = useState(storage);
 
   const accountsRef = useRef<AccountArrayMap>({});
   const [cacheAccounts, setCacheAccounts] = useState<AccountArrayMap>(accountsRef.current);
@@ -133,8 +134,10 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const promiseMapRef = useRef<WalletPromiseMap>({});
   const enablePromise = useRef<VoidFunction | undefined>();
 
-  const [loadingInject, setLoadingInject] = useState(initEnable);
+  const [loadingInject, setLoadingInject] = useState(initEnable && injected);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+
+  const enabled = useMemo(() => storage && injected, [injected, storage]);
 
   const checkLoading = useCallback(() => {
     const values = promiseMapRef.current;
@@ -143,11 +146,13 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     const allError = Object.values(values).every((v) => v === 'FAIL');
 
     if (hasDone || allError) {
-      if (hasDone || allError) {
-        setLoadingInject(false);
+      setLoadingInject(false);
+
+      if (allError) {
+        setStorage(false);
       }
     }
-  }, []);
+  }, [setStorage]);
 
   const updateState = useCallback(() => {
     addLazy(updateStatePromiseKey, () => {
@@ -160,19 +165,19 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   }, []);
 
   const enableInject = useCallback((callback?: VoidFunction) => {
-    setEnabled(true);
+    setStorage(true);
     enablePromise.current = callback;
     setUpdate({});
     setLoadingInject(true);
-  }, [setEnabled]);
+  }, [setStorage]);
 
   const disableInject = useCallback(() => {
-    setEnabled(false);
+    setStorage(false);
     setSubstrateWallet(undefined);
     setEvmWallet(undefined);
     accountsRef.current = {};
     updateState();
-  }, [setEnabled, updateState]);
+  }, [setStorage, updateState]);
 
   const initCallback = useCallback((callback?: VoidFunction) => {
     enablePromise.current = callback;
@@ -204,16 +209,18 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
       promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'PENDING' };
       checkLoading();
 
-      wallet.enable()
-        .then(() => {
-          setEvmWallet(wallet);
-        })
-        .catch((e) => {
-          console.error(e);
-          promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'FAIL' };
-          checkLoading();
-        })
-      ;
+      addLazy(enablePromiseKey, () => {
+        wallet.enable()
+          .then(() => {
+            setEvmWallet(wallet);
+          })
+          .catch((e) => {
+            console.error(e);
+            promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'FAIL' };
+            checkLoading();
+          })
+        ;
+      }, 200, undefined, false);
     }
   }, [enabled, update, checkLoading]);
 

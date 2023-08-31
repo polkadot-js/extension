@@ -9,7 +9,7 @@ export interface BasicInputEvent<T = string> {
   }
 }
 
-export type BasicOnChangeFunction<T = string> = (event: BasicInputEvent) => void;
+export type BasicOnChangeFunction<T = string> = (event: BasicInputEvent<T>) => void;
 
 export interface BasicInputWrapper<T = string> {
   id?: string;

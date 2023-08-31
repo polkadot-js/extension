@@ -15,14 +15,6 @@ export default function useUnlockChecker (): () => Promise<void> {
   const isUnlocking = useRef(checkActive(UNLOCK_MODAL_ID));
 
   useEffect(() => {
-    if (isLocked) {
-      unlockPromiseHandler.current = createPromiseHandler();
-    } else {
-      unlockPromiseHandler.current.resolve();
-    }
-  }, [isLocked]);
-
-  useEffect(() => {
     const unlockModalIsOpen = !!data.activeMap[UNLOCK_MODAL_ID];
 
     // On close modal
@@ -39,6 +31,7 @@ export default function useUnlockChecker (): () => Promise<void> {
 
   return useCallback(() => {
     if (isLocked) {
+      unlockPromiseHandler.current = createPromiseHandler<void>();
       activeModal(UNLOCK_MODAL_ID);
       isUnlocking.current = true;
 

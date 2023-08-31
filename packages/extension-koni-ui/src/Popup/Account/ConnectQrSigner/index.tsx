@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
@@ -20,7 +21,7 @@ import { Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { QrCode, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import DefaultLogosMap from '../../../assets/logo';
@@ -143,16 +144,18 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
           <div className='instruction'>
-            <span>{deviceName}</span>
-            <span>&nbsp;{t('will provide you with a QR code to scan. Read')}&nbsp;</span>
-            <a
-              className='link'
-              href={instructionUrl}
-            >
-              {t('this instruction')}
-            </a>
-            <span>,&nbsp;</span>
-            <span>{t('for more details.')}</span>
+            <Trans
+              components={{
+                highlight: (
+                  <a
+                    className='link'
+                    href={instructionUrl}
+                  />
+                )
+              }}
+              i18nKey={detectTranslate('{{deviceName}} will provide you with a QR code to scan. Read <highlight>this instruction</highlight>, for more details.')}
+              values={{ deviceName }}
+            />
           </div>
           {
             validateState.message && (

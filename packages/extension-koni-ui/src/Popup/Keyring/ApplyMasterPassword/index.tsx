@@ -5,6 +5,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { useDefaultNavigate, useDeleteAccount, useNotification } from '@subwallet/extension-koni-ui/hooks';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import { forgetAccount, keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -98,6 +99,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const checkUnlock = useUnlockChecker();
+
   const migratedRef = useRef<AccountJson[]>(accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && acc.isMasterPassword));
 
   const migrated = useMemo(() => {
@@ -136,6 +139,14 @@ const Component: React.FC<Props> = (props: Props) => {
     setIsDisable(error || empty);
   }, []);
 
+  const convertError = useCallback((error: string) => {
+    if (error === 'Unable to decode using the supplied passphrase') {
+      return t('Wrong password');
+    } else {
+      return t(error);
+    }
+  }, [t]);
+
   const onSubmit: FormCallbacks<MigratePasswordFormState>['onFinish'] = useCallback((values: MigratePasswordFormState) => {
     const password = values[FormFieldName.PASSWORD];
 
@@ -147,7 +158,7 @@ const Component: React.FC<Props> = (props: Props) => {
           password: password
         }).then((res) => {
           if (!res.status) {
-            form.setFields([{ name: FormFieldName.PASSWORD, errors: [res.errors[0]] }]);
+            form.setFields([{ name: FormFieldName.PASSWORD, errors: [convertError(res.errors[0])] }]);
             selectPassword();
             setIsError(true);
           } else {
@@ -155,14 +166,14 @@ const Component: React.FC<Props> = (props: Props) => {
           }
         }).catch((e: Error) => {
           setIsError(true);
-          form.setFields([{ name: FormFieldName.PASSWORD, errors: [e.message] }]);
+          form.setFields([{ name: FormFieldName.PASSWORD, errors: [convertError(e.message)] }]);
           selectPassword();
         }).finally(() => {
           setLoading(false);
         });
       }, 500);
     }
-  }, [currentAccount?.address, form]);
+  }, [currentAccount?.address, form, convertError]);
 
   const title = useMemo((): string => {
     const migrated = canMigrate.length - needMigrate.length;
@@ -185,7 +196,11 @@ const Component: React.FC<Props> = (props: Props) => {
         return {
           children: t('Apply master password now'),
           onClick: () => {
-            setStep(needMigrate.length ? 'Migrate' : 'Done');
+            checkUnlock().then(() => {
+              setStep(needMigrate.length ? 'Migrate' : 'Done');
+            }).catch(() => {
+              // User cancel unlock
+            });
           },
           icon: nextIcon
         };
@@ -206,7 +221,7 @@ const Component: React.FC<Props> = (props: Props) => {
           icon: nextIcon
         };
     }
-  }, [form, goHome, needMigrate.length, step, t]);
+  }, [checkUnlock, form, goHome, needMigrate.length, step, t]);
 
   const onDelete = useCallback(() => {
     if (currentAccount?.address) {

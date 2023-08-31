@@ -5,7 +5,7 @@ import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTyp
 import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
@@ -56,6 +56,7 @@ function getRelayParentKey (groupDisplayName: string) {
 const FILTER_MODAL_ID = 'crowdloan-filter-modal';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  useSetCurrentPage('/home/crowdloans');
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const items: CrowdloanItemType[] = useGetCrowdloanList();

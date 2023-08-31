@@ -15,6 +15,7 @@ export interface BasicInputWrapper<T = string> {
   id?: string;
   label?: string;
   placeholder?: string;
+  defaultValue?: T;
   value?: T;
   disabled?: boolean;
   loading?: boolean;

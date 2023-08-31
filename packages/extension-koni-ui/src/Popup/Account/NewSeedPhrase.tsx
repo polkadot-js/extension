@@ -2,21 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_ACCOUNT_TYPES, SELECTED_CREATE_ACCOUNT_TYPE_KEY } from '@subwallet/extension-koni-ui/constants/account';
-import { NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
-import { useIsPopup } from '@subwallet/extension-koni-ui/hooks';
-import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
-import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
-import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetDefaultAccountName, useIsPopup, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isFirefox } from '@subwallet/extension-koni-ui/utils';
-import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
+import { isFirefox, isNoAccount } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
@@ -24,8 +15,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-import { KeypairType } from '@polkadot/util-crypto/types';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps;
 
@@ -44,6 +34,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { goHome } = useDefaultNavigate();
   const { activeModal } = useContext(ModalContext);
+  const checkUnlock = useUnlockChecker();
 
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
@@ -53,13 +44,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const isOpenWindowRef = useRef(false);
 
-  const [accountTypes] = useState<KeypairType[]>(() => {
-    const storage = localStorage.getItem(SELECTED_CREATE_ACCOUNT_TYPE_KEY);
+  const [storage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
 
-    const types = storage ? JSON.parse(storage) as KeypairType[] : DEFAULT_ACCOUNT_TYPES;
-
-    return types.length ? types : DEFAULT_ACCOUNT_TYPES;
-  });
+  const [accountTypes] = useState(storage);
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);
@@ -70,7 +57,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     navigate(DEFAULT_ROUTER_PATH);
 
     if (!noAccount) {
-      activeModal(NEW_ACCOUNT_MODAL);
+      activeModal(NEW_SEED_MODAL);
     }
   }, [navigate, activeModal, noAccount]);
 
@@ -79,29 +66,32 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       return;
     }
 
-    setLoading(true);
-
-    setTimeout(() => {
-      createAccountSuriV2({
-        name: accountName,
-        suri: seedPhrase,
-        types: accountTypes,
-        isAllowed: true
-      })
-        .then(() => {
-          onComplete();
+    checkUnlock().then(() => {
+      setLoading(true);
+      setTimeout(() => {
+        createAccountSuriV2({
+          name: accountName,
+          suri: seedPhrase,
+          types: accountTypes,
+          isAllowed: true
         })
-        .catch((error: Error): void => {
-          notify({
-            message: error.message,
-            type: 'error'
+          .then(() => {
+            onComplete();
+          })
+          .catch((error: Error): void => {
+            notify({
+              message: error.message,
+              type: 'error'
+            });
+          })
+          .finally(() => {
+            setLoading(false);
           });
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }, 500);
-  }, [seedPhrase, accountName, accountTypes, onComplete, notify]);
+      }, 500);
+    }).catch(() => {
+      // User cancel unlock
+    });
+  }, [seedPhrase, checkUnlock, accountName, accountTypes, onComplete, notify]);
 
   useEffect(() => {
     createSeedV2(undefined, undefined, DEFAULT_ACCOUNT_TYPES)

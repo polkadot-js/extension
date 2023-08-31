@@ -188,12 +188,25 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
 
       '.ant-input': {
         overflow: 'hidden'
+      },
+
+      '.ant-input-suffix>span:last-child:empty': {
+        marginRight: token.marginXS
       }
     },
 
     '.ant-tooltip-placement-bottom, .ant-tooltip-placement-bottomLeft, .ant-tooltip-placement-bottomRight': {
       '.ant-tooltip-arrow': {
         top: 1
+      }
+    },
+
+    '.ant-select-modal-input-content': {
+      '.ant-select-modal-input-placeholder': {
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        textWrap: 'nowrap',
+        display: 'block'
       }
     }
   });
@@ -222,7 +235,11 @@ export interface ThemeProviderProps {
 const getModalContainer = () => document.getElementById('popup-container') || document.body;
 const getPopupContainer = () => document.getElementById('tooltip-container') || document.body;
 
-const TooltipContainer = styled.div`z-index: 10000`;
+const TooltipContainer = styled.div({
+  '& > div': {
+    zIndex: 10000
+  }
+});
 
 export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactElement<ThemeProviderProps> {
   const dataContext = useContext(DataContext);

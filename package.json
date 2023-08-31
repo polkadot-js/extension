@@ -10,19 +10,20 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "1.1.8",
+  "version": "1.1.10",
   "workspaces": [
     "packages/*"
   ],
   "bin": {
     "koni-ci-build-dev": "./scripts/koni-ci-build-dev.mjs",
+    "koni-ci-build-i18n": "./scripts/koni-ci-build-i18n.mjs",
     "koni-ci-ghact-build": "./scripts/koni-ci-ghact-build.mjs",
     "koni-dev-build-ts": "./scripts/koni-dev-build-ts.mjs"
   },
   "scripts": {
     "build": "koni-dev-build-ts && yarn build:zip && yarn build:rollup",
     "build:extra": "yarn build:i18n && yarn build:ui",
-    "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
+    "build:i18n": "koni-ci-build-i18n",
     "build:koni-dev": "koni-ci-build-dev",
     "build:release": "koni-ci-ghact-build",
     "build:rollup": "polkadot-exec-rollup --config",
@@ -74,7 +75,7 @@
     "@polkadot/types": "^10.9.1",
     "@polkadot/util": "^12.3.2",
     "@polkadot/util-crypto": "^12.3.2",
-    "@subwallet/chain-list": "0.2.10",
+    "@subwallet/chain-list": "0.2.12",
     "@subwallet/keyring": "^0.0.10",
     "@subwallet/ui-keyring": "^0.0.10",
     "babel-core": "^7.0.0-bridge.0",

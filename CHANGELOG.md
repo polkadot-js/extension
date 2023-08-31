@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 1.1.10
+Build date: Aug 26, 2023.
+
+Features & Update:
+- Save entered transaction information when closing and reopening the extension (#1555)
+- Support multi-language for messages returned from the background (round 1) (#1640)
+- Support new language: Japanese (#1644)
+- Improve lock UX (#1684)
+- Improve import security (#1798)
+- Update chain list: Add support Gemini 3f, Update RPC for Creditcoin (#1839)
+
+## 1.1.9
+Build date: Aug 22, 2023.
+
+Features & Update:
+- Improve case delete connection when reset wallet (#1760)
+- Update Banxa service (#1806)
+- Update chain-list (#1821)
+  - Integrate Jur Node network
+  - Integrate Azero Domain NFT
+
+Bugs fixed:
+- Fix a few minor bugs with NFT (#1817)
+- Update webpack config environment for page.js and content.js to improve security (#1823)
+
 ## 1.1.8
 Build date: Aug 12, 2023.
 

@@ -129,18 +129,19 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.body-container': {
-      padding: `0 ${token.padding}px`,
+      padding: `${token.sizeLG * 3}px ${token.padding}px ${token.sizeXL}px`,
       textAlign: 'center',
       opacity: 0.999, // Hot fix show wrong opacity in browser
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.sizeLG,
 
       '.logo-container': {
-        marginTop: token.sizeLG * 3,
-        marginBottom: token.sizeLG,
         color: token.colorTextBase
       },
 
       '.title': {
-        marginTop: token.marginXS,
         fontWeight: token.fontWeightStrong,
         fontSize: token.fontSizeHeading1,
         lineHeight: token.lineHeightHeading1,
@@ -148,11 +149,12 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
       },
 
       '.sub-title': {
-        marginTop: token.marginXS,
-        marginBottom: token.sizeLG * 2 + token.sizeXS,
+        paddingLeft: token.padding - 1,
+        paddingRight: token.padding - 1,
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
-        color: token.colorTextLight3
+        color: token.colorTextLight3,
+        flex: 1
       }
     },
 

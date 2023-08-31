@@ -42,7 +42,7 @@ const decodeMethod = (data: string, chain: Chain, specVersion: BN): Decoded => {
       method = chain.registry.createType('Call', data);
       args = (method.toHuman() as { args: AnyJson }).args;
     } else {
-      console.log(displayDecodeVersion('Outdated metadata to decode', chain, specVersion));
+      console.log(displayDecodeVersion('Your metadata is out of date', chain, specVersion));
     }
   } catch (error) {
     console.error(`${displayDecodeVersion('Error decoding method', chain, specVersion)}:: ${(error as Error).message}`);

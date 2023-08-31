@@ -1,16 +1,29 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PassPhishing, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
+import { LanguageType, PassPhishing, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
+import { LANGUAGE } from '@subwallet/extension-base/constants';
 import PassPhishingStore from '@subwallet/extension-base/stores/PassPhishingStore';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { Subject } from 'rxjs';
 
+import i18n from './i18n/i18n';
 import { DEFAULT_SETTING } from './constants';
 
 export default class SettingService {
   private readonly settingsStore = new SettingsStore();
   private readonly passPhishingStore = new PassPhishingStore();
+
+  constructor () {
+    let old: LanguageType = localStorage.getItem(LANGUAGE) as LanguageType || 'en';
+
+    this.settingsStore.getSubject().subscribe(({ language }) => {
+      if (language !== old) {
+        old = language;
+        i18n.changeLanguage(language).catch(console.error);
+      }
+    });
+  }
 
   public getSubject (): Subject<RequestSettingsType> {
     return this.settingsStore.getSubject();
@@ -18,11 +31,10 @@ export default class SettingService {
 
   public getSettings (update: (value: RequestSettingsType) => void): void {
     this.settingsStore.get('Settings', (value) => {
-      if (!value) {
-        update(DEFAULT_SETTING);
-      } else {
-        update(value);
-      }
+      update({
+        ...DEFAULT_SETTING,
+        ...(value || {})
+      });
     });
   }
 

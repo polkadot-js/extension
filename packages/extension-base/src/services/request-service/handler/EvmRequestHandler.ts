@@ -12,6 +12,7 @@ import keyring from '@subwallet/ui-keyring';
 import BN from 'bn.js';
 import { Transaction } from 'ethereumjs-tx';
 import { toBuffer } from 'ethereumjs-util';
+import { t } from 'i18next';
 import { BehaviorSubject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
@@ -75,7 +76,7 @@ export default class EvmRequestHandler {
     const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
 
     if (duplicated) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Duplicate request information');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Duplicate request'));
     }
 
     confirmationType[id] = {
@@ -122,7 +123,7 @@ export default class EvmRequestHandler {
     const exists = confirmationType[id];
 
     if (!exists) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Request does not exist');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Request does not exist'));
     }
 
     const payloadJson = JSON.stringify(payload);
@@ -159,7 +160,7 @@ export default class EvmRequestHandler {
       case 'eth_signTypedData_v4':
         return await pair.evmSigner.signMessage(payload, type);
       default:
-        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found sign method');
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unsupported action'));
     }
   }
 
@@ -231,20 +232,20 @@ export default class EvmRequestHandler {
     const confirmations = this.confirmationsQueueSubject.getValue();
 
     for (const ct in request) {
-      const t = ct as ConfirmationType;
-      const result = request[t] as ConfirmationDefinitions[typeof t][1];
+      const type = ct as ConfirmationType;
+      const result = request[type] as ConfirmationDefinitions[typeof type][1];
 
       const { id } = result;
       const { resolver, validator } = this.confirmationsPromiseMap[id];
-      const confirmation = confirmations[t][id];
+      const confirmation = confirmations[type][id];
 
       if (!resolver || !confirmation) {
-        this.#logger.error('Not found confirmation', t, id);
-        throw new Error('Not found promise for confirmation');
+        this.#logger.error(t('Unable to proceed. Please try again'), type, id);
+        throw new Error(t('Unable to proceed. Please try again'));
       }
 
       // Fill signature for some special type
-      await this.decorateResult(t, confirmation, result);
+      await this.decorateResult(type, confirmation, result);
 
       // Validate response from confirmation popup some info like password, response format....
       const error = validator && validator(result);
@@ -255,7 +256,7 @@ export default class EvmRequestHandler {
 
       // Delete confirmations from queue
       delete this.confirmationsPromiseMap[id];
-      delete confirmations[t][id];
+      delete confirmations[type][id];
       this.confirmationsQueueSubject.next(confirmations);
 
       // Update icon, and close queue

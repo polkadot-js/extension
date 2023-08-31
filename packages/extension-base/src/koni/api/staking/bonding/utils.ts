@@ -1,10 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
-import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import { t } from 'i18next';
 
 import { ApiPromise } from '@polkadot/api';
 import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
@@ -463,3 +466,67 @@ export function getValidatorLabel (chain: string) {
 
   return 'Collator';
 }
+
+export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {
+  const tokenInfo = _getChainNativeTokenBasicInfo(chainInfo);
+  const number = bnMinStake.div(new BN(10).pow(new BN(tokenInfo.decimals))).toString();
+
+  return t('Insufficient stake. Please stake at least {{number}} {{tokenSymbol}} to get rewards', { replace: { tokenSymbol: tokenInfo.symbol, number } });
+};
+
+export const getMaxValidatorErrorMessage = (chainInfo: _ChainInfo, max: number): string => {
+  let message = detectTranslate('You cannot select more than {{number}} validators for this network');
+  const label = getValidatorLabel(chainInfo.slug);
+
+  if (max > 1) {
+    switch (label) {
+      case 'dApp':
+        message = detectTranslate('You cannot select more than {{number}} dApps for this network');
+        break;
+      case 'Collator':
+        message = detectTranslate('You cannot select more than {{number}} collators for this network');
+        break;
+      case 'Validator':
+        message = detectTranslate('You cannot select more than {{number}} validators for this network');
+        break;
+    }
+  } else {
+    switch (label) {
+      case 'dApp':
+        message = detectTranslate('You cannot select more than {{number}} dApp for this network');
+        break;
+      case 'Collator':
+        message = detectTranslate('You cannot select more than {{number}} collator for this network');
+        break;
+      case 'Validator':
+        message = detectTranslate('You cannot select more than {{number}} validator for this network');
+        break;
+    }
+  }
+
+  return t(message, { replace: { number: max } });
+};
+
+export const getExistUnstakeErrorMessage = (chain: string, isStakeMore?: boolean): string => {
+  const label = getValidatorLabel(chain);
+
+  if (!isStakeMore) {
+    switch (label) {
+      case 'dApp':
+        return t('You can unstake from a dApp once');
+      case 'Collator':
+        return t('You can unstake from a collator once');
+      case 'Validator':
+        return t('You can unstake from a validator once');
+    }
+  } else {
+    switch (label) {
+      case 'dApp':
+        return t('You cannot stake more for a dApp you are unstaking from');
+      case 'Collator':
+        return t('You cannot stake more for a collator you are unstaking from');
+      case 'Validator':
+        return t('You cannot stake more for a validator you are unstaking from');
+    }
+  }
+};

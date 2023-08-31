@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import SelectAccount from '../SelectAccount';
-import InjectStatus from './InjectStatus';
 import LockStatus from './LockStatus';
 import Networks from './Networks';
 
@@ -55,7 +54,6 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
             <SelectAccount />
           </div>
           <LockStatus />
-          <InjectStatus />
         </div>
       </div>
     </div>

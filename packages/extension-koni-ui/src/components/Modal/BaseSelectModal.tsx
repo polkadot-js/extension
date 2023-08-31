@@ -48,6 +48,7 @@ export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemePro
       top: token.paddingLG,
 
       '.ant-sw-modal-content': {
+        width: '100%',
         height: '100%',
         maxHeight: '100%',
         paddingLeft: token.paddingLG,

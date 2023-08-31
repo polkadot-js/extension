@@ -103,6 +103,10 @@ const Controller = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       paddingLeft: token.paddingXXS,
       paddingRight: 0,
 
+      '.account-name': {
+        maxWidth: 150
+      },
+
       '.input-suffix .anticon': {
         fontSize: 12,
         color: token.colorTextLight3

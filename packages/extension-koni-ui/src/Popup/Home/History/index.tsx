@@ -114,7 +114,6 @@ const FILTER_MODAL_ID = 'history-filter-id';
 enum FilterValue {
   ALL = 'all',
   TOKENS = 'tokens',
-  STAKING = 'staking',
   SEND = 'send',
   RECEIVED = 'received',
   NFT = 'nft',
@@ -131,6 +130,8 @@ function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'addres
 
 const modalId = HISTORY_DETAIL_MODAL;
 
+const LIST_KEY = 'history-list';
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
@@ -142,6 +143,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { chainInfoMap } = useSelector((root) => root.chainStore);
   const { language } = useSelector((root) => root.settings);
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
+  const [listKey, setListKey] = useState<string>(LIST_KEY);
 
   const isActive = checkActive(modalId);
 
@@ -386,6 +388,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const onSelectFilterTab = useCallback((value: string) => {
     setSelectedFilterTab(value);
+    setListKey(`${LIST_KEY}-${Date.now()}`);
   }, []);
 
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {
@@ -404,12 +407,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       },
       {
         label: t('Staking'),
-        value: FilterValue.STAKING
+        value: FilterValue.STAKE
       }
     ];
   }, [t]);
 
-  const webUifilterFunction = useCallback((item: TransactionHistoryDisplayItem) => {
+  const webUiFilterFunction = useCallback((item: TransactionHistoryDisplayItem) => {
     const filterTabFunction = (_item: TransactionHistoryDisplayItem) => {
       if (selectedFilterTab === FilterValue.ALL) {
         return true;
@@ -423,7 +426,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         return _item.type === ExtrinsicType.SEND_NFT;
       }
 
-      if (selectedFilterTab === FilterValue.STAKING) {
+      if (selectedFilterTab === FilterValue.STAKE) {
         return isTypeStaking(_item.type);
       }
 
@@ -432,6 +435,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     return filterTabFunction(item) && filterFunction(item);
   }, [filterFunction, selectedFilterTab]);
+
+  const _onApplyFilter = useCallback(() => {
+    onApplyFilter();
+    setListKey(`${LIST_KEY}-${Date.now()}`);
+  }, [onApplyFilter]);
 
   const listSection = useMemo(() => {
     if (isWebUI) {
@@ -455,11 +463,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             />
           </div>
           <SwList
-            filterBy={webUifilterFunction}
+            filterBy={webUiFilterFunction}
             groupBy={groupBy}
             groupSeparator={groupSeparator}
+            key={listKey}
             list={historyList}
             renderItem={renderItem}
+            renderOnScroll={true}
             renderWhenEmpty={emptyList}
             searchBy={searchFunc}
             searchMinCharactersCount={2}
@@ -479,6 +489,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         list={historyList}
         onClickActionBtn={onClickActionBtn}
         renderItem={renderItem}
+        renderOnScroll={true}
         renderWhenEmpty={emptyList}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}
@@ -486,7 +497,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [emptyList, filterFunction, filterTabItems, groupBy, groupSeparator, historyList, isWebUI, onClickActionBtn, onSelectFilterTab, renderItem, searchFunc, searchInput, selectedFilterTab, t, webUifilterFunction]);
+  }, [emptyList, filterFunction, filterTabItems, groupBy, groupSeparator, historyList, isWebUI, listKey, onClickActionBtn, onSelectFilterTab, renderItem, searchFunc, searchInput, selectedFilterTab, t, webUiFilterFunction]);
 
   return (
     <>
@@ -519,7 +530,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       <FilterModal
         id={FILTER_MODAL_ID}
-        onApplyFilter={onApplyFilter}
+        onApplyFilter={_onApplyFilter}
         onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
@@ -536,6 +547,7 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.web-list': {
       flex: 1,
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
 
@@ -546,6 +558,7 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
       },
 
       '.ant-sw-list': {
+        overflow: 'auto',
         marginTop: 24,
         flex: 1
       }

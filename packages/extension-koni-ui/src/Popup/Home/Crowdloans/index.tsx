@@ -207,7 +207,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           decimal={0}
           displayNetwork={item.chainDisplayName}
           displayToken={item.symbol}
-          hideBalance={!isShowBalance}
           isShowSubLogo={true}
           key={`${item.symbol}_${item.slug}`}
           networkKey={item.slug}

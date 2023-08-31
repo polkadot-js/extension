@@ -114,12 +114,18 @@ export const CustomizeModal = styled(Component)<Props>(({ theme: { token } }: Pr
       flex: 1
     },
 
+    '.ant-sw-list-section .ant-sw-list-wrapper.ant-sw-list-wrapper': {
+      flexBasis: '100vh'
+    },
+
     '.network_item__container .ant-web3-block-right-item': {
       marginRight: 0
     },
 
     '.ant-sw-list': {
-      height: '100%'
+      height: '100vh',
+      maxHeight: '100%',
+      display: 'block'
     }
   });
 });

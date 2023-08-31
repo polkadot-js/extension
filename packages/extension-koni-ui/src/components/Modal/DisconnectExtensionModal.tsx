@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DISCONNECT_EXTENSION_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ModalContext, SwModal } from '@subwallet/react-ui';
@@ -30,6 +30,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const onClick = useCallback(() => {
     disableInject();
     inactiveModal(modalId);
+    inactiveModal(SELECT_ACCOUNT_MODAL);
   }, [disableInject, inactiveModal]);
 
   return (

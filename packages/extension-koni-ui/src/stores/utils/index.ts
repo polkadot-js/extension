@@ -8,7 +8,7 @@ import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { canDerive } from '@subwallet/extension-base/utils';
+import { addLazy, canDerive, isEmptyObject } from '@subwallet/extension-base/utils';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
@@ -45,13 +45,17 @@ export const updateCurrentAccountState = (currentAccountJson: AccountJson) => {
 };
 
 export const updateAccountsContext = (data: AccountsContext) => {
-  store.dispatch({ type: 'accountState/updateAccountsContext', payload: data });
+  addLazy('updateAccountsContext', () => {
+    store.dispatch({ type: 'accountState/updateAccountsContext', payload: data });
+  }, 300, 2400);
 };
 
 export const subscribeAccountsData = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateAccountData, updateAccountData);
 
 export const updateKeyringState = (data: KeyringState) => {
-  store.dispatch({ type: 'accountState/updateKeyringState', payload: data });
+  addLazy('updateKeyringState', () => {
+    store.dispatch({ type: 'accountState/updateKeyringState', payload: data });
+  }, 300, 2400);
 };
 
 export const subscribeKeyringState = lazySubscribeMessage('pri(keyring.subscribe)', null, updateKeyringState, updateKeyringState);
@@ -151,8 +155,9 @@ export const updateChainInfoMap = (data: Record<string, _ChainInfo>) => {
 export const subscribeChainInfoMap = lazySubscribeMessage('pri(chainService.subscribeChainInfoMap)', null, updateChainInfoMap, updateChainInfoMap);
 
 export const updateChainStateMap = (data: Record<string, _ChainState>) => {
-  // TODO useTokenGroup
-  store.dispatch({ type: 'chainStore/updateChainStateMap', payload: data });
+  !isEmptyObject(data) && addLazy('updateChainStateMap', () => {
+    store.dispatch({ type: 'chainStore/updateChainStateMap', payload: data });
+  }, 600, 1800);
 };
 
 export const subscribeChainStateMap = lazySubscribeMessage('pri(chainService.subscribeChainStateMap)', null, updateChainStateMap, updateChainStateMap);
@@ -190,7 +195,9 @@ export const updatePrice = (data: PriceJson) => {
 export const subscribePrice = lazySubscribeMessage('pri(price.getSubscription)', null, updatePrice, updatePrice);
 
 export const updateBalance = (data: BalanceJson) => {
-  store.dispatch({ type: 'balance/update', payload: data.details });
+  !isEmptyObject(data.details) && addLazy('updateBalance', () => {
+    store.dispatch({ type: 'balance/update', payload: data.details });
+  }, 600, 1800);
 };
 
 export const subscribeBalance = lazySubscribeMessage('pri(balance.getSubscription)', null, updateBalance, updateBalance);
@@ -238,7 +245,9 @@ export const updateStakingNominatorMetadata = (data: NominatorMetadata[]) => {
 export const subscribeStakingNominatorMetadata = lazySubscribeMessage('pri(bonding.subscribeNominatorMetadata)', null, updateStakingNominatorMetadata, updateStakingNominatorMetadata);
 
 export const updateTxHistory = (data: TransactionHistoryItem[]) => {
-  store.dispatch({ type: 'transactionHistory/update', payload: data });
+  addLazy('updateTxHistory', () => {
+    store.dispatch({ type: 'transactionHistory/update', payload: data });
+  });
 };
 
 export const subscribeTxHistory = lazySubscribeMessage('pri(transaction.history.getSubscription)', null, updateTxHistory, updateTxHistory);

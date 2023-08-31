@@ -45,13 +45,17 @@ export const updateCurrentAccountState = (currentAccountJson: AccountJson) => {
 };
 
 export const updateAccountsContext = (data: AccountsContext) => {
-  store.dispatch({ type: 'accountState/updateAccountsContext', payload: data });
+  addLazy('updateAccountsContext', () => {
+    store.dispatch({ type: 'accountState/updateAccountsContext', payload: data });
+  }, 300, 2400);
 };
 
 export const subscribeAccountsData = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateAccountData, updateAccountData);
 
 export const updateKeyringState = (data: KeyringState) => {
-  store.dispatch({ type: 'accountState/updateKeyringState', payload: data });
+  addLazy('updateKeyringState', () => {
+    store.dispatch({ type: 'accountState/updateKeyringState', payload: data });
+  }, 300, 2400);
 };
 
 export const subscribeKeyringState = lazySubscribeMessage('pri(keyring.subscribe)', null, updateKeyringState, updateKeyringState);

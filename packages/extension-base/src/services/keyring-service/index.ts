@@ -11,6 +11,7 @@ import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import { BehaviorSubject } from 'rxjs';
 
 import { stringShorten } from '@polkadot/util';
+import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 
 export class KeyringService {
   private readonly currentAccountStore = new CurrentAccountStore();
@@ -114,6 +115,15 @@ export class KeyringService {
   }
 
   public removeInjectAccounts (addresses: string[]) {
+    const currentAddress = this.currentAccountSubject.value.address;
+    const afterAccounts = Object.keys(this.accounts).filter((address) => (addresses.indexOf(address) < 0));
+
+    if (afterAccounts.length === 1) {
+      this.currentAccountSubject.next({ address: afterAccounts[0], currentGenesisHash: null });
+    } else if (addresses.indexOf(currentAddress) > -1) {
+      this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
+    }
+
     keyring.removeInjects(addresses);
   }
 

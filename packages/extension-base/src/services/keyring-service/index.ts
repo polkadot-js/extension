@@ -5,9 +5,12 @@ import { CurrentAccountInfo, KeyringState } from '@subwallet/extension-base/back
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { CurrentAccountStore } from '@subwallet/extension-base/stores';
+import { InjectedAccountWithMeta } from '@subwallet/extension-inject/types';
 import { keyring } from '@subwallet/ui-keyring';
 import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import { BehaviorSubject } from 'rxjs';
+
+import { stringShorten } from '@polkadot/util';
 
 export class KeyringService {
   private readonly currentAccountStore = new CurrentAccountStore();
@@ -98,6 +101,25 @@ export class KeyringService {
     this.currentAccountStore.set('CurrentAccountInfo', currentAccountData);
   }
 
+  /* Inject */
+
+  public addInjectAccounts (accounts: InjectedAccountWithMeta[]) {
+    keyring.addInjects(accounts.map((account, index) => ({
+      ...account,
+      meta: {
+        ...account.meta,
+        name: `${account.meta.name || stringShorten(account.address)} (${account.meta.source})`
+      }
+    })));
+  }
+
+  public removeInjectAccounts (addresses: string[]) {
+    keyring.removeInjects(addresses);
+  }
+
+  /* Inject */
+
+  /* Reset */
   resetWallet (resetAll: boolean) {
     keyring.resetWallet(resetAll);
     this.updateKeyringState();

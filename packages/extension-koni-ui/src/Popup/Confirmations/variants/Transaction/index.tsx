@@ -4,7 +4,6 @@
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
-import useParseSubstrateRequestPayload from '@subwallet/extension-koni-ui/hooks/transaction/confirmation/useParseSubstrateRequestPayload';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ConfirmationQueueItem } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -55,8 +54,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const transaction = useMemo(() => transactionRequest[id], [transactionRequest, id]);
 
-  const substratePayload = useParseSubstrateRequestPayload(type === 'signingRequest' ? (item as SigningRequest).request : undefined);
-
   const renderContent = useCallback((transaction: SWTransactionResult): React.ReactNode => {
     const { extrinsicType } = transaction;
 
@@ -75,16 +72,16 @@ const Component: React.FC<Props> = (props: Props) => {
           <SubstrateSignArea
             account={(item as SigningRequest).account}
             id={item.id}
-            payload={substratePayload}
+            request={(item as SigningRequest).request}
           />
         )
       }
       {
-        type === 'evmSendTransactionRequest' && (
+        (type === 'evmSendTransactionRequest' || type === 'evmWatchTransactionRequest') && (
           <EvmSignArea
             id={item.id}
-            payload={(item as ConfirmationDefinitions['evmSendTransactionRequest'][0])}
-            type='evmSendTransactionRequest'
+            payload={(item as ConfirmationDefinitions['evmSendTransactionRequest' | 'evmWatchTransactionRequest'][0])}
+            type={type}
           />
         )
       }

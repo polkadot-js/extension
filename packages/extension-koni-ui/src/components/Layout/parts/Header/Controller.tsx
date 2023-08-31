@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import LockStatus from '@subwallet/extension-koni-ui/components/Layout/parts/Header/LockStatus';
-import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -10,6 +8,9 @@ import { CaretLeft } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import SelectAccount from '../SelectAccount';
+import InjectStatus from './InjectStatus';
+import LockStatus from './LockStatus';
 import Networks from './Networks';
 
 export type Props = ThemeProps & {
@@ -54,6 +55,7 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
             <SelectAccount />
           </div>
           <LockStatus />
+          <InjectStatus />
         </div>
       </div>
     </div>

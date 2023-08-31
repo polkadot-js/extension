@@ -9,7 +9,7 @@ import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chai
 import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
+import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
 import { KeyringAddress, KeyringPairs$Json } from '@subwallet/ui-keyring/types';
@@ -904,6 +904,16 @@ export interface RequestDeleteContactAccount {
   address: string;
 }
 
+// Inject account
+
+export interface RequestAddInjectedAccounts {
+  accounts: InjectedAccountWithMeta[];
+}
+
+export interface RequestRemoveInjectedAccounts {
+  addresses: string[];
+}
+
 /// Sign Transaction
 
 /// Sign External Request
@@ -1190,6 +1200,8 @@ export interface EvmSendTransactionRequest extends TransactionConfig, EvmSignReq
   isToContract: boolean;
 }
 
+export type EvmWatchTransactionRequest = EvmSendTransactionRequest;
+
 export interface ConfirmationsQueueItemOptions {
   requiredPassword?: boolean;
   address?: string;
@@ -1254,6 +1266,7 @@ export interface ConfirmationDefinitions {
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<string>]
+  evmWatchTransactionRequest: [ConfirmationsQueueItem<EvmWatchTransactionRequest>, ConfirmationResult<string>]
 }
 
 export type ConfirmationType = keyof ConfirmationDefinitions;
@@ -2109,31 +2122,55 @@ export interface KoniRequestSignatures {
   'pri(authorize.rejectV2)': [RequestAuthorizeReject, boolean];
   'pri(authorize.cancelV2)': [RequestAuthorizeCancel, boolean];
 
-  // Account management
-  'pri(seed.createV2)': [RequestSeedCreateV2, ResponseSeedCreateV2];
+  /* Account management */
+
+  // Validate
   'pri(seed.validateV2)': [RequestSeedValidateV2, ResponseSeedValidateV2];
   'pri(privateKey.validateV2)': [RequestSeedValidateV2, ResponsePrivateKeyValidateV2];
+  'pri(accounts.checkPublicAndSecretKey)': [RequestCheckPublicAndSecretKey, ResponseCheckPublicAndSecretKey];
+
+  // Create account
+  'pri(seed.createV2)': [RequestSeedCreateV2, ResponseSeedCreateV2];
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, AccountExternalError[]];
   'pri(accounts.create.hardwareV2)': [RequestAccountCreateHardwareV2, boolean];
   'pri(accounts.create.hardwareMultiple)': [RequestAccountCreateHardwareMultiple, boolean];
   'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
+
+  // Inject account
+  'pri(accounts.inject.add)': [RequestAddInjectedAccounts, boolean];
+  'pri(accounts.inject.remove)': [RequestRemoveInjectedAccounts, boolean];
+
+  // Derive
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean]; // Substrate
+
+  // Restore by json
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
+
+  // Export account
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
-  'pri(accounts.checkPublicAndSecretKey)': [RequestCheckPublicAndSecretKey, ResponseCheckPublicAndSecretKey];
+
+  // Current account
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, AccountsWithCurrentAddress, AccountsWithCurrentAddress];
-  'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
-  'pri(accounts.saveRecent)': [RequestSaveRecentAccount, KeyringAddress];
-  'pri(accounts.get.meta)': [RequestAccountMeta, ResponseAccountMeta];
-  'pri(accounts.updateCurrentAddress)': [string, boolean];
+  'pri(accounts.updateCurrentAddress)': [string, boolean]; // old
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, CurrentAccountInfo];
+  'pri(accounts.get.meta)': [RequestAccountMeta, ResponseAccountMeta];
+
+  // Address book
+  'pri(accounts.saveRecent)': [RequestSaveRecentAccount, KeyringAddress];
   'pri(accounts.subscribeAddresses)': [null, AddressBookInfo, AddressBookInfo];
   'pri(accounts.editContact)': [RequestEditContactAccount, boolean];
   'pri(accounts.deleteContact)': [RequestDeleteContactAccount, boolean];
+
+  // Domain name
   'pri(accounts.resolveDomainToAddress)': [ResolveDomainRequest, string | undefined];
   'pri(accounts.resolveAddressToDomain)': [ResolveAddressToDomainRequest, string | undefined];
+
+  // For input UI
+  'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
+
+  /* Account management */
 
   // Settings
   'pri(settings.changeBalancesVisibility)': [null, boolean];

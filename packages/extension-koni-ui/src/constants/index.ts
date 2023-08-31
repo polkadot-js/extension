@@ -5,6 +5,7 @@ export * from './account';
 export * from './buy';
 export * from './common';
 export * from './history';
+export * from './localStorage';
 export * from './modal';
 export * from './nft';
 export * from './number';

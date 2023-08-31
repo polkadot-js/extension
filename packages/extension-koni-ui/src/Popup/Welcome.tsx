@@ -4,6 +4,7 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ACCOUNT_TYPES, DOWNLOAD_EXTENSION } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -37,12 +38,14 @@ interface WelcomeButtonItem {
   schema: ButtonProps['schema'];
   title: string;
   description: string;
+  loading: boolean;
 }
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
+  const { enableInject, initCallback, initEnable, injected, loadingInject } = useContext(InjectContext);
   const navigate = useNavigate();
 
   const [form] = Form.useForm<ReadOnlyAccountInput>();
@@ -51,8 +54,13 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(false);
   const [isAttachAddressEthereum, setAttachAddressEthereum] = useState(false);
   const [isAttachReadonlyAccountButtonDisable, setIsAttachReadonlyAccountButtonDisable] = useState(true);
+  // use for trigger after enable inject
+  const [enInject, setEnInject] = useState({});
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
-  const [isAccountsEmpty] = useState(isNoAccount(accounts));
+  const isAccountsEmpty = useMemo(() => {
+    return isNoAccount(accounts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enInject]);
   const { goHome } = useDefaultNavigate();
 
   usePreloadView([
@@ -154,37 +162,45 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       icon: PlusCircle,
       id: CREATE_ACCOUNT_MODAL,
       schema: isWebUI ? 'secondary' : 'primary',
-      title: t('Create a new account')
+      title: t('Create a new account'),
+      loading: false
     },
     {
       description: t('Import an existing account'),
       icon: FileArrowDown,
       id: IMPORT_ACCOUNT_MODAL,
       schema: 'secondary',
-      title: t('Import an account')
+      title: t('Import an account'),
+      loading: false
     },
     {
       description: t('Attach an account without private key'),
       icon: Swatches,
       id: ATTACH_ACCOUNT_MODAL,
       schema: 'secondary',
-      title: t('Attach an account')
+      title: t('Attach an account'),
+      loading: false
     },
     {
       description: 'For management of your account keys',
       icon: PuzzlePiece,
       id: DOWNLOAD_EXTENSION,
       schema: 'secondary',
-      title: t('Download SubWallet extension')
+      title: injected ? t('Use SubWallet extension') : t('Download SubWallet extension'),
+      loading: loadingInject
     }
-  ], [isWebUI, t]);
+  ], [injected, isWebUI, t, loadingInject]);
 
   const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI, items]);
 
   const openModal = useCallback((id: string) => {
     return () => {
       if (id === DOWNLOAD_EXTENSION) {
-        openInNewTab(EXTENSION_URL)();
+        if (injected) {
+          enableInject(() => setEnInject({}));
+        } else {
+          openInNewTab(EXTENSION_URL)();
+        }
 
         return;
       }
@@ -197,7 +213,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         activeModal(id);
       }
     };
-  }, [activeModal, inactiveModal, navigate]
+  }, [activeModal, enableInject, inactiveModal, injected, navigate]
   );
 
   useLayoutEffect(() => {
@@ -205,6 +221,13 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       goHome();
     }
   }, [goHome, isAccountsEmpty]);
+
+  // Go root after inject
+  useEffect(() => {
+    if (initEnable) {
+      initCallback(() => setEnInject({}));
+    }
+  }, [initCallback, initEnable]);
 
   return (
     <Layout.Base
@@ -254,6 +277,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                   />
                 }
                 key={item.id}
+                loading={item.loading}
                 onClick={openModal(item.id)}
                 schema={item.schema}
               >

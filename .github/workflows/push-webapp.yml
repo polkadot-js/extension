@@ -20,16 +20,19 @@ jobs:
       with:
         fetch-depth: 0
         token: ${{ secrets.GH_PAT }}
-    - uses: actions/setup-node@v3
+    - name: Setup Node
+      uses: actions/setup-node@v3
       with:
         node-version: '18'
         cache: 'yarn'
+    - name: Build
       env:
         TRANSAK_API_KEY: ${{ secrets.TRANSAK_API_KEY }}
         BANXA_SANDBOX_API_KEY: ${{ secrets.BANXA_SANDBOX_API_KEY }}
         BANXA_SANBOX_API_SECRET: ${{ secrets.BANXA_SANBOX_API_SECRET }}
-    - run: yarn install --immutable | grep -v 'YN0013'
-    - run: yarn webapp:build
+      run: |
+        yarn install --immutable | grep -v 'YN0013'
+        yarn webapp:build
     - name: Publish to Cloudflare Pages
       uses: cloudflare/pages-action@v1
       with:

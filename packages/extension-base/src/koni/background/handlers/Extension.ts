@@ -2904,6 +2904,10 @@ export default class KoniExtension {
 
     this.#koniState.updateKeyringState();
 
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
+
     return {
       status: true,
       errors: []

@@ -18,6 +18,14 @@ export const BUY_SERVICE_CONTACTS: Record<SupportService, BuyServiceInfo> = {
     url: 'https://banxa.com/',
     termUrl: 'https://banxa.com/wp-content/uploads/2023/06/Customer-Terms-and-Conditions-19-June-2023.pdf'
   },
+  // TODO: Change text and url
+  coinbase: {
+    contactUrl: 'https://help.coinbase.com/en/contact-us',
+    name: 'Coinbase',
+    policyUrl: 'https://www.coinbase.com/legal/cookie',
+    url: 'https://banxa.com/',
+    termUrl: 'https://www.coinbase.com/legal/user_agreement/kenya'
+  },
   moonpay: {
     contactUrl: 'https://support.moonpay.com/',
     name: 'MoonPay',

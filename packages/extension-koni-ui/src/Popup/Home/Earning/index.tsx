@@ -14,6 +14,7 @@ import CN from 'classnames';
 import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 
 type Props = ThemeProps;
 
@@ -23,28 +24,39 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
 
   // TODO: calculate rewards based on amount - daily, monthly, annually
+  // useEffect(() => {
+  //   const selectedPool = Object.values(poolInfo)[0];
+  //
+  //   if (!selectedPool) {
+  //     return;
+  //   }
+  //
+  //   if (selectedPool?.stats?.assetEarning) {
+  //     selectedPool?.stats?.assetEarning.forEach((assetEarningStats) => {
+  //       const assetApr = assetEarningStats?.apr || 0;
+  //
+  //       const _1dEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.DAILY);
+  //       const _7dEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.WEEKLY);
+  //       const _monthlyEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.MONTHLY);
+  //       const _yearlyEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.YEARLY);
+  //
+  //       console.log('_1dEarning', _1dEarning);
+  //       console.log('_7dEarning', _7dEarning);
+  //       console.log('_monthlyEarning', _monthlyEarning);
+  //       console.log('_yearlyEarning', _yearlyEarning);
+  //     });
+  //   }
+  // }, [poolInfo]);
+
   useEffect(() => {
-    const selectedPool = Object.values(poolInfo)[0];
-
-    if (!selectedPool) {
-      return;
-    }
-
-    if (selectedPool?.stats?.assetEarning) {
-      selectedPool?.stats?.assetEarning.forEach((assetEarningStats) => {
-        const assetApr = assetEarningStats?.apr || 0;
-
-        const _1dEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.DAILY);
-        const _7dEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.WEEKLY);
-        const _monthlyEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.MONTHLY);
-        const _yearlyEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.YEARLY);
-
-        console.log('_1dEarning', _1dEarning);
-        console.log('_7dEarning', _7dEarning);
-        console.log('_monthlyEarning', _monthlyEarning);
-        console.log('_yearlyEarning', _yearlyEarning);
-      });
-    }
+    getOptimalYieldPath({
+      amount: '10000000',
+      poolInfo: Object.values(poolInfo)[0]
+    })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(console.error);
   }, [poolInfo]);
 
   const renderEarningItem = (item: YieldPoolInfo) => {

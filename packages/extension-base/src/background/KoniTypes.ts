@@ -2039,11 +2039,52 @@ export interface YieldPoolInfo {
   chain: string,
   inputAssets: string[], // slug
   rewardAssets: string[], // slug
+  feeAssets: string[],
   withdrawalMethods: YieldWithdrawalMethod[],
   description: string,
   name: string,
   type: YieldPoolType,
   stats?: YieldPoolStats
+}
+
+export interface OptimalYieldPathRequest {
+  amount: string,
+  poolInfo: YieldPoolInfo
+}
+
+export interface OptimalYieldPathParams {
+  amount: string,
+  poolInfo: YieldPoolInfo,
+
+  assetInfoMap: Record<string, _ChainAsset>,
+  chainInfoMap: Record<string, _ChainInfo>
+  substrateApiMap: Record<string, _SubstrateApi>,
+  balanceMap: Record<string, BalanceItem>
+}
+
+export interface YieldTokenBaseInfo {
+  slug: string,
+  amount?: string,
+}
+
+export enum YieldStepType {
+  XCM = 'XCM',
+  // native staking
+  NOMINATE = 'NOMINATE',
+  BOND = 'BOND',
+  // nomination pool
+  JOIN_NOMINATION_POOL = 'JOIN_NOMINATION_POOL',
+}
+
+export interface YieldStepDetail {
+  name: string,
+  type: YieldStepType,
+  metadata?: Record<string, unknown>; // for generating extrinsic
+}
+
+export interface OptimalPathResp {
+  totalFee: YieldTokenBaseInfo[],
+  steps: YieldStepDetail[]
 }
 
 export interface YieldAssetExpectedEarning {
@@ -2208,6 +2249,7 @@ export interface KoniRequestSignatures {
 
   // yield
   'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
+  'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalPathResp | undefined];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

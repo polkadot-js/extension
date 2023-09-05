@@ -16,6 +16,9 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     rewardAssets: [
       'polkadot-NATIVE-DOT'
     ],
+    feeAssets: [
+      'polkadot-NATIVE-DOT'
+    ],
     withdrawalMethods: [
       {
         name: 'Default Unstaking',
@@ -34,6 +37,9 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
       'polkadot-NATIVE-DOT'
     ],
     rewardAssets: [
+      'polkadot-NATIVE-DOT'
+    ],
+    feeAssets: [
       'polkadot-NATIVE-DOT'
     ],
     withdrawalMethods: [
@@ -55,6 +61,10 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     ],
     rewardAssets: [
       'acala-LOCAL-LDOT'
+    ],
+    feeAssets: [
+      'polkadot-LOCAL-DOT',
+      'acala-NATIVE-ACA'
     ],
     withdrawalMethods: [
       {
@@ -81,6 +91,10 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     rewardAssets: [
       'bifrost_dot-LOCAL-vDOT'
     ],
+    feeAssets: [
+      'bifrost_dot-LOCAL-DOT',
+      'bifrost_dot-NATIVE-BNC'
+    ],
     withdrawalMethods: [
       {
         name: 'Default unstaking',
@@ -105,6 +119,9 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     ],
     rewardAssets: [
       'parallel-LOCAL-sDOT'
+    ],
+    feeAssets: [
+      'parallel-NATIVE-PARA'
     ],
     withdrawalMethods: [
       {
@@ -131,6 +148,10 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     rewardAssets: [
       'interlay-LOCAL-DOT',
       'interlay-NATIVE-INTR'
+    ],
+    feeAssets: [
+      'interlay-NATIVE-INTR',
+      'interlay-LOCAL-DOT'
     ],
     withdrawalMethods: [
       {

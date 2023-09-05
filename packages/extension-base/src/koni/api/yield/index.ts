@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { OptimalYieldPathParams, OptimalPathResp, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -12,10 +12,6 @@ import { Codec } from '@polkadot/types/types';
 import { BN } from '@polkadot/util';
 
 // only apply for DOT right now, will need to scale up
-
-export function getYieldPools (): YieldPoolInfo[] {
-  return Object.values(YIELD_POOLS_INFO);
-}
 
 export function subscribeYieldPoolStats (substrateApiMap: Record<string, _SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, callback: (rs: YieldPoolInfo) => void) {
   const unsubList: VoidFunction[] = [];
@@ -129,4 +125,79 @@ export function calculateReward (apr: number, amount = 0, compoundingPeriod = Yi
     apy: periodApy,
     rewardInToken: reward
   };
+}
+
+export async function generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalPathResp | undefined> { // assume inputs are already validated
+  if (['DOT___native_staking', 'DOT___nomination_pool'].includes(params.poolInfo.slug)) {
+    return await generatePathForNativeStaking(params);
+  }
+
+  return undefined;
+}
+
+const syntheticSelectedValidators = [
+  '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',
+  '1REAJ1k691g5Eqqg9gL7vvZCBG7FCCZ8zgQkZWd4va5ESih',
+  '1yGJ3h7TQuJWLYSsUVPZbM8aR8UsQXCqMvrFx5Fn1ktiAmq',
+  '16GDRhRYxk42paoK6TfHAqWej8PdDDUwdDazjv4bAn4KGNeb',
+  '13Ybj8CPEArUee78DxUAP9yX3ABmFNVQME1ZH4w8HVncHGzc',
+  '14yx4vPAACZRhoDQm1dyvXD3QdRQyCRRCe5tj1zPomhhS29a',
+  '14Vh8S1DzzycngbAB9vqEgPFR9JpSvmF1ezihTUES1EaHAV',
+  '153YD8ZHD9dRh82U419bSCB5SzWhbdAFzjj4NtA5pMazR2yC',
+  '1LUckyocmz9YzeQZHVpBvYYRGXb3rnSm2tvfz79h3G3JDgP',
+  '14oRE62MB1SWR6h5RTx3GY5HK2oZipi1Gp3zdiLwVYLfEyRZ',
+  '1cFsLn7o74nmjbRyDtMAnMpQMc5ZLsjgCSz9Np2mcejUK83',
+  '15ZvLonEseaWZNy8LDkXXj3Y8bmAjxCjwvpy4pXWSL4nGSBs',
+  '1NebF2xZHb4TJJpiqZZ3reeTo8dZov6LZ49qZqcHHbsmHfo',
+  '1HmAqbBRrWvsqbLkvpiVDkdA2PcctUE5JUe3qokEh1FN455',
+  '15tfUt4iQNjMyhZiJGBf4EpETE2KqtW1nfJwbBT1MvWjvcK9',
+  '12RXTLiaYh59PokjZVhQvKzcfBEB5CvDnjKKUmDUotzcTH3S'
+];
+
+export async function generatePathForNativeStaking (params: OptimalYieldPathParams): Promise<OptimalPathResp | undefined> {
+  const bnAmount = new BN(params.amount);
+  const result: OptimalPathResp = {
+    totalFee: [],
+    steps: []
+  };
+
+  const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
+  const inputTokenBalance = params.balanceMap[inputTokenSlug].free;
+  const bnInputTokenBalance = new BN(inputTokenBalance);
+  const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
+
+  if (bnInputTokenBalance.gte(bnAmount)) {
+    if (params.poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+      result.steps.push({
+        metadata: {
+          amount: params.amount
+        },
+        name: 'Bond token',
+        type: YieldStepType.BOND
+      });
+      result.steps.push({
+        name: 'Nominate validators',
+        type: YieldStepType.NOMINATE
+      });
+
+      const [bondFeeInfo, nominateFeeInfo] = await Promise.all([
+        substrateApi.api.tx.staking.bond(bnAmount, 'Staked').paymentInfo('15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6'),
+        substrateApi.api.tx.staking.nominate(syntheticSelectedValidators).paymentInfo('15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6')
+      ]);
+
+      console.log(bondFeeInfo.toPrimitive(), nominateFeeInfo.toPrimitive());
+    } else {
+      result.steps.push({
+        metadata: {
+          amount: params.amount
+        },
+        name: 'Join nomination pool',
+        type: YieldStepType.JOIN_NOMINATION_POOL
+      });
+    }
+
+    return result;
+  }
+
+  return undefined;
 }

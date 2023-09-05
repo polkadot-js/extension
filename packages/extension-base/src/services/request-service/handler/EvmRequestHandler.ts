@@ -225,6 +225,14 @@ export default class EvmRequestHandler {
       } else if (t === 'evmSendTransactionRequest') {
         result.payload = await this.signTransaction(request as ConfirmationDefinitions['evmSendTransactionRequest'][0]);
       }
+
+      if (t === 'evmSignatureRequest' || t === 'evmSendTransactionRequest') {
+        const isAlwaysRequired = await this.#requestService.settingService.isAlwaysRequired;
+
+        if (isAlwaysRequired) {
+          this.#requestService.keyringService.lock();
+        }
+      }
     }
   }
 

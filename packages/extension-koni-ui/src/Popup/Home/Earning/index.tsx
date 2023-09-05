@@ -1,20 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
+import { YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EarningItem from '@subwallet/extension-koni-ui/components/EarningItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { SwList } from '@subwallet/react-ui';
+import { ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
+import StakingCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingCalculatorModal';
 
 type Props = ThemeProps;
 
@@ -22,31 +22,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
+  const { activeModal } = useContext(ModalContext);
+  const [selectedItem, setSelectedItem] = useState<YieldPoolInfo | undefined>(undefined);
 
-  // TODO: calculate rewards based on amount - daily, monthly, annually
-  // useEffect(() => {
-  //   const selectedPool = Object.values(poolInfo)[0];
-  //
-  //   if (!selectedPool) {
-  //     return;
-  //   }
-  //
-  //   if (selectedPool?.stats?.assetEarning) {
-  //     selectedPool?.stats?.assetEarning.forEach((assetEarningStats) => {
-  //       const assetApr = assetEarningStats?.apr || 0;
-  //
-  //       const _1dEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.DAILY);
-  //       const _7dEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.WEEKLY);
-  //       const _monthlyEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.MONTHLY);
-  //       const _yearlyEarning = calculateReward(assetApr, 100, YieldCompoundingPeriod.YEARLY);
-  //
-  //       console.log('_1dEarning', _1dEarning);
-  //       console.log('_7dEarning', _7dEarning);
-  //       console.log('_monthlyEarning', _monthlyEarning);
-  //       console.log('_yearlyEarning', _yearlyEarning);
-  //     });
-  //   }
-  // }, [poolInfo]);
+  const onClickCalculatorBtn = useCallback((item: YieldPoolInfo) => {
+    setSelectedItem(item);
+    activeModal(STAKING_CALCULATOR_MODAL_ID);
+  }, [activeModal]);
 
   useEffect(() => {
     getOptimalYieldPath({
@@ -61,7 +43,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const renderEarningItem = (item: YieldPoolInfo) => {
     return (
-      <EarningItem item={item} />
+      <EarningItem item={item} onClickCalculatorBtn={() => onClickCalculatorBtn(item)} />
     );
   };
 
@@ -90,6 +72,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           renderWhenEmpty={<></>}
           searchMinCharactersCount={2}
         />
+
+        {selectedItem && <StakingCalculatorModal item={selectedItem}/>}
       </Layout.Base>
     </PageWrapper>
 

@@ -22,9 +22,9 @@ export const BUY_SERVICE_CONTACTS: Record<SupportService, BuyServiceInfo> = {
   coinbase: {
     contactUrl: 'https://help.coinbase.com/en/contact-us',
     name: 'Coinbase',
-    policyUrl: 'https://www.coinbase.com/legal/cookie',
-    url: 'https://banxa.com/',
-    termUrl: 'https://www.coinbase.com/legal/user_agreement/kenya'
+    policyUrl: 'https://coinbase.com/legal/cookie',
+    url: 'https://coinbase.com/',
+    termUrl: 'https://coinbase.com/legal/user_agreement/kenya'
   },
   moonpay: {
     contactUrl: 'https://support.moonpay.com/',

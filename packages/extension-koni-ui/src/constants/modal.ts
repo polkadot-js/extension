@@ -29,3 +29,7 @@ export const ADD_CONNECTION_MODAL = 'add-connection-modal';
 export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
 
 export const ACCOUNT_EXPORT_MODAL = 'account-export-modal';
+
+export const WALLET_CONNECT_CREATE_MODAL = 'wallet-connect-create-modal';
+export const WALLET_CONNECT_DETAIL_MODAL = 'wallet-connect-detail-modal';
+export const WALLET_CONNECT_LIST_MODAL = 'wallet-connect-list-modal';

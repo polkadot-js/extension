@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import WalletConnect from '@subwallet/extension-koni-ui/components/Layout/parts/Header/parts/WalletConnect';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -9,8 +10,8 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import SelectAccount from '../SelectAccount';
-import LockStatus from './LockStatus';
-import Networks from './Networks';
+import LockStatus from './parts/LockStatus';
+import Networks from './parts/Networks';
 
 export type Props = ThemeProps & {
   title?: string | React.ReactNode;
@@ -49,10 +50,14 @@ function Component ({ className, onBack, showBackButton, title = '' }: Props): R
           <Typography.Title className='page-name'>{title}</Typography.Title>
         </div>
         <div className='action-group'>
+          <WalletConnect />
+
           <Networks />
+
           <div className={'trigger-container -select-account'}>
             <SelectAccount />
           </div>
+
           <LockStatus />
         </div>
       </div>

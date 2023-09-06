@@ -10,7 +10,7 @@ export const createCoinbaseOrder: CreateBuyOrderFunction = (symbol, address, net
     const onRampURL = generateOnRampURL({
       appId: COINBASE_PAY_ID,
       destinationWallets: [
-        { address: address, blockchains: [network], assets: [symbol] }
+        { address: address, supportedNetworks: [network], assets: [symbol] }
       ]
     });
 

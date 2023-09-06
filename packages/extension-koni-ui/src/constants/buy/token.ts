@@ -24,13 +24,17 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       banxa: {
         network: 'DOT',
         symbol: 'DOT'
+      },
+      coinbase: {
+        network: 'polkadot',
+        symbol: 'DOT'
       }
     },
     network: 'polkadot',
     slug: 'polkadot-NATIVE-DOT',
     symbol: 'DOT',
     support: 'SUBSTRATE',
-    services: ['transak', 'banxa']
+    services: ['transak', 'banxa', 'coinbase']
   },
   KSM: {
     serviceInfo: {
@@ -42,13 +46,17 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       banxa: {
         network: 'KSM',
         symbol: 'KSM'
+      },
+      coinbase: {
+        network: 'kusama',
+        symbol: 'KSM'
       }
     },
     network: 'kusama',
     slug: 'kusama-NATIVE-KSM',
     symbol: 'KSM',
     support: 'SUBSTRATE',
-    services: ['transak', 'banxa']
+    services: ['transak', 'banxa', 'coinbase']
   },
   ASTR: {
     serviceInfo: {

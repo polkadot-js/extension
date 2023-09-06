@@ -85,6 +85,7 @@ export default class KoniExtension {
   #timeAutoLock: number = DEFAULT_AUTO_LOCK_TIME;
   #skipAutoLock = false;
   #alwaysLock = false;
+  #firstTime = true;
 
   constructor (state: KoniState) {
     this.#koniState = state;
@@ -103,7 +104,13 @@ export default class KoniExtension {
             }
           }, this.#timeAutoLock * 60 * 1000);
         } else if (this.#alwaysLock) {
-          this.keyringLock();
+          if (!this.#firstTime) {
+            this.keyringLock();
+          }
+        }
+
+        if (this.#firstTime) {
+          this.#firstTime = false;
         }
       }
     };

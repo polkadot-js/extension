@@ -139,7 +139,7 @@ const Component: React.FC<Props> = (props: Props) => {
             }
             onClick={onAdd}
           >
-            {t('Connect')}
+            {t('New connection')}
           </Button>
         </div>
       </BaseModal>
@@ -221,7 +221,8 @@ const ConnectionList = styled(Component)<Props>(({ theme: { token } }: Props) =>
       },
 
       '.__modal-content': {
-        overflow: 'hidden'
+        overflow: 'hidden',
+        minHeight: 330
       },
 
       '.sessions-list.ant-sw-list-section .ant-sw-list-wrapper': {

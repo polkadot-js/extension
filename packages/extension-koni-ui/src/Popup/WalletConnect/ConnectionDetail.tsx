@@ -440,7 +440,8 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
       },
       '.body-container': {
         padding: 0,
-        overflow: 'auto'
+        overflow: 'auto',
+        minHeight: 330
       },
       '.__footer': {
         paddingTop: token.padding

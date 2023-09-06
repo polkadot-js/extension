@@ -56,6 +56,15 @@ export default class SettingService {
     this.passPhishingStore.set('PassPhishing', data, callback);
   }
 
+  // Use for mobile only
+  public get isAlwaysRequired (): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      this.settingsStore.get('Settings', (value) => {
+        resolve(!value.timeAutoLock);
+      });
+    });
+  }
+
   public resetWallet () {
     this.settingsStore.set('Settings', DEFAULT_SETTING);
     this.passPhishingStore.set('PassPhishing', {});

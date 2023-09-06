@@ -63,8 +63,13 @@ export default class SubstrateRequestHandler {
     return Object.keys(this.#substrateRequests).length;
   }
 
-  public sign (url: string, request: RequestSign, account: AccountJson, _id?: string): Promise<ResponseSigning> {
+  public async sign (url: string, request: RequestSign, account: AccountJson, _id?: string): Promise<ResponseSigning> {
     const id = _id || getId();
+    const isAlwaysRequired = await this.#requestService.settingService.isAlwaysRequired;
+
+    if (isAlwaysRequired) {
+      this.#requestService.keyringService.lock();
+    }
 
     return new Promise((resolve, reject): void => {
       this.#substrateRequests[id] = {
@@ -80,7 +85,13 @@ export default class SubstrateRequestHandler {
     });
   }
 
-  public signTransaction (id: string, address: string, url: string, payload: SignerPayloadJSON): Promise<ResponseSigning> {
+  public async signTransaction (id: string, address: string, url: string, payload: SignerPayloadJSON): Promise<ResponseSigning> {
+    const isAlwaysRequired = await this.#requestService.settingService.isAlwaysRequired;
+
+    if (isAlwaysRequired) {
+      this.#requestService.keyringService.lock();
+    }
+
     return new Promise((resolve, reject): void => {
       const pair = keyring.getPair(address);
       const account: AccountJson = { address: pair.address, ...pair.meta };

@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { OptimalYieldPathParams, OptimalPathResp, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { OptimalPathResp, OptimalYieldPathParams, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { Codec } from '@polkadot/types/types';
-import { BN } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 // only apply for DOT right now, will need to scale up
 
@@ -23,6 +24,11 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
 
     if (YieldPoolType.NATIVE_STAKING === poolInfo.type) {
       const unsub = await subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
+
+      // @ts-ignore
+      unsubList.push(unsub);
+    } else if (poolInfo.slug === 'DOT___bifrost_liquid_staking') {
+      const unsub = subscribeBifrostLiquidStakingStats(poolInfo, callback);
 
       // @ts-ignore
       unsubList.push(unsub);
@@ -109,6 +115,35 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
   });
 }
 
+export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
+  function getPoolStat () {
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      ...poolInfo,
+      stats: {
+        assetEarning: [
+          {
+            slug: poolInfo.inputAssets[0],
+            apr: 18.38
+          }
+        ],
+        maxCandidatePerFarmer: 1,
+        maxWithdrawalRequestPerFarmer: 1,
+        minJoinPool: '10000000000',
+        minWithdrawal: '0',
+        totalApr: 18.38,
+        tvl: '13095111106588368'
+      }
+    });
+  }
+
+  const interval = setInterval(getPoolStat, 30000);
+
+  return () => {
+    clearInterval(interval);
+  };
+}
+
 export function calculateReward (apr: number, amount = 0, compoundingPeriod = YieldCompoundingPeriod.YEARLY): YieldAssetExpectedEarning {
   if (!apr) {
     return {};
@@ -127,9 +162,16 @@ export function calculateReward (apr: number, amount = 0, compoundingPeriod = Yi
   };
 }
 
-export async function generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalPathResp | undefined> { // assume inputs are already validated
+export async function generateNaiveOptimalPath (params: OptimalYieldPathParams): Promise<OptimalPathResp | undefined> {
+  // 1. assume inputs are already validated
+  // 2. generate paths based on amount only, not taking fee into account
+  // 3. fees are calculated in the worst possible situation
+  // 4. fees are calculated for the whole process, either user can pay all or nothing
+
   if (['DOT___native_staking', 'DOT___nomination_pool'].includes(params.poolInfo.slug)) {
     return await generatePathForNativeStaking(params);
+  } else if (params.poolInfo.slug === 'DOT___bifrost_liquid_staking') {
+    return await generatePathForBifrostLiquidStaking(params);
   }
 
   return undefined;
@@ -154,6 +196,17 @@ const syntheticSelectedValidators = [
   '12RXTLiaYh59PokjZVhQvKzcfBEB5CvDnjKKUmDUotzcTH3S'
 ];
 
+const fakeAddress = '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6';
+
+export interface RuntimeDispatchInfo {
+  weight: {
+    refTime: number,
+    proofSize: number
+  },
+  class: string,
+  partialFee: number
+}
+
 export async function generatePathForNativeStaking (params: OptimalYieldPathParams): Promise<OptimalPathResp | undefined> {
   const bnAmount = new BN(params.amount);
   const result: OptimalPathResp = {
@@ -162,12 +215,14 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
   };
 
   const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
-  const inputTokenBalance = params.balanceMap[inputTokenSlug].free;
+  const feeAsset = params.poolInfo.feeAssets[0];
+  const inputTokenBalance = params.balanceMap[inputTokenSlug]?.free || '0';
   const bnInputTokenBalance = new BN(inputTokenBalance);
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
 
   if (bnInputTokenBalance.gte(bnAmount)) {
     if (params.poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+      // TODO: check existing position
       result.steps.push({
         metadata: {
           amount: params.amount
@@ -180,13 +235,22 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
         type: YieldStepType.NOMINATE
       });
 
-      const [bondFeeInfo, nominateFeeInfo] = await Promise.all([
-        substrateApi.api.tx.staking.bond(bnAmount, 'Staked').paymentInfo('15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6'),
-        substrateApi.api.tx.staking.nominate(syntheticSelectedValidators).paymentInfo('15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6')
+      const [_bondFeeInfo, _nominateFeeInfo] = await Promise.all([
+        substrateApi.api.tx.staking.bond(bnAmount, 'Staked').paymentInfo(fakeAddress),
+        substrateApi.api.tx.staking.nominate(syntheticSelectedValidators).paymentInfo(fakeAddress)
       ]);
 
-      console.log(bondFeeInfo.toPrimitive(), nominateFeeInfo.toPrimitive());
+      const bondFeeInfo = _bondFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+      const nominateFeeInfo = _nominateFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      const totalFee = bondFeeInfo.partialFee + nominateFeeInfo.partialFee;
+
+      result.totalFee.push({
+        slug: feeAsset,
+        amount: totalFee.toString()
+      });
     } else {
+      // TODO: check existing position
       result.steps.push({
         metadata: {
           amount: params.amount
@@ -194,10 +258,127 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
         name: 'Join nomination pool',
         type: YieldStepType.JOIN_NOMINATION_POOL
       });
+
+      const _joinPoolFeeInfo = await substrateApi.api.tx.nominationPools.join(params.amount, 1).paymentInfo(fakeAddress);
+      const joinPoolFeeInfo = _joinPoolFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      result.totalFee.push({
+        slug: feeAsset,
+        amount: joinPoolFeeInfo.partialFee.toString()
+      });
     }
 
     return result;
   }
 
   return undefined;
+}
+
+export async function generatePathForBifrostLiquidStaking (params: OptimalYieldPathParams): Promise<OptimalPathResp | undefined> {
+  const bnAmount = new BN(params.amount);
+  const result: OptimalPathResp = {
+    totalFee: [],
+    steps: []
+  };
+
+  const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
+  const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
+
+  const inputTokenBalance = params.balanceMap[inputTokenSlug]?.free || '0';
+  const bnInputTokenBalance = new BN(inputTokenBalance);
+
+  const feeTokenSlug = params.poolInfo.feeAssets[0];
+  const feeTokenBalance = params.balanceMap[feeTokenSlug]?.free || '0';
+  const bnFeeTokenBalance = new BN(feeTokenBalance);
+
+  console.log('feeTokenSlug', feeTokenSlug);
+
+  const feeTokenInfo = params.assetInfoMap[feeTokenSlug];
+  const bnMinAmountFeeToken = new BN(feeTokenInfo.minAmount || '0');
+
+  const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
+
+  let inputTokenFee = BN_ZERO;
+
+  console.log('inputTokenInfo', inputTokenInfo);
+
+  if (!bnInputTokenBalance.gte(bnAmount)) {
+    if (params.poolInfo.altInputAssets) {
+      const remainingAmount = bnAmount.sub(bnInputTokenBalance);
+
+      const altInputTokenSlug = params.poolInfo.altInputAssets[0];
+      const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
+      const bnMinAmountAltInputToken = new BN(altInputTokenInfo.minAmount || '0');
+
+      const altInputTokenBalance = params.balanceMap[altInputTokenSlug]?.free || '0';
+      const bnAltInputTokenBalance = new BN(altInputTokenBalance);
+
+      const xcmAmount = bnAltInputTokenBalance.sub(remainingAmount);
+
+      if (xcmAmount.gte(bnMinAmountAltInputToken)) {
+        result.steps.push({
+          metadata: {
+            sendingValue: xcmAmount.toString(),
+            originTokenInfo: altInputTokenInfo,
+            destinationTokenInfo: inputTokenInfo
+          },
+          name: 'Transfer DOT from Polkadot',
+          type: YieldStepType.XCM
+        });
+
+        const xcmTransfer = await createXcmExtrinsic({
+          originTokenInfo: altInputTokenInfo,
+          destinationTokenInfo: inputTokenInfo,
+          sendingValue: xcmAmount.toString(),
+          recipient: fakeAddress,
+          chainInfoMap: params.chainInfoMap,
+          substrateApi
+        });
+
+        const _xcmFeeInfo = await xcmTransfer.paymentInfo(fakeAddress);
+        const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+        // TODO: calculate fee for destination chain
+
+        inputTokenFee = inputTokenFee.add(new BN(xcmFeeInfo.partialFee.toString()));
+      } else {
+        return undefined;
+      }
+    } else {
+      return undefined;
+    }
+  }
+
+  result.steps.push({
+    name: 'Mint vDOT',
+    type: YieldStepType.MINT_VDOT
+  });
+
+  const _mintFeeInfo = await substrateApi.api.tx.vtokenMinting.mint({ VToken: 'DOT' }, params.amount).paymentInfo(fakeAddress);
+  const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+  const bnMintFee = new BN(mintFeeInfo.partialFee.toString());
+
+  if (bnFeeTokenBalance.gte(bnMinAmountFeeToken)) {
+    if (inputTokenFee.gt(BN_ZERO)) {
+      result.totalFee.push({
+        slug: inputTokenSlug,
+        amount: inputTokenFee.toString()
+      });
+    }
+
+    result.totalFee.push({
+      slug: feeTokenSlug,
+      amount: mintFeeInfo.partialFee.toString()
+    });
+  } else {
+    console.log('paying with input token');
+
+    inputTokenFee = inputTokenFee.add(bnMintFee);
+
+    result.totalFee.push({
+      slug: inputTokenSlug,
+      amount: inputTokenFee.toString()
+    });
+  }
+
+  return result;
 }

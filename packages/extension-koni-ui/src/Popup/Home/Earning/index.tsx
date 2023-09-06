@@ -6,15 +6,15 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EarningItem from '@subwallet/extension-koni-ui/components/EarningItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
+import StakingCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingCalculatorModal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
-import StakingCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingCalculatorModal';
 
 type Props = ThemeProps;
 
@@ -31,9 +31,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   useEffect(() => {
+    const selectedPool = Object.values(poolInfo)[0];
+
+    console.log('poolInfo', selectedPool);
     getOptimalYieldPath({
-      amount: '10000000',
-      poolInfo: Object.values(poolInfo)[0]
+      amount: '100000000',
+      poolInfo: selectedPool
     })
       .then((res) => {
         console.log(res);
@@ -41,11 +44,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       .catch(console.error);
   }, [poolInfo]);
 
-  const renderEarningItem = (item: YieldPoolInfo) => {
+  const renderEarningItem = useCallback((item: YieldPoolInfo) => {
     return (
-      <EarningItem item={item} onClickCalculatorBtn={() => onClickCalculatorBtn(item)} />
+      <EarningItem
+        item={item}
+        onClickCalculatorBtn={() => onClickCalculatorBtn(item)}
+      />
     );
-  };
+  }, [onClickCalculatorBtn]);
 
   return (
     <PageWrapper
@@ -73,7 +79,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           searchMinCharactersCount={2}
         />
 
-        {selectedItem && <StakingCalculatorModal item={selectedItem}/>}
+        {selectedItem && <StakingCalculatorModal item={selectedItem} />}
       </Layout.Base>
     </PageWrapper>
 

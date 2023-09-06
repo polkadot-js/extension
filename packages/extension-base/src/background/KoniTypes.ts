@@ -2039,6 +2039,7 @@ export interface YieldPoolInfo {
   chain: string,
   inputAssets: string[], // slug
   rewardAssets: string[], // slug
+  altInputAssets?: string[],
   feeAssets: string[],
   withdrawalMethods: YieldWithdrawalMethod[],
   description: string,
@@ -2059,7 +2060,9 @@ export interface OptimalYieldPathParams {
   assetInfoMap: Record<string, _ChainAsset>,
   chainInfoMap: Record<string, _ChainInfo>
   substrateApiMap: Record<string, _SubstrateApi>,
-  balanceMap: Record<string, BalanceItem>
+  balanceMap: Record<string, BalanceItem>,
+
+  hasPosition?: boolean
 }
 
 export interface YieldTokenBaseInfo {
@@ -2069,11 +2072,16 @@ export interface YieldTokenBaseInfo {
 
 export enum YieldStepType {
   XCM = 'XCM',
+
   // native staking
   NOMINATE = 'NOMINATE',
   BOND = 'BOND',
+
   // nomination pool
   JOIN_NOMINATION_POOL = 'JOIN_NOMINATION_POOL',
+
+  // bifrost
+  MINT_VDOT = 'MINT_VDOT'
 }
 
 export interface YieldStepDetail {

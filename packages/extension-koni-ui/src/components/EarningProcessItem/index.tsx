@@ -11,12 +11,12 @@ interface Props extends ThemeProps {
   stepName: string;
 }
 
-const Component = ({ isSelected, index, stepName }: Props) => {
+const Component = ({ className, isSelected, index, stepName }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
   return (
-    <div className={'staking-process-flex-wrapper'}>
+    <div className={`${className}`}>
       {isSelected ? (
         <BackgroundIcon
           size={'lg'}
@@ -50,6 +50,10 @@ const Component = ({ isSelected, index, stepName }: Props) => {
 
 const EarningProcessItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    display: 'flex',
+    alignItems: 'center',
+    gap: token.paddingSM,
+
     '.staking-process-text': {
       fontWeight: '600',
       color: token.colorTextLight4

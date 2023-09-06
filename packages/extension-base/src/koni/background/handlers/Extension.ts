@@ -84,19 +84,28 @@ export default class KoniExtension {
   readonly #koniState: KoniState;
   #timeAutoLock: number = DEFAULT_AUTO_LOCK_TIME;
   #skipAutoLock = false;
+  #alwaysLock = false;
 
   constructor (state: KoniState) {
     this.#koniState = state;
 
     const updateTimeAutoLock = (rs: RequestSettingsType) => {
-      this.#timeAutoLock = rs.timeAutoLock;
-      clearTimeout(this.#lockTimeOut);
+      // Check time auto lock change
+      if (this.#timeAutoLock !== rs.timeAutoLock) {
+        this.#timeAutoLock = rs.timeAutoLock;
+        this.#alwaysLock = !rs.timeAutoLock;
+        clearTimeout(this.#lockTimeOut);
 
-      this.#lockTimeOut = setTimeout(() => {
-        if (!this.#skipAutoLock) {
+        if (this.#timeAutoLock > 0) {
+          this.#lockTimeOut = setTimeout(() => {
+            if (!this.#skipAutoLock) {
+              this.keyringLock();
+            }
+          }, this.#timeAutoLock * 60 * 1000);
+        } else if (this.#alwaysLock) {
           this.keyringLock();
         }
-      }, this.#timeAutoLock * 60 * 1000);
+      }
     };
 
     this.#koniState.settingService.getSettings(updateTimeAutoLock);
@@ -1264,6 +1273,10 @@ export default class KoniExtension {
       });
     });
 
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
+
     return addressDict;
   }
 
@@ -1415,6 +1428,10 @@ export default class KoniExtension {
           keyring.restoreAccount(file, password, withMasterPassword);
           this._addAddressToAuthList(address, isAllowed);
         });
+
+        if (this.#alwaysLock) {
+          this.keyringLock();
+        }
       } catch (error) {
         throw new Error((error as Error).message);
       }
@@ -1433,6 +1450,10 @@ export default class KoniExtension {
           keyring.restoreAccounts(file, password);
           this._addAddressesToAuthList(addressList, isAllowed);
         });
+
+        if (this.#alwaysLock) {
+          this.keyringLock();
+        }
       } catch (error) {
         throw new Error((error as Error).message);
       }
@@ -2322,6 +2343,10 @@ export default class KoniExtension {
         });
       });
 
+      if (this.#alwaysLock) {
+        this.keyringLock();
+      }
+
       return {
         errors: [],
         success: true
@@ -2879,6 +2904,10 @@ export default class KoniExtension {
 
     this.#koniState.updateKeyringState();
 
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
+
     return {
       status: true,
       errors: []
@@ -2930,9 +2959,7 @@ export default class KoniExtension {
   // Lock wallet
 
   private keyringLock (): void {
-    keyring.lockAll();
-
-    this.#koniState.updateKeyringState();
+    this.#koniState.keyringService.lock();
     clearTimeout(this.#lockTimeOut);
   }
 
@@ -3032,6 +3059,10 @@ export default class KoniExtension {
       // In case evm chain, must be cut 2 character after 0x
       signature: isEvm ? `0x${result.signature.slice(4)}` : result.signature
     });
+
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
 
     return true;
   }
@@ -3141,6 +3172,10 @@ export default class KoniExtension {
       keyring.addPair(childPair, true);
       this._addAddressToAuthList(address, true);
     });
+
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
 
     return true;
   }
@@ -3730,11 +3765,13 @@ export default class KoniExtension {
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     clearTimeout(this.#lockTimeOut);
 
-    this.#lockTimeOut = setTimeout(() => {
-      if (!this.#skipAutoLock) {
-        this.keyringLock();
-      }
-    }, this.#timeAutoLock * 60 * 1000);
+    if (this.#timeAutoLock > 0) {
+      this.#lockTimeOut = setTimeout(() => {
+        if (!this.#skipAutoLock) {
+          this.keyringLock();
+        }
+      }, this.#timeAutoLock * 60 * 1000);
+    }
 
     switch (type) {
       /// Clone from PolkadotJs

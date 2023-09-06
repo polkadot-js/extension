@@ -40,9 +40,8 @@ const EarningInfoItem = styled(Component)<Props>(({ theme: { token } }: Props) =
     padding: `${token.paddingXXS}px ${token.paddingSM}px`,
     height: '30px',
 
-    '.ant-image': {
-      display: 'flex',
-      alignItems: 'center',
+    '.ant-image-img': {
+      marginBottom: '2px'
     },
 
     '.earning-info-item-text': {

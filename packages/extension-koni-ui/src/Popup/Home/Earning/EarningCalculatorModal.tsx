@@ -105,15 +105,15 @@ const Component = ({ className, item }: Props) => {
       onCancel={onCloseModal}
       title={t('Staking calculator')}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
-        <EarningBtn icon={<Logo className={'staking-calculator-tag'} size={16} network={'polkadot'} />} size={'xs'}>
+        <EarningBtn icon={<Logo className={'earning-calculator-tag'} size={16} network={'polkadot'} />} size={'xs'}>
           {'DOT'}
         </EarningBtn>
 
-        <Typography.Text className={'staking-calculator-message'}>{t('Enter the number of tokens to estimate the rewards')}</Typography.Text>
+        <Typography.Text className={'earning-calculator-message'}>{t('Enter the number of tokens to estimate the rewards')}</Typography.Text>
 
 
         <Form
-          className={'form-container form-space-sm staking-calculator-form-container'}
+          className={'form-container form-space-sm earning-calculator-form-container'}
           form={form}
           initialValues={formDefault}
           onFieldsChange={onFieldsChange}
@@ -123,7 +123,7 @@ const Component = ({ className, item }: Props) => {
             label={'Select method'}
             colon={false}
           >
-            <EarningMethodSelector items={Object.values(poolInfo)} />
+            <EarningMethodSelector items={Object.values(poolInfo)} showChainInSelected />
           </Form.Item>
 
 
@@ -169,17 +169,21 @@ const Component = ({ className, item }: Props) => {
   );
 };
 
-const StakingCalculatorModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const EarningCalculatorModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.staking-calculator-tag': {
-      paddingRight: token.paddingXXS
+    '.earning-calculator-tag': {
+      paddingRight: token.paddingXXS,
+
+      '.ant-image-img': {
+        marginBottom: '2px'
+      }
     },
 
-    '.staking-calculator-message': {
+    '.earning-calculator-message': {
       color: token.colorTextLight4
     },
 
-    '.staking-calculator-form-container': {
+    '.earning-calculator-form-container': {
       '.ant-form-item-label': {
         display: 'flex',
         alignItems: 'center',
@@ -192,4 +196,4 @@ const StakingCalculatorModal = styled(Component)<Props>(({ theme: { token } }: P
   }
 });
 
-export default StakingCalculatorModal;
+export default EarningCalculatorModal;

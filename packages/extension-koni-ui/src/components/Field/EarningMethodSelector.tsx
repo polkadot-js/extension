@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -27,20 +26,16 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const { className = '', disabled, id = 'token-select', items, label, placeholder, showChainInSelected = false, statusHelp, tooltip, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  console.log('items', items);
-
   const { chainInfoMap } = useSelector((state) => state.chainStore);
-
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
   const chainLogo = useMemo(() => {
-    const chainInfo = items.find((x) => x.chain === value);
+    const chainInfo = items.find((x) => x.slug === value);
 
     return chainInfo &&
       (
         <Logo
           className='token-logo'
-          isShowSubLogo={true}
           shape='squircle'
           network={chainInfo.chain}
           size={token.controlHeightSM}

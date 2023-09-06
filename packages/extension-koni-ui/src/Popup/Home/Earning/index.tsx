@@ -7,7 +7,6 @@ import EarningItem from '@subwallet/extension-koni-ui/components/EarningItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
-import StakingCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingCalculatorModal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList } from '@subwallet/react-ui';
@@ -15,6 +14,8 @@ import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import EarningCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
+import StakingModal, { STAKING_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingModal';
 
 type Props = ThemeProps;
 
@@ -28,6 +29,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onClickCalculatorBtn = useCallback((item: YieldPoolInfo) => {
     setSelectedItem(item);
     activeModal(STAKING_CALCULATOR_MODAL_ID);
+  }, [activeModal]);
+
+  const onClickStakeBtn = useCallback((item: YieldPoolInfo) => {
+    setSelectedItem(item);
+    activeModal(STAKING_MODAL_ID);
   }, [activeModal]);
 
   useEffect(() => {
@@ -49,9 +55,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <EarningItem
         item={item}
         onClickCalculatorBtn={() => onClickCalculatorBtn(item)}
+        onClickStakeBtn={() => onClickStakeBtn(item)}
       />
     );
-  }, [onClickCalculatorBtn]);
+  }, [onClickCalculatorBtn, onClickStakeBtn]);
 
   return (
     <PageWrapper
@@ -79,7 +86,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           searchMinCharactersCount={2}
         />
 
-        {selectedItem && <StakingCalculatorModal item={selectedItem} />}
+        {selectedItem && <EarningCalculatorModal item={selectedItem} />}
+        {selectedItem && <StakingModal item={selectedItem} />}
       </Layout.Base>
     </PageWrapper>
 

@@ -13,6 +13,7 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 interface Props extends ThemeProps {
   item: YieldPoolInfo,
   onClickCalculatorBtn: () => void;
+  onClickStakeBtn: () => void;
 }
 
 export const TagTypes = () => {
@@ -54,7 +55,7 @@ export const TagTypes = () => {
 }
 
 
-const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn }: Props) => {
+const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onClickStakeBtn }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { chain, name, description, type, stats } = item;
@@ -123,7 +124,7 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn }: P
             icon={<Icon phosphorIcon={Question} weight={'fill'} size={'sm'} />}
             size={'xs'}
           />
-          <Button shape={'circle'} icon={<Icon phosphorIcon={PlusCircle} weight={'fill'} size={'sm'} />} size={'xs'}>
+          <Button shape={'circle'} icon={<Icon phosphorIcon={PlusCircle} weight={'fill'} size={'sm'} />} size={'xs'} onClick={onClickStakeBtn}>
             {t('Stake now')}
           </Button>
         </div>

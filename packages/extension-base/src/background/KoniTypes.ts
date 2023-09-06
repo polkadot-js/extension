@@ -2081,7 +2081,10 @@ export enum YieldStepType {
   JOIN_NOMINATION_POOL = 'JOIN_NOMINATION_POOL',
 
   // bifrost
-  MINT_VDOT = 'MINT_VDOT'
+  MINT_VDOT = 'MINT_VDOT',
+
+  // acala
+  MINT_LDOT = 'MINT_LDOT'
 }
 
 export interface YieldStepDetail {

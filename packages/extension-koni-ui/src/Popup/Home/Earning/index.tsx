@@ -41,7 +41,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     console.log('poolInfo', selectedPool);
     getOptimalYieldPath({
-      amount: '100000000',
+      amount: '100000000000',
       poolInfo: selectedPool
     })
       .then((res) => {

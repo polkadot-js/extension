@@ -2075,7 +2075,6 @@ export enum YieldStepType {
 
   // native staking
   NOMINATE = 'NOMINATE',
-  BOND = 'BOND',
 
   // nomination pool
   JOIN_NOMINATION_POOL = 'JOIN_NOMINATION_POOL',
@@ -2099,6 +2098,17 @@ export interface YieldStepDetail {
 export interface OptimalPathResp {
   totalFee: YieldTokenBaseInfo[],
   steps: YieldStepDetail[]
+}
+
+export enum YieldValidationStatus {
+  NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
+  NOT_ENOUGH_MIN_AMOUNT = 'NOT_ENOUGH_MIN_AMOUNT'
+}
+
+export interface YieldProcessValidation {
+  ok: boolean,
+  status: YieldValidationStatus,
+  message?: string
 }
 
 export interface YieldAssetExpectedEarning {

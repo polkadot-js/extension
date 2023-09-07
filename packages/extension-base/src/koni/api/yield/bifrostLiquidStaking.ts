@@ -3,7 +3,7 @@
 
 import { OptimalPathResp, OptimalYieldPathParams, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
+import { calculateAlternativeFee, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -68,21 +68,16 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
   const inputTokenBalance = params.balanceMap[inputTokenSlug]?.free || '0';
   const bnInputTokenBalance = new BN(inputTokenBalance);
 
-  const feeTokenSlug = params.poolInfo.feeAssets[0];
-  const feeTokenBalance = params.balanceMap[feeTokenSlug]?.free || '0';
-  const bnFeeTokenBalance = new BN(feeTokenBalance);
+  const defaultFeeTokenSlug = params.poolInfo.feeAssets[0];
+  const defaultFeeTokenBalance = params.balanceMap[defaultFeeTokenSlug]?.free || '0';
+  const bnDefaultFeeTokenBalance = new BN(defaultFeeTokenBalance);
 
-  const feeTokenInfo = params.assetInfoMap[feeTokenSlug];
-  const bnMinAmountFeeToken = new BN(feeTokenInfo.minAmount || '0');
+  const canPayFeeWithInputToken = params.poolInfo.feeAssets.includes(inputTokenSlug); // TODO
 
   const poolOriginSubstrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
 
-  let inputTokenFee = BN_ZERO;
-
   if (!bnInputTokenBalance.gte(bnAmount)) {
     if (params.poolInfo.altInputAssets) {
-      const remainingAmount = bnAmount.sub(bnInputTokenBalance);
-
       const altInputTokenSlug = params.poolInfo.altInputAssets[0];
       const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
 
@@ -90,11 +85,9 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
       const bnAltInputTokenBalance = new BN(altInputTokenBalance);
 
       if (bnAltInputTokenBalance.gt(BN_ZERO)) {
-        const xcmAmount = bnAltInputTokenBalance.sub(remainingAmount);
-
         result.steps.push({
           metadata: {
-            sendingValue: xcmAmount.toString(),
+            sendingValue: bnAmount.toString(),
             originTokenInfo: altInputTokenInfo,
             destinationTokenInfo: inputTokenInfo
           },
@@ -117,7 +110,10 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
         const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
         // TODO: calculate fee for destination chain
 
-        inputTokenFee = inputTokenFee.add(new BN(xcmFeeInfo.partialFee.toString()));
+        result.totalFee.push({
+          slug: altInputTokenSlug,
+          amount: xcmFeeInfo.partialFee.toString()
+        });
       }
     }
   }
@@ -130,27 +126,18 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
   const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.vtokenMinting.mint({ VToken: 'DOT' }, params.amount).paymentInfo(fakeAddress);
   const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-  if (bnFeeTokenBalance.gte(bnMinAmountFeeToken)) {
-    if (inputTokenFee.gt(BN_ZERO)) {
-      result.totalFee.push({
-        slug: inputTokenSlug,
-        amount: inputTokenFee.toString()
-      });
-    }
-
+  if (bnDefaultFeeTokenBalance.gt(BN_ZERO)) {
     result.totalFee.push({
-      slug: feeTokenSlug,
+      slug: defaultFeeTokenSlug,
       amount: mintFeeInfo.partialFee.toString()
     });
   } else {
-    const bnMintFee = new BN(mintFeeInfo.partialFee.toString());
-
-    inputTokenFee = inputTokenFee.add(bnMintFee);
-
-    result.totalFee.push({
-      slug: inputTokenSlug,
-      amount: inputTokenFee.toString()
-    });
+    if (canPayFeeWithInputToken) {
+      result.totalFee.push({
+        slug: inputTokenSlug, // TODO
+        amount: calculateAlternativeFee(mintFeeInfo).toString()
+      });
+    }
   }
 
   return result;

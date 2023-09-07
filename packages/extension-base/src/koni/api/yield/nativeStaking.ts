@@ -98,13 +98,6 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
   if (params.poolInfo.type === YieldPoolType.NATIVE_STAKING) {
     // TODO: check existing position
     result.steps.push({
-      metadata: {
-        amount: params.amount
-      },
-      name: 'Bond token',
-      type: YieldStepType.BOND
-    });
-    result.steps.push({
       name: 'Nominate validators',
       type: YieldStepType.NOMINATE
     });

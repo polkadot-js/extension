@@ -30,3 +30,7 @@ export const syntheticSelectedValidators = [
 ];
 
 export const fakeAddress = '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6';
+
+export function calculateAlternativeFee (feeInfo: RuntimeDispatchInfo) {
+  return feeInfo.partialFee;
+}

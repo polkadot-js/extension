@@ -111,7 +111,7 @@ export async function generatePathForInterlayLending (params: OptimalYieldPathPa
         // TODO: calculate fee for destination chain
 
         result.totalFee.push({
-          slug: inputTokenSlug,
+          slug: altInputTokenSlug,
           amount: xcmFeeInfo.partialFee.toString()
         });
       }

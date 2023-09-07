@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { OptimalPathResp, OptimalYieldPathParams, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { OptimalPathResp, OptimalYieldPathParams, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldProcessValidation } from '@subwallet/extension-base/background/KoniTypes';
 import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
@@ -81,4 +81,10 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams):
   }
 
   return await generatePathForNativeStaking(params);
+}
+
+export function validateProcess (amount: string, optimalPath: OptimalPathResp, poolInfo: YieldPoolInfo): YieldProcessValidation {
+  // TODO: compare to minAmount
+  // TODO: compare to fee (step by step)
+
 }

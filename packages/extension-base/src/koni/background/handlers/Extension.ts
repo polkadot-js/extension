@@ -108,10 +108,10 @@ export default class KoniExtension {
             this.keyringLock();
           }
         }
+      }
 
-        if (this.#firstTime) {
-          this.#firstTime = false;
-        }
+      if (this.#firstTime) {
+        this.#firstTime = false;
       }
     };
 

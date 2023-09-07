@@ -42,8 +42,22 @@ const Component: React.FC = () => {
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
   const isEthAdr = isEthereumAddress(currentAccount?.address);
 
-  const defaultStakingType: StakingType = useMemo(() => {
+  const defaultPoolTokenList = useGetSupportedStakingTokens(StakingType.POOLED, currentAccount?.address || '', stakingChain);
+
+  const disablePool = useMemo(() => {
     if (isEthAdr) {
+      return true;
+    } else {
+      if (currentAccount?.address) {
+        return !defaultPoolTokenList.length;
+      } else {
+        return false;
+      }
+    }
+  }, [currentAccount?.address, defaultPoolTokenList.length, isEthAdr]);
+
+  const defaultStakingType: StakingType = useMemo(() => {
+    if (disablePool) {
       return StakingType.NOMINATED;
     }
 
@@ -59,7 +73,7 @@ const Component: React.FC = () => {
       default:
         return StakingType.POOLED;
     }
-  }, [_stakingType, defaultData.type, isEthAdr]);
+  }, [_stakingType, disablePool, defaultData.type]);
 
   const [form] = Form.useForm<StakeParams>();
 
@@ -395,7 +409,7 @@ const Component: React.FC = () => {
                 {
                   label: t('Pools'),
                   value: StakingType.POOLED,
-                  disabled: isEthAdr
+                  disabled: disablePool
                 },
                 {
                   label: t('Nominate'),

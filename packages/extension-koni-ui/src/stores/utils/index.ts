@@ -7,7 +7,7 @@ import { AccountsWithCurrentAddress, AddressBookInfo, AllLogoMap, AssetSetting, 
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
-import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -269,7 +269,7 @@ export const updateConnectWCRequests = (data: WalletConnectSessionRequest[]) => 
   store.dispatch({ type: 'requestState/updateConnectWCRequests', payload: requests });
 };
 
-export const subscribeConnectWCRequests = lazySubscribeMessage('pri(walletConnect.requests.subscribe)', null, updateConnectWCRequests, updateConnectWCRequests);
+export const subscribeConnectWCRequests = lazySubscribeMessage('pri(walletConnect.requests.connect.subscribe)', null, updateConnectWCRequests, updateConnectWCRequests);
 
 export const updateWalletConnectSessions = (data: SessionTypes.Struct[]) => {
   const payload: Record<string, SessionTypes.Struct> = {};
@@ -281,3 +281,12 @@ export const updateWalletConnectSessions = (data: SessionTypes.Struct[]) => {
 };
 
 export const subscribeWalletConnectSessions = lazySubscribeMessage('pri(walletConnect.session.subscribe)', null, updateWalletConnectSessions, updateWalletConnectSessions);
+
+export const updateWCNotSupportRequests = (data: WalletConnectNotSupportRequest[]) => {
+  // Convert data to object with key as id
+  const requests = convertConfirmationToMap(data);
+
+  store.dispatch({ type: 'requestState/updateWCNotSupportRequests', payload: requests });
+};
+
+export const subscribeWCNotSupportRequests = lazySubscribeMessage('pri(walletConnect.requests.notSupport.subscribe)', null, updateWCNotSupportRequests, updateWCNotSupportRequests);

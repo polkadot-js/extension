@@ -8,8 +8,6 @@ import { MetadataDef } from '@subwallet/extension-inject/types';
 import { knownGenesis } from '@polkadot/networks/defaults';
 import { HexString } from '@polkadot/util/types';
 
-import { OSType } from '../types';
-
 export const extractMetadata = (store: MetadataStore): void => {
   store.allMap((map): void => {
     const knownEntries = Object.entries(knownGenesis);
@@ -44,29 +42,4 @@ export const extractMetadata = (store: MetadataStore): void => {
     removals.forEach((key) => store.remove(key));
     Object.values(defs).forEach(({ def }) => addMetadata(def));
   });
-};
-
-export const getOS = (): OSType => {
-  const userAgent = window.navigator.userAgent;
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-  const platform: string = window.navigator?.userAgentData?.platform || window.navigator.platform;
-  const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'];
-  const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
-  const iosPlatforms = ['iPhone', 'iPad', 'iPod'];
-  let os: OSType = 'Unknown';
-
-  if (macosPlatforms.indexOf(platform) !== -1) {
-    os = 'Mac OS';
-  } else if (iosPlatforms.indexOf(platform) !== -1) {
-    os = 'iOS';
-  } else if (windowsPlatforms.indexOf(platform) !== -1) {
-    os = 'Windows';
-  } else if (/Android/.test(userAgent)) {
-    os = 'Android';
-  } else if (/Linux/.test(platform)) {
-    os = 'Linux';
-  }
-
-  return os;
 };

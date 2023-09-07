@@ -11,8 +11,13 @@ export interface WalletConnectSessionRequest extends ConfirmationRequestBase {
   request: SignClientTypes.EventArguments['session_proposal'];
 }
 
+export interface WalletConnectNotSupportRequest extends ConfirmationRequestBase {
+  request: SignClientTypes.EventArguments['session_request'];
+}
+
 export type ResultApproveWalletConnectSession = EngineTypes.ApproveParams;
 export interface RequestWalletConnectSession extends WalletConnectSessionRequest, Resolver<void> {}
+export interface RequestWalletConnectNotSupport extends WalletConnectNotSupportRequest, Resolver<void> {}
 
 export enum EIP155_SIGNING_METHODS {
   PERSONAL_SIGN = 'personal_sign',

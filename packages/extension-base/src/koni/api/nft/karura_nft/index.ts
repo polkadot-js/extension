@@ -191,7 +191,7 @@ const getKaruraMetadata = (metadataUrl: string) => {
     return null;
   }
 
-  url = getRandomIpfsGateway() + metadataUrl + '/metadata.json';
+  url = getRandomIpfsGateway() + metadataUrl + '/azero_domain_registry_abi.json';
 
   return fetch(url, {
     method: 'GET',

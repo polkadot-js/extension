@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MantaPayEnableMessage } from '@subwallet/extension-base/background/KoniTypes';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { CloseIcon, Layout, PageWrapper, ZkModeFooter } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -11,6 +12,7 @@ import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/a
 import { useGetMantaPayConfig } from '@subwallet/extension-koni-ui/hooks/account/useGetMantaPayConfig';
 import { useIsMantaPayAvailable } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayAvailable';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { deriveAccountV3, disableMantaPay, editAccount, enableMantaPay, forgetAccount, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -120,12 +122,12 @@ const zkModeConfirmationId = 'zkModeConfirmation';
 
 function getZkErrorMessage (error: MantaPayEnableMessage) {
   if (error === MantaPayEnableMessage.WRONG_PASSWORD) {
-    return 'Wrong password';
+    return detectTranslate('Wrong password');
   } else if (error === MantaPayEnableMessage.CHAIN_DISCONNECTED) {
-    return 'Chain disconnected';
+    return detectTranslate('Network is disconnected');
   }
 
-  return 'Some errors occurred. Please try again later';
+  return detectTranslate('Some errors occurred. Please try again later');
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -154,6 +156,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [deleting, setDeleting] = useState(false);
   const [deriving, setDeriving] = useState(false);
   const [saving, setSaving] = useState(false);
+  const checkUnlock = useUnlockChecker();
 
   const signMode = useGetAccountSignModeByAddress(accountAddress);
 
@@ -240,23 +243,27 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
-    setDeriving(true);
+    checkUnlock().then(() => {
+      setDeriving(true);
 
-    setTimeout(() => {
-      deriveAccountV3({
-        address: account.address
-      }).then(() => {
-        goHome();
-      }).catch((e: Error) => {
-        notify({
-          message: e.message,
-          type: 'error'
+      setTimeout(() => {
+        deriveAccountV3({
+          address: account.address
+        }).then(() => {
+          goHome();
+        }).catch((e: Error) => {
+          notify({
+            message: e.message,
+            type: 'error'
+          });
+        }).finally(() => {
+          setDeriving(false);
         });
-      }).finally(() => {
-        setDeriving(false);
-      });
-    }, 500);
-  }, [account?.address, goHome, notify]);
+      }, 500);
+    }).catch(() => {
+      // User cancel unlock
+    });
+  }, [account?.address, checkUnlock, goHome, notify]);
 
   const onExport = useCallback(() => {
     if (account?.address) {
@@ -384,7 +391,7 @@ const Component: React.FC<Props> = (props: Props) => {
               });
             }
 
-            dispatchMantaPayState({ type: MantaPayReducerActionType.SET_ERROR_MESSAGE, payload: getZkErrorMessage(result.message) });
+            dispatchMantaPayState({ type: MantaPayReducerActionType.SET_ERROR_MESSAGE, payload: t(getZkErrorMessage(result.message)) });
           }
         })
         .catch((e) => {

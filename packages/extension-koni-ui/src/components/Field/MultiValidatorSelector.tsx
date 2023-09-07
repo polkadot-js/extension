@@ -5,6 +5,7 @@ import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { detectTranslate } from '@subwallet/extension-base/utils';
+import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
@@ -26,7 +27,6 @@ import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContex
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import GeneralEmptyList from '../GeneralEmptyList';
 import SelectValidatorInput from '../SelectValidatorInput';
 
 interface Props extends ThemeProps, BasicInputWrapper {
@@ -35,6 +35,7 @@ interface Props extends ThemeProps, BasicInputWrapper {
   onClickBookBtn?: (e: SyntheticEvent) => void;
   onClickLightningBtn?: (e: SyntheticEvent) => void;
   isSingleSelect?: boolean;
+  setForceFetchValidator: (val: boolean) => void;
 }
 
 enum SortKey {
@@ -72,11 +73,10 @@ const filterOptions = [
   }
 ];
 
-const renderEmpty = () => <GeneralEmptyList />;
 const defaultModalId = 'multi-validator-selector';
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, onChange, value, loading } = props;
+  const { chain, defaultValue, setForceFetchValidator, className = '', from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, onChange, value, loading } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
 
@@ -92,7 +92,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const maxCount = chainStakingMetadata?.maxValidatorPerNominator || 1;
 
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
-  const nominations = useMemo(() => nominatorMetadata[0]?.nominations, [nominatorMetadata]);
+  const nominations = useMemo(() => from ? nominatorMetadata[0]?.nominations : [], [from, nominatorMetadata]);
   const isSingleSelect = useMemo(() => _isSingleSelect || !isRelayChain, [_isSingleSelect, isRelayChain]);
   const hasReturn = useMemo(() => items[0]?.expectedReturn !== undefined, [items]);
 
@@ -206,6 +206,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     };
   }, [activeModal]);
 
+  const renderEmpty = useCallback(() => {
+    return (
+      <EmptyValidator
+        isDataEmpty={items.length === 0}
+        onClickReload={setForceFetchValidator}
+        validatorTitle={t(getValidatorLabel(chain).toLowerCase())}
+      />
+    );
+  }, [chain, items.length, setForceFetchValidator, t]);
+
   const renderItem = useCallback((item: ValidatorDataType) => {
     const key = getValidatorKey(item.address, item.identity);
     const selected = changeValidators.includes(key);
@@ -245,10 +255,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal, id]);
 
   useEffect(() => {
-    const defaultValue = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
-    const selected = isSingleSelect ? '' : defaultValue;
+    const _default = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
+    const selected = defaultValue || (isSingleSelect ? '' : _default);
 
-    onInitValidators(defaultValue, selected);
+    onInitValidators(_default, selected);
     onChange && onChange({ target: { value: selected } });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

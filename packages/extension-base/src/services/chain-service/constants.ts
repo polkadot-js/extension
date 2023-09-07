@@ -11,7 +11,8 @@ export const API_MAX_RETRY = 2;
 
 export const _API_OPTIONS_CHAIN_GROUP = {
   acala: ['acala', 'karura', 'origintrail', 'kintsugi'],
-  turing: ['turingStaging', 'turing']
+  turing: ['turingStaging', 'turing'],
+  avail: ['kate']
 };
 
 export const _PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {
@@ -52,12 +53,12 @@ export const _NFT_CHAIN_GROUP = {
 // Staking--------------------------------------------------------------------------------------------------------------
 
 export const _STAKING_CHAIN_GROUP = {
-  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend'],
+  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend', 'kate', 'edgeware'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
   astar: ['astar', 'shiden', 'shibuya'],
   amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine', 'pendulum'], // amplitude and kilt only share some common logic
   kilt: ['kilt', 'kilt_peregrine'],
-  nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph'],
+  nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph', 'kate'],
   bifrost: ['bifrost', 'bifrost_testnet'],
   aleph: ['aleph', 'alephTest'], // A0 has distinct tokenomics
   ternoa: ['ternoa', 'ternoa_alphanet']
@@ -88,7 +89,9 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   amplitude_test: 2,
   pendulum: 2,
   kilt: 2,
-  kilt_peregrine: 2
+  kilt_peregrine: 2,
+  edgeware: 6,
+  kate: 6
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {

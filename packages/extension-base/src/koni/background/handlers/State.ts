@@ -6,7 +6,7 @@ import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
@@ -39,6 +39,7 @@ import { decodePair } from '@subwallet/keyring/pair/decode';
 import { keyring } from '@subwallet/ui-keyring';
 import { Subscription } from 'dexie';
 import SimpleKeyring from 'eth-simple-keyring';
+import { t } from 'i18next';
 import { interfaces } from 'manta-extension-sdk';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
@@ -202,7 +203,7 @@ export default class KoniState {
 
   // Start a provider, return its meta
   public rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
-    assert(Object.keys(this.providers).includes(key), `Provider ${key} is not exposed by extension`);
+    assert(Object.keys(this.providers).includes(key), 'Provider cannot be found.');
 
     if (this.injectedProviders.get(port)) {
       return Promise.resolve(this.providers[key].meta);
@@ -299,7 +300,7 @@ export default class KoniState {
   }
 
   public async initMantaPay (password: string) {
-    const mantaPayConfig = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
+    const mantaPayConfig = await this.chainService?.mantaPay?.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
 
     if (mantaPayConfig && mantaPayConfig.enabled && !this.isMantaPayEnabled) { // only init the first login
       console.debug('Initiating MantaPay for', mantaPayConfig.address);
@@ -643,7 +644,7 @@ export default class KoniState {
     if (address !== ALL_ACCOUNT_KEY) {
       const pair = keyring.getPair(address);
 
-      assert(pair, 'Unable to find pair');
+      assert(pair, t('Unable to find account'));
 
       keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash });
     }
@@ -672,7 +673,7 @@ export default class KoniState {
       authUrls[shortenUrl].currentEvmNetworkKey = networkKey;
       this.setAuthorize(authUrls);
     } else {
-      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, `Not found ${shortenUrl} in auth list`);
+      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, t('Not found {{shortenUrl}} in auth list', { replace: { shortenUrl } }));
     }
   }
 
@@ -696,7 +697,7 @@ export default class KoniState {
           if (useAddress !== ALL_ACCOUNT_KEY) {
             const pair = keyring.getPair(useAddress);
 
-            assert(pair, 'Unable to find pair');
+            assert(pair, t('Unable to find account'));
 
             keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: _getSubstrateGenesisHash(chainInfo) });
           }
@@ -777,6 +778,17 @@ export default class KoniState {
       const newSettings: UiSettings = {
         ...settings,
         [key]: value
+      };
+
+      this.settingService.setSettings(newSettings);
+    });
+  }
+
+  public setShowBalance (value: boolean): void {
+    this.settingService.getSettings((settings) => {
+      const newSettings = {
+        ...settings,
+        isShowBalance: value
       };
 
       this.settingService.setSettings(newSettings);
@@ -1056,6 +1068,10 @@ export default class KoniState {
     return this.chainService.removeCustomChain(networkKey);
   }
 
+  public forceRemoveChain (networkKey: string) {
+    this.chainService.forceRemoveChain(networkKey);
+  }
+
   // TODO: avoids turning off chains related to ledger account
   private getDefaultNetworkKeys = (): string[] => {
     const genesisHashes: Record<string, string> = {};
@@ -1089,7 +1105,7 @@ export default class KoniState {
     await this.chainService.updateAssetSettingByChain(chainSlug, false);
 
     if (_MANTA_ZK_CHAIN_GROUP.includes(chainSlug)) {
-      const mantaPayConfig = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
+      const mantaPayConfig = await this.chainService?.mantaPay?.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
 
       if (mantaPayConfig && mantaPayConfig.enabled && this.isMantaPayEnabled) {
         await this.disableMantaPay(mantaPayConfig.address);
@@ -1363,11 +1379,11 @@ export default class KoniState {
     }
 
     if (address === '' || !payload) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found address or payload to sign');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Not found address or payload to sign'));
     }
 
     if (['eth_sign', 'personal_sign', 'eth_signTypedData', 'eth_signTypedData_v1', 'eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) < 0) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found sign method');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unsupported action'));
     }
 
     if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
@@ -1377,13 +1393,13 @@ export default class KoniState {
 
     // Check sign abiblity
     if (!allowedAccounts.find((acc) => (acc.toLowerCase() === address.toLowerCase()))) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Account ' + address + ' not in allowed list');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('You have rescinded allowance for this account in wallet'));
     }
 
     const pair = keyring.getPair(address);
 
     if (!pair) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Cannot find pair with address: ' + address);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unable to find account'));
     }
 
     const account: AccountJson = { address: pair.address, ...pair.meta };
@@ -1407,7 +1423,7 @@ export default class KoniState {
 
         break;
       default:
-        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found sign method');
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unsupported action'));
     }
 
     const signPayload: EvmSignatureRequest = {
@@ -1428,7 +1444,7 @@ export default class KoniState {
           if (payload) {
             return payload;
           } else {
-            throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found signature');
+            throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Not found signature'));
           }
         } else {
           throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
@@ -1452,7 +1468,7 @@ export default class KoniState {
     };
 
     if (transactionParams.from === transactionParams.to) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'From address and to address must not be the same');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Receiving address must be different from sending address'));
     }
 
     const transaction: TransactionConfig = {
@@ -1484,13 +1500,13 @@ export default class KoniState {
     const fromAddress = allowedAccounts.find((account) => (account.toLowerCase() === (transaction.from as string).toLowerCase()));
 
     if (!fromAddress) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'From address is not in available for ' + url);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('You have rescinded allowance for this account in wallet'));
     }
 
     const pair = keyring.getPair(fromAddress);
 
     if (!pair) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Cannot find pair with address: ' + fromAddress);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unable to find account'));
     }
 
     const account: AccountJson = { address: pair.address, ...pair.meta };
@@ -1499,7 +1515,7 @@ export default class KoniState {
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
 
     if (balance.lt(new BN(gasPrice.toString()).mul(new BN(transaction.gas)).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Balance can be not enough to send transaction');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Insufficient balance'));
     }
 
     transaction.nonce = await web3.eth.getTransactionCount(fromAddress);
@@ -1848,25 +1864,25 @@ export default class KoniState {
       return;
     }
 
-    this.chainService.mantaPay.setCurrentAddress(address);
+    this.chainService?.mantaPay?.setCurrentAddress(address);
 
-    await this.chainService.mantaPay.privateWallet?.initialSigner();
+    await this.chainService?.mantaPay?.privateWallet?.initialSigner();
 
     if (updateStore && seedPhrase) { // first time initiation
-      await this.chainService.mantaPay.privateWallet?.loadUserSeedPhrase(seedPhrase);
-      const authContext = await this.chainService.mantaPay.privateWallet?.getAuthorizationContext();
+      await this.chainService?.mantaPay?.privateWallet?.loadUserSeedPhrase(seedPhrase);
+      const authContext = await this.chainService?.mantaPay?.privateWallet?.getAuthorizationContext();
 
-      await this.chainService.mantaPay.privateWallet?.loadAuthorizationContext(authContext as interfaces.AuthContextType);
+      await this.chainService?.mantaPay?.privateWallet?.loadAuthorizationContext(authContext as interfaces.AuthContextType);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
       const encryptedData = await passworder.encrypt(password, authContext);
 
-      await this.chainService.mantaPay.saveMantaAuthContext({
+      await this.chainService?.mantaPay?.saveMantaAuthContext({
         chain: _DEFAULT_MANTA_ZK_CHAIN,
         address,
         data: encryptedData
       });
     } else {
-      const authContext = (await this.chainService.mantaPay.getMantaAuthContext(address, _DEFAULT_MANTA_ZK_CHAIN)) as MantaAuthorizationContext;
+      const authContext = (await this.chainService?.mantaPay?.getMantaAuthContext(address, _DEFAULT_MANTA_ZK_CHAIN)) as MantaAuthorizationContext;
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
       const decryptedData = await passworder.decrypt(password, authContext.data);
@@ -1874,19 +1890,19 @@ export default class KoniState {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
       const proofAuthKey = new Uint8Array(Object.values(decryptedData.proof_authorization_key));
 
-      await this.chainService.mantaPay.privateWallet?.loadAuthorizationContext({
+      await this.chainService?.mantaPay?.privateWallet?.loadAuthorizationContext({
         proof_authorization_key: proofAuthKey
       } as interfaces.AuthContextType);
     }
 
-    const zkAddress = await this.chainService.mantaPay.privateWallet?.getZkAddress();
+    const zkAddress = await this.chainService?.mantaPay?.privateWallet?.getZkAddress();
 
     if (updateStore) {
-      await this.chainService.mantaPay.saveMantaPayConfig({
+      await this.chainService?.mantaPay?.saveMantaPayConfig({
         address,
         zkAddress: zkAddress,
         enabled: true,
-        chain: this.chainService.mantaPay.privateWallet?.network?.toLowerCase(),
+        chain: this.chainService?.mantaPay?.privateWallet?.network?.toLowerCase(),
         isInitialSync: false
       } as MantaPayConfig);
     }
@@ -1897,17 +1913,17 @@ export default class KoniState {
   }
 
   public async disableMantaPay (address: string) {
-    const config = await this.chainService.mantaPay.getMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
+    const config = await this.chainService?.mantaPay?.getMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
 
     if (!config) {
       return false;
     }
 
-    await this.chainService.mantaPay.privateWallet?.dropAuthorizationContext();
-    await this.chainService.mantaPay.privateWallet?.dropUserSeedPhrase();
-    // await this.chainService.mantaPay.privateWallet?.resetState();
-    await this.chainService.mantaPay.deleteMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN);
-    await this.chainService.mantaPay.deleteMantaAuthContext(address, _DEFAULT_MANTA_ZK_CHAIN);
+    await this.chainService?.mantaPay?.privateWallet?.dropAuthorizationContext();
+    await this.chainService?.mantaPay?.privateWallet?.dropUserSeedPhrase();
+    // await this.chainService?.mantaPay?.privateWallet?.resetState();
+    await this.chainService?.mantaPay?.deleteMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN);
+    await this.chainService?.mantaPay?.deleteMantaAuthContext(address, _DEFAULT_MANTA_ZK_CHAIN);
 
     this.chainService.setMantaZkAssetSettings(false);
     this.isMantaPayEnabled = false;
@@ -1920,13 +1936,13 @@ export default class KoniState {
       return;
     }
 
-    this.chainService.mantaPay.setCurrentAddress(address);
+    this.chainService?.mantaPay?.setCurrentAddress(address);
 
-    await this.chainService.mantaPay.privateWallet?.baseWallet?.isApiReady();
+    await this.chainService?.mantaPay?.privateWallet?.baseWallet?.isApiReady();
 
-    const syncResult = await this.chainService.mantaPay.privateWallet?.initialWalletSync();
+    const syncResult = await this.chainService?.mantaPay?.privateWallet?.initialWalletSync();
 
-    await this.chainService.mantaPay.updateMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN, { isInitialSync: true });
+    await this.chainService?.mantaPay?.updateMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN, { isInitialSync: true });
 
     this.eventService.emit('mantaPay.initSync', undefined);
 
@@ -1934,7 +1950,7 @@ export default class KoniState {
   }
 
   public getMantaZkBalance () {
-    if (!this.chainService || !this.chainService.mantaPay) {
+    if (!this.chainService || !this.chainService?.mantaPay) {
       return;
     }
 
@@ -1950,7 +1966,7 @@ export default class KoniState {
 
     const assetMap = this.chainService.getMantaZkAssets(chain?.toLowerCase());
 
-    this.chainService.mantaPay.privateWallet?.getMultiZkBalance(Object.values(assetMap).map((tokenInfo) => new BN(_getTokenOnChainAssetId(tokenInfo))))
+    this.chainService?.mantaPay?.privateWallet?.getMultiZkBalance(Object.values(assetMap).map((tokenInfo) => new BN(_getTokenOnChainAssetId(tokenInfo))))
       .then((zkBalances) => {
         const assetList = Object.values(assetMap);
 
@@ -1973,7 +1989,7 @@ export default class KoniState {
   public subscribeMantaPayBalance () {
     let interval: NodeJS.Timer | undefined;
 
-    this.chainService.mantaPay.getMantaPayConfig(this.keyringService.currentAccount.address, _DEFAULT_MANTA_ZK_CHAIN)
+    this.chainService?.mantaPay?.getMantaPayConfig(this.keyringService.currentAccount.address, _DEFAULT_MANTA_ZK_CHAIN)
       .then((config: MantaPayConfig) => {
         if (config && config.enabled && config.isInitialSync) {
           this.getMantaZkBalance();
@@ -1989,7 +2005,7 @@ export default class KoniState {
   }
 
   public async syncMantaPay () {
-    const config = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
+    const config = await this.chainService?.mantaPay?.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
 
     if (!config.isInitialSync) {
       return;
@@ -2004,7 +2020,7 @@ export default class KoniState {
 
   public async getMantaPayZkBalance (address: string, tokenInfo: _ChainAsset): Promise<AmountData> {
     const bnAssetId = new BN(_getTokenOnChainAssetId(tokenInfo));
-    const balance = await this.chainService.mantaPay.privateWallet?.getZkBalance(bnAssetId);
+    const balance = await this.chainService?.mantaPay?.privateWallet?.getZkBalance(bnAssetId);
 
     return {
       decimals: tokenInfo.decimals || 0,
@@ -2014,7 +2030,11 @@ export default class KoniState {
   }
 
   public subscribeMantaPaySyncState () {
-    return this.chainService.mantaPay.subscribeSyncState();
+    if (!this.chainService?.mantaPay) {
+      return new Subject<MantaPaySyncState>();
+    }
+
+    return this.chainService?.mantaPay?.subscribeSyncState();
   }
 
   // Metadata

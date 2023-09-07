@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AvatarGroup } from '@subwallet/extension-koni-ui/components/Account';
+import { BaseAccountInfo } from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { useGetAccountByAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { findNetworkJsonByGenesisHash, isAccountAll, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
@@ -16,10 +17,11 @@ export interface AccountInfoItem extends InfoItemBase {
   address: string;
   name?: string;
   networkPrefix?: number;
+  accounts?: BaseAccountInfo[];
 }
 
 const Component: React.FC<AccountInfoItem> = (props: AccountInfoItem) => {
-  const { address: accountAddress, className, label, name: accountName, networkPrefix: addressPrefix, valueColorSchema = 'default' } = props;
+  const { accounts, address: accountAddress, className, label, name: accountName, networkPrefix: addressPrefix, valueColorSchema = 'default' } = props;
 
   const { t } = useTranslation();
 
@@ -64,9 +66,12 @@ const Component: React.FC<AccountInfoItem> = (props: AccountInfoItem) => {
             isAll
               ? (
                 <>
-                  <AvatarGroup className={'__account-avatar'} />
+                  <AvatarGroup
+                    accounts={accounts}
+                    className={'__account-avatar'}
+                  />
                   <div className={'__account-name ml-xs'}>
-                    {t('All accounts')}
+                    {accounts ? t('{{number}} accounts', { replace: { number: accounts.length } }) : t('All accounts')}
                   </div>
                 </>
               )

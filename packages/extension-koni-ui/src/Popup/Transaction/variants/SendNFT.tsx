@@ -4,19 +4,18 @@
 import { ExtrinsicType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AddressInput, ChainSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AddressInput, ChainSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
-import { FormCallbacks, FormFieldData, FormInstance, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { FormCallbacks, FormFieldData, FormInstance, FormRule, SendNftParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { findAccountByAddress, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Image, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -24,17 +23,8 @@ import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { nftParamsHandler } from '../helper';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
-import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
 type Props = ThemeProps;
-
-enum FormFieldName {
-  TO = 'to'
-}
-
-interface SendNFTFormProps extends TransactionFormBaseProps {
-  [FormFieldName.TO]: string
-}
 
 const DEFAULT_COLLECTION: NftCollection = {
   collectionId: 'unknown',
@@ -48,11 +38,27 @@ const DEFAULT_ITEM: NftItem = {
   id: 'unknown'
 };
 
+const hiddenFields: Array<keyof SendNftParams> = ['from', 'chain', 'asset', 'itemId', 'collectionId'];
+const validateFields: Array<keyof SendNftParams> = ['to'];
+
 const Component: React.FC = () => {
+  useSetCurrentPage('/transaction/send-nft');
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { chain: nftChain = '', collectionId, itemId, owner = '' } = useParams();
+  const { defaultData, onDone, persistData } = useTransactionContext<SendNftParams>();
+
+  const { collectionId, itemId } = defaultData;
+
+  const [form] = Form.useForm<SendNftParams>();
+  const formDefault = useMemo(() => {
+    return {
+      ...defaultData
+    };
+  }, [defaultData]);
+
+  const from = useWatchTransaction('from', form, defaultData);
+  const chain = useWatchTransaction('chain', form, defaultData);
 
   const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { nftCollections, nftItems } = useSelector((state) => state.nft);
@@ -62,42 +68,31 @@ const Component: React.FC = () => {
   const nftItem = useMemo((): NftItem =>
     nftItems.find(
       (item) =>
-        isSameAddress(item.owner, owner) &&
-        nftChain === item.chain &&
+        isSameAddress(item.owner, from) &&
+        chain === item.chain &&
         item.collectionId === collectionId &&
         item.id === itemId
     ) || DEFAULT_ITEM
-  , [collectionId, itemId, nftChain, nftItems, owner]);
+  , [collectionId, itemId, chain, nftItems, from]);
 
   const collectionInfo = useMemo((): NftCollection =>
     nftCollections.find(
       (item) =>
-        nftChain === item.chain &&
+        chain === item.chain &&
       item.collectionId === collectionId
     ) || DEFAULT_COLLECTION
-  , [collectionId, nftChain, nftCollections]);
+  , [collectionId, chain, nftCollections]);
 
-  const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
-  const addressPrefix = useGetChainPrefixBySlug(nftChain);
-  const chainGenesisHash = chainInfoMap[nftChain]?.substrateInfo?.genesisHash || '';
-
-  const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
+  const chainInfo = useMemo(() => chainInfoMap[chain], [chainInfoMap, chain]);
+  const addressPrefix = useGetChainPrefixBySlug(chain);
+  const chainGenesisHash = chainInfoMap[chain]?.substrateInfo?.genesisHash || '';
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
-
-  const [form] = Form.useForm<SendNFTFormProps>();
-  const formDefault = useMemo(() => {
-    return {
-      from,
-      chain,
-      to: ''
-    };
-  }, [chain, from]);
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const recipientValidator = useCallback(({ getFieldValue }: FormInstance<SendNFTFormProps>) => {
+  const recipientValidator = useCallback(({ getFieldValue }: FormInstance<SendNftParams>) => {
     return ({
       validator: (rule: FormRule, _recipientAddress: string): Promise<void> => {
         if (!_recipientAddress) {
@@ -113,7 +108,7 @@ const Component: React.FC = () => {
         }
 
         if (isEthereumAddress(_recipientAddress) !== isEthereumAddress(from)) {
-          const message = isEthereumAddress(from) ? t('Receive address must be of evm account.') : t('Receive address must be of substrate account.');
+          const message = isEthereumAddress(from) ? t('Receive address must be of EVM account.') : t('Receive address must be of Substrate account.');
 
           return Promise.reject(message);
         }
@@ -136,15 +131,16 @@ const Component: React.FC = () => {
     });
   }, [from, accounts, t, chainInfoMap, chain]);
 
-  const onFieldsChange: FormCallbacks<SendNFTFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<SendNftParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
 
+    persistData(form.getFieldsValue());
     setIsDisable(error);
-  }, []);
+  }, [form, persistData]);
 
   // Submit transaction
-  const onSubmit: FormCallbacks<SendNFTFormProps>['onFinish'] = useCallback(
-    (values: SendNFTFormProps) => {
+  const onSubmit: FormCallbacks<SendNftParams>['onFinish'] = useCallback(
+    (values: SendNftParams) => {
       const isEthereumInterface = isEthereumAddress(from);
       const { to } = values;
       const params = nftParamsHandler(nftItem, chain);
@@ -190,18 +186,25 @@ const Component: React.FC = () => {
   const checkAction = usePreCheckAction(from);
 
   useEffect(() => {
-    setChain(nftChain);
-    setFrom(owner);
-  }, [nftChain, owner, setChain, setFrom]);
-
-  useEffect(() => {
     if (nftItem === DEFAULT_ITEM || collectionInfo === DEFAULT_COLLECTION) {
       navigate('/home/nfts/collections');
     }
   }, [collectionInfo, navigate, nftItem]);
 
+  // enable button at first time
+  useEffect(() => {
+    if (defaultData.to) {
+      // First time the form is empty, so need time out
+      setTimeout(() => {
+        form.validateFields().finally(noop);
+      }, 500);
+    }
+  }, [form, defaultData]);
+
   // Focus to the first field
   useFocusFormItem(form, 'to');
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
 
   const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
 
@@ -227,6 +230,7 @@ const Component: React.FC = () => {
           onFieldsChange={onFieldsChange}
           onFinish={onSubmit}
         >
+          <HiddenInput fields={hiddenFields} />
           <Form.Item
             name={'to'}
             rules={[
@@ -236,6 +240,8 @@ const Component: React.FC = () => {
           >
             <AddressInput
               addressPrefix={addressPrefix}
+              allowDomain={true}
+              chain={chain}
               label={t('Send to')}
               networkGenesisHash={chainGenesisHash}
               placeholder={t('Account address')}

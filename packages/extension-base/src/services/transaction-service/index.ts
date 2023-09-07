@@ -28,9 +28,11 @@ import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import keyring from '@subwallet/ui-keyring';
+import BigN from 'bignumber.js';
 import { addHexPrefix } from 'ethereumjs-util';
 import { ethers, TransactionLike } from 'ethers';
 import EventEmitter from 'eventemitter3';
+import { t } from 'i18next';
 import { BehaviorSubject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
@@ -42,13 +44,13 @@ import { isHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 
 export default class TransactionService {
-  private readonly chainService: ChainService;
-  private readonly eventService: EventService;
-  private readonly databaseService: DatabaseService;
-  private readonly requestService: RequestService;
   private readonly balanceService: BalanceService;
+  private readonly chainService: ChainService;
+  private readonly databaseService: DatabaseService;
+  private readonly eventService: EventService;
   private readonly historyService: HistoryService;
   private readonly notificationService: NotificationService;
+  private readonly requestService: RequestService;
   private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
 
   private get transactions (): Record<string, SWTransaction> {
@@ -120,7 +122,7 @@ export default class TransactionService {
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
     if (!chainInfo) {
-      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, "Can't find network"));
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('Cannot find network')));
     } else {
       const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
@@ -135,7 +137,7 @@ export default class TransactionService {
             const web3 = this.chainService.getEvmApi(chain);
 
             if (!web3) {
-              validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED));
+              validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED, undefined));
             } else {
               const gasPrice = await web3.api.eth.getGasPrice();
               const gasLimit = await web3.api.eth.estimateGas(transaction);
@@ -146,7 +148,7 @@ export default class TransactionService {
         } catch (e) {
           const error = e as Error;
 
-          if (error.message.includes('gas required exceeds allowance')) {
+          if (error.message.includes('gas required exceeds allowance') && error.message.includes('insufficient funds')) {
             validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
           }
 
@@ -161,10 +163,10 @@ export default class TransactionService {
     const pair = keyring.getPair(address);
 
     if (!pair) {
-      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'Can\'t find account'));
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('Unable to find account')));
     } else {
       if (pair.meta?.isReadOnly) {
-        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'This is watch-only account'));
+        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('This account is watch-only')));
       }
     }
 
@@ -180,6 +182,10 @@ export default class TransactionService {
     const balanceNum = parseInt(balance.value);
     const edNum = parseInt(existentialDeposit);
     const transferNativeNum = parseInt(transferNative);
+
+    if (!new BigN(balance.value).gt(0)) {
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+    }
 
     if (transferNativeNum + feeNum > balanceNum) {
       if (!isTransferAll) {
@@ -199,9 +205,9 @@ export default class TransactionService {
     if (!isTransferAll) {
       if (balanceNum - (transferNativeNum + feeNum) < edNum) {
         if (edAsWarning) {
-          validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+          validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
         } else {
-          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
         }
       }
     }
@@ -614,8 +620,8 @@ export default class TransactionService {
 
     this.notificationService.notify({
       type: NotificationType.SUCCESS,
-      title: 'Transaction completed',
-      message: `Transaction ${info} completed`,
+      title: t('Transaction completed'),
+      message: t('Transaction {{info}} completed', { replace: { info } }),
       action: { url: this.getTransactionLink(id) },
       notifyViaBrowser: true
     });
@@ -642,8 +648,8 @@ export default class TransactionService {
 
       this.notificationService.notify({
         type: NotificationType.ERROR,
-        title: 'Transaction failed',
-        message: `Transaction ${info} failed`,
+        title: t('Transaction failed'),
+        message: t('Transaction {{info}} failed', { replace: { info } }),
         action: { url: this.getTransactionLink(id) },
         notifyViaBrowser: true
       });
@@ -756,7 +762,7 @@ export default class TransactionService {
           let signedTransaction: string | undefined;
 
           if (!payload) {
-            throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
+            throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, t('Failed to sign'));
           }
 
           const web3Api = this.chainService.getEvmApi(chain).api;
@@ -769,7 +775,7 @@ export default class TransactionService {
             const recover = web3Api.eth.accounts.recoverTransaction(signed);
 
             if (recover.toLowerCase() !== account.address.toLowerCase()) {
-              throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
+              throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, t('Wrong signature. Please sign with the account you use in dApp'));
             }
 
             signedTransaction = signed;
@@ -797,11 +803,11 @@ export default class TransactionService {
               emitter.emit('success', eventData);
             })
             .once('error', (e) => {
-              eventData.errors.push(new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, e.message));
+              eventData.errors.push(new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, t(e.message)));
               emitter.emit('error', eventData);
             })
             .catch((e: Error) => {
-              eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, e.message));
+              eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, t(e.message)));
               emitter.emit('error', eventData);
             });
         } else {
@@ -812,7 +818,7 @@ export default class TransactionService {
       })
       .catch((e: Error) => {
         this.removeTransaction(id);
-        eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SIGN, e.message));
+        eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SIGN, t(e.message)));
 
         emitter.emit('error', eventData);
       });
@@ -901,7 +907,7 @@ export default class TransactionService {
       const transaction = this.getTransaction(eventData.id);
 
       if (transaction.status !== ExtrinsicStatus.SUCCESS && transaction.status !== ExtrinsicStatus.FAIL) {
-        eventData.errors.push(new TransactionError(BasicTxErrorType.TIMEOUT, 'Transaction timeout'));
+        eventData.errors.push(new TransactionError(BasicTxErrorType.TIMEOUT, t('Transaction timeout')));
         emitter.emit('error', eventData);
         clearTimeout(timeout);
       }

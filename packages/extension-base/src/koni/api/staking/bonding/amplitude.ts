@@ -276,24 +276,26 @@ export async function getAmplitudeCollatorsInfo (chain: string, substrateApi: _S
   const allCollators: ValidatorInfo[] = [];
 
   for (const _collator of _allCollators) {
-    const collatorInfo = _collator[1].toHuman() as unknown as CollatorInfo;
+    const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
 
-    if (typeof collatorInfo.status === 'string' && collatorInfo.status.toLowerCase() === 'active') {
-      allCollators.push({
-        address: collatorInfo.id,
-        totalStake: parseRawNumber(collatorInfo.total).toString(),
-        ownStake: parseRawNumber(collatorInfo.stake).toString(),
-        otherStake: (parseRawNumber(collatorInfo.total) - parseRawNumber(collatorInfo.stake)).toString(),
-        nominatorCount: collatorInfo.delegators.length,
-        commission: 0,
-        expectedReturn: delegatorReturn,
-        blocked: false,
-        isVerified: false,
-        minBond: '0',
-        chain,
-        isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
-      });
-    }
+    const bnTotalStake = new BN(collatorInfo.total);
+    const bnOwnStake = new BN(collatorInfo.stake);
+    const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+
+    allCollators.push({
+      address: collatorInfo.id,
+      totalStake: bnTotalStake.toString(),
+      ownStake: bnOwnStake.toString(),
+      otherStake: bnOtherStake.toString(),
+      nominatorCount: collatorInfo.delegators.length,
+      commission: 0,
+      expectedReturn: delegatorReturn,
+      blocked: false,
+      isVerified: false,
+      minBond: '0',
+      chain,
+      isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
+    });
   }
 
   return allCollators;

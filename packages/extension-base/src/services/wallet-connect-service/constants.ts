@@ -2,19 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, WalletConnectSigningMethod } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { isMobile } from '@subwallet/extension-base/utils';
 import { SignClientTypes } from '@walletconnect/types';
 
-export const PROJECT_ID = '6da34c0b48164d27681924dd9a46d6be';
+export const PROJECT_ID_EXTENSION = '6da34c0b48164d27681924dd9a46d6be';
+export const PROJECT_ID_MOBILE = '6da34c0b48164d27681924dd9a46d6be';
 export const RELAY_URL = 'wss://relay.walletconnect.com';
+
 export const DEFAULT_WALLET_CONNECT_OPTIONS: SignClientTypes.Options = {
   logger: 'debug',
-  projectId: PROJECT_ID,
+  projectId: !isMobile ? PROJECT_ID_EXTENSION : PROJECT_ID_MOBILE,
   relayUrl: RELAY_URL,
   metadata: {
     name: 'SubWallet',
     description: 'React Wallet for WalletConnect',
     url: 'https://www.subwallet.app/',
-    icons: ['https://1570604715-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-Lh39Kwxa1xxZM9WX_Bs%2Ficon%2FiETEgi1ykXUQRW63vPnL%2FLogo%3DWhite%2C%20Background%3DGradient.jpg?alt=media&token=46c5dafa-ce09-4576-bcd9-a5c796786f1a']
+    icons: ['https://raw.githubusercontent.com/Koniverse/SubWallet-Extension/master/packages/extension-koni/public/images/icon-128.png']
   }
 };
 

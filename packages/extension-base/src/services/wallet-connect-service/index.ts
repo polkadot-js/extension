@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import PolkadotRequestHandler from './handler/PolkadotRequestHandler';
 import { ALL_WALLET_CONNECT_EVENT, DEFAULT_WALLET_CONNECT_OPTIONS, WALLET_CONNECT_SUPPORTED_METHODS } from './constants';
-import { convertConnectRequest, isSupportWalletConnectChain } from './helpers';
+import { convertConnectRequest, convertNotSupportRequest, isSupportWalletConnectChain } from './helpers';
 import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, ResultApproveWalletConnectSession, WalletConnectSigningMethod } from './types';
 
 export default class WalletConnectService {
@@ -36,9 +36,25 @@ export default class WalletConnectService {
     this.#initClient().catch(console.error);
   }
 
-  async #initClient () {
+  get #haveData (): boolean {
+    const sessionStorage = localStorage.getItem('wc@2:client:0.3//session');
+    const pairingStorage = localStorage.getItem('wc@2:core:0.3//pairing');
+    const subscriptionStorage = localStorage.getItem('wc@2:core:0.3//subscription');
+
+    const sessions: Array<unknown> = sessionStorage ? JSON.parse(sessionStorage) as Array<unknown> : [];
+    const pairings: Array<unknown> = pairingStorage ? JSON.parse(pairingStorage) as Array<unknown> : [];
+    const subscriptions: Array<unknown> = subscriptionStorage ? JSON.parse(subscriptionStorage) as Array<unknown> : [];
+
+    return !!sessions.length || !!pairings.length || !!subscriptions.length;
+  }
+
+  async #initClient (force?: boolean) {
     this.#removeListener();
-    this.#client = await SignClient.init(this.#option);
+
+    if (force || this.#haveData) {
+      this.#client = await SignClient.init(this.#option);
+    }
+
     this.#updateSessions();
     this.#createListener();
   }
@@ -113,6 +129,13 @@ export default class WalletConnectService {
     } catch (e) {
       console.log(e);
 
+      try {
+        const requestSession = this.getSession(topic);
+        const notSupportRequest = convertNotSupportRequest(requestEvent, requestSession.peer.metadata.url);
+
+        this.#requestService.addNotSupportWCRequest(notSupportRequest);
+      } catch (e) {}
+
       this.responseRequest({
         topic: topic,
         response: formatJsonRpcError(id, (e as Error).message)
@@ -157,13 +180,11 @@ export default class WalletConnectService {
     await this.#initClient();
   }
 
-  public getSessions () {
-    this.#checkClient();
-
-    console.log(this.#client?.session.values);
-  }
-
   public async connect (uri: string) {
+    if (!this.#haveData) {
+      await this.#initClient(true);
+    }
+
     this.#checkClient();
 
     await this.#client?.pair({ uri });
@@ -196,20 +217,28 @@ export default class WalletConnectService {
     const sessions = this.#client?.session.values || [];
 
     for (const session of sessions) {
-      this.#client?.disconnect({
-        topic: session.topic,
-        reason: getSdkError('USER_DISCONNECTED')
-      }).catch(console.error);
+      try {
+        await this.#client?.disconnect({
+          topic: session.topic,
+          reason: getSdkError('USER_DISCONNECTED')
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     // Disconnect pair
     const pairs = this.#client?.pairing.values || [];
 
     for (const pair of pairs) {
-      this.#client?.disconnect({
-        topic: pair.topic,
-        reason: getSdkError('USER_DISCONNECTED')
-      }).catch(console.error);
+      try {
+        await this.#client?.disconnect({
+          topic: pair.topic,
+          reason: getSdkError('USER_DISCONNECTED')
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     const keys: string[] = await this.#client?.core.storage.getKeys() || [];
@@ -225,6 +254,7 @@ export default class WalletConnectService {
     }
 
     await this.#initClient();
+    this.#updateSessions();
   }
 
   public async disconnect (topic: string) {

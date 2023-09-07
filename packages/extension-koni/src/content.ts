@@ -63,7 +63,7 @@ placeholderScript.textContent = `class SubWalletPlaceholder {
   isSubWallet = true;
   connected = false;
   isConnected = () => false;
-  __waitProvider = async () => {
+  __waitProvider = (async () => {
     const self = this;
     if (self.provider) {
       return self.provider;
@@ -82,46 +82,51 @@ placeholderScript.textContent = `class SubWalletPlaceholder {
         }, 100);
       })
     }
-  }
+  })();
   on() {
-    this.__waitProvider().then((provider) => {
+    this.__waitProvider.then((provider) => {
       provider.on(...arguments);
     });
   }
+  once() {
+    this.__waitProvider.then((provider) => {
+      provider.once(...arguments);
+    });
+  }
   off() {
-    this.__waitProvider().then((provider) => {
+    this.__waitProvider.then((provider) => {
       provider.off(...arguments);
     });
   }
   addListener() {
-    this.__waitProvider().then((provider) => {
+    this.__waitProvider.then((provider) => {
       provider.addListener(...arguments);
     });
   }
   removeListener() {
-    this.__waitProvider().then((provider) => {
+    this.__waitProvider.then((provider) => {
       provider.removeListener(...arguments);
     });
   }
   removeAllListeners() {
-    this.__waitProvider().then((provider) => {
+    this.__waitProvider.then((provider) => {
       provider.removeAllListeners(...arguments);
     });
   }
   async enable() {
-    const provider = await this.__waitProvider();
+    const provider = await this.__waitProvider;
     return await provider.enable(...arguments);
   }
   async request() {
-    const provider = await this.__waitProvider();
+    const provider = await this.__waitProvider;
     return await provider.request(...arguments);
   }
   async send() {
-    const provider = await this.__waitProvider();
+    const provider = await this.__waitProvider;
     return await provider.send(...arguments);
   }
   async sendAsync() {
-    const provider = await this.__waitProvider();
+    const provider = await this.__waitProvider;
     return await provider.sendAsync(...arguments);
   }
 }

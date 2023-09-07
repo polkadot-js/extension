@@ -4,7 +4,7 @@
 import '@polkadot/types-augment';
 
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainConnectionStatus, _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { BehaviorSubject } from 'rxjs';
 import Web3 from 'web3';
@@ -18,6 +18,7 @@ export class EvmApi implements _EvmApi {
   apiError?: string;
   apiRetry = 0;
   public readonly isApiConnectedSubject = new BehaviorSubject(false);
+  public readonly connectionStatusSubject = new BehaviorSubject(_ChainConnectionStatus.DISCONNECTED);
   isApiReady = false;
   isApiReadyOnce = false;
   isReadyHandler: PromiseHandler<_EvmApi>;
@@ -29,9 +30,19 @@ export class EvmApi implements _EvmApi {
     return this.isApiConnectedSubject.getValue();
   }
 
-  private updateConnectedStatus (isConnected: boolean): void {
+  get connectionStatus (): _ChainConnectionStatus {
+    return this.connectionStatusSubject.getValue();
+  }
+
+  private updateConnectionStatus (status: _ChainConnectionStatus): void {
+    const isConnected = status === _ChainConnectionStatus.CONNECTED;
+
     if (isConnected !== this.isApiConnectedSubject.value) {
       this.isApiConnectedSubject.next(isConnected);
+    }
+
+    if (status !== this.connectionStatusSubject.value) {
+      this.connectionStatusSubject.next(status);
     }
   }
 
@@ -100,6 +111,7 @@ export class EvmApi implements _EvmApi {
     const wsProvider = this.provider as WebsocketProvider;
 
     wsProvider.connect && wsProvider.connect();
+    this.updateConnectionStatus(_ChainConnectionStatus.CONNECTING);
     // Check if api is ready
     this.api.eth.net.isListening()
       .then(() => {
@@ -109,7 +121,7 @@ export class EvmApi implements _EvmApi {
         this.isApiReadyOnce = false;
         this.isApiReady = false;
         this.isReadyHandler.reject(error);
-        this.updateConnectedStatus(false);
+        this.updateConnectionStatus(_ChainConnectionStatus.DISCONNECTED);
         console.warn(`Can not connect to ${this.chainSlug} (EVM) at ${this.apiUrl}`);
       });
 
@@ -126,7 +138,7 @@ export class EvmApi implements _EvmApi {
 
     wsProvider.disconnect && wsProvider.disconnect();
 
-    this.updateConnectedStatus(false);
+    this.updateConnectionStatus(_ChainConnectionStatus.DISCONNECTED);
 
     return Promise.resolve();
   }
@@ -146,11 +158,11 @@ export class EvmApi implements _EvmApi {
       }
     }
 
-    this.updateConnectedStatus(true);
+    this.updateConnectionStatus(_ChainConnectionStatus.CONNECTED);
   }
 
   onDisconnect (): void {
-    this.updateConnectedStatus(false);
+    this.updateConnectionStatus(_ChainConnectionStatus.DISCONNECTED);
 
     if (this.isApiConnected) {
       console.warn(`Disconnected from ${this.chainSlug} of ${this.apiUrl} (EVM)`);

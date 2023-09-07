@@ -4,8 +4,8 @@
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { BrowserConfirmationType, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
 import RequestService from '@subwallet/extension-base/services/request-service';
-import { getOS } from '@subwallet/extension-base/services/request-service/helper';
 import { DEFAULT_NOTIFICATION_TYPE } from '@subwallet/extension-base/services/setting-service/constants';
+import { getOS } from '@subwallet/extension-base/utils';
 
 const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
 

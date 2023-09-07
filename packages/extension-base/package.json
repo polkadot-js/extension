@@ -17,11 +17,12 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "1.1.2-1",
+  "version": "1.1.10-0",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "^5.0.2",
     "@apollo/client": "^3.7.14",
+    "@azns/resolver-core": "^1.4.0",
     "@equilab/api": "^1.14.25",
     "@ethereumjs/common": "^2.6.5",
     "@ethereumjs/tx": "^4.0.2",
@@ -46,16 +47,17 @@
     "@reduxjs/toolkit": "^1.9.1",
     "@sora-substrate/type-definitions": "^1.17.7",
     "@substrate/connect": "^0.7.26",
-    "@subwallet/chain-list": "^0.2.5",
-    "@subwallet/extension-base": "^1.1.2-1",
-    "@subwallet/extension-chains": "^1.1.2-1",
-    "@subwallet/extension-dapp": "^1.1.2-1",
-    "@subwallet/extension-inject": "^1.1.2-1",
+    "@subwallet/chain-list": "0.2.12",
+    "@subwallet/extension-base": "^1.1.10-0",
+    "@subwallet/extension-chains": "^1.1.10-0",
+    "@subwallet/extension-dapp": "^1.1.10-0",
+    "@subwallet/extension-inject": "^1.1.10-0",
     "@subwallet/keyring": "^0.0.10",
     "@subwallet/ui-keyring": "^0.0.10",
     "@walletconnect/sign-client": "^2.8.4",
     "@walletconnect/types": "^2.8.4",
     "@walletconnect/utils": "^2.8.4",
+    "avail-js-sdk": "^0.0.10",
     "axios": "^1.2.1",
     "bignumber.js": "^9.1.1",
     "bn.js": "^5.2.1",
@@ -74,8 +76,9 @@
     "json-rpc-engine": "^6.1.0",
     "manta-extension-sdk": "^1.1.0",
     "moment": "^2.29.4",
-    "protobufjs": "^7.1.2",
+    "protobufjs": "^7.2.4",
     "rxjs": "^7.8.1",
+    "uuid": "^9.0.0",
     "web3": "^1.10.0",
     "web3-core": "^1.10.0",
     "web3-core-helpers": "^1.10.0",
@@ -83,6 +86,7 @@
     "web3-utils": "^1.10.0"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^1.1.2-1"
+    "@subwallet/extension-mocks": "^1.1.10-0",
+    "@types/uuid": "^9.0.1"
   }
 }

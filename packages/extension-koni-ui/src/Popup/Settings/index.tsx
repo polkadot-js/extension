@@ -5,9 +5,10 @@ import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/compone
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
@@ -71,14 +72,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const notify = useNotification();
   const { goHome } = useDefaultNavigate();
   const { t } = useTranslation();
-
   const [locking, setLocking] = useState(false);
 
-  const onLock = useCallback(() => {
-    setLocking(true);
+  const { isUILocked, lock, unlock } = useUILock();
 
-    setTimeout(() => {
-      keyringLock()
+  const onLock = useCallback(() => {
+    if (isUILocked) {
+      unlock();
+      goHome();
+    } else {
+      setLocking(true);
+      lock()
         .then(() => {
           goHome();
         })
@@ -87,12 +91,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             message: e.message,
             type: 'error'
           });
-        })
-        .finally(() => {
+        }).finally(() => {
           setLocking(false);
         });
-    }, 100);
-  }, [goHome, notify]);
+    }
+  }, [goHome, isUILocked, lock, notify, unlock]);
 
   // todo: i18n all titles, labels below
   const SettingGroupItemType = useMemo((): SettingGroupItemType[] => ([

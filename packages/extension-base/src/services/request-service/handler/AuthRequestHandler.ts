@@ -13,7 +13,7 @@ import { AuthUrls } from '@subwallet/extension-base/services/request-service/typ
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
 import { getDomainFromUrl, stripUrl } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { assert } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -26,8 +26,8 @@ export default class AuthRequestHandler {
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
   private authorizeCached: AuthUrls | undefined = undefined;
-  private readonly authorizeUrlSubject = new Subject<AuthUrls>();
-  private readonly evmChainSubject = new Subject<AuthUrls>();
+  private readonly authorizeUrlSubject = new BehaviorSubject<AuthUrls>({});
+  private readonly evmChainSubject = new BehaviorSubject<AuthUrls>({});
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
   constructor (requestService: RequestService, chainService: ChainService, private keyringService: KeyringService) {
@@ -72,6 +72,8 @@ export default class AuthRequestHandler {
     } else {
       this.authorizeStore.get('authUrls', (data) => {
         this.authorizeCached = data || {};
+        this.evmChainSubject.next(this.authorizeCached);
+        this.authorizeUrlSubject.next(this.authorizeCached);
         update(this.authorizeCached);
       });
     }
@@ -225,7 +227,7 @@ export default class AuthRequestHandler {
     const isDuplicate = Object.values(this.#authRequestsV2)
       .some((request) => request.idStr === idStr);
 
-    assert(!isDuplicate, `The source ${url} has a pending authorization request`);
+    assert(!isDuplicate, 'The source {{url}} has a pending authorization request'.replace('{{url}}', url));
 
     const existedAuth = authList[idStr];
     const existedAccountAuthType = existedAuth?.accountAuthType;
@@ -240,7 +242,7 @@ export default class AuthRequestHandler {
       const inBlackList = existedAuth && !existedAuth.isAllowed;
 
       if (inBlackList) {
-        throw new Error(`The source ${url} is not allowed to interact with this extension`);
+        throw new Error('The source {{url}} is not allowed to interact with this extension'.replace('{{url}}', url));
       }
 
       request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
@@ -285,11 +287,11 @@ export default class AuthRequestHandler {
     return this.#authRequestsV2[id];
   }
 
-  public get subscribeEvmChainChange (): Subject<AuthUrls> {
+  public get subscribeEvmChainChange () {
     return this.evmChainSubject;
   }
 
-  public get subscribeAuthorizeUrlSubject (): Subject<AuthUrls> {
+  public get subscribeAuthorizeUrlSubject () {
     return this.authorizeUrlSubject;
   }
 
@@ -305,14 +307,14 @@ export default class AuthRequestHandler {
         const entry = Object.keys(value).includes(idStr);
 
         if (!entry) {
-          reject(new Error(`The source ${url} has not been enabled yet`));
+          reject(new Error('The source {{url}} has not been authorized yet'.replace('{{url}}', url)));
         }
 
         const isConnected = value[idStr] && Object.keys(value[idStr].isAllowedMap)
           .some((address) => value[idStr].isAllowedMap[address]);
 
         if (!isConnected) {
-          reject(new Error(`The source ${url} is not allowed to interact with this extension`));
+          reject(new Error('The source {{url}} is not allowed to interact with this extension'.replace('{{url}}', url)));
         }
 
         resolve(true);

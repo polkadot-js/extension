@@ -17,12 +17,12 @@ export const languageOptions: LanguageOptionType[] = [
     value: 'zh'
   },
   {
-    text: 'Русский',
-    value: 'ru'
-  },
-  {
     text: '日本語',
     value: 'ja'
+  },
+  {
+    text: 'Русский',
+    value: 'ru'
   },
   {
     text: 'Français',
@@ -46,4 +46,4 @@ export const languageOptions: LanguageOptionType[] = [
   }
 ];
 
-export const ENABLE_LANGUAGES: LanguageType[] = ['en', 'vi', 'zh', 'ru'];
+export const ENABLE_LANGUAGES: LanguageType[] = ['en', 'vi', 'zh', 'ja', 'ru'];

@@ -5,41 +5,41 @@ import { AuthRequestV2, ConfirmationDefinitions, ConfirmationsQueue, Confirmatio
 import { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestSign, ResponseSigning, SigningRequest } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
-import AuthRequestHandler from '@subwallet/extension-base/services/request-service/handler/AuthRequestHandler';
-import EvmRequestHandler from '@subwallet/extension-base/services/request-service/handler/EvmRequestHandler';
-import MetadataRequestHandler from '@subwallet/extension-base/services/request-service/handler/MetadataRequestHandler';
-import PopupHandler from '@subwallet/extension-base/services/request-service/handler/PopupHandler';
-import SubstrateRequestHandler from '@subwallet/extension-base/services/request-service/handler/SubstrateRequestHandler';
-import WalletConnectRequestHandler from '@subwallet/extension-base/services/request-service/handler/WalletConnectRequestHandler';
-import { AuthUrls, MetaRequest } from '@subwallet/extension-base/services/request-service/types';
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
-import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { MetadataDef } from '@subwallet/extension-inject/types';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
+
+import { AuthRequestHandler, ConnectWCRequestHandler, EvmRequestHandler, MetadataRequestHandler, NotSupportWCRequestHandler, PopupHandler, SubstrateRequestHandler } from './handler';
+import { AuthUrls, MetaRequest } from './types';
 
 export default class RequestService {
   // Common
   readonly #chainService: ChainService;
   readonly settingService: SettingService;
+  readonly keyringService: KeyringService;
   readonly #popupHandler: PopupHandler;
   readonly #metadataRequestHandler: MetadataRequestHandler;
   readonly #authRequestHandler: AuthRequestHandler;
   readonly #substrateRequestHandler: SubstrateRequestHandler;
   readonly #evmRequestHandler: EvmRequestHandler;
-  readonly #walletConnectRequestHandler: WalletConnectRequestHandler;
+  readonly #connectWCRequestHandler: ConnectWCRequestHandler;
+  readonly #notSupportWCRequestHandler: NotSupportWCRequestHandler;
 
   // Common
-  constructor (chainService: ChainService, settingService: SettingService, private keyringService: KeyringService) {
+  constructor (chainService: ChainService, settingService: SettingService, keyringService: KeyringService) {
     this.#chainService = chainService;
     this.settingService = settingService;
+    this.keyringService = keyringService;
     this.#popupHandler = new PopupHandler(this);
     this.#metadataRequestHandler = new MetadataRequestHandler(this);
     this.#authRequestHandler = new AuthRequestHandler(this, this.#chainService, this.keyringService);
     this.#substrateRequestHandler = new SubstrateRequestHandler(this);
     this.#evmRequestHandler = new EvmRequestHandler(this);
-    this.#walletConnectRequestHandler = new WalletConnectRequestHandler(this);
+    this.#connectWCRequestHandler = new ConnectWCRequestHandler(this);
+    this.#notSupportWCRequestHandler = new NotSupportWCRequestHandler(this);
 
     // Reset icon on start service
     this.updateIconV2();
@@ -137,11 +137,11 @@ export default class RequestService {
     return this.#authRequestHandler.getDAppChainInfo(options);
   }
 
-  public get subscribeEvmChainChange (): Subject<AuthUrls> {
+  public get subscribeEvmChainChange () {
     return this.#authRequestHandler.subscribeEvmChainChange;
   }
 
-  public get subscribeAuthorizeUrlSubject (): Subject<AuthUrls> {
+  public get subscribeAuthorizeUrlSubject () {
     return this.#authRequestHandler.subscribeAuthorizeUrlSubject;
   }
 
@@ -208,30 +208,51 @@ export default class RequestService {
     return this.#evmRequestHandler.updateConfirmation(id, type, payload, options, validator);
   }
 
-  // Wallet Connect requests
+  // WalletConnect Connect requests
   public getConnectWCRequest (id: string) {
-    return this.#walletConnectRequestHandler.getConnectWCRequest(id);
+    return this.#connectWCRequestHandler.getConnectWCRequest(id);
   }
 
   public get connectWCSubject (): BehaviorSubject<WalletConnectSessionRequest[]> {
-    return this.#walletConnectRequestHandler.connectWCSubject;
+    return this.#connectWCRequestHandler.connectWCSubject;
   }
 
   public get allConnectWCRequests (): WalletConnectSessionRequest[] {
-    return this.#walletConnectRequestHandler.allConnectWCRequests;
+    return this.#connectWCRequestHandler.allConnectWCRequests;
   }
 
   public get numConnectWCRequests (): number {
-    return this.#walletConnectRequestHandler.numConnectWCRequests;
+    return this.#connectWCRequestHandler.numConnectWCRequests;
   }
 
   public addConnectWCRequest (request: WalletConnectSessionRequest): void {
-    return this.#walletConnectRequestHandler.addConnectWCRequest(request);
+    return this.#connectWCRequestHandler.addConnectWCRequest(request);
+  }
+
+  // WalletConnect not support requests
+  public getNotSupportWCRequest (id: string) {
+    return this.#notSupportWCRequestHandler.getNotSupportWCRequest(id);
+  }
+
+  public get notSupportWCSubject (): BehaviorSubject<WalletConnectNotSupportRequest[]> {
+    return this.#notSupportWCRequestHandler.notSupportWCSubject;
+  }
+
+  public get allNotSupportWCRequests (): WalletConnectNotSupportRequest[] {
+    return this.#notSupportWCRequestHandler.allNotSupportWCRequests;
+  }
+
+  public get numNotSupportWCRequests (): number {
+    return this.#notSupportWCRequestHandler.numNotSupportWCRequests;
+  }
+
+  public addNotSupportWCRequest (request: WalletConnectNotSupportRequest): void {
+    return this.#notSupportWCRequestHandler.addNotSupportWCRequest(request);
   }
 
   // General methods
   public get numRequests (): number {
-    return this.numMetaRequests + this.numAuthRequests + this.numSubstrateRequests + this.numEvmRequests + this.numConnectWCRequests;
+    return this.numMetaRequests + this.numAuthRequests + this.numSubstrateRequests + this.numEvmRequests + this.numConnectWCRequests + this.numNotSupportWCRequests;
   }
 
   public resetWallet (): void {
@@ -239,6 +260,7 @@ export default class RequestService {
     this.#substrateRequestHandler.resetWallet();
     this.#evmRequestHandler.resetWallet();
     this.#metadataRequestHandler.resetWallet();
-    this.#walletConnectRequestHandler.resetWallet();
+    this.#connectWCRequestHandler.resetWallet();
+    this.#notSupportWCRequestHandler.resetWallet();
   }
 }

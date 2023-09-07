@@ -35,7 +35,7 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     icon: 'substrate',
     network: 'acala',
     slug: ChainInfoMap.acala.slug,
-    isDevMode: true,
+    isDevMode: false,
     isEthereum: false
   },
   {
@@ -46,7 +46,18 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     icon: 'substrate',
     network: 'aleph-node',
     slug: ChainInfoMap.aleph.slug,
-    isDevMode: true,
+    isDevMode: false,
+    isEthereum: false
+  },
+  {
+    accountName: 'Astar',
+    appName: 'Astar',
+    networkName: 'Astar network',
+    genesisHash: ChainInfoMap.astar.substrateInfo?.genesisHash || '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
+    icon: 'substrate',
+    network: 'astar',
+    slug: ChainInfoMap.astar.slug,
+    isDevMode: false,
     isEthereum: false
   },
   {
@@ -96,10 +107,11 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   //   isDevMode: true
   // },
   // {
-  //   displayName: 'Polkadex',
-  //   genesisHash: '0x3920bcb4960a1eef5580cd5367ff3f430eef052774f78468852f7b9cb39f8a3c',
+  //   displayName: 'Polkadex network',
+  //   genesisHash: ChainInfoMap.polkadex.substrateInfo?.genesisHash || '0x3920bcb4960a1eef5580cd5367ff3f430eef052774f78468852f7b9cb39f8a3c',
   //   icon: 'substrate',
   //   network: 'polkadex',
+  //   slug: ChainInfoMap.polkadex.slug,
   //   isDevMode: true
   // }
 ];
@@ -114,7 +126,7 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
 export const BLOCK_TRANSFER_NATIVE_LEDGER_NETWORKS: string[] = [];
 export const BLOCK_TRANSFER_TOKEN_LEDGER_NETWORKS: string[] = ['aleph'];
 export const BLOCK_TRANSFER_XCM_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['aleph'];
+export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['aleph', 'astar'];
 
 /// STAKING
 // NOMINATE

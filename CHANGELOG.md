@@ -1,5 +1,114 @@
 # CHANGELOG
 
+## 1.1.10
+Build date: Aug 26, 2023.
+
+Features & Update:
+- Save entered transaction information when closing and reopening the extension (#1555)
+- Support multi-language for messages returned from the background (round 1) (#1640)
+- Support new language: Japanese (#1644)
+- Improve lock UX (#1684)
+- Improve import security (#1798)
+- Update chain list: Add support Gemini 3f, Update RPC for Creditcoin (#1839)
+
+## 1.1.9
+Build date: Aug 22, 2023.
+
+Features & Update:
+- Improve case delete connection when reset wallet (#1760)
+- Update Banxa service (#1806)
+- Update chain-list (#1821)
+  - Integrate Jur Node network
+  - Integrate Azero Domain NFT
+
+Bugs fixed:
+- Fix a few minor bugs with NFT (#1817)
+- Update webpack config environment for page.js and content.js to improve security (#1823)
+
+## 1.1.8
+Build date: Aug 12, 2023.
+
+Features & Update:
+- Integrate Azero domain (#1750)
+- Show collection ID and NFT Id in the NFT detail screen (#1784)
+- Update chain list (#1777)
+  - Remove Snow and Arctic network
+  - Integrate Deeper network
+
+Bugs fixed:
+- Fixed bug showing staking APY (#1726)
+- Fixed bug showing token price for staking item (Calamari network) (#1766)
+- Fixed bug showing Minimum active value on the network detail screen (#1752)
+- Fixed bug Validator avatars are auto-generated continuously (#1757)
+- Fixed bug do not delete connection when reset wallet (#1762)
+
+## 1.1.7
+Build date: Aug 06, 2023.
+
+Bugs fixed:
+- Fix error issue can not get address
+- Fix error can not export account
+- Fix error can not buy with Banxa
+
+## 1.1.6
+Build date: Aug 04, 2023.
+
+Features & Update:
+- Integrate Banxa for fiat on-ramp (#1084)
+- Optimize WalletConnect - Not implement if no connection (#1626)
+- Update showing min stake value (#1537)
+- Improve connection status (#1554)
+- Improve EVM Inject Object (#1710)
+- Update chain list (#1715)
+  - Integrate Krest network
+  - Add PANX token for Aleph Zero network
+  - Support staking for Avail
+  - Support staking for Edgeware
+
+Bugs fixed:
+- Fixed bug Still show history of the removed account (#1731)
+- Fixed bug Showing staking account on the Staking detail screen (#1643)
+- Fixed bug Do not show validator on the Select validator screen in case turn on network when stake (#1496)
+- Fixed bug Still show NFT and staking data when turn off all networks (#1728)
+- Fixed bug Do not reset selected validator when change token to stake (#1721)
+- Fixed bug Do not display the history of addresses other than the original address (#1748)
+
+## 1.1.5
+Build date: Jul 29, 2023.
+
+Features & Update:
+- Update logo for Avail network (#1708)
+- Allow substrate Dapp subscribe allow access accounts List (#1712)
+
+Bugs fixed:
+- Fixed bug signature method handling is not supported for Wallet Connect (#1674)
+- Fixed bug does not synchronize the configuration of the network and the token (#1633)
+- Fixed bug still send local token in case the native token balance = 0 (#1667)
+
+## 1.1.4
+Build date: Jul 24, 2023.
+
+Bugs fixed:
+- Can not load another NFTs when collection contain any NFT with wrong information (#1672)
+
+## 1.1.3
+Build date: Jul 21, 2023.
+
+Features & Update:
+- Support show/hide balance (#1582)
+- Support sort token by value (#1444)
+- Update UI for notification (#1639)
+- Auto update metadata (#588)
+- Update chainlist (0.2.7) (#1661)
+  - Integrate aSEED token for Acala
+  - Add support for LPtokens and qTokens on Interlay
+
+Bugs fixed:
+- Fixed bug video NFT size (#1651)
+- Fixed bug Show incorrect transaction time on the history screen (#1654)
+- Fixed bug Do not validate amount of the recipient address in case send token (#1657)
+- Fix bug signing transaction on Avail (#1670)
+
 ## 1.1.2
 Build date: Jul 14, 2023.
 

@@ -25,6 +25,7 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
   const [isRefresh, setIsRefresh] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isChainActive = chainStateMap[chain]?.active;
 
   const refreshBalance = useCallback(() => {
     setIsRefresh({});
@@ -36,83 +37,87 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
     setIsLoading(true);
     setTokenBalance(DEFAULT_BALANCE);
 
+    let timeout: NodeJS.Timeout | undefined;
+
     if (address && chain) {
-      const promiseList = [] as Promise<any>[];
-      const isChainActive = chainStateMap[chain]?.active;
-      const nativeTokenActive = nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible;
-      let childTokenActive = true;
+      timeout = setTimeout(() => {
+        const promiseList = [] as Promise<any>[];
+        const nativeTokenActive = nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible;
+        let childTokenActive = true;
 
-      if (tokenSlug && tokenSlug !== nativeTokenSlug && !assetSettingMap[tokenSlug]?.visible) {
-        childTokenActive = false;
-      }
-
-      if (isChainActive) {
-        if (!childTokenActive) {
-          promiseList.push(updateAssetSetting({
-            tokenSlug,
-            assetSetting: {
-              visible: true
-            },
-            autoEnableNativeToken: true
-          }));
-        } else if (nativeTokenSlug && !nativeTokenActive) {
-          promiseList.push(updateAssetSetting({
-            tokenSlug: nativeTokenSlug,
-            assetSetting: {
-              visible: true
-            }
-          }));
+        if (tokenSlug && tokenSlug !== nativeTokenSlug && !assetSettingMap[tokenSlug]?.visible) {
+          childTokenActive = false;
         }
 
-        promiseList.push(getFreeBalance({ address, networkKey: chain })
-          .then((balance) => {
-            !cancel && setNativeTokenBalance(balance);
-          })
-          .catch((e: Error) => {
-            !cancel && setError(t('Unable to get balance. Please re-enable the network'));
-            !cancel && setNativeTokenBalance(DEFAULT_BALANCE);
-            console.error(e);
-          }));
+        if (isChainActive) {
+          if (!childTokenActive) {
+            promiseList.push(updateAssetSetting({
+              tokenSlug,
+              assetSetting: {
+                visible: true
+              },
+              autoEnableNativeToken: true
+            }));
+          } else if (nativeTokenSlug && !nativeTokenActive) {
+            promiseList.push(updateAssetSetting({
+              tokenSlug: nativeTokenSlug,
+              assetSetting: {
+                visible: true
+              }
+            }));
+          }
 
-        if (tokenSlug && tokenSlug !== nativeTokenSlug) {
-          promiseList.push(getFreeBalance({ address, networkKey: chain, token: tokenSlug })
+          promiseList.push(getFreeBalance({ address, networkKey: chain })
             .then((balance) => {
-              !cancel && setTokenBalance(balance);
+              !cancel && setNativeTokenBalance(balance);
             })
             .catch((e: Error) => {
               !cancel && setError(t('Unable to get balance. Please re-enable the network'));
-              !cancel && setTokenBalance(DEFAULT_BALANCE);
+              !cancel && setNativeTokenBalance(DEFAULT_BALANCE);
               console.error(e);
             }));
-        }
 
-        Promise.all(promiseList).finally(() => {
+          if (tokenSlug && tokenSlug !== nativeTokenSlug) {
+            promiseList.push(getFreeBalance({ address, networkKey: chain, token: tokenSlug })
+              .then((balance) => {
+                !cancel && setTokenBalance(balance);
+              })
+              .catch((e: Error) => {
+                !cancel && setError(t('Unable to get balance. Please re-enable the network'));
+                !cancel && setTokenBalance(DEFAULT_BALANCE);
+                console.error(e);
+              }));
+          }
+
+          Promise.all(promiseList).finally(() => {
+            !cancel && setIsLoading(false);
+          });
+        } else {
+          const tokenNames = [];
+
+          if (!isChainActive && nativeTokenSlug && assetRegistry[nativeTokenSlug]) {
+            tokenNames.push(assetRegistry[nativeTokenSlug].symbol);
+          }
+
+          if (!isChainActive && tokenSlug && tokenSlug !== nativeTokenSlug && assetRegistry[tokenSlug]) {
+            tokenNames.push(assetRegistry[tokenSlug].symbol);
+          }
+
+          !cancel && setNativeTokenBalance(DEFAULT_BALANCE);
+          !cancel && setTokenBalance(DEFAULT_BALANCE);
           !cancel && setIsLoading(false);
-        });
-      } else {
-        const tokenNames = [];
-
-        if (!isChainActive && nativeTokenSlug && assetRegistry[nativeTokenSlug]) {
-          tokenNames.push(assetRegistry[nativeTokenSlug].symbol);
+          !cancel && setError(t('Please enable {{tokenNames}} on {{chain}}', { tokenNames: tokenNames.join(', '), chain: chainInfo?.name }));
         }
-
-        if (!isChainActive && tokenSlug && tokenSlug !== nativeTokenSlug && assetRegistry[tokenSlug]) {
-          tokenNames.push(assetRegistry[tokenSlug].symbol);
-        }
-
-        !cancel && setNativeTokenBalance(DEFAULT_BALANCE);
-        !cancel && setTokenBalance(DEFAULT_BALANCE);
-        !cancel && setIsLoading(false);
-        !cancel && setError(t('Please enable {{tokenNames}} on {{chain}}', { tokenNames: tokenNames.join(', '), chain: chainInfo?.name }));
-      }
+      }, 600);
     }
 
     return () => {
       cancel = true;
+      clearTimeout(timeout);
       setIsLoading(true);
       setError(null);
     };
-  }, [address, chain, nativeTokenSlug, tokenSlug, isRefresh, assetSettingMap, t, assetRegistry, chainInfo?.name, chainStateMap]);
+  }, [address, chain, nativeTokenSlug, tokenSlug, isRefresh, assetSettingMap, t, assetRegistry, chainInfo?.name, isChainActive]);
 
   return { refreshBalance, tokenBalance, nativeTokenBalance, nativeTokenSlug, isLoading, error };
 };

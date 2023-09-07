@@ -10,8 +10,9 @@ import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS, API_CONNECT_TIMEOUT } fr
 import { getSubstrateConnectProvider } from '@subwallet/extension-base/services/chain-service/handler/light-client';
 import { DEFAULT_AUX } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _SubstrateApi, _SubstrateDefaultFormatBalance } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainConnectionStatus, _SubstrateApi, _SubstrateDefaultFormatBalance } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
+import { spec as availSpec } from 'avail-js-sdk';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
@@ -38,13 +39,26 @@ export class SubstrateApi implements _SubstrateApi {
   apiError?: string;
   private handleApiReady: PromiseHandler<_SubstrateApi>;
   public readonly isApiConnectedSubject = new BehaviorSubject(false);
+  public readonly connectionStatusSubject = new BehaviorSubject(_ChainConnectionStatus.DISCONNECTED);
   get isApiConnected (): boolean {
     return this.isApiConnectedSubject.getValue();
   }
 
-  private updateConnectedStatus (isConnected: boolean): void {
+  substrateRetry = 0;
+
+  get connectionStatus (): _ChainConnectionStatus {
+    return this.connectionStatusSubject.getValue();
+  }
+
+  private updateConnectionStatus (status: _ChainConnectionStatus): void {
+    const isConnected = status === _ChainConnectionStatus.CONNECTED;
+
     if (isConnected !== this.isApiConnectedSubject.value) {
       this.isApiConnectedSubject.next(isConnected);
+    }
+
+    if (status !== this.connectionStatusSubject.value) {
+      this.connectionStatusSubject.next(status);
     }
   }
 
@@ -71,7 +85,7 @@ export class SubstrateApi implements _SubstrateApi {
     }
   }
 
-  private createApi (provider: ProviderInterface): ApiPromise {
+  private createApi (provider: ProviderInterface, externalApiPromise?: ApiPromise): ApiPromise {
     const apiOption: ApiOptions = {
       provider,
       typesBundle,
@@ -86,17 +100,37 @@ export class SubstrateApi implements _SubstrateApi {
       };
     }
 
-    if (_API_OPTIONS_CHAIN_GROUP.acala.includes(this.chainSlug)) {
-      return new ApiPromise(acalaOptions({ provider }));
+    this.updateConnectionStatus(_ChainConnectionStatus.CONNECTING);
+
+    let api: ApiPromise;
+
+    if (externalApiPromise) {
+      api = externalApiPromise;
+    } else if (_API_OPTIONS_CHAIN_GROUP.acala.includes(this.chainSlug)) {
+      api = new ApiPromise(acalaOptions({ provider }));
     } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(this.chainSlug)) {
-      return new ApiPromise({
+      api = new ApiPromise({
         provider,
         rpc: oakRpc,
         types: oakTypes
       });
+    } else if (_API_OPTIONS_CHAIN_GROUP.avail.includes(this.chainSlug)) {
+      api = new ApiPromise({
+        provider,
+        rpc: availSpec.rpc,
+        types: availSpec.types,
+        signedExtensions: availSpec.signedExtensions
+      });
     } else {
-      return new ApiPromise(apiOption);
+      api = new ApiPromise(apiOption);
     }
+
+    api.on('ready', this.onReady.bind(this));
+    api.on('connected', this.onConnect.bind(this));
+    api.on('disconnected', this.onDisconnect.bind(this));
+    api.on('error', this.onError.bind(this));
+
+    return api;
   }
 
   constructor (chainSlug: string, apiUrl: string, { externalApiPromise, metadata, providerName }: _ApiOptions = {}) {
@@ -106,13 +140,9 @@ export class SubstrateApi implements _SubstrateApi {
     this.registry = new TypeRegistry();
     this.metadata = metadata;
     this.provider = this.createProvider(apiUrl);
-    this.api = externalApiPromise || this.createApi(this.provider);
+    this.api = this.createApi(this.provider, externalApiPromise);
 
     this.handleApiReady = createPromiseHandler<_SubstrateApi>();
-    this.api.on('ready', this.onReady.bind(this));
-    this.api.on('connected', this.onConnect.bind(this));
-    this.api.on('disconnected', this.onDisconnect.bind(this));
-    this.api.on('error', this.onError.bind(this));
   }
 
   get isReady (): Promise<_SubstrateApi> {
@@ -136,19 +166,19 @@ export class SubstrateApi implements _SubstrateApi {
     this.apiUrl = apiUrl;
     this.provider = this.createProvider(apiUrl);
     this.api = this.createApi(this.provider);
-    this.api.on('ready', this.onReady.bind(this));
-    this.api.on('connected', this.onConnect.bind(this));
-    this.api.on('disconnected', this.onDisconnect.bind(this));
-    this.api.on('error', this.onError.bind(this));
   }
 
   connect (): void {
     if (this.api.isConnected) {
-      this.updateConnectedStatus(true);
+      this.updateConnectionStatus(_ChainConnectionStatus.CONNECTED);
     } else {
+      this.updateConnectionStatus(_ChainConnectionStatus.CONNECTING);
+
       this.api.connect()
         .then(() => {
-          this.updateConnectedStatus(true);
+          this.api.isReady.then(() => {
+            this.updateConnectionStatus(_ChainConnectionStatus.CONNECTED);
+          }).catch(console.error);
         }).catch(console.error);
     }
   }
@@ -160,7 +190,7 @@ export class SubstrateApi implements _SubstrateApi {
       console.error(e);
     }
 
-    this.updateConnectedStatus(false);
+    this.updateConnectionStatus(_ChainConnectionStatus.DISCONNECTED);
   }
 
   async recoverConnect () {
@@ -186,7 +216,8 @@ export class SubstrateApi implements _SubstrateApi {
   }
 
   onConnect (): void {
-    this.updateConnectedStatus(true);
+    this.updateConnectionStatus(_ChainConnectionStatus.CONNECTED);
+    this.substrateRetry = 0;
     console.log(`Connected to ${this.chainSlug || ''} at ${this.apiUrl}`);
 
     if (this.isApiReadyOnce) {
@@ -197,8 +228,15 @@ export class SubstrateApi implements _SubstrateApi {
   onDisconnect (): void {
     this.isApiReady = false;
     console.log(`Disconnected from ${this.chainSlug} at ${this.apiUrl}`);
-    this.updateConnectedStatus(false);
+    this.updateConnectionStatus(_ChainConnectionStatus.DISCONNECTED);
     this.handleApiReady = createPromiseHandler<_SubstrateApi>();
+    this.substrateRetry += 1;
+
+    if (this.substrateRetry > 9) {
+      this.disconnect().then(() => {
+        this.updateConnectionStatus(_ChainConnectionStatus.UNSTABLE);
+      }).catch(console.error);
+    }
   }
 
   onError (e: Error): void {

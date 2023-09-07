@@ -3,27 +3,29 @@
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import ErrorFallback from '@subwallet/extension-koni-ui/Popup/ErrorFallback';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { i18nPromise } from '@subwallet/extension-koni-ui/utils/common/i18n';
-import React, { ComponentType, ReactNode } from 'react';
-import { createHashRouter, Outlet, useLocation } from 'react-router-dom';
+import React, { ComponentType } from 'react';
+import { createHashRouter, IndexRouteObject, Outlet, useLocation } from 'react-router-dom';
 
 export class LazyLoader {
-  public loader;
+  private elemLoader;
 
-  public element;
   constructor (promise: () => Promise<{ default: ComponentType<any> }>) {
-    this.loader = promise;
-    this.element = React.lazy(promise);
+    this.elemLoader = promise;
   }
 
-  public generateRouterObject (path: string): { path: string, loader: () => Promise<any>, element: ReactNode } {
-    const Component = this.element;
-
+  public generateRouterObject (path: string): Pick<IndexRouteObject, 'path' | 'lazy'> {
     return {
       path,
-      loader: this.loader,
-      element: <Component />
+      lazy: async () => {
+        const Element = await this.elemLoader();
+
+        return {
+          element: <Element.default />
+        };
+      }
     };
   }
 }
@@ -96,8 +98,6 @@ const ConnectWalletConnect = new LazyLoader(() => import('@subwallet/extension-k
 const ConnectionList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
 const ConnectionDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
-const ErrorFallback = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/ErrorFallback'));
-
 // A Placeholder page
 export function Example () {
   const location = useLocation();
@@ -113,7 +113,7 @@ export const router = createHashRouter([
     path: '/',
     loader: () => i18nPromise,
     element: <Root />,
-    errorElement: <ErrorFallback.element />,
+    errorElement: <ErrorFallback />,
     children: [
       Welcome.generateRouterObject('/welcome'),
       BuyTokens.generateRouterObject('/buy-tokens'),
@@ -142,12 +142,12 @@ export const router = createHashRouter([
         ...Transaction.generateRouterObject('/transaction'),
         children: [
           SendFund.generateRouterObject('send-fund'),
-          SendNFT.generateRouterObject('send-nft/:owner/:chain/:collectionId/:itemId'),
-          Stake.generateRouterObject('stake/:type/:chain'),
-          Unstake.generateRouterObject('unstake/:type/:chain'),
-          CancelUnstake.generateRouterObject('cancel-unstake/:type/:chain'),
-          ClaimReward.generateRouterObject('claim-reward/:type/:chain'),
-          Withdraw.generateRouterObject('withdraw/:type/:chain'),
+          SendNFT.generateRouterObject('send-nft'),
+          Stake.generateRouterObject('stake'),
+          Unstake.generateRouterObject('unstake'),
+          CancelUnstake.generateRouterObject('cancel-unstake'),
+          ClaimReward.generateRouterObject('claim-reward'),
+          Withdraw.generateRouterObject('withdraw'),
           {
             path: 'compound',
             element: <Example />

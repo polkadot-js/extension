@@ -29,5 +29,3 @@ export interface AuthUrlInfo {
 }
 
 export type AuthUrls = Record<string, AuthUrlInfo>;
-
-export type OSType = 'Mac OS' | 'iOS' | 'Windows' | 'Android' | 'Linux' | 'Unknown';

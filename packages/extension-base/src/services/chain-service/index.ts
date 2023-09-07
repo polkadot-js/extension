@@ -15,6 +15,7 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
+import { MODULE_SUPPORT } from '@subwallet/extension-base/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
@@ -36,7 +37,7 @@ export class ChainService {
 
   private substrateChainHandler: SubstrateChainHandler;
   private evmChainHandler: EvmChainHandler;
-  private mantaChainHandler: MantaPrivateHandler;
+  private mantaChainHandler: MantaPrivateHandler | undefined;
 
   public get mantaPay () {
     return this.mantaChainHandler;
@@ -59,15 +60,15 @@ export class ChainService {
     this.dbService = dbService;
     this.eventService = eventService;
 
-    this.substrateChainHandler = new SubstrateChainHandler();
-    this.evmChainHandler = new EvmChainHandler();
-    this.mantaChainHandler = new MantaPrivateHandler(dbService);
-
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
-    this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
     this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
+
+    if (MODULE_SUPPORT.MANTA_ZK) {
+      console.log('Init Manta ZK');
+      this.mantaChainHandler = new MantaPrivateHandler(dbService);
+    }
 
     this.substrateChainHandler = new SubstrateChainHandler(this);
     this.evmChainHandler = new EvmChainHandler(this);
@@ -362,12 +363,38 @@ export class ChainService {
   }
 
   // Setter
-  public removeCustomChain (slug: string) {
+  public forceRemoveChain (slug: string) {
     if (this.lockChainInfoMap) {
       return false;
     }
 
+    const chainInfoMap = this.getChainInfoMap();
+    const chainStateMap = this.getChainStateMap();
+
+    if (!(slug in chainInfoMap)) {
+      return false;
+    }
+
     this.lockChainInfoMap = true;
+
+    delete chainStateMap[slug];
+    delete chainInfoMap[slug];
+    this.deleteAssetsByChain(slug);
+    this.dbService.removeFromChainStore([slug]).catch(console.error);
+
+    this.updateChainSubscription();
+
+    this.lockChainInfoMap = false;
+
+    this.eventService.emit('chain.updateState', slug);
+
+    return true;
+  }
+
+  public removeCustomChain (slug: string) {
+    if (this.lockChainInfoMap) {
+      return false;
+    }
 
     const chainInfoMap = this.getChainInfoMap();
     const chainStateMap = this.getChainStateMap();
@@ -383,6 +410,8 @@ export class ChainService {
     if (chainStateMap[slug].active) {
       return false;
     }
+
+    this.lockChainInfoMap = true;
 
     delete chainStateMap[slug];
     delete chainInfoMap[slug];
@@ -502,7 +531,7 @@ export class ChainService {
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
-    this.chainStateMapSubject.next(this.getChainStateMap());
+    this.updateChainStateMapSubscription();
     this.assetRegistrySubject.next(this.getAssetRegistry());
     this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
 
@@ -530,20 +559,19 @@ export class ChainService {
   private async initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
-    const onUpdateStatus = (isConnected: boolean) => {
+    const onUpdateStatus = (status: _ChainConnectionStatus) => {
       const currentStatus = this.getChainStateByKey(chainInfo.slug).connectionStatus;
-      const newStatus = isConnected ? _ChainConnectionStatus.CONNECTED : _ChainConnectionStatus.DISCONNECTED;
 
       // Avoid unnecessary update in case disable chain
-      if (currentStatus !== newStatus) {
-        this.setChainConnectionStatus(chainInfo.slug, newStatus);
-        this.chainStateMapSubject.next(this.getChainStateMap());
+      if (currentStatus !== status) {
+        this.setChainConnectionStatus(chainInfo.slug, status);
+        this.updateChainStateMapSubscription();
       }
     };
 
     if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
-      if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug)) {
-        const apiPromise = await this.mantaChainHandler.initMantaPay(endpoint, chainInfo.slug);
+      if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && MODULE_SUPPORT.MANTA_ZK && this.mantaChainHandler) {
+        const apiPromise = await this.mantaChainHandler?.initMantaPay(endpoint, chainInfo.slug);
         const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, externalApiPromise: apiPromise, onUpdateStatus });
 
         this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
@@ -635,6 +663,13 @@ export class ChainService {
     needUpdate && this.updateChainStateMapSubscription();
 
     return needUpdate;
+  }
+
+  public async reconnectChain (chain: string) {
+    await this.getSubstrateApi(chain)?.recoverConnect();
+    await this.getEvmApi(chain)?.recoverConnect();
+
+    return true;
   }
 
   public disableChain (chainSlug: string): boolean {
@@ -849,6 +884,15 @@ export class ChainService {
   private async initAssetRegistry (deprecatedCustomChainMap: Record<string, string>) {
     const storedAssetRegistry = await this.dbService.getAllAssetStore();
     const latestAssetRegistry = await this.fetchLatestData(_CHAIN_ASSET_SRC, ChainAssetMap) as Record<string, _ChainAsset>;
+
+    // Fill out zk assets from latestAssetRegistry if not supported
+    if (!MODULE_SUPPORT.MANTA_ZK) {
+      Object.keys(latestAssetRegistry).forEach((slug) => {
+        if (_isMantaZkAsset(latestAssetRegistry[slug])) {
+          delete latestAssetRegistry[slug];
+        }
+      });
+    }
 
     if (storedAssetRegistry.length === 0) {
       this.dataMap.assetRegistry = latestAssetRegistry;

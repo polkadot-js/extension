@@ -169,7 +169,9 @@ export class KoniSubscription {
         maxValidatorPerNominator: rs.maxValidatorPerNominator, // temporary fix for Astar, there's no limit for now
         maxWithdrawalRequestPerValidator: rs.maxWithdrawalRequestPerValidator, // by default
         allowCancelUnstaking: rs.allowCancelUnstaking,
-        unstakingPeriod: rs.unstakingPeriod
+        unstakingPeriod: rs.unstakingPeriod,
+        expectedReturn: rs.expectedReturn,
+        inflation: rs.inflation
       });
     });
 

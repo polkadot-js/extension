@@ -7,11 +7,12 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AddressBookInfo, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BasicTxWarningCode, BondingOptionParams, BrowserConfirmationType, ChainType, CreateDeriveAccountInfo, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, MantaPayEnableMessage, MantaPayEnableParams, MantaPayEnableResponse, MantaPaySyncState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestApproveConnectWalletSession, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeEnableChainPatrol, RequestChangeLanguage, RequestChangeMasterPassword, RequestChangeShowZeroBalance, RequestChangeTimeAutoLock, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestConnectWalletConnect, RequestCrossChainTransfer, RequestDeleteContactAccount, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestDisconnectWalletConnectSession, RequestEditContactAccount, RequestFindRawMetadata, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestPassPhishingPage, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectConnectWalletSession, RequestRejectExternalRequest, RequestResetWallet, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseFindRawMetadata, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResetWallet, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AddressBookInfo, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BasicTxWarningCode, BondingOptionParams, BrowserConfirmationType, ChainType, CreateDeriveAccountInfo, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, MantaPayEnableMessage, MantaPayEnableParams, MantaPayEnableResponse, MantaPaySyncState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestApproveConnectWalletSession, RequestApproveWalletConnectNotSupport, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeEnableChainPatrol, RequestChangeLanguage, RequestChangeMasterPassword, RequestChangeShowBalance, RequestChangeShowZeroBalance, RequestChangeTimeAutoLock, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestConnectWalletConnect, RequestCrossChainTransfer, RequestDeleteContactAccount, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestDisconnectWalletConnectSession, RequestEditContactAccount, RequestFindRawMetadata, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestPassPhishingPage, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectConnectWalletSession, RequestRejectExternalRequest, RequestRejectWalletConnectNotSupport, RequestResetWallet, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestUnlockType, ResolveAddressToDomainRequest, ResolveDomainRequest, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseFindRawMetadata, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResetWallet, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeCancel, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApproveSignature, RequestSigningCancel, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseType, SigningRequest, WindowOpenParams } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, XCM_MIN_AMOUNT_RATIO } from '@subwallet/extension-base/constants';
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
+import { resolveAzeroAddressToDomain, resolveAzeroDomainToAddress } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { parseSubstrateTransaction } from '@subwallet/extension-base/koni/api/dotsama/parseTransaction';
 import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-base/koni/api/nft/transfer';
@@ -22,7 +23,7 @@ import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObjec
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
+import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isMantaZkAsset, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
@@ -31,8 +32,8 @@ import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setti
 import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionEmitter, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
-import { ResultApproveWalletConnectSession, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
+import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -48,6 +49,7 @@ import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/sessio
 import { getSdkError } from '@walletconnect/utils';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
+import { t } from 'i18next';
 import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -82,19 +84,35 @@ export default class KoniExtension {
   readonly #koniState: KoniState;
   #timeAutoLock: number = DEFAULT_AUTO_LOCK_TIME;
   #skipAutoLock = false;
+  #alwaysLock = false;
+  #firstTime = true;
 
   constructor (state: KoniState) {
     this.#koniState = state;
 
     const updateTimeAutoLock = (rs: RequestSettingsType) => {
-      this.#timeAutoLock = rs.timeAutoLock;
-      clearTimeout(this.#lockTimeOut);
+      // Check time auto lock change
+      if (this.#timeAutoLock !== rs.timeAutoLock) {
+        this.#timeAutoLock = rs.timeAutoLock;
+        this.#alwaysLock = !rs.timeAutoLock;
+        clearTimeout(this.#lockTimeOut);
 
-      this.#lockTimeOut = setTimeout(() => {
-        if (!this.#skipAutoLock) {
-          this.keyringLock();
+        if (this.#timeAutoLock > 0) {
+          this.#lockTimeOut = setTimeout(() => {
+            if (!this.#skipAutoLock) {
+              this.keyringLock();
+            }
+          }, this.#timeAutoLock * 60 * 1000);
+        } else if (this.#alwaysLock) {
+          if (!this.#firstTime) {
+            this.keyringLock();
+          }
         }
-      }, this.#timeAutoLock * 60 * 1000);
+      }
+
+      if (this.#firstTime) {
+        this.#firstTime = false;
+      }
     };
 
     this.#koniState.settingService.getSettings(updateTimeAutoLock);
@@ -130,7 +148,7 @@ export default class KoniExtension {
   private accountsChangePassword ({ address, newPass, oldPass }: RequestAccountChangePassword): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find account'));
 
     try {
       if (!pair.isLocked) {
@@ -139,7 +157,7 @@ export default class KoniExtension {
 
       pair.decodePkcs8(oldPass);
     } catch (error) {
-      throw new Error('oldPass is invalid');
+      throw new Error(t('Wrong password'));
     }
 
     keyring.encryptAccount(pair, newPass);
@@ -150,7 +168,7 @@ export default class KoniExtension {
   private accountsEdit ({ address, name }: RequestAccountEdit): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find account'));
 
     keyring.saveAccountMeta(pair, { ...pair.meta, name });
 
@@ -164,7 +182,7 @@ export default class KoniExtension {
   private accountsShow ({ address, isShowing }: RequestAccountShow): boolean {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find account'));
 
     keyring.saveAccountMeta(pair, { ...pair.meta, isHidden: !isShowing });
 
@@ -200,7 +218,7 @@ export default class KoniExtension {
   private metadataApprove ({ id }: RequestMetadataApprove): boolean {
     const queued = this.#koniState.getMetaRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { request, resolve } = queued;
 
@@ -222,7 +240,7 @@ export default class KoniExtension {
   private metadataReject ({ id }: RequestMetadataReject): boolean {
     const queued = this.#koniState.getMetaRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { reject } = queued;
 
@@ -290,11 +308,11 @@ export default class KoniExtension {
     const { phrase } = keyExtractSuri(suri);
 
     if (isHex(phrase)) {
-      assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
+      assert(isHex(phrase, 256), t('Invalid seed phrase. Please try again.'));
     } else {
       // sadly isHex detects as string, so we need a cast here
-      assert(SEED_LENGTHS.includes((phrase).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
-      assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
+      assert(SEED_LENGTHS.includes((phrase).split(' ').length), t('Seed phrase needs to contain {{x}} words', { replace: { x: SEED_LENGTHS.join(', ') } }));
+      assert(mnemonicValidate(phrase), t('Invalid seed phrase. Please try again.'));
     }
 
     return {
@@ -307,7 +325,7 @@ export default class KoniExtension {
   private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
     const queued = this.#koniState.getSignRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { resolve } = queued;
 
@@ -320,7 +338,7 @@ export default class KoniExtension {
   private signingCancel ({ id }: RequestSigningCancel): boolean {
     const queued = this.#koniState.getSignRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { reject } = queued;
 
@@ -380,13 +398,13 @@ export default class KoniExtension {
     try {
       parentPair.decodePkcs8(password);
     } catch (e) {
-      throw new Error('invalid password');
+      throw new Error(t('Wrong password'));
     }
 
     try {
       return parentPair.derive(suri, metadata);
     } catch (err) {
-      throw new Error(`"${suri}" is not a valid derivation path`);
+      throw new Error(t('"{{suri}}" is not a valid derivation path', { replace: { suri } }));
     }
   }
 
@@ -530,7 +548,7 @@ export default class KoniExtension {
 
       return account || contact || { ...keyring.saveRecent(address).json, publicKey: decodeAddress(address) };
     } else {
-      throw Error('Invalid address');
+      throw Error(t('This is not an address'));
     }
   }
 
@@ -542,7 +560,7 @@ export default class KoniExtension {
 
       return true;
     } else {
-      throw Error('Invalid address');
+      throw Error(t('This is not an address'));
     }
   }
 
@@ -554,7 +572,7 @@ export default class KoniExtension {
 
       return true;
     } else {
-      throw Error('Invalid address');
+      throw Error(t('This is not an address'));
     }
   }
 
@@ -613,7 +631,7 @@ export default class KoniExtension {
   private authorizeApproveV2 ({ accounts, id }: RequestAuthorizeApproveV2): boolean {
     const queued = this.#koniState.getAuthRequestV2(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { resolve } = queued;
 
@@ -625,7 +643,7 @@ export default class KoniExtension {
   private authorizeRejectV2 ({ id }: RequestAuthorizeReject): boolean {
     const queued = this.#koniState.getAuthRequestV2(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { reject } = queued;
 
@@ -637,7 +655,7 @@ export default class KoniExtension {
   private authorizeCancelV2 ({ id }: RequestAuthorizeCancel): boolean {
     const queued = this.#koniState.getAuthRequestV2(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { reject } = queued;
 
@@ -699,11 +717,11 @@ export default class KoniExtension {
     return true;
   }
 
-  private getNonReadonlyAccounts (): string[] {
+  private getAccounts (): string[] {
     const storedAccounts = this.#koniState.keyringService.accounts;
     const transformedAccounts = transformAccounts(storedAccounts);
 
-    return transformedAccounts.filter((a) => !a.isReadOnly).map((a) => a.address);
+    return transformedAccounts.map((a) => a.address);
   }
 
   private isAddressValidWithAuthType (address: string, accountAuthType?: AccountAuthType): boolean {
@@ -730,14 +748,14 @@ export default class KoniExtension {
     this.#koniState.getAuthorize((value) => {
       assert(value, 'The source is not known');
 
-      const nonReadonlyAccounts = this.getNonReadonlyAccounts();
+      const accounts = this.getAccounts();
 
       Object.keys(value).forEach((url) => {
         if (!value[url].isAllowed) {
           return;
         }
 
-        const targetAccounts = this.filterAccountsByAccountAuthType(nonReadonlyAccounts, value[url].accountAuthType);
+        const targetAccounts = this.filterAccountsByAccountAuthType(accounts, value[url].accountAuthType);
 
         targetAccounts.forEach((address) => {
           value[url].isAllowedMap[address] = connectValue;
@@ -767,8 +785,8 @@ export default class KoniExtension {
     this.#koniState.getAuthorize((value) => {
       assert(value[url], 'The source is not known');
 
-      const nonReadonlyAccounts = this.getNonReadonlyAccounts();
-      const targetAccounts = this.filterAccountsByAccountAuthType(nonReadonlyAccounts, value[url].accountAuthType);
+      const accounts = this.getAccounts();
+      const targetAccounts = this.filterAccountsByAccountAuthType(accounts, value[url].accountAuthType);
 
       targetAccounts.forEach((address) => {
         value[url].isAllowedMap[address] = connectValue;
@@ -938,6 +956,12 @@ export default class KoniExtension {
     return true;
   }
 
+  private setUnlockType ({ unlockType }: RequestUnlockType) {
+    this.#koniState.updateSetting('unlockType', unlockType);
+
+    return true;
+  }
+
   private async subscribeSettings (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(settings.subscribe)'>(id, port);
 
@@ -970,6 +994,12 @@ export default class KoniExtension {
 
   private setLanguage ({ language }: RequestChangeLanguage) {
     this.#koniState.updateSetting('language', language);
+
+    return true;
+  }
+
+  private setShowBalance ({ enable }: RequestChangeShowBalance) {
+    this.#koniState.updateSetting('isShowBalance', enable);
 
     return true;
   }
@@ -1209,7 +1239,7 @@ export default class KoniExtension {
 
     if (!hasMasterPassword) {
       if (!password) {
-        throw Error('Require password to set up master password');
+        throw Error(t('The password of each account is needed to set up master password'));
       } else {
         keyring.changeMasterPassword(password);
         this.#koniState.updateKeyringState();
@@ -1249,6 +1279,10 @@ export default class KoniExtension {
         resolve();
       });
     });
+
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
 
     return addressDict;
   }
@@ -1308,11 +1342,11 @@ export default class KoniExtension {
     const { phrase } = keyExtractSuri(suri);
 
     if (isHex(phrase)) {
-      assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
+      assert(isHex(phrase, 256), t('Invalid seed phrase. Please try again.'));
     } else {
       // sadly isHex detects as string, so we need a cast here
-      assert(SEED_LENGTHS.includes((phrase).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
-      assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
+      assert(SEED_LENGTHS.includes((phrase).split(' ').length), t('Seed phrase needs to contain {{x}} words', { replace: { x: SEED_LENGTHS.join(', ') } }));
+      assert(mnemonicValidate(phrase), t('Invalid seed phrase. Please try again.'));
     }
 
     const rs = { seed: suri, addressMap: {} } as ResponseSeedValidateV2;
@@ -1340,7 +1374,7 @@ export default class KoniExtension {
       });
     } else {
       rs.autoAddPrefix = false;
-      assert(false, 'Not valid private key');
+      assert(false, t('Invalid private key. Please try again.'));
     }
 
     return rs;
@@ -1366,7 +1400,7 @@ export default class KoniExtension {
     try {
       return parentPair.derive(suri, metadata);
     } catch (err) {
-      throw new Error(`"${suri}" is not a valid derivation path`);
+      throw new Error(t('"{{suri}}" is not a valid derivation path', { replace: { suri } }));
     }
   }
 
@@ -1401,11 +1435,15 @@ export default class KoniExtension {
           keyring.restoreAccount(file, password, withMasterPassword);
           this._addAddressToAuthList(address, isAllowed);
         });
+
+        if (this.#alwaysLock) {
+          this.keyringLock();
+        }
       } catch (error) {
         throw new Error((error as Error).message);
       }
     } else {
-      throw new Error('Unable to decode using the supplied passphrase');
+      throw new Error(t('Wrong password'));
     }
   }
 
@@ -1419,11 +1457,15 @@ export default class KoniExtension {
           keyring.restoreAccounts(file, password);
           this._addAddressesToAuthList(addressList, isAllowed);
         });
+
+        if (this.#alwaysLock) {
+          this.keyringLock();
+        }
       } catch (error) {
         throw new Error((error as Error).message);
       }
     } else {
-      throw new Error('Unable to decode using the supplied passphrase');
+      throw new Error(t('Wrong password'));
     }
   }
 
@@ -1520,15 +1562,23 @@ export default class KoniExtension {
 
     const historySubject = await this.#koniState.historyService.getHistorySubject();
 
-    historySubject.subscribe(cb);
+    const subscription = historySubject.subscribe((histories) => {
+      const addresses = keyring.getAccounts().map((a) => a.address);
 
-    this.createUnsubscriptionHandle(id, historySubject.unsubscribe);
+      // Re-filter
+      cb(histories.filter((item) => addresses.some((address) => isSameAddress(item.address, address))));
+    });
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
 
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
 
-    return historySubject.getValue();
+    const addresses = keyring.getAccounts().map((a) => a.address);
+
+    // Re-filter
+    return historySubject.getValue().filter((item) => addresses.some((address) => isSameAddress(item.address, address)));
   }
 
   // Save address to contact
@@ -1549,7 +1599,7 @@ export default class KoniExtension {
 
     if (!transferAll) {
       if (value === undefined) {
-        errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Require transfer value'));
+        errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Transfer amount is required')));
       }
 
       if (value) {
@@ -1560,11 +1610,11 @@ export default class KoniExtension {
     const tokenInfo = this.#koniState.getAssetBySlug(tokenSlug);
 
     if (!tokenInfo) {
-      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Not found token from registry'));
+      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Not found token from registry')));
     }
 
     if (isEthereumAddress(from) && isEthereumAddress(to) && _isTokenEvmSmartContract(tokenInfo) && _getContractAddressOfToken(tokenInfo).length === 0) {
-      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Not found ERC20 address for this token'));
+      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Not found ERC20 address for this token')));
     }
 
     return [errors, keypair, transferValue, tokenInfo];
@@ -1628,7 +1678,7 @@ export default class KoniExtension {
       const error = e as Error;
 
       if (error.message.includes('transfer amount exceeds balance')) {
-        error.message = 'Not enough balance';
+        error.message = t('Insufficient balance');
       }
 
       throw error;
@@ -1646,7 +1696,7 @@ export default class KoniExtension {
         const { value: balance } = await this.getAddressFreeBalance({ address: from, networkKey, token: tokenSlug });
 
         if (new BigN(balance).minus(transferAmount.value).lt(minAmount)) {
-          inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+          inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
         }
       }
 
@@ -1658,7 +1708,7 @@ export default class KoniExtension {
 
         const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter);
 
-        inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${tokenInfo.symbol} to keep the destination account alive`));
+        inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}}{{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: tokenInfo.symbol } })));
       }
     };
 
@@ -1692,7 +1742,7 @@ export default class KoniExtension {
     const destinationTokenInfo = this.#koniState.getXcmEqualAssetByChain(destinationNetworkKey, sendingTokenSlug);
 
     if (!destinationTokenInfo) {
-      errors.push(new TransactionError(TransferTxErrorType.INVALID_TOKEN, 'Not found token from registry'));
+      errors.push(new TransactionError(TransferTxErrorType.INVALID_TOKEN, t('Not found token from registry')));
     }
 
     return [errors, keypair, transferValue, originTokenInfo, destinationTokenInfo];
@@ -1731,7 +1781,7 @@ export default class KoniExtension {
         if (new BigN(value).lt(atLeast)) {
           const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
 
-          inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${originTokenInfo.symbol} to keep the destination account alive`));
+          inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}}{{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: originTokenInfo.symbol } })));
         }
 
         const srcMinAmount = originTokenInfo.minAmount || '0';
@@ -1742,7 +1792,7 @@ export default class KoniExtension {
           const { value: balance } = await this.getAddressFreeBalance({ address: from, networkKey: originNetworkKey, token: originTokenInfo.slug });
 
           if (new BigN(balance).minus(value).lt(srcMinAmount)) {
-            inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+            inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
           }
         }
       };
@@ -1824,6 +1874,10 @@ export default class KoniExtension {
 
   private async enableChain ({ chainSlug, enableTokens }: EnableChainParams): Promise<boolean> {
     return await this.#koniState.enableChain(chainSlug, enableTokens);
+  }
+
+  private async reconnectChain (chainSlug: string): Promise<boolean> {
+    return this.#koniState.chainService.reconnectChain(chainSlug);
   }
 
   private async validateNetwork ({ existedChainSlug,
@@ -1963,7 +2017,7 @@ export default class KoniExtension {
         }
       } catch (e) {
         estimatedFee = '0';
-        console.warn('Error estimating fee', e);
+        console.warn('Unable to estimate fee', e);
       }
 
       maxTransferable = maxTransferable.sub(new BN(estimatedFee));
@@ -2051,7 +2105,7 @@ export default class KoniExtension {
   private getAccountMeta ({ address }: RequestAccountMeta): ResponseAccountMeta {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find account'));
 
     return {
       meta: pair.meta
@@ -2076,7 +2130,7 @@ export default class KoniExtension {
 
         if (exists) {
           if (exists.type === (isEthereum ? 'ethereum' : 'sr25519')) {
-            return [{ code: AccountExternalErrorCode.INVALID_ADDRESS, message: 'Account exists' }];
+            return [{ code: AccountExternalErrorCode.INVALID_ADDRESS, message: t('Account exists') }];
           }
         }
       } catch (e) {
@@ -2168,7 +2222,7 @@ export default class KoniExtension {
     const addresses: string[] = [];
 
     if (!accounts.length) {
-      throw new Error('No accounts to import');
+      throw new Error(t("Can't find an account. Please try again"));
     }
 
     const slugMap: Record<string, string> = {};
@@ -2277,7 +2331,7 @@ export default class KoniExtension {
       if (!keyringPair) {
         return {
           success: false,
-          errors: [{ code: AccountExternalErrorCode.KEYRING_ERROR, message: 'Invalid keyring' }]
+          errors: [{ code: AccountExternalErrorCode.KEYRING_ERROR, message: t('Cannot create account') }]
         };
       }
 
@@ -2295,6 +2349,10 @@ export default class KoniExtension {
           resolve();
         });
       });
+
+      if (this.#alwaysLock) {
+        this.keyringLock();
+      }
 
       return {
         errors: [],
@@ -2419,7 +2477,7 @@ export default class KoniExtension {
   private qrSignSubstrate ({ address, data, networkKey }: RequestQrSignSubstrate): ResponseQrSignSubstrate {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find pair');
+    assert(pair, t('Unable to find account'));
 
     if (pair.isLocked) {
       keyring.unlockPair(pair.address);
@@ -2442,13 +2500,13 @@ export default class KoniExtension {
     const network: _ChainInfo | null = this.getNetworkJsonByChainId(chainId);
 
     if (!network) {
-      throw new Error('Cannot find network');
+      throw new Error(t('Cannot find network'));
     }
 
     const pair = keyring.getPair(address);
 
     if (!pair) {
-      throw Error('Unable to find pair');
+      throw Error(t('Unable to find account'));
     }
 
     if (pair.isLocked) {
@@ -2469,7 +2527,7 @@ export default class KoniExtension {
       const tx: QrTransaction | null = createTransactionFromRLP(message);
 
       if (!tx) {
-        throw new Error(`Cannot create tx from ${message}`);
+        throw new Error(t('Failed to decode data. Please use a valid QR code'));
       }
 
       const txObject: TransactionConfig = {
@@ -2846,12 +2904,16 @@ export default class KoniExtension {
       console.error(e);
 
       return {
-        errors: [(e as Error).message],
+        errors: [t((e as Error).message)],
         status: false
       };
     }
 
     this.#koniState.updateKeyringState();
+
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
 
     return {
       status: true,
@@ -2904,9 +2966,7 @@ export default class KoniExtension {
   // Lock wallet
 
   private keyringLock (): void {
-    keyring.lockAll();
-
-    this.#koniState.updateKeyringState();
+    this.#koniState.keyringService.lock();
     clearTimeout(this.#lockTimeOut);
   }
 
@@ -2942,7 +3002,7 @@ export default class KoniExtension {
   private signingApprovePasswordV2 ({ id }: RequestSigningApprovePasswordV2): boolean {
     const queued = this.#koniState.getSignRequest(id);
 
-    assert(queued, 'Unable to find request');
+    assert(queued, t('Unable to proceed. Please try again'));
 
     const { reject, request, resolve } = queued;
     const pair = keyring.getPair(queued.account.address);
@@ -2953,7 +3013,7 @@ export default class KoniExtension {
     const { address } = pair;
 
     if (!pair) {
-      reject(new Error('Unable to find pair'));
+      reject(new Error(t('Unable to find account')));
 
       return false;
     }
@@ -2964,7 +3024,7 @@ export default class KoniExtension {
 
     const { payload } = request;
 
-    const registry = new TypeRegistry();
+    let registry = new TypeRegistry();
 
     let isEvm = false;
 
@@ -2982,18 +3042,34 @@ export default class KoniExtension {
 
       const [, chainInfo] = this.#koniState.findNetworkKeyByGenesisHash(payload.genesisHash);
 
+      if (chainInfo && _API_OPTIONS_CHAIN_GROUP.avail.includes(chainInfo.slug)) {
+        const isChainActive = this.#koniState.getChainStateByKey(chainInfo.slug).active;
+
+        if (!isChainActive) {
+          reject(new Error('Unable to sign'));
+
+          return false;
+        } else {
+          registry = this.#koniState.getSubstrateApi(chainInfo.slug).api.registry as unknown as TypeRegistry;
+        }
+      }
+
       if (chainInfo) {
         isEvm = _isChainEvmCompatible(chainInfo);
       }
     }
 
-    const result = request.sign(registry, pair);
+    const result = request.sign(registry as unknown as TypeRegistry, pair);
 
     resolve({
       id,
       // In case evm chain, must be cut 2 character after 0x
       signature: isEvm ? `0x${result.signature.slice(4)}` : result.signature
     });
+
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
 
     return true;
   }
@@ -3029,7 +3105,7 @@ export default class KoniExtension {
         }
 
         if (!index) {
-          throw Error('Invalid derive path');
+          throw Error(t('Invalid derive path'));
         }
 
         meta.suri = `//${index}`;
@@ -3104,6 +3180,10 @@ export default class KoniExtension {
       this._addAddressToAuthList(address, true);
     });
 
+    if (this.#alwaysLock) {
+      this.keyringLock();
+    }
+
     return true;
   }
 
@@ -3136,7 +3216,7 @@ export default class KoniExtension {
       }
 
       if (!index) {
-        throw Error('Invalid derive path');
+        throw Error(t('Invalid derive path'));
       }
 
       meta.suri = `//${index}`;
@@ -3349,7 +3429,7 @@ export default class KoniExtension {
   }
 
   private connectWCSubscribe (id: string, port: chrome.runtime.Port): WalletConnectSessionRequest[] {
-    const cb = createSubscription<'pri(walletConnect.requests.subscribe)'>(id, port);
+    const cb = createSubscription<'pri(walletConnect.requests.connect.subscribe)'>(id, port);
     const subscription = this.#koniState.requestService.connectWCSubject.subscribe((requests: WalletConnectSessionRequest[]): void =>
       cb(requests)
     );
@@ -3495,6 +3575,38 @@ export default class KoniExtension {
     return true;
   }
 
+  private WCNotSupportSubscribe (id: string, port: chrome.runtime.Port): WalletConnectNotSupportRequest[] {
+    const cb = createSubscription<'pri(walletConnect.requests.notSupport.subscribe)'>(id, port);
+    const subscription = this.#koniState.requestService.notSupportWCSubject.subscribe((requests: WalletConnectNotSupportRequest[]): void =>
+      cb(requests)
+    );
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+      subscription.unsubscribe();
+    });
+
+    return this.#koniState.requestService.allNotSupportWCRequests;
+  }
+
+  private approveWalletConnectNotSupport ({ id }: RequestApproveWalletConnectNotSupport): boolean {
+    const request = this.#koniState.requestService.getNotSupportWCRequest(id);
+
+    request.resolve();
+
+    return true;
+  }
+
+  private rejectWalletConnectNotSupport ({ id }: RequestRejectWalletConnectNotSupport): boolean {
+    const request = this.#koniState.requestService.getNotSupportWCRequest(id);
+
+    request.reject(new Error('USER_REJECTED'));
+
+    return true;
+  }
+
+  /// Manta
+
   private async enableMantaPay ({ address, password }: MantaPayEnableParams): Promise<MantaPayEnableResponse> { // always takes the current account
     function timeout () {
       return new Promise((resolve) => setTimeout(resolve, 1500));
@@ -3515,7 +3627,7 @@ export default class KoniExtension {
 
       this.#skipAutoLock = true;
       await this.saveCurrentAccountAddress({ address });
-      const unsubSyncProgress = await this.#koniState.chainService.mantaPay.subscribeSyncProgress();
+      const unsubSyncProgress = await this.#koniState.chainService?.mantaPay?.subscribeSyncProgress();
 
       console.debug('Start initial sync for MantaPay');
 
@@ -3524,13 +3636,13 @@ export default class KoniExtension {
           console.debug('Finished initial sync for MantaPay');
 
           this.#skipAutoLock = false;
-          unsubSyncProgress();
+          unsubSyncProgress && unsubSyncProgress();
         })
         .catch((e) => {
           console.error('Error syncing MantaPay', e);
 
           this.#skipAutoLock = false;
-          unsubSyncProgress();
+          unsubSyncProgress && unsubSyncProgress();
         });
 
       return {
@@ -3555,13 +3667,13 @@ export default class KoniExtension {
   }
 
   private async initSyncMantaPay (address: string) {
-    if (this.#koniState.chainService.mantaPay.getSyncState().isSyncing) {
+    if (this.#koniState.chainService?.mantaPay?.getSyncState().isSyncing) {
       return;
     }
 
     this.#skipAutoLock = true;
     await this.saveCurrentAccountAddress({ address });
-    const unsubSyncProgress = await this.#koniState.chainService.mantaPay.subscribeSyncProgress();
+    const unsubSyncProgress = await this.#koniState.chainService?.mantaPay?.subscribeSyncProgress();
 
     console.debug('Start initial sync for MantaPay');
 
@@ -3570,9 +3682,9 @@ export default class KoniExtension {
         console.debug('Finished initial sync for MantaPay');
 
         this.#skipAutoLock = false;
-        unsubSyncProgress();
+        unsubSyncProgress && unsubSyncProgress();
         // make sure the sync state is set, just in case it gets unsubscribed
-        this.#koniState.chainService.mantaPay.setSyncState({
+        this.#koniState.chainService?.mantaPay?.setSyncState({
           progress: 100,
           isSyncing: false
         });
@@ -3581,8 +3693,8 @@ export default class KoniExtension {
         console.error('Error syncing MantaPay', e);
 
         this.#skipAutoLock = false;
-        unsubSyncProgress();
-        this.#koniState.chainService.mantaPay.setSyncState({
+        unsubSyncProgress && unsubSyncProgress();
+        this.#koniState.chainService?.mantaPay?.setSyncState({
           progress: 0,
           isSyncing: false
         });
@@ -3613,7 +3725,7 @@ export default class KoniExtension {
   private subscribeMantaPaySyncState (id: string, port: chrome.runtime.Port): MantaPaySyncState {
     const cb = createSubscription<'pri(mantaPay.subscribeSyncingState)'>(id, port);
 
-    const syncingStateSubscription = this.#koniState.subscribeMantaPaySyncState().subscribe({
+    const syncingStateSubscription = this.#koniState.subscribeMantaPaySyncState()?.subscribe({
       next: (rs) => {
         cb(rs);
       }
@@ -3625,7 +3737,11 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return this.#koniState.chainService.mantaPay.getSyncState();
+    return this.#koniState.chainService?.mantaPay?.getSyncState() || {
+      isSyncing: false,
+      progress: 0,
+      needManualSync: false
+    };
   }
 
   /// Metadata
@@ -3639,16 +3755,30 @@ export default class KoniExtension {
     };
   }
 
+  private async resolveDomainByAddress (request: ResolveDomainRequest) {
+    const chainApi = this.#koniState.getSubstrateApi(request.chain);
+
+    return await resolveAzeroDomainToAddress(request.domain, request.chain, chainApi.api);
+  }
+
+  private async resolveAddressByDomain (request: ResolveAddressToDomainRequest) {
+    const chainApi = this.#koniState.getSubstrateApi(request.chain);
+
+    return await resolveAzeroAddressToDomain(request.address, request.chain, chainApi.api);
+  }
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     clearTimeout(this.#lockTimeOut);
 
-    this.#lockTimeOut = setTimeout(() => {
-      if (!this.#skipAutoLock) {
-        this.keyringLock();
-      }
-    }, this.#timeAutoLock * 60 * 1000);
+    if (this.#timeAutoLock > 0) {
+      this.#lockTimeOut = setTimeout(() => {
+        if (!this.#skipAutoLock) {
+          this.keyringLock();
+        }
+      }, this.#timeAutoLock * 60 * 1000);
+    }
 
     switch (type) {
       /// Clone from PolkadotJs
@@ -3767,12 +3897,16 @@ export default class KoniExtension {
         return this.saveBrowserConfirmationType(request as BrowserConfirmationType);
       case 'pri(settings.saveAutoLockTime)':
         return this.setAutoLockTime(request as RequestChangeTimeAutoLock);
+      case 'pri(settings.saveUnlockType)':
+        return this.setUnlockType(request as RequestUnlockType);
       case 'pri(settings.saveEnableChainPatrol)':
         return this.setEnableChainPatrol(request as RequestChangeEnableChainPatrol);
       case 'pri(settings.saveShowZeroBalance)':
         return this.setShowZeroBalance(request as RequestChangeShowZeroBalance);
       case 'pri(settings.saveLanguage)':
         return this.setLanguage(request as RequestChangeLanguage);
+      case 'pri(settings.saveShowBalance)':
+        return this.setShowBalance(request as RequestChangeShowBalance);
 
       case 'pri(price.getPrice)':
         return await this.getPrice();
@@ -3870,6 +4004,11 @@ export default class KoniExtension {
       case 'pri(accounts.subscribeAddresses)':
         return this.subscribeAddresses(id, port);
 
+      case 'pri(accounts.resolveDomainToAddress)':
+        return await this.resolveDomainByAddress(request as ResolveDomainRequest);
+      case 'pri(accounts.resolveAddressToDomain)':
+        return await this.resolveAddressByDomain(request as ResolveAddressToDomainRequest);
+
       // ChainService
       case 'pri(chainService.subscribeChainInfoMap)':
         return this.subscribeChainInfoMap(id, port);
@@ -3881,6 +4020,8 @@ export default class KoniExtension {
         return this.getSupportedSmartContractTypes();
       case 'pri(chainService.enableChain)':
         return await this.enableChain(request as EnableChainParams);
+      case 'pri(chainService.reconnectChain)':
+        return await this.reconnectChain(request as string);
       case 'pri(chainService.disableChain)':
         return await this.disableChain(request as string);
       case 'pri(chainService.removeChain)':
@@ -4052,7 +4193,7 @@ export default class KoniExtension {
       /// Wallet Connect
       case 'pri(walletConnect.connect)':
         return this.connectWalletConnect(request as RequestConnectWalletConnect);
-      case 'pri(walletConnect.requests.subscribe)':
+      case 'pri(walletConnect.requests.connect.subscribe)':
         return this.connectWCSubscribe(id, port);
       case 'pri(walletConnect.session.approve)':
         return this.approveWalletConnectSession(request as RequestApproveConnectWalletSession);
@@ -4063,6 +4204,15 @@ export default class KoniExtension {
       case 'pri(walletConnect.session.disconnect)':
         return this.disconnectWalletConnectSession(request as RequestDisconnectWalletConnectSession);
 
+      // Not support
+      case 'pri(walletConnect.requests.notSupport.subscribe)':
+        return this.WCNotSupportSubscribe(id, port);
+      case 'pri(walletConnect.notSupport.approve)':
+        return this.approveWalletConnectNotSupport(request as RequestApproveWalletConnectNotSupport);
+      case 'pri(walletConnect.notSupport.reject)':
+        return this.rejectWalletConnectNotSupport(request as RequestRejectWalletConnectNotSupport);
+
+      // Manta
       case 'pri(mantaPay.enable)':
         return await this.enableMantaPay(request as MantaPayEnableParams);
       case 'pri(mantaPay.initSyncMantaPay)':

@@ -7,39 +7,33 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
+import { HiddenInput } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
-import { Button, Form, Icon, Input } from '@subwallet/react-ui';
+import { Button, Form, Icon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PaperPlaneRight, PaperPlaneTilt } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { useIsFirstRender } from 'usehooks-ts';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
-import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
-
-interface TransferFormProps extends TransactionFormBaseProps {
-  to: string;
-  destChain: string;
-  value: string;
-}
 
 type Props = ThemeProps;
 
@@ -215,14 +209,30 @@ const filterAccountFunc = (
   };
 };
 
+const hiddenFields: Array<keyof TransferParams> = ['chain'];
+const validateFields: Array<keyof TransferParams> = ['value', 'to'];
+
 const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
+  useSetCurrentPage('/transaction/send-fund');
   const { t } = useTranslation();
   const notification = useNotification();
 
-  const locationState = useLocation().state as SendFundParam;
-  const [sendFundSlug] = useState<string | undefined>(locationState?.slug);
+  const { defaultData, onDone, persistData } = useTransactionContext<TransferParams>();
+  const { defaultSlug: sendFundSlug } = defaultData;
+  const isFirstRender = useIsFirstRender();
 
-  const { asset, chain, from, onDone, setAsset, setChain, setFrom } = useContext(TransactionContext);
+  const [form] = Form.useForm<TransferParams>();
+  const formDefault = useMemo((): TransferParams => {
+    return {
+      ...defaultData
+    };
+  }, [defaultData]);
+
+  const destChain = useWatchTransaction('destChain', form, defaultData);
+  const transferAmount = useWatchTransaction('value', form, defaultData);
+  const from = useWatchTransaction('from', form, defaultData);
+  const chain = useWatchTransaction('chain', form, defaultData);
+  const asset = useWatchTransaction('asset', form, defaultData);
 
   const { chainInfoMap, chainStateMap } = useSelector((root) => root.chainStore);
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
@@ -245,28 +255,15 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone, handleTransferAll);
 
-  const [form] = Form.useForm<TransferFormProps>();
-  const formDefault = useMemo((): TransferFormProps => {
-    return {
-      from: from,
-      chain: chain,
-      destChain: '',
-      asset: '',
-      to: '',
-      value: ''
-    };
-  }, [chain, from]);
-
-  const destChain = Form.useWatch('destChain', form);
-  const transferAmount = Form.useWatch('value', form);
-
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
   }, [chainInfoMap, asset, xcmRefMap]);
 
   const currentChainAsset = useMemo(() => {
-    return asset ? assetRegistry[asset] : undefined;
-  }, [assetRegistry, asset]);
+    const _asset = isFirstRender ? defaultData.asset : asset;
+
+    return _asset ? assetRegistry[_asset] : undefined;
+  }, [isFirstRender, defaultData.asset, asset, assetRegistry]);
 
   const decimals = useMemo(() => {
     return currentChainAsset ? _getAssetDecimals(currentChainAsset) : 0;
@@ -311,7 +308,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
 
     if (!isAddress(_recipientAddress)) {
-      return Promise.reject(t('Invalid Recipient address'));
+      return Promise.reject(t('Invalid recipient address'));
     }
 
     const { chain, destChain, from, to } = form.getFieldsValue();
@@ -342,7 +339,11 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
       if (isDestChainEvmCompatible !== isEthereumAddress(to)) {
         // todo: change message later
-        return Promise.reject(t(`The recipient address must be ${isDestChainEvmCompatible ? 'EVM' : 'substrate'} type`));
+        if (isDestChainEvmCompatible) {
+          return Promise.reject(t('The recipient address must be EVM type'));
+        } else {
+          return Promise.reject(t('The recipient address must be Substrate type'));
+        }
       }
     }
 
@@ -378,14 +379,23 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return Promise.resolve();
   }, [decimals, maxTransfer, t]);
 
-  const onValuesChange: FormCallbacks<TransferFormProps>['onValuesChange'] = useCallback(
-    (part: Partial<TransferFormProps>, values: TransferFormProps) => {
+  const onValuesChange: FormCallbacks<TransferParams>['onValuesChange'] = useCallback(
+    (part: Partial<TransferParams>, values: TransferParams) => {
       const validateField: string[] = [];
 
       if (part.from) {
-        setFrom(part.from);
         setForceUpdateMaxValue(undefined);
         form.resetFields(['asset']);
+        // Because cache data, so next data may be same with default data
+        form.setFields([{ name: 'asset', value: '' }]);
+      }
+
+      if (part.destChain) {
+        setForceUpdateMaxValue(isTransferAll ? {} : undefined);
+
+        if (values.to) {
+          validateField.push('to');
+        }
       }
 
       if (part.asset) {
@@ -404,31 +414,23 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           validateField.push('to');
         }
 
-        setChain(chain);
-        setAsset(part.asset);
         setIsTransferAll(false);
         setForceUpdateMaxValue(undefined);
-      }
-
-      if (part.destChain) {
-        setForceUpdateMaxValue(isTransferAll ? {} : undefined);
-
-        if (values.to) {
-          validateField.push('to');
-        }
       }
 
       if (validateField.length) {
         form.validateFields(validateField).catch(noop);
       }
+
+      persistData(form.getFieldsValue());
     },
-    [setFrom, form, assetRegistry, setChain, setAsset, isTransferAll]
+    [form, assetRegistry, isTransferAll, persistData]
   );
 
   // Submit transaction
-  const onSubmit: FormCallbacks<TransferFormProps>['onFinish'] = useCallback((values: TransferFormProps) => {
+  const onSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
     setLoading(true);
-    const { destChain, to, value } = values;
+    const { asset, chain, destChain, from, to, value } = values;
 
     let sendPromise: Promise<SWTransactionResponse>;
 
@@ -505,7 +507,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         })
       ;
     }, 300);
-  }, [accounts, from, assetRegistry, asset, chain, notification, t, isTransferAll, onSuccess, onError]);
+  }, [accounts, assetRegistry, notification, t, isTransferAll, onSuccess, onError]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
@@ -530,7 +532,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         chain: tokenInfo.originChain,
         destChain: tokenInfo.originChain
       });
-      setChain(tokenInfo.originChain);
     };
 
     if (tokenItems.length) {
@@ -560,7 +561,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         updateInfoWithTokenSlug(tokenItems[0].slug);
       }
     }
-  }, [accounts, tokenItems, assetRegistry, form, setChain, chainInfoMap]);
+  }, [accounts, tokenItems, assetRegistry, form, chainInfoMap]);
 
   // Get max transfer value
   useEffect(() => {
@@ -606,6 +607,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       setIsTransferAll(true);
     }
   }, [maxTransfer, transferAmount]);
+
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
 
   return (
     <>
@@ -660,14 +664,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             </Form.Item>
           </div>
 
-          <Form.Item
-            className={'hidden'}
-            name={'chain'}
-          >
-            <Input
-              placeholder={t('value')}
-            />
-          </Form.Item>
+          <HiddenInput fields={hiddenFields} />
 
           <Form.Item
             name={'to'}
@@ -681,6 +678,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           >
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
+              allowDomain={true}
+              chain={chain}
               label={t('Send to')}
               networkGenesisHash={destChainGenesisHash}
               placeholder={t('Account address')}

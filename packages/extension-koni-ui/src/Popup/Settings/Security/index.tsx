@@ -1,19 +1,20 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { EDIT_AUTO_LOCK_TIME_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { EDIT_AUTO_LOCK_TIME_MODAL, EDIT_UNLOCK_TYPE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { saveAutoLockTime, saveCameraSetting, saveEnableChainPatrol, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { saveAutoLockTime, saveCameraSetting, saveEnableChainPatrol, saveUnlockType, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockLaminated, ShieldStar } from 'phosphor-react';
+import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockKeyOpen, LockLaminated, ShieldStar } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -27,6 +28,7 @@ enum SecurityType {
   WEBSITE_ACCESS = 'website-access',
   CAMERA_ACCESS = 'camera-access',
   AUTO_LOCK = 'auto-lock',
+  UNLOCK_TYPE = 'unlock-type',
   CHAIN_PATROL_SERVICE = 'chain-patrol-service'
 }
 
@@ -43,7 +45,8 @@ interface AutoLockOption {
   value: number;
 }
 
-const modalId = EDIT_AUTO_LOCK_TIME_MODAL;
+const editAutoLockTimeModalId = EDIT_AUTO_LOCK_TIME_MODAL;
+const editUnlockTypeModalId = EDIT_UNLOCK_TYPE_MODAL;
 
 const timeOptions = [5, 10, 15, 30, 60];
 
@@ -60,14 +63,28 @@ const Component: React.FC<Props> = (props: Props) => {
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
-  const { camera, enableChainPatrol, timeAutoLock } = useSelector((state: RootState) => state.settings);
+  const { camera, enableChainPatrol, timeAutoLock, unlockType } = useSelector((state: RootState) => state.settings);
 
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
 
-  const autoLockOptions = useMemo((): AutoLockOption[] => timeOptions.map((value) => ({
-    value: value,
-    label: t('{{time}} minutes', { replace: { time: value } })
-  })), [t]);
+  const autoLockOptions = useMemo((): AutoLockOption[] => timeOptions.map((value) => {
+    if (value > 0) {
+      return {
+        value: value,
+        label: t('{{time}} minutes', { replace: { time: value } })
+      };
+    } else if (value < 0) {
+      return {
+        value: value,
+        label: t('Required once')
+      };
+    } else {
+      return {
+        value: value,
+        label: t('Always require')
+      };
+    }
+  }), [t]);
 
   const items = useMemo((): SecurityItem[] => [
     {
@@ -81,6 +98,13 @@ const Component: React.FC<Props> = (props: Props) => {
       icon: LockLaminated,
       key: SecurityType.AUTO_LOCK,
       title: t('Wallet auto-lock'),
+      url: '',
+      disabled: false
+    },
+    {
+      icon: LockKeyOpen,
+      key: SecurityType.UNLOCK_TYPE,
+      title: t('Authenticate with password'),
       url: '',
       disabled: false
     }
@@ -149,30 +173,48 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
-  const onOpenModal = useCallback(() => {
-    activeModal(modalId);
+  const onOpenAutoLockTimeModal = useCallback(() => {
+    activeModal(editAutoLockTimeModalId);
   }, [activeModal]);
 
-  const onCloseModal = useCallback(() => {
-    inactiveModal(modalId);
+  const onOpenUnlockTypeModal = useCallback(() => {
+    activeModal(editUnlockTypeModalId);
+  }, [activeModal]);
+
+  const onCloseAutoLockTimeModal = useCallback(() => {
+    inactiveModal(editAutoLockTimeModalId);
+  }, [inactiveModal]);
+
+  const onCloseUnlockTypeModal = useCallback(() => {
+    inactiveModal(editUnlockTypeModalId);
   }, [inactiveModal]);
 
   const onClickItem = useCallback((item: SecurityItem) => {
     return () => {
       switch (item.key) {
         case SecurityType.AUTO_LOCK:
-          onOpenModal();
+          onOpenAutoLockTimeModal();
+          break;
+        case SecurityType.UNLOCK_TYPE:
+          onOpenUnlockTypeModal();
           break;
         default:
           navigate(item.url);
       }
     };
-  }, [navigate, onOpenModal]);
+  }, [navigate, onOpenAutoLockTimeModal, onOpenUnlockTypeModal]);
 
   const onSelectTime = useCallback((item: AutoLockOption) => {
     return () => {
-      inactiveModal(modalId);
+      inactiveModal(editAutoLockTimeModalId);
       saveAutoLockTime(item.value).finally(noop);
+    };
+  }, [inactiveModal]);
+
+  const onSetUnlockType = useCallback((value: WalletUnlockType) => {
+    return () => {
+      inactiveModal(editAutoLockTimeModalId);
+      saveUnlockType(value).finally(noop);
     };
   }, [inactiveModal]);
 
@@ -289,8 +331,8 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
         <SwModal
           className={className}
-          id={modalId}
-          onCancel={onCloseModal}
+          id={editAutoLockTimeModalId}
+          onCancel={onCloseAutoLockTimeModal}
           title={t('Wallet auto-lock')}
         >
           <div className='modal-body-container'>
@@ -322,6 +364,55 @@ const Component: React.FC<Props> = (props: Props) => {
                 );
               })
             }
+          </div>
+        </SwModal>
+        <SwModal
+          className={className}
+          id={editUnlockTypeModalId}
+          onCancel={onCloseUnlockTypeModal}
+          title={t('Authenticate with password')}
+        >
+          <div className='modal-body-container'>
+            <SettingItem
+              className={CN('__selection-item')}
+              key={WalletUnlockType.ALWAYS_REQUIRED}
+              name={t('Always required')}
+              onPressItem={onSetUnlockType(WalletUnlockType.ALWAYS_REQUIRED)}
+              rightItem={
+                unlockType === WalletUnlockType.ALWAYS_REQUIRED
+                  ? (
+                    <Icon
+                      className='__right-icon'
+                      iconColor='var(--icon-color)'
+                      phosphorIcon={CheckCircle}
+                      size='sm'
+                      type='phosphor'
+                      weight='fill'
+                    />
+                  )
+                  : null
+              }
+            />
+            <SettingItem
+              className={CN('__selection-item')}
+              key={WalletUnlockType.WHEN_NEEDED}
+              name={t('When needed')}
+              onPressItem={onSetUnlockType(WalletUnlockType.WHEN_NEEDED)}
+              rightItem={
+                unlockType === WalletUnlockType.WHEN_NEEDED
+                  ? (
+                    <Icon
+                      className='__right-icon'
+                      iconColor='var(--icon-color)'
+                      phosphorIcon={CheckCircle}
+                      size='sm'
+                      type='phosphor'
+                      weight='fill'
+                    />
+                  )
+                  : null
+              }
+            />
           </div>
         </SwModal>
       </Layout.WithSubHeaderOnly>
@@ -378,6 +469,14 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '&:hover': {
         '--icon-bg-color': token['green-7']
+      }
+    },
+
+    [`.security-type-${SecurityType.UNLOCK_TYPE}`]: {
+      '--icon-bg-color': token['purple-8'],
+
+      '&:hover': {
+        '--icon-bg-color': token['purple-9']
       }
     },
 

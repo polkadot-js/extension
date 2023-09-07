@@ -1,9 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { CrowdloanParaState, MobileOS, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { getOS } from '@subwallet/extension-base/utils/environment';
+import { t } from 'i18next';
 
 import { assert, BN, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
@@ -18,6 +20,8 @@ export const isEmptyArray = (x: any) => !Array.isArray(x) || (Array.isArray(x) &
 export function isAccountAll (address?: string): boolean {
   return address === ALL_ACCOUNT_KEY;
 }
+
+export const isMobile = MobileOS.includes(getOS());
 
 export function reformatAddress (address: string, networkPrefix = 42, isEthereum = false): string {
   try {
@@ -345,7 +349,7 @@ export async function waitTimeout (ms: number) {
 }
 
 export const stripUrl = (url: string): string => {
-  assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
+  assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), t('Invalid URL for provider'));
 
   const parts = url.split('/');
 

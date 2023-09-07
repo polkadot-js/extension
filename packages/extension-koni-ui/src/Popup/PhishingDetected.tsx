@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { BackgroundExpandView, Layout } from '@subwallet/extension-koni-ui/components';
+import { useDefaultNavigate, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { passPhishingPage } from '@subwallet/extension-koni-ui/messaging';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { noop } from '@subwallet/extension-koni-ui/utils';
@@ -11,9 +12,6 @@ import { ShieldSlash, XCircle } from 'phosphor-react';
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router';
 import styled, { useTheme } from 'styled-components';
-
-import { Layout } from '../components';
-import useTranslation from '../hooks/common/useTranslation';
 
 interface Props {
   className?: string;
@@ -73,6 +71,7 @@ function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
       >
         {t('I trust this site')}
       </div>
+      <BackgroundExpandView />
     </Layout.WithSubHeaderOnly>
   );
 }
@@ -82,6 +81,7 @@ const PhishingDetected = styled(_PhishingDetected)<Props>(({ theme }) => {
 
   return ({
     position: 'relative',
+    border: `1px solid ${token.colorBgInput}`,
 
     '.ant-sw-screen-layout-body': {
       display: 'flex',

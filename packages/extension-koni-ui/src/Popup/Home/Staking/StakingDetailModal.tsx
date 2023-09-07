@@ -9,13 +9,15 @@ import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
+import { DEFAULT_STAKE_PARAMS, DEFAULT_UN_STAKE_PARAMS, STAKE_TRANSACTION, UN_STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
 import { useGetAccountByAddress, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
+import useGetAccountsByStaking from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetAccountsByStaking';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/utils';
+import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -24,6 +26,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
   nominatorMetadata: NominatorMetadata;
@@ -59,6 +62,10 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
   const account = useGetAccountByAddress(staking.address);
 
+  const stakingAccounts = useGetAccountsByStaking(chain, type);
+  const [, setStakeStorage] = useLocalStorage(STAKE_TRANSACTION, DEFAULT_STAKE_PARAMS);
+  const [, setUnStakeStorage] = useLocalStorage(UN_STAKE_TRANSACTION, DEFAULT_UN_STAKE_PARAMS);
+
   const stakingTypeNameMap: Record<string, string> = {
     nominated: t('Nominated'),
     pooled: t('Pooled')
@@ -67,14 +74,34 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const onClickStakeMoreBtn = useCallback(() => {
     inactiveModal(STAKING_DETAIL_MODAL_ID);
     setTimeout(() => {
-      navigate(`/transaction/stake/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
+      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+      setStakeStorage({
+        ...DEFAULT_STAKE_PARAMS,
+        from: address,
+        defaultChain: nominatorMetadata.chain,
+        defaultType: nominatorMetadata.type,
+        type: nominatorMetadata.type,
+        chain: nominatorMetadata.chain
+      });
+      navigate('/transaction/stake');
     }, 300);
-  }, [inactiveModal, navigate, nominatorMetadata]);
+  }, [currentAccount, inactiveModal, navigate, nominatorMetadata, setStakeStorage]);
 
   const onClickUnstakeBtn = useCallback(() => {
     inactiveModal(STAKING_DETAIL_MODAL_ID);
-    setTimeout(() => navigate(`/transaction/unstake/${nominatorMetadata.type}/${nominatorMetadata.chain}`), 300);
-  }, [inactiveModal, navigate, nominatorMetadata]);
+    setTimeout(() => {
+      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+      setUnStakeStorage({
+        ...DEFAULT_UN_STAKE_PARAMS,
+        from: address,
+        type: nominatorMetadata.type,
+        chain: nominatorMetadata.chain
+      });
+      navigate('/transaction/unstake');
+    }, 300);
+  }, [currentAccount, inactiveModal, navigate, nominatorMetadata, setUnStakeStorage]);
 
   const onClickMoreAction = useCallback(() => {
     activeModal(MORE_ACTION_MODAL);
@@ -212,6 +239,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     >
       <MetaInfo>
         <MetaInfo.Account
+          accounts={isAccountAll(address) ? stakingAccounts : undefined}
           address={address}
           label={t('Account')}
           name={account?.name}
@@ -256,19 +284,19 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           value={String(parseFloat(activeStake) + parseFloat(staking.unlockingBalance || '0'))}
         />
 
-        {<MetaInfo.Number
+        <MetaInfo.Number
           decimals={decimals}
           label={t('Active staked')}
           suffix={staking.nativeToken}
           value={activeStake}
-        />}
+        />
 
-        {<MetaInfo.Number
+        <MetaInfo.Number
           decimals={decimals}
           label={t('Unstaked')}
           suffix={staking.nativeToken}
           value={staking.unlockingBalance || '0'}
-        />}
+        />
 
         <MetaInfo.Chain
           chain={staking.chain}

@@ -3,12 +3,14 @@
 
 import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AZERO_DOMAIN_CONTRACTS } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { collectionApiFromArtZero, collectionDetailApiFromArtZero, externalUrlOnArtZero, ipfsApiFromArtZero, itemImageApiFromArtZero } from '@subwallet/extension-base/koni/api/nft/wasm_nft/utils';
-import { getPSP34ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
+import { getPSP34ContractPromise, isAzeroDomainNft, isPinkRoboNft } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { isUrl } from '@subwallet/extension-base/utils';
 import axios from 'axios';
 import fetch from 'cross-fetch';
 
@@ -85,6 +87,10 @@ export class WasmNftApi extends BaseNftApi {
   private parseFeaturedTokenUri (tokenUri: string) {
     if (!tokenUri || tokenUri.length === 0) {
       return undefined;
+    }
+
+    if (isUrl(tokenUri)) {
+      return tokenUri;
     }
 
     if (tokenUri.startsWith('/ipfs/')) {
@@ -292,23 +298,27 @@ export class WasmNftApi extends BaseNftApi {
 
   private async processOffChainMetadata (contractPromise: ContractPromise, address: string, tokenId: string, isFeatured: boolean): Promise<NftItem> {
     const nftItem: NftItem = { chain: '', collectionId: '', id: '', owner: '', name: tokenId };
+    const _isFeatured = isFeatured && !AZERO_DOMAIN_CONTRACTS.includes(contractPromise.address.toString());
 
-    const _tokenUri = await contractPromise.query['psp34Traits::tokenUri'](address, { gasLimit: getDefaultWeightV2(this.substrateApi?.api as ApiPromise) }, tokenId);
+    const _tokenUri = await contractPromise.query[isPinkRoboNft(contractPromise.address.toString()) ? 'pinkMint::tokenUri' : 'psp34Traits::tokenUri'](
+      address,
+      { gasLimit: getDefaultWeightV2(this.substrateApi?.api as ApiPromise) },
+      isAzeroDomainNft(contractPromise.address.toString()) ? { bytes: tokenId } : tokenId);
 
     if (_tokenUri.output) {
       let itemDetail: Record<string, any> | boolean = false;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const _tokenUriObj = _tokenUri.output.toJSON() as Record<string, any>;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const tokenUri = (_tokenUriObj.Ok || _tokenUriObj.ok) as string;
+      const tokenUri = isPinkRoboNft(contractPromise.address.toString()) ? _tokenUriObj.ok.ok as string : (_tokenUriObj.Ok || _tokenUriObj.ok) as string;
 
-      if (isFeatured) {
+      if (_isFeatured) {
         const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri);
 
         if (parsedTokenUri) {
           const resp = await fetch(`${ipfsApiFromArtZero(this.chain)}?input=${parsedTokenUri}`);
 
-          itemDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
+          itemDetail = (resp && resp.ok && await resp.json()) as Record<string, any>;
         }
       } else {
         const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri);
@@ -318,6 +328,11 @@ export class WasmNftApi extends BaseNftApi {
           const resp = await fetch(detailUrl);
 
           itemDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
+
+          if (AZERO_DOMAIN_CONTRACTS.includes(contractPromise.address.toString())) {
+            // @ts-ignore
+            itemDetail = itemDetail?.metadata as Record<string, any>;
+          }
         }
       }
 
@@ -331,7 +346,7 @@ export class WasmNftApi extends BaseNftApi {
 
       const rawImageSrc = itemDetail.image ? itemDetail.image as string : itemDetail.image_url as string;
 
-      if (isFeatured) {
+      if (_isFeatured) {
         nftItem.image = await this.parseFeaturedNftImage(rawImageSrc);
         nftItem.externalUrl = externalUrlOnArtZero(this.chain);
       } else {
@@ -339,7 +354,7 @@ export class WasmNftApi extends BaseNftApi {
       }
 
       const propertiesMap: Record<string, any> = {};
-      const traitList = itemDetail.attributes ? itemDetail.attributes as Record<string, any>[] : itemDetail.traits as Record<string, any>[];
+      const traitList = (itemDetail.attributes || itemDetail.traits) as Record<string, any>[];
 
       if (traitList) {
         traitList.forEach((traitMap) => {
@@ -392,8 +407,12 @@ export class WasmNftApi extends BaseNftApi {
           if (_tokenByIndexResp.output) {
             const rawTokenId = _tokenByIndexResp.output.toHuman() as Record<string, any>;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            const tokenIdObj = (rawTokenId.Ok.Ok || rawTokenId.ok.ok) as Record<string, string>; // capital O, not normal o
+            let tokenIdObj = (rawTokenId.Ok.Ok || rawTokenId.ok.ok) as Record<string, string>; // capital O, not normal o
             const tokenId = Object.values(tokenIdObj)[0].replaceAll(',', '');
+
+            if (isAzeroDomainNft(contractPromise.address.toString())) {
+              tokenIdObj = { bytes: tokenId };
+            }
 
             nftIds.push(tokenId);
 
@@ -401,7 +420,12 @@ export class WasmNftApi extends BaseNftApi {
 
             try {
               if (isAttributeOnChain) {
-                const _tokenUri = await contractPromise.query['psp34Traits::getAttributes'](address, { gasLimit: getDefaultWeightV2(this.substrateApi?.api as ApiPromise) }, tokenIdObj, ['metadata']);
+                const _tokenUri = await contractPromise.query['psp34Traits::getAttributes'](
+                  address,
+                  { gasLimit: getDefaultWeightV2(this.substrateApi?.api as ApiPromise) },
+                  tokenIdObj,
+                  ['metadata']
+                );
                 const tokenUriObj = _tokenUri.output?.toJSON() as Record<string, unknown>;
 
                 tokenUri = ((tokenUriObj.ok || tokenUriObj.Ok) as string[])[0];

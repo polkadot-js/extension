@@ -5,7 +5,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
-import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { ReduxStatus, RequestState } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: RequestState = {
@@ -13,7 +13,10 @@ const initialState: RequestState = {
   metadataRequest: {},
   signingRequest: {},
   transactionRequest: {},
+
+  // WalletConnect
   connectWCRequest: {},
+  notSupportWCRequest: {},
 
   // Type of confirmation requets
   addNetworkRequest: {},
@@ -38,7 +41,8 @@ export const CONFIRMATIONS_FIELDS: Array<keyof RequestState> = [
   'switchNetworkRequest',
   'evmSignatureRequest',
   'evmSendTransactionRequest',
-  'connectWCRequest'
+  'connectWCRequest',
+  'notSupportWCRequest'
 ];
 
 export interface ConfirmationQueueItem {
@@ -52,7 +56,9 @@ const readyMap = {
   updateAuthorizeRequests: false,
   updateMetadataRequests: false,
   updateSigningRequests: false,
-  updateConfirmationRequests: false
+  updateConfirmationRequests: false,
+  updateConnectWalletConnect: false,
+  updateNotSupportWalletConnect: false
 };
 
 function computeStateSummary (state: RequestState) {
@@ -106,7 +112,13 @@ const requestStateSlice = createSlice({
     },
     updateConnectWCRequests (state, { payload }: PayloadAction<Record<string, WalletConnectSessionRequest>>) {
       state.connectWCRequest = payload;
-      readyMap.updateConfirmationRequests = true;
+      readyMap.updateConnectWalletConnect = true;
+      computeStateSummary(state);
+    },
+
+    updateWCNotSupportRequests (state, { payload }: PayloadAction<Record<string, WalletConnectNotSupportRequest>>) {
+      state.notSupportWCRequest = payload;
+      readyMap.updateNotSupportWalletConnect = true;
       computeStateSummary(state);
     }
   }

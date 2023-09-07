@@ -114,7 +114,7 @@ export class MantaPrivateHandler {
 
     const baseWallet = await BaseWallet.init({
       apiEndpoint: providerUrl,
-      loggingEnabled: false,
+      loggingEnabled: true,
       provingFilePath: './manta-pay/proving',
       parametersFilePath: './manta-pay/parameters',
       saveStorageStateToLocal: this.saveLedgerState.bind(this),

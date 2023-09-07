@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
+import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { resetWallet } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
@@ -22,6 +23,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const notify = useNotification();
+  const { unlock } = useUILock();
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -48,6 +50,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 message: rs.errors[0],
                 type: 'error'
               });
+            } else {
+              unlock();
             }
           })
           .catch((e: Error) => {
@@ -62,7 +66,7 @@ const Component: React.FC<Props> = (props: Props) => {
           });
       }, 300);
     };
-  }, [notify, onClose]);
+  }, [notify, onClose, unlock]);
 
   return (
     <SwModal

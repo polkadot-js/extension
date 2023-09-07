@@ -22,7 +22,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const chainInfoList = useChainInfoWithState();
 
   const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
-    const connectSymbol = (chainInfo.connectionStatus === _ChainConnectionStatus.CONNECTED) ? '__connected__' : '__disconnected__';
+    const connectSymbol = `__${chainInfo.connectionStatus}__`;
 
     return (
       <NetworkItem

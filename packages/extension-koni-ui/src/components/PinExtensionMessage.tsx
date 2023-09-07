@@ -1,23 +1,44 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
+import { detectTranslate } from '@subwallet/extension-base/utils';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, Image } from '@subwallet/react-ui';
+import { Icon as SwIcon, Image, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { PushPinSimple, PuzzlePiece } from 'phosphor-react';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
+
+type IconProps = Pick<SwIconProps, 'phosphorIcon'>;
+
+const Icon: React.FC<IconProps> = (props: IconProps) => {
+  const { phosphorIcon } = props;
+
+  return (
+    <SwIcon
+      className='custom-icon'
+      phosphorIcon={phosphorIcon}
+      size='sm'
+      weight='fill'
+    />
+  );
+};
+
+const specialLanguages: LanguageType[] = ['ja'];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const { t } = useTranslation();
+  const { language } = useSelector((state) => state.settings);
 
   return (
-    <div className={CN(className)}>
+    <div className={CN(className, { 'special-language': specialLanguages.includes(language) })}>
       <div className='message-header'>
         <div className='message-image'>
           <Image
@@ -31,17 +52,14 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
       </div>
       <div className='message-sub-content'>
-        <span>Click&nbsp;</span>
-        <Icon
-          phosphorIcon={PuzzlePiece}
-          size='sm'
-          weight='fill'
-        />
-        <span>&nbsp;select SubWallet and then&nbsp;</span>
-        <Icon
-          phosphorIcon={PushPinSimple}
-          size='sm'
-          weight='fill'
+        <Trans
+          components={{
+            extension: <Icon phosphorIcon={PuzzlePiece} />,
+            pin: (
+              <Icon phosphorIcon={PushPinSimple} />
+            )
+          }}
+          i18nKey={detectTranslate('Click <extension/> select SubWallet and then <pin/>')}
         />
       </div>
     </div>
@@ -77,10 +95,20 @@ const PinExtensionMessage = styled(Component)<Props>(({ theme: { token } }: Prop
     '.message-sub-content': {
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
       marginTop: token.marginSM
+    },
+
+    '.custom-icon': {
+      verticalAlign: '-0.15em'
+    },
+
+    '&.special-language': {
+      padding: token.paddingLG,
+      width: token.sizeXL * 12.5,
+
+      '.message-sub-content': {
+        textAlign: 'end'
+      }
     }
   };
 });

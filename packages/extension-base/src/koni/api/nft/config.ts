@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MODULE_SUPPORT } from '@subwallet/extension-base/utils';
+import { RuntimeInfo } from '@subwallet/extension-base/utils';
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account-rmrk1/';
 
@@ -37,17 +37,17 @@ export const UNIQUE_IPFS_GATEWAY = 'https://ipfs.unique.network/ipfs/';
 
 export const NFT_STORAGE_GATEWAY = 'https://nftstorage.link/ipfs/';
 
-export const IPFS_IO_GATEWAY = 'https://ipfs.io/ipfs/';
+export const IPFS_W3S_LINK = 'https://w3s.link/ipfs/';
 
 export const GATEWAY_IPFS_IO = 'https://gateway.ipfs.io/ipfs/';
 
+export const IPFS_IO = 'https://ipfs.io/ipfs/';
+
 export const DWEB_LINK = 'https://dweb.link/ipfs/';
 
-export const IPFS_GATEWAY_CLOUD = 'https://ipfs-gateway.cloud/ipfs/';
+export const IPFS_GATEWAY_4EVERLAND = 'https://4everland.io/ipfs/';
 
 export const IPFS_FLEEK = 'https://ipfs.fleek.co/ipfs/';
-
-export const IPFS_TELOS_MIAMI = 'https://ipfs.telos.miami/ipfs';
 
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
@@ -107,10 +107,6 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
 
 const RANDOM_IPFS_GATEWAY_SETTING = [
   {
-    provider: IPFS_IO_GATEWAY,
-    weight: 0 // Not stable
-  },
-  {
     provider: CF_IPFS_GATEWAY,
     weight: 4
   },
@@ -123,31 +119,35 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
     weight: 1 // Rate limit too low
   },
   {
-    provider: GATEWAY_IPFS_IO,
-    weight: 5
-  },
-  {
     provider: DWEB_LINK,
     weight: 5
   },
   {
-    provider: IPFS_GATEWAY_CLOUD,
-    weight: 0 // Deceptive site warning
+    provider: GATEWAY_IPFS_IO,
+    weight: 5
   },
   {
-    provider: IPFS_TELOS_MIAMI,
-    weight: 0
+    provider: IPFS_IO,
+    weight: 5
+  },
+  {
+    provider: NFT_STORAGE_GATEWAY,
+    weight: 50
   }
 ];
 
-if (!MODULE_SUPPORT.CORS) {
-  RANDOM_IPFS_GATEWAY_SETTING.push({
-    provider: NFT_STORAGE_GATEWAY,
-    weight: 50
-  });
+if (!RuntimeInfo.protocol || (RuntimeInfo.protocol && !RuntimeInfo.protocol.startsWith('http'))) {
   RANDOM_IPFS_GATEWAY_SETTING.push({
     provider: IPFS_FLEEK,
     weight: 4
+  });
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: IPFS_GATEWAY_4EVERLAND,
+    weight: 2
+  });
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: IPFS_W3S_LINK,
+    weight: 1
   });
 }
 

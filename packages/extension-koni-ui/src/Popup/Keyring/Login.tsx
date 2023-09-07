@@ -4,6 +4,7 @@
 import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -34,6 +35,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
+  const { unlock } = useUILock();
 
   const onUpdate: FormCallbacks<LoginFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { empty, error } = simpleCheckForm(allFields);
@@ -54,7 +56,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       })
         .then((data) => {
           if (!data.status) {
-            onError(data.errors[0]);
+            onError(t(data.errors[0]));
+          } else {
+            unlock();
           }
         })
         .catch((e: Error) => {
@@ -64,7 +68,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }, 500);
-  }, [onError]);
+  }, [onError, unlock, t]);
 
   const onReset = useCallback(() => {
     activeModal(RESET_WALLET_MODAL);

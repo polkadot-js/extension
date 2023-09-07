@@ -467,7 +467,6 @@ export async function generatePathForAcalaLiquidStaking (params: OptimalYieldPat
   let inputTokenFee = BN_ZERO;
 
   if (!bnInputTokenBalance.gte(bnAmount)) {
-    console.log('need xcm');
     if (params.poolInfo.altInputAssets) {
       const remainingAmount = bnAmount.sub(bnInputTokenBalance);
 
@@ -490,14 +489,12 @@ export async function generatePathForAcalaLiquidStaking (params: OptimalYieldPat
           type: YieldStepType.XCM
         });
 
-        console.log('info', altInputTokenInfo, inputTokenInfo);
-
         const xcmOriginSubstrateApi = await params.substrateApiMap[altInputTokenInfo.originChain].isReady;
 
         const xcmTransfer = await createXcmExtrinsic({
           originTokenInfo: altInputTokenInfo,
           destinationTokenInfo: inputTokenInfo,
-          sendingValue: xcmAmount.toString(),
+          sendingValue: bnAmount.toString(),
           recipient: fakeAddress,
           chainInfoMap: params.chainInfoMap,
           substrateApi: xcmOriginSubstrateApi
@@ -522,7 +519,6 @@ export async function generatePathForAcalaLiquidStaking (params: OptimalYieldPat
   const bnMintFee = new BN(mintFeeInfo.partialFee.toString());
 
   if (bnFeeTokenBalance.gte(bnMinAmountFeeToken)) {
-    console.log('paying with native token');
     if (inputTokenFee.gt(BN_ZERO)) {
       result.totalFee.push({
         slug: inputTokenSlug,
@@ -535,8 +531,6 @@ export async function generatePathForAcalaLiquidStaking (params: OptimalYieldPat
       amount: mintFeeInfo.partialFee.toString()
     });
   } else {
-    console.log('paying with input token');
-
     inputTokenFee = inputTokenFee.add(bnMintFee);
 
     result.totalFee.push({
@@ -546,4 +540,8 @@ export async function generatePathForAcalaLiquidStaking (params: OptimalYieldPat
   }
 
   return result;
+}
+
+export async function generatePathForInterlayLending (params: OptimalYieldPathParams): Promise<OptimalPathResp> {
+
 }

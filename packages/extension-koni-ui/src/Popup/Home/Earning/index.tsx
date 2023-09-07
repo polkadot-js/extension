@@ -36,20 +36,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     activeModal(STAKING_MODAL_ID);
   }, [activeModal]);
 
-  useEffect(() => {
-    const selectedPool = Object.values(poolInfo)[0];
-
-    console.log('poolInfo', selectedPool);
-    getOptimalYieldPath({
-      amount: '100000000000',
-      poolInfo: selectedPool
-    })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch(console.error);
-  }, [poolInfo]);
-
   const renderEarningItem = useCallback((item: YieldPoolInfo) => {
     return (
       <EarningItem

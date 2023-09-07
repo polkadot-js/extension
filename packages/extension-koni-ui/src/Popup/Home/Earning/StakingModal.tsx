@@ -65,8 +65,9 @@ const Component = ({ className, item }: Props) => {
 
   useEffect(() => {
     const selectedPool = Object.values(poolInfo)[0];
+
     getOptimalYieldPath({
-      amount: '',
+      amount: '100000000000',
       poolInfo: selectedPool
     })
       .then((res) => {
@@ -76,7 +77,6 @@ const Component = ({ className, item }: Props) => {
   }, [poolInfo]);
 
   const currentFrom = Form.useWatch('from', form);
-
 
   const onCloseModal = useCallback(() => {
     setStep(1);

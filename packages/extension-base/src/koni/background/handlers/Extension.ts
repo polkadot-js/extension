@@ -48,6 +48,7 @@ import { ProposalTypes } from '@walletconnect/types/dist/types/sign-client/propo
 import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/session';
 import { getSdkError } from '@walletconnect/utils';
 import BigN from 'bignumber.js';
+import { log } from 'console';
 import { Transaction } from 'ethereumjs-tx';
 import { t } from 'i18next';
 import { TransactionConfig } from 'web3-core';
@@ -108,10 +109,10 @@ export default class KoniExtension {
             this.keyringLock();
           }
         }
+      }
 
-        if (this.#firstTime) {
-          this.#firstTime = false;
-        }
+      if (this.#firstTime) {
+        this.#firstTime = false;
       }
     };
 

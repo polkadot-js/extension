@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { resetWallet } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -26,6 +27,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { unlock } = useUILock();
 
   const { inactiveModal } = useContext(ModalContext);
+  const { disableInject } = useContext(InjectContext);
 
   const [loading, setLoading] = useState(false);
   const [loadingAll, setLoadingAll] = useState(false);
@@ -41,6 +43,7 @@ const Component: React.FC<Props> = (props: Props) => {
       _setLoading(true);
 
       setTimeout(() => {
+        disableInject();
         resetWallet({
           resetAll: resetAll
         })
@@ -66,7 +69,7 @@ const Component: React.FC<Props> = (props: Props) => {
           });
       }, 300);
     };
-  }, [notify, onClose, unlock]);
+  }, [disableInject, notify, onClose, unlock]);
 
   return (
     <SwModal

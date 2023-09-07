@@ -6,6 +6,7 @@ import { addLazy } from '@subwallet/extension-base/utils';
 import { EvmProvider, Injected, InjectedAccountWithMeta, InjectedWindowProvider, Unsubcall } from '@subwallet/extension-inject/types';
 import { DisconnectExtensionModal } from '@subwallet/extension-koni-ui/components';
 import { ENABLE_INJECT } from '@subwallet/extension-koni-ui/constants';
+import { useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
 import { noop, toShort } from '@subwallet/extension-koni-ui/utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -42,7 +43,6 @@ type WalletPromiseMap = Record<string, WalletState>;
 const win = window as Window & InjectedWindow;
 const updateStatePromiseKey = 'updateInjectState';
 const injectPromiseKey = 'injectAccount';
-const enablePromiseKey = 'enableEvm';
 
 const evmConvertToInject = (address: string): InjectedAccountWithMeta => {
   return {
@@ -118,6 +118,9 @@ export const InjectContext = React.createContext<InjectContextProps>({
 });
 
 export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
+  const notification = useNotification();
+  const { t } = useTranslation();
+
   const injected = useMemo(() => {
     return !!win.injectedWeb3?.['subwallet-js'] || !!win.SubWallet;
   }, []);
@@ -183,6 +186,13 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     enablePromise.current = callback;
   }, []);
 
+  const handleConnectFail = useCallback(() => {
+    notification({
+      message: t('Fail to connect wallet'),
+      type: 'error'
+    });
+  }, [notification, t]);
+
   useEffect(() => {
     const wallet = win.injectedWeb3?.['subwallet-js'];
 
@@ -196,11 +206,12 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
         .catch((e) => {
           console.error(e);
           promiseMapRef.current = { ...promiseMapRef.current, 'subwallet-js': 'FAIL' };
+          handleConnectFail();
           checkLoading();
         })
       ;
     }
-  }, [enabled, update, checkLoading]);
+  }, [enabled, update, checkLoading, handleConnectFail]);
 
   useEffect(() => {
     const wallet = win.SubWallet;
@@ -209,20 +220,19 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
       promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'PENDING' };
       checkLoading();
 
-      addLazy(enablePromiseKey, () => {
-        wallet.enable()
-          .then(() => {
-            setEvmWallet(wallet);
-          })
-          .catch((e) => {
-            console.error(e);
-            promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'FAIL' };
-            checkLoading();
-          })
-        ;
-      }, 200, undefined, false);
+      wallet.enable()
+        .then(() => {
+          setEvmWallet(wallet);
+        })
+        .catch((e) => {
+          console.error(e);
+          promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'FAIL' };
+          handleConnectFail();
+          checkLoading();
+        })
+      ;
     }
-  }, [enabled, update, checkLoading]);
+  }, [enabled, update, checkLoading, handleConnectFail]);
 
   useEffect(() => {
     let unsubscribe: Unsubcall | undefined;

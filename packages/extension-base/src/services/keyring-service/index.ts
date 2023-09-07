@@ -101,6 +101,11 @@ export class KeyringService {
     this.currentAccountStore.set('CurrentAccountInfo', currentAccountData);
   }
 
+  public lock () {
+    keyring.lockAll();
+    this.updateKeyringState();
+  }
+
   /* Inject */
 
   public addInjectAccounts (accounts: InjectedAccountWithMeta[]) {

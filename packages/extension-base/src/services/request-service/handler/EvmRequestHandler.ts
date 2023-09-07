@@ -52,7 +52,7 @@ export default class EvmRequestHandler {
     return this.confirmationsQueueSubject;
   }
 
-  public addConfirmation<CT extends ConfirmationType> (
+  public async addConfirmation<CT extends ConfirmationType> (
     id: string,
     url: string,
     type: CT,
@@ -64,6 +64,14 @@ export default class EvmRequestHandler {
     const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
     const payloadJson = JSON.stringify(payload);
     const isInternal = isInternalRequest(url);
+
+    if (['evmSignatureRequest', 'evmSendTransactionRequest'].includes(type)) {
+      const isAlwaysRequired = await this.#requestService.settingService.isAlwaysRequired;
+
+      if (isAlwaysRequired) {
+        this.#requestService.keyringService.lock();
+      }
+    }
 
     // Check duplicate request
     const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
@@ -217,6 +225,14 @@ export default class EvmRequestHandler {
         result.payload = await this.signMessage(request as ConfirmationDefinitions['evmSignatureRequest'][0]);
       } else if (t === 'evmSendTransactionRequest') {
         result.payload = await this.signTransaction(request as ConfirmationDefinitions['evmSendTransactionRequest'][0]);
+      }
+
+      if (t === 'evmSignatureRequest' || t === 'evmSendTransactionRequest') {
+        const isAlwaysRequired = await this.#requestService.settingService.isAlwaysRequired;
+
+        if (isAlwaysRequired) {
+          this.#requestService.keyringService.lock();
+        }
       }
     }
   }

@@ -67,10 +67,24 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
 
-  const autoLockOptions = useMemo((): AutoLockOption[] => timeOptions.map((value) => ({
-    value: value,
-    label: t('{{time}} minutes', { replace: { time: value } })
-  })), [t]);
+  const autoLockOptions = useMemo((): AutoLockOption[] => timeOptions.map((value) => {
+    if (value > 0) {
+      return {
+        value: value,
+        label: t('{{time}} minutes', { replace: { time: value } })
+      };
+    } else if (value < 0) {
+      return {
+        value: value,
+        label: t('Required once')
+      };
+    } else {
+      return {
+        value: value,
+        label: t('Always require')
+      };
+    }
+  }), [t]);
 
   const items = useMemo((): SecurityItem[] => [
     {

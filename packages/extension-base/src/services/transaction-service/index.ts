@@ -46,13 +46,13 @@ import { isHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 
 export default class TransactionService {
-  private readonly chainService: ChainService;
-  private readonly eventService: EventService;
-  private readonly databaseService: DatabaseService;
-  private readonly requestService: RequestService;
   private readonly balanceService: BalanceService;
+  private readonly chainService: ChainService;
+  private readonly databaseService: DatabaseService;
+  private readonly eventService: EventService;
   private readonly historyService: HistoryService;
   private readonly notificationService: NotificationService;
+  private readonly requestService: RequestService;
   private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
 
   private readonly watchTransactionSubscribes: Record<string, Promise<void>> = {};

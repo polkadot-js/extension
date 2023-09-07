@@ -65,6 +65,7 @@ function Component ({ className, request, type }: Props) {
           />
           <MetaInfo.Account
             address={recipient?.address || recipientAddress || ''}
+            className='to-account'
             label={request.payload.isToContract ? t('To contract') : t('To account')}
             name={recipient?.name}
           />
@@ -111,6 +112,10 @@ const EvmTransactionConfirmation = styled(Component)<Props>(({ theme: { token } 
       width: '50%',
       float: 'left'
     }
+  },
+
+  '.to-account': {
+    marginTop: token.margin - 2
   },
 
   '.__label': {

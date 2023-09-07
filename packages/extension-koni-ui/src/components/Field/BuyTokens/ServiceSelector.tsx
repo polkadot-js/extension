@@ -33,7 +33,7 @@ export const baseServiceItems: ServiceItem[] = [
   },
   {
     key: 'coinbase',
-    name: 'Coinbase',
+    name: 'Coinbase Pay',
     disabled: false
   },
   {

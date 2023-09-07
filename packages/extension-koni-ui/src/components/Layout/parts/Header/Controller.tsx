@@ -107,7 +107,7 @@ const Controller = styled(Component)<Props>(({ theme: { token } }: Props) => ({
         maxWidth: 150
       },
 
-      '.input-suffix .anticon': {
+      '.ant-select-modal-input-suffix .anticon': {
         fontSize: 12,
         color: token.colorTextLight3
       }

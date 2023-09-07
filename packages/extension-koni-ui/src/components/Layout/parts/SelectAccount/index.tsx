@@ -1,23 +1,29 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountJson } from '@subwallet/extension-base/background/types';
-import { useGetCurrentAuth, useGetCurrentTab, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
+import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { funcSortByName, isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, ModalContext, Tooltip } from '@subwallet/react-ui';
+import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
+import { BackgroundIcon, Icon, Logo, ModalContext, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Plug, Plugs, PlugsConnected } from 'phosphor-react';
+import { CaretDown, Plug, Plugs, PlugsConnected, SignOut } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import { AccountBriefInfo, AccountCardSelection, AccountItemWithName } from '../../../Account';
+import GeneralEmptyList from '../../../GeneralEmptyList';
+import { BaseSelectModal } from '../../../Modal';
 import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
-import SelectAccountModal from './SelectAccountModal';
+import SelectAccountFooter from '../SelectAccount/Footer';
 
 type Props = ThemeProps
 
@@ -39,9 +45,16 @@ const iconMap = {
 
 const ConnectWebsiteId = 'connectWebsiteId';
 
+const renderEmpty = () => <GeneralEmptyList />;
+
+const modalId = SELECT_ACCOUNT_MODAL;
+
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { goHome } = useDefaultNavigate();
 
   const { accounts: _accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
 
@@ -70,6 +83,101 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));
   }, [accounts]);
+
+  const _onSelect = useCallback((address: string) => {
+    if (address) {
+      const accountByAddress = findAccountByAddress(accounts, address);
+
+      if (accountByAddress) {
+        const accountInfo = {
+          address: address
+        } as CurrentAccountInfo;
+
+        saveCurrentAccountAddress(accountInfo).then(() => {
+          const pathName = location.pathname;
+          const locationPaths = location.pathname.split('/');
+
+          if (locationPaths) {
+            if (locationPaths[1] === 'home') {
+              if (locationPaths.length >= 3) {
+                if (pathName.startsWith('/home/nfts')) {
+                  navigate('/home/nfts/collections');
+                } else if (pathName.startsWith('/home/tokens/detail')) {
+                  navigate('/home/tokens');
+                } else {
+                  navigate(`/home/${locationPaths[2]}`);
+                }
+              }
+            } else {
+              goHome();
+            }
+          }
+        }).catch((e) => {
+          console.error('There is a problem when set Current Account', e);
+        });
+      } else {
+        console.error('There is a problem when change account');
+      }
+    }
+  }, [accounts, location.pathname, navigate, goHome]);
+
+  const onClickDetailAccount = useCallback((address: string) => {
+    return () => {
+      inactiveModal(modalId);
+      setTimeout(() => {
+        navigate(`/accounts/detail/${address}`);
+      }, 100);
+    };
+  }, [navigate, inactiveModal]);
+
+  const openDisconnectExtensionModal = useCallback(() => {
+    activeModal(DISCONNECT_EXTENSION_MODAL);
+  }, [activeModal]);
+
+  const renderItem = useCallback((item: AccountJson, _selected: boolean) => {
+    const currentAccountIsAll = isAccountAll(item.address);
+
+    if (currentAccountIsAll) {
+      return (
+        <AccountItemWithName
+          address={item.address}
+          className='all-account-selection'
+          isSelected={_selected}
+        />
+      );
+    }
+
+    const isInjected = !!item.isInjected;
+
+    return (
+      <AccountCardSelection
+        accountName={item.name || ''}
+        address={item.address}
+        className={className}
+        genesisHash={item.genesisHash}
+        isSelected={_selected}
+        isShowSubIcon
+        moreIcon={!isInjected ? undefined : SignOut}
+        onPressMoreBtn={isInjected ? openDisconnectExtensionModal : onClickDetailAccount(item.address)}
+        source={item.source}
+        subIcon={(
+          <Logo
+            network={isEthereumAddress(item.address) ? 'ethereum' : 'polkadot'}
+            shape={'circle'}
+            size={16}
+          />
+        )}
+      />
+    );
+  }, [className, onClickDetailAccount, openDisconnectExtensionModal]);
+
+  const renderSelectedItem = useCallback((item: AccountJson): React.ReactNode => {
+    return (
+      <div className='selected-account'>
+        <AccountBriefInfo account={item} />
+      </div>
+    );
+  }, []);
 
   useEffect(() => {
     if (currentAuth) {
@@ -194,7 +302,33 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </Tooltip>
       )}
 
-      <SelectAccountModal />
+      <BaseSelectModal
+        background={'default'}
+        className={className}
+        footer={<SelectAccountFooter />}
+        id={modalId}
+        ignoreScrollbarMethod='padding'
+        inputWidth={'100%'}
+        itemKey='address'
+        items={noAllAccounts.length <= 1 ? noAllAccounts : accounts}
+        onSelect={_onSelect}
+        renderItem={renderItem}
+        renderSelected={renderSelectedItem}
+        renderWhenEmpty={renderEmpty}
+        searchFunction={searchAccountFunction}
+        searchMinCharactersCount={2}
+        searchPlaceholder={t<string>('Account name')}
+        selected={currentAccount?.address || ''}
+        shape='round'
+        size='small'
+        suffix={
+          <Icon
+            phosphorIcon={CaretDown}
+            weight={'bold'}
+          />
+        }
+        title={t('Select account')}
+      />
 
       <ConnectWebsiteModal
         authInfo={currentAuth}
@@ -226,7 +360,7 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
         paddingLeft: 0
       },
 
-      '.input-container:hover .account-name': {
+      '.ant-select-modal-input-container:hover .account-name': {
         color: token.colorTextLight3
       }
     },
@@ -264,8 +398,7 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       '.ant-account-card-name': {
         textOverflow: 'ellipsis',
         overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        maxWidth: 120
+        whiteSpace: 'nowrap'
       },
 
       '.ant-input-container .ant-input': {

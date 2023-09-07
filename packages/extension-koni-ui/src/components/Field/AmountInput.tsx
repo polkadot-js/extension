@@ -16,6 +16,7 @@ interface Props extends ThemeProps, BasicInputWrapper {
   onSetMax?: (value: boolean) => void;
   showMaxButton?: boolean;
   forceUpdateMaxValue?: object;
+  prefix?: React.ReactNode;
 }
 
 const isValidInput = (input: string) => {
@@ -44,7 +45,7 @@ export const getOutputValuesFromString: (input: string, power: number) => string
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, decimals, disabled, forceUpdateMaxValue, maxValue, onChange, onSetMax, showMaxButton, statusHelp, tooltip, value } = props;
+  const { className, decimals, disabled, forceUpdateMaxValue, maxValue, onChange, onSetMax, showMaxButton, statusHelp, tooltip, value, prefix } = props;
 
   const { t } = useTranslation();
 
@@ -165,6 +166,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       readOnly={props.readOnly}
       ref={inputRef}
       statusHelp={statusHelp}
+      prefix={prefix}
       suffix={suffix}
       tooltip={tooltip}
       value={inputValue}

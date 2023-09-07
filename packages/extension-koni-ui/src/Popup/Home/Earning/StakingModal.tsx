@@ -11,18 +11,18 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountSelector, AmountInput } from '@subwallet/extension-koni-ui/components';
 import BigN from 'bignumber.js';
 import { ArrowCircleRight, CheckCircle, Question } from 'phosphor-react';
-import CN from 'classnames';
 import { YieldPoolInfo, YieldStepDetail } from '@subwallet/extension-base/background/KoniTypes';
 import { useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import { FreeBalance } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
 import StakingProcessModal, {
   STAKING_PROCESS_MODAL_ID
 } from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingProcessModal';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
+import useGetNativeTokenBasicInfo from '../../../hooks/common/useGetNativeTokenBasicInfo';
+import FreeBalanceToStake from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalanceToStake';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -30,13 +30,13 @@ interface Props extends ThemeProps {
 }
 
 enum FormFieldName {
-  VALUE = 'amount',
   METHOD = 'method',
   FROM = 'from',
 }
 
-interface EarningCalculatorFormProps {
-  [FormFieldName.VALUE]: string;
+const formFieldPrefix = 'amount-';
+
+interface StakingFormProps extends Record<`amount-${number}`, string> {
   [FormFieldName.METHOD]: string;
   [FormFieldName.FROM]: string;
 }
@@ -51,30 +51,36 @@ const Component = ({ className, item }: Props) => {
   const [yieldSteps, setYieldSteps] = useState<YieldStepDetail[]>();
   const [isBalanceReady, setIsBalanceReady] = useState(true);
   const [step, setStep] = useState<number>(1);
+  const { decimals } = useGetNativeTokenBasicInfo(item.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(item.chain);
   const { token } = useTheme() as Theme;
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
-  const [form] = Form.useForm<EarningCalculatorFormProps>();
-  const formDefault: EarningCalculatorFormProps = useMemo(() => {
+  const [form] = Form.useForm<StakingFormProps>();
+  const formDefault: StakingFormProps = useMemo(() => {
     return {
-      [FormFieldName.VALUE]: '0',
       [FormFieldName.METHOD]: '',
       [FormFieldName.FROM]: !isAllAccount ? currentAccount?.address || '' : '',
     };
   }, []);
 
+  const currentAmount = Form.useWatch(`${formFieldPrefix}0`, form);
+
+  useEffect(() => {
+    form.setFieldValue(FormFieldName.METHOD, item.slug);
+  }, [form, item]);
+
   useEffect(() => {
     const selectedPool = Object.values(poolInfo)[0];
 
     getOptimalYieldPath({
-      amount: '100000000000',
+      amount: currentAmount,
       poolInfo: selectedPool
     })
       .then((res) => {
         setYieldSteps(res?.steps);
       })
       .catch(console.error);
-  }, [poolInfo]);
+  }, [poolInfo, currentAmount]);
 
   const currentFrom = Form.useWatch('from', form);
 
@@ -93,7 +99,7 @@ const Component = ({ className, item }: Props) => {
     };
   };
 
-  const onFieldsChange: FormCallbacks<EarningCalculatorFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<StakingFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
   }, [])
 
   return (
@@ -146,7 +152,7 @@ const Component = ({ className, item }: Props) => {
 
 
           <Form.Item
-            className={CN({ hidden: !isAllAccount })}
+            // className={CN({ hidden: !isAllAccount })}
             name={'from'}
           >
             <AccountSelector
@@ -156,38 +162,47 @@ const Component = ({ className, item }: Props) => {
             />
           </Form.Item>
 
-          <Form.Item
-            label={'Staking amount'}
-            colon={false}
-            name={FormFieldName.VALUE}
-            rules={[
-              () => ({
-                validator: (_, value: string) => {
-                  const val = new BigN(value);
-                  if (val.lte(0)) {
-                    return Promise.reject(new Error(t('Amount must be greater than 0')));
-                  }
+          {item.inputAssets.map((asset, index) => {
+            const name = formFieldPrefix + String(index);
+            return (
+              <div key={name}>
+                <FreeBalanceToStake
+                  address={currentFrom}
+                  chain={item.chain}
+                  tokenSlug={asset}
+                  className={'account-free-balance'}
+                  label={t('Available to stake:')}
+                  onBalanceReady={setIsBalanceReady}
+                />
 
-                  return Promise.resolve();
-                }
-              })
-            ]}
-            statusHelpAsTooltip={true}
-          >
-            <AmountInput
-              decimals={0}
-              maxValue={'1'}
-              showMaxButton={false}
-            />
-          </Form.Item>
+                <Form.Item
+                  colon={false}
+                  name={name}
+                  rules={[
+                    () => ({
+                      validator: (_, value: string) => {
+                        const val = new BigN(value);
+                        if (val.lte(0)) {
+                          return Promise.reject(new Error(t('Amount must be greater than 0')));
+                        }
 
-          <FreeBalance
-            address={currentFrom}
-            chain={item.chain}
-            className={'account-free-balance'}
-            label={t('Available balance:')}
-            onBalanceReady={setIsBalanceReady}
-          />
+                        return Promise.resolve();
+                      }
+                    })
+                  ]}
+                  statusHelpAsTooltip={true}
+                >
+                  <AmountInput
+                    decimals={decimals}
+                    maxValue={'1'}
+                    prefix={<Logo size={20} token={asset.split('-')[2].toLowerCase()} className={'amount-prefix'} />}
+                    showMaxButton={true}
+                    tooltip={t('Amount')}
+                  />
+                </Form.Item>
+              </div>
+            );
+          })}
         </Form>
       </div>
 
@@ -244,6 +259,10 @@ const StakingModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '.ant-form-item-label > label': {
         color: token.colorTextLight4
       },
+
+      '.amount-prefix': {
+        marginBottom: token.marginXXS / 2
+      }
     }
   }
 });

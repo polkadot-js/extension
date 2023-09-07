@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
 import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
-import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -23,7 +23,7 @@ interface Props extends ThemeProps {
 function Component (props: Props): React.ReactElement<Props> {
   const { className = '', stakingType } = props;
   const { t } = useTranslation();
-  const { chain } = useContext(TransactionContext);
+  const { defaultData: { chain } } = useContext(TransactionContext);
   const { token } = useTheme() as Theme;
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);

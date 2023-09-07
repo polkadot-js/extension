@@ -11,8 +11,6 @@ import { createBrowserRouter, IndexRouteObject, Outlet, useLocation, useOutletCo
 
 export const lazyLoaderMap: Record<string, LazyLoader> = {};
 
-export const lazyLoaderMap: Record<string, LazyLoader> = {};
-
 export class LazyLoader {
   private elemLoader;
   private loadPromise: Promise<ComponentType<any>> | undefined;

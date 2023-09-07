@@ -116,7 +116,6 @@ export const WalletModalContext = ({ children }: Props) => {
     />
     <ImportAccountModal />
     <AttachAccountModal />
-    <NewAccountModal setAccountTypes={setAccountTypes} />
     <ImportSeedModal />
     <DeriveAccountModal />
     <RequestCreatePasswordModal />

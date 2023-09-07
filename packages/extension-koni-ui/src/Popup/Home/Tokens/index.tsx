@@ -10,8 +10,8 @@ import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/T
 import { DEFAULT_TRANSFER_PARAMS, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
-import { useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useReceiveQR from '@subwallet/extension-koni-ui/hooks/screen/home/useReceiveQR';
@@ -54,6 +54,8 @@ const Component = (): React.ReactElement => {
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
+  const [, setStorage] = useLocalStorage<TransferParams>(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
 
   const outletContext: {
     searchInput: string,

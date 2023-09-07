@@ -6,7 +6,7 @@ import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
-import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL, SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
@@ -18,6 +18,7 @@ import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -30,13 +31,12 @@ interface Props extends ThemeProps {
   icon?: PhosphorIcon;
 }
 
-const modalId = NEW_ACCOUNT_MODAL;
-
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, id, previousId, url, label, icon = CheckCircle } = props;
+  const { className, icon = CheckCircle, id, label, previousId, url } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const isActive = checkActive(id);
+  const navigate = useNavigate();
   const { isWebUI } = useContext(ScreenContext);
   const [selectedItems, setSelectedItems] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
 
@@ -45,17 +45,16 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [id, inactiveModal]);
 
   const onSubmit = useCallback(() => {
+    setSelectedAccountTypes(selectedItems);
+
     if (isWebUI) {
       activeModal(SEED_PHRASE_MODAL);
-
-      setAccountTypes && setAccountTypes(selectedItems);
     } else {
-        setSelectedAccountTypes(selectedItems);
-        navigate(url);
+      navigate(url);
     }
 
-    inactiveModal(modalId);
-  }, [isWebUI, inactiveModal, activeModal, setAccountTypes, selectedItems]);
+    inactiveModal(id);
+  }, [selectedItems, isWebUI, inactiveModal, id, activeModal, navigate, url]);
 
   const onBack = useSwitchModal(id, previousId);
 

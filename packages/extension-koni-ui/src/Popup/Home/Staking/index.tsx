@@ -6,7 +6,7 @@ import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenBalanc
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
-import { DEFAULT_STAKE_PARAMS, STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { ALL_KEY, DEFAULT_STAKE_PARAMS, STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -371,7 +371,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, [onClickItem]);
 
   const onClickStake = useCallback(() => {
-    preCheck(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`), ExtrinsicType.STAKING_BOND)();
+    preCheck(() => navigate(`/transaction/stake/${ALL_KEY}`), ExtrinsicType.STAKING_BOND)();
   }, [navigate, preCheck]);
 
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {

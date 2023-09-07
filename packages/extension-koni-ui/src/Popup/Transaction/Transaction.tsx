@@ -6,6 +6,7 @@ import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/comp
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import { DEFAULT_TRANSACTION_PARAMS, TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
 import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
@@ -26,26 +27,7 @@ interface Props extends ThemeProps {
   modalContent?: boolean
 }
 
-type ContentWrapperProps = {
-  transactionContext: TransactionContextProps,
-  dataContext: DataContextType,
-  children: React.ReactNode,
-};
-
-function ContentWrapper ({ children,
-  dataContext,
-  transactionContext }: ContentWrapperProps) {
-
-  return (
-    <TransactionContext.Provider value={transactionContext}>
-      <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
-        {children}
-      </PageWrapper>
-    </TransactionContext.Provider>
-  );
-}
-
-function Component ({ className }: Props) {
+function Component ({ className, modalContent }: Props) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -169,20 +151,15 @@ function Component ({ className }: Props) {
     chain !== '' && chainChecker(chain);
   }, [chain, chainChecker]);
 
-  const transactionContextProps = {
-    transactionType, from, setFrom, chain, setChain, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn, asset, setAsset
-  };
-
   if (modalContent) {
     return (
-      <ContentWrapper
-        dataContext={dataContext}
-        transactionContext={transactionContextProps}
-      >
-        <div className={CN(className, 'transaction-wrapper __modal-content')}>
-          {children}
-        </div>
-      </ContentWrapper>
+      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
+        <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
+          <div className={CN(className, 'transaction-wrapper __modal-content')}>
+            <Outlet />
+          </div>
+        </PageWrapper>
+      </TransactionContext.Provider>
     );
   }
 
@@ -193,14 +170,13 @@ function Component ({ className }: Props) {
         showBackButton
         title={titleMap[transactionType]}
       >
-        <ContentWrapper
-          dataContext={dataContext}
-          transactionContext={transactionContextProps}
-        >
-          <div className={CN(className, 'transaction-wrapper')}>
-            <Outlet />
-          </div>
-        </ContentWrapper>
+        <TransactionContext.Provider value={{ defaultData, needPersistData, persistData, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
+          <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
+            <div className={CN(className, 'transaction-wrapper')}>
+              <Outlet />
+            </div>
+          </PageWrapper>
+        </TransactionContext.Provider>
       </Layout.WithSubHeaderOnly>
     );
   }
@@ -210,23 +186,22 @@ function Component ({ className }: Props) {
       showFilterIcon
       showTabBar={false}
     >
-      <ContentWrapper
-        dataContext={dataContext}
-        transactionContext={transactionContextProps}
-      >
-        <div className={CN(className, 'transaction-wrapper')}>
-          <SwSubHeader
-            background={'transparent'}
-            center
-            className={'transaction-header'}
-            onBack={goBack}
-            rightButtons={subHeaderButton}
-            showBackButton
-            title={titleMap[transactionType]}
-          />
-          <Outlet />
-        </div>
-      </ContentWrapper>
+      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
+        <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
+          <div className={CN(className, 'transaction-wrapper')}>
+            <SwSubHeader
+              background={'transparent'}
+              center
+              className={'transaction-header'}
+              onBack={goBack}
+              rightButtons={subHeaderButton}
+              showBackButton
+              title={titleMap[transactionType]}
+            />
+            <Outlet />
+          </div>
+        </PageWrapper>
+      </TransactionContext.Provider>
     </Layout.Home>
   );
 }

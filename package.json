@@ -16,8 +16,8 @@
   ],
   "bin": {
     "koni-ci-build-dev": "./scripts/koni-ci-build-dev.mjs",
-    "koni-ci-build-webapp": "./scripts/koni-ci-build-webapp.mjs",
     "koni-ci-build-i18n": "./scripts/koni-ci-build-i18n.mjs",
+    "koni-ci-build-webapp": "./scripts/koni-ci-build-webapp.mjs",
     "koni-ci-ghact-build": "./scripts/koni-ci-ghact-build.mjs",
     "koni-dev-build-ts": "./scripts/koni-dev-build-ts.mjs"
   },

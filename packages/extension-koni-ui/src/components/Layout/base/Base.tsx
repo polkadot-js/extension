@@ -3,10 +3,9 @@
 
 import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
+import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwScreenLayout } from '@subwallet/react-ui';

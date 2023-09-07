@@ -2084,7 +2084,10 @@ export enum YieldStepType {
   MINT_VDOT = 'MINT_VDOT',
 
   // acala
-  MINT_LDOT = 'MINT_LDOT'
+  MINT_LDOT = 'MINT_LDOT',
+
+  // interlay
+  MINT_QDOT = 'MINT_QDOT'
 }
 
 export interface YieldStepDetail {

@@ -225,7 +225,7 @@ export default class AuthRequestHandler {
     const idStr = stripUrl(url);
     // Do not enqueue duplicate authorization requests.
     const isDuplicate = Object.values(this.#authRequestsV2)
-      .some((request) => request.idStr === idStr);
+      .some((_request) => _request.idStr === idStr && _request.accountAuthType === request.accountAuthType);
 
     assert(!isDuplicate, 'The source {{url}} has a pending authorization request'.replace('{{url}}', url));
 
@@ -264,7 +264,8 @@ export default class AuthRequestHandler {
     } else {
       // Auto auth for web app
 
-      const isWhiteList = WEB_APP_URL.some((url) => idStr.includes(url));
+      // Ignore white list
+      const isWhiteList = WEB_APP_URL.some((url) => idStr.includes(url)) && false;
 
       if (isWhiteList) {
         const isAllowedMap = this.getAddressList(true);

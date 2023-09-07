@@ -93,7 +93,6 @@ const DEFAULT_LANGUAGE_TIME_DEFINE: Record<LanguageType, TimeDefine> = {
       suffix: '日'
     }
   }),
-  ru: mergeTimeDefine({}),
   ja: mergeTimeDefine({
     year: {
       suffix: '年'

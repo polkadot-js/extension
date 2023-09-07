@@ -220,13 +220,19 @@ const Component: React.FC<Props> = (props: Props) => {
           setFirstStep(false);
         })
         .catch((e: Error) => {
-          form.setFields([{ name: FormFieldName.PASSWORD, errors: [e.message] }]);
+          let message = e.message;
+
+          if (message === 'Unable to decode using the supplied passphrase') {
+            message = t('Wrong password');
+          }
+
+          form.setFields([{ name: FormFieldName.PASSWORD, errors: [message] }]);
         })
         .finally(() => {
           setLoading(false);
         });
     }, 500);
-  }, [account, form]);
+  }, [account, form, t]);
 
   const onPressType = useCallback((value: ExportType) => {
     return () => {

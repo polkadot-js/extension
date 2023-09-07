@@ -126,9 +126,12 @@ export class KeyringService {
     keyring.removeInjects(addresses);
   }
 
-  /* Inject */
-
   /* Reset */
+  public lock () {
+    keyring.lockAll();
+    this.updateKeyringState();
+  }
+
   resetWallet (resetAll: boolean) {
     keyring.resetWallet(resetAll);
     this.updateKeyringState();

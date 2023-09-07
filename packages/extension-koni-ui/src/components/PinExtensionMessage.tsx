@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
 import { detectTranslate } from '@subwallet/extension-base/utils';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon as SwIcon, Image, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -12,33 +14,31 @@ import styled from 'styled-components';
 
 type Props = ThemeProps;
 
-interface IconProps extends Pick<SwIconProps, 'phosphorIcon'> {
-  last?: boolean;
-}
+type IconProps = Pick<SwIconProps, 'phosphorIcon'>;
 
 const Icon: React.FC<IconProps> = (props: IconProps) => {
-  const { last, phosphorIcon } = props;
+  const { phosphorIcon } = props;
 
   return (
-    <span>
-      &nbsp;
-      <SwIcon
-        phosphorIcon={phosphorIcon}
-        size='sm'
-        weight='fill'
-      />
-      {!last && <span>&nbsp;</span>}
-    </span>
+    <SwIcon
+      className='custom-icon'
+      phosphorIcon={phosphorIcon}
+      size='sm'
+      weight='fill'
+    />
   );
 };
+
+const specialLanguages: LanguageType[] = ['ja'];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const { t } = useTranslation();
+  const { language } = useSelector((state) => state.settings);
 
   return (
-    <div className={CN(className)}>
+    <div className={CN(className, { 'special-language': specialLanguages.includes(language) })}>
       <div className='message-header'>
         <div className='message-image'>
           <Image
@@ -56,10 +56,7 @@ const Component: React.FC<Props> = (props: Props) => {
           components={{
             extension: <Icon phosphorIcon={PuzzlePiece} />,
             pin: (
-              <Icon
-                last={true}
-                phosphorIcon={PushPinSimple}
-              />
+              <Icon phosphorIcon={PushPinSimple} />
             )
           }}
           i18nKey={detectTranslate('Click <extension/> select SubWallet and then <pin/>')}
@@ -98,10 +95,20 @@ const PinExtensionMessage = styled(Component)<Props>(({ theme: { token } }: Prop
     '.message-sub-content': {
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
       marginTop: token.marginSM
+    },
+
+    '.custom-icon': {
+      verticalAlign: '-0.15em'
+    },
+
+    '&.special-language': {
+      padding: token.paddingLG,
+      width: token.sizeXL * 12.5,
+
+      '.message-sub-content': {
+        textAlign: 'end'
+      }
     }
   };
 });

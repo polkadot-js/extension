@@ -3,22 +3,23 @@
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { ProviderErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 
 const defaultErrorMap: Record<ProviderErrorType, { message: string, code?: number }> = {
   CHAIN_DISCONNECTED: {
-    message: 'Chain is disconnected',
+    message: detectTranslate('Network is disconnected'),
     code: undefined
   },
   INVALID_PARAMS: {
-    message: 'Invalid params',
+    message: detectTranslate('Undefined error. Please contact SubWallet support'),
     code: undefined
   },
   INTERNAL_ERROR: {
-    message: 'Internal error',
+    message: detectTranslate('Undefined error. Please contact SubWallet support'),
     code: undefined
   },
   USER_REJECT: {
-    message: 'User reject request',
+    message: detectTranslate('Rejected by user'),
     code: undefined
   }
 };

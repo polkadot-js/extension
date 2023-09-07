@@ -4,7 +4,10 @@
 import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import BaseWeb from '@subwallet/extension-koni-ui/components/Layout/base/BaseWeb';
+import { isSameAddress } from '@subwallet/extension-base/utils';
+import { BackgroundExpandView } from '@subwallet/extension-koni-ui/components';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
+import { TRANSACTION_STORAGES } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -15,7 +18,7 @@ import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isNoAccount } from '@subwallet/extension-koni-ui/utils';
+import { isNoAccount, removeStorage } from '@subwallet/extension-koni-ui/utils';
 import { changeHeaderLogo } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import CN from 'classnames';
@@ -89,7 +92,8 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   const { unlockType } = useSelector((state: RootState) => state.settings);
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
-  const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
+  const { accounts, currentAccount, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
+  const [initAccount, setInitAccount] = useState(currentAccount);
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
   const { isUILocked } = useUILock();
   const needUnlock = isUILocked || (isLocked && unlockType === WalletUnlockType.ALWAYS_REQUIRED);
@@ -146,7 +150,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     RouteState.lastPathName = location.pathname;
   }, [location]);
 
-  const redirectPath = useMemo<string | null>(() => {
+const redirectPath = useMemo<string | null>(() => {
     const pathName = location.pathname;
     let redirectTarget: string | null = null;
 
@@ -201,14 +205,32 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     }
   }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, rootLoading, openPModal, navigate]);
 
+  // Remove transaction persist state
+  useEffect(() => {
+    if (!isSameAddress(initAccount?.address || '', currentAccount?.address || '')) {
+      for (const key of TRANSACTION_STORAGES) {
+        removeStorage(key);
+      }
+
+      setInitAccount(currentAccount);
+    }
+  }, [currentAccount, initAccount]);
+
   if (rootLoading || redirectPath) {
     return <></>;
   } else {
-    return <MainWrapper className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
+    return <MainWrapper className={CN('main-page-container')}>
       {children}
+      <BackgroundExpandView />
     </MainWrapper>;
   }
 }
+
+const Main = styled.main`
+  display: flex;
+  height: 100%;
+  flex-direction: column
+`;
 
 export function Root (): React.ReactElement {
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider

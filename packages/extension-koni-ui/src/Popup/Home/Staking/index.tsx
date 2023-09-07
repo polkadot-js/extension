@@ -6,21 +6,22 @@ import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenBalanc
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_STAKE_PARAMS, STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { sortStakingByValue, stopClickPropagation } from '@subwallet/extension-koni-ui/utils';
+import { isAccountAll, sortStakingByValue, stopClickPropagation } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList, Table, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { ArrowClockwise, DotsThree, FadersHorizontal, Plus, Trophy, User, Users } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import MoreActionModal, { MORE_ACTION_MODAL } from './MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from './StakingDetailModal';
@@ -58,6 +59,7 @@ interface StakingItem extends StakingDataType {
 }
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  useSetCurrentPage('/home/staking');
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState<string>('');
@@ -79,6 +81,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
+
+  const [, setStorage] = useLocalStorage(STAKE_TRANSACTION, DEFAULT_STAKE_PARAMS);
 
   const items = useMemo<StakingItem[]>(() => {
     const result = stakingItems
@@ -140,8 +144,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const preCheck = usePreCheckAction(currentAccount?.address, false);
 
   const onClickStakeMore = useCallback(() => {
-    navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`);
-  }, [navigate]);
+    const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+    setStorage({
+      ...DEFAULT_STAKE_PARAMS,
+      from: address
+    });
+
+    navigate('/transaction/stake');
+  }, [currentAccount, navigate, setStorage]);
 
   const onClickReload = useCallback(() => {
     setLoading(true);

@@ -1,25 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import { CloseIcon, Layout, PageWrapper, PrivateKeyInput } from '@subwallet/extension-koni-ui/components';
 import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
-import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
-import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
-import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
-import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useFocusFormItem, useGetDefaultAccountName, useGoBackFromCreateAccount, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
-import { Button, Form, Icon, Input } from '@subwallet/react-ui';
+import { Button, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { FileArrowDown } from 'phosphor-react';
+import { Eye, EyeSlash, FileArrowDown } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -61,9 +53,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const timeOutRef = useRef<NodeJS.Timer>();
 
+  // TODO: Change way validate
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [validating, setValidating] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [show, setShow] = useState(false);
   const [changed, setChanged] = useState(false);
   const [form] = Form.useForm<FormState>();
   const checkUnlock = useUnlockChecker();
@@ -167,6 +161,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, []);
 
+  const toggleShow = useCallback(() => {
+    setShow((value) => !value);
+  }, []);
+
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
@@ -207,12 +205,29 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 name={fieldName}
                 validateStatus={validateState.status}
               >
-                <Input.TextArea
+                <PrivateKeyInput
                   className='private-key-input'
+                hideText={!show}
+                label={t('Private key')}
                   placeholder={t('Enter or paste private key')}
                   statusHelp={validateState.message}
                 />
               </Form.Item>
+            <div className='button-container'>
+              <Button
+                icon={(
+                  <Icon
+                    phosphorIcon={show ? EyeSlash : Eye}
+                    size='sm'
+                  />
+                )}
+                onClick={toggleShow}
+                size='xs'
+                type='ghost'
+              >
+                {show ? t('Hide private key') : t('Show private key')}
+              </Button>
+            </div>
               <Form.Item hidden={!isWebUI}>
                 <Button
                   disabled={!privateKey || !!validateState.status}

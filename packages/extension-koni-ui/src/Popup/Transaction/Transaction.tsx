@@ -4,18 +4,18 @@
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
-import { TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
-import { DataContext, DataContextType } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { DEFAULT_TRANSACTION_PARAMS, TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
 import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Theme, ThemeProps, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
+import { detectTransactionPersistKey } from '@subwallet/extension-koni-ui/utils';
 import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useContext, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -26,45 +26,6 @@ interface Props extends ThemeProps {
   modalContent?: boolean
 }
 
-export interface TransactionFormBaseProps {
-  from: string,
-  chain: string
-  asset: string
-}
-
-export interface TransactionContextProps extends TransactionFormBaseProps {
-  transactionType: ExtrinsicType,
-  setFrom: Dispatch<SetStateAction<string>>,
-  setChain: Dispatch<SetStateAction<string>>,
-  setAsset: Dispatch<SetStateAction<string>>,
-  onDone: (extrinsicHash: string) => void,
-  onClickRightBtn: () => void,
-  setShowRightBtn: Dispatch<SetStateAction<boolean>>
-  setDisabledRightBtn: Dispatch<SetStateAction<boolean>>
-}
-
-export const TransactionContext = React.createContext<TransactionContextProps>({
-  transactionType: ExtrinsicType.TRANSFER_BALANCE,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  from: '',
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setFrom: (value) => {},
-  chain: '',
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setChain: (value) => {},
-  asset: '',
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setAsset: (value) => {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onDone: (extrinsicHash) => {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onClickRightBtn: () => {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setShowRightBtn: (value) => {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setDisabledRightBtn: (value) => {}
-});
-
 type ContentWrapperProps = {
   transactionContext: TransactionContextProps,
   dataContext: DataContextType,
@@ -74,6 +35,7 @@ type ContentWrapperProps = {
 function ContentWrapper ({ children,
   dataContext,
   transactionContext }: ContentWrapperProps) {
+
   return (
     <TransactionContext.Provider value={transactionContext}>
       <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
@@ -83,7 +45,7 @@ function ContentWrapper ({ children,
   );
 }
 
-function Component ({ children, className, modalContent = false }: Props) {
+function Component ({ className }: Props) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -91,8 +53,6 @@ function Component ({ children, className, modalContent = false }: Props) {
   const { activeModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
-
-  const { currentAccount, isAllAccount } = useSelector((root: RootState) => root.accountState);
 
   const transactionType = useMemo((): ExtrinsicType => {
     const pathName = location.pathname;
@@ -118,6 +78,19 @@ function Component ({ children, className, modalContent = false }: Props) {
         return ExtrinsicType.TRANSFER_BALANCE;
     }
   }, [location.pathname]);
+
+  const storageKey = useMemo((): string => detectTransactionPersistKey(transactionType), [transactionType]);
+
+  const [storage, setStorage] = useLocalStorage<TransactionFormBaseProps>(storageKey, DEFAULT_TRANSACTION_PARAMS);
+
+  const cacheStorage = useDeferredValue(storage);
+
+  const needPersistData = useMemo(() => {
+    return JSON.stringify(cacheStorage) === JSON.stringify(DEFAULT_TRANSACTION_PARAMS);
+  }, [cacheStorage]);
+
+  const [defaultData] = useState(storage);
+  const { chain, from } = storage;
 
   const homePath = useMemo((): string => {
     const pathName = location.pathname;
@@ -151,9 +124,6 @@ function Component ({ children, className, modalContent = false }: Props) {
 
   useNavigateOnChangeAccount(homePath, !modalContent);
 
-  const [from, setFrom] = useState(!isAllAccount ? currentAccount?.address || '' : '');
-  const [chain, setChain] = useState('');
-  const [asset, setAsset] = useState('');
   const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
   const [disabledRightBtn, setDisabledRightBtn] = useState<boolean>(false);
 
@@ -162,6 +132,10 @@ function Component ({ children, className, modalContent = false }: Props) {
   const goBack = useCallback(() => {
     navigate(homePath);
   }, [homePath, navigate]);
+
+  const persistData = useCallback((value: TransactionFormBaseProps) => {
+    setStorage(value);
+  }, [setStorage]);
 
   // Navigate to finish page
   const onDone = useCallback(
@@ -293,7 +267,7 @@ const Transaction = styled(Component)(({ theme }) => {
     },
 
     '.transaction-content': {
-      flex: '1 1 400px',
+      flex: '1 1 370px',
       paddingLeft: token.padding,
       paddingRight: token.padding,
       overflow: 'auto'

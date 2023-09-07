@@ -6,6 +6,9 @@ import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
+import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
@@ -13,6 +16,7 @@ import { Aperture, Clock, Database, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 import Footer from '../parts/Footer';
 import SelectAccount from '../parts/SelectAccount';
@@ -20,13 +24,15 @@ import SelectAccount from '../parts/SelectAccount';
 export interface LayoutBaseProps extends Omit<
 SwScreenLayoutProps,
 'tabBarItems' | 'footer' | 'headerContent' | 'selectedTabBarItem'
-> {
+>, ThemeProps {
   children: React.ReactNode | React.ReactNode[];
   showFooter?: boolean;
   isSetTitleContext?: boolean;
 }
 
-const Base = ({ children, headerIcons, isSetTitleContext = true, onBack, showFooter, ...props }: LayoutBaseProps) => {
+const specialLanguages: Array<LanguageType> = ['ja', 'ru'];
+
+const Component = ({ children, className, headerIcons, isSetTitleContext = true, onBack, showFooter, ...props }: LayoutBaseProps) => {
   const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
@@ -35,6 +41,7 @@ const Base = ({ children, headerIcons, isSetTitleContext = true, onBack, showFoo
   const { setTitle } = useContext(WebUIContext);
   const { headerType, isSettingPage, setShowBackButtonOnHeader } = useContext(WebUIContext);
   const [customClassName, setCustomClassName] = useState('');
+  const { language } = useSelector((state) => state.settings);
 
   const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
     {
@@ -128,7 +135,7 @@ const Base = ({ children, headerIcons, isSetTitleContext = true, onBack, showFoo
   return (
     <SwScreenLayout
       {...props}
-      className={CN(props.className, customClassName)}
+      className={CN(className, customClassName, { 'special-language': specialLanguages.includes(language) })}
       footer={showFooter && <Footer />}
       headerContent={props.showHeader && <SelectAccount />}
       headerIcons={headerIcons}
@@ -146,5 +153,33 @@ const Base = ({ children, headerIcons, isSetTitleContext = true, onBack, showFoo
     </SwScreenLayout>
   );
 };
+
+const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBaseProps) => ({
+  '.ant-sw-tab-bar-container': {
+    padding: `${token.paddingXS}px ${token.paddingSM}px ${token.paddingSM}px`,
+    alignItems: 'flex-start',
+
+    '.ant-sw-tab-bar-item-label': {
+      textAlign: 'center'
+    }
+  },
+
+  '&.special-language': {
+    '.ant-sw-tab-bar-container': {
+      paddingBottom: token.paddingXS,
+
+      '.ant-sw-tab-bar-item': {
+        gap: token.sizeXXS,
+
+        '.ant-sw-tab-bar-item-label': {
+          fontSize: token.fontSizeXS,
+          lineHeight: 1,
+          maxWidth: token.sizeXXL,
+          overflowWrap: 'break-word'
+        }
+      }
+    }
+  }
+}));
 
 export default Base;

@@ -71,7 +71,7 @@ export default class Tabs {
   private getSigningPair (address: string): KeyringPair {
     const pair = keyring.getPair(address);
 
-    assert(pair, 'Unable to find keypair');
+    assert(pair, 'Unable to find account');
 
     return pair;
   }

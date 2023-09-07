@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import React from 'react';
+import styled from 'styled-components';
 
 import { LayoutBaseProps } from './Base';
 
@@ -12,7 +13,7 @@ LayoutBaseProps,
 > & Required<Pick<LayoutBaseProps, 'title'>>
   ;
 
-const WithSubHeaderOnly = (props: Props) => {
+const Component = (props: Props) => {
   const { children,
     showBackButton = true,
     subHeaderCenter = true,
@@ -34,5 +35,7 @@ const WithSubHeaderOnly = (props: Props) => {
     </Layout.Base>
   );
 };
+
+const WithSubHeaderOnly = styled(Component)<Props>(({ theme: { token } }: Props) => ({}));
 
 export { WithSubHeaderOnly };

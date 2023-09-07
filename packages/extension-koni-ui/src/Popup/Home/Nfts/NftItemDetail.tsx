@@ -4,7 +4,7 @@
 import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { CAMERA_CONTROLS_MODEL_VIEWER_PROPS, DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
+import { CAMERA_CONTROLS_MODEL_VIEWER_PROPS, DEFAULT_MODEL_VIEWER_PROPS, DEFAULT_NFT_PARAMS, NFT_TRANSACTION, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
@@ -14,7 +14,7 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import useGetChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetAccountInfoByAddress from '@subwallet/extension-koni-ui/hooks/screen/common/useGetAccountInfoByAddress';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { SendNftParams, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, Logo, ModalContext } from '@subwallet/react-ui';
@@ -26,6 +26,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -75,6 +76,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
   const accountExternalUrl = getExplorerLink(originChainInfo, nftItem.owner, 'account');
   const [sendNftKey, setSendNftKey] = useState<string>('sendNftKey');
+  const [, setStorage] = useLocalStorage<SendNftParams>(NFT_TRANSACTION, DEFAULT_NFT_PARAMS);
 
   useNavigateOnChangeAccount('/home/nfts/collections');
 
@@ -97,9 +99,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     if (isWebUI) {
       activeModal(TRANSFER_NFT_MODAL);
     } else {
-      navigate(`/transaction/send-nft/${nftItem.owner}/${nftItem.chain}/${nftItem.collectionId}/${nftItem.id}`);
+      setStorage({
+        asset: '',
+        collectionId: nftItem.collectionId,
+        from: nftItem.owner,
+        itemId: nftItem.id,
+        to: '',
+        chain: nftItem.chain
+      });
+      navigate('/transaction/send-nft');
     }
-  }, [accounts, navigate, nftItem, isWebUI, activeModal, notify, t]);
+  }, [accounts, navigate, nftItem, isWebUI, activeModal, notify, setStorage, t]);
 
   const subHeaderRightButton: ButtonProps[] = [
     {

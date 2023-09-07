@@ -205,6 +205,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
 
       '.ant-input': {
         overflow: 'hidden'
+      },
+
+      '.ant-input-suffix>span:last-child:empty': {
+        marginRight: token.marginXS
       }
     },
 

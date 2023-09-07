@@ -14,11 +14,12 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetDefaultAccountName, useIsPopup, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isFirefox } from '@subwallet/extension-koni-ui/utils';
-import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
+import { isFirefox, isNoAccount } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
@@ -26,8 +27,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-import { KeypairType } from '@polkadot/util-crypto/types';
+import { useLocalStorage } from 'usehooks-ts';
 
 import InstructionContainer, { InstructionContentType } from '../../components/InstructionContainer';
 
@@ -72,13 +72,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const isOpenWindowRef = useRef(false);
 
-  const [accountTypes] = useState<KeypairType[]>(() => {
-    const storage = localStorage.getItem(SELECTED_CREATE_ACCOUNT_TYPE_KEY);
+  const [storage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
 
-    const types = storage ? JSON.parse(storage) as KeypairType[] : DEFAULT_ACCOUNT_TYPES;
-
-    return types.length ? types : DEFAULT_ACCOUNT_TYPES;
-  });
+  const [accountTypes] = useState(storage);
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);
@@ -89,7 +85,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     navigate(DEFAULT_ROUTER_PATH);
 
     if (!noAccount) {
-      activeModal(NEW_ACCOUNT_MODAL);
+      activeModal(NEW_SEED_MODAL);
     }
   }, [navigate, activeModal, noAccount]);
 

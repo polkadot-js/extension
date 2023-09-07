@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
@@ -11,7 +12,7 @@ import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountSignMode, PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isSubstrateMessage } from '@subwallet/extension-koni-ui/utils';
+import { isSubstrateMessage, removeTransactionPersist } from '@subwallet/extension-koni-ui/utils';
 import { getSignMode } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -30,6 +31,7 @@ interface Props extends ThemeProps {
   account: AccountJson;
   id: string;
   request: RequestSign;
+  extrinsicType?: ExtrinsicType;
 }
 
 const handleConfirm = async (id: string) => await approveSignPasswordV2({ id });
@@ -41,7 +43,7 @@ const handleSignature = async (id: string, { signature }: SigData) => await appr
 const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD, AccountSignMode.INJECTED];
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { account, className, id, request } = props;
+  const { account, className, extrinsicType, id, request } = props;
 
   const { t } = useTranslation();
   const notify = useNotification();
@@ -207,6 +209,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [account.address, isMessage, onApproveSignature, payload, request.payload, substrateWallet]);
 
   const onConfirm = useCallback(() => {
+    removeTransactionPersist(extrinsicType);
+
     switch (signMode) {
       case AccountSignMode.QR:
         onConfirmQr();
@@ -224,7 +228,7 @@ const Component: React.FC<Props> = (props: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [checkUnlock, onApprovePassword, onConfirmInject, onConfirmLedger, onConfirmQr, signMode]);
+  }, [checkUnlock, extrinsicType, onApprovePassword, onConfirmInject, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
     !!ledgerError && notify({

@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 1.1.10
+Build date: Aug 26, 2023.
+
+Features & Update:
+- Save entered transaction information when closing and reopening the extension (#1555)
+- Support multi-language for messages returned from the background (round 1) (#1640)
+- Support new language: Japanese (#1644)
+- Improve lock UX (#1684)
+- Improve import security (#1798)
+- Update chain list: Add support Gemini 3f, Update RPC for Creditcoin (#1839)
+
 ## 1.1.9
 Build date: Aug 22, 2023.
 

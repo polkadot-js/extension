@@ -11,7 +11,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { setSelectedAccountTypes } from '@subwallet/extension-koni-ui/utils';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
@@ -22,22 +22,27 @@ import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-type Props = ThemeProps & {
-  setAccountTypes?: React.Dispatch<React.SetStateAction<KeypairType[]>>
-};
+interface Props extends ThemeProps {
+  id: string;
+  previousId: string;
+  url: string;
+  label: string;
+  icon?: PhosphorIcon;
+}
 
 const modalId = NEW_ACCOUNT_MODAL;
 
-const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
+const Component: React.FC<Props> = (props: Props) => {
+  const { className, id, previousId, url, label, icon = CheckCircle } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
-  const isActive = checkActive(modalId);
+  const isActive = checkActive(id);
   const { isWebUI } = useContext(ScreenContext);
   const [selectedItems, setSelectedItems] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
 
   const onCancel = useCallback(() => {
-    inactiveModal(modalId);
-  }, [inactiveModal]);
+    inactiveModal(id);
+  }, [id, inactiveModal]);
 
   const onSubmit = useCallback(() => {
     if (isWebUI) {
@@ -45,13 +50,14 @@ const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
 
       setAccountTypes && setAccountTypes(selectedItems);
     } else {
-      setSelectedAccountTypes(selectedItems);
+        setSelectedAccountTypes(selectedItems);
+        navigate(url);
     }
 
     inactiveModal(modalId);
   }, [isWebUI, inactiveModal, activeModal, setAccountTypes, selectedItems]);
 
-  const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL);
+  const onBack = useSwitchModal(id, previousId);
 
   useClickOutSide(isActive, renderModalSelector(className), onCancel);
 
@@ -65,7 +71,7 @@ const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
     <BaseModal
       className={CN(className)}
       closeIcon={(<BackIcon />)}
-      id={modalId}
+      id={id}
       maskClosable={false}
       onCancel={onBack}
       rightIconProps={{
@@ -86,19 +92,19 @@ const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
         icon={(
           <Icon
             className={'icon-submit'}
-            phosphorIcon={CheckCircle}
+            phosphorIcon={icon}
             weight='fill'
           />
         )}
         onClick={onSubmit}
       >
-        {t('Confirm')}
+        {label}
       </Button>
     </BaseModal>
   );
 };
 
-const CreateAccountModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const AccountTypeModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.__select-account-type': {
       marginBottom: token.size
@@ -106,4 +112,4 @@ const CreateAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
   };
 });
 
-export default CreateAccountModal;
+export default AccountTypeModal;

@@ -116,6 +116,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
           TARGET_ENV: JSON.stringify('webapp'),
+          ID_PREFIX: JSON.stringify('sw-app-'),
           TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
           TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
           BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true)

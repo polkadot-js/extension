@@ -63,6 +63,8 @@ export const WalletModalContext = ({ children }: Props) => {
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useExcludeModal('confirmations');
+  useExcludeModal('transfer-fund-modal');
+  useExcludeModal('buy-token-modal');
 
   useEffect(() => {
     const confirmID = searchParams.get('popup');

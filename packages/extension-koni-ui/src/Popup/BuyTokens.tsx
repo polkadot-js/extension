@@ -7,12 +7,12 @@ import { baseServiceItems, Layout, PageWrapper, ServiceItem } from '@subwallet/e
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { ServiceSelector } from '@subwallet/extension-koni-ui/components/Field/BuyTokens/ServiceSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { BUY_SERVICE_CONTACTS, PREDEFINED_BUY_TOKEN, PREDEFINED_BUY_TOKEN_BY_SLUG } from '@subwallet/extension-koni-ui/constants';
+import { BUY_SERVICE_CONTACTS, LIST_PREDEFINED_BUY_TOKEN, MAP_PREDEFINED_BUY_TOKEN } from '@subwallet/extension-koni-ui/constants';
 import { useAssetChecker, useDefaultNavigate, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { AccountType, CreateBuyOrderFunction, SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AccountType, BuyServiceInfo, CreateBuyOrderFunction, SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BuyTokensParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { createBanxaOrder, createTransakOrder, findAccountByAddress, isFirefox, noop, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { createBanxaOrder, createTransakOrder, findAccountByAddress, noop, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { getAccountType } from '@subwallet/extension-koni-ui/utils/account/account';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
@@ -40,46 +40,8 @@ interface LinkUrlProps {
   content: string;
 }
 
-function getTokenItems (accountType: AccountType, ledgerNetwork?: string): TokenItemType[] {
-  const result: TokenItemType[] = [];
-
-  Object.values(PREDEFINED_BUY_TOKEN).forEach((info) => {
-    if (ledgerNetwork) {
-      if (info.network === ledgerNetwork) {
-        result.push({
-          name: info.symbol,
-          slug: info.slug,
-          symbol: info.symbol,
-          originChain: info.network
-        });
-      }
-    } else {
-      if (accountType === 'ALL' || accountType === info.support) {
-        result.push({
-          name: info.symbol,
-          slug: info.slug,
-          symbol: info.symbol,
-          originChain: info.network
-        });
-      }
-    }
-  });
-
-  return result;
-}
-
-const tokenKeyMapIsEthereum: Record<string, boolean> = (() => {
-  const result: Record<string, boolean> = {};
-
-  Object.values(PREDEFINED_BUY_TOKEN).forEach((info) => {
-    result[info.slug] = info.support === 'ETHEREUM';
-  });
-
-  return result;
-})();
-
 const getServiceItems = (tokenSlug: string): ServiceItem[] => {
-  const buyInfo = PREDEFINED_BUY_TOKEN_BY_SLUG[tokenSlug];
+  const buyInfo = MAP_PREDEFINED_BUY_TOKEN[tokenSlug];
   const result: ServiceItem[] = [];
 
   for (const serviceItem of baseServiceItems) {
@@ -87,10 +49,6 @@ const getServiceItems = (tokenSlug: string): ServiceItem[] => {
       ...serviceItem,
       disabled: buyInfo ? !buyInfo.services.includes(serviceItem.key) : true
     };
-
-    if (serviceItem.key === 'banxa' && isFirefox()) {
-      temp.disabled = true;
-    }
 
     result.push(temp);
   }
@@ -118,7 +76,14 @@ const modalId = 'disclaimer-modal';
 function Component ({ className }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
   const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
-  const fixedTokenKey = currentSymbol ? PREDEFINED_BUY_TOKEN[currentSymbol]?.slug : undefined;
+
+  const fixedTokenKey = useMemo((): string | undefined => {
+    if (currentSymbol) {
+      return LIST_PREDEFINED_BUY_TOKEN.filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol)[0]?.slug;
+    } else {
+      return undefined;
+    }
+  }, [currentSymbol]);
 
   const notify = useNotification();
 
@@ -133,11 +98,11 @@ function Component ({ className }: Props) {
   const { t } = useTranslation();
   const { goBack } = useDefaultNavigate();
   const [form] = Form.useForm<BuyTokensFormProps>();
-  const formDefault: BuyTokensFormProps = {
+  const formDefault = useMemo((): BuyTokensFormProps => ({
     address: isAllAccount ? '' : (currentAccount?.address || ''),
     tokenKey: fixedTokenKey || '',
     service: '' as SupportService
-  };
+  }), [currentAccount?.address, fixedTokenKey, isAllAccount]);
 
   const promiseRef = useRef<Resolver<void>>({ resolve: noop, reject: noop });
 
@@ -152,6 +117,10 @@ function Component ({ className }: Props) {
   const selectedAddress = Form.useWatch('address', form);
   const selectedTokenKey = Form.useWatch('tokenKey', form);
   const selectedService = Form.useWatch('service', form);
+
+  const { contactUrl, name: serviceName, policyUrl, termUrl, url } = useMemo((): BuyServiceInfo => {
+    return BUY_SERVICE_CONTACTS[selectedService] || { name: '', url: '', contactUrl: '', policyUrl: '', termUrl: '' };
+  }, [selectedService]);
 
   const onConfirm = useCallback((): Promise<void> => {
     activeModal(modalId);
@@ -190,22 +159,42 @@ function Component ({ className }: Props) {
   }, [accounts, chainInfoMap, selectedAddress]);
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
-    if (fixedTokenKey) {
-      return getTokenItems('ALL', ledgerNetwork);
-    }
+    const result: TokenItemType[] = [];
 
-    if (!accountType) {
-      return [];
-    }
+    const list = [...LIST_PREDEFINED_BUY_TOKEN];
 
-    return getTokenItems(accountType, ledgerNetwork);
-  }, [accountType, fixedTokenKey, ledgerNetwork]);
+    const filtered = currentSymbol ? list.filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol) : list;
+
+    filtered.forEach((info) => {
+      if (ledgerNetwork) {
+        if (info.network === ledgerNetwork) {
+          result.push({
+            name: info.symbol,
+            slug: info.slug,
+            symbol: info.symbol,
+            originChain: info.network
+          });
+        }
+      } else {
+        if (accountType === 'ALL' || accountType === info.support) {
+          result.push({
+            name: info.symbol,
+            slug: info.slug,
+            symbol: info.symbol,
+            originChain: info.network
+          });
+        }
+      }
+    });
+
+    return result;
+  }, [accountType, currentSymbol, ledgerNetwork]);
 
   const serviceItems = useMemo(() => getServiceItems(selectedTokenKey), [selectedTokenKey]);
 
   const isSupportBuyTokens = useMemo(() => {
     if (selectedService && selectedAddress && selectedTokenKey) {
-      const buyInfo = PREDEFINED_BUY_TOKEN_BY_SLUG[selectedTokenKey];
+      const buyInfo = MAP_PREDEFINED_BUY_TOKEN[selectedTokenKey];
       const accountType = getAccountType(selectedAddress);
 
       return buyInfo && buyInfo.support === accountType && buyInfo.services.includes(selectedService) && tokenItems.find((item) => item.slug === selectedTokenKey);
@@ -221,7 +210,7 @@ function Component ({ className }: Props) {
 
     let urlPromise: CreateBuyOrderFunction | undefined;
 
-    const buyInfo = PREDEFINED_BUY_TOKEN_BY_SLUG[tokenKey];
+    const buyInfo = MAP_PREDEFINED_BUY_TOKEN[tokenKey];
     const { network } = buyInfo;
 
     const serviceInfo = buyInfo.serviceInfo[service];
@@ -278,13 +267,37 @@ function Component ({ className }: Props) {
     }
   }, [form, chainInfoMap, disclaimerAgree, onConfirm, walletReference, notify, t]);
 
+  const filterAccountType = useMemo((): AccountType => {
+    if (currentSymbol) {
+      let result: AccountType = '' as AccountType;
+
+      const list = LIST_PREDEFINED_BUY_TOKEN.filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol);
+
+      list.forEach((info) => {
+        if (result) {
+          if (result !== info.support) {
+            if (result === 'SUBSTRATE' || result === 'ETHEREUM') {
+              result = 'ALL';
+            }
+          }
+        } else {
+          result = info.support;
+        }
+      });
+
+      return result;
+    } else {
+      return 'ALL';
+    }
+  }, [currentSymbol]);
+
   const accountsFilter = useCallback((account: AccountJson) => {
     if (isAccountAll(account.address)) {
       return false;
     }
 
-    if (fixedTokenKey) {
-      if (tokenKeyMapIsEthereum[fixedTokenKey]) {
+    if (filterAccountType !== 'ALL') {
+      if (filterAccountType === 'ETHEREUM') {
         return isEthereumAddress(account.address);
       } else {
         return !isEthereumAddress(account.address);
@@ -292,7 +305,7 @@ function Component ({ className }: Props) {
     }
 
     return true;
-  }, [fixedTokenKey]);
+  }, [filterAccountType]);
 
   useEffect(() => {
     if (currentAddress !== currentAccount?.address) {
@@ -313,6 +326,10 @@ function Component ({ className }: Props) {
           form.setFieldsValue({ tokenKey: tokenItems[0].slug });
         }
       }
+    } else if (fixedTokenKey) {
+      setTimeout(() => {
+        form.setFieldsValue({ tokenKey: fixedTokenKey });
+      }, 100);
     }
   }, [tokenItems, fixedTokenKey, form]);
 
@@ -332,9 +349,6 @@ function Component ({ className }: Props) {
       }
     }
   }, [selectedTokenKey, form]);
-
-  const service = BUY_SERVICE_CONTACTS[selectedService];
-  const { contactUrl, name: serviceName, policyUrl, termUrl, url } = service || { name: '', url: '', contactUrl: '', policyUrl: '', termUrl: '' };
 
   return (
     <Layout.Home
@@ -381,7 +395,7 @@ function Component ({ className }: Props) {
             <div className='form-row'>
               <Form.Item name={'tokenKey'}>
                 <TokenSelector
-                  disabled={!!fixedTokenKey || !tokenItems.length}
+                  disabled={tokenItems.length < 2}
                   items={tokenItems}
                   showChainInSelected={false}
                 />

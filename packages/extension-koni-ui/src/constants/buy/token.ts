@@ -12,8 +12,8 @@ const DEFAULT_SERVICE_INFO: Record<SupportService, BuyService> = {
   moonpay: { ...DEFAULT_BUY_SERVICE }
 };
 
-export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
-  DOT: {
+export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
+  'polkadot-NATIVE-DOT': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
       transak: {
@@ -31,7 +31,7 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     support: 'SUBSTRATE',
     services: ['transak', 'banxa']
   },
-  KSM: {
+  'kusama-NATIVE-KSM': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
       transak: {
@@ -49,7 +49,7 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     support: 'SUBSTRATE',
     services: ['transak', 'banxa']
   },
-  ASTR: {
+  'astar-NATIVE-ASTR': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
       transak: {
@@ -63,7 +63,7 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     support: 'SUBSTRATE',
     services: ['transak']
   },
-  GLMR: {
+  'moonbeam-NATIVE-GLMR': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
       transak: {
@@ -81,7 +81,7 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     support: 'ETHEREUM',
     services: ['transak', 'banxa']
   },
-  MOVR: {
+  'moonriver-NATIVE-MOVR': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
       transak: {
@@ -95,7 +95,7 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     support: 'ETHEREUM',
     services: ['transak']
   },
-  ETH: {
+  'ethereum-NATIVE-ETH': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
       transak: {
@@ -113,7 +113,7 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     support: 'ETHEREUM',
     services: ['transak', 'banxa']
   },
-  BNB: {
+  'binance-NATIVE-BNB': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
       transak: {
@@ -127,7 +127,7 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     support: 'ETHEREUM',
     services: ['transak']
   },
-  NEER: {
+  'pioneer-NATIVE-NEER': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
       transak: {
@@ -140,7 +140,39 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     symbol: 'NEER',
     support: 'SUBSTRATE',
     services: ['transak']
+  },
+  'ethereum-ERC20-USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': {
+    serviceInfo: {
+      ...DEFAULT_SERVICE_INFO,
+      banxa: {
+        network: 'ETH',
+        symbol: 'USDT'
+      },
+      transak: {
+        network: 'ethereum',
+        symbol: 'USDT'
+      }
+    },
+    network: 'ethereum',
+    slug: 'ethereum-ERC20-USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7',
+    symbol: 'USDT',
+    support: 'ETHEREUM',
+    services: ['banxa', 'transak']
+  },
+  'polygon-ERC20-USDT-0xc2132D05D31c914a87C6611C10748AEb04B58e8F': {
+    serviceInfo: {
+      ...DEFAULT_SERVICE_INFO,
+      transak: {
+        network: 'polygon',
+        symbol: 'USDT'
+      }
+    },
+    network: 'polygon',
+    slug: 'polygon-ERC20-USDT-0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+    symbol: 'USDT',
+    support: 'ETHEREUM',
+    services: ['transak']
   }
 };
 
-export const PREDEFINED_BUY_TOKEN_BY_SLUG: Record<string, BuyTokenInfo> = Object.fromEntries(Object.values(PREDEFINED_BUY_TOKEN).map((info) => [info.slug, info]));
+export const LIST_PREDEFINED_BUY_TOKEN = Object.values(MAP_PREDEFINED_BUY_TOKEN);

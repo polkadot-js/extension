@@ -41,13 +41,13 @@ export const IPFS_W3S_LINK = 'https://w3s.link/ipfs/';
 
 export const GATEWAY_IPFS_IO = 'https://gateway.ipfs.io/ipfs/';
 
+export const IPFS_IO = 'https://ipfs.io/ipfs/';
+
 export const DWEB_LINK = 'https://dweb.link/ipfs/';
 
 export const IPFS_GATEWAY_4EVERLAND = 'https://4everland.io/ipfs/';
 
 export const IPFS_FLEEK = 'https://ipfs.fleek.co/ipfs/';
-
-export const IPFS_HARDBIN = 'https://hardbin.com/ipfs/';
 
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
@@ -119,27 +119,27 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
     weight: 1 // Rate limit too low
   },
   {
+    provider: DWEB_LINK,
+    weight: 5
+  },
+  {
     provider: GATEWAY_IPFS_IO,
     weight: 5
   },
   {
-    provider: DWEB_LINK,
+    provider: IPFS_IO,
     weight: 5
+  },
+  {
+    provider: NFT_STORAGE_GATEWAY,
+    weight: 50
   }
 ];
 
 if (!RuntimeInfo.protocol || (RuntimeInfo.protocol && !RuntimeInfo.protocol.startsWith('http'))) {
   RANDOM_IPFS_GATEWAY_SETTING.push({
-    provider: NFT_STORAGE_GATEWAY,
-    weight: 50
-  });
-  RANDOM_IPFS_GATEWAY_SETTING.push({
     provider: IPFS_FLEEK,
     weight: 4
-  });
-  RANDOM_IPFS_GATEWAY_SETTING.push({
-    provider: IPFS_HARDBIN,
-    weight: 1
   });
   RANDOM_IPFS_GATEWAY_SETTING.push({
     provider: IPFS_GATEWAY_4EVERLAND,

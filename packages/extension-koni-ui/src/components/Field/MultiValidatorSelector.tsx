@@ -77,7 +77,7 @@ const filterOptions = [
 const defaultModalId = 'multi-validator-selector';
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', from, defaultValue, id = defaultModalId, isSingleSelect: _isSingleSelect = false, loading, onChange, setForceFetchValidator, value } = props;
+  const { chain, className = '', defaultValue, from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, loading, onChange, setForceFetchValidator, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
 

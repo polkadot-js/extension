@@ -840,9 +840,9 @@ export default class TransactionService {
           if (isApproved) {
             let signedTransaction: string | undefined;
 
-          if (!payload) {
-            throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, t('Failed to sign'));
-          }
+            if (!payload) {
+              throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, t('Failed to sign'));
+            }
 
             const web3Api = this.chainService.getEvmApi(chain).api;
 
@@ -853,9 +853,9 @@ export default class TransactionService {
 
               const recover = web3Api.eth.accounts.recoverTransaction(signed);
 
-            if (recover.toLowerCase() !== account.address.toLowerCase()) {
-              throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, t('Wrong signature. Please sign with the account you use in dApp'));
-            }
+              if (recover.toLowerCase() !== account.address.toLowerCase()) {
+                throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, t('Wrong signature. Please sign with the account you use in dApp'));
+              }
 
               signedTransaction = signed;
             }
@@ -866,38 +866,38 @@ export default class TransactionService {
             // Send transaction
             this.handleTransactionTimeout(emitter, eventData);
 
-          // Add start info
-          eventData.nonce = txObject.nonce;
-          eventData.startBlock = await web3Api.eth.getBlockNumber();
-          emitter.emit('send', eventData); // This event is needed after sending transaction with queue
-          signedTransaction && web3Api.eth.sendSignedTransaction(signedTransaction)
-            .once('transactionHash', (hash) => {
-              eventData.extrinsicHash = hash;
-              emitter.emit('extrinsicHash', eventData);
-            })
-            .once('receipt', (rs) => {
-              eventData.extrinsicHash = rs.transactionHash;
-              eventData.blockHash = rs.blockHash;
-              eventData.blockNumber = rs.blockNumber;
-              emitter.emit('success', eventData);
-            })
-            .once('error', (e) => {
-              eventData.errors.push(new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, t(e.message)));
-              emitter.emit('error', eventData);
-            })
-            .catch((e: Error) => {
-              eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, t(e.message)));
-              emitter.emit('error', eventData);
-            });
-        } else {
+            // Add start info
+            eventData.nonce = txObject.nonce;
+            eventData.startBlock = await web3Api.eth.getBlockNumber();
+            emitter.emit('send', eventData); // This event is needed after sending transaction with queue
+            signedTransaction && web3Api.eth.sendSignedTransaction(signedTransaction)
+              .once('transactionHash', (hash) => {
+                eventData.extrinsicHash = hash;
+                emitter.emit('extrinsicHash', eventData);
+              })
+              .once('receipt', (rs) => {
+                eventData.extrinsicHash = rs.transactionHash;
+                eventData.blockHash = rs.blockHash;
+                eventData.blockNumber = rs.blockNumber;
+                emitter.emit('success', eventData);
+              })
+              .once('error', (e) => {
+                eventData.errors.push(new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, t(e.message)));
+                emitter.emit('error', eventData);
+              })
+              .catch((e: Error) => {
+                eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, t(e.message)));
+                emitter.emit('error', eventData);
+              });
+          } else {
+            this.removeTransaction(id);
+            eventData.errors.push(new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST));
+            emitter.emit('error', eventData);
+          }
+        })
+        .catch((e: Error) => {
           this.removeTransaction(id);
-          eventData.errors.push(new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST));
-          emitter.emit('error', eventData);
-        }
-      })
-      .catch((e: Error) => {
-        this.removeTransaction(id);
-        eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SIGN, t(e.message)));
+          eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SIGN, t(e.message)));
 
           emitter.emit('error', eventData);
         });

@@ -39,7 +39,7 @@
     "@subwallet/extension-dapp": "^1.1.10-0",
     "@subwallet/extension-inject": "^1.1.10-0",
     "@subwallet/keyring": "^0.0.10",
-    "@subwallet/react-ui": "5.1.2-b69",
+    "@subwallet/react-ui": "5.1.2-b72",
     "@subwallet/ui-keyring": "^0.0.10",
     "@walletconnect/types": "^2.8.4",
     "bip39": "^3.1.0",

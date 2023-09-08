@@ -207,27 +207,27 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               >
                 <PrivateKeyInput
                   className='private-key-input'
-                hideText={!show}
-                label={t('Private key')}
+                  hideText={!show}
+                  label={t('Private key')}
                   placeholder={t('Enter or paste private key')}
                   statusHelp={validateState.message}
                 />
               </Form.Item>
-            <div className='button-container'>
-              <Button
-                icon={(
-                  <Icon
-                    phosphorIcon={show ? EyeSlash : Eye}
-                    size='sm'
-                  />
-                )}
-                onClick={toggleShow}
-                size='xs'
-                type='ghost'
-              >
-                {show ? t('Hide private key') : t('Show private key')}
-              </Button>
-            </div>
+              <div className='button-container'>
+                <Button
+                  icon={(
+                    <Icon
+                      phosphorIcon={show ? EyeSlash : Eye}
+                      size='sm'
+                    />
+                  )}
+                  onClick={toggleShow}
+                  size='xs'
+                  type='ghost'
+                >
+                  {show ? t('Hide private key') : t('Show private key')}
+                </Button>
+              </div>
               <Form.Item hidden={!isWebUI}>
                 <Button
                   disabled={!privateKey || !!validateState.status}

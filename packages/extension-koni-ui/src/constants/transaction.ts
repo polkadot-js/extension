@@ -21,6 +21,7 @@ export const TRANSACTION_TITLE_MAP: Record<ExtrinsicType, string> = {
   [ExtrinsicType.STAKING_CLAIM_REWARD]: detectTranslate('Claim rewards'),
   [ExtrinsicType.STAKING_COMPOUNDING]: detectTranslate('Compound'),
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: detectTranslate('Cancel compound'),
+  [ExtrinsicType.EARN]: detectTranslate('Earn'), //TODO: Change this
   [ExtrinsicType.EVM_EXECUTE]: detectTranslate('Execute'),
   [ExtrinsicType.UNKNOWN]: detectTranslate('Unknown')
 };

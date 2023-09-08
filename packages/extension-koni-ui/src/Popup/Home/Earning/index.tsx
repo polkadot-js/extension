@@ -6,21 +6,21 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EarningItem from '@subwallet/extension-koni-ui/components/EarningItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import EarningCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
-import StakingModal, { STAKING_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingModal';
+import { useNavigate } from 'react-router-dom';
 
 type Props = ThemeProps;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { activeModal } = useContext(ModalContext);
@@ -33,7 +33,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const onClickStakeBtn = useCallback((item: YieldPoolInfo) => {
     setSelectedItem(item);
-    activeModal(STAKING_MODAL_ID);
+    navigate(`/transaction/earn/${item.slug}`)
   }, [activeModal]);
 
   const renderEarningItem = useCallback((item: YieldPoolInfo) => {
@@ -42,6 +42,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         item={item}
         onClickCalculatorBtn={() => onClickCalculatorBtn(item)}
         onClickStakeBtn={() => onClickStakeBtn(item)}
+        key={item.slug}
       />
     );
   }, [onClickCalculatorBtn, onClickStakeBtn]);
@@ -73,7 +74,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
 
         {selectedItem && <EarningCalculatorModal item={selectedItem} />}
-        {selectedItem && <StakingModal item={selectedItem} />}
       </Layout.Base>
     </PageWrapper>
 

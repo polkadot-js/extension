@@ -109,6 +109,7 @@ const Unstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/
 const CancelUnstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/CancelUnstake'));
 const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/ClaimReward'));
 const Withdraw = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Withdraw'));
+const Earn = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Earn'));
 
 // Wallet Connect
 const ConnectWalletConnect = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
@@ -175,6 +176,7 @@ export const router = createBrowserRouter([
           CancelUnstake.generateRouterObject('cancel-unstake/:type/:chain'),
           ClaimReward.generateRouterObject('claim-reward/:type/:chain'),
           Withdraw.generateRouterObject('withdraw/:type/:chain'),
+          Earn.generateRouterObject('earn/:slug'),
           {
             path: 'compound',
             element: <Example />

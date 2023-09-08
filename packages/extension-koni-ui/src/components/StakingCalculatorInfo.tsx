@@ -5,7 +5,7 @@ import styled, { useTheme } from 'styled-components';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { CalendarCheck } from 'phosphor-react';
 import EarningInfoItem from '@subwallet/extension-koni-ui/components/EarningInfoItem';
-import { TransformAssetEarning } from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingCalculatorModal';
+import { TransformAssetEarning } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 
 interface Props extends ThemeProps {
@@ -16,11 +16,12 @@ interface Props extends ThemeProps {
 const Component: React.FC<Props> = ({ className, earningAssets, label }: Props) => {
   const { token } = useTheme() as Theme;
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
+  const chainAsset = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const totalEarningAsset = useMemo(() => {
     let result = 0;
     Object.keys(earningAssets).forEach(key => {
-      const symbol = key.split('-')[0];
-      const tokenPrice = priceMap[symbol.toLowerCase()] || 0;
+      const asset = chainAsset[key];
+      const tokenPrice = asset.priceId ? priceMap[asset.priceId] : 0;
       const tokenReward = (earningAssets[key].rewardInToken || 0) * tokenPrice;
       result += tokenReward;
     });

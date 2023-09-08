@@ -12,6 +12,7 @@ import { InfoItemBase } from './types';
 export interface NumberInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
   value: string | number | BigN
   suffix?: string
+  prefix?: string
   decimals?: number
   valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd'
   decimalOpacity?: number
@@ -26,6 +27,7 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
     label,
     size = 30,
     subFloatNumber = false,
+    prefix,
     suffix,
     value,
     valueColorSchema = 'default' } = props;
@@ -42,6 +44,7 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
           decimalOpacity={decimalOpacity}
           intOpacity={1}
           size={size}
+          prefix={prefix}
           subFloatNumber={subFloatNumber}
           suffix={suffix}
           unitOpacity={1}

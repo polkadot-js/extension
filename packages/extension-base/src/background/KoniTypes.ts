@@ -487,6 +487,7 @@ export enum ExtrinsicType {
   STAKING_COMPOUNDING = 'staking.compounding',
   STAKING_CANCEL_COMPOUNDING = 'staking.cancel_compounding',
   STAKING_CANCEL_UNSTAKE = 'staking.cancel_unstake',
+  EARN = 'earn',
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }

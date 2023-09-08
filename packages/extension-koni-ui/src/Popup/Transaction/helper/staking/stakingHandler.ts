@@ -37,7 +37,7 @@ export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t:
   }
 }
 
-const fetchChainValidator = (chain: string, unmount: boolean, setValidatorLoading: (value: boolean) => void, setForceFetchValidator: (value: boolean) => void) => {
+export const fetchChainValidator = (chain: string, unmount: boolean, setValidatorLoading: (value: boolean) => void, setForceFetchValidator: (value: boolean) => void) => {
   if (!unmount) {
     setValidatorLoading(true);
     getBondingOptions(chain, StakingType.NOMINATED)
@@ -54,7 +54,7 @@ const fetchChainValidator = (chain: string, unmount: boolean, setValidatorLoadin
   }
 };
 
-const fetchChainPool = (chain: string, unmount: boolean, setPoolLoading: (value: boolean) => void, setForceFetchValidator: (value: boolean) => void) => {
+export const fetchChainPool = (chain: string, unmount: boolean, setPoolLoading: (value: boolean) => void, setForceFetchValidator: (value: boolean) => void) => {
   if (!unmount && _STAKING_CHAIN_GROUP.nominationPool.includes(chain)) {
     setPoolLoading(true);
     getNominationPoolOptions(chain)

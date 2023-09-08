@@ -1812,6 +1812,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@coinbase/cbpay-js@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "@coinbase/cbpay-js@npm:1.7.0"
+  peerDependencies:
+    regenerator-runtime: ^0.13.9
+  peerDependenciesMeta:
+    regenerator-runtime:
+      optional: true
+  checksum: 915b98ea75eeb8e7676f119e90e26b88ed3059dadb568ea218f7fd29fe666d3bb68778aa7558265722f27b105d3f7b13a12dcd889a4ef6c2db2da0a5bd1dcc0e
+  languageName: node
+  linkType: hard
+
 "@crustio/type-definitions@npm:1.3.0":
   version: 1.3.0
   resolution: "@crustio/type-definitions@npm:1.3.0"
@@ -5994,6 +6006,7 @@ __metadata:
   resolution: "@subwallet/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
     "@babel/runtime": ^7.20.6
+    "@coinbase/cbpay-js": ^1.7.0
     "@fortawesome/fontawesome-svg-core": ^6.2.1
     "@fortawesome/free-brands-svg-icons": ^6.2.1
     "@fortawesome/free-regular-svg-icons": ^6.2.1

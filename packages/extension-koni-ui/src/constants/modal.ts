@@ -1,6 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+export const DEFAULT_MODAL_INDEX = 1000;
+export const CONFIRMATION_MODAL_INDEX = DEFAULT_MODAL_INDEX + 100;
+
 export const SELECT_ACCOUNT_MODAL = 'account-list-modal';
 export const CREATE_ACCOUNT_MODAL = 'create-account-modal';
 export const CUSTOMIZE_MODAL = 'customize-modal';

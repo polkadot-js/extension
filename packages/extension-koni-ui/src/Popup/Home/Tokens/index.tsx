@@ -53,14 +53,18 @@ const Component = (): React.ReactElement => {
 
   const outletContext: {
     searchInput: string,
-    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
+    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>,
+    setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>
   } = useOutletContext();
 
   const searchInput = outletContext?.searchInput;
+  const setSearchPlaceholder = outletContext?.setSearchPlaceholder;
+  const setShowSearchInput = outletContext?.setShowSearchInput;
 
   useEffect(() => {
-    outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Token name');
-  }, [outletContext, outletContext?.setSearchPlaceholder]);
+    setSearchPlaceholder?.(t('Token name'));
+    setShowSearchInput?.(true);
+  }, [setSearchPlaceholder, setShowSearchInput, t]);
 
   const notify = useNotification();
   const { accountSelectorItems,

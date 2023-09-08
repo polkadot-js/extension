@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
+import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
+import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Input, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import styled from 'styled-components';
@@ -72,15 +74,27 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const goBack = useCallback(() => navigate(-1), [navigate]);
   const [searchInput, setSearchInput] = useState<string>('');
+  const [showSearchInput, setShowSearchInput] = useState<boolean>(true);
   const searchInputRef = useRef<SearchInputRef>(null);
+  const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
 
-  const TAB_LIST = [t('Tokens'), t('NFTs')];
+  const isTotalZero = totalBalanceInfo.convertedValue.eq(BN_ZERO);
+
+  const TAB_LIST = useMemo(() => {
+    if (isTotalZero) {
+      return [t('Tokens'), t('NFTs')];
+    }
+
+    return [t('Tokens'), t('NFTs'), t('Statistics')];
+  }, [isTotalZero, t]);
 
   const handleSelectTab = useCallback((index: number) => {
     if (!index) {
       navigate('tokens');
-    } else {
+    } else if (index === 1) {
       navigate('nfts/collections');
+    } else if (index === 2) {
+      navigate('statistics');
     }
   }, [navigate]);
 
@@ -122,6 +136,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                     <div style={{ display: 'none' }}>
                       <TabPanel></TabPanel>
                       <TabPanel></TabPanel>
+                      {!isTotalZero && <TabPanel></TabPanel>}
                     </div>
                   </Tabs>
                 </>
@@ -139,7 +154,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           }
           <div className='right-section'>
             <SearchInput
-              className='search-input'
+              className={CN('search-input', {
+                hidden: !showSearchInput
+              })}
               onChange={setSearchInput}
               placeholder={searchPlaceholder}
               ref={searchInputRef}
@@ -153,7 +170,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           context={{
             searchInput,
             setDetailTitle,
-            setSearchPlaceholder
+            setSearchPlaceholder,
+            setShowSearchInput
           }}
         />
       </div>
@@ -190,6 +208,7 @@ const PortfolioPage = styled(Component)<Props>(({ theme: { token } }: Props) => 
       alignItems: 'center',
       justifyContent: 'space-between',
       background: 'transparent',
+      minHeight: 50,
 
       '.web-header': {
         flex: 1,

@@ -10,7 +10,7 @@ import { TRANSACTION_STORAGES } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
-import { useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
+import { useGetCurrentPage, useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
@@ -22,7 +22,7 @@ import { NotificationProps } from '@subwallet/react-ui/es/notification/Notificat
 import CN from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 changeHeaderLogo(<Logo2D />);
@@ -76,12 +76,13 @@ function removeLoadingPlaceholder (): void {
 function DefaultRoute ({ children }: { children: React.ReactNode }): React.ReactElement {
   const dataContext = useContext(DataContext);
   const location = useLocation();
-  const navigate = useNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
   const notify = useNotification();
   const [rootLoading, setRootLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
   const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay']));
+  const currentPage = useGetCurrentPage();
+  const firstRender = useRef(true);
 
   useSubscribeLanguage();
 
@@ -173,6 +174,8 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
     } else if (pathName === DEFAULT_ROUTER_PATH) {
       if (hasConfirmations) {
         openPModal('confirmations');
+      } else if (firstRender.current && currentPage) {
+        redirectTarget = currentPage;
       } else {
         redirectTarget = tokenUrl;
       }
@@ -185,22 +188,21 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
     }
 
     // Remove loading on finished first compute
-    rootLoading && setRootLoading((val) => {
+    firstRender.current && setRootLoading((val) => {
       if (val) {
         removeLoadingPlaceholder();
+        firstRender.current = false;
       }
 
       return false;
     });
 
     if (redirectTarget && redirectTarget !== pathName) {
-      navigate(redirectTarget);
-
       return redirectTarget;
     } else {
       return null;
     }
-  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, rootLoading, openPModal, navigate]);
+  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasInternalConfirmations, isOpenPModal, hasConfirmations, currentPage, openPModal]);
 
   // Remove transaction persist state
   useEffect(() => {
@@ -214,7 +216,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   }, [currentAccount, initAccount]);
 
   if (rootLoading || redirectPath) {
-    return <></>;
+    return <>{redirectPath && <Navigate to={redirectPath} />}</>;
   } else {
     return <MainWrapper className={CN('main-page-container')}>
       {children}

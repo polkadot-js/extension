@@ -23,7 +23,7 @@ import { NotificationProps } from '@subwallet/react-ui/es/notification/Notificat
 import CN from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { WebUIContextProvider } from '../contexts/WebUIContext';
@@ -80,12 +80,12 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const dataContext = useContext(DataContext);
   const screenContext = useContext(ScreenContext);
   const location = useLocation();
-  const navigate = useNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
   const notify = useNotification();
   const [rootLoading, setRootLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
   const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay']));
+  const firstRender = useRef(true);
 
   useSubscribeLanguage();
 
@@ -187,22 +187,21 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     }
 
     // Remove loading on finished first compute
-    rootLoading && setRootLoading((val) => {
+    firstRender.current && setRootLoading((val) => {
       if (val) {
         removeLoadingPlaceholder();
+        firstRender.current = false;
       }
 
       return false;
     });
 
     if (redirectTarget && redirectTarget !== pathName) {
-      navigate(redirectTarget);
-
       return redirectTarget;
     } else {
       return null;
     }
-  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, rootLoading, openPModal, navigate]);
+  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, openPModal]);
 
   // Remove transaction persist state
   useEffect(() => {
@@ -216,9 +215,9 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   }, [currentAccount, initAccount]);
 
   if (rootLoading || redirectPath) {
-    return <></>;
+    return <>{redirectPath && <Navigate to={redirectPath} />}</>;
   } else {
-    return <MainWrapper className={CN('main-page-container')}>
+    return <MainWrapper className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
       {children}
     </MainWrapper>;
   }

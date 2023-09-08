@@ -225,6 +225,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const isFirstRender = useIsFirstRender();
 
   const [form] = Form.useForm<TransferParams>();
+
   const formDefault = useMemo((): TransferParams => {
     return {
       ...defaultData
@@ -300,10 +301,10 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       assetRegistry,
       assetSettingMap,
       multiChainAssetMap,
-      tokenGroupSlug,
+      sendFundSlug,
       isZKModeEnabled
     );
-  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, from, isZKModeEnabled, multiChainAssetMap, tokenGroupSlug]);
+  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, from, isZKModeEnabled, multiChainAssetMap, sendFundSlug]);
 
   const validateRecipientAddress = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
     if (!_recipientAddress) {
@@ -512,7 +513,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
     }, 300);
   }, [accounts, assetRegistry, notification, t, isTransferAll, onSuccess, onError]);
 
-  const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, tokenGroupSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, tokenGroupSlug]);
+  const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
   const onSetMaxTransferable = useCallback((value: boolean) => {
     const bnMaxTransfer = new BN(maxTransfer);

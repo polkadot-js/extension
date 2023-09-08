@@ -27,7 +27,7 @@ interface Props extends ThemeProps {
   modalContent?: boolean
 }
 
-function Component ({ className, modalContent }: Props) {
+function Component ({ children, className, modalContent }: Props) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -156,7 +156,7 @@ function Component ({ className, modalContent }: Props) {
       <TransactionContext.Provider value={{ defaultData, needPersistData, persistData, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper __modal-content')}>
-            <Outlet />
+            {children}
           </div>
         </PageWrapper>
       </TransactionContext.Provider>

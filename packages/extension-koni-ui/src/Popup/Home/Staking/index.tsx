@@ -370,10 +370,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       };
     }, [onClickItem]);
 
-  const onClickStake = useCallback(() => {
-    preCheck(() => navigate(`/transaction/stake/${ALL_KEY}`), ExtrinsicType.STAKING_BOND)();
-  }, [navigate, preCheck]);
-
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {
     return [
       {
@@ -434,7 +430,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         size='sm'
                       />
                     )}
-                    onClick={onClickStake}
+                    onClick={onClickStakeMore}
                     tooltip={t('Add to bond')}
                     type='ghost'
                   />
@@ -486,7 +482,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [columns, emptyStakingList, filterFunction, filterTabItems, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, onSelectFilterTab, renderItem, searchFunction, searchInput, selectedFilterTab, t]);
+  }, [columns, emptyStakingList, filterFunction, filterTabItems, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStakeMore, onRow, onSearch, onSelectFilterTab, renderItem, searchFunction, searchInput, selectedFilterTab, t]);
 
   return (
     <PageWrapper

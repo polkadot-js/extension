@@ -42,8 +42,11 @@ const _accountFilterFunc = (
 const hideFields: Array<keyof UnStakeParams> = ['chain', 'asset', 'type'];
 const validateFields: Array<keyof UnStakeParams> = ['value'];
 
-const Component: React.FC = () => {
+const Component: React.FC = ({ className }: Props) => {
   const { t } = useTranslation();
+  const dataContext = useContext(DataContext);
+
+  useSetCurrentPage('/transaction/unstake');
 
   const { defaultData, onDone, persistData } = useTransactionContext<UnStakeParams>();
   const { chain, type } = defaultData;
@@ -232,7 +235,7 @@ const Component: React.FC = () => {
   useInitValidateTransaction(validateFields, form, defaultData);
 
   return (
-    <div className={className}>
+    <div>
       <TransactionContent>
         <Form
           className={CN('form-container', 'form-space-xxs')}
@@ -336,7 +339,7 @@ const Component: React.FC = () => {
   );
 };
 
-const Wrapper: React.FC<Props> = (props: Props) => {
+const Wrapper: React.FC<Component> = (props: Props) => {
   const { className } = props;
 
   useSetCurrentPage('/transaction/unstake');

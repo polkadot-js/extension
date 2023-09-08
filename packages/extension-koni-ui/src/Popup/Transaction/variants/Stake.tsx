@@ -6,7 +6,7 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AmountInput,HiddenInput,  MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AmountInput, HiddenInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import NetworkInformation from '@subwallet/extension-koni-ui/components/NetworkInformation';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -35,10 +35,12 @@ type Props = ThemeProps;
 const hiddenFields: Array<keyof StakeParams> = ['chain', 'defaultChain', 'defaultType'];
 const validateFields: Array<keyof StakeParams> = ['value'];
 
-const Component: React.FC = () => {
+function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
 
+  useSetCurrentPage('/transaction/stake');
+  const dataContext = useContext(DataContext);
   const { defaultData, onDone, persistData, setDisabledRightBtn, setShowRightBtn } = useTransactionContext<StakeParams>();
   const { defaultChain: stakingChain, defaultType: _stakingType } = defaultData;
 
@@ -391,44 +393,44 @@ const Component: React.FC = () => {
 
   return (
     <>
-  <div className={className}>
-    <div className={'__transaction-block'}>
-      <TransactionContent>
-
-        <Form
-          className={'form-container form-space-sm'}
-          form={form}
-          initialValues={formDefault}
-          onFieldsChange={onFieldsChange}
-          onFinish={onSubmit}
-        >
-          <HiddenInput fields={hiddenFields} />
-          <Form.Item
-            className='staking-type'
-            hidden={_stakingType !== ALL_KEY}
-            name={'type'}
-          >
-            <RadioGroup
-              optionType='button'
-              options={[
-                {
-                  label: t('Pools'),
-                  value: StakingType.POOLED,
-                  disabled: disablePool
-                },
-                {
-                  label: t('Nominate'),
-                  value: StakingType.NOMINATED
-                }
-              ]}
-            />
-          </Form.Item>
-          <Form.Item
-            hidden={!isAllAccount}
-            name={'from'}
-          >
-            <AccountSelector filter={accountFilterFunc(chainInfoMap, stakingType, stakingChain)} />
-          </Form.Item>
+      <div className={className}>
+        <div className={'__transaction-block'}>
+          <TransactionContent>
+            <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
+              <Form
+                className={'form-container form-space-sm'}
+                form={form}
+                initialValues={formDefault}
+                onFieldsChange={onFieldsChange}
+                onFinish={onSubmit}
+              >
+                <HiddenInput fields={hiddenFields} />
+                <Form.Item
+                  className='staking-type'
+                  hidden={_stakingType !== ALL_KEY}
+                  name={'type'}
+                >
+                  <RadioGroup
+                    optionType='button'
+                    options={[
+                      {
+                        label: t('Pools'),
+                        value: StakingType.POOLED,
+                        disabled: disablePool
+                      },
+                      {
+                        label: t('Nominate'),
+                        value: StakingType.NOMINATED
+                      }
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item
+                  hidden={!isAllAccount}
+                  name={'from'}
+                >
+                  <AccountSelector filter={accountFilterFunc(chainInfoMap, stakingType, stakingChain)} />
+                </Form.Item>
 
                 {
                   !isAllAccount &&
@@ -510,7 +512,7 @@ const Component: React.FC = () => {
                 >
                   <PoolSelector
                     chain={chain}// Not use initialValues of Form, because some state changes by hook, it will be delayed
-              defaultValue={persistPool}
+                    defaultValue={persistPool}
                     from={from}
                     label={t('Select pool')}
                     loading={poolLoading}
@@ -524,7 +526,7 @@ const Component: React.FC = () => {
                 >
                   <MultiValidatorSelector
                     chain={asset ? chain : ''}// Not use initialValues of Form, because some state changes by hook, it will be delayed
-              defaultValue={persistValidator}
+                    defaultValue={persistValidator}
                     from={asset ? from : ''}
                     loading={validatorLoading}
                     setForceFetchValidator={setForceFetchValidator}
@@ -539,7 +541,7 @@ const Component: React.FC = () => {
                   </>
                 )
               }
-
+            </PageWrapper>
           </TransactionContent>
 
           <TransactionFooter
@@ -586,26 +588,9 @@ const Component: React.FC = () => {
       }
     </>
   );
-};
+}
 
-const Wrapper: React.FC<Props> = (props: Props) => {
-  const { className } = props;
-
-  useSetCurrentPage('/transaction/stake');
-
-  const dataContext = useContext(DataContext);
-
-  return (
-    <PageWrapper
-      className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['staking'])}
-    >
-      <Component />
-    </PageWrapper>
-  );
-};
-
-const Stake = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
+const Stake = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     display: 'flex',
     flex: 1,

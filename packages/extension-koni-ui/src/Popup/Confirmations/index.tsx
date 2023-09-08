@@ -14,6 +14,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import { SignerPayloadJSON } from '@polkadot/types/types';
+
 import { ConfirmationHeader } from './parts';
 import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, NotSupportWCConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
 
@@ -63,7 +65,19 @@ const Component = function ({ className }: Props) {
         const _isMessage = isRawPayload(request.request.payload);
 
         account = request.account;
-        canSign = !_isMessage || !account.isHardware;
+
+        if (account.isHardware) {
+          if (_isMessage) {
+            canSign = false;
+          } else {
+            const payload = request.request.payload as SignerPayloadJSON;
+
+            canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash);
+          }
+        } else {
+          canSign = true;
+        }
+
         isMessage = _isMessage;
       } else if (confirmation.type === 'evmSignatureRequest' || confirmation.type === 'evmSendTransactionRequest') {
         const request = confirmation.item as ConfirmationDefinitions['evmSignatureRequest' | 'evmSendTransactionRequest'][0];

@@ -215,7 +215,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
       );
     },
-    [getParaStateLabel, isShowBalance]
+    [getParaStateLabel]
   );
 
   // empty list

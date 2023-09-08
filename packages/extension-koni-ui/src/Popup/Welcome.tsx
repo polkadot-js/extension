@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_ACCOUNT_TYPES, DOWNLOAD_EXTENSION } from '@subwallet/extension-koni-ui/constants';
+import { CONNECT_EXTENSION, DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -182,11 +182,11 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       loading: false
     },
     {
-      description: 'For management of your account keys',
+      description: injected ? t('Connect to your existing extension wallet') : t('For management of your account keys'),
       icon: PuzzlePiece,
-      id: DOWNLOAD_EXTENSION,
+      id: CONNECT_EXTENSION,
       schema: 'secondary',
-      title: injected ? t('Use SubWallet extension') : t('Download SubWallet extension'),
+      title: injected ? t('Connect extension wallet') : t('Download SubWallet extension'),
       loading: loadingInject
     }
   ], [injected, isWebUI, t, loadingInject]);
@@ -195,7 +195,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const openModal = useCallback((id: string) => {
     return () => {
-      if (id === DOWNLOAD_EXTENSION) {
+      if (id === CONNECT_EXTENSION) {
         if (injected) {
           enableInject(() => setEnInject({}));
         } else {
@@ -525,8 +525,10 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
           [`.type-${ATTACH_ACCOUNT_MODAL}`]: {
             color: token['magenta-6']
           },
-          [`.type-${DOWNLOAD_EXTENSION}`]: {
-            color: token.colorSuccess
+
+          [`.type-${CONNECT_EXTENSION}`]: {
+            color: token.colorSuccess,
+            order: -1
           },
 
           '.welcome-import-button': {

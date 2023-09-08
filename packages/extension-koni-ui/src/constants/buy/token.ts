@@ -8,6 +8,7 @@ const DEFAULT_BUY_SERVICE: BuyService = { symbol: '', network: '' };
 const DEFAULT_SERVICE_INFO: Record<SupportService, BuyService> = {
   transak: { ...DEFAULT_BUY_SERVICE },
   banxa: { ...DEFAULT_BUY_SERVICE },
+  coinbase: { ...DEFAULT_BUY_SERVICE },
   onramper: { ...DEFAULT_BUY_SERVICE },
   moonpay: { ...DEFAULT_BUY_SERVICE }
 };
@@ -23,13 +24,17 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       banxa: {
         network: 'DOT',
         symbol: 'DOT'
+      },
+      coinbase: {
+        network: 'polkadot',
+        symbol: 'DOT'
       }
     },
     network: 'polkadot',
     slug: 'polkadot-NATIVE-DOT',
     symbol: 'DOT',
     support: 'SUBSTRATE',
-    services: ['transak', 'banxa']
+    services: ['transak', 'banxa', 'coinbase']
   },
   'kusama-NATIVE-KSM': {
     serviceInfo: {
@@ -41,13 +46,17 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       banxa: {
         network: 'KSM',
         symbol: 'KSM'
+      },
+      coinbase: {
+        network: 'kusama',
+        symbol: 'KSM'
       }
     },
     network: 'kusama',
     slug: 'kusama-NATIVE-KSM',
     symbol: 'KSM',
     support: 'SUBSTRATE',
-    services: ['transak', 'banxa']
+    services: ['transak', 'banxa', 'coinbase']
   },
   'astar-NATIVE-ASTR': {
     serviceInfo: {
@@ -105,13 +114,17 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       banxa: {
         network: 'ETH',
         symbol: 'ETH'
+      },
+      coinbase: {
+        network: 'ethereum',
+        symbol: 'ETH'
       }
     },
     network: 'ethereum',
     slug: 'ethereum-NATIVE-ETH',
     symbol: 'ETH',
     support: 'ETHEREUM',
-    services: ['transak', 'banxa']
+    services: ['transak', 'banxa', 'coinbase']
   },
   'binance-NATIVE-BNB': {
     serviceInfo: {

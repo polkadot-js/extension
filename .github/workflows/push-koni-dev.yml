@@ -28,6 +28,7 @@ jobs:
         NEXTCLOUD_CONFIG: ${{ secrets.NEXTCLOUD_CONFIG }}
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         TRANSAK_API_KEY: ${{ secrets.TRANSAK_API_KEY }}
+        COINBASE_PAY_ID: ${{ secrets.COINBASE_PAY_ID }}
         BANXA_SANDBOX_API_KEY: ${{ secrets.BANXA_SANDBOX_API_KEY }}
         BANXA_SANBOX_API_SECRET: ${{ secrets.BANXA_SANBOX_API_SECRET }}
         GH_RELEASE_FILES: master-build.zip,master-src.zip

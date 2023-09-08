@@ -14,9 +14,17 @@ export const BUY_SERVICE_CONTACTS: Record<SupportService, BuyServiceInfo> = {
   banxa: {
     contactUrl: 'http://support.banxa.com/',
     name: 'Banxa',
-    policyUrl: 'https://banxa.com/wp-content/uploads/2023/06/Privacy-and-Cookies-Policy-19-June-2023.pdf',
+    policyUrl: 'https://banxa.com/wp-content/uploads/2023/07/Privacy-and-Cookies-Policy-19-June-2023.pdf',
     url: 'https://banxa.com/',
-    termUrl: 'https://banxa.com/wp-content/uploads/2023/06/Customer-Terms-and-Conditions-19-June-2023.pdf'
+    termUrl: 'https://banxa.com/wp-content/uploads/2023/07/Customer-Terms-and-Conditions-19-June-2023.pdf'
+  },
+  // TODO: Change text and url
+  coinbase: {
+    contactUrl: 'https://help.coinbase.com/en/contact-us',
+    name: 'Coinbase',
+    policyUrl: 'https://coinbase.com/legal/privacy',
+    url: 'https://coinbase.com/',
+    termUrl: 'https://coinbase.com/legal/user_agreement/united_states'
   },
   moonpay: {
     contactUrl: 'https://support.moonpay.com/',

@@ -17,6 +17,7 @@
   "version": "1.1.10-0",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
+    "@coinbase/cbpay-js": "^1.7.0",
     "@fortawesome/fontawesome-svg-core": "^6.2.1",
     "@fortawesome/free-brands-svg-icons": "^6.2.1",
     "@fortawesome/free-regular-svg-icons": "^6.2.1",

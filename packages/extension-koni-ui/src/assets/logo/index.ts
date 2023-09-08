@@ -14,7 +14,8 @@ export const DefaultLogosMap: Record<string, string> = {
   onramper: './images/projects/onramper.png',
   polkadot_vault: './images/projects/polkadot-vault.png',
   walletconnect: './images/projects/walletconnect.png',
-  banxa: './images/projects/banxa.png'
+  banxa: './images/projects/banxa.png',
+  coinbase: './images/projects/coinbase.png'
 };
 
 export const IconMap = {

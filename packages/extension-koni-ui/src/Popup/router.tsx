@@ -9,94 +9,114 @@ import { i18nPromise } from '@subwallet/extension-koni-ui/utils/common/i18n';
 import React, { ComponentType } from 'react';
 import { createHashRouter, IndexRouteObject, Outlet, useLocation } from 'react-router-dom';
 
+export const lazyLoaderMap: Record<string, LazyLoader> = {};
+
 export class LazyLoader {
   private elemLoader;
+  private loadPromise: Promise<ComponentType<any>> | undefined;
 
-  constructor (promise: () => Promise<{ default: ComponentType<any> }>) {
-    this.elemLoader = promise;
+  constructor (key: string, promiseFunction: () => Promise<{ default: ComponentType<any> }>) {
+    this.elemLoader = promiseFunction;
+    lazyLoaderMap[key] = this;
   }
 
-  public generateRouterObject (path: string): Pick<IndexRouteObject, 'path' | 'lazy'> {
+  public loadElement () {
+    if (!this.loadPromise) {
+      this.loadPromise = new Promise<ComponentType<any>>((resolve, reject) => {
+        this.elemLoader().then((module) => {
+          resolve(module.default);
+        }).catch(reject);
+      });
+    }
+
+    return this.loadPromise;
+  }
+
+  public generateRouterObject (path: string, preload = false): Pick<IndexRouteObject, 'path' | 'lazy'> {
+    if (preload) {
+      this.loadElement().catch(console.error);
+    }
+
     return {
       path,
       lazy: async () => {
-        const Element = await this.elemLoader();
+        const Element = await this.loadElement();
 
         return {
-          element: <Element.default />
+          element: <Element />
         };
       }
     };
   }
 }
 
-const PhishingDetected = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
-const Welcome = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Welcome'));
-const CreateDone = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/CreateDone'));
-const BuyTokens = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/BuyTokens'));
-const Staking = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
+const PhishingDetected = new LazyLoader('PhishingDetected', () => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
+const Welcome = new LazyLoader('Welcome', () => import('@subwallet/extension-koni-ui/Popup/Welcome'));
+const CreateDone = new LazyLoader('CreateDone', () => import('@subwallet/extension-koni-ui/Popup/CreateDone'));
+const BuyTokens = new LazyLoader('BuyTokens', () => import('@subwallet/extension-koni-ui/Popup/BuyTokens'));
+const Staking = new LazyLoader('Staking', () => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
 
-const Tokens = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
-const TokenDetailList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
+const Tokens = new LazyLoader('Tokens', () => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
+const TokenDetailList = new LazyLoader('TokenDetailList', () => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
 
-const NftItemDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftItemDetail'));
-const NftCollections = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollections'));
-const NftCollectionDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
-const NftImport = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftImport'));
+const NftItemDetail = new LazyLoader('NftItemDetail', () => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftItemDetail'));
+const NftCollections = new LazyLoader('NftCollections', () => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollections'));
+const NftCollectionDetail = new LazyLoader('NftCollectionDetail', () => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
+const NftImport = new LazyLoader('NftImport', () => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftImport'));
 
-const History = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
-const Crowdloans = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
-const Home = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home'));
+const History = new LazyLoader('History', () => import('@subwallet/extension-koni-ui/Popup/Home/History'));
+const Crowdloans = new LazyLoader('Crowdloans', () => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
+const Home = new LazyLoader('Home', () => import('@subwallet/extension-koni-ui/Popup/Home'));
 
-const Settings = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
-const GeneralSetting = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
-const ManageAddressBook = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/AddressBook'));
+const Settings = new LazyLoader('Settings', () => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const GeneralSetting = new LazyLoader('GeneralSetting', () => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
+const ManageAddressBook = new LazyLoader('ManageAddressBook', () => import('@subwallet/extension-koni-ui/Popup/Settings/AddressBook'));
 
-const ManageChains = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ManageChains'));
-const ChainImport = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ChainImport'));
-const AddProvider = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/AddProvider'));
-const ChainDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ChainDetail'));
+const ManageChains = new LazyLoader('ManageChains', () => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ManageChains'));
+const ChainImport = new LazyLoader('ChainImport', () => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ChainImport'));
+const AddProvider = new LazyLoader('AddProvider', () => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/AddProvider'));
+const ChainDetail = new LazyLoader('ChainDetail', () => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ChainDetail'));
 
-const ManageTokens = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/ManageTokens'));
-const FungibleTokenImport = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
-const TokenDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/TokenDetail'));
+const ManageTokens = new LazyLoader('ManageTokens', () => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/ManageTokens'));
+const FungibleTokenImport = new LazyLoader('FungibleTokenImport', () => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
+const TokenDetail = new LazyLoader('TokenDetail', () => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/TokenDetail'));
 
-const SecurityList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Security'));
-const ManageWebsiteAccess = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Security/ManageWebsiteAccess'));
-const ManageWebsiteAccessDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Security/ManageWebsiteAccess/Detail'));
+const SecurityList = new LazyLoader('SecurityList', () => import('@subwallet/extension-koni-ui/Popup/Settings/Security'));
+const ManageWebsiteAccess = new LazyLoader('ManageWebsiteAccess', () => import('@subwallet/extension-koni-ui/Popup/Settings/Security/ManageWebsiteAccess'));
+const ManageWebsiteAccessDetail = new LazyLoader('ManageWebsiteAccessDetail', () => import('@subwallet/extension-koni-ui/Popup/Settings/Security/ManageWebsiteAccess/Detail'));
 
-const NewSeedPhrase = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/NewSeedPhrase'));
-const ImportSeedPhrase = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportSeedPhrase'));
-const ImportPrivateKey = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportPrivateKey'));
-const RestoreJson = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/RestoreJson'));
-const ImportQrCode = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportQrCode'));
-const AttachReadOnly = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/AttachReadOnly'));
-const ConnectPolkadotVault = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectPolkadotVault'));
-const ConnectKeystone = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
-const ConnectLedger = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectLedger'));
+const NewSeedPhrase = new LazyLoader('NewSeedPhrase', () => import('@subwallet/extension-koni-ui/Popup/Account/NewSeedPhrase'));
+const ImportSeedPhrase = new LazyLoader('ImportSeedPhrase', () => import('@subwallet/extension-koni-ui/Popup/Account/ImportSeedPhrase'));
+const ImportPrivateKey = new LazyLoader('ImportPrivateKey', () => import('@subwallet/extension-koni-ui/Popup/Account/ImportPrivateKey'));
+const RestoreJson = new LazyLoader('RestoreJson', () => import('@subwallet/extension-koni-ui/Popup/Account/RestoreJson'));
+const ImportQrCode = new LazyLoader('ImportQrCode', () => import('@subwallet/extension-koni-ui/Popup/Account/ImportQrCode'));
+const AttachReadOnly = new LazyLoader('AttachReadOnly', () => import('@subwallet/extension-koni-ui/Popup/Account/AttachReadOnly'));
+const ConnectPolkadotVault = new LazyLoader('ConnectPolkadotVault', () => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectPolkadotVault'));
+const ConnectKeystone = new LazyLoader('ConnectKeystone', () => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
+const ConnectLedger = new LazyLoader('ConnectLedger', () => import('@subwallet/extension-koni-ui/Popup/Account/ConnectLedger'));
 
-const Login = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
-const CreatePassword = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword'));
-const ChangePassword = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ChangePassword'));
-const ApplyMasterPassword = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword'));
+const Login = new LazyLoader('Login', () => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
+const CreatePassword = new LazyLoader('CreatePassword', () => import('@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword'));
+const ChangePassword = new LazyLoader('ChangePassword', () => import('@subwallet/extension-koni-ui/Popup/Keyring/ChangePassword'));
+const ApplyMasterPassword = new LazyLoader('ApplyMasterPassword', () => import('@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword'));
 
-const AccountDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/AccountDetail'));
-const AccountExport = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/AccountExport'));
+const AccountDetail = new LazyLoader('AccountDetail', () => import('@subwallet/extension-koni-ui/Popup/Account/AccountDetail'));
+const AccountExport = new LazyLoader('AccountExport', () => import('@subwallet/extension-koni-ui/Popup/Account/AccountExport'));
 
-const Transaction = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Transaction'));
-const TransactionDone = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/TransactionDone'));
-const SendFund = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund'));
-const SendNFT = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendNFT'));
-const Stake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake'));
-const Unstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Unbond'));
-const CancelUnstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/CancelUnstake'));
-const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/ClaimReward'));
-const Withdraw = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Withdraw'));
+const Transaction = new LazyLoader('Transaction', () => import('@subwallet/extension-koni-ui/Popup/Transaction/Transaction'));
+const TransactionDone = new LazyLoader('TransactionDone', () => import('@subwallet/extension-koni-ui/Popup/TransactionDone'));
+const SendFund = new LazyLoader('SendFund', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund'));
+const SendNFT = new LazyLoader('SendNFT', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendNFT'));
+const Stake = new LazyLoader('Stake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake'));
+const Unstake = new LazyLoader('Unstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Unbond'));
+const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/CancelUnstake'));
+const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/ClaimReward'));
+const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Withdraw'));
 
 // Wallet Connect
-const ConnectWalletConnect = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
-const ConnectionList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
-const ConnectionDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
+const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
+const ConnectionList = new LazyLoader('ConnectionList', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
+const ConnectionDetail = new LazyLoader('ConnectionDetail', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
 // A Placeholder page
 export function Example () {

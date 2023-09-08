@@ -9,6 +9,7 @@ import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data'
 import { generatePathForInterlayLending, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
 import { generatePathForNativeStaking, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { BN } from '@polkadot/util';
 
 // only apply for DOT right now, will need to scale up
 
@@ -83,8 +84,21 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams):
   return await generatePathForNativeStaking(params);
 }
 
-export function validateProcess (amount: string, optimalPath: OptimalPathResp, poolInfo: YieldPoolInfo): YieldProcessValidation {
+export function validateProcess (params: OptimalYieldPathParams, path: OptimalPathResp): YieldProcessValidation {
+  // TODO: calculate token portion
+  // TODO: compare to ED
   // TODO: compare to minAmount
-  // TODO: compare to fee (step by step)
+  // TODO: simulate the whole process, compare to fee (step by step)
 
+  const bnAmount = new BN(params.amount);
+  const inputTokenSlug = params.poolInfo.inputAssets[0]; // TODO
+  const bnInputTokenBalance = new BN(params.balanceMap[inputTokenSlug]?.free || '0');
+
+  for (const step of path.steps) {
+
+  }
+
+  if (bnAmount.gt(bnInputTokenBalance)) {
+
+  }
 }

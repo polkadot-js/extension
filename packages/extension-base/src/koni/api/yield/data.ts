@@ -64,7 +64,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     ],
     feeAssets: [
       'acala-NATIVE-ACA',
-      'polkadot-LOCAL-DOT'
+      'acala-LOCAL-DOT'
     ],
     altInputAssets: [
       'polkadot-NATIVE-DOT'

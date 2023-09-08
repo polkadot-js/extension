@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
+import { YieldStepDetail, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+
 export interface RuntimeDispatchInfo {
   weight: {
     refTime: number,
@@ -34,3 +36,9 @@ export const fakeAddress = '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6';
 export function calculateAlternativeFee (feeInfo: RuntimeDispatchInfo) {
   return feeInfo.partialFee;
 }
+
+export const DEFAULT_YIELD_FIRST_STEP: YieldStepDetail = {
+  id: 0,
+  name: 'Fill information',
+  type: YieldStepType.DEFAULT
+};

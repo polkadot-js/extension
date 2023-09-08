@@ -86,6 +86,7 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
 
       if (bnAltInputTokenBalance.gt(BN_ZERO)) {
         result.steps.push({
+          id: result.steps.length,
           metadata: {
             sendingValue: bnAmount.toString(),
             originTokenInfo: altInputTokenInfo,

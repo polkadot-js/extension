@@ -2072,6 +2072,7 @@ export interface YieldTokenBaseInfo {
 }
 
 export enum YieldStepType {
+  DEFAULT = 'DEFAULT',
   XCM = 'XCM',
 
   // native staking
@@ -2091,6 +2092,7 @@ export enum YieldStepType {
 }
 
 export interface YieldStepDetail {
+  id: number,
   name: string,
   type: YieldStepType,
   metadata?: Record<string, unknown>; // for generating extrinsic
@@ -2103,12 +2105,14 @@ export interface OptimalPathResp {
 
 export enum YieldValidationStatus {
   NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
-  NOT_ENOUGH_MIN_AMOUNT = 'NOT_ENOUGH_MIN_AMOUNT'
+  NOT_ENOUGH_MIN_AMOUNT = 'NOT_ENOUGH_MIN_AMOUNT',
+  OK = 'OK'
 }
 
 export interface YieldProcessValidation {
   ok: boolean,
   status: YieldValidationStatus,
+  failedStep?: YieldStepDetail,
   message?: string
 }
 

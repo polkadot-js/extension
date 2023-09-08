@@ -3,7 +3,7 @@
 
 import { OptimalPathResp, OptimalYieldPathParams, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { calculateAlternativeFee, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
+import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -59,7 +59,7 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
   const bnAmount = new BN(params.amount);
   const result: OptimalPathResp = {
     totalFee: [],
-    steps: []
+    steps: [DEFAULT_YIELD_FIRST_STEP]
   };
 
   const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
@@ -120,6 +120,7 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
   }
 
   result.steps.push({
+    id: result.steps.length,
     name: 'Mint vDOT',
     type: YieldStepType.MINT_VDOT
   });

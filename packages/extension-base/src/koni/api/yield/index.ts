@@ -3,13 +3,12 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { OptimalPathResp, OptimalYieldPathParams, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldProcessValidation } from '@subwallet/extension-base/background/KoniTypes';
-import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
+import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats, validateProcessForAcalaLiquidStaking } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { generatePathForInterlayLending, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
 import { generatePathForNativeStaking, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { BN } from '@polkadot/util';
 
 // only apply for DOT right now, will need to scale up
 
@@ -90,15 +89,7 @@ export function validateProcess (params: OptimalYieldPathParams, path: OptimalPa
   // TODO: compare to minAmount
   // TODO: simulate the whole process, compare to fee (step by step)
 
-  const bnAmount = new BN(params.amount);
-  const inputTokenSlug = params.poolInfo.inputAssets[0]; // TODO
-  const bnInputTokenBalance = new BN(params.balanceMap[inputTokenSlug]?.free || '0');
-
-  for (const step of path.steps) {
-
-  }
-
-  if (bnAmount.gt(bnInputTokenBalance)) {
-
+  if (['DOT___bifrost_liquid_staking', 'DOT___acala_liquid_staking'].includes(params.poolInfo.slug)) {
+    return validateProcessForAcalaLiquidStaking(params, path);
   }
 }

@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { OptimalPathResp, OptimalYieldPathParams, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
-import { fakeAddress, RuntimeDispatchInfo, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/utils';
+import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 
@@ -89,7 +89,7 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
   const bnAmount = new BN(params.amount);
   const result: OptimalPathResp = {
     totalFee: [],
-    steps: []
+    steps: [DEFAULT_YIELD_FIRST_STEP]
   };
 
   const feeAsset = params.poolInfo.feeAssets[0];
@@ -98,6 +98,7 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
   if (params.poolInfo.type === YieldPoolType.NATIVE_STAKING) {
     // TODO: check existing position
     result.steps.push({
+      id: result.steps.length,
       name: 'Nominate validators',
       type: YieldStepType.NOMINATE
     });
@@ -119,6 +120,7 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
   } else {
     // TODO: check existing position
     result.steps.push({
+      id: result.steps.length,
       metadata: {
         amount: params.amount
       },

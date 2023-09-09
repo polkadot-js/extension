@@ -475,8 +475,10 @@ export enum ExtrinsicType {
   TRANSFER_BALANCE = 'transfer.balance',
   TRANSFER_TOKEN = 'transfer.token',
   TRANSFER_XCM = 'transfer.xcm',
+
   SEND_NFT = 'send_nft',
   CROWDLOAN = 'crowdloan',
+
   STAKING_JOIN_POOL = 'staking.join_pool',
   STAKING_LEAVE_POOL = 'staking.leave_pool',
   STAKING_POOL_WITHDRAW = 'staking.pool_withdraw',
@@ -487,7 +489,10 @@ export enum ExtrinsicType {
   STAKING_COMPOUNDING = 'staking.compounding',
   STAKING_CANCEL_COMPOUNDING = 'staking.cancel_compounding',
   STAKING_CANCEL_UNSTAKE = 'staking.cancel_unstake',
-  EARN = 'earn',
+
+  MINT_LDOT = 'earn.mint_ldot',
+  MINT_VDOT = 'earn.mint_vdot',
+
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }

@@ -33,11 +33,9 @@ import useGetNativeTokenBasicInfo from '../../../hooks/common/useGetNativeTokenB
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
-
 }
 
 enum FormFieldName {
-  METHOD = 'method',
   FROM = 'from',
   NOMINATE = 'nominate',
   POOL = 'pool',
@@ -46,7 +44,6 @@ enum FormFieldName {
 const formFieldPrefix = 'amount-';
 
 interface StakingFormProps extends Record<`amount-${number}`, string> {
-  [FormFieldName.METHOD]: string;
   [FormFieldName.FROM]: string;
   [FormFieldName.NOMINATE]: string;
   [FormFieldName.POOL]: string;
@@ -56,48 +53,49 @@ const Component = () => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { slug: _methodSlug } = useParams();
-  const methodSlug = _methodSlug || '';
+
+  const methodSlug = useMemo(() => {
+    return _methodSlug || '';
+  }, [_methodSlug]);
+
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainAsset = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+
   const [yieldSteps, setYieldSteps] = useState<YieldStepDetail[]>();
   const [totalFee, setTotalFee] = useState<YieldTokenBaseInfo[]>();
   const [isBalanceReady, setIsBalanceReady] = useState(true);
   const [step, setStep] = useState<number>(1);
+
   const [forceFetchValidator, setForceFetchValidator] = useState(false);
   const [poolLoading, setPoolLoading] = useState(false);
   const [validatorLoading, setValidatorLoading] = useState(false);
-  const [isDisable, setIsDisable] = useState(true);
+
+  const [isSubmitDisable, setIsSubmitDisable] = useState(true);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   // TODO: transaction interface
   // TODO: process manager
   // TODO: listening to transaction progress
-
-  const defaultInfo = useMemo(() => poolInfo[methodSlug], [poolInfo, methodSlug]);
   const [form] = Form.useForm<StakingFormProps>();
-
-  useEffect(() => {
-    form.setFieldValue(FormFieldName.METHOD, defaultInfo.slug);
-  }, [form, defaultInfo]);
 
   const currentAmount = Form.useWatch(`${formFieldPrefix}0`, form);
   const currentFrom = Form.useWatch(FormFieldName.FROM, form);
-  const currentMethod = Form.useWatch(FormFieldName.METHOD, form);
-  const currentPoolInfo = useMemo(() => poolInfo[currentMethod || methodSlug], [currentMethod, methodSlug, poolInfo]);
+  const currentPoolInfo = useMemo(() => poolInfo[methodSlug], [methodSlug, poolInfo]);
+
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const { decimals, symbol } = useGetNativeTokenBasicInfo(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
 
   const formDefault: StakingFormProps = useMemo(() => {
     return {
-      [FormFieldName.METHOD]: defaultInfo.slug,
       [FormFieldName.FROM]: !isAllAccount ? currentAccount?.address || '' : '',
       [FormFieldName.POOL]: '',
       [FormFieldName.NOMINATE]: ''
     };
-  }, [currentAccount?.address, defaultInfo.slug, isAllAccount]);
+  }, [currentAccount?.address, isAllAccount]);
 
   useEffect(() => {
     let unmount = false;
@@ -185,7 +183,7 @@ const Component = () => {
       checkEmpty.pool = true;
     }
 
-    setIsDisable(error || Object.values(checkEmpty).some((value) => !value));
+    setIsSubmitDisable(error || Object.values(checkEmpty).some((value) => !value));
   }, [currentPoolInfo.type]);
 
   const renderMetaInfo = useCallback(() => {
@@ -214,13 +212,23 @@ const Component = () => {
     );
   }, [t, _assetEarnings, symbol, estimatedFee]);
 
-  const onClick = useCallback(() => () => {
+  const onClick = useCallback(() => {
+    setSubmitLoading(true);
+
+    const { from, nominate, pool } = form.getFieldsValue();
+
+    if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL && pool) {
+      console.log('pool', from, pool);
+    } else {
+      console.log('nominate', from, nominate);
+    }
+
     if (yieldSteps && step === yieldSteps.length) {
       // onCloseModal();
     } else {
       setStep(step + 1);
     }
-  }, [step, yieldSteps]);
+  }, [currentPoolInfo.type, form, step, yieldSteps]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -339,7 +347,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={isDisable || !isBalanceReady}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady}
             icon={
               <Icon
                 phosphorIcon={yieldSteps && step === yieldSteps.length ? CheckCircle : ArrowCircleRight}
@@ -373,9 +381,9 @@ const Component = () => {
 
             return (
               <EarningProcessItem
-                key={index}
                 index={index}
                 isSelected={isSelected}
+                key={index}
                 stepName={item.name}
               />
             );

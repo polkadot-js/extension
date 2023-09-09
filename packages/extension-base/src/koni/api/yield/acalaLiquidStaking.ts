@@ -48,7 +48,7 @@ export function subscribeAcalaLiquidStakingStats (poolInfo: YieldPoolInfo, callb
     }
   });
 
-  const interval = setInterval(getPoolStat, 30000);
+  const interval = setInterval(getPoolStat, 3000000);
 
   return () => {
     clearInterval(interval);

@@ -17,6 +17,10 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   Object.values(YIELD_POOLS_INFO).forEach(async (poolInfo) => {
+    if (!substrateApiMap[poolInfo.chain]) {
+      return;
+    }
+
     const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
     const chainInfo = chainInfoMap[poolInfo.chain];
 

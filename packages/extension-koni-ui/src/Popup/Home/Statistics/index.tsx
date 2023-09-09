@@ -16,7 +16,7 @@ import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import React, { Context, useContext, useEffect, useMemo } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import styled, { ThemeContext } from 'styled-components';
 
 type Props = ThemeProps;
@@ -38,18 +38,11 @@ const Component = ({ className }: Props) => {
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo } } = useContext(HomeContext);
   const { data: stakingItems, priceMap } = useGetStakingList();
-  const navigate = useNavigate();
 
   const outletContext: {
     setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>
   } = useOutletContext();
   const setShowSearchInput = outletContext?.setShowSearchInput;
-
-  useEffect(() => {
-    if (totalBalanceInfo.convertedValue.eq(BN_ZERO)) {
-      navigate('/home/tokens');
-    }
-  }, [totalBalanceInfo.convertedValue, navigate]);
 
   useEffect(() => {
     setShowSearchInput?.(false);
@@ -66,8 +59,14 @@ const Component = ({ className }: Props) => {
 
     const results: PresentItem[] = [];
 
-    for (let i = 0; i < 6; i++) {
+    const itemLength = balanceItems.length < 6 ? balanceItems.length : 6;
+
+    for (let i = 0; i < itemLength; i++) {
       const item = balanceItems[i];
+
+      if (!item) {
+        continue;
+      }
 
       if (item.total.convertedValue.eq(BN_ZERO)) {
         break;
@@ -206,41 +205,56 @@ const Component = ({ className }: Props) => {
       resolve={dataContext.awaitStores(['staking', 'price'])}
     >
       <div className='__box-container'>
-        <div className='__box-part -left-part'>
-          <div className='__box-part-title'>
-            {t('Portfolio Allocation')}
-          </div>
+        {
+          isTotalZero
+            ? (
+              <>
+                {/* todo: will make empty page later */}
+                <div>
+                  Unable to obtain statistic info
+                </div>
+              </>
+            )
+            : (
+              <>
+                <div className='__box-part -left-part'>
+                  <div className='__box-part-title'>
+                    {t('Portfolio Allocation')}
+                  </div>
 
-          <div className='__present-items-area'>
-            {presentItems.map(renderPresentItem)}
-          </div>
-        </div>
-        <div className='__box-part'>
-          <div className='__box-part-title'>
-            {t('Portfolio Distribution')}
-          </div>
+                  <div className='__present-items-area'>
+                    {presentItems.map(renderPresentItem)}
+                  </div>
+                </div>
+                <div className='__box-part'>
+                  <div className='__box-part-title'>
+                    {t('Portfolio Distribution')}
+                  </div>
 
-          <div className='__chart-area'>
-            <div className='__chart-wrapper'>
-              <PieDonutChart
-                animationSpeed={0}
-                chartCenterSize={194}
-                colors={{
-                  chartCenter: token.colorBgSecondary,
-                  text: 'transparent'
-                }}
-                data={chartData}
-                hoverScaleRatio={1.03}
-                resizeReRenderDebounceTime={100}
-                size={240}
-              />
-            </div>
+                  <div className='__chart-area'>
+                    <div className='__chart-wrapper'>
+                      <PieDonutChart
+                        animationSpeed={0}
+                        chartCenterSize={194}
+                        colors={{
+                          chartCenter: token.colorBgSecondary,
+                          text: 'transparent'
+                        }}
+                        data={chartData}
+                        hoverScaleRatio={1.03}
+                        resizeReRenderDebounceTime={100}
+                        size={240}
+                      />
+                    </div>
 
-            <div className='__legend-area'>
-              {chartItems.map(renderLegendItem)}
-            </div>
-          </div>
-        </div>
+                    <div className='__legend-area'>
+                      {chartItems.map(renderLegendItem)}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )
+        }
       </div>
     </PageWrapper>
   );

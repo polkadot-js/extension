@@ -2,13 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
-import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
-import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Input, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import styled from 'styled-components';
@@ -76,17 +74,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const [searchInput, setSearchInput] = useState<string>('');
   const [showSearchInput, setShowSearchInput] = useState<boolean>(true);
   const searchInputRef = useRef<SearchInputRef>(null);
-  const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
-
-  const isTotalZero = totalBalanceInfo.convertedValue.eq(BN_ZERO);
 
   const TAB_LIST = useMemo(() => {
-    if (isTotalZero) {
-      return [t('Tokens'), t('NFTs')];
-    }
-
     return [t('Tokens'), t('NFTs'), t('Statistics')];
-  }, [isTotalZero, t]);
+  }, [t]);
 
   const handleSelectTab = useCallback((index: number) => {
     if (!index) {
@@ -102,8 +93,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     const currentTab = pathname.split('/').filter((i) => !!i)[1];
 
     return (TAB_LIST.map((tab) => tab.toLowerCase())).indexOf(currentTab);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [TAB_LIST, pathname]);
 
   const isDetail = useMemo(() => pathname.includes('detail'), [pathname]);
 
@@ -136,7 +126,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                     <div style={{ display: 'none' }}>
                       <TabPanel></TabPanel>
                       <TabPanel></TabPanel>
-                      {!isTotalZero && <TabPanel></TabPanel>}
+                      <TabPanel></TabPanel>
                     </div>
                   </Tabs>
                 </>

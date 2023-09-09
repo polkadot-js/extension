@@ -6,15 +6,15 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EarningItem from '@subwallet/extension-koni-ui/components/EarningItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import EarningCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-import EarningCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 type Props = ThemeProps;
 
@@ -33,16 +33,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const onClickStakeBtn = useCallback((item: YieldPoolInfo) => {
     setSelectedItem(item);
-    navigate(`/transaction/earn/${item.slug}`)
-  }, [activeModal]);
+    navigate(`/transaction/earn/${item.slug}`);
+  }, [navigate]);
 
   const renderEarningItem = useCallback((item: YieldPoolInfo) => {
     return (
       <EarningItem
         item={item}
+        key={item.slug}
         onClickCalculatorBtn={() => onClickCalculatorBtn(item)}
         onClickStakeBtn={() => onClickStakeBtn(item)}
-        key={item.slug}
       />
     );
   }, [onClickCalculatorBtn, onClickStakeBtn]);

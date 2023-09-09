@@ -8,6 +8,7 @@ import { TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext, DataContextType } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { STAKING_PROCESS_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingProcessModal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
@@ -114,7 +115,7 @@ function Component ({ children, className, modalContent = false }: Props) {
       case 'send-nft':
         return ExtrinsicType.SEND_NFT;
       case 'earn':
-        return ExtrinsicType.EARN; //TODO: change this
+        return ExtrinsicType.EARN; // TODO: change this
       case 'send-fund':
       default:
         return ExtrinsicType.TRANSFER_BALANCE;
@@ -178,6 +179,10 @@ function Component ({ children, className, modalContent = false }: Props) {
   const onClickRightBtn = useCallback(() => {
     if (transactionType === ExtrinsicType.STAKING_JOIN_POOL) {
       activeModal(StakingNetworkDetailModalId);
+    }
+
+    if (transactionType === ExtrinsicType.EARN) {
+      activeModal(STAKING_PROCESS_MODAL_ID);
     }
   }, [activeModal, transactionType]);
 

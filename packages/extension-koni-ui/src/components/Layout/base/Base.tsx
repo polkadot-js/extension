@@ -9,7 +9,7 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
-import { Aperture, Clock, Database, Rocket, Wallet } from 'phosphor-react';
+import { Aperture, Clock, Rocket, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -67,15 +67,25 @@ const Base = ({ children, headerIcons, isSetTitleContext = true, onBack, showFoo
       key: 'crowdloans',
       url: '/home/crowdloans'
     },
+    // {
+    //   icon: {
+    //     type: 'phosphor',
+    //     phosphorIcon: Database,
+    //     weight: 'fill'
+    //   },
+    //   label: t('Staking'),
+    //   key: 'staking',
+    //   url: '/home/staking'
+    // },
     {
       icon: {
         type: 'phosphor',
-        phosphorIcon: Database,
+        phosphorIcon: Vault,
         weight: 'fill'
       },
-      label: t('Staking'),
-      key: 'staking',
-      url: '/home/staking'
+      label: t('Earning'),
+      key: 'earning',
+      url: '/home/earning'
     },
     {
       icon: {

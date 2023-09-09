@@ -1,8 +1,11 @@
-import React, { useMemo } from 'react';
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import styled from 'styled-components';
 import { Button } from '@subwallet/react-ui';
 import { SizeType } from '@subwallet/react-ui/es/config-provider/SizeContext';
+import React, { useMemo } from 'react';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   icon?: React.ReactNode,
@@ -10,7 +13,7 @@ interface Props extends ThemeProps {
   children?: React.ReactNode,
 }
 
-const Component = ({ className, icon, size = 'xs', children }: Props) => {
+const Component = ({ children, className, icon, size = 'xs' }: Props) => {
   const _borderRadius = useMemo(() => {
     if (size === 'xs') {
       return '20px';
@@ -21,10 +24,18 @@ const Component = ({ className, icon, size = 'xs', children }: Props) => {
     }
 
     return '32px';
-  }, [])
+  }, [size]);
 
   return (
-    <Button block={false} style={{ borderRadius: _borderRadius }} className={className} icon={icon} size={size} type={'ghost'} shape={'round'}>{children}</Button>
+    <Button
+      block={false}
+      className={className}
+      icon={icon}
+      shape={'round'}
+      size={size}
+      style={{ borderRadius: _borderRadius }}
+      type={'ghost'}
+    >{children}</Button>
   );
 };
 
@@ -34,9 +45,9 @@ const EarningBtn = styled(Component)<Props>(({ theme: { token } }: Props) => {
     border: `2px solid ${token.colorBgBorder}`,
     '&:hover': {
       backgroundColor: token.colorBgSecondary,
-      border: `2px solid ${token.colorBgSecondary}`,
+      border: `2px solid ${token.colorBgSecondary}`
     }
-  }
+  };
 });
 
 export default EarningBtn;

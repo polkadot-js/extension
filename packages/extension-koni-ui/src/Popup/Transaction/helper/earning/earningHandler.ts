@@ -1,6 +1,9 @@
-import {ALL_KEY} from "@subwallet/extension-koni-ui/constants";
-import { YieldPoolType } from "@subwallet/extension-base/background/KoniTypes";
-import {fetchChainPool, fetchChainValidator} from "@subwallet/extension-koni-ui/Popup/Transaction/helper";
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
+import { fetchChainPool, fetchChainValidator } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 
 export function fetchEarningChainValidators (
   chain: string,

@@ -71,6 +71,10 @@ const Component = () => {
   const [validatorLoading, setValidatorLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
 
+  // TODO: transaction interface
+  // TODO: process manager
+  // TODO: listening to transaction progress
+
   const defaultInfo = useMemo(() => poolInfo[methodSlug], [poolInfo, methodSlug]);
   const [form] = Form.useForm<StakingFormProps>();
 
@@ -79,12 +83,12 @@ const Component = () => {
   }, [form, defaultInfo]);
 
   const currentAmount = Form.useWatch(`${formFieldPrefix}0`, form);
-  const currentFrom = Form.useWatch('from', form);
+  const currentFrom = Form.useWatch(FormFieldName.FROM, form);
   const currentMethod = Form.useWatch(FormFieldName.METHOD, form);
-  const currentInfo = useMemo(() => poolInfo[currentMethod || methodSlug], [currentMethod, methodSlug, poolInfo]);
-  const chainState = useFetchChainState(currentInfo.chain);
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(currentInfo.chain);
-  const chainNetworkPrefix = useGetChainPrefixBySlug(currentInfo.chain);
+  const currentPoolInfo = useMemo(() => poolInfo[currentMethod || methodSlug], [currentMethod, methodSlug, poolInfo]);
+  const chainState = useFetchChainState(currentPoolInfo.chain);
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(currentPoolInfo.chain);
+  const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
 
   const formDefault: StakingFormProps = useMemo(() => {
     return {
@@ -100,33 +104,33 @@ const Component = () => {
 
     // fetch validators when change chain
     // _stakingType is predefined form start
-    if ((!!currentInfo.chain && !!currentFrom && chainState?.active) || forceFetchValidator) {
-      fetchEarningChainValidators(currentInfo.chain, currentInfo.type || ALL_KEY, unmount, setPoolLoading, setValidatorLoading, setForceFetchValidator);
+    if ((!!currentPoolInfo.chain && !!currentFrom && chainState?.active) || forceFetchValidator) {
+      fetchEarningChainValidators(currentPoolInfo.chain, currentPoolInfo.type || ALL_KEY, unmount, setPoolLoading, setValidatorLoading, setForceFetchValidator);
     }
 
     return () => {
       unmount = true;
     };
-  }, [currentInfo, currentFrom, chainState?.active, forceFetchValidator]);
+  }, [currentPoolInfo, currentFrom, chainState?.active, forceFetchValidator]);
 
   useEffect(() => {
     getOptimalYieldPath({
       amount: currentAmount,
-      poolInfo: currentInfo
+      poolInfo: currentPoolInfo
     })
       .then((res) => {
         setYieldSteps(res?.steps);
         setTotalFee(res?.totalFee);
       })
       .catch(console.error);
-  }, [currentInfo, currentAmount]);
+  }, [currentPoolInfo, currentAmount]);
 
   const _assetEarnings: Record<string, YieldAssetExpectedEarning> = useMemo(() => {
     const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
     const currentAmountNumb = currentAmount ? Number(currentAmount) / (10 ** decimals) : 0;
 
-    if (currentInfo?.stats?.assetEarning) {
-      currentInfo?.stats?.assetEarning.forEach((assetEarningStats) => {
+    if (currentPoolInfo?.stats?.assetEarning) {
+      currentPoolInfo?.stats?.assetEarning.forEach((assetEarningStats) => {
         const assetApr = assetEarningStats?.apr || 0;
         const assetSlug = assetEarningStats.slug;
 
@@ -135,7 +139,7 @@ const Component = () => {
     }
 
     return yearlyEarnings;
-  }, [currentAmount, currentInfo?.stats?.assetEarning, decimals]);
+  }, [currentAmount, currentPoolInfo?.stats?.assetEarning, decimals]);
 
   const estimatedFee = useMemo(() => {
     let _totalFee = 0;
@@ -156,7 +160,7 @@ const Component = () => {
 
   const accountFilterFunc = (chainInfoMap: Record<string, _ChainInfo>): ((account: AccountJson) => boolean) => {
     return (account: AccountJson) => {
-      const chain = chainInfoMap[currentInfo.chain];
+      const chain = chainInfoMap[currentPoolInfo.chain];
       const isEvmChain = _isChainEvmCompatible(chain);
       const isEvmAddress = isEthereumAddress(account.address);
 
@@ -175,14 +179,14 @@ const Component = () => {
       checkEmpty[key] = !!value;
     }
 
-    if (currentInfo.type === YieldPoolType.NOMINATION_POOL) {
+    if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL) {
       checkEmpty.nominate = true;
-    } else if (currentInfo.type === YieldPoolType.NATIVE_STAKING) {
+    } else if (currentPoolInfo.type === YieldPoolType.NATIVE_STAKING) {
       checkEmpty.pool = true;
     }
 
     setIsDisable(error || Object.values(checkEmpty).some((value) => !value));
-  }, [currentInfo.type]);
+  }, [currentPoolInfo.type]);
 
   const renderMetaInfo = useCallback(() => {
     return (
@@ -209,6 +213,14 @@ const Component = () => {
       </MetaInfo>
     );
   }, [t, _assetEarnings, symbol, estimatedFee]);
+
+  const onClick = useCallback(() => () => {
+    if (yieldSteps && step === yieldSteps.length) {
+      // onCloseModal();
+    } else {
+      setStep(step + 1);
+    }
+  }, [step, yieldSteps]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -259,7 +271,7 @@ const Component = () => {
                 />
               </Form.Item>
 
-              {currentInfo.inputAssets.map((asset, index) => {
+              {currentPoolInfo.inputAssets.map((asset, index) => {
                 const name = formFieldPrefix + String(index);
 
                 return (
@@ -269,7 +281,7 @@ const Component = () => {
                   >
                     <FreeBalanceToStake
                       address={currentFrom}
-                      chain={currentInfo.chain}
+                      chain={currentPoolInfo.chain}
                       className={'account-free-balance'}
                       label={t('Available to stake:')}
                       onBalanceReady={setIsBalanceReady}
@@ -299,11 +311,11 @@ const Component = () => {
               })}
 
               <Form.Item
-                hidden={currentInfo.type !== YieldPoolType.NOMINATION_POOL}
+                hidden={currentPoolInfo.type !== YieldPoolType.NOMINATION_POOL}
                 name={FormFieldName.POOL}
               >
                 <PoolSelector
-                  chain={currentInfo.chain}
+                  chain={currentPoolInfo.chain}
                   from={currentFrom}
                   label={t('Select pool')}
                   loading={poolLoading}
@@ -312,11 +324,11 @@ const Component = () => {
               </Form.Item>
 
               <Form.Item
-                hidden={currentInfo.type !== YieldPoolType.NATIVE_STAKING}
+                hidden={currentPoolInfo.type !== YieldPoolType.NATIVE_STAKING}
                 name={FormFieldName.NOMINATE}
               >
                 <MultiValidatorSelector
-                  chain={currentInfo.chain}
+                  chain={currentPoolInfo.chain}
                   from={currentFrom}
                   loading={validatorLoading}
                   setForceFetchValidator={setForceFetchValidator}
@@ -334,13 +346,7 @@ const Component = () => {
                 weight={'fill'}
               />
             }
-            onClick={() => {
-              if (yieldSteps && step === yieldSteps.length) {
-                // onCloseModal();
-              } else {
-                setStep(step + 1);
-              }
-            }}
+            onClick={onClick}
           >
             {yieldSteps && step === yieldSteps.length ? t('Finish') : t('Submit')}
           </Button>

@@ -646,7 +646,7 @@
   "New connection": "新连接",
   "Connection already exists": "连接已存在",
   "Fail to add connection": "添加连接失败",
-  "By clicking \"Connect\", you allow this dapp to view your public address": "点击“连接”即表示你允许此dapp查看你的公共地址",
+  "By clicking \"Connect\", you allow this dapp to view your public address": "点击“连接”即表示你允许此dApp查看你的公共地址",
   "URI is required": "URI为必须填写",
   "URI": "URI",
   "Create a new account with SubWallet": "通过SubWallet创建新账户",
@@ -837,5 +837,7 @@
   "Hide private key": "隐藏私钥",
   "Show private key": "显示私钥",
   "Private key": "私钥",
-  "Invalid private key. Please try again.": "私钥无效。请重试。"
+  "Invalid private key. Please try again.": "私钥无效。请重试。",
+  "Required once": "",
+  "Always require": ""
 }

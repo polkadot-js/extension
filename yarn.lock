@@ -1812,6 +1812,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@coinbase/cbpay-js@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "@coinbase/cbpay-js@npm:1.7.0"
+  peerDependencies:
+    regenerator-runtime: ^0.13.9
+  peerDependenciesMeta:
+    regenerator-runtime:
+      optional: true
+  checksum: 915b98ea75eeb8e7676f119e90e26b88ed3059dadb568ea218f7fd29fe666d3bb68778aa7558265722f27b105d3f7b13a12dcd889a4ef6c2db2da0a5bd1dcc0e
+  languageName: node
+  linkType: hard
+
 "@crustio/type-definitions@npm:1.3.0":
   version: 1.3.0
   resolution: "@crustio/type-definitions@npm:1.3.0"
@@ -5842,14 +5854,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.12":
-  version: 0.2.12
-  resolution: "@subwallet/chain-list@npm:0.2.12"
+"@subwallet/chain-list@npm:0.2.13":
+  version: 0.2.13
+  resolution: "@subwallet/chain-list@npm:0.2.13"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: adb40c85819512a54646aa8e185b4fa75ba24677acc06b0a658c233b55ccf56fb19417812d76b13c935dcb9852654cdafe179faa7778a18c8942614da1cd2d0b
+  checksum: 700d4f4fa022e945533c7963067114a0418dea91a44fd6dc9226d99fb9ab489d93234675039b95b783d38115cce8e12c5ed9eb5883f5b417da2648f6f9fe6477
   languageName: node
   linkType: hard
 
@@ -5884,7 +5896,7 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.2.12
+    "@subwallet/chain-list": 0.2.13
     "@subwallet/extension-base": ^1.1.10-0
     "@subwallet/extension-chains": ^1.1.10-0
     "@subwallet/extension-dapp": ^1.1.10-0
@@ -5996,6 +6008,7 @@ __metadata:
   resolution: "@subwallet/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
     "@babel/runtime": ^7.20.6
+    "@coinbase/cbpay-js": ^1.7.0
     "@fortawesome/fontawesome-svg-core": ^6.2.1
     "@fortawesome/free-brands-svg-icons": ^6.2.1
     "@fortawesome/free-regular-svg-icons": ^6.2.1
@@ -6012,7 +6025,7 @@ __metadata:
     "@polkadot/util-crypto": ^12.3.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.12
+    "@subwallet/chain-list": 0.2.13
     "@subwallet/extension-base": ^1.1.10-0
     "@subwallet/extension-chains": ^1.1.10-0
     "@subwallet/extension-dapp": ^1.1.10-0

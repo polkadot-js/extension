@@ -132,8 +132,13 @@ export class KeyringService {
   /* Inject */
 
   /* Reset */
-  resetWallet (resetAll: boolean) {
+  async resetWallet (resetAll: boolean) {
     keyring.resetWallet(resetAll);
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 500);
+    });
     this.updateKeyringState();
     this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
   }

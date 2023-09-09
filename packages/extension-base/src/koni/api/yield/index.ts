@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { OptimalPathResp, OptimalYieldPathParams, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldProcessValidation } from '@subwallet/extension-base/background/KoniTypes';
+import { OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldProcessValidation } from '@subwallet/extension-base/background/KoniTypes';
 import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats, validateProcessForAcalaLiquidStaking } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { generatePathForInterlayLending, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
-import { generatePathForNativeStaking, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
+import { generatePathForNativeStaking, getNativeStakingExtrinsic, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 // only apply for DOT right now, will need to scale up
@@ -70,24 +70,24 @@ export function calculateReward (apr: number, amount = 0, compoundingPeriod = Yi
   };
 }
 
-export async function generateNaiveOptimalPath (params: OptimalYieldPathParams): Promise<OptimalPathResp> {
+export async function generateNaiveOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
   // 1. assume inputs are already validated
   // 2. generate paths based on amount only, not taking fee into account
   // 3. fees are calculated in the worst possible situation
   // 4. fees are calculated for the whole process, either user can pay all or nothing
 
   if (params.poolInfo.slug === 'DOT___bifrost_liquid_staking') {
-    return await generatePathForBifrostLiquidStaking(params);
+    return generatePathForBifrostLiquidStaking(params);
   } else if (params.poolInfo.slug === 'DOT___acala_liquid_staking') {
-    return await generatePathForAcalaLiquidStaking(params);
+    return generatePathForAcalaLiquidStaking(params);
   } else if (params.poolInfo.slug === 'DOT___interlay_lending') {
-    return await generatePathForInterlayLending(params);
+    return generatePathForInterlayLending(params);
   }
 
-  return await generatePathForNativeStaking(params);
+  return generatePathForNativeStaking(params);
 }
 
-export function validateProcess (params: OptimalYieldPathParams, path: OptimalPathResp): YieldProcessValidation {
+export function validateProcess (params: OptimalYieldPathParams, path: OptimalYieldPath): YieldProcessValidation {
   // TODO: calculate token portion
   // TODO: compare to ED
   // TODO: compare to minAmount
@@ -98,6 +98,11 @@ export function validateProcess (params: OptimalYieldPathParams, path: OptimalPa
   }
 }
 
-export function getJoinPoolExtrinsic () {
+export async function getJoinPoolExtrinsic (address: string, params: OptimalYieldPathParams, data: unknown) {
+  const inputData = data as SubmitJoinNativeStaking;
+  const poolInfo = params.poolInfo;
+  const substrateApi = params.substrateApiMap[poolInfo.chain];
+  const chainInfo = params.chainInfoMap[poolInfo.chain];
 
+  return await getNativeStakingExtrinsic(substrateApi, inputData.amount, inputData.selectedValidators, chainInfo, address);
 }

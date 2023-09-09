@@ -490,8 +490,7 @@ export enum ExtrinsicType {
   STAKING_CANCEL_COMPOUNDING = 'staking.cancel_compounding',
   STAKING_CANCEL_UNSTAKE = 'staking.cancel_unstake',
 
-  MINT_LDOT = 'earn.mint_ldot',
-  MINT_VDOT = 'earn.mint_vdot',
+  JOIN_YIELD_POOL = 'earn.join_pool',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -2104,7 +2103,7 @@ export interface YieldStepDetail {
   metadata?: Record<string, unknown>; // for generating extrinsic
 }
 
-export interface OptimalPathResp {
+export interface OptimalYieldPath {
   totalFee: YieldTokenBaseInfo[],
   steps: YieldStepDetail[]
 }
@@ -2154,6 +2153,7 @@ export interface YieldPoolStats {
 export interface JoinYieldPoolParams extends BaseRequestSign {
   address: string,
   yieldPoolInfo: YieldPoolInfo;
+  path: OptimalYieldPath;
   data: SubmitJoinNativeStaking | unknown
 }
 
@@ -2297,7 +2297,7 @@ export interface KoniRequestSignatures {
 
   // yield
   'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
-  'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalPathResp | undefined];
+  'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalYieldPath | undefined];
   'pri(yield.submitJoin)': [JoinYieldPoolParams, SWTransactionResponse];
 
   // Subscription

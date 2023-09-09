@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { OptimalPathResp, OptimalYieldPathParams, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { OptimalYieldPath, OptimalYieldPathParams, ValidatorInfo, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/utils';
@@ -85,9 +85,9 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
   });
 }
 
-export async function generatePathForNativeStaking (params: OptimalYieldPathParams): Promise<OptimalPathResp> {
+export async function generatePathForNativeStaking (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
   const bnAmount = new BN(params.amount);
-  const result: OptimalPathResp = {
+  const result: OptimalYieldPath = {
     totalFee: [],
     steps: [DEFAULT_YIELD_FIRST_STEP]
   };
@@ -138,4 +138,69 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
   }
 
   return result;
+}
+
+export async function getNativeStakingExtrinsic (substrateApi: _SubstrateApi, amount: string, targetValidators: ValidatorInfo[], chainInfo: _ChainInfo, address: string, bondDest = 'Staked') {
+  const chainApi = await substrateApi.isReady;
+  const binaryAmount = new BN(amount);
+
+  let bondTx;
+  let nominateTx;
+
+  const _params = chainApi.api.tx.staking.bond.toJSON() as Record<string, any>;
+  const paramsCount = (_params.args as any[]).length;
+
+  const validatorParamList = targetValidators.map((validator) => {
+    return validator.address;
+  });
+
+  if (paramsCount === 2) {
+    bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
+  } else {
+    bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
+  }
+
+  nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
+
+  return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
+
+  // if (!nominatorMetadata) {
+  //   if (paramsCount === 2) {
+  //     bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
+  //   } else {
+  //     bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
+  //   }
+  //
+  //   nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
+  //
+  //   return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
+  // }
+  //
+  // if (!nominatorMetadata.isBondedBefore) { // first time
+  //   if (paramsCount === 2) {
+  //     bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
+  //   } else {
+  //     bondTx = chainApi.api.tx.staking.bond(nominatorMetadata.address, binaryAmount, bondDest);
+  //   }
+  //
+  //   nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
+  //
+  //   return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
+  // } else {
+  //   if (binaryAmount.gt(BN_ZERO)) {
+  //     bondTx = chainApi.api.tx.staking.bondExtra(binaryAmount);
+  //   }
+  //
+  //   if (nominatorMetadata.isBondedBefore && targetValidators.length > 0) {
+  //     nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
+  //   }
+  // }
+  //
+  // if (bondTx && !nominateTx) {
+  //   return bondTx;
+  // } else if (nominateTx && !bondTx) {
+  //   return nominateTx;
+  // }
+  //
+  // return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
 }

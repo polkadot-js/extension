@@ -23,7 +23,7 @@ import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transacti
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import {ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography} from '@subwallet/react-ui';
+import { ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -285,6 +285,10 @@ const Component = () => {
       submitPromise = submitJoinYieldPool({
         address: from,
         yieldPoolInfo: currentPoolInfo,
+        path: {
+          totalFee: totalFee as YieldTokenBaseInfo[],
+          steps: yieldSteps as YieldStepDetail[]
+        },
         data: {
           amount: currentAmount,
           selectedValidators
@@ -304,7 +308,7 @@ const Component = () => {
           setSubmitLoading(false);
         });
     }, 300);
-  }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, step, yieldSteps]);
+  }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, step, totalFee, yieldSteps]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -480,7 +484,10 @@ const Component = () => {
               );
             })}
 
-            {isLoading && <ActivityIndicator prefixCls={'ant'} size={'32px'}/>}
+            {isLoading && <ActivityIndicator
+              prefixCls={'ant'}
+              size={'32px'}
+            />}
           </div>
           <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
 

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { OptimalPathResp, OptimalYieldPathParams, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { OptimalYieldPath, OptimalYieldPathParams, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
 
@@ -55,9 +55,9 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, cal
   };
 }
 
-export async function generatePathForBifrostLiquidStaking (params: OptimalYieldPathParams): Promise<OptimalPathResp> {
+export async function generatePathForBifrostLiquidStaking (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
   const bnAmount = new BN(params.amount);
-  const result: OptimalPathResp = {
+  const result: OptimalYieldPath = {
     totalFee: [],
     steps: [DEFAULT_YIELD_FIRST_STEP]
   };

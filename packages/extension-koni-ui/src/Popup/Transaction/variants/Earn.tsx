@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { NominationPoolInfo, StakingType, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepDetail, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationPoolInfo, SubmitJoinNativeStaking, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepDetail, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -14,7 +14,7 @@ import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetChainPrefixBySlug, useHandleSubmitTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { getOptimalYieldPath, submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
+import { getOptimalYieldPath, submitJoinYieldPool, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingProcessModal';
 import { fetchEarningChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/earning/earningHandler';
 import { TransactionContent } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
@@ -64,7 +64,7 @@ const Component = () => {
     return _methodSlug || '';
   }, [_methodSlug]);
 
-  const poolInfo = useSelector((state: RootState) => state.yieldPool.poolInfo);
+  const poolInfoMap = useSelector((state: RootState) => state.yieldPool.poolInfo);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainAsset = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
@@ -97,7 +97,7 @@ const Component = () => {
 
   const currentAmount = Form.useWatch(`${formFieldPrefix}0`, form);
   const currentFrom = Form.useWatch(FormFieldName.FROM, form);
-  const currentPoolInfo = useMemo(() => poolInfo[methodSlug], [methodSlug, poolInfo]);
+  const currentPoolInfo = useMemo(() => poolInfoMap[methodSlug], [methodSlug, poolInfoMap]);
 
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const { decimals, symbol } = useGetNativeTokenBasicInfo(currentPoolInfo.chain);
@@ -265,12 +265,12 @@ const Component = () => {
 
     const { from, nominate, pool } = form.getFieldsValue();
 
-    let bondingPromise: Promise<SWTransactionResponse>;
+    let submitPromise: Promise<SWTransactionResponse>;
 
     if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL && pool) {
       const selectedPool = getSelectedPool(pool);
 
-      bondingPromise = submitPoolBonding({
+      submitPromise = submitPoolBonding({
         amount: currentAmount,
         chain: currentPoolInfo.chain,
         selectedPool: selectedPool as NominationPoolInfo,
@@ -279,14 +279,14 @@ const Component = () => {
     } else {
       const selectedValidators = getSelectedValidators(parseNominations(nominate));
 
-      bondingPromise = submitBonding({
-        amount: currentAmount,
-        chain: currentPoolInfo.chain,
-        selectedValidators,
+      submitPromise = submitJoinYieldPool({
         address: from,
-        type: StakingType.NOMINATED
+        yieldPoolInfo: currentPoolInfo,
+        data: {
+          amount: currentAmount,
+          selectedValidators
+        } as SubmitJoinNativeStaking
       });
-      console.log('nominate', from, nominate);
     }
 
     if (!(yieldSteps && step === yieldSteps.length)) {
@@ -294,14 +294,14 @@ const Component = () => {
     }
 
     setTimeout(() => {
-      bondingPromise
+      submitPromise
         .then(onSuccess)
         .catch(onError)
         .finally(() => {
           setSubmitLoading(false);
         });
     }, 300);
-  }, [currentAmount, currentPoolInfo.chain, currentPoolInfo.type, form, getSelectedPool, getSelectedValidators, onError, onSuccess, step, yieldSteps]);
+  }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, step, yieldSteps]);
 
   return (
     <div className={'earning-wrapper'}>

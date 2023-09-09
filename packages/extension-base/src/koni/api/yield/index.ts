@@ -97,3 +97,7 @@ export function validateProcess (params: OptimalYieldPathParams, path: OptimalPa
     return validateProcessForAcalaLiquidStaking(params, path);
   }
 }
+
+export function getJoinPoolExtrinsic () {
+
+}

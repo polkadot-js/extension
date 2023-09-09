@@ -2151,6 +2151,19 @@ export interface YieldPoolStats {
   tvl?: string // in $
 }
 
+export interface JoinYieldPoolParams extends BaseRequestSign {
+  address: string,
+  yieldPoolInfo: YieldPoolInfo;
+  data: SubmitJoinNativeStaking | unknown
+}
+
+export type RequestJoinYieldPoolSubmit = InternalRequestSign<JoinYieldPoolParams>;
+
+export interface SubmitJoinNativeStaking {
+  amount: string,
+  selectedValidators: ValidatorInfo[]
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -2285,6 +2298,7 @@ export interface KoniRequestSignatures {
   // yield
   'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
   'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalPathResp | undefined];
+  'pri(yield.submitJoin)': [JoinYieldPoolParams, SWTransactionResponse];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

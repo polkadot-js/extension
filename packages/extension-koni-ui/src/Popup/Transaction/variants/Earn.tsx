@@ -23,7 +23,7 @@ import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transacti
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
+import {ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography} from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -74,14 +74,15 @@ const Component = () => {
 
   const [yieldSteps, setYieldSteps] = useState<YieldStepDetail[]>();
   const [totalFee, setTotalFee] = useState<YieldTokenBaseInfo[]>();
-  const [isBalanceReady, setIsBalanceReady] = useState(true);
+  const [isBalanceReady, setIsBalanceReady] = useState<boolean>(true);
   const [step, setStep] = useState<number>(1);
 
-  const [forceFetchValidator, setForceFetchValidator] = useState(false);
-  const [poolLoading, setPoolLoading] = useState(false);
-  const [validatorLoading, setValidatorLoading] = useState(false);
+  const [forceFetchValidator, setForceFetchValidator] = useState<boolean>(false);
+  const [poolLoading, setPoolLoading] = useState<boolean>(false);
+  const [validatorLoading, setValidatorLoading] = useState<boolean>(false);
 
-  const [isSubmitDisable, setIsSubmitDisable] = useState(true);
+  const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
 
   const onDone = useCallback((extrinsicHash: string) => {
@@ -130,6 +131,7 @@ const Component = () => {
   }, [currentPoolInfo, currentFrom, chainState?.active, forceFetchValidator]);
 
   useEffect(() => {
+    setIsLoading(true);
     getOptimalYieldPath({
       amount: currentAmount,
       poolInfo: currentPoolInfo
@@ -138,7 +140,8 @@ const Component = () => {
         setYieldSteps(res?.steps);
         setTotalFee(res?.totalFee);
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
   }, [currentPoolInfo, currentAmount]);
 
   const _assetEarnings: Record<string, YieldAssetExpectedEarning> = useMemo(() => {
@@ -464,7 +467,7 @@ const Component = () => {
 
             <Typography.Text className={'earning-calculator-message'}>{t('Staking process:')}</Typography.Text>
 
-            {yieldSteps && yieldSteps.map((item, index) => {
+            {!isLoading && yieldSteps && yieldSteps.map((item, index) => {
               const isSelected = step === index + 1;
 
               return (
@@ -476,6 +479,8 @@ const Component = () => {
                 />
               );
             })}
+
+            {isLoading && <ActivityIndicator prefixCls={'ant'} size={'32px'}/>}
           </div>
           <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
 
@@ -575,6 +580,11 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.earn-transform-amount, .account-free-balance': {
       paddingBottom: token.paddingSM
+    },
+
+    '.ant-loading-icon': {
+      display: 'flex',
+      justifyContent: 'center'
     }
   };
 });

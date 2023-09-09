@@ -710,10 +710,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       banxa: {
         network: 'ETH',
         symbol: 'USDC'
-      },
-      coinbase: {
-        network: 'ethereum',
-        symbol: 'USDC'
       }
     },
     network: 'ethereum',
@@ -722,8 +718,7 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     support: 'ETHEREUM',
     services: [
       'transak',
-      'banxa',
-      'coinbase'
+      'banxa'
     ]
   },
   'optimism-ERC20-USDC-0x7F5c764cBc14f9669B88837ca1490cCa17c31607': {
@@ -748,10 +743,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       transak: {
         network: 'polygon',
         symbol: 'USDC'
-      },
-      coinbase: {
-        network: 'polygon',
-        symbol: 'USDC'
       }
     },
     network: 'polygon',
@@ -759,8 +750,7 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     symbol: 'USDC',
     support: 'ETHEREUM',
     services: [
-      'transak',
-      'coinbase'
+      'transak'
     ]
   },
   'binance-ERC20-USDT-0x55d398326f99059fF775485246999027B3197955': {
@@ -789,10 +779,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       banxa: {
         network: 'ETH',
         symbol: 'USDT'
-      },
-      coinbase: {
-        network: 'ethereum',
-        symbol: 'USDT'
       }
     },
     network: 'ethereum',
@@ -801,8 +787,7 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     support: 'ETHEREUM',
     services: [
       'transak',
-      'banxa',
-      'coinbase'
+      'banxa'
     ]
   },
   'polygon-ERC20-USDT-0xc2132D05D31c914a87C6611C10748AEb04B58e8F': {
@@ -846,7 +831,7 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       },
       coinbase: {
         network: 'ethereum',
-        symbol: 'wBTC'
+        symbol: 'WBTC'
       }
     },
     network: 'ethereum',

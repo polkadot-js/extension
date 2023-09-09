@@ -3,18 +3,16 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
-import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
-import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { useGetZkAddress } from '@subwallet/extension-koni-ui/hooks/account/useGetZkAddress';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { useGetZkAddress, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import GeneralEmptyList from '../../GeneralEmptyList';
+import { TokenEmptyList } from '../../EmptyList';
+import { TokenSelectionItem } from '../../TokenItem';
 
 interface Props extends ThemeProps {
   onSelectItem?: (item: _ChainAsset) => void,
@@ -22,9 +20,9 @@ interface Props extends ThemeProps {
   items: _ChainAsset[]
 }
 
-const renderEmpty = () => <GeneralEmptyList />;
-
 const modalId = RECEIVE_TOKEN_SELECTOR_MODAL;
+
+const renderEmpty = () => <TokenEmptyList modalId={modalId} />;
 
 function Component ({ address, className = '', items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();

@@ -27,7 +27,7 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import GeneralEmptyList from '../../../GeneralEmptyList';
+import { GeneralEmptyList } from '../../../EmptyList';
 import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
 import SelectAccountFooter from '../SelectAccount/Footer';
 

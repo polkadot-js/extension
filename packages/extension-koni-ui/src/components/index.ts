@@ -4,8 +4,6 @@
 export { default as AlertBox } from './Alert';
 export { default as BackgroundExpandView } from './BackgroundExpandView';
 export { default as ChainItemFooter } from './ChainItemFooter';
-export { default as EmptyList } from './EmptyList';
-export { default as GeneralEmptyList } from './GeneralEmptyList';
 export { default as LoadingScreen } from './LoadingScreen';
 export { default as NetworkToggleItem } from './NetworkToggleItem';
 export { default as PinExtensionMessage } from './PinExtensionMessage';
@@ -19,6 +17,7 @@ export * from '../contexts';
 export * from './Account';
 export * from './Avatar';
 export * from './Confirmation';
+export * from './EmptyList';
 export * from './Field';
 export * from './History';
 export * from './Icon';

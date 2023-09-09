@@ -24,7 +24,7 @@ import React, { useCallback, useContext, useMemo, useRef, useState } from 'react
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 
-import GeneralEmptyList from '../../GeneralEmptyList';
+import { GeneralEmptyList } from '../../EmptyList';
 
 type Props = ThemeProps;
 

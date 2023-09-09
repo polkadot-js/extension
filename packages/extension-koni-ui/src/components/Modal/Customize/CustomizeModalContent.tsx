@@ -2,22 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
+import { NetworkEmptyList } from '@subwallet/extension-koni-ui/components';
 import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
+import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { NetworkItem, PageIcon, SwList } from '@subwallet/react-ui';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { NetworkItem, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 type Props = ThemeProps;
 
+const renderEmpty = () => <NetworkEmptyList modalId={CUSTOMIZE_MODAL} />;
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
-  const { token } = useTheme() as Theme;
   const { t } = useTranslation();
   const chainInfoList = useChainInfoWithState();
 
@@ -45,27 +46,6 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, []);
 
-  const emptyChainList = useCallback(() => {
-    return (
-      <div className={'manage_chain__empty_container'}>
-        <div className={'manage_chain__empty_icon_wrapper'}>
-          <PageIcon
-            color={token['gray-3']}
-            iconProps={{
-              phosphorIcon: MagnifyingGlass,
-              weight: 'fill'
-            }}
-          />
-        </div>
-
-        <div className={'manage_chain__empty_text_container'}>
-          <div className={'manage_chain__empty_title'}>{t<string>('No chain')}</div>
-          <div className={'manage_chain__empty_subtitle'}>{t<string>('Your chain will appear here.')}</div>
-        </div>
-      </div>
-    );
-  }, [t, token]);
-
   return (
     <SwList.Section
       className={CN(className)}
@@ -73,7 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
       enableSearchInput
       list={chainInfoList}
       renderItem={renderChainItem}
-      renderWhenEmpty={emptyChainList}
+      renderWhenEmpty={renderEmpty}
       rowGap={'8px'}
       searchFunction={chainSearchFunc}
       searchMinCharactersCount={2}

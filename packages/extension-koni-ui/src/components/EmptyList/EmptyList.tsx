@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { PageIcon } from '@subwallet/react-ui';
+import { Button, ButtonProps, PageIcon } from '@subwallet/react-ui';
 import { IconProps } from 'phosphor-react';
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -11,10 +11,11 @@ interface Props extends ThemeProps {
   phosphorIcon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,
   emptyTitle?: string,
   emptyMessage?: string,
+  buttonProps?: ButtonProps;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, emptyMessage, emptyTitle, phosphorIcon } = props;
+  const { buttonProps, className, emptyMessage, emptyTitle, phosphorIcon } = props;
   const { token } = useTheme() as Theme;
 
   return (
@@ -33,6 +34,14 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className={'empty_title'}>{emptyTitle}</div>
         <div className={'empty_subtitle'}>{emptyMessage}</div>
       </div>
+
+      {
+        buttonProps && (
+          <div className='button-container'>
+            <Button {...buttonProps} />
+          </div>
+        )
+      }
     </div>
   );
 };
@@ -54,24 +63,34 @@ const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flexDirection: 'column',
       alignContent: 'center',
       justifyContent: 'center',
-      flexWrap: 'wrap'
+      flexWrap: 'wrap',
+      whiteSpace: 'pre-line'
     },
 
     '.empty_title': {
       fontWeight: token.headingFontWeight,
       textAlign: 'center',
       fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
       color: token.colorText
     },
 
     '.empty_subtitle': {
-      marginTop: 6,
       textAlign: 'center',
-      color: token.colorTextTertiary
+      color: token.colorTextTertiary,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6
     },
 
     '.empty_icon_wrapper': {
       display: 'flex',
+      justifyContent: 'center'
+    },
+
+    '.button-container': {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
       justifyContent: 'center'
     }
   };

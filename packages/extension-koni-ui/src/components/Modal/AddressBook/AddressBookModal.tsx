@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { AccountItemWithName } from '../../Account';
-import GeneralEmptyList from '../../GeneralEmptyList';
+import { GeneralEmptyList } from '../../EmptyList';
 import { FilterModal } from '../FilterModal';
 
 interface Props extends ThemeProps {

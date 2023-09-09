@@ -11,8 +11,8 @@ import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nf
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowClockwise, Image, Plus } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
+import { ArrowClockwise, Image, Plus, PlusCircle } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -109,26 +109,46 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     const state: INftCollectionDetail = { collectionInfo: nftCollection, nftList };
 
-    return (<NftGalleryWrapper
-      fallbackImage={fallbackImage}
-      handleOnClick={handleOnClickCollection}
-      image={nftCollection.image}
-      itemCount={nftList.length}
-      key={`${nftCollection.collectionId}_${nftCollection.chain}`}
-      routingParams={state}
-      title={nftCollection.collectionName || nftCollection.collectionId}
-    />);
+    return (
+      <NftGalleryWrapper
+        fallbackImage={fallbackImage}
+        handleOnClick={handleOnClickCollection}
+        image={nftCollection.image}
+        itemCount={nftList.length}
+        key={`${nftCollection.collectionId}_${nftCollection.chain}`}
+        routingParams={state}
+        title={nftCollection.collectionName || nftCollection.collectionId}
+      />
+    );
   }, [getNftsByCollection, handleOnClickCollection]);
+
+  const emptyButtonProps = useMemo((): ButtonProps => {
+    return {
+      icon: (
+        <Icon
+          phosphorIcon={PlusCircle}
+          weight='fill'
+        />
+      ),
+      children: t('Import NFT'),
+      shape: 'circle',
+      size: 'xs',
+      onClick: () => {
+        navigate('/settings/tokens/import-nft', { state: { isExternalRequest: false } });
+      }
+    };
+  }, [navigate, t]);
 
   const emptyNft = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Your NFT collectible will appear here!')}
-        emptyTitle={t('No NFT collectible')}
+        buttonProps={emptyButtonProps}
+        emptyMessage={t('Click [+] on the top right corner to import your NFT')}
+        emptyTitle={t('No NFTs found')}
         phosphorIcon={Image}
       />
     );
-  }, [t]);
+  }, [emptyButtonProps, t]);
 
   return (
     <PageWrapper

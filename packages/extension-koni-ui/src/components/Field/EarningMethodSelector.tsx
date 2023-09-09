@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,7 +13,6 @@ import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from
 import styled, { useTheme } from 'styled-components';
 
 import GeneralEmptyList from '../GeneralEmptyList';
-import { YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   items: YieldPoolInfo[];
@@ -26,7 +25,6 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const { className = '', disabled, id = 'token-select', items, label, placeholder, showChainInSelected = false, statusHelp, tooltip, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
   const chainLogo = useMemo(() => {
@@ -36,12 +34,12 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       (
         <Logo
           className='token-logo'
-          shape='squircle'
           network={chainInfo.chain}
+          shape='squircle'
           size={token.controlHeightSM}
         />
       );
-  }, [token.controlHeightSM, value]);
+  }, [token.controlHeightSM, items, value]);
 
   const renderMethodSelected = useCallback((item: YieldPoolInfo) => {
     return (
@@ -63,7 +61,10 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       <Web3Block
         className={'earning-method-item'}
         leftItem={(
-          <Logo network={item.chain} size={36} />
+          <Logo
+            network={item.chain}
+            size={36}
+          />
         )}
         middleItem={(
           <div className='token-info-container'>
@@ -89,7 +90,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         }
       />
     );
-  }, [chainInfoMap, token.colorSuccess]);
+  }, [token.colorSuccess]);
 
   useEffect(() => {
     if (!value) {
@@ -189,7 +190,7 @@ export const EarningMethodSelector = styled(forwardRef(Component))<Props>(({ the
 
       '.ant-web3-block-right-item': {
         marginRight: 0
-      },
+      }
     }
   });
 });

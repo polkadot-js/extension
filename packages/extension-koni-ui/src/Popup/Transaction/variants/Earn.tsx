@@ -10,15 +10,18 @@ import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWra
 import EarningProcessItem from '@subwallet/extension-koni-ui/components/EarningProcessItem';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
+import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingProcessModal';
 import { fetchEarningChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/earning/earningHandler';
 import { TransactionContent } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
 import FreeBalanceToStake from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalanceToStake';
+import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { Button, Divider, Form, Icon, Logo, Typography } from '@subwallet/react-ui';
+import { Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -54,6 +57,7 @@ const Component = () => {
   const { token } = useTheme() as Theme;
   const { slug: _methodSlug } = useParams();
 
+  const { isWebUI } = useContext(ScreenContext);
   const methodSlug = useMemo(() => {
     return _methodSlug || '';
   }, [_methodSlug]);
@@ -62,6 +66,7 @@ const Component = () => {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainAsset = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const { setShowRightBtn } = useContext(TransactionContext);
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
 
   const [yieldSteps, setYieldSteps] = useState<YieldStepDetail[]>();
@@ -98,6 +103,10 @@ const Component = () => {
   }, [currentAccount?.address, isAllAccount]);
 
   useEffect(() => {
+    setShowRightBtn(true);
+  }, [setShowRightBtn]);
+
+  useEffect(() => {
     let unmount = false;
 
     // fetch validators when change chain
@@ -125,7 +134,7 @@ const Component = () => {
 
   const _assetEarnings: Record<string, YieldAssetExpectedEarning> = useMemo(() => {
     const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
-    const currentAmountNumb = currentAmount ? Number(currentAmount) / (10 ** decimals) : 0;
+    const currentAmountNumb = currentAmount ? parseFloat(currentAmount) / (10 ** decimals) : 0;
 
     if (currentPoolInfo?.stats?.assetEarning) {
       currentPoolInfo?.stats?.assetEarning.forEach((assetEarningStats) => {
@@ -147,7 +156,7 @@ const Component = () => {
         const asset = chainAsset[fee.slug];
         const feeDecimals = _getAssetDecimals(asset);
         const priceValue = asset.priceId ? priceMap[asset.priceId] : 0;
-        const feeNumb = priceValue * (fee.amount ? (Number(fee.amount) / (10 ** feeDecimals)) : 0);
+        const feeNumb = priceValue * (fee.amount ? (parseFloat(fee.amount) / (10 ** feeDecimals)) : 0);
 
         _totalFee += feeNumb;
       });
@@ -281,11 +290,15 @@ const Component = () => {
 
               {currentPoolInfo.inputAssets.map((asset, index) => {
                 const name = formFieldPrefix + String(index);
+                const _asset = chainAsset[asset];
+                const assetDecimals = _getAssetDecimals(_asset);
+                const priceValue = _asset.priceId ? priceMap[_asset.priceId] : 0;
+                const transformAmount = currentAmount ? (parseFloat(currentAmount) / (10 ** assetDecimals)) * priceValue : 0;
 
                 return (
                   <div
                     key={name}
-                    style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM }}
+                    style={{ display: 'flex', flexDirection: 'column' }}
                   >
                     <FreeBalanceToStake
                       address={currentFrom}
@@ -314,6 +327,16 @@ const Component = () => {
                         tooltip={t('Amount')}
                       />
                     </Form.Item>
+
+                    <Number
+                      className={'earn-transform-amount'}
+                      decimal={0}
+                      decimalColor={token.colorTextLight4}
+                      intColor={token.colorTextLight4}
+                      prefix={'$'}
+                      unitColor={token.colorTextLight4}
+                      value={transformAmount}
+                    />
                   </div>
                 );
               })}
@@ -371,13 +394,14 @@ const Component = () => {
         </TransactionContent>
       </div>
 
-      <div className={'__transaction-process'}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
+      {isWebUI && (
+        <div className={'__transaction-process'}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
 
-          <Typography.Text className={'earning-calculator-message'}>{t('Staking process:')}</Typography.Text>
+            <Typography.Text className={'earning-calculator-message'}>{t('Staking process:')}</Typography.Text>
 
-          {yieldSteps && yieldSteps.map((item, index) => {
-            const isSelected = step === index + 1;
+            {yieldSteps && yieldSteps.map((item, index) => {
+              const isSelected = step === index + 1;
 
             return (
               <EarningProcessItem
@@ -391,10 +415,16 @@ const Component = () => {
         </div>
         <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
 
-        <Typography.Text style={{ color: token.colorTextLight4 }}>
-          {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
-        </Typography.Text>
-      </div>
+          <Typography.Text style={{ color: token.colorTextLight4 }}>
+            {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
+          </Typography.Text>
+        </div>
+      )}
+
+      {<StakingProcessModal
+        currentStep={step}
+        yieldSteps={yieldSteps}
+      />}
     </div>
   );
 };
@@ -426,38 +456,51 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.earning-wrapper': {
       display: 'flex',
-      flex: 1,
-      paddingTop: 24,
-      maxWidth: 784,
-      width: '100%',
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      gap: token.size
+      flex: 1
     },
 
     '.__transaction-block': {
-      display: 'block',
-      maxWidth: 384,
+      display: 'flex',
+      flexDirection: 'column',
       flex: 1
     },
+
+    '.web-ui-enable &': {
+      '.earning-wrapper': {
+        paddingTop: 24,
+        maxWidth: 784,
+        width: '100%',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        gap: token.size
+      },
+
+      '.__transaction-block': {
+        display: 'block',
+        maxWidth: 384,
+        flex: 1
+      },
+
+      '.transaction-content': {
+        paddingLeft: 0,
+        paddingRight: 0
+      },
+
+      '.transaction-footer': {
+        paddingTop: 4,
+        paddingLeft: 0,
+        paddingRight: 0,
+        marginBottom: 0
+      },
+
+      '.meta-info': {
+        marginBottom: token.marginSM
+      }
+
+    },
+
     '.__transaction-process': {
       flex: 1
-    },
-
-    '.transaction-content': {
-      paddingLeft: 0,
-      paddingRight: 0
-    },
-
-    '.transaction-footer': {
-      paddingTop: 4,
-      paddingLeft: 0,
-      paddingRight: 0,
-      marginBottom: 0
-    },
-
-    '.meta-info': {
-      marginBottom: token.marginSM
     },
 
     '.ant-form-item-label > label': {
@@ -472,6 +515,10 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       backgroundColor: token.colorBgDivider,
       marginTop: token.marginSM,
       marginBottom: token.marginSM
+    },
+
+    '.earn-transform-amount, .account-free-balance': {
+      paddingBottom: token.paddingSM
     }
   };
 });

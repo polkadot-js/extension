@@ -45,7 +45,7 @@ export const getOutputValuesFromString: (input: string, power: number) => string
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, decimals, disabled, forceUpdateMaxValue, maxValue, onChange, onSetMax, showMaxButton, statusHelp, tooltip, value, prefix } = props;
+  const { className, decimals, disabled, forceUpdateMaxValue, maxValue, onChange, onSetMax, prefix, showMaxButton, statusHelp, tooltip, value } = props;
 
   const { t } = useTranslation();
 
@@ -163,10 +163,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       onKeyDown={onKeyDown}
       onPaste={onPaste}
       placeholder={props.placeholder || t('Amount')}
+      prefix={prefix}
       readOnly={props.readOnly}
       ref={inputRef}
       statusHelp={statusHelp}
-      prefix={prefix}
       suffix={suffix}
       tooltip={tooltip}
       value={inputValue}

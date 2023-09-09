@@ -51,7 +51,7 @@ export const TagTypes = () => {
         phosphorIcon={HandsClapping}
         weight='fill'
       />,
-      color: token.colorSecondary
+      color: 'success'
     },
     PARACHAIN_STAKING: {
       label: t('Parachain staking'),
@@ -154,6 +154,7 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onC
             />
             <Button
               icon={<Icon
+                className={'earning-item-stake-btn'}
                 phosphorIcon={PlusCircle}
                 size={'sm'}
                 weight={'fill'}
@@ -237,6 +238,11 @@ const EarningItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       justifyContent: 'center',
       paddingTop: token.paddingLG,
       paddingBottom: token.padding
+    },
+
+    '.earning-item-stake-btn': {
+      width: token.sizeMD,
+      height: token.sizeMD
     }
   });
 });

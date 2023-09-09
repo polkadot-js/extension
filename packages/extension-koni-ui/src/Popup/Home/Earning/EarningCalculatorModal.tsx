@@ -1,23 +1,22 @@
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
-import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { useTranslation } from 'react-i18next';
-import { Button, Divider, Form, Icon, Logo, ModalContext, Typography } from '@subwallet/react-ui';
-import styled, { useTheme } from 'styled-components';
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
+import { AmountInput } from '@subwallet/extension-koni-ui/components';
 import EarningBtn from '@subwallet/extension-koni-ui/components/EarningBtn';
 import { EarningMethodSelector } from '@subwallet/extension-koni-ui/components/Field/EarningMethodSelector';
-import { useSelector } from 'react-redux';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { AmountInput } from '@subwallet/extension-koni-ui/components';
-import BigN from 'bignumber.js';
-import {
-  YieldAssetExpectedEarning,
-  YieldCompoundingPeriod,
-  YieldPoolInfo
-} from '@subwallet/extension-base/background/KoniTypes';
-import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import EarningCalculatorInfo from '@subwallet/extension-koni-ui/components/StakingCalculatorInfo';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Button, Divider, Form, Icon, Logo, ModalContext, Typography } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -52,7 +51,7 @@ const Component = ({ className, item }: Props) => {
   const formDefault: EarningCalculatorFormProps = useMemo(() => {
     return {
       [FormFieldName.VALUE]: '0',
-      [FormFieldName.METHOD]: '',
+      [FormFieldName.METHOD]: ''
     };
   }, []);
 
@@ -60,24 +59,23 @@ const Component = ({ className, item }: Props) => {
     form.setFieldValue(FormFieldName.METHOD, item.slug);
   }, [form, item]);
 
-  const currentAmount = Form.useWatch('amount', form);
-
+  const currentAmount = Form.useWatch(FormFieldName.VALUE, form);
 
   const transformAssetEarnings: TransformAssetEarningMap = useMemo(() => {
-    let dailyEarnings: Record<string, YieldAssetExpectedEarning> = {};
-    let weeklyEarnings: Record<string, YieldAssetExpectedEarning> = {};
-    let monthlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
-    let yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
+    const dailyEarnings: Record<string, YieldAssetExpectedEarning> = {};
+    const weeklyEarnings: Record<string, YieldAssetExpectedEarning> = {};
+    const monthlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
+    const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
 
     if (item?.stats?.assetEarning) {
       item?.stats?.assetEarning.forEach((assetEarningStats) => {
         const assetApr = assetEarningStats?.apr || 0;
         const assetSlug = assetEarningStats.slug;
 
-        const _1dEarning = calculateReward(assetApr, currentAmount, YieldCompoundingPeriod.DAILY);
-        const _7dEarning = calculateReward(assetApr, currentAmount, YieldCompoundingPeriod.WEEKLY);
-        const _monthlyEarning = calculateReward(assetApr, currentAmount, YieldCompoundingPeriod.MONTHLY);
-        const _yearlyEarning = calculateReward(assetApr, currentAmount, YieldCompoundingPeriod.YEARLY);
+        const _1dEarning = calculateReward(assetApr, parseFloat(currentAmount), YieldCompoundingPeriod.DAILY);
+        const _7dEarning = calculateReward(assetApr, parseFloat(currentAmount), YieldCompoundingPeriod.WEEKLY);
+        const _monthlyEarning = calculateReward(assetApr, parseFloat(currentAmount), YieldCompoundingPeriod.MONTHLY);
+        const _yearlyEarning = calculateReward(assetApr, parseFloat(currentAmount), YieldCompoundingPeriod.YEARLY);
 
         dailyEarnings[assetSlug] = _1dEarning;
         weeklyEarnings[assetSlug] = _7dEarning;
@@ -94,7 +92,7 @@ const Component = ({ className, item }: Props) => {
   }, [inactiveModal]);
 
   const onFieldsChange: FormCallbacks<EarningCalculatorFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
-  }, [])
+  }, []);
 
   return (
     <BaseModal
@@ -103,14 +101,21 @@ const Component = ({ className, item }: Props) => {
       id={STAKING_CALCULATOR_MODAL_ID}
       maskClosable
       onCancel={onCloseModal}
-      title={t('Staking calculator')}>
+      title={t('Staking calculator')}
+    >
       <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
-        <EarningBtn icon={<Logo className={'earning-calculator-tag'} size={16} network={'polkadot'} />} size={'xs'}>
+        <EarningBtn
+          icon={<Logo
+            className={'earning-calculator-tag'}
+            network={'polkadot'}
+            size={16}
+          />}
+          size={'xs'}
+        >
           {'DOT'}
         </EarningBtn>
 
         <Typography.Text className={'earning-calculator-message'}>{t('Enter the number of tokens to estimate the rewards')}</Typography.Text>
-
 
         <Form
           className={'form-container form-space-sm earning-calculator-form-container'}
@@ -119,22 +124,25 @@ const Component = ({ className, item }: Props) => {
           onFieldsChange={onFieldsChange}
         >
           <Form.Item
-            name={FormFieldName.METHOD}
-            label={'Select method'}
             colon={false}
+            label={'Select method'}
+            name={FormFieldName.METHOD}
           >
-            <EarningMethodSelector items={Object.values(poolInfo)} showChainInSelected />
+            <EarningMethodSelector
+              items={Object.values(poolInfo)}
+              showChainInSelected
+            />
           </Form.Item>
 
-
           <Form.Item
-            label={'Staking amount'}
             colon={false}
+            label={'Staking amount'}
             name={FormFieldName.VALUE}
             rules={[
               () => ({
                 validator: (_, value: string) => {
                   const val = new BigN(value);
+
                   if (val.lte(0)) {
                     return Promise.reject(new Error(t('Amount must be greater than 0')));
                   }
@@ -155,16 +163,35 @@ const Component = ({ className, item }: Props) => {
       </div>
       <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
 
-      <EarningCalculatorInfo label={t('Daily earnings')} earningAssets={transformAssetEarnings.dailyEarnings} />
-      <EarningCalculatorInfo label={t('Weekly earnings')} earningAssets={transformAssetEarnings.weeklyEarnings} />
-      <EarningCalculatorInfo label={t('Monthly earnings')} earningAssets={transformAssetEarnings.monthlyEarnings} />
-      <EarningCalculatorInfo label={t('Yearly earnings')} earningAssets={transformAssetEarnings.yearlyEarnings} />
+      <EarningCalculatorInfo
+        earningAssets={transformAssetEarnings.dailyEarnings}
+        label={t('Daily earnings')}
+      />
+      <EarningCalculatorInfo
+        earningAssets={transformAssetEarnings.weeklyEarnings}
+        label={t('Weekly earnings')}
+      />
+      <EarningCalculatorInfo
+        earningAssets={transformAssetEarnings.monthlyEarnings}
+        label={t('Monthly earnings')}
+      />
+      <EarningCalculatorInfo
+        earningAssets={transformAssetEarnings.yearlyEarnings}
+        label={t('Yearly earnings')}
+      />
 
       <Typography.Text style={{ color: token.colorTextLight4 }}>
         {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
       </Typography.Text>
 
-      <Button style={{ marginTop: token.paddingXL }} block icon={<Icon phosphorIcon={PlusCircle} weight={'fill'} />}>{t('Stake now')}</Button>
+      <Button
+        block
+        icon={<Icon
+          phosphorIcon={PlusCircle}
+          weight={'fill'}
+        />}
+        style={{ marginTop: token.paddingXL }}
+      >{t('Stake now')}</Button>
     </BaseModal>
   );
 };
@@ -186,14 +213,14 @@ const EarningCalculatorModal = styled(Component)<Props>(({ theme: { token } }: P
     '.earning-calculator-form-container': {
       '.ant-form-item-label': {
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'center'
       },
 
       '.ant-form-item-label > label': {
         color: token.colorTextLight4
-      },
+      }
     }
-  }
+  };
 });
 
 export default EarningCalculatorModal;

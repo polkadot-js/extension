@@ -25,9 +25,9 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
     decimalOpacity = 1,
     decimals = 0,
     label,
+    prefix,
     size = 30,
     subFloatNumber = false,
-    prefix,
     suffix,
     value,
     valueColorSchema = 'default' } = props;
@@ -43,8 +43,8 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
           decimal={decimals}
           decimalOpacity={decimalOpacity}
           intOpacity={1}
-          size={size}
           prefix={prefix}
+          size={size}
           subFloatNumber={subFloatNumber}
           suffix={suffix}
           unitOpacity={1}

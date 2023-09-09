@@ -2,18 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button } from '@subwallet/react-ui';
+import {Button, Logo} from '@subwallet/react-ui';
 import { SizeType } from '@subwallet/react-ui/es/config-provider/SizeContext';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
-  icon?: React.ReactNode,
+  network?: string,
+  token?: string,
   size?: SizeType,
   children?: React.ReactNode,
 }
 
-const Component = ({ children, className, icon, size = 'xs' }: Props) => {
+const Component = ({ children, className, network, token, size = 'xs' }: Props) => {
   const _borderRadius = useMemo(() => {
     if (size === 'xs') {
       return '20px';
@@ -30,7 +31,7 @@ const Component = ({ children, className, icon, size = 'xs' }: Props) => {
     <Button
       block={false}
       className={className}
-      icon={icon}
+      icon={<Logo className={'earning-btn-icon'} size={16} network={network} token={token} />}
       shape={'round'}
       size={size}
       style={{ borderRadius: _borderRadius }}
@@ -46,7 +47,15 @@ const EarningBtn = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '&:hover': {
       backgroundColor: token.colorBgSecondary,
       border: `2px solid ${token.colorBgSecondary}`
-    }
+    },
+
+    '.earning-btn-icon': {
+      paddingRight: token.paddingXXS,
+
+      '.ant-image-img': {
+        marginBottom: '2px'
+      }
+    },
   };
 });
 

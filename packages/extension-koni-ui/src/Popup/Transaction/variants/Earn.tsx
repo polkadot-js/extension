@@ -355,8 +355,8 @@ const Component = () => {
               {currentPoolInfo.inputAssets.map((asset, index) => {
                 const name = formFieldPrefix + String(index);
                 const _asset = chainAsset[asset];
-                const assetDecimals = _getAssetDecimals(_asset);
-                const priceValue = _asset.priceId ? priceMap[_asset.priceId] : 0;
+                const assetDecimals = _asset ? _getAssetDecimals(_asset) : 0;
+                const priceValue = _asset && _asset.priceId ? priceMap[_asset.priceId] : 0;
                 const transformAmount = currentAmount ? (parseFloat(currentAmount) / (10 ** assetDecimals)) * priceValue : 0;
 
                 return (
@@ -510,14 +510,6 @@ const Wrapper: React.FC<Props> = (props: Props) => {
 
 const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.earning-calculator-tag': {
-      paddingRight: token.paddingXXS,
-
-      '.ant-image-img': {
-        marginBottom: '2px'
-      }
-    },
-
     '.earning-wrapper': {
       display: 'flex',
       flex: 1

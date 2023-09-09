@@ -2045,13 +2045,14 @@ export interface YieldPoolInfo {
   chain: string,
   inputAssets: string[], // slug
   rewardAssets: string[], // slug
-  altInputAssets?: string[],
+  altInputAssets?: string[], // TODO
   feeAssets: string[],
   withdrawalMethods: YieldWithdrawalMethod[],
   description: string,
   name: string,
   type: YieldPoolType,
-  stats?: YieldPoolStats
+  stats?: YieldPoolStats,
+  metadata?: ChainStakingMetadata | any
 }
 
 export interface OptimalYieldPathRequest {

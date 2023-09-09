@@ -2,17 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepDetail, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationPoolInfo, StakingType, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepDetail, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector } from '@subwallet/extension-koni-ui/components';
 import EarningProcessItem from '@subwallet/extension-koni-ui/components/EarningProcessItem';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFetchChainState, useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
-import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
+import { useFetchChainState, useGetChainPrefixBySlug, useHandleSubmitTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { getOptimalYieldPath, submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingProcessModal';
 import { fetchEarningChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/earning/earningHandler';
 import { TransactionContent } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
@@ -20,7 +22,7 @@ import FreeBalanceToStake from '@subwallet/extension-koni-ui/Popup/Transaction/p
 import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle } from 'phosphor-react';
@@ -62,12 +64,13 @@ const Component = () => {
     return _methodSlug || '';
   }, [_methodSlug]);
 
-  const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
+  const poolInfo = useSelector((state: RootState) => state.yieldPool.poolInfo);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainAsset = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const { setShowRightBtn } = useContext(TransactionContext);
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+  const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
 
   const [yieldSteps, setYieldSteps] = useState<YieldStepDetail[]>();
   const [totalFee, setTotalFee] = useState<YieldTokenBaseInfo[]>();
@@ -80,6 +83,12 @@ const Component = () => {
 
   const [isSubmitDisable, setIsSubmitDisable] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  const onDone = useCallback((extrinsicHash: string) => {
+    console.log('extrinsicHash', extrinsicHash);
+  }, []);
+
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   // TODO: transaction interface
   // TODO: process manager
@@ -221,23 +230,78 @@ const Component = () => {
     );
   }, [t, _assetEarnings, symbol, estimatedFee]);
 
+  const getSelectedValidators = useCallback((nominations: string[]) => {
+    const validatorList = validatorInfoMap[currentPoolInfo.chain];
+
+    if (!validatorList) {
+      return [];
+    }
+
+    const result: ValidatorInfo[] = [];
+
+    validatorList.forEach((validator) => {
+      if (nominations.some((nomination) => isSameAddress(nomination, validator.address))) { // remember the format of the address
+        result.push(validator);
+      }
+    });
+
+    return result;
+  }, [currentPoolInfo.chain, validatorInfoMap]);
+
+  const getSelectedPool = useCallback((poolId?: string) => {
+    const nominationPoolList = nominationPoolInfoMap[currentPoolInfo.chain];
+
+    for (const pool of nominationPoolList) {
+      if (String(pool.id) === poolId) {
+        return pool;
+      }
+    }
+
+    return undefined;
+  }, [nominationPoolInfoMap, currentPoolInfo.chain]);
+
   const onClick = useCallback(() => {
     setSubmitLoading(true);
 
     const { from, nominate, pool } = form.getFieldsValue();
 
+    let bondingPromise: Promise<SWTransactionResponse>;
+
     if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL && pool) {
-      console.log('pool', from, pool);
+      const selectedPool = getSelectedPool(pool);
+
+      bondingPromise = submitPoolBonding({
+        amount: currentAmount,
+        chain: currentPoolInfo.chain,
+        selectedPool: selectedPool as NominationPoolInfo,
+        address: from
+      });
     } else {
+      const selectedValidators = getSelectedValidators(parseNominations(nominate));
+
+      bondingPromise = submitBonding({
+        amount: currentAmount,
+        chain: currentPoolInfo.chain,
+        selectedValidators,
+        address: from,
+        type: StakingType.NOMINATED
+      });
       console.log('nominate', from, nominate);
     }
 
-    if (yieldSteps && step === yieldSteps.length) {
-      // onCloseModal();
-    } else {
+    if (!(yieldSteps && step === yieldSteps.length)) {
       setStep(step + 1);
     }
-  }, [currentPoolInfo.type, form, step, yieldSteps]);
+
+    setTimeout(() => {
+      bondingPromise
+        .then(onSuccess)
+        .catch(onError)
+        .finally(() => {
+          setSubmitLoading(false);
+        });
+    }, 300);
+  }, [currentAmount, currentPoolInfo.chain, currentPoolInfo.type, form, getSelectedPool, getSelectedValidators, onError, onSuccess, step, yieldSteps]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -270,7 +334,7 @@ const Component = () => {
                     size={'lg'}
                     style={{ fontWeight: '600' }}
                   >
-                    {t('Step 0{{step}}: {{label}}', {
+                    {t('Step {{step}}: {{label}}', {
                       replace: { step, label: yieldSteps[step - 1].name }
                     })}
                   </Typography.Text>
@@ -403,17 +467,17 @@ const Component = () => {
             {yieldSteps && yieldSteps.map((item, index) => {
               const isSelected = step === index + 1;
 
-            return (
-              <EarningProcessItem
-                index={index}
-                isSelected={isSelected}
-                key={index}
-                stepName={item.name}
-              />
-            );
-          })}
-        </div>
-        <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
+              return (
+                <EarningProcessItem
+                  index={index}
+                  isSelected={isSelected}
+                  key={index}
+                  stepName={item.name}
+                />
+              );
+            })}
+          </div>
+          <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
 
           <Typography.Text style={{ color: token.colorTextLight4 }}>
             {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}

@@ -10,7 +10,7 @@ import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseMod
 import EarningCalculatorInfo from '@subwallet/extension-koni-ui/components/StakingCalculatorInfo';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Divider, Form, Icon, Logo, ModalContext, Typography } from '@subwallet/react-ui';
+import { Button, Divider, Form, Icon, ModalContext, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
@@ -104,14 +104,7 @@ const Component = ({ className, item }: Props) => {
       title={t('Staking calculator')}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
-        <EarningBtn
-          icon={<Logo
-            className={'earning-calculator-tag'}
-            network={'polkadot'}
-            size={16}
-          />}
-          size={'xs'}
-        >
+        <EarningBtn network={'polkadot'} size={'xs'}>
           {'DOT'}
         </EarningBtn>
 

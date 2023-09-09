@@ -83,6 +83,8 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onC
     return apy ? (apy * 100) : 0;
   }, [stats?.totalApr]);
 
+  console.log('stats?.tvl', stats?.tvl);
+
   return (
     <Web3Block
       className={className}

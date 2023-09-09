@@ -430,22 +430,22 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       'banxa'
     ]
   },
-  'binance-ERC20-BUSD-0xe9e7cea3dedca5984780bafc599bd69add087d56': {
-    serviceInfo: {
-      ...DEFAULT_SERVICE_INFO,
-      transak: {
-        network: 'bsc',
-        symbol: 'BUSD'
-      }
-    },
-    network: 'binance',
-    slug: 'binance-ERC20-BUSD-0xe9e7cea3dedca5984780bafc599bd69add087d56',
-    symbol: 'BUSD',
-    support: 'ETHEREUM',
-    services: [
-      'transak'
-    ]
-  },
+  // 'binance-ERC20-BUSD-0xe9e7cea3dedca5984780bafc599bd69add087d56': {
+  //   serviceInfo: {
+  //     ...DEFAULT_SERVICE_INFO,
+  //     transak: {
+  //       network: 'bsc',
+  //       symbol: 'BUSD'
+  //     }
+  //   },
+  //   network: 'binance',
+  //   slug: 'binance-ERC20-BUSD-0xe9e7cea3dedca5984780bafc599bd69add087d56',
+  //   symbol: 'BUSD',
+  //   support: 'ETHEREUM',
+  //   services: [
+  //     'transak'
+  //   ]
+  // },
   'ethereum-ERC20-BUSD-0x4Fabb145d64652a948d72533023f6E7A623C7C53': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
@@ -613,22 +613,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     services: [
       'transak',
       'banxa'
-    ]
-  },
-  'ethereum-ERC20-NEAR-0x85F17Cf997934a597031b2E18a9aB6ebD4B9f6a4': {
-    serviceInfo: {
-      ...DEFAULT_SERVICE_INFO,
-      transak: {
-        network: 'mainnet',
-        symbol: 'NEAR'
-      }
-    },
-    network: 'ethereum',
-    slug: 'ethereum-ERC20-NEAR-0x85F17Cf997934a597031b2E18a9aB6ebD4B9f6a4',
-    symbol: 'NEAR',
-    support: 'ETHEREUM',
-    services: [
-      'transak'
     ]
   },
   'optimism-ERC20-OP-0x4200000000000000000000000000000000000042': {
@@ -872,22 +856,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     services: [
       'transak',
       'coinbase'
-    ]
-  },
-  'binance-ERC20-XRP-0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE': {
-    serviceInfo: {
-      ...DEFAULT_SERVICE_INFO,
-      transak: {
-        network: 'mainnet',
-        symbol: 'XRP'
-      }
-    },
-    network: 'binance',
-    slug: 'binance-ERC20-XRP-0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE',
-    symbol: 'XRP',
-    support: 'ETHEREUM',
-    services: [
-      'transak'
     ]
   }
 };

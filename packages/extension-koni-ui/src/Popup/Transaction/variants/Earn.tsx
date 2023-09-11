@@ -10,7 +10,6 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector } from '@subwallet/extension-koni-ui/components';
 import EarningProcessItem from '@subwallet/extension-koni-ui/components/EarningProcessItem';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetChainPrefixBySlug, useHandleSubmitTransaction } from '@subwallet/extension-koni-ui/hooks';
@@ -122,7 +121,7 @@ const Component = () => {
     // fetch validators when change chain
     // _stakingType is predefined form start
     if ((!!currentPoolInfo.chain && !!currentFrom && chainState?.active) || forceFetchValidator) {
-      fetchEarningChainValidators(currentPoolInfo.chain, currentPoolInfo.type || ALL_KEY, unmount, setPoolLoading, setValidatorLoading, setForceFetchValidator);
+      fetchEarningChainValidators(currentPoolInfo, unmount, setPoolLoading, setValidatorLoading, setForceFetchValidator);
     }
 
     return () => {

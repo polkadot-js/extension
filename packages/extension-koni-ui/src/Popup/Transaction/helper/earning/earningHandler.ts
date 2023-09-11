@@ -1,24 +1,38 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
-import { fetchChainPool, fetchChainValidator } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { getYieldStakingCandidates } from '@subwallet/extension-koni-ui/messaging';
+import { store } from '@subwallet/extension-koni-ui/stores';
 
 export function fetchEarningChainValidators (
-  chain: string,
-  yieldPoolType: string,
+  poolInfo: YieldPoolInfo,
   unmount: boolean,
   setPoolLoading: (value: boolean) => void,
   setValidatorLoading: (value: boolean) => void,
   setForceFetchValidator: (value: boolean) => void
 ) {
-  if (yieldPoolType === ALL_KEY) {
-    fetchChainValidator(chain, unmount, setValidatorLoading, setForceFetchValidator);
-    fetchChainPool(chain, unmount, setPoolLoading, setForceFetchValidator);
-  } else if (yieldPoolType === YieldPoolType.NATIVE_STAKING) {
-    fetchChainValidator(chain, unmount, setValidatorLoading, setForceFetchValidator);
-  } else if (yieldPoolType === YieldPoolType.NOMINATION_POOL) {
-    fetchChainPool(chain, unmount, setPoolLoading, setForceFetchValidator);
+  if (!unmount) {
+    setValidatorLoading(true);
+    getYieldStakingCandidates(poolInfo)
+      .then((result) => {
+        if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+          store.dispatch({ type: 'bonding/updateChainValidators', payload: { chain: poolInfo.chain, validators: result } });
+        } else {
+          store.dispatch({ type: 'bonding/updateNominationPools', payload: { chain: poolInfo.chain, pools: result } });
+        }
+      })
+      .catch(console.error)
+      .finally(() => {
+        if (!unmount) {
+          if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+            setValidatorLoading(false);
+          } else {
+            setPoolLoading(false);
+          }
+
+          setForceFetchValidator(false);
+        }
+      });
   }
 }

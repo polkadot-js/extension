@@ -3,9 +3,10 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { OptimalYieldPath, OptimalYieldPathParams, ValidatorInfo, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, calculateInflation } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, parseIdentity, TernoaStakingRewardsStakingRewardsData, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 
@@ -203,4 +204,128 @@ export async function getNativeStakingExtrinsic (substrateApi: _SubstrateApi, am
   // }
   //
   // return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
+}
+
+export async function getRelayValidatorsInfo (yieldPoolInfo: YieldPoolInfo, substrateApi: _SubstrateApi, decimals: number): Promise<ValidatorInfo[]> {
+  const chainApi = await substrateApi.isReady;
+
+  const _era = await chainApi.api.query.staking.currentEra();
+  const currentEra = _era.toString();
+
+  const allValidators: string[] = [];
+  const validatorInfoList: ValidatorInfo[] = [];
+
+  const [_totalEraStake, _eraStakers, _minBond, _stakingRewards] = await Promise.all([
+    chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
+    chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra)),
+    chainApi.api.query.staking.minNominatorBond(),
+    chainApi.api.query.stakingRewards && chainApi.api.query.stakingRewards.data()
+  ]);
+
+  const stakingRewards = _stakingRewards?.toPrimitive() as unknown as TernoaStakingRewardsStakingRewardsData;
+
+  const maxNominatorRewarded = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+  const bnTotalEraStake = new BN(_totalEraStake.toString());
+  const eraStakers = _eraStakers as any[];
+
+  const rawMinBond = _minBond.toHuman() as string;
+  const minBond = rawMinBond.replaceAll(',', '');
+
+  const totalStakeMap: Record<string, BN> = {};
+  const bnDecimals = new BN((10 ** decimals).toString());
+
+  for (const item of eraStakers) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const rawValidatorInfo = item[0].toHuman() as any[];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const rawValidatorStat = item[1].toHuman() as Record<string, any>;
+
+    const validatorAddress = rawValidatorInfo[1] as string;
+    const rawTotalStake = rawValidatorStat.total as string;
+    const rawOwnStake = rawValidatorStat.own as string;
+
+    const bnTotalStake = new BN(rawTotalStake.replaceAll(',', ''));
+    const bnOwnStake = new BN(rawOwnStake.replaceAll(',', ''));
+    const otherStake = bnTotalStake.sub(bnOwnStake);
+
+    totalStakeMap[validatorAddress] = bnTotalStake;
+
+    let nominatorCount = 0;
+
+    if ('others' in rawValidatorStat) {
+      const others = rawValidatorStat.others as Record<string, any>[];
+
+      nominatorCount = others.length;
+    }
+
+    allValidators.push(validatorAddress);
+
+    validatorInfoList.push({
+      address: validatorAddress,
+      totalStake: bnTotalStake.toString(),
+      ownStake: bnOwnStake.toString(),
+      otherStake: otherStake.toString(),
+      nominatorCount,
+      // to be added later
+      commission: 0,
+      expectedReturn: 0,
+      blocked: false,
+      isVerified: false,
+      minBond,
+      isCrowded: nominatorCount > parseInt(maxNominatorRewarded)
+    } as ValidatorInfo);
+  }
+
+  const extraInfoMap: Record<string, ValidatorExtraInfo> = {};
+
+  await Promise.all(allValidators.map(async (address) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const [_commissionInfo, _identityInfo] = await Promise.all([
+      chainApi.api.query.staking.validators(address),
+      chainApi.api.query?.identity?.identityOf(address)
+    ]);
+
+    const commissionInfo = _commissionInfo.toHuman() as Record<string, any>;
+    const identityInfo = _identityInfo ? (_identityInfo.toHuman() as unknown as PalletIdentityRegistration) : null;
+    let identity;
+
+    if (identityInfo !== null) {
+      identity = parseIdentity(identityInfo);
+    }
+
+    extraInfoMap[address] = {
+      commission: commissionInfo.commission as string,
+      blocked: commissionInfo.blocked as boolean,
+      identity,
+      isVerified: identityInfo && identityInfo?.judgements?.length > 0
+    } as ValidatorExtraInfo;
+  }));
+
+  const bnAvgStake = bnTotalEraStake.divn(validatorInfoList.length).div(bnDecimals);
+
+  for (const validator of validatorInfoList) {
+    const commission = extraInfoMap[validator.address].commission;
+
+    const bnValidatorStake = totalStakeMap[validator.address].div(bnDecimals);
+
+    if (yieldPoolInfo.stats?.totalApr) {
+      if (_STAKING_CHAIN_GROUP.aleph.includes(yieldPoolInfo.chain)) {
+        validator.expectedReturn = calculateAlephZeroValidatorReturn(yieldPoolInfo.stats?.totalApr, getCommission(commission));
+      } else if (_STAKING_CHAIN_GROUP.ternoa.includes(yieldPoolInfo.chain)) {
+        const rewardPerValidator = new BN(stakingRewards.sessionExtraRewardPayout).divn(allValidators.length).div(bnDecimals);
+        const validatorStake = totalStakeMap[validator.address].div(bnDecimals).toNumber();
+
+        validator.expectedReturn = calculateTernoaValidatorReturn(rewardPerValidator.toNumber(), validatorStake, getCommission(commission));
+      } else {
+        validator.expectedReturn = calculateValidatorStakedReturn(yieldPoolInfo.stats?.totalApr, bnValidatorStake, bnAvgStake, getCommission(commission));
+      }
+    }
+
+    validator.commission = parseFloat(commission.split('%')[0]);
+    validator.blocked = extraInfoMap[validator.address].blocked;
+    validator.identity = extraInfoMap[validator.address].identity;
+    validator.isVerified = extraInfoMap[validator.address].isVerified;
+  }
+
+  return validatorInfoList;
 }

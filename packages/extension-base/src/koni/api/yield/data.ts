@@ -27,6 +27,29 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
       }
     ]
   },
+  WND___native_staking: {
+    slug: 'WND___native_staking',
+    chain: 'westend',
+    name: 'Westend Native Staking',
+    description: 'Staking WND by directly nominating validators',
+    type: YieldPoolType.NATIVE_STAKING,
+    inputAssets: [
+      'westend-NATIVE-WND'
+    ],
+    rewardAssets: [
+      'westend-NATIVE-WND'
+    ],
+    feeAssets: [
+      'westend-NATIVE-WND'
+    ],
+    withdrawalMethods: [
+      {
+        name: 'Default Unstaking',
+        description: 'Wait 28 days to get your tokens back',
+        waitingTime: 28 * 24 // 0 means immediately
+      }
+    ]
+  },
   DOT___nomination_pool: {
     slug: 'DOT___nomination_pool',
     chain: 'polkadot',

@@ -2299,6 +2299,7 @@ export interface KoniRequestSignatures {
   'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
   'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalYieldPath | undefined];
   'pri(yield.submitJoin)': [JoinYieldPoolParams, SWTransactionResponse];
+  'pri(yield.getStakingCandidates)': [YieldPoolInfo, ValidatorInfo[]];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

@@ -1024,3 +1024,7 @@ export async function getOptimalYieldPath (data: OptimalYieldPathRequest) {
 export async function submitJoinYieldPool (data: RequestJoinYieldPoolSubmit): Promise<SWTransactionResponse> {
   return sendMessage('pri(yield.submitJoin)', data);
 }
+
+export async function getYieldStakingCandidates (poolInfo: YieldPoolInfo): Promise<ValidatorInfo[]> {
+  return sendMessage('pri(yield.getStakingCandidates)', poolInfo);
+}

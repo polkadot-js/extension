@@ -34,6 +34,7 @@ import styled, { useTheme } from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import useGetNativeTokenBasicInfo from '../../../hooks/common/useGetNativeTokenBasicInfo';
+import { useNavigate } from 'react-router-dom';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -110,6 +111,7 @@ const Component = () => {
   const methodSlug = useMemo(() => {
     return _methodSlug || '';
   }, [_methodSlug]);
+  const navigate = useNavigate();
 
   const poolInfoMap = useSelector((state: RootState) => state.yieldPool.poolInfo);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
@@ -330,9 +332,13 @@ const Component = () => {
           type: ProcessReducerActionType.SET_CURRENT_STEP,
           payload: processState.currentStep + 1
         });
+
+        if (processState.currentStep + 1 === processState.steps.length) {
+          navigate('/');
+        }
       }
-    }, 5000);
-  }, [isProcessDone, processState.currentStep]);
+    }, 1000);
+  }, [isProcessDone, navigate, processState.currentStep, processState.steps.length]);
 
   // const onClick = useCallback(() => {
   //   setSubmitLoading(true);
@@ -525,7 +531,7 @@ const Component = () => {
             loading={submitLoading}
             onClick={simulateOnClick}
           >
-            {isProcessDone ? t('Finish') : t('Submit')}
+            {processState.currentStep === 0 ? t('Submit') : (!isProcessDone ? t('Continue') : t('Finish'))}
           </Button>
 
           <Divider className={'staking-modal-divider'} />

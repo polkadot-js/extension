@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldPoolInfo, YieldPoolType, YieldStepDetail } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldStakingCandidates } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
+import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 
 export function fetchEarningChainValidators (
   poolInfo: YieldPoolInfo,
@@ -36,3 +37,11 @@ export function fetchEarningChainValidators (
       });
   }
 }
+
+// export async function handleYieldProcess (
+//   yieldPoolInfo: YieldPoolInfo,
+//   steps: YieldStepDetail[],
+//   currentStep: number
+// ): Promise<SWTransactionResponse> {
+//
+// }

@@ -104,6 +104,18 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
       type: YieldStepType.NOMINATE
     });
 
+    result.steps.push({
+      id: result.steps.length,
+      name: 'Fuck around',
+      type: YieldStepType.NOMINATE
+    });
+
+    result.steps.push({
+      id: result.steps.length,
+      name: 'And find out',
+      type: YieldStepType.NOMINATE
+    });
+
     const [_bondFeeInfo, _nominateFeeInfo] = await Promise.all([
       substrateApi.api.tx.staking.bond(bnAmount, 'Staked').paymentInfo(fakeAddress),
       substrateApi.api.tx.staking.nominate(syntheticSelectedValidators).paymentInfo(fakeAddress)
@@ -113,6 +125,16 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
     const nominateFeeInfo = _nominateFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
     const totalFee = bondFeeInfo.partialFee + nominateFeeInfo.partialFee;
+
+    result.totalFee.push({
+      slug: feeAsset,
+      amount: totalFee.toString()
+    });
+
+    result.totalFee.push({
+      slug: feeAsset,
+      amount: totalFee.toString()
+    });
 
     result.totalFee.push({
       slug: feeAsset,

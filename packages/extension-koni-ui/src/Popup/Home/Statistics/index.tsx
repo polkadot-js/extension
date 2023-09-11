@@ -3,6 +3,7 @@
 
 import PieDonutChart, { DataItem } from '@garvae/react-pie-donut-chart';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { ProgressBar } from '@subwallet/extension-koni-ui/components/ProgressBar';
 import { BN_100, BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -204,58 +205,52 @@ const Component = ({ className }: Props) => {
       className={className}
       resolve={dataContext.awaitStores(['staking', 'price'])}
     >
-      <div className='__box-container'>
-        {
-          isTotalZero
-            ? (
-              <>
-                {/* todo: will make empty page later */}
-                <div>
-                  Unable to obtain statistic info
+      {
+        isTotalZero
+          ? (
+            <NoContent pageType={PAGE_TYPE.STATISTIC} />
+          )
+          : (
+            <div className='__box-container'>
+              <div className='__box-part -left-part'>
+                <div className='__box-part-title'>
+                  {t('Portfolio Allocation')}
                 </div>
-              </>
-            )
-            : (
-              <>
-                <div className='__box-part -left-part'>
-                  <div className='__box-part-title'>
-                    {t('Portfolio Allocation')}
+
+                <div className='__present-items-area'>
+                  {presentItems.map(renderPresentItem)}
+                </div>
+              </div>
+              <div className='__box-part'>
+                <div className='__box-part-title'>
+                  {t('Portfolio Distribution')}
+                </div>
+
+                <div className='__chart-area'>
+                  <div className='__chart-wrapper'>
+                    <PieDonutChart
+                      animationSpeed={0}
+                      chartCenterSize={194}
+                      colors={{
+                        chartCenter: token.colorBgSecondary,
+                        text: 'transparent'
+                      }}
+                      data={chartData}
+                      hoverScaleRatio={1.03}
+                      resizeReRenderDebounceTime={100}
+                      size={240}
+                    />
                   </div>
 
-                  <div className='__present-items-area'>
-                    {presentItems.map(renderPresentItem)}
+                  <div className='__legend-area'>
+                    {chartItems.map(renderLegendItem)}
                   </div>
                 </div>
-                <div className='__box-part'>
-                  <div className='__box-part-title'>
-                    {t('Portfolio Distribution')}
-                  </div>
+              </div>
 
-                  <div className='__chart-area'>
-                    <div className='__chart-wrapper'>
-                      <PieDonutChart
-                        animationSpeed={0}
-                        chartCenterSize={194}
-                        colors={{
-                          chartCenter: token.colorBgSecondary,
-                          text: 'transparent'
-                        }}
-                        data={chartData}
-                        hoverScaleRatio={1.03}
-                        resizeReRenderDebounceTime={100}
-                        size={240}
-                      />
-                    </div>
-
-                    <div className='__legend-area'>
-                      {chartItems.map(renderLegendItem)}
-                    </div>
-                  </div>
-                </div>
-              </>
-            )
-        }
-      </div>
+            </div>
+          )
+      }
     </PageWrapper>
   );
 };

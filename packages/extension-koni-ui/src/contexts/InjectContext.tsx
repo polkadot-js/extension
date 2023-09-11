@@ -188,8 +188,8 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
 
   const handleConnectFail = useCallback(() => {
     notification({
-      message: t('Fail to connect wallet'),
-      type: 'error'
+      message: t('Fail to connect. Please try again later'),
+      type: 'warning'
     });
   }, [notification, t]);
 

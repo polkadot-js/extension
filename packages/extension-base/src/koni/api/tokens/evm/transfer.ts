@@ -47,6 +47,7 @@ export const handleTransferBalanceResult = ({ callback,
 
 export async function getEVMTransactionObject (
   chainInfo: _ChainInfo,
+  from: string,
   to: string,
   value: string,
   transferAll: boolean,
@@ -57,7 +58,9 @@ export async function getEVMTransactionObject (
   const gasPrice = await web3Api.api.eth.getGasPrice();
   const transactionObject = {
     gasPrice: gasPrice,
-    to: to
+    to: to,
+    value: value,
+    from: from
   } as TransactionConfig;
   const gasLimit = await web3Api.api.eth.estimateGas(transactionObject);
 

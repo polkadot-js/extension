@@ -49,7 +49,6 @@ const ctrlKey = 17;
 const cmdLeftKey = 91;
 const cmdRightKey = 93;
 const cmdFirefoxKey = 224;
-const vKey = 86;
 
 interface ControlData {
   [ctrlKey]: boolean;
@@ -142,12 +141,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       }
 
       if (event.key.length === 1) {
-        const isCopy = Object.values(controlRef.current).some((v) => v) && keycode === vKey;
+        const isUseControl = Object.values(controlRef.current).some((v) => v);
 
         const { selectionEnd: j, selectionStart: i, value } = event.target as HTMLInputElement;
         const newValue = `${value.substring(0, i || 0)}${event.key}${value.substring(j || 0)}`;
 
-        if (!isCopy) {
+        if (!isUseControl) {
           if (!(/^(0|[1-9]\d*)(\.\d*)?$/).test(newValue)) {
             event.preventDefault();
           }
@@ -221,6 +220,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       onKeyDown={onKeyDown}
       onKeyUp={onKeyUp}
       onPaste={onPaste}
+      // onCopy={onPaste}
       placeholder={props.placeholder || t('Amount')}
       readOnly={props.readOnly}
       ref={inputRef}

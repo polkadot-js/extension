@@ -54,6 +54,7 @@ function Component ({ children, className, modalContent }: Props) {
       case 'compound':
         return ExtrinsicType.STAKING_COMPOUNDING;
       case 'send-nft':
+      case 'nfts':
         return ExtrinsicType.SEND_NFT;
       case 'send-fund':
       default:
@@ -62,6 +63,8 @@ function Component ({ children, className, modalContent }: Props) {
   }, [location.pathname]);
 
   const storageKey = useMemo((): string => detectTransactionPersistKey(transactionType), [transactionType]);
+
+  console.debug(storageKey);
 
   const [storage, setStorage] = useLocalStorage<TransactionFormBaseProps>(storageKey, DEFAULT_TRANSACTION_PARAMS);
 

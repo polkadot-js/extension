@@ -223,12 +223,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   }
 }
 
-const Main = styled.main`
-  display: flex;
-  height: 100%;
-  flex-direction: column
-`;
-
 export function Root (): React.ReactElement {
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
 

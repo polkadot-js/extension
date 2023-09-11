@@ -4065,7 +4065,8 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.JOIN_YIELD_POOL,
-      chainType: ChainType.SUBSTRATE
+      chainType: ChainType.SUBSTRATE,
+      resolveOnDone: true
     });
   }
 

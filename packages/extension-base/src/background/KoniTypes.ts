@@ -512,6 +512,9 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: RequestTuringCancelStakeCompound,
   [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: RequestStakeCancelWithdrawal,
   [ExtrinsicType.STAKING_POOL_WITHDRAW]: any,
+
+  [ExtrinsicType.JOIN_YIELD_POOL]: RequestJoinYieldPoolSubmit,
+
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.UNKNOWN]: any
 }
@@ -2297,7 +2300,7 @@ export interface KoniRequestSignatures {
 
   // yield
   'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
-  'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalYieldPath | undefined];
+  'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalYieldPath];
   'pri(yield.submitJoin)': [JoinYieldPoolParams, SWTransactionResponse];
   'pri(yield.getStakingCandidates)': [YieldPoolInfo, ValidatorInfo[]];
 

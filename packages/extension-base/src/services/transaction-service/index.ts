@@ -284,12 +284,22 @@ export default class TransactionService {
 
     const emitter = await this.addTransaction(validatedTransaction);
 
-    await new Promise<void>((resolve) => {
-      emitter.on('signed', (data: TransactionEventResponse) => {
-        validatedTransaction.id = data.id;
-        validatedTransaction.extrinsicHash = data.extrinsicHash;
-        resolve();
-      });
+    await new Promise<void>((resolve, reject) => {
+      // TODO
+      if (transaction.resolveOnDone) {
+        emitter.on('success', (data: TransactionEventResponse) => {
+          validatedTransaction.id = data.id;
+          validatedTransaction.extrinsicHash = data.extrinsicHash;
+          resolve();
+          console.log('tx success');
+        });
+      } else {
+        emitter.on('signed', (data: TransactionEventResponse) => {
+          validatedTransaction.id = data.id;
+          validatedTransaction.extrinsicHash = data.extrinsicHash;
+          resolve();
+        });
+      }
 
       emitter.on('error', (data: TransactionEventResponse) => {
         if (data.errors.length > 0) {

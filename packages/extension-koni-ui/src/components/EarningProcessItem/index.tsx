@@ -43,7 +43,7 @@ const Component = ({ className, index, isSelected, stepName }: Props) => {
         <Typography.Text
           className={`staking-process-text ${isSelected ? 'staking-process-selected-text' : ''}`}
         >
-          {t('Step {{stepNumb}}:', { replace: { stepNumb: index + 1 } })}
+          {t('Step {{stepNumb}}:', { replace: { stepNumb: index } })}
         </Typography.Text>
         <Typography.Text
           className={`staking-process-text ${isSelected ? 'staking-process-selected-text' : ''}`}

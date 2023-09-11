@@ -39,12 +39,12 @@ const Component = ({ className, currentStep, yieldSteps }: Props) => {
         <Typography.Text className={'earning-calculator-message'}>{t('Staking process:')}</Typography.Text>
 
         {yieldSteps && yieldSteps.map((item, index) => {
-          const isSelected = currentStep === index + 1;
+          const isSelected = currentStep === index;
 
           return <EarningProcessItem
-            key={index}
             index={index}
             isSelected={isSelected}
+            key={index}
             stepName={item.name}
           />;
         })}

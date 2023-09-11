@@ -25,7 +25,7 @@ import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwal
 import { ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
@@ -53,6 +53,54 @@ interface StakingFormProps extends Record<`amount-${number}`, string> {
   [FormFieldName.POOL]: string;
 }
 
+interface YieldProcessState {
+  steps: YieldStepDetail[],
+  feeStructure: YieldTokenBaseInfo[],
+  currentStep: number,
+  stepResults: SWTransactionResponse[]
+}
+
+const DEFAULT_YIELD_PROCESS: YieldProcessState = {
+  steps: [],
+  feeStructure: [],
+  currentStep: 0,
+  stepResults: []
+};
+
+enum ProcessReducerActionType {
+  SET_CURRENT_STEP = 'SET_CURRENT_STEP',
+  SET_YIELD_PROCESS = 'SET_YIELD_PROCESS',
+  UPDATE_STEP_RESULT = 'UPDATE_STEP_RESULT'
+}
+
+interface ProcessReducerAction {
+  payload: unknown,
+  type: ProcessReducerActionType
+}
+
+function processReducer (state: YieldProcessState, action: ProcessReducerAction): YieldProcessState {
+  switch (action.type) {
+    case ProcessReducerActionType.SET_CURRENT_STEP:
+      return {
+        ...state,
+        currentStep: action.payload as number
+      };
+
+    case ProcessReducerActionType.SET_YIELD_PROCESS: {
+      const { fee, steps } = action.payload as Record<string, unknown>;
+
+      return {
+        ...state,
+        steps: steps as YieldStepDetail[],
+        feeStructure: fee as YieldTokenBaseInfo[]
+      };
+    }
+
+    default:
+      throw Error('Unknown action');
+  }
+}
+
 const Component = () => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
@@ -71,10 +119,11 @@ const Component = () => {
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
 
-  const [yieldSteps, setYieldSteps] = useState<YieldStepDetail[]>();
-  const [totalFee, setTotalFee] = useState<YieldTokenBaseInfo[]>();
+  const [processState, dispatchProcessState] = useReducer(processReducer, DEFAULT_YIELD_PROCESS);
+
+  console.log('processState', processState);
+
   const [isBalanceReady, setIsBalanceReady] = useState<boolean>(true);
-  const [step, setStep] = useState<number>(1);
 
   const [forceFetchValidator, setForceFetchValidator] = useState<boolean>(false);
   const [poolLoading, setPoolLoading] = useState<boolean>(false);
@@ -90,9 +139,6 @@ const Component = () => {
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
-  // TODO: transaction interface
-  // TODO: process manager
-  // TODO: listening to transaction progress
   const [form] = Form.useForm<StakingFormProps>();
 
   const currentAmount = Form.useWatch(`${formFieldPrefix}0`, form);
@@ -131,13 +177,19 @@ const Component = () => {
 
   useEffect(() => {
     setIsLoading(true);
+
     getOptimalYieldPath({
       amount: currentAmount,
       poolInfo: currentPoolInfo
     })
       .then((res) => {
-        setYieldSteps(res?.steps);
-        setTotalFee(res?.totalFee);
+        dispatchProcessState({
+          payload: {
+            steps: res.steps,
+            fee: res.totalFee
+          },
+          type: ProcessReducerActionType.SET_YIELD_PROCESS
+        });
       })
       .catch(console.error)
       .finally(() => setIsLoading(false));
@@ -162,8 +214,8 @@ const Component = () => {
   const estimatedFee = useMemo(() => {
     let _totalFee = 0;
 
-    if (totalFee) {
-      totalFee.forEach((fee) => {
+    if (processState.feeStructure) {
+      processState.feeStructure.forEach((fee) => {
         const asset = chainAsset[fee.slug];
         const feeDecimals = _getAssetDecimals(asset);
         const priceValue = asset.priceId ? priceMap[asset.priceId] : 0;
@@ -174,7 +226,7 @@ const Component = () => {
     }
 
     return _totalFee;
-  }, [chainAsset, priceMap, totalFee]);
+  }, [chainAsset, priceMap, processState.feeStructure]);
 
   const accountFilterFunc = (chainInfoMap: Record<string, _ChainInfo>): ((account: AccountJson) => boolean) => {
     return (account: AccountJson) => {
@@ -262,52 +314,75 @@ const Component = () => {
     return undefined;
   }, [nominationPoolInfoMap, currentPoolInfo.chain]);
 
-  const onClick = useCallback(() => {
+  const isProcessDone = useMemo(() => {
+    return processState.currentStep === processState.steps.length;
+  }, [processState.currentStep, processState.steps.length]);
+
+  const simulateOnClick = useCallback(() => {
     setSubmitLoading(true);
 
-    const { from, nominate, pool } = form.getFieldsValue();
-
-    let submitPromise: Promise<SWTransactionResponse>;
-
-    if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL && pool) {
-      const selectedPool = getSelectedPool(pool);
-
-      submitPromise = submitPoolBonding({
-        amount: currentAmount,
-        chain: currentPoolInfo.chain,
-        selectedPool: selectedPool as NominationPoolInfo,
-        address: from
-      });
-    } else {
-      const selectedValidators = getSelectedValidators(parseNominations(nominate));
-
-      submitPromise = submitJoinYieldPool({
-        address: from,
-        yieldPoolInfo: currentPoolInfo,
-        path: {
-          totalFee: totalFee as YieldTokenBaseInfo[],
-          steps: yieldSteps as YieldStepDetail[]
-        },
-        data: {
-          amount: currentAmount,
-          selectedValidators
-        } as SubmitJoinNativeStaking
-      });
-    }
-
-    if (!(yieldSteps && step === yieldSteps.length)) {
-      setStep(step + 1);
-    }
-
     setTimeout(() => {
-      submitPromise
-        .then(onSuccess)
-        .catch(onError)
-        .finally(() => {
-          setSubmitLoading(false);
+      console.log('tx done');
+      setSubmitLoading(false);
+
+      if (!isProcessDone) {
+        dispatchProcessState({
+          type: ProcessReducerActionType.SET_CURRENT_STEP,
+          payload: processState.currentStep + 1
         });
-    }, 300);
-  }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, step, totalFee, yieldSteps]);
+      }
+    }, 5000);
+  }, [isProcessDone, processState.currentStep]);
+
+  // const onClick = useCallback(() => {
+  //   setSubmitLoading(true);
+  //
+  //   const { from, nominate, pool } = form.getFieldsValue();
+  //
+  //   let submitPromise: Promise<SWTransactionResponse>;
+  //
+  //   if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL && pool) {
+  //     const selectedPool = getSelectedPool(pool);
+  //
+  //     submitPromise = submitPoolBonding({
+  //       amount: currentAmount,
+  //       chain: currentPoolInfo.chain,
+  //       selectedPool: selectedPool as NominationPoolInfo,
+  //       address: from
+  //     });
+  //   } else {
+  //     const selectedValidators = getSelectedValidators(parseNominations(nominate));
+  //
+  //     submitPromise = submitJoinYieldPool({
+  //       address: from,
+  //       yieldPoolInfo: currentPoolInfo,
+  //       path: {
+  //         totalFee: processState.feeStructure,
+  //         steps: processState.steps
+  //       },
+  //       data: {
+  //         amount: currentAmount,
+  //         selectedValidators
+  //       } as SubmitJoinNativeStaking
+  //     });
+  //   }
+  //
+  //   if (!isProcessDone) {
+  //     dispatchProcessState({
+  //       type: ProcessReducerActionType.SET_CURRENT_STEP,
+  //       payload: processState.currentStep + 1
+  //     });
+  //   }
+  //
+  //   setTimeout(() => {
+  //     submitPromise
+  //       .then(onSuccess)
+  //       .catch(onError)
+  //       .finally(() => {
+  //         setSubmitLoading(false);
+  //       });
+  //   }, 300);
+  // }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, isProcessDone, onError, onSuccess, processState.currentStep, processState.feeStructure, processState.steps]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -334,14 +409,14 @@ const Component = () => {
 
               {/* <Divider className={'staking-modal-divider'} /> */}
 
-              {yieldSteps && (
+              {processState.steps && (
                 <div style={{ display: 'flex', alignItems: 'center', paddingBottom: token.paddingSM }}>
                   <Typography.Text
                     size={'lg'}
                     style={{ fontWeight: '600' }}
                   >
                     {t('Step {{step}}: {{label}}', {
-                      replace: { step, label: yieldSteps[step - 1].name }
+                      replace: { step: processState.currentStep + 1, label: processState.steps[processState.currentStep]?.name }
                     })}
                   </Typography.Text>
                 </div>
@@ -443,13 +518,14 @@ const Component = () => {
             disabled={submitLoading || isSubmitDisable || !isBalanceReady}
             icon={
               <Icon
-                phosphorIcon={yieldSteps && step === yieldSteps.length ? CheckCircle : ArrowCircleRight}
+                phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}
                 weight={'fill'}
               />
             }
-            onClick={onClick}
+            loading={submitLoading}
+            onClick={simulateOnClick}
           >
-            {yieldSteps && step === yieldSteps.length ? t('Finish') : t('Submit')}
+            {isProcessDone ? t('Finish') : t('Submit')}
           </Button>
 
           <Divider className={'staking-modal-divider'} />
@@ -470,12 +546,12 @@ const Component = () => {
 
             <Typography.Text className={'earning-calculator-message'}>{t('Staking process:')}</Typography.Text>
 
-            {!isLoading && yieldSteps && yieldSteps.map((item, index) => {
-              const isSelected = step === index + 1;
+            {!isLoading && processState.steps.map((item, index) => {
+              const isSelected = processState.currentStep === index;
 
               return (
                 <EarningProcessItem
-                  index={index}
+                  index={index + 1}
                   isSelected={isSelected}
                   key={index}
                   stepName={item.name}
@@ -497,8 +573,8 @@ const Component = () => {
       )}
 
       {<StakingProcessModal
-        currentStep={step}
-        yieldSteps={yieldSteps}
+        currentStep={processState.currentStep}
+        yieldSteps={processState.steps}
       />}
     </div>
   );

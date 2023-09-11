@@ -67,6 +67,7 @@ const NftImport = new LazyLoader('NftImport', () => import('@subwallet/extension
 const History = new LazyLoader('History', () => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = new LazyLoader('Crowdloans', () => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = new LazyLoader('Home', () => import('@subwallet/extension-koni-ui/Popup/Home'));
+const Statistics = new LazyLoader('Statistics', () => import('@subwallet/extension-koni-ui/Popup/Home/Statistics'));
 
 const Settings = new LazyLoader('Settings', () => import('@subwallet/extension-koni-ui/Popup/Settings'));
 const GeneralSetting = new LazyLoader('GeneralSetting', () => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
@@ -145,6 +146,7 @@ export const router = createBrowserRouter([
         ...Home.generateRouterObject('/home'),
         children: [
           Tokens.generateRouterObject('tokens'),
+          Statistics.generateRouterObject('statistics'),
           TokenDetailList.generateRouterObject('tokens/detail/:slug'),
           {
             path: 'nfts',

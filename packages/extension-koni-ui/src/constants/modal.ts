@@ -17,7 +17,7 @@ export const REQUEST_CAMERA_ACCESS_MODAL = 'request-camera-access-modal';
 export const VALIDATOR_DETAIL_MODAL = 'validator-detail-modal';
 export const HISTORY_DETAIL_MODAL = 'history-detail-modal';
 export const RECEIVE_TOKEN_SELECTOR_MODAL = 'receive-tokens-selector-modal';
-export const DOWNLOAD_EXTENSION = 'download-extension';
+export const CONNECT_EXTENSION = 'connect-extension';
 export const ADD_ADDRESS_BOOK_MODAL = 'add-address-book-modal';
 export const EDIT_ADDRESS_BOOK_MODAL = 'edit-address-book-modal';
 export const DELETE_ADDRESS_BOOK_MODAL = 'delete-address-book-modal';
@@ -29,3 +29,7 @@ export const ADD_CONNECTION_MODAL = 'add-connection-modal';
 export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
 
 export const ACCOUNT_EXPORT_MODAL = 'account-export-modal';
+
+export const WALLET_CONNECT_CREATE_MODAL = 'wallet-connect-create-modal';
+export const WALLET_CONNECT_DETAIL_MODAL = 'wallet-connect-detail-modal';
+export const WALLET_CONNECT_LIST_MODAL = 'wallet-connect-list-modal';

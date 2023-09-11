@@ -42,6 +42,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     searchInput: string,
     setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>,
     setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
+    setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>
   } = useOutletContext();
   const { isWebUI } = useContext(ScreenContext);
 
@@ -155,6 +156,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     if (outletContext) {
       outletContext.setDetailTitle(title);
       outletContext.setSearchPlaceholder('NFTid');
+      outletContext.setShowSearchInput(true);
     }
   }, [outletContext, title]);
 

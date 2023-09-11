@@ -2440,6 +2440,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@garvae/react-pie-donut-chart@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@garvae/react-pie-donut-chart@npm:1.0.0"
+  peerDependencies:
+    react: ">=16"
+  checksum: d806accc7b71fd9a4b2bace6f65e442337aab66f4844d8d8b6467ea33b1e69775577b025e3d178bd4b26c12a677661ae0dcd3779f20fca1bb84f3da041a44ac1
+  languageName: node
+  linkType: hard
+
 "@google/model-viewer@npm:3.1.1":
   version: 3.1.1
   resolution: "@google/model-viewer@npm:3.1.1"
@@ -5453,6 +5462,7 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^6.2.1
     "@fortawesome/free-solid-svg-icons": ^6.2.1
     "@fortawesome/react-fontawesome": ^0.2.0
+    "@garvae/react-pie-donut-chart": 1.0.0
     "@ledgerhq/hw-app-eth": ^6.33.4
     "@polkadot/api-contract": ^10.9.1
     "@polkadot/hw-ledger": ^12.3.2

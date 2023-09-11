@@ -114,6 +114,7 @@ export const WalletModalContext = ({ children }: Props) => {
       onBack={onSeedPhraseModalBack}
       onSubmitSuccess={onSeedPhraseModalSubmitSuccess}
     />
+    <NewSeedModal />
     <ImportAccountModal />
     <AttachAccountModal />
     <ImportSeedModal />

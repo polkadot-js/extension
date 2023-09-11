@@ -6,7 +6,6 @@ import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
-import { SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
@@ -26,13 +25,14 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 interface Props extends ThemeProps {
   id: string;
   previousId: string;
+  nextId?: string;
   url: string;
   label: string;
   icon?: PhosphorIcon;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, icon = CheckCircle, id, label, previousId, url } = props;
+  const { className, icon = CheckCircle, id, label, nextId, previousId, url } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const isActive = checkActive(id);
@@ -47,14 +47,14 @@ const Component: React.FC<Props> = (props: Props) => {
   const onSubmit = useCallback(() => {
     setSelectedAccountTypes(selectedItems);
 
-    if (isWebUI) {
-      activeModal(SEED_PHRASE_MODAL);
+    if (isWebUI && nextId) {
+      activeModal(nextId);
     } else {
       navigate(url);
     }
 
     inactiveModal(id);
-  }, [selectedItems, isWebUI, inactiveModal, id, activeModal, navigate, url]);
+  }, [selectedItems, isWebUI, inactiveModal, id, activeModal, navigate, url, nextId]);
 
   const onBack = useSwitchModal(id, previousId);
 

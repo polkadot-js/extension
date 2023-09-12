@@ -79,8 +79,8 @@ const Component = function ({ className }: Props) {
         }
 
         isMessage = _isMessage;
-      } else if (confirmation.type === 'evmSignatureRequest' || confirmation.type === 'evmSendTransactionRequest') {
-        const request = confirmation.item as ConfirmationDefinitions['evmSignatureRequest' | 'evmSendTransactionRequest'][0];
+      } else if (['evmSignatureRequest', 'evmSendTransactionRequest', 'evmWatchTransactionRequest'].includes(confirmation.type)) {
+        const request = confirmation.item as ConfirmationDefinitions['evmSignatureRequest' | 'evmSendTransactionRequest' | 'evmWatchTransactionRequest'][0];
 
         account = request.payload.account;
         canSign = request.payload.canSign;
@@ -224,7 +224,7 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
   '--content-gap': token.sizeMD,
 
   '.confirmation-content': {
-    flex: '1 1 auto',
+    flex: '1',
     overflow: 'auto',
     padding: `0 ${token.padding}px`,
     display: 'flex',

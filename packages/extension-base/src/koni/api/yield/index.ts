@@ -99,7 +99,7 @@ export function validateProcess (params: OptimalYieldPathParams, path: OptimalYi
   }
 }
 
-export async function getJoinPoolExtrinsic (address: string, params: OptimalYieldPathParams, data: unknown) {
+export async function getNativeStakingBondExtrinsic (address: string, params: OptimalYieldPathParams, data: unknown) {
   const inputData = data as SubmitJoinNativeStaking;
   const poolInfo = params.poolInfo;
   const substrateApi = params.substrateApiMap[poolInfo.chain];

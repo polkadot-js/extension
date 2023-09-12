@@ -22,7 +22,7 @@ import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, getRelayPools
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { generateNaiveOptimalPath, getJoinPoolExtrinsic } from '@subwallet/extension-base/koni/api/yield';
+import { generateNaiveOptimalPath, getNativeStakingBondExtrinsic } from '@subwallet/extension-base/koni/api/yield';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
@@ -3774,7 +3774,7 @@ export default class KoniExtension {
         .generateBeforeHandleResponseErrors(yieldValidation);
     }
 
-    const extrinsic = await getJoinPoolExtrinsic(address, {
+    const extrinsic = await getNativeStakingBondExtrinsic(address, {
       // @ts-ignore
       amount: data?.amount as string || '0',
       assetInfoMap: this.#koniState.getAssetRegistry(),

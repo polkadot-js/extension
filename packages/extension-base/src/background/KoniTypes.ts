@@ -2157,15 +2157,22 @@ export interface HandleYieldStepParams extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
   path: OptimalYieldPath;
-  data: SubmitJoinNativeStaking | unknown;
+  data: SubmitYieldStep;
   currentStep: number;
 }
 
 export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
 
+export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool | unknown;
+
 export interface SubmitJoinNativeStaking {
   amount: string,
   selectedValidators: ValidatorInfo[]
+}
+
+export interface SubmitJoinNominationPool {
+  amount: string,
+  selectedPool: NominationPoolInfo
 }
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value

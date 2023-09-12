@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationPoolInfo, OptimalYieldPath, SubmitJoinNativeStaking, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationPoolInfo, OptimalYieldPath, SubmitYieldStep, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { getYieldNativeStakingValidators, getYieldNominationPools, submitJoinYieldPool } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -51,7 +51,7 @@ export async function handleYieldStep (
   yieldPoolInfo: YieldPoolInfo,
   path: OptimalYieldPath,
   currentStep: number,
-  data: SubmitJoinNativeStaking | unknown
+  data: SubmitYieldStep
 ): Promise<SWTransactionResponse> {
   return submitJoinYieldPool({
     address,

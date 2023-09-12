@@ -96,7 +96,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [onSetMax, inputRef, decimals, maxValue, onChange]);
 
   const getMaxLengthText = useCallback((value: string) => {
-    return value.includes('.') ? decimals + 1 + value.split('.')[0].length : 10;
+    return value.includes('.') ? decimals + 1 + value.split('.')[0].length : undefined;
   }, [decimals]);
 
   const suffix = useMemo((): React.ReactNode => (
@@ -119,7 +119,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     let value = event.target.value;
     const maxLength = getMaxLengthText(value);
 
-    if (value.length > maxLength) {
+    if (maxLength && value.length > maxLength) {
       value = value.slice(0, maxLength);
     }
 

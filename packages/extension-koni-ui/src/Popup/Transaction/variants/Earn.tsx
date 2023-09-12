@@ -30,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import styled, { useTheme } from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -110,7 +111,7 @@ const Component = () => {
   const methodSlug = useMemo(() => {
     return _methodSlug || '';
   }, [_methodSlug]);
-
+  const navigate = useNavigate();
   const poolInfoMap = useSelector((state: RootState) => state.yieldPool.poolInfo);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
@@ -130,13 +131,6 @@ const Component = () => {
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
-
-  const onDone = useCallback((extrinsicHash: string) => {
-    console.log('extrinsicHash', extrinsicHash);
-  }, []);
-
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
-
   const [form] = Form.useForm<StakingFormProps>();
 
   const currentAmount = Form.useWatch(`${formFieldPrefix}0`, form);
@@ -146,6 +140,13 @@ const Component = () => {
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const { decimals, symbol } = useGetNativeTokenBasicInfo(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
+
+  const onDone = useCallback((extrinsicHash: string) => {
+    const chainType = isEthereumAddress(currentFrom) ? 'ethereum' : 'substrate';
+    navigate(`/transaction-done/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
+  }, []);
+
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   const formDefault: StakingFormProps = useMemo(() => {
     return {

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestJoinYieldPoolSubmit, SubmitJoinNativeStaking, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestYieldStepSubmit, SubmitJoinNativeStaking, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
@@ -16,7 +16,7 @@ type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
-  const inputData = transaction.data as RequestJoinYieldPoolSubmit;
+  const inputData = transaction.data as RequestYieldStepSubmit;
   const data = useMemo(() => {
     return inputData.data as SubmitJoinNativeStaking;
   }, [inputData.data]);

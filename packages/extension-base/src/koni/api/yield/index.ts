@@ -3,11 +3,12 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldProcessValidation } from '@subwallet/extension-base/background/KoniTypes';
+import { getRelayBondingExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats, validateProcessForAcalaLiquidStaking } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { generatePathForInterlayLending, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
-import { generatePathForNativeStaking, getNativeStakingExtrinsic, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
+import { generatePathForNativeStaking, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 // only apply for DOT right now, will need to scale up
@@ -104,5 +105,5 @@ export async function getJoinPoolExtrinsic (address: string, params: OptimalYiel
   const substrateApi = params.substrateApiMap[poolInfo.chain];
   const chainInfo = params.chainInfoMap[poolInfo.chain];
 
-  return await getNativeStakingExtrinsic(substrateApi, inputData.amount, inputData.selectedValidators, chainInfo, address);
+  return await getRelayBondingExtrinsic(substrateApi, inputData.amount, inputData.selectedValidators, chainInfo, address);
 }

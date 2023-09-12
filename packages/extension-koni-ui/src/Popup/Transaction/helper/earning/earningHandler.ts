@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo, YieldPoolType, YieldStepDetail } from '@subwallet/extension-base/background/KoniTypes';
-import { getYieldStakingCandidates } from '@subwallet/extension-koni-ui/messaging';
-import { store } from '@subwallet/extension-koni-ui/stores';
+import { NominationPoolInfo, OptimalYieldPath, SubmitJoinNativeStaking, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { getYieldNativeStakingValidators, getYieldNominationPools, submitJoinYieldPool } from '@subwallet/extension-koni-ui/messaging';
+import { store } from '@subwallet/extension-koni-ui/stores';
 
 export function fetchEarningChainValidators (
   poolInfo: YieldPoolInfo,
@@ -14,13 +14,21 @@ export function fetchEarningChainValidators (
   setForceFetchValidator: (value: boolean) => void
 ) {
   if (!unmount) {
+    let promise;
+
+    if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+      promise = getYieldNativeStakingValidators(poolInfo);
+    } else {
+      promise = getYieldNominationPools(poolInfo);
+    }
+
     setValidatorLoading(true);
-    getYieldStakingCandidates(poolInfo)
+    promise
       .then((result) => {
         if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
-          store.dispatch({ type: 'bonding/updateChainValidators', payload: { chain: poolInfo.chain, validators: result } });
+          store.dispatch({ type: 'bonding/updateChainValidators', payload: { chain: poolInfo.chain, validators: result as ValidatorInfo[] } });
         } else {
-          store.dispatch({ type: 'bonding/updateNominationPools', payload: { chain: poolInfo.chain, pools: result } });
+          store.dispatch({ type: 'bonding/updateNominationPools', payload: { chain: poolInfo.chain, pools: result as NominationPoolInfo[] } });
         }
       })
       .catch(console.error)
@@ -38,10 +46,18 @@ export function fetchEarningChainValidators (
   }
 }
 
-// export async function handleYieldProcess (
-//   yieldPoolInfo: YieldPoolInfo,
-//   steps: YieldStepDetail[],
-//   currentStep: number
-// ): Promise<SWTransactionResponse> {
-//
-// }
+export async function handleYieldStep (
+  address: string,
+  yieldPoolInfo: YieldPoolInfo,
+  path: OptimalYieldPath,
+  currentStep: number,
+  data: SubmitJoinNativeStaking | unknown
+): Promise<SWTransactionResponse> {
+  return submitJoinYieldPool({
+    address,
+    path: path,
+    yieldPoolInfo,
+    currentStep,
+    data
+  });
+}

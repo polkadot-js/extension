@@ -513,7 +513,7 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: RequestStakeCancelWithdrawal,
   [ExtrinsicType.STAKING_POOL_WITHDRAW]: any,
 
-  [ExtrinsicType.JOIN_YIELD_POOL]: RequestJoinYieldPoolSubmit,
+  [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.UNKNOWN]: any
@@ -2054,7 +2054,7 @@ export interface YieldPoolInfo {
   name: string,
   type: YieldPoolType,
   stats?: YieldPoolStats,
-  metadata?: ChainStakingMetadata | any
+  metadata?: ChainStakingMetadata | unknown
 }
 
 export interface OptimalYieldPathRequest {
@@ -2153,14 +2153,15 @@ export interface YieldPoolStats {
   tvl?: string // in $
 }
 
-export interface JoinYieldPoolParams extends BaseRequestSign {
-  address: string,
+export interface HandleYieldStepParams extends BaseRequestSign {
+  address: string;
   yieldPoolInfo: YieldPoolInfo;
   path: OptimalYieldPath;
-  data: SubmitJoinNativeStaking | unknown
+  data: SubmitJoinNativeStaking | unknown;
+  currentStep: number;
 }
 
-export type RequestJoinYieldPoolSubmit = InternalRequestSign<JoinYieldPoolParams>;
+export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
 
 export interface SubmitJoinNativeStaking {
   amount: string,
@@ -2301,8 +2302,9 @@ export interface KoniRequestSignatures {
   // yield
   'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
   'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalYieldPath];
-  'pri(yield.submitJoin)': [JoinYieldPoolParams, SWTransactionResponse];
-  'pri(yield.getStakingCandidates)': [YieldPoolInfo, ValidatorInfo[]];
+  'pri(yield.handleStep)': [HandleYieldStepParams, SWTransactionResponse];
+  'pri(yield.getNativeStakingValidators)': [YieldPoolInfo, ValidatorInfo[]];
+  'pri(yield.getStakingNominationPools)': [YieldPoolInfo, NominationPoolInfo[]]
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

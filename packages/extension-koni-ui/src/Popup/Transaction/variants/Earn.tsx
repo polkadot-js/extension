@@ -15,7 +15,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useFetchChainState, useGetChainPrefixBySlug, useHandleSubmitTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath, submitJoinYieldPool, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingProcessModal';
-import { fetchEarningChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/earning/earningHandler';
+import { fetchEarningChainValidators, handleYieldStep } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/earning/earningHandler';
 import { TransactionContent } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
 import FreeBalanceToStake from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalanceToStake';
 import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
@@ -29,12 +29,12 @@ import React, { useCallback, useContext, useEffect, useMemo, useReducer, useStat
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import useGetNativeTokenBasicInfo from '../../../hooks/common/useGetNativeTokenBasicInfo';
-import { useNavigate } from 'react-router-dom';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -122,8 +122,6 @@ const Component = () => {
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
 
   const [processState, dispatchProcessState] = useReducer(processReducer, DEFAULT_YIELD_PROCESS);
-
-  console.log('processState', processState);
 
   const [isBalanceReady, setIsBalanceReady] = useState<boolean>(true);
 
@@ -340,55 +338,58 @@ const Component = () => {
     }, 1000);
   }, [isProcessDone, navigate, processState.currentStep, processState.steps.length]);
 
-  // const onClick = useCallback(() => {
-  //   setSubmitLoading(true);
-  //
-  //   const { from, nominate, pool } = form.getFieldsValue();
-  //
-  //   let submitPromise: Promise<SWTransactionResponse>;
-  //
-  //   if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL && pool) {
-  //     const selectedPool = getSelectedPool(pool);
-  //
-  //     submitPromise = submitPoolBonding({
-  //       amount: currentAmount,
-  //       chain: currentPoolInfo.chain,
-  //       selectedPool: selectedPool as NominationPoolInfo,
-  //       address: from
-  //     });
-  //   } else {
-  //     const selectedValidators = getSelectedValidators(parseNominations(nominate));
-  //
-  //     submitPromise = submitJoinYieldPool({
-  //       address: from,
-  //       yieldPoolInfo: currentPoolInfo,
-  //       path: {
-  //         totalFee: processState.feeStructure,
-  //         steps: processState.steps
-  //       },
-  //       data: {
-  //         amount: currentAmount,
-  //         selectedValidators
-  //       } as SubmitJoinNativeStaking
-  //     });
-  //   }
-  //
-  //   if (!isProcessDone) {
-  //     dispatchProcessState({
-  //       type: ProcessReducerActionType.SET_CURRENT_STEP,
-  //       payload: processState.currentStep + 1
-  //     });
-  //   }
-  //
-  //   setTimeout(() => {
-  //     submitPromise
-  //       .then(onSuccess)
-  //       .catch(onError)
-  //       .finally(() => {
-  //         setSubmitLoading(false);
-  //       });
-  //   }, 300);
-  // }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, isProcessDone, onError, onSuccess, processState.currentStep, processState.feeStructure, processState.steps]);
+  const onClick = useCallback(() => {
+    setSubmitLoading(true);
+
+    const { from, nominate, pool } = form.getFieldsValue();
+
+    let submitPromise: Promise<SWTransactionResponse>;
+    let data;
+
+    if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL && pool) {
+      const selectedPool = getSelectedPool(pool);
+
+      // submitPromise = submitPoolBonding({
+      //   amount: currentAmount,
+      //   chain: currentPoolInfo.chain,
+      //   selectedPool: selectedPool as NominationPoolInfo,
+      //   address: from
+      // });
+    } else {
+      const selectedValidators = getSelectedValidators(parseNominations(nominate));
+
+      data = {
+        amount: currentAmount,
+        selectedValidators
+      } as SubmitJoinNativeStaking;
+    }
+
+    submitPromise = handleYieldStep(
+      from,
+      currentPoolInfo,
+      {
+        steps: processState.steps,
+        totalFee: processState.feeStructure
+      },
+      processState.currentStep,
+      data);
+
+    if (!isProcessDone) {
+      dispatchProcessState({
+        type: ProcessReducerActionType.SET_CURRENT_STEP,
+        payload: processState.currentStep + 1
+      });
+    }
+
+    setTimeout(() => {
+      submitPromise
+        .then(onSuccess)
+        .catch(onError)
+        .finally(() => {
+          setSubmitLoading(false);
+        });
+    }, 300);
+  }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, isProcessDone, onError, onSuccess, processState.currentStep, processState.feeStructure, processState.steps]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -529,7 +530,7 @@ const Component = () => {
               />
             }
             loading={submitLoading}
-            onClick={simulateOnClick}
+            onClick={onClick}
           >
             {processState.currentStep === 0 ? t('Submit') : (!isProcessDone ? t('Continue') : t('Finish'))}
           </Button>

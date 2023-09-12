@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { OptimalYieldPath, OptimalYieldPathParams, YieldPoolInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
@@ -149,8 +150,9 @@ export async function generatePathForAcalaLiquidStaking (params: OptimalYieldPat
   return result;
 }
 
-export function validateProcessForAcalaLiquidStaking (params: OptimalYieldPathParams, path: OptimalYieldPath): YieldProcessValidation {
-  const result: YieldProcessValidation = {
+export function validateProcessForAcalaLiquidStaking (params: OptimalYieldPathParams, path: OptimalYieldPath): TransactionError[] {
+  const errors: TransactionError[] = [];
+  const processValidation: YieldProcessValidation = {
     ok: true,
     status: YieldValidationStatus.OK
   };
@@ -169,11 +171,13 @@ export function validateProcessForAcalaLiquidStaking (params: OptimalYieldPathPa
     const altInputTokenMinAmount = new BN(params.assetInfoMap[altInputTokenSlug].minAmount || '0');
 
     if (!bnAltInputTokenBalance.sub(xcmAmount).gte(altInputTokenMinAmount)) {
-      result.failedStep = path.steps[0];
-      result.ok = false;
-      result.status = YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT;
+      processValidation.failedStep = path.steps[0];
+      processValidation.ok = false;
+      processValidation.status = YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT;
 
-      return result;
+      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT, processValidation.message, processValidation));
+
+      return errors;
     }
   }
 
@@ -187,32 +191,38 @@ export function validateProcessForAcalaLiquidStaking (params: OptimalYieldPathPa
     const bnFeeTokenMinAmount = new BN(params.assetInfoMap[feeTokenSlug]?.minAmount || '0');
 
     if (!bnFeeTokenBalance.sub(bnFeeAmount).gte(bnFeeTokenMinAmount)) {
-      result.failedStep = path.steps[submitStep.id];
-      result.ok = false;
-      result.status = YieldValidationStatus.NOT_ENOUGH_FEE;
+      processValidation.failedStep = path.steps[submitStep.id];
+      processValidation.ok = false;
+      processValidation.status = YieldValidationStatus.NOT_ENOUGH_FEE;
 
-      return result;
+      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_FEE, processValidation.message, processValidation));
+
+      return errors;
     }
 
     if (!bnAmount.gte(new BN(params.poolInfo.stats?.minJoinPool || '0'))) {
-      result.failedStep = path.steps[submitStep.id];
-      result.ok = false;
-      result.status = YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT;
+      processValidation.failedStep = path.steps[submitStep.id];
+      processValidation.ok = false;
+      processValidation.status = YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT;
 
-      return result;
+      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT, processValidation.message, processValidation));
+
+      return errors;
     }
   } else {
     const bnFeeAmount = new BN(path.totalFee[submitStep.id]?.amount || '0');
 
     // paying fee with input token
     if (!bnAmount.sub(bnFeeAmount).gte(new BN(params.poolInfo.stats?.minJoinPool || '0'))) {
-      result.failedStep = path.steps[submitStep.id];
-      result.ok = false;
-      result.status = YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT;
+      processValidation.failedStep = path.steps[submitStep.id];
+      processValidation.ok = false;
+      processValidation.status = YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT;
 
-      return result;
+      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT, processValidation.message, processValidation));
+
+      return errors;
     }
   }
 
-  return result;
+  return errors;
 }

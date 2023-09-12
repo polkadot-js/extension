@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldProcessValidation } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats, validateProcessForAcalaLiquidStaking } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
@@ -89,7 +90,7 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams):
   return generatePathForNativeStaking(params);
 }
 
-export function validateProcess (params: OptimalYieldPathParams, path: OptimalYieldPath): YieldProcessValidation {
+export function validateYieldProcess (params: OptimalYieldPathParams, path: OptimalYieldPath): TransactionError[] {
   // TODO: calculate token portion
   // TODO: compare to ED
   // TODO: compare to minAmount
@@ -98,6 +99,8 @@ export function validateProcess (params: OptimalYieldPathParams, path: OptimalYi
   if (['DOT___bifrost_liquid_staking', 'DOT___acala_liquid_staking'].includes(params.poolInfo.slug)) {
     return validateProcessForAcalaLiquidStaking(params, path);
   }
+
+  return [];
 }
 
 export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStep): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {

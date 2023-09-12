@@ -131,6 +131,7 @@ export class KoniSubscription {
 
   subscribeYieldPoolStats (substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
     this.updateSubscription('yieldPoolStats', this.initYieldPoolStatsSubscription(substrateApiMap, onlyRunOnFirstTime));
+    // subscribe yield positions
   }
 
   initYieldPoolStatsSubscription (substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {

@@ -2054,8 +2054,23 @@ export interface YieldPoolInfo {
   name: string,
   type: YieldPoolType,
   stats?: YieldPoolStats,
-  metadata?: ChainStakingMetadata | unknown
+  metadata?: YieldPoolMetadata
 }
+
+export interface YieldPositionInfo {
+  slug: string,
+  chain: string,
+  address: string,
+  status: StakingStatus,
+  activeStake: string,
+  unstakings: UnstakingInfo[],
+
+  metadata: YieldPositionMetadata
+}
+
+export type YieldPoolMetadata = ChainStakingMetadata;
+
+export type YieldPositionMetadata = NominatorMetadata;
 
 export interface OptimalYieldPathRequest {
   amount: string,
@@ -2163,16 +2178,18 @@ export interface HandleYieldStepParams extends BaseRequestSign {
 
 export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
 
-export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool | unknown;
+export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool;
 
 export interface SubmitJoinNativeStaking {
   amount: string,
-  selectedValidators: ValidatorInfo[]
+  selectedValidators: ValidatorInfo[],
+  nominatorMetadata?: NominatorMetadata
 }
 
 export interface SubmitJoinNominationPool {
   amount: string,
-  selectedPool: NominationPoolInfo
+  selectedPool: NominationPoolInfo,
+  nominatorMetadata?: NominatorMetadata
 }
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value

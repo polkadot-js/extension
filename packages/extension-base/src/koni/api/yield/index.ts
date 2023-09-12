@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldProcessValidation } from '@subwallet/extension-base/background/KoniTypes';
-import { getRelayBondingExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldProcessValidation } from '@subwallet/extension-base/background/KoniTypes';
 import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats, validateProcessForAcalaLiquidStaking } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { generatePathForInterlayLending, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
-import { generatePathForNativeStaking, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
+import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNominationPoolJoinExtrinsic, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 
 // only apply for DOT right now, will need to scale up
 
@@ -99,11 +100,14 @@ export function validateProcess (params: OptimalYieldPathParams, path: OptimalYi
   }
 }
 
-export async function getNativeStakingBondExtrinsic (address: string, params: OptimalYieldPathParams, data: unknown) {
-  const inputData = data as SubmitJoinNativeStaking;
-  const poolInfo = params.poolInfo;
-  const substrateApi = params.substrateApiMap[poolInfo.chain];
-  const chainInfo = params.chainInfoMap[poolInfo.chain];
+export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStep): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+  if (yieldPoolInfo.type === YieldPoolType.NATIVE_STAKING) {
+    const extrinsic = await getNativeStakingBondExtrinsic(address, params, data as SubmitJoinNativeStaking);
 
-  return await getRelayBondingExtrinsic(substrateApi, inputData.amount, inputData.selectedValidators, chainInfo, address);
+    return [ExtrinsicType.STAKING_BOND, extrinsic];
+  }
+
+  const extrinsic = await getNominationPoolJoinExtrinsic(address, params, data as SubmitJoinNominationPool);
+
+  return [ExtrinsicType.STAKING_JOIN_POOL, extrinsic];
 }

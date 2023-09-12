@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { OptimalYieldPath, OptimalYieldPathParams, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, OptimalYieldPath, OptimalYieldPathParams, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { getPoolingBondingExtrinsic, getRelayBondingExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { calculateChainStakedReturn, calculateInflation } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/utils';
+import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 
@@ -17,6 +19,7 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
     const currentEra = _currentEra.toString();
     const maxNominations = substrateApi.api.consts.staking.maxNominations.toString();
     const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
+    const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
     const [_totalEraStake, _totalIssuance, _auctionCounter, _minNominatorBond, _minPoolJoin, _minimumActiveStake] = await Promise.all([
       substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
@@ -44,6 +47,7 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
     const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
     const minPoolJoin = _minPoolJoin?.toString() || undefined;
     const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
+    const unlockingPeriod = parseInt(unlockingEras) * (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default); // in hours
 
     // eslint-disable-next-line node/no-callback-literal
     callback({
@@ -61,7 +65,20 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
         minWithdrawal: '0',
         totalApr: expectedReturn,
         tvl: bnTotalEraStake.toString()
-      }
+      },
+      metadata: {
+        chain: chainInfo.slug,
+        type: StakingType.NOMINATED,
+        expectedReturn: !_STAKING_CHAIN_GROUP.ternoa.includes(chainInfo.slug) ? expectedReturn : undefined, // in %, annually
+        inflation,
+        era: parseInt(currentEra),
+        minStake: minStake.toString(),
+        maxValidatorPerNominator: parseInt(maxNominations),
+        maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
+        allowCancelUnstaking: true,
+        unstakingPeriod: unlockingPeriod,
+        minJoinNominationPool: minPoolJoin
+      } as ChainStakingMetadata
     });
 
     // eslint-disable-next-line node/no-callback-literal
@@ -80,7 +97,20 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
         minWithdrawal: '0',
         totalApr: expectedReturn,
         tvl: bnTotalEraStake.toString()
-      }
+      },
+      metadata: {
+        chain: chainInfo.slug,
+        type: StakingType.NOMINATED,
+        expectedReturn: !_STAKING_CHAIN_GROUP.ternoa.includes(chainInfo.slug) ? expectedReturn : undefined, // in %, annually
+        inflation,
+        era: parseInt(currentEra),
+        minStake: minStake.toString(),
+        maxValidatorPerNominator: parseInt(maxNominations),
+        maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
+        allowCancelUnstaking: true,
+        unstakingPeriod: unlockingPeriod,
+        minJoinNominationPool: minPoolJoin
+      } as ChainStakingMetadata
     });
   });
 }
@@ -138,4 +168,19 @@ export async function generatePathForNativeStaking (params: OptimalYieldPathPara
   }
 
   return result;
+}
+
+export async function getNominationPoolJoinExtrinsic (address: string, params: OptimalYieldPathParams, inputData: SubmitJoinNominationPool) {
+  const poolInfo = params.poolInfo;
+  const substrateApi = params.substrateApiMap[poolInfo.chain];
+
+  return await getPoolingBondingExtrinsic(substrateApi, inputData.amount, inputData.selectedPool.id, inputData.nominatorMetadata);
+}
+
+export async function getNativeStakingBondExtrinsic (address: string, params: OptimalYieldPathParams, inputData: SubmitJoinNativeStaking) {
+  const poolInfo = params.poolInfo;
+  const substrateApi = params.substrateApiMap[poolInfo.chain];
+  const chainInfo = params.chainInfoMap[poolInfo.chain];
+
+  return await getRelayBondingExtrinsic(substrateApi, inputData.amount, inputData.selectedValidators, chainInfo, address, inputData.nominatorMetadata);
 }

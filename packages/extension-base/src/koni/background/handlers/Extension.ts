@@ -22,7 +22,7 @@ import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, getRelayPools
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { generateNaiveOptimalPath, getNativeStakingBondExtrinsic } from '@subwallet/extension-base/koni/api/yield';
+import { generateNaiveOptimalPath, handleYieldStep } from '@subwallet/extension-base/koni/api/yield';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
@@ -3762,7 +3762,7 @@ export default class KoniExtension {
   private async handleYieldStep (inputData: RequestYieldStepSubmit): Promise<SWTransactionResponse> {
     const { address, data, yieldPoolInfo } = inputData;
 
-    if (!data) {
+    if (!data || !yieldPoolInfo.metadata) {
       return this.#koniState.transactionService
         .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
@@ -3774,22 +3774,25 @@ export default class KoniExtension {
         .generateBeforeHandleResponseErrors(yieldValidation);
     }
 
-    const extrinsic = await getNativeStakingBondExtrinsic(address, {
-      // @ts-ignore
-      amount: data?.amount as string || '0',
-      assetInfoMap: this.#koniState.getAssetRegistry(),
-      balanceMap: this.#koniState.getBalance().details,
-      chainInfoMap: this.#koniState.getChainInfoMap(),
-      poolInfo: yieldPoolInfo,
-      substrateApiMap: this.#koniState.getSubstrateApiMap()
-    }, data);
+    const [extrinsicType, extrinsic] = await handleYieldStep(
+      address,
+      yieldPoolInfo,
+      {
+        // @ts-ignore
+        amount: data?.amount || '0',
+        assetInfoMap: this.#koniState.getAssetRegistry(),
+        balanceMap: this.#koniState.getBalance().details,
+        chainInfoMap: this.#koniState.getChainInfoMap(),
+        poolInfo: yieldPoolInfo,
+        substrateApiMap: this.#koniState.getSubstrateApiMap()
+      }, data);
 
     return await this.#koniState.transactionService.handleTransaction({
       address,
       chain: yieldPoolInfo.chain,
       transaction: extrinsic,
       data: inputData,
-      extrinsicType: ExtrinsicType.JOIN_YIELD_POOL, // change this depends on step
+      extrinsicType, // change this depends on step
       chainType: ChainType.SUBSTRATE,
       resolveOnDone: true
     });

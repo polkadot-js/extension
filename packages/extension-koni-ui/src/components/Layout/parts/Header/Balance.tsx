@@ -4,7 +4,7 @@
 import { ReceiveQrModal, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { DEFAULT_TRANSFER_PARAMS, PREDEFINED_BUY_TOKEN, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_TRANSFER_PARAMS, MAP_PREDEFINED_BUY_TOKEN, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -159,7 +159,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       return true;
     }
 
-    const buyInfo = PREDEFINED_BUY_TOKEN[buyTokenSymbol];
+    const buyInfo = MAP_PREDEFINED_BUY_TOKEN[buyTokenSymbol];
 
     if (buyInfo) {
       const supportType = buyInfo.support;

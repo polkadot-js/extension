@@ -104,13 +104,20 @@ export class KeyringService {
   /* Inject */
 
   public addInjectAccounts (accounts: InjectedAccountWithMeta[]) {
-    keyring.addInjects(accounts.map((account, index) => ({
-      ...account,
-      meta: {
-        ...account.meta,
-        name: `${account.meta.name || stringShorten(account.address)} (${account.meta.source})`
-      }
-    })));
+    keyring.addInjects(accounts.map((account) => {
+      const name = account.meta.name || stringShorten(account.address);
+
+      // TODO: Add if need
+      // name = name.concat(' (', account.meta.source, ')');
+
+      return {
+        ...account,
+        meta: {
+          ...account.meta,
+          name: name
+        }
+      };
+    }));
   }
 
   public removeInjectAccounts (addresses: string[]) {
@@ -129,8 +136,13 @@ export class KeyringService {
   /* Inject */
 
   /* Reset */
-  resetWallet (resetAll: boolean) {
+  async resetWallet (resetAll: boolean) {
     keyring.resetWallet(resetAll);
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 500);
+    });
     this.updateKeyringState();
     this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
   }

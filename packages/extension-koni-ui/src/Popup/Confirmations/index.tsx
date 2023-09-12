@@ -210,7 +210,7 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
   '--content-gap': `${token.sizeMD}px`,
 
   '.confirmation-content': {
-    flex: '1 1 auto',
+    flex: '1',
     overflow: 'auto',
     padding: `0 ${token.padding}px`,
     display: 'flex',

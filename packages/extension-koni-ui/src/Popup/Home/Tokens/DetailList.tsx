@@ -8,7 +8,7 @@ import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/Receiv
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
-import { DEFAULT_TRANSFER_PARAMS, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_TRANSFER_PARAMS, MAP_PREDEFINED_BUY_TOKEN, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -16,9 +16,9 @@ import { useDefaultNavigate, useNavigateOnChangeAccount, useNotification, useRec
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { BuyTokenInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { isAccountAll, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
+import { getAccountType, isAccountAll, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import CN from 'classnames';
@@ -85,6 +85,7 @@ function Component (): React.ReactElement {
   const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+  const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const [, setStorage] = useLocalStorage(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -113,6 +114,32 @@ function Component (): React.ReactElement {
 
     return '';
   }, [tokenGroupSlug, assetRegistryMap, multiChainAssetMap]);
+
+  const buyInfos = useMemo(() => {
+    const slug = tokenGroupSlug || '';
+    const slugs = tokenGroupMap[slug] ? tokenGroupMap[slug] : [slug];
+    const result: BuyTokenInfo[] = [];
+
+    for (const [slug, buyInfo] of Object.entries(MAP_PREDEFINED_BUY_TOKEN)) {
+      if (slugs.includes(slug)) {
+        const supportType = buyInfo.support;
+
+        if (isAccountAll(currentAccount?.address || '')) {
+          const support = accounts.some((account) => supportType === getAccountType(account.address));
+
+          if (support) {
+            result.push(buyInfo);
+          }
+        } else {
+          if (currentAccount?.address && (supportType === getAccountType(currentAccount?.address))) {
+            result.push(buyInfo);
+          }
+        }
+      }
+    }
+
+    return result;
+  }, [accounts, currentAccount?.address, tokenGroupMap, tokenGroupSlug]);
 
   const tokenBalanceValue = useMemo<SwNumberProps['value']>(() => {
     if (tokenGroupSlug) {
@@ -275,9 +302,19 @@ function Component (): React.ReactElement {
   );
 
   const onOpenBuyTokens = useCallback(() => {
+    let symbol = '';
+
+    if (buyInfos.length) {
+      if (buyInfos.length === 1) {
+        symbol = buyInfos[0].slug;
+      } else {
+        symbol = buyInfos[0].symbol;
+      }
+    }
+
     navigate('/buy-tokens', { state: { symbol } });
   },
-  [navigate, symbol]
+  [buyInfos, navigate]
   );
 
   useEffect(() => {
@@ -339,6 +376,7 @@ function Component (): React.ReactElement {
             balanceValue={tokenBalanceValue}
             className={'__static-block'}
             isShrink={isShrink}
+            isSupportBuyTokens={!!buyInfos.length}
             onClickBack={goHome}
             onOpenBuyTokens={onOpenBuyTokens}
             onOpenReceive={onOpenReceive}

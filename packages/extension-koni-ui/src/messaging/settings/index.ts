@@ -32,10 +32,6 @@ export async function saveAutoLockTime (value: number): Promise<boolean> {
   return sendMessage('pri(settings.saveAutoLockTime)', { autoLockTime: value });
 }
 
-export async function saveUnlockType (unlockType: WalletUnlockType): Promise<boolean> {
-  return sendMessage('pri(settings.saveUnlockType)', { unlockType });
-}
-
 export async function saveEnableChainPatrol (value: boolean): Promise<boolean> {
   return sendMessage('pri(settings.saveEnableChainPatrol)', { enable: value });
 }
@@ -50,4 +46,8 @@ export async function saveShowZeroBalance (show: boolean): Promise<boolean> {
 
 export async function saveShowBalance (value: boolean): Promise<boolean> {
   return sendMessage('pri(settings.saveShowBalance)', { enable: value });
+}
+
+export async function saveUnlockType (value: WalletUnlockType): Promise<boolean> {
+  return sendMessage('pri(settings.saveUnlockType)', { unlockType: value });
 }

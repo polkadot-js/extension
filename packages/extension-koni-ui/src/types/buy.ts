@@ -6,7 +6,7 @@ export interface BuyService {
   symbol: string;
 }
 
-export type SupportService = 'transak' | 'banxa' | 'moonpay' | 'onramper';
+export type SupportService = 'transak' | 'banxa' | 'coinbase' | 'moonpay' | 'onramper';
 
 export interface BuyTokenInfo {
   network: string;

@@ -837,5 +837,7 @@
   "Hide private key": "",
   "Show private key": "",
   "Private key": "秘密鍵",
-  "Invalid private key. Please try again.": ""
+  "Invalid private key. Please try again.": "",
+  "Required once": "",
+  "Always require": ""
 }

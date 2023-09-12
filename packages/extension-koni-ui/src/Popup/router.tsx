@@ -117,6 +117,7 @@ const ConnectionList = new LazyLoader(() => import('@subwallet/extension-koni-ui
 const ConnectionDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
 const Earning = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Earning'));
+// const EarningManagement = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
 
 // A Placeholder page
 export function Example () {

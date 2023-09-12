@@ -261,7 +261,8 @@ export const subscribeMantaPaySyncingState = lazySubscribeMessage('pri(mantaPay.
 //
 // export const subscribeChainValidators = lazySubscribeMessage('pri(bonding.getBondingOptions)', null, updateChainValidators, updateChainValidators);
 
-// Wallet connect
+/* Wallet connect */
+
 export const updateConnectWCRequests = (data: WalletConnectSessionRequest[]) => {
   // Convert data to object with key as id
   const requests = convertConfirmationToMap(data);

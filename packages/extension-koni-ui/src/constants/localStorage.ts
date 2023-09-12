@@ -4,6 +4,8 @@
 export const THEME_BACKGROUND_COLOR = 'theme-background-color';
 export const LANGUAGE = 'current-language';
 
+export const ENABLE_INJECT = 'inject.enable';
+
 export const CURRENT_PAGE = 'page.current';
 
 export const TRANSFER_TRANSACTION = 'transaction.transfer';

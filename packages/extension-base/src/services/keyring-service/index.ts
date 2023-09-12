@@ -5,9 +5,12 @@ import { CurrentAccountInfo, KeyringState } from '@subwallet/extension-base/back
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { CurrentAccountStore } from '@subwallet/extension-base/stores';
+import { InjectedAccountWithMeta } from '@subwallet/extension-inject/types';
 import { keyring } from '@subwallet/ui-keyring';
 import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import { BehaviorSubject } from 'rxjs';
+
+import { stringShorten } from '@polkadot/util';
 
 export class KeyringService {
   private readonly currentAccountStore = new CurrentAccountStore();
@@ -103,8 +106,39 @@ export class KeyringService {
     this.updateKeyringState();
   }
 
-  resetWallet (resetAll: boolean) {
+  /* Inject */
+
+  public addInjectAccounts (accounts: InjectedAccountWithMeta[]) {
+    keyring.addInjects(accounts.map((account) => {
+      const name = account.meta.name || stringShorten(account.address);
+
+      // TODO: Add if need
+      // name = name.concat(' (', account.meta.source, ')');
+
+      return {
+        ...account,
+        meta: {
+          ...account.meta,
+          name: name
+        }
+      };
+    }));
+  }
+
+  public removeInjectAccounts (addresses: string[]) {
+    keyring.removeInjects(addresses);
+  }
+
+  /* Inject */
+
+  /* Reset */
+  async resetWallet (resetAll: boolean) {
     keyring.resetWallet(resetAll);
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 500);
+    });
     this.updateKeyringState();
     this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
   }

@@ -8,11 +8,14 @@ import styled from 'styled-components';
 
 import { BasicInputWrapper } from './Base';
 
-type Props = ThemeProps & RadioGroupProps & BasicInputWrapper;
+type Props = ThemeProps & Omit<RadioGroupProps, 'onChange'> & BasicInputWrapper;
 
-const Component: React.ForwardRefRenderFunction<InputRef, Props> = (props: Props, ref: ForwardedRef<InputRef>) => {
+const Component: React.ForwardRefRenderFunction<InputRef, Props> = ({ onChange, ...props }: Props, ref: ForwardedRef<InputRef>) => {
   return (
-    <Radio.Group {...props} />
+    <Radio.Group
+      onChange={onChange as RadioGroupProps['onChange']}
+      {...props}
+    />
   );
 };
 

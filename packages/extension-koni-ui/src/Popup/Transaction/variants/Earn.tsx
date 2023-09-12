@@ -12,7 +12,12 @@ import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWra
 import EarningProcessItem from '@subwallet/extension-koni-ui/components/EarningProcessItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFetchChainState, useGetChainPrefixBySlug, useHandleSubmitTransaction } from '@subwallet/extension-koni-ui/hooks';
+import {
+  useFetchChainState,
+  useGetChainPrefixBySlug,
+  useHandleSubmitTransaction,
+  useNotification
+} from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingProcessModal';
 import { fetchEarningChainValidators, handleYieldStep } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/earning/earningHandler';
@@ -112,11 +117,12 @@ const Component = () => {
     return _methodSlug || '';
   }, [_methodSlug]);
   const navigate = useNavigate();
+  const notification = useNotification();
   const poolInfoMap = useSelector((state: RootState) => state.yieldPool.poolInfo);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainAsset = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const { setShowRightBtn } = useContext(TransactionContext);
+  const { setShowRightBtn, setChain } = useContext(TransactionContext);
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
 
@@ -155,6 +161,10 @@ const Component = () => {
       [FormFieldName.NOMINATE]: ''
     };
   }, [currentAccount?.address, isAllAccount]);
+
+  useEffect(() => {
+    setChain(currentPoolInfo.chain);
+  }, [currentPoolInfo, setChain]);
 
   useEffect(() => {
     setShowRightBtn(true);
@@ -354,6 +364,12 @@ const Component = () => {
         type: ProcessReducerActionType.SET_CURRENT_STEP,
         payload: processState.currentStep + 1
       });
+
+      notification({
+        message: t(`Complete step {{currentStep}}`, { replace: { currentStep: processState.currentStep + 1 } }),
+        type: 'success',
+        key: '124124'
+      })
     }
 
     setTimeout(() => {

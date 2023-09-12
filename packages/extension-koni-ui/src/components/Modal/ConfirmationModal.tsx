@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
+import { CONFIRMATION_MODAL_INDEX } from '@subwallet/extension-koni-ui/constants';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -26,6 +27,7 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
       onCancel={onCancel}
       transitionName={'fade'}
       wrapClassName={CN({ hidden: !hasConfirmations })}
+      zIndex={CONFIRMATION_MODAL_INDEX}
     >
       <Confirmations className={'confirmation-content-wrapper'} />
     </BaseModal>

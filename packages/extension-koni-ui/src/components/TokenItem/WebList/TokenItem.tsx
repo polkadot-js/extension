@@ -75,10 +75,14 @@ export const TokenItem = styled(Component)<Props>(({ theme: { token } }: Props) 
         display: 'flex',
         flexDirection: 'column',
 
-        '&__title': {},
+        '&__title': {
+          fontSize: token.fontSizeLG,
+          lineHeight: token.lineHeightLG
+        },
 
         '&__sub-title': {
           fontSize: 12,
+          lineHeight: token.lineHeightSM,
           opacity: 0.65,
           textAlign: 'start'
         }

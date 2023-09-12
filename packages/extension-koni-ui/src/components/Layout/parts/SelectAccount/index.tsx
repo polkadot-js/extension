@@ -398,8 +398,7 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       '.ant-account-card-name': {
         textOverflow: 'ellipsis',
         overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        maxWidth: 120
+        whiteSpace: 'nowrap'
       },
 
       '.ant-input-container .ant-input': {

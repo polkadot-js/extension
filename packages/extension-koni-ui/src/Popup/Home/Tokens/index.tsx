@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EmptyList, PageWrapper, TokenBalance, TokenItem, TokenPrice } from '@subwallet/extension-koni-ui/components';
+import NetworkGroup from '@subwallet/extension-koni-ui/components/MetaInfo/parts/NetworkGroup';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
@@ -20,7 +21,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { isAccountAll, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, Number } from '@subwallet/react-ui';
+import { Button, Icon, Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import classNames from 'classnames';
 import { Coins, FadersHorizontal, SlidersHorizontal } from 'phosphor-react';
@@ -59,14 +60,18 @@ const Component = (): React.ReactElement => {
 
   const outletContext: {
     searchInput: string,
-    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
+    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>,
+    setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>
   } = useOutletContext();
 
   const searchInput = outletContext?.searchInput;
+  const setSearchPlaceholder = outletContext?.setSearchPlaceholder;
+  const setShowSearchInput = outletContext?.setShowSearchInput;
 
   useEffect(() => {
-    outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Token name');
-  }, [outletContext, outletContext?.setSearchPlaceholder]);
+    setSearchPlaceholder?.(t('Token name'));
+    setShowSearchInput?.(true);
+  }, [setSearchPlaceholder, setShowSearchInput, t]);
 
   const notify = useNotification();
   const { accountSelectorItems,
@@ -224,18 +229,32 @@ const Component = (): React.ReactElement => {
     };
   }, [onClickItem]);
 
-  const getRowSubTitle = useCallback((row: TokenBalanceItemType) => {
+  const getRowSubContent = useCallback((row: TokenBalanceItemType) => {
     const relatedChains = row.relatedChains;
 
     if (relatedChains.length === 1) {
       if (chainInfoMap[relatedChains[0]]) {
-        return chainInfoMap[relatedChains[0]].name?.replace(' Relay Chain', '') || '';
+        return (
+          <Typography.Text className={'token-item-information__sub-title'}>
+            {chainInfoMap[relatedChains[0]].name?.replace(' Relay Chain', '') || ''}
+          </Typography.Text>
+        );
       }
     } else if (relatedChains.length > 1) {
-      return `${relatedChains.length}  ${t('networks')}`;
+      return (
+        <div className={'token-item-information__sub-content'}>
+          <Typography.Text className={'token-item-information__sub-title'}>
+            {`${relatedChains.length} ${t('networks')}`}
+          </Typography.Text>
+
+          <NetworkGroup chains={relatedChains} />
+        </div>
+      );
     }
 
-    return '';
+    return (
+      <Typography.Text className={'token-item-information__sub-title'}></Typography.Text>
+    );
   }, [chainInfoMap, t]);
 
   if (isWebUI) {
@@ -260,7 +279,7 @@ const Component = (): React.ReactElement => {
                         chain={row.chain}
                         logoKey={row.logoKey}
                         slug={row.slug}
-                        subTitle={getRowSubTitle(row)}
+                        subContent={getRowSubContent(row)}
                         symbol={row.symbol}
                       />
                     );
@@ -529,6 +548,12 @@ const Tokens = styled(WrapperComponent)<WrapperProps>(({ theme: { extendToken, t
       '.__scrolling-block': {
         display: 'flex'
       }
+    },
+
+    '.token-item-information__sub-content': {
+      display: 'flex',
+      gap: token.sizeXXS,
+      alignItems: 'center'
     }
   });
 });

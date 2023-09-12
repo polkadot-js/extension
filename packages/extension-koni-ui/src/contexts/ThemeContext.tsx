@@ -126,6 +126,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       marginLeft: token.marginXS
     },
 
+    '.mr-xs': {
+      marginRight: token.marginXS
+    },
+
     '.ml-xxs': {
       marginLeft: token.marginXXS
     },

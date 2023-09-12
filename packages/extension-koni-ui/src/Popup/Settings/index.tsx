@@ -161,7 +161,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           title: t('WalletConnect'),
           onClick: () => {
             navigate('/wallet-connect/list');
-          }
+          },
+          isHidden: isWebUI
         }
       ]
     },
@@ -259,7 +260,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       ]
     }
-  ]), [isPopup, navigate, t, token]);
+  ]), [isPopup, isWebUI, navigate, t, token]);
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
     return [

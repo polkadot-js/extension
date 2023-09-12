@@ -49,7 +49,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const disableDerive = useMemo(
     () => !accounts
-      .filter(({ isExternal }) => !isExternal)
+      .filter(({ isExternal, isInjected }) => !isExternal && !isInjected)
       .filter(({ isMasterAccount, type }) => canDerive(type) && (type !== EVM_ACCOUNT_TYPE || (isMasterAccount && type === EVM_ACCOUNT_TYPE))).length,
     [accounts]
   );

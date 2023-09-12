@@ -1843,7 +1843,7 @@ export default class KoniState {
   }
 
   public async resetWallet (resetAll: boolean) {
-    this.keyringService.resetWallet(resetAll);
+    await this.keyringService.resetWallet(resetAll);
     this.requestService.resetWallet();
     this.transactionService.resetWallet();
     await this.dbService.resetWallet(resetAll);

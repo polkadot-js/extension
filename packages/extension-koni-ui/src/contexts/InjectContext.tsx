@@ -6,6 +6,7 @@ import { addLazy } from '@subwallet/extension-base/utils';
 import { EvmProvider, Injected, InjectedAccountWithMeta, InjectedWindowProvider, Unsubcall } from '@subwallet/extension-inject/types';
 import { DisconnectExtensionModal } from '@subwallet/extension-koni-ui/components';
 import { ENABLE_INJECT } from '@subwallet/extension-koni-ui/constants';
+import { useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
 import { noop, toShort } from '@subwallet/extension-koni-ui/utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -117,6 +118,9 @@ export const InjectContext = React.createContext<InjectContextProps>({
 });
 
 export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
+  const notification = useNotification();
+  const { t } = useTranslation();
+
   const injected = useMemo(() => {
     return !!win.injectedWeb3?.['subwallet-js'] || !!win.SubWallet;
   }, []);
@@ -124,8 +128,8 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const [substrateWallet, setSubstrateWallet] = useState<Injected | undefined>();
   const [evmWallet, setEvmWallet] = useState<SubWalletEvmProvider | undefined>();
   const [update, setUpdate] = useState({});
-  const [enabled, setEnabled] = useLocalStorage<boolean>(ENABLE_INJECT, false);
-  const [initEnable] = useState(enabled);
+  const [storage, setStorage] = useLocalStorage<boolean>(ENABLE_INJECT, false);
+  const [initEnable] = useState(storage);
 
   const accountsRef = useRef<AccountArrayMap>({});
   const [cacheAccounts, setCacheAccounts] = useState<AccountArrayMap>(accountsRef.current);
@@ -133,8 +137,10 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const promiseMapRef = useRef<WalletPromiseMap>({});
   const enablePromise = useRef<VoidFunction | undefined>();
 
-  const [loadingInject, setLoadingInject] = useState(initEnable);
+  const [loadingInject, setLoadingInject] = useState(initEnable && injected);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+
+  const enabled = useMemo(() => storage && injected, [injected, storage]);
 
   const checkLoading = useCallback(() => {
     const values = promiseMapRef.current;
@@ -143,11 +149,13 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     const allError = Object.values(values).every((v) => v === 'FAIL');
 
     if (hasDone || allError) {
-      if (hasDone || allError) {
-        setLoadingInject(false);
+      setLoadingInject(false);
+
+      if (allError) {
+        setStorage(false);
       }
     }
-  }, []);
+  }, [setStorage]);
 
   const updateState = useCallback(() => {
     addLazy(updateStatePromiseKey, () => {
@@ -160,23 +168,30 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   }, []);
 
   const enableInject = useCallback((callback?: VoidFunction) => {
-    setEnabled(true);
+    setStorage(true);
     enablePromise.current = callback;
     setUpdate({});
     setLoadingInject(true);
-  }, [setEnabled]);
+  }, [setStorage]);
 
   const disableInject = useCallback(() => {
-    setEnabled(false);
+    setStorage(false);
     setSubstrateWallet(undefined);
     setEvmWallet(undefined);
     accountsRef.current = {};
     updateState();
-  }, [setEnabled, updateState]);
+  }, [setStorage, updateState]);
 
   const initCallback = useCallback((callback?: VoidFunction) => {
     enablePromise.current = callback;
   }, []);
+
+  const handleConnectFail = useCallback(() => {
+    notification({
+      message: t('Fail to connect. Please try again later'),
+      type: 'warning'
+    });
+  }, [notification, t]);
 
   useEffect(() => {
     const wallet = win.injectedWeb3?.['subwallet-js'];
@@ -191,11 +206,12 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
         .catch((e) => {
           console.error(e);
           promiseMapRef.current = { ...promiseMapRef.current, 'subwallet-js': 'FAIL' };
+          handleConnectFail();
           checkLoading();
         })
       ;
     }
-  }, [enabled, update, checkLoading]);
+  }, [enabled, update, checkLoading, handleConnectFail]);
 
   useEffect(() => {
     const wallet = win.SubWallet;
@@ -211,11 +227,12 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
         .catch((e) => {
           console.error(e);
           promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'FAIL' };
+          handleConnectFail();
           checkLoading();
         })
       ;
     }
-  }, [enabled, update, checkLoading]);
+  }, [enabled, update, checkLoading, handleConnectFail]);
 
   useEffect(() => {
     let unsubscribe: Unsubcall | undefined;

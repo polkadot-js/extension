@@ -48,7 +48,7 @@ function checkSettingPage (pathname: string) {
 }
 
 function checkPortfolioPage (pathname: string) {
-  return pathname.startsWith('/home/tokens') || pathname.startsWith('/home/nfts');
+  return pathname.startsWith('/home/tokens') || pathname.startsWith('/home/nfts') || pathname.startsWith('/home/statistics');
 }
 
 const simplePages = ['/', '/welcome', '/keyring/login', '/keyring/create-password', '/keyring/migrate-password', '/create-done'];

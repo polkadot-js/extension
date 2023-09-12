@@ -416,7 +416,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     icon={(
                       <Icon
                         phosphorIcon={ArrowClockwise}
-                        size='sm'
+                        size='md'
                       />
                     )}
                     onClick={onClickReload}
@@ -427,7 +427,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     icon={(
                       <Icon
                         phosphorIcon={Plus}
-                        size='sm'
+                        size='md'
                       />
                     )}
                     onClick={onClickStakeMore}

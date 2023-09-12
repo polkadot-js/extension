@@ -77,7 +77,7 @@ const ConnectionItem = styled(Component)<Props>(({ theme: { token } }: Props) =>
     padding: 0,
     paddingLeft: token.sizeSM,
     paddingRight: token.sizeXXS,
-    minHeight: 48,
+    minHeight: 52,
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
 

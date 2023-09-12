@@ -47,10 +47,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const outletContext: {
     searchInput: string,
-    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
+    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>,
+    setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>
   } = useOutletContext();
 
   const setSearchPlaceholder = outletContext?.setSearchPlaceholder;
+  const setShowSearchInput = outletContext?.setShowSearchInput;
 
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
@@ -63,7 +65,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     setSearchPlaceholder?.('Collectible name');
-  }, [setSearchPlaceholder]);
+    setShowSearchInput?.(true);
+  }, [setSearchPlaceholder, setShowSearchInput]);
 
   const subHeaderButton: ButtonProps[] = [
     {

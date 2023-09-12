@@ -59,7 +59,7 @@ export const WalletModalContext = ({ children }: Props) => {
   const navigate = useNavigate();
   const { activeModal, hasActiveModal, inactiveAll, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [accountTypes, setAccountTypes] = useState<KeypairType[]>([]);
+  const [accountTypes] = useState<KeypairType[]>([]);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useExcludeModal('confirmations');

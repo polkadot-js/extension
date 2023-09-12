@@ -3,6 +3,7 @@
 
 import { ConfirmationDefinitions, ConfirmationResult, EvmSendTransactionRequest, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useGetChainInfoByChainId, useLedger, useNotification } from '@subwallet/extension-koni-ui/hooks';
 import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
@@ -12,7 +13,7 @@ import { EvmSignatureSupportType } from '@subwallet/extension-koni-ui/types/conf
 import { getSignMode, isEvmMessage, removeTransactionPersist } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, QrCode, Swatches, XCircle } from 'phosphor-react';
+import { CheckCircle, QrCode, Swatches, Wallet, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -60,6 +61,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const notify = useNotification();
 
   const { activeModal } = useContext(ModalContext);
+  const { evmWallet } = useContext(InjectContext);
 
   const chain = useGetChainInfoByChainId(chainId);
   const checkUnlock = useUnlockChecker();
@@ -91,6 +93,8 @@ const Component: React.FC<Props> = (props: Props) => {
         return QrCode;
       case AccountSignMode.LEDGER:
         return Swatches;
+      case AccountSignMode.INJECTED:
+        return Wallet;
       default:
         return CheckCircle;
     }
@@ -158,6 +162,45 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, [account.accountIndex, account.addressOffset, hashPayload, isLedgerConnected, isMessage, ledger, ledgerSignMessage, ledgerSignTransaction, onApproveSignature, refreshLedger]);
 
+  const onConfirmInject = useCallback(() => {
+    if (evmWallet) {
+      let promise: Promise<`0x${string}`>;
+
+      if (isMessage) {
+        promise = evmWallet.request<`0x${string}`>({ method: payload.payload.type, params: [account.address, payload.payload.payload] });
+      } else {
+        promise = new Promise<`0x${string}`>((resolve, reject) => {
+          const { account, canSign, estimateGas, hashPayload, isToContract, parseData, ...transactionConfig } = payload.payload;
+
+          evmWallet.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: chainId.toString(16) }]
+          })
+            .then(() => evmWallet.request<`0x${string}`>({
+              method: 'eth_sendTransaction',
+              params: [transactionConfig]
+            }))
+            .then((value) => {
+              resolve(value);
+            })
+            .catch(reject);
+        });
+      }
+
+      setLoading(true);
+      promise
+        .then((signature) => {
+          onApproveSignature({ signature });
+        })
+        .catch((e) => {
+          console.error(e);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [account.address, chainId, evmWallet, isMessage, onApproveSignature, payload.payload]);
+
   const onConfirm = useCallback(() => {
     removeTransactionPersist(extrinsicType);
 
@@ -168,6 +211,9 @@ const Component: React.FC<Props> = (props: Props) => {
       case AccountSignMode.LEDGER:
         onConfirmLedger();
         break;
+      case AccountSignMode.INJECTED:
+        onConfirmInject();
+        break;
       default:
         checkUnlock().then(() => {
           onApprovePassword();
@@ -175,7 +221,7 @@ const Component: React.FC<Props> = (props: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [checkUnlock, extrinsicType, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
+  }, [checkUnlock, extrinsicType, onConfirmInject, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
     !!ledgerError && notify({

@@ -23,6 +23,7 @@ import styled, { ThemeContext } from 'styled-components';
 type Props = ThemeProps;
 
 type PresentItem = {
+  key: string;
   logoKey: string;
   symbol: string;
   percent: number;
@@ -73,11 +74,16 @@ const Component = ({ className }: Props) => {
         break;
       }
 
-      results.push({
-        logoKey: item.logoKey,
-        symbol: item.symbol,
-        percent: item.total.convertedValue.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue).toNumber()
-      });
+      const percent = item.total.convertedValue.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue);
+
+      if (percent.gte(0.0001)) {
+        results.push({
+          key: item.slug,
+          logoKey: item.logoKey,
+          symbol: item.symbol,
+          percent: percent.toNumber()
+        });
+      }
     }
 
     return results;
@@ -87,7 +93,7 @@ const Component = ({ className }: Props) => {
     return (
       <div
         className={'__present-item'}
-        key={item.logoKey}
+        key={item.key}
       >
         <div className={'__present-item-left-part'}>
           <Logo
@@ -151,7 +157,7 @@ const Component = ({ className }: Props) => {
       return 0;
     }
 
-    let percentBigN = new BigN(0);
+    let stakingBigN = new BigN(0);
 
     for (const si of stakingItems) {
       if (!si.staking.balance || BN_ZERO.eq(si.staking.balance)) {
@@ -161,10 +167,14 @@ const Component = ({ className }: Props) => {
       const balanceValue = getBalanceValue(si.staking.balance || '0', si.decimals);
       const convertedBalanceValue = getConvertedBalanceValue(balanceValue, +`${priceMap[si.staking.chain]}` || 0);
 
-      percentBigN = percentBigN.plus(convertedBalanceValue);
+      stakingBigN = stakingBigN.plus(convertedBalanceValue);
     }
 
-    return +percentBigN.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue).toFixed(2);
+    if (stakingBigN.gt(totalBalanceInfo.convertedValue)) {
+      return 0;
+    }
+
+    return +stakingBigN.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue).toFixed(2);
   })();
 
   const otherPercent = (() => {

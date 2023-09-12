@@ -514,6 +514,14 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
           gridTemplateColumns: '1fr 1fr',
           gap: token.sizeMS,
 
+          '.ant-btn:not(.-icon-only) .ant-btn-loading-icon>.anticon': {
+            fontSize: 24,
+            height: 24,
+            width: 24,
+            marginLeft: 4,
+            marginRight: 0
+          },
+
           [`.type-${CREATE_ACCOUNT_MODAL}`]: {
             color: token['green-6']
           },

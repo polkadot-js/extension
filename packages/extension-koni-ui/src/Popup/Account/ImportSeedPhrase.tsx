@@ -13,7 +13,7 @@ import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { wordlists } from 'bip39';
 import CN from 'classnames';
 import { Eye, EyeSlash, FileArrowDown } from 'phosphor-react';
-import React, { ChangeEventHandler, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 

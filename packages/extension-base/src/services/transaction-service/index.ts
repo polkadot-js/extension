@@ -51,7 +51,6 @@ export default class TransactionService {
   private readonly eventService: EventService;
   private readonly databaseService: DatabaseService;
   private readonly requestService: RequestService;
-  private readonly balanceService: BalanceService;
   private readonly historyService: HistoryService;
   private readonly notificationService: NotificationService;
   private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});

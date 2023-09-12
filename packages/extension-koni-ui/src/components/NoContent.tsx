@@ -110,71 +110,71 @@ const Component: React.FC<Props> = ({ className, pageType }: Props) => {
 const NoContent = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     height: '100%',
+    paddingTop: 48,
+    paddingBottom: 88,
+    display: 'flex',
+    alignItems: 'center',
 
     '.message-wrapper': {
-      height: '100%',
-      flex: 1,
+      maxWidth: 358,
+      width: '100%',
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
+      paddingTop: token.padding,
+      marginLeft: 'auto',
+      marginRight: 'auto'
+    },
+
+    '.message-icon': {
       display: 'flex',
-      flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: '50px 0 50px',
+      fontSize: 64,
+      position: 'relative',
+      width: 112,
+      height: 112,
+      marginLeft: 'auto',
+      marginRight: 'auto',
 
-      '.message-icon': {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: 60,
-        height: 'fit-content',
-        width: 'fit-content',
-        padding: '28px',
+      '.anticon': {
         position: 'relative',
-
-        '.anticon': {
-          position: 'relative',
-          zIndex: 10
-        },
-
-        '.shape': {
-          opacity: 0.1,
-          background: '#4D4D4D',
-          borderRadius: '50%',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0
-        }
+        zIndex: 10
       },
 
-      '.message-content': {
-        marginTop: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-
-        '& > *': {
-          margin: 0
-        },
-
-        '.title': {
-          fontSize: 16,
-          lineHeight: '24px'
-        },
-
-        '.content': {
-          fontSize: 14,
-          lineHeight: '22px',
-          color: token.colorTextLight4,
-          maxWidth: 326,
-          textAlign: 'center'
-        }
+      '.shape': {
+        opacity: 0.1,
+        background: '#4D4D4D',
+        borderRadius: '50%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0
       }
     },
 
-    '.action-button': {
-      opacity: 0.45
+    '.message-content': {
+      marginTop: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+      display: 'flex',
+      flexDirection: 'column',
+
+      '& > *': {
+        margin: 0
+      },
+
+      '.title': {
+        fontSize: 16,
+        lineHeight: '24px'
+      },
+
+      '.content': {
+        fontSize: 14,
+        lineHeight: '22px',
+        color: token.colorTextLight4,
+        textAlign: 'center'
+      }
     }
   };
 });

@@ -208,7 +208,10 @@ const Component = ({ className }: Props) => {
       {
         isTotalZero
           ? (
-            <NoContent pageType={PAGE_TYPE.STATISTIC} />
+            <NoContent
+              className={'__no-content-block'}
+              pageType={PAGE_TYPE.STATISTIC}
+            />
           )
           : (
             <div className='__box-container'>
@@ -362,6 +365,14 @@ const Statistics = styled(Component)<Props>(({ theme: { token } }: Props) => {
       lineHeight: token.lineHeight,
       marginLeft: token.marginSM,
       marginRight: token.marginXS
+    },
+
+    '.web-ui-enable &': {
+      '.__no-content-block': {
+        paddingTop: 92,
+        paddingBottom: 132,
+        height: 'auto'
+      }
     },
 
     '@media (max-width: 1400px)': {

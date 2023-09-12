@@ -221,7 +221,7 @@ const Component: React.FC<Props> = (props: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [checkUnlock, onConfirmInject, extrinsicType, onConfirmInject, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
+  }, [checkUnlock, onConfirmInject, extrinsicType, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
     !!ledgerError && notify({

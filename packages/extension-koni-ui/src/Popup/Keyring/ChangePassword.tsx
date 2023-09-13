@@ -62,6 +62,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     navigate('/settings/security');
   }, [navigate]);
 
+  const goBackSetting = useCallback(() => {
+    navigate('/settings');
+  }, [navigate]);
+
   const onSubmit: FormCallbacks<ChangePasswordFormState>['onFinish'] = useCallback((values: ChangePasswordFormState) => {
     const password = values[FormFieldName.PASSWORD];
     const oldPassword = values[FormFieldName.OLD_PASSWORD];
@@ -122,7 +126,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
-            onClick: goHome
+            onClick: isWebUI ? goBackSetting : goHome
           }
         ]}
         title={t('Change password')}

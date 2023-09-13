@@ -34,6 +34,7 @@ jobs:
         yarn install --immutable | grep -v 'YN0013'
         yarn webapp:build
     - name: Publish to Cloudflare Pages
+      id: cloudflare_deployment
       uses: cloudflare/pages-action@v1
       with:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -43,3 +44,15 @@ jobs:
         branch: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.ref_name }}
         directory: './packages/webapp/build'
         wranglerVersion: '3'
+    - name: Notify to Discord
+      uses: sarisia/actions-status-discord@v1
+      if: always()
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        status: ${{ job.status }}
+        username: WebApp Worker
+        title: ${{ github.workflow }}
+        description: |
+          The deployment is completed.
+            - URL: ${{ steps.cloudflare_deployment.outputs.url }}
+            - Alias: ${{ steps.cloudflare_deployment.outputs.alias }}

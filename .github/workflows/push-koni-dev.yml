@@ -1,6 +1,9 @@
 name: Koni Dev
 on:
-  pull_request: { }
+  pull_request:
+    branches:
+      - koni-dev
+      - upgrade-ui
   push:
     branches:
       - koni-dev
@@ -9,28 +12,28 @@ on:
 jobs:
   master:
     if: "! startsWith(github.event.head_commit.message, '[CI Skip]')"
-    strategy:
-      matrix:
-        step: ['build:koni-dev']
-    name: ${{ matrix.step }}
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
+    name: Build Development Preview
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
         token: ${{ secrets.GH_PAT }}
-    - name: ${{ matrix.step }}
+    - name: Set current datetime
+      id: inputs_data
+      run: echo "::set-output name=current_datetime::$(date +'%Y-%m-%d-%H-%M')"
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'yarn'
+    - name: Build Dev
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         GH_PAT: ${{ secrets.GH_PAT }}
         GH_RELEASE_GITHUB_API_TOKEN: ${{ secrets.GH_PAT }}
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        NEXTCLOUD_CONFIG: ${{ secrets.NEXTCLOUD_CONFIG }}
-        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         TRANSAK_API_KEY: ${{ secrets.TRANSAK_API_KEY }}
         COINBASE_PAY_ID: ${{ secrets.COINBASE_PAY_ID }}
-        BANXA_SANDBOX_API_KEY: ${{ secrets.BANXA_SANDBOX_API_KEY }}
-        BANXA_SANBOX_API_SECRET: ${{ secrets.BANXA_SANBOX_API_SECRET }}
         GH_RELEASE_FILES: master-build.zip,master-src.zip
         COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         REF_NAME: ${{ github.ref_name }}
@@ -39,4 +42,40 @@ jobs:
         CURRENT_BRANCH: ${{ github.event.pull_request.head.ref || github.ref }}
       run: |
         yarn install --immutable | grep -v 'YN0013'
-        yarn ${{ matrix.step }}
+        yarn build:koni-dev
+    # Deploy after build
+    - name: Upload to Build to Nextcloud
+      id: nextcloud_upload
+      uses: trympet/nextcloud-artifacts-action@v2
+      with:
+        name: 'build-${{ steps.inputs_data.outputs.current_datetime }}'
+        path: 'master-build.zip'
+        nextcloud-url: 'https://file.cdmteck.com'
+        nextcloud-username: ${{ secrets.NEXTCLOUD_USERNAME }}
+        nextcloud-password: ${{ secrets.NEXTCLOUD_PASSWORD }}
+    - name: Deploy Webrunner to Netlify
+      id: netlify_deployment
+      uses: nwtgck/actions-netlify@v2.0
+      with:
+        publish-dir: './packages/web-runner/build'
+        alias: ${{ github.head_ref }}
+        github-token: ${{ secrets.GH_PAT }}
+        deploy-message: ${{ github.event.head_commit.message }}
+        enable-pull-request-comment: true
+        enable-commit-comment: true
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_WEB_RUNNER_SITE_ID }}
+      timeout-minutes: 1
+    - name: Notify to Discord
+      uses: sarisia/actions-status-discord@v1
+      if: always()
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        status: ${{ job.status }}
+        username: Extension Worker
+        title: ${{ github.workflow }}
+        description: |
+          The Deployment has been completed.
+          - Extension: ${{ steps.nextcloud_upload.outputs.SHAREABLE_URL }}
+          - Web-runner: ${{ steps.netlify_deployment.outputs.deploy-url }}

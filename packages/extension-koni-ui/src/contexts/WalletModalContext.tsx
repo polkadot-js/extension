@@ -4,7 +4,7 @@
 import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
 import { ConfirmationModal } from '@subwallet/extension-koni-ui/components/Modal/ConfirmationModal';
 import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModal';
-import { CREATE_ACCOUNT_MODAL, SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { BUY_TOKEN_MODAL, CONFIRMATION_MODAL, CREATE_ACCOUNT_MODAL, SEED_PHRASE_MODAL, TRANSFER_FUND_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext, useExcludeModal } from '@subwallet/react-ui';
@@ -62,9 +62,9 @@ export const WalletModalContext = ({ children }: Props) => {
   const [accountTypes] = useState<KeypairType[]>([]);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
-  useExcludeModal('confirmations');
-  useExcludeModal('transfer-fund-modal');
-  useExcludeModal('buy-token-modal');
+  useExcludeModal(CONFIRMATION_MODAL);
+  useExcludeModal(TRANSFER_FUND_MODAL);
+  useExcludeModal(BUY_TOKEN_MODAL);
 
   useEffect(() => {
     const confirmID = searchParams.get('popup');
@@ -104,7 +104,7 @@ export const WalletModalContext = ({ children }: Props) => {
     />
     {children}
     <ConfirmationModal
-      id={'confirmations'}
+      id={CONFIRMATION_MODAL}
       onCancel={onCloseConfirmationModal}
     />
     <CreateAccountModal />

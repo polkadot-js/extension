@@ -153,7 +153,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const emptyNft = useCallback(() => {
     if (isWebUI) {
-      return <NoContent pageType={PAGE_TYPE.NFT} />;
+      return (
+        <NoContent
+          className={'__no-content-block'}
+          pageType={PAGE_TYPE.NFT}
+        />
+      );
     }
 
     return (
@@ -199,7 +204,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <div className={'nft-collect-list-wrapper'}>
           <SwList
             displayGrid={true}
-            gridGap={'14px'}
+            gridGap={'16px'}
             list={nftCollections}
             minColumnWidth={'160px'}
             renderItem={renderNftCollection}
@@ -213,7 +218,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       );
     }
 
-    return <NoContent pageType={PAGE_TYPE.NFT} />;
+    return (
+      <NoContent
+        className={'__no-content-block'}
+        pageType={PAGE_TYPE.NFT}
+      />
+    );
   }, [isWebUI, nftCollections, renderNftCollection, emptyNft, searchCollection, outletContext?.searchInput, t]);
 
   return (
@@ -232,20 +242,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }}
       >
         {listSection}
-        <Button
-          block
-          icon={(
-            <Icon
-              phosphorIcon={PlusCircle}
-              size='md'
-              weight='fill'
-            />
-          )}
-          onClick={openImportModal}
-          type='ghost'
-        >
-          {t('Import collectible')}
-        </Button>
+        <div className={'__import-collectible-button-wrapper'}>
+          <Button
+            block={!isWebUI}
+            className={'__import-collectible-button'}
+            icon={(
+              <Icon
+                phosphorIcon={PlusCircle}
+                size={isWebUI ? undefined : 'md'}
+                weight='fill'
+              />
+            )}
+            onClick={openImportModal}
+            size={isWebUI ? 'xs' : undefined}
+            type='ghost'
+          >
+            {t('Import collectible')}
+          </Button>
+        </div>
       </Layout.Base>
 
       <BaseModal
@@ -287,6 +301,33 @@ const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
       '.nft-collect-list-wrapper': {
         flex: 1
+      },
+
+      '.web-ui-enable &': {
+        '.__no-content-block': {
+          paddingTop: 92,
+          paddingBottom: 132,
+          height: 'auto'
+        },
+
+        '.__import-collectible-button-wrapper': {
+          display: 'flex',
+          justifyContent: 'center'
+        },
+
+        '.__import-collectible-button': {
+          '&:not(:hover)': {
+            color: token.colorTextLight4
+          }
+        },
+
+        '.nft-collect-list-wrapper': {
+          flexGrow: 0
+        },
+
+        '.nft-collect-list-wrapper + .__import-collectible-button-wrapper': {
+          marginTop: token.marginXS
+        }
       }
     },
     '&.import-nft-modal': {

@@ -6,11 +6,10 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import BaseWeb from '@subwallet/extension-koni-ui/components/Layout/base/BaseWeb';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
-import { TRANSACTION_STORAGES } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
+import { WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import { useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
@@ -18,7 +17,7 @@ import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount, removeStorage } from '@subwallet/extension-koni-ui/utils';
-import { changeHeaderLogo } from '@subwallet/react-ui';
+import { changeHeaderLogo, ModalContext } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import CN from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -26,6 +25,7 @@ import { useSelector } from 'react-redux';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { CONFIRMATION_MODAL, TRANSACTION_STORAGES } from '../constants';
 import { WebUIContextProvider } from '../contexts/WebUIContext';
 
 changeHeaderLogo(<Logo2D />);
@@ -80,7 +80,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const dataContext = useContext(DataContext);
   const screenContext = useContext(ScreenContext);
   const location = useLocation();
-  const { isOpenPModal, openPModal } = usePredefinedModal();
   const notify = useNotification();
   const [rootLoading, setRootLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -88,6 +87,8 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const firstRender = useRef(true);
 
   useSubscribeLanguage();
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { unlockType } = useSelector((state: RootState) => state.settings);
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
@@ -175,15 +176,15 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
         redirectTarget = welcomeUrl;
       }
     } else if (hasConfirmations) {
-      openPModal('confirmations');
+      activeModal(CONFIRMATION_MODAL);
     } else if (pathName === DEFAULT_ROUTER_PATH) {
       redirectTarget = tokenUrl;
     } else if (pathName === loginUrl && !needUnlock) {
       redirectTarget = DEFAULT_ROUTER_PATH;
     } else if (hasInternalConfirmations) {
-      openPModal('confirmations');
-    } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
-      openPModal(null);
+      activeModal(CONFIRMATION_MODAL);
+    } else if (!hasInternalConfirmations) {
+      inactiveModal(CONFIRMATION_MODAL);
     }
 
     // Remove loading on finished first compute
@@ -201,7 +202,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     } else {
       return null;
     }
-  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, openPModal]);
+  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, activeModal, inactiveModal]);
 
   // Remove transaction persist state
   useEffect(() => {

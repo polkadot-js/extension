@@ -627,7 +627,6 @@ const Stake = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.web-ui-enable &': {
-      paddingTop: 24,
       maxWidth: 784,
       width: '100%',
       marginLeft: 'auto',

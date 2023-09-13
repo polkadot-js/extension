@@ -75,7 +75,7 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken, token } 
 
     '.web-layout-header': {
       flex: 0,
-      padding: '24px 36px 24px 44px'
+      padding: '24px 36px 48px 44px'
     },
 
     '.web-layout-content': {

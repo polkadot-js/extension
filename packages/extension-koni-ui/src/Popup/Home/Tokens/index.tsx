@@ -264,7 +264,10 @@ const Component = (): React.ReactElement => {
       <div className='token-table'>
         {tokenGroupBalanceItems.length <= 0
           ? (
-            <NoContent pageType={PAGE_TYPE.TOKEN} />
+            <NoContent
+              className={'__no-content-block'}
+              pageType={PAGE_TYPE.TOKEN}
+            />
           )
           : (
             <DetailTable
@@ -334,19 +337,22 @@ const Component = (): React.ReactElement => {
             />
 
           )}
-        <Button
-          block
-          icon={(
-            <Icon
-              phosphorIcon={SlidersHorizontal}
-              size='md'
-            />
-          )}
-          onClick={onClickManageToken}
-          type='ghost'
-        >
-          {t('Manage token list')}
-        </Button>
+        <div className='__manage-token-button-wrapper'>
+          <Button
+            className={'__manage-token-button'}
+            icon={(
+              <Icon
+                customSize='28px'
+                phosphorIcon={SlidersHorizontal}
+              />
+            )}
+            onClick={onClickManageToken}
+            size={'xs'}
+            type='ghost'
+          >
+            {t('Manage token list')}
+          </Button>
+        </div>
       </div>
     );
   }
@@ -554,6 +560,28 @@ const Tokens = styled(WrapperComponent)<WrapperProps>(({ theme: { extendToken, t
       display: 'flex',
       gap: token.sizeXXS,
       alignItems: 'center'
+    },
+
+    '.web-ui-enable &': {
+      '.__no-content-block': {
+        paddingTop: 92,
+        paddingBottom: 132
+      },
+
+      '.__manage-token-button-wrapper': {
+        display: 'flex',
+        justifyContent: 'center'
+      },
+
+      '.ant-table-wrapper + .__manage-token-button-wrapper': {
+        marginTop: token.margin
+      },
+
+      '.__manage-token-button': {
+        '&:not(:hover)': {
+          color: token.colorTextLight4
+        }
+      }
     }
   });
 });

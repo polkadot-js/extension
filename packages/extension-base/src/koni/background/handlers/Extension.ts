@@ -3768,6 +3768,8 @@ export default class KoniExtension {
     }
 
     const currentStep = path.steps[inputData.currentStep];
+    const isLastStep = inputData.currentStep + 1 === path.steps.length;
+    const isBasicStaking = [YieldStepType.NOMINATE, YieldStepType.JOIN_NOMINATION_POOL].includes(currentStep.type);
 
     const params: OptimalYieldPathParams = {
       // @ts-ignore
@@ -3811,10 +3813,11 @@ export default class KoniExtension {
       chain: yieldPoolInfo.chain,
       transaction: extrinsic,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      data: [YieldStepType.NOMINATE, YieldStepType.JOIN_NOMINATION_POOL].includes(currentStep.type) ? convertYieldTxData(address, yieldPoolInfo, data) : inputData,
+      data: isBasicStaking ? convertYieldTxData(address, yieldPoolInfo, data) : inputData,
       extrinsicType, // change this depends on step
       chainType: ChainType.SUBSTRATE,
-      resolveOnDone: true
+      resolveOnDone: !isLastStep,
+      transferNativeAmount: isBasicStaking ? (data?.amount || '0') : undefined
     });
   }
 

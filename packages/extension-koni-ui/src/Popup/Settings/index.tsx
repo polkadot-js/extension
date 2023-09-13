@@ -390,6 +390,7 @@ export const Settings = styled(Component)<Props>(({ theme: { extendToken, token 
       paddingBottom: token.paddingLG,
 
       '.web-ui-enable &': {
+        paddingTop: 0,
         paddingBottom: token.paddingLG,
         margin: '0 auto',
         width: extendToken.bigOneColumnWidth,

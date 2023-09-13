@@ -3,6 +3,7 @@
 
 import PieDonutChart, { DataItem } from '@garvae/react-pie-donut-chart';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { ProgressBar } from '@subwallet/extension-koni-ui/components/ProgressBar';
 import { BN_100, BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -22,6 +23,7 @@ import styled, { ThemeContext } from 'styled-components';
 type Props = ThemeProps;
 
 type PresentItem = {
+  key: string;
   logoKey: string;
   symbol: string;
   percent: number;
@@ -72,11 +74,16 @@ const Component = ({ className }: Props) => {
         break;
       }
 
-      results.push({
-        logoKey: item.logoKey,
-        symbol: item.symbol,
-        percent: item.total.convertedValue.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue).toNumber()
-      });
+      const percent = item.total.convertedValue.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue);
+
+      if (percent.gte(0.0001)) {
+        results.push({
+          key: item.slug,
+          logoKey: item.logoKey,
+          symbol: item.symbol,
+          percent: percent.toNumber()
+        });
+      }
     }
 
     return results;
@@ -86,7 +93,7 @@ const Component = ({ className }: Props) => {
     return (
       <div
         className={'__present-item'}
-        key={item.logoKey}
+        key={item.key}
       >
         <div className={'__present-item-left-part'}>
           <Logo
@@ -150,7 +157,7 @@ const Component = ({ className }: Props) => {
       return 0;
     }
 
-    let percentBigN = new BigN(0);
+    let stakingBigN = new BigN(0);
 
     for (const si of stakingItems) {
       if (!si.staking.balance || BN_ZERO.eq(si.staking.balance)) {
@@ -160,10 +167,14 @@ const Component = ({ className }: Props) => {
       const balanceValue = getBalanceValue(si.staking.balance || '0', si.decimals);
       const convertedBalanceValue = getConvertedBalanceValue(balanceValue, +`${priceMap[si.staking.chain]}` || 0);
 
-      percentBigN = percentBigN.plus(convertedBalanceValue);
+      stakingBigN = stakingBigN.plus(convertedBalanceValue);
     }
 
-    return +percentBigN.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue).toFixed(2);
+    if (stakingBigN.gt(totalBalanceInfo.convertedValue)) {
+      return 0;
+    }
+
+    return +stakingBigN.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue).toFixed(2);
   })();
 
   const otherPercent = (() => {
@@ -204,58 +215,55 @@ const Component = ({ className }: Props) => {
       className={className}
       resolve={dataContext.awaitStores(['staking', 'price'])}
     >
-      <div className='__box-container'>
-        {
-          isTotalZero
-            ? (
-              <>
-                {/* todo: will make empty page later */}
-                <div>
-                  Unable to obtain statistic info
+      {
+        isTotalZero
+          ? (
+            <NoContent
+              className={'__no-content-block'}
+              pageType={PAGE_TYPE.STATISTIC}
+            />
+          )
+          : (
+            <div className='__box-container'>
+              <div className='__box-part -left-part'>
+                <div className='__box-part-title'>
+                  {t('Portfolio Allocation')}
                 </div>
-              </>
-            )
-            : (
-              <>
-                <div className='__box-part -left-part'>
-                  <div className='__box-part-title'>
-                    {t('Portfolio Allocation')}
+
+                <div className='__present-items-area'>
+                  {presentItems.map(renderPresentItem)}
+                </div>
+              </div>
+              <div className='__box-part'>
+                <div className='__box-part-title'>
+                  {t('Portfolio Distribution')}
+                </div>
+
+                <div className='__chart-area'>
+                  <div className='__chart-wrapper'>
+                    <PieDonutChart
+                      animationSpeed={0}
+                      chartCenterSize={194}
+                      colors={{
+                        chartCenter: token.colorBgSecondary,
+                        text: 'transparent'
+                      }}
+                      data={chartData}
+                      hoverScaleRatio={1.03}
+                      resizeReRenderDebounceTime={100}
+                      size={240}
+                    />
                   </div>
 
-                  <div className='__present-items-area'>
-                    {presentItems.map(renderPresentItem)}
+                  <div className='__legend-area'>
+                    {chartItems.map(renderLegendItem)}
                   </div>
                 </div>
-                <div className='__box-part'>
-                  <div className='__box-part-title'>
-                    {t('Portfolio Distribution')}
-                  </div>
+              </div>
 
-                  <div className='__chart-area'>
-                    <div className='__chart-wrapper'>
-                      <PieDonutChart
-                        animationSpeed={0}
-                        chartCenterSize={194}
-                        colors={{
-                          chartCenter: token.colorBgSecondary,
-                          text: 'transparent'
-                        }}
-                        data={chartData}
-                        hoverScaleRatio={1.03}
-                        resizeReRenderDebounceTime={100}
-                        size={240}
-                      />
-                    </div>
-
-                    <div className='__legend-area'>
-                      {chartItems.map(renderLegendItem)}
-                    </div>
-                  </div>
-                </div>
-              </>
-            )
-        }
-      </div>
+            </div>
+          )
+      }
     </PageWrapper>
   );
 };
@@ -367,6 +375,14 @@ const Statistics = styled(Component)<Props>(({ theme: { token } }: Props) => {
       lineHeight: token.lineHeight,
       marginLeft: token.marginSM,
       marginRight: token.marginXS
+    },
+
+    '.web-ui-enable &': {
+      '.__no-content-block': {
+        paddingTop: 92,
+        paddingBottom: 132,
+        height: 'auto'
+      }
     },
 
     '@media (max-width: 1400px)': {

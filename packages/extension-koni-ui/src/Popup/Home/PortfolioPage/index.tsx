@@ -221,12 +221,12 @@ const PortfolioPage = styled(Component)<Props>(({ theme: { token } }: Props) => 
     height: '100%',
 
     '.portfolio-header': {
-      flex: '0 0 auto',
-      paddingBottom: token.paddingLG
+      flex: '0 0 auto'
     },
 
     '.portfolio-content': {
       flex: '1 1 500px',
+      paddingTop: token.paddingLG,
       paddingBottom: token.paddingLG
     },
 

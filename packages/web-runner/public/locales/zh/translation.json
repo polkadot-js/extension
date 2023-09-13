@@ -839,5 +839,9 @@
   "Private key": "私钥",
   "Invalid private key. Please try again.": "私钥无效。请重试。",
   "Required once": "",
-  "Always require": ""
+  "Always require": "",
+  "Disconnect wallet": "",
+  "Do want to disconnect all wallets?": "",
+  "All connected wallets will be disconnected immediately. If you want to disconnect some accounts, please go to the corresponding wallet app to disable.": "",
+  "Fail to connect. Please try again later": ""
 }

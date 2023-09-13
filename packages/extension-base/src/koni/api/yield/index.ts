@@ -3,7 +3,8 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { validatePoolBondingCondition, validateRelayBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats, validateProcessForAcalaLiquidStaking } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
@@ -90,17 +91,25 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams):
   return generatePathForNativeStaking(params);
 }
 
-export function validateYieldProcess (params: OptimalYieldPathParams, path: OptimalYieldPath): TransactionError[] {
-  // TODO: calculate token portion
-  // TODO: compare to ED
-  // TODO: compare to minAmount
-  // TODO: simulate the whole process, compare to fee (step by step)
+// TODO: calculate token portion
+// TODO: compare to ED
+// TODO: compare to minAmount
+// TODO: simulate the whole process, compare to fee (step by step)
+export function validateYieldProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data: SubmitYieldStep): TransactionError[] {
+  const poolInfo = params.poolInfo;
+  const chainInfo = params.chainInfoMap[poolInfo.chain];
 
   if (['DOT___bifrost_liquid_staking', 'DOT___acala_liquid_staking'].includes(params.poolInfo.slug)) {
     return validateProcessForAcalaLiquidStaking(params, path);
+  } else if (params.poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+    const inputData = data as SubmitJoinNominationPool;
+
+    return validatePoolBondingCondition(chainInfo, inputData.amount, inputData.selectedPool, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
   }
 
-  return [];
+  const inputData = data as SubmitJoinNativeStaking;
+
+  return validateRelayBondingCondition(chainInfo, inputData.amount, inputData.selectedValidators, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
 }
 
 export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStep): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
@@ -113,4 +122,29 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
   const extrinsic = await getNominationPoolJoinExtrinsic(address, params, data as SubmitJoinNominationPool);
 
   return [ExtrinsicType.STAKING_JOIN_POOL, extrinsic];
+}
+
+export function convertYieldTxData (address: string, poolInfo: YieldPoolInfo, data: SubmitYieldStep): any {
+  if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+    const inputData = data as SubmitJoinNominationPool;
+
+    return {
+      nominatorMetadata: data.nominatorMetadata,
+      chain: poolInfo.chain,
+      selectedPool: inputData.selectedPool,
+      amount: inputData.amount,
+      address
+    } as RequestStakePoolingBonding;
+  }
+
+  const inputData = data as SubmitJoinNativeStaking;
+
+  return {
+    chain: poolInfo.chain,
+    type: StakingType.NOMINATED,
+    nominatorMetadata: inputData.nominatorMetadata, // undefined if user has no stake
+    amount: inputData.amount,
+    address,
+    selectedValidators: inputData.selectedValidators
+  } as RequestBondingSubmit;
 }

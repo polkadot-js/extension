@@ -229,7 +229,7 @@ const Component: React.FC<Props> = (props: Props) => {
         .then(() => {
           setDeleting(true);
           setTimeout(() => {
-            forgetAccount(currentAccount.address)
+            forgetAccount(currentAccount.address, true)
               .then(() => {
                 setIsError(false);
               })

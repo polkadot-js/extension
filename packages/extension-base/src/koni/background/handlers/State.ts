@@ -316,6 +316,7 @@ export default class KoniState {
 
   private async startSubscription () {
     await this.eventService.waitKeyringReady;
+    await this.eventService.waitAssetReady;
 
     this.dbService.subscribeChainStakingMetadata([], (data) => {
       this.chainStakingMetadataSubject.next(data);

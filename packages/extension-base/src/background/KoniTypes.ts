@@ -2062,8 +2062,8 @@ export interface YieldPositionInfo {
   chain: string,
   address: string,
   status: StakingStatus,
-  activeStake: string,
-  unstakings: UnstakingInfo[],
+  activeBalance: string,
+  withdrawals: UnstakingInfo[],
 
   metadata: YieldPositionMetadata
 }

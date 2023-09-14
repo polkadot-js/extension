@@ -84,6 +84,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     return accounts.filter(({ address }) => !isAccountAll(address));
   }, [accounts]);
 
+  const showAllAccount = useMemo(() => {
+    return noAllAccounts.length > 1;
+  }, [noAllAccounts]);
+
   const _onSelect = useCallback((address: string) => {
     if (address) {
       const accountByAddress = findAccountByAddress(accounts, address);
@@ -134,17 +138,21 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     activeModal(DISCONNECT_EXTENSION_MODAL);
   }, [activeModal]);
 
-  const renderItem = useCallback((item: AccountJson, _selected: boolean) => {
+  const renderItem = useCallback((item: AccountJson, _selected: boolean): React.ReactNode => {
     const currentAccountIsAll = isAccountAll(item.address);
 
     if (currentAccountIsAll) {
-      return (
-        <AccountItemWithName
-          address={item.address}
-          className='all-account-selection'
-          isSelected={_selected}
-        />
-      );
+      if (showAllAccount) {
+        return (
+          <AccountItemWithName
+            address={item.address}
+            className='all-account-selection'
+            isSelected={_selected}
+          />
+        );
+      } else {
+        return null;
+      }
     }
 
     const isInjected = !!item.isInjected;
@@ -169,7 +177,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         )}
       />
     );
-  }, [className, onClickDetailAccount, openDisconnectExtensionModal]);
+  }, [className, onClickDetailAccount, openDisconnectExtensionModal, showAllAccount]);
 
   const renderSelectedItem = useCallback((item: AccountJson): React.ReactNode => {
     return (
@@ -310,7 +318,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         ignoreScrollbarMethod='padding'
         inputWidth={'100%'}
         itemKey='address'
-        items={noAllAccounts.length <= 1 ? noAllAccounts : accounts}
+        items={accounts}
         onSelect={_onSelect}
         renderItem={renderItem}
         renderSelected={renderSelectedItem}

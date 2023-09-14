@@ -15,7 +15,7 @@ import BuyTokens from '@subwallet/extension-koni-ui/Popup/BuyTokens';
 import Transaction from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import SendFund from '@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { BuyTokenInfo, PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getAccountType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -45,8 +45,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { setBackground } = useContext(WebUIContext);
   const locationPathname = useLocation().pathname;
   const tokenGroupSlug = useParams()?.slug;
-  const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
-  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const isShowBalance = useSelector((state: RootState) => state.settings.isShowBalance);
 
   const onChangeShowBalance = useCallback(() => {
@@ -64,7 +62,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   }, [locationPathname, tokenGroupSlug]);
 
   const { t } = useTranslation();
-  const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
+  const { accountBalance: { totalBalanceInfo }, tokenGroupStructure: { tokenGroupMap } } = useContext(HomeContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { accountSelectorItems,
     onOpenReceive,
@@ -77,6 +75,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [sendFundKey, setSendFundKey] = useState<string>('sendFundKey');
   const [buyTokensKey, setBuyTokensKey] = useState<string>('buyTokensKey');
+  const [buyTokenSymbol, setBuyTokenSymbol] = useState<string>('');
   const notify = useNotification();
 
   const isTotalBalanceDecrease = totalBalanceInfo.change.status === 'decrease';
@@ -85,12 +84,53 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const totalValue = totalBalanceInfo.convertedValue;
 
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
-  const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
   const [, setStorage] = useLocalStorage(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
 
+  const buyInfos = useMemo(() => {
+    if (!locationPathname.includes('/home/tokens/detail/')) {
+      return [];
+    }
+
+    const slug = tokenGroupSlug || '';
+    const slugs = tokenGroupMap[slug] ? tokenGroupMap[slug] : [slug];
+    const result: BuyTokenInfo[] = [];
+
+    for (const [slug, buyInfo] of Object.entries(MAP_PREDEFINED_BUY_TOKEN)) {
+      if (slugs.includes(slug)) {
+        const supportType = buyInfo.support;
+
+        if (isAccountAll(currentAccount?.address || '')) {
+          const support = accounts.some((account) => supportType === getAccountType(account.address));
+
+          if (support) {
+            result.push(buyInfo);
+          }
+        } else {
+          if (currentAccount?.address && (supportType === getAccountType(currentAccount?.address))) {
+            result.push(buyInfo);
+          }
+        }
+      }
+    }
+
+    return result;
+  }, [accounts, currentAccount?.address, locationPathname, tokenGroupMap, tokenGroupSlug]);
+
   const onOpenBuyTokens = useCallback(() => {
+    let symbol = '';
+
+    if (buyInfos.length) {
+      if (buyInfos.length === 1) {
+        symbol = buyInfos[0].slug;
+      } else {
+        symbol = buyInfos[0].symbol;
+      }
+    }
+
+    setBuyTokenSymbol(symbol);
+
     activeModal(BUY_TOKEN_MODAL);
-  }, [activeModal]);
+  }, [activeModal, buyInfos]);
 
   useEffect(() => {
     dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance']).catch(console.error);
@@ -130,20 +170,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     setBackground(backgroundColor);
   }, [isTotalBalanceDecrease, setBackground]);
 
-  const buyTokenSymbol = useMemo<string>(() => {
-    if (tokenGroupSlug) {
-      if (multiChainAssetMap[tokenGroupSlug]) {
-        return multiChainAssetMap[tokenGroupSlug].symbol;
-      }
-
-      if (assetRegistryMap[tokenGroupSlug]) {
-        return assetRegistryMap[tokenGroupSlug].symbol;
-      }
-    }
-
-    return '';
-  }, [tokenGroupSlug, assetRegistryMap, multiChainAssetMap]);
-
   const handleCancelTransfer = useCallback(() => {
     inactiveModal(TRANSFER_FUND_MODAL);
     setSendFundKey(`sendFundKey-${Date.now()}`);
@@ -159,26 +185,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       return true;
     }
 
-    const buyInfo = MAP_PREDEFINED_BUY_TOKEN[buyTokenSymbol];
-
-    if (buyInfo) {
-      const supportType = buyInfo.support;
-
-      if (isAllAccount) {
-        for (const account of accounts) {
-          if (supportType === getAccountType(account.address)) {
-            return true;
-          }
-        }
-      } else {
-        if (currentAccount?.address && (supportType === getAccountType(currentAccount?.address))) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }, [locationPathname, buyTokenSymbol, isAllAccount, accounts, currentAccount?.address]);
+    return !!buyInfos.length;
+  }, [buyInfos.length, locationPathname]);
 
   const actions: Action[] = [
     {

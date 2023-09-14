@@ -4,7 +4,7 @@
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
-import { DEFAULT_TRANSACTION_PARAMS, TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_TRANSACTION_PARAMS, TRANSACTION_TITLE_MAP, TRANSFER_FUND_MODAL, TRANSFER_NFT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
@@ -32,13 +32,19 @@ function Component ({ children, className, modalContent }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { activeModal } = useContext(ModalContext);
+  const { activeModal, checkActive } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
 
   const transactionType = useMemo((): ExtrinsicType => {
     const pathName = location.pathname;
     const action = pathName.split('/')[2] || '';
+
+    if (checkActive(TRANSFER_FUND_MODAL)) {
+      return ExtrinsicType.TRANSFER_BALANCE;
+    } else if (checkActive(TRANSFER_NFT_MODAL)) {
+      return ExtrinsicType.SEND_NFT;
+    }
 
     switch (action) {
       case 'stake':
@@ -54,17 +60,14 @@ function Component ({ children, className, modalContent }: Props) {
       case 'compound':
         return ExtrinsicType.STAKING_COMPOUNDING;
       case 'send-nft':
-      case 'nfts':
         return ExtrinsicType.SEND_NFT;
       case 'send-fund':
       default:
         return ExtrinsicType.TRANSFER_BALANCE;
     }
-  }, [location.pathname]);
+  }, [checkActive, location.pathname]);
 
   const storageKey = useMemo((): string => detectTransactionPersistKey(transactionType), [transactionType]);
-
-  console.debug(storageKey);
 
   const [storage, setStorage] = useLocalStorage<TransactionFormBaseProps>(storageKey, DEFAULT_TRANSACTION_PARAMS);
 

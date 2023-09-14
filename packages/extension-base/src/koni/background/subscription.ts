@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { NominatorMetadata, StakingItem, StakingRewardItem, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, StakingItem, StakingRewardItem, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
 import { subscribeEssentialChainStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
 import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-base/koni/api/staking/paraChain';
-import { subscribeYieldPoolStats } from '@subwallet/extension-base/koni/api/yield';
+import { subscribeYieldPoolStats, subscribeYieldPosition } from '@subwallet/extension-base/koni/api/yield';
 import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
+import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import { COMMON_RELOAD_EVENTS, EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
@@ -21,7 +22,7 @@ import { Logger } from '@polkadot/util/types';
 
 import KoniState from './handlers/State';
 
-type SubscriptionName = 'balance' | 'crowdloan' | 'stakingOnChain' | 'essentialChainStakingMetadata' | 'yieldPoolStats';
+type SubscriptionName = 'balance' | 'crowdloan' | 'stakingOnChain' | 'essentialChainStakingMetadata' | 'yieldPoolStats' | 'yieldPosition';
 
 export class KoniSubscription {
   private eventHandler?: (events: EventItem<EventType>[], eventTypes: EventType[]) => void;
@@ -30,7 +31,8 @@ export class KoniSubscription {
     balance: undefined,
     stakingOnChain: undefined,
     essentialChainStakingMetadata: undefined,
-    yieldPoolStats: undefined
+    yieldPoolStats: undefined,
+    yieldPosition: undefined
   };
 
   public dbService: DatabaseService;
@@ -81,7 +83,7 @@ export class KoniSubscription {
 
     if (currentAddress) {
       this.subscribeBalancesAndCrowdloans(currentAddress, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
-      this.subscribeYieldPoolStats(this.state.getSubstrateApiMap());
+      this.subscribeYieldPools(currentAddress, this.state.getChainInfoMap(), this.state.getSubstrateApiMap());
     }
 
     this.eventHandler = (events, eventTypes) => {
@@ -99,7 +101,8 @@ export class KoniSubscription {
       }
 
       this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
-      this.subscribeYieldPoolStats(serviceInfo.chainApiMap.substrate);
+      // @ts-ignore
+      this.subscribeYieldPools(address, serviceInfo.chainInfoMap, serviceInfo.chainApiMap.substrate);
     };
 
     this.state.eventService.onLazy(this.eventHandler);
@@ -129,9 +132,36 @@ export class KoniSubscription {
     }).catch((err) => this.logger.warn(err));
   }
 
-  subscribeYieldPoolStats (substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
+  subscribeYieldPools (address: string, chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, SubstrateApi>, onlyRunOnFirstTime?: boolean) {
     this.updateSubscription('yieldPoolStats', this.initYieldPoolStatsSubscription(substrateApiMap, onlyRunOnFirstTime));
-    // subscribe yield positions
+
+    this.state.handleSwitchAccount(address).then(() => {
+      const addresses = this.state.getDecodedAddresses(address);
+
+      if (!addresses.length) {
+        return;
+      }
+
+      this.updateSubscription('yieldPosition', this.initYieldPositionSubscription(addresses, substrateApiMap, chainInfoMap));
+    }).catch((e) => this.logger.warn(e));
+  }
+
+  initYieldPositionSubscription (addresses: string[], substrateApiMap: Record<string, SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, onlyRunOnFirstTime?: boolean) {
+    const updateYieldPoolStats = (data: YieldPositionInfo) => {
+      console.log('yieldPosition', data);
+    };
+
+    const unsub = subscribeYieldPosition(substrateApiMap, addresses, chainInfoMap, updateYieldPoolStats);
+
+    if (onlyRunOnFirstTime) {
+      unsub && unsub();
+
+      return;
+    }
+
+    return () => {
+      unsub && unsub();
+    };
   }
 
   initYieldPoolStatsSubscription (substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
@@ -348,7 +378,7 @@ export class KoniSubscription {
   async reloadStaking () {
     // const currentAddress = this.state.keyringService.currentAccount?.address;
 
-    this.subscribeYieldPoolStats(this.state.getSubstrateApiMap());
+    // this.subscribeYieldPools(this.state.getSubstrateApiMap());
 
     await waitTimeout(1800);
   }

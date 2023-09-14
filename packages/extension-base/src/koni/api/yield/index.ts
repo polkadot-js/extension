@@ -3,13 +3,14 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ChainStakingMetadata, ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { validatePoolBondingCondition, validateRelayBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats, validateProcessForAcalaLiquidStaking } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { generatePathForInterlayLending, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
-import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNominationPoolJoinExtrinsic, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
+import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
+import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -44,6 +45,36 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___interlay_lending') {
       const unsub = subscribeInterlayLendingStats(poolInfo, callback);
+
+      unsubList.push(unsub);
+    }
+  });
+
+  return () => {
+    unsubList.forEach((unsub) => {
+      unsub && unsub();
+    });
+  };
+}
+
+export function subscribeYieldPosition (substrateApiMap: Record<string, SubstrateApi>, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, callback: (rs: YieldPositionInfo) => void) {
+  const unsubList: VoidFunction[] = [];
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  Object.values(YIELD_POOLS_INFO).forEach(async (poolInfo) => {
+    if (!substrateApiMap[poolInfo.chain]) {
+      return;
+    }
+
+    const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
+    const chainInfo = chainInfoMap[poolInfo.chain];
+
+    if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+      const unsub = await getNativeStakingPosition(substrateApi, addresses, chainInfo, poolInfo, callback);
+
+      unsubList.push(unsub);
+    } else if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+      const unsub = await getNominationPoolPosition(substrateApi, addresses, chainInfo, poolInfo, callback);
 
       unsubList.push(unsub);
     }

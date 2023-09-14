@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, OptimalYieldPath, OptimalYieldPathParams, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
-import { getPoolingBondingExtrinsic, getRelayBondingExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
-import { calculateChainStakedReturn, calculateInflation } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { ChainStakingMetadata, OptimalYieldPath, OptimalYieldPathParams, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { getPoolingBondingExtrinsic, getRelayBondingExtrinsic, PalletStakingStakingLedger, subscribeRelayChainNominatorMetadata, subscribeRelayChainPoolMemberMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
+import { calculateChainStakedReturn, calculateInflation, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/utils';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Codec } from '@polkadot/types/types';
 import { BN } from '@polkadot/util';
@@ -183,4 +184,82 @@ export async function getNativeStakingBondExtrinsic (address: string, params: Op
   const chainInfo = params.chainInfoMap[poolInfo.chain];
 
   return await getRelayBondingExtrinsic(substrateApi, inputData.amount, inputData.selectedValidators, chainInfo, address, inputData.nominatorMetadata);
+}
+
+export function getNativeStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, positionCallback: (rs: YieldPositionInfo) => void) {
+  const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
+
+  return substrateApi.api.query.staking?.ledger.multi(useAddresses, async (ledgers: Codec[]) => {
+    if (ledgers) {
+      await Promise.all(ledgers.map(async (_ledger: Codec, i) => {
+        const owner = reformatAddress(useAddresses[i], 42);
+        const ledger = _ledger.toPrimitive() as unknown as PalletStakingStakingLedger;
+
+        if (ledger) {
+          const _totalBalance = ledger.total.toString();
+          const _activeBalance = ledger.active.toString();
+
+          const nominatorMetadata = await subscribeRelayChainNominatorMetadata(chainInfo, owner, substrateApi, ledger);
+
+          positionCallback({
+            balance: [
+              {
+                slug: nativeTokenSlug,
+                totalBalance: _totalBalance,
+                activeBalance: _activeBalance
+              }
+            ],
+            address: owner,
+            chain: poolInfo.chain,
+            metadata: nominatorMetadata,
+            slug: poolInfo.slug
+          });
+        }
+      }));
+    }
+  });
+}
+
+export function getNominationPoolPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, positionCallback: (rs: YieldPositionInfo) => void) {
+  const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
+
+  return substrateApi.api.query?.nominationPools?.poolMembers.multi(useAddresses, async (ledgers: Codec[]) => {
+    if (ledgers) {
+      await Promise.all(ledgers.map(async (_poolMemberInfo, i) => {
+        const poolMemberInfo = _poolMemberInfo.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
+        const owner = reformatAddress(useAddresses[i], 42);
+
+        if (poolMemberInfo) {
+          const bondedBalance = poolMemberInfo.points;
+          const unbondedBalance = poolMemberInfo.unbondingEras;
+
+          let unlockingBalance = new BN(0);
+          const bnBondedBalance = new BN(bondedBalance.toString());
+
+          Object.entries(unbondedBalance).forEach(([, value]) => {
+            const bnUnbondedBalance = new BN(value.toString());
+
+            unlockingBalance = unlockingBalance.add(bnUnbondedBalance);
+          });
+
+          const totalBalance = bnBondedBalance.add(unlockingBalance);
+          const nominatorMetadata = await subscribeRelayChainPoolMemberMetadata(chainInfo, owner, substrateApi, poolMemberInfo);
+
+          positionCallback({
+            balance: [
+              {
+                slug: nativeTokenSlug,
+                totalBalance: totalBalance.toString(),
+                activeBalance: bnBondedBalance.toString()
+              }
+            ],
+            address: owner,
+            chain: poolInfo.chain,
+            metadata: nominatorMetadata,
+            slug: poolInfo.slug
+          });
+        }
+      }));
+    }
+  });
 }

@@ -2057,13 +2057,17 @@ export interface YieldPoolInfo {
   metadata?: YieldPoolMetadata
 }
 
+export interface YieldAssetBalance {
+  slug: string, // token slug
+  totalBalance: string,
+  activeBalance: string,
+}
+
 export interface YieldPositionInfo {
   slug: string,
   chain: string,
   address: string,
-  status: StakingStatus,
-  activeBalance: string,
-  withdrawals: UnstakingInfo[],
+  balance: YieldAssetBalance[],
 
   metadata: YieldPositionMetadata
 }

@@ -589,7 +589,8 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
       '.nft_item_detail_field_container': {
         flexGrow: 1,
-        flexBasis: 500
+        flexBasis: 500,
+        overflow: 'hidden'
       },
 
       '.nft_item_detail__description': {

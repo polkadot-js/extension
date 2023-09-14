@@ -186,10 +186,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         ]}
         title={t<string>('Import by private key')}
       >
-        <div className={CN('container', {
-          '__web-ui': isWebUI
-        })}
-        >
+        <div className={'container'}>
           <div className='import-container'>
             <div className='description'>
               {t('To import an existing wallet, please enter the private key here')}
@@ -217,6 +214,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 <Button
                   icon={(
                     <Icon
+                      customSize={isWebUI ? '28px' : undefined}
                       phosphorIcon={show ? EyeSlash : Eye}
                       size='sm'
                     />
@@ -230,6 +228,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               </div>
               <Form.Item hidden={!isWebUI}>
                 <Button
+                  block
                   disabled={!privateKey || !!validateState.status}
                   icon={FooterIcon}
                   loading={validating || loading}
@@ -250,25 +249,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   );
 };
 
-const ImportPrivateKey = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
+const ImportPrivateKey = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      '&.__web-ui': {
-        display: 'flex',
-        justifyContent: 'center',
-        width: extendToken.twoColumnWidth,
-        maxWidth: '100%',
-        margin: '0 auto',
-
-        '& > *': {
-          flex: 1
-        },
-
-        '& .ant-btn': {
-          width: '100%'
-        }
-      },
-
       '.import-container': {
         padding: token.padding
       },
@@ -291,6 +274,44 @@ const ImportPrivateKey = styled(Component)<Props>(({ theme: { extendToken, token
           resize: 'none',
           height: `${token.sizeLG * 6}px !important`
         }
+      }
+    },
+
+    '.web-ui-enable &': {
+      '.ant-sw-screen-layout-header': {
+        marginBottom: token.marginXL
+      },
+
+      '.container': {
+        display: 'flex',
+        justifyContent: 'center',
+        width: '100%',
+        maxWidth: 820,
+        margin: '0 auto',
+        paddingLeft: token.padding,
+        paddingRight: token.padding,
+        gap: token.size
+      },
+
+      '.description': {
+        paddingLeft: 0,
+        paddingRight: 0,
+        textAlign: 'left'
+      },
+
+      '.import-container': {
+        padding: 0,
+        flex: 1
+      },
+
+      '.instruction-container': {
+        flex: 1
+      },
+
+      '.button-container': {
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: token.marginLG
       }
     }
   };

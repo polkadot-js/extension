@@ -8,11 +8,9 @@ import { BUY_TOKEN_MODAL, CONFIRMATION_MODAL, CREATE_ACCOUNT_MODAL, SEED_PHRASE_
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext, useExcludeModal } from '@subwallet/react-ui';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-
-import { KeypairType } from '@polkadot/util-crypto/types';
 
 import SeedPhraseModal from '../components/Modal/Account/SeedPhraseModal';
 import { UnlockModal } from '../components/Modal/UnlockModal';

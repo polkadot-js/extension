@@ -17,6 +17,10 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
+import { KeypairType } from '@polkadot/util-crypto/types';
+
+import SelectAccountType from '../../components/Account/SelectAccountType';
+
 type Props = ThemeProps;
 
 const FooterIcon = (
@@ -69,7 +73,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [submitting, setSubmitting] = useState(false);
   const [storage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
 
-  const [keyTypes] = useState(storage);
+  const [outerKeyTypes] = useState(storage);
+
+  const [localKeyTypes, setLocalKeyTypes] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
+
+  const keyTypes = isWebUI ? localKeyTypes : outerKeyTypes;
 
   const [disabled, setDisabled] = useState(true);
   const [showSeed, setShowSeed] = useState(false);
@@ -195,7 +203,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       >
         <div className='container'>
           <div className='description'>
-            {t('To import an existing account,\n please enter seed phrase.')}
+            {!isWebUI && t('To import an existing account,\n please enter seed phrase.')}
+            { isWebUI && t('To import an existing existing account, please select account type and enter the recovery seed phrase here:')}
           </div>
           <Form
             className='form-container form-space-xs'
@@ -221,6 +230,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 <Button
                   icon={(
                     <Icon
+                      customSize={isWebUI ? '28px' : undefined}
                       phosphorIcon={showSeed ? EyeSlash : Eye}
                       size='sm'
                     />
@@ -264,6 +274,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
           {isWebUI && (
             <>
+              <div className='__select-account-type'>
+                <SelectAccountType
+                  selectedItems={localKeyTypes}
+                  setSelectedItems={setLocalKeyTypes}
+                />
+              </div>
+
               <Button
                 {...buttonProps}
                 block={true}
@@ -324,6 +341,8 @@ const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) 
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)',
       gap: token.sizeXS,
+      marginLeft: token.marginSM,
+      marginRight: token.marginSM,
 
       '.ant-form-item': {
         minWidth: 0,
@@ -352,6 +371,10 @@ const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) 
         flex: 1
       },
 
+      '.form-container': {
+        marginBottom: token.margin
+      },
+
       '.description': {
         paddingLeft: 0,
         paddingRight: 0,
@@ -359,7 +382,8 @@ const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) 
       },
 
       '.__submit-button': {
-        marginTop: token.margin
+        marginTop: token.margin,
+        marginBottom: token.margin
       },
 
       '.instruction-container': {

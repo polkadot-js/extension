@@ -75,8 +75,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const onClickSeed = useCallback(() => {
     inactiveModal(modalId);
-    activeModal(IMPORT_SEED_MODAL);
-  }, [activeModal, inactiveModal]);
+
+    if (isWebUI) {
+      navigate('/accounts/import-seed-phrase');
+    } else {
+      activeModal(IMPORT_SEED_MODAL);
+    }
+  }, [activeModal, inactiveModal, isWebUI, navigate]);
 
   const items = useMemo((): ImportAccountItem[] => [
     {

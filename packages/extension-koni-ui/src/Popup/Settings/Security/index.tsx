@@ -48,7 +48,7 @@ interface AutoLockOption {
 const editAutoLockTimeModalId = EDIT_AUTO_LOCK_TIME_MODAL;
 const editUnlockTypeModalId = EDIT_UNLOCK_TYPE_MODAL;
 
-const timeOptions = [5, 10, 15, 30, 60];
+const timeOptions = [0, 5, 10, 15, 30, 60];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;

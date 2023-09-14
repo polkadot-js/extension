@@ -5,7 +5,8 @@ import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_ACCOUNT_TYPES, EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -19,23 +20,24 @@ import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-
-import { KeypairType } from '@polkadot/util-crypto/types';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps & {
-  accountTypes: KeypairType[],
   modalId: string,
   onBack?: () => void;
   onSubmitSuccess?: () => void;
 };
 
-const Component: React.FC<Props> = ({ accountTypes, className, modalId, onBack, onSubmitSuccess }: Props) => {
+const Component: React.FC<Props> = ({ className, modalId, onBack, onSubmitSuccess }: Props) => {
   const { t } = useTranslation();
   const { checkActive, inactiveModal } = useContext(ModalContext);
   const isActive = checkActive(modalId);
   const notify = useNotification();
   const accountName = useGetDefaultAccountName();
   const checkUnlock = useUnlockChecker();
+
+  const [storage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
+  const [accountTypes] = useState(storage);
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);

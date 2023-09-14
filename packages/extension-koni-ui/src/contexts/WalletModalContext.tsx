@@ -59,7 +59,7 @@ export const WalletModalContext = ({ children }: Props) => {
   const navigate = useNavigate();
   const { activeModal, hasActiveModal, inactiveAll, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [accountTypes] = useState<KeypairType[]>([]);
+  const [accountTypes, setAccountTypes] = useState<KeypairType[]>([]);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useExcludeModal(CONFIRMATION_MODAL);
@@ -109,7 +109,6 @@ export const WalletModalContext = ({ children }: Props) => {
     />
     <CreateAccountModal />
     <SeedPhraseModal
-      accountTypes={accountTypes}
       modalId={SEED_PHRASE_MODAL}
       onBack={onSeedPhraseModalBack}
       onSubmitSuccess={onSeedPhraseModalSubmitSuccess}

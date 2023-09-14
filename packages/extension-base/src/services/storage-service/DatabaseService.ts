@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MetadataStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
@@ -12,6 +12,7 @@ import MantaPayStore from '@subwallet/extension-base/services/storage-service/db
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
 import YieldPoolStore from '@subwallet/extension-base/services/storage-service/db-stores/YieldPoolStore';
+import YieldPositionStore from '@subwallet/extension-base/services/storage-service/db-stores/YieldPositionStore';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { Subscription } from 'dexie';
 
@@ -48,6 +49,7 @@ export default class DatabaseService {
 
       // yield
       yieldPoolInfo: new YieldPoolStore(this._db.yieldPoolInfo),
+      yieldPosition: new YieldPositionStore(this._db.yieldPosition),
 
       // staking
       chainStakingMetadata: new ChainStakingMetadataStore(this._db.chainStakingMetadata),
@@ -340,6 +342,20 @@ export default class DatabaseService {
 
   subscribeYieldPoolInfo (chains: string[], callback: (data: YieldPoolInfo[]) => void) {
     this.stores.yieldPoolInfo.subscribeYieldPoolInfo(chains).subscribe(({
+      next: (data) => callback && callback(data)
+    }));
+  }
+
+  async updateYieldPosition (data: YieldPositionInfo) {
+    await this.stores.yieldPosition.upsert(data);
+  }
+
+  async getYieldPositionByAddress (addresses: string[]) {
+    return this.stores.yieldPosition.getByAddress(addresses);
+  }
+
+  subscribeYieldPosition (addresses: string[], callback: (data: YieldPositionInfo[]) => void) {
+    this.stores.yieldPosition.subscribeYieldPositions(addresses).subscribe(({
       next: (data) => callback && callback(data)
     }));
   }

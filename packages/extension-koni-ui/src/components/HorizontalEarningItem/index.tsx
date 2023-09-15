@@ -1,27 +1,17 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {Button, Icon, Logo, Number, Tag, Typography, Web3Block} from '@subwallet/react-ui';
-import {
-  CheckCircle,
-  Database,
-  HandsClapping,
-  Leaf,
-  MinusCircle,
-  PlusCircle,
-  PlusMinus,
-  Question,
-  StopCircle,
-  Wallet
-} from 'phosphor-react';
+import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
+import { CheckCircle, Database, HandsClapping, Leaf, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
-  item: YieldPoolInfo,
+  yieldPoolInfo: YieldPoolInfo;
+  yieldPositionInfo: YieldPositionInfo;
   onClickCalculatorBtn: () => void;
   onClickStakeBtn: () => void;
 }
@@ -82,10 +72,10 @@ export const TagTypes = () => {
   };
 };
 
-const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onClickStakeBtn }: Props) => {
+const Component: React.FC<Props> = ({ className, onClickCalculatorBtn, onClickStakeBtn, yieldPoolInfo }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { chain, description, name, type } = item;
+  const { chain, description, name, type } = yieldPoolInfo;
 
   return (
     <Web3Block
@@ -194,13 +184,32 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onC
       rightItem={(
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
-            <Icon phosphorIcon={CheckCircle} weight={'fill'} iconColor={token.colorSuccess} size={'sm'} />
+            <Icon
+              iconColor={token.colorSuccess}
+              phosphorIcon={CheckCircle}
+              size={'sm'}
+              weight={'fill'}
+            />
             <Typography.Text style={{ color: token.colorSuccess, fontWeight: '600' }}>{'Earning reward'}</Typography.Text>
           </div>
-          <Number decimal={10} value={100000} suffix={'DOT'} size={30} decimalOpacity={0.4} unitOpacity={0.4} />
+          <Number
+            decimal={10}
+            decimalOpacity={0.4}
+            size={30}
+            suffix={'DOT'}
+            unitOpacity={0.4}
+            value={100000}
+          />
           <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
             <Typography.Text style={{ color: token.colorTextLight4 }}>{t('Total rewards:')}</Typography.Text>
-            <Number decimal={10} value={10000000} intColor={token.colorSuccess} decimalColor={token.colorSuccess} unitColor={token.colorSuccess} suffix={'DOT'} />
+            <Number
+              decimal={10}
+              decimalColor={token.colorSuccess}
+              intColor={token.colorSuccess}
+              suffix={'DOT'}
+              unitColor={token.colorSuccess}
+              value={10000000}
+            />
           </div>
         </div>
       )}
@@ -225,14 +234,14 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
       fontSize: token.fontSizeHeading4,
       lineHeight: token.lineHeightHeading4,
       fontWeight: 600,
-      color: token.colorTextLight1,
+      color: token.colorTextLight1
     },
 
     '.earning-item-description': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
       fontWeight: 500,
-      color: token.colorTextLight4,
+      color: token.colorTextLight4
     },
 
     '.earning-item-reward': {

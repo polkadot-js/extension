@@ -2332,7 +2332,8 @@ export interface KoniRequestSignatures {
   'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalYieldPath];
   'pri(yield.handleStep)': [HandleYieldStepParams, SWTransactionResponse];
   'pri(yield.getNativeStakingValidators)': [YieldPoolInfo, ValidatorInfo[]];
-  'pri(yield.getStakingNominationPools)': [YieldPoolInfo, NominationPoolInfo[]]
+  'pri(yield.getStakingNominationPools)': [YieldPoolInfo, NominationPoolInfo[]];
+  'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

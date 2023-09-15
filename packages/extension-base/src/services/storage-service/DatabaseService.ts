@@ -355,7 +355,7 @@ export default class DatabaseService {
   }
 
   subscribeYieldPosition (addresses: string[], callback: (data: YieldPositionInfo[]) => void) {
-    this.stores.yieldPosition.subscribeYieldPositions(addresses).subscribe(({
+    return this.stores.yieldPosition.subscribeYieldPositions(addresses).subscribe(({
       next: (data) => callback && callback(data)
     }));
   }

@@ -3835,6 +3835,26 @@ export default class KoniExtension {
     return getRelayPoolsInfo(yieldPoolInfo.chain, substrateApi);
   }
 
+  // TODO: subscribe YieldPosition
+
+  private subscribeYieldPosition (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(yield.subscribeYieldPosition)'>(id, port);
+
+    const yieldPositionSubscription = this.#koniState.subscribeYieldPosition().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, yieldPositionSubscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.getYieldPositionInfo();
+  }
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -4022,6 +4042,8 @@ export default class KoniExtension {
         return await this.getYieldNativeStakingValidators(request as YieldPoolInfo);
       case 'pri(yield.getStakingNominationPools)':
         return await this.getYieldStakingNominationPools(request as YieldPoolInfo);
+      case 'pri(yield.subscribeYieldPosition)':
+        return this.subscribeYieldPosition(id, port);
 
       /// Account management
       // Add account

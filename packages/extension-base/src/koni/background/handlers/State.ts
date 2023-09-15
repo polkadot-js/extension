@@ -115,6 +115,7 @@ export default class KoniState {
 
   // earning
   private yieldPoolInfoSubject = new Subject<YieldPoolInfo[]>();
+  private yieldPositionSubject = new Subject<YieldPositionInfo[]>();
 
   private lazyMap: Record<string, unknown> = {};
 
@@ -335,8 +336,8 @@ export default class KoniState {
     this.keyringService.accountSubject.subscribe((accounts) => { // TODO: improve this
       unsub && unsub.unsubscribe();
 
-      unsub = this.dbService.subscribeNominatorMetadata(Object.keys(accounts), (data) => {
-        this.stakingNominatorMetadataSubject.next(data);
+      unsub = this.dbService.subscribeYieldPosition(Object.keys(accounts), (data) => {
+        this.yieldPositionSubject.next(data);
       });
     });
   }
@@ -454,8 +455,18 @@ export default class KoniState {
     return this.yieldPoolInfoSubject;
   }
 
+  public subscribeYieldPosition () {
+    return this.yieldPositionSubject;
+  }
+
   public getYieldPoolInfo () {
     return this.dbService.getYieldPools();
+  }
+
+  public getYieldPositionInfo () {
+    const addresses = this.getDecodedAddresses(this.keyringService.currentAccount.address);
+
+    return this.dbService.getYieldPositionByAddress(addresses);
   }
 
   public subscribeMantaPayConfig () {

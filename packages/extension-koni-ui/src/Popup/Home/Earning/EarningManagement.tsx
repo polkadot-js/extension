@@ -2,23 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import {FilterModal, Layout, PageWrapper, SortingModal} from '@subwallet/extension-koni-ui/components';
-import {DataContext} from '@subwallet/extension-koni-ui/contexts/DataContext';
-import {useFilterModal, useTranslation} from '@subwallet/extension-koni-ui/hooks';
-import EarningCalculatorModal, {
-  STAKING_CALCULATOR_MODAL_ID
-} from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
-import {RootState} from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps} from '@subwallet/extension-koni-ui/types';
-import {BackgroundIcon, Button, Icon, ModalContext, SwList, Typography} from '@subwallet/react-ui';
+import { FilterModal, Layout, PageWrapper, SortingModal } from '@subwallet/extension-koni-ui/components';
+import EarningBtn from '@subwallet/extension-koni-ui/components/EarningBtn';
+import HorizontalEarningItem from '@subwallet/extension-koni-ui/components/HorizontalEarningItem';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import EarningCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { BackgroundIcon, Button, Icon, ModalContext, SwList, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, {useCallback, useContext, useMemo, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {useNavigate} from 'react-router-dom';
-import styled, {useTheme} from 'styled-components';
-import EarningBtn from "@subwallet/extension-koni-ui/components/EarningBtn";
-import {CaretDown, FadersHorizontal, Question, SortAscending} from "phosphor-react";
-import HorizontalEarningItem from "@subwallet/extension-koni-ui/components/HorizontalEarningItem";
+import { CaretDown, FadersHorizontal, Question, SortAscending } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps;
 
@@ -40,7 +38,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
-  const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
+  const { poolInfo, yieldPosition } = useSelector((state: RootState) => state.yieldPool);
   const { activeModal } = useContext(ModalContext);
   const [selectedItem, setSelectedItem] = useState<YieldPoolInfo | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
@@ -53,6 +51,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     { label: t('Parachain staking'), value: YieldPoolType.PARACHAIN_STAKING },
     { label: t('Single farming'), value: YieldPoolType.SINGLE_FARMING }
   ], [t]);
+
+  console.log('yieldPosition', yieldPosition);
 
   const sortingOptions: SortOption[] = useMemo(() => {
     return [
@@ -140,7 +140,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return t('All type');
     } else {
       if (selectedFilters.length === 1) {
-        return filterOptions.find(opt => opt.value === selectedFilters[0])?.label
+        return filterOptions.find((opt) => opt.value === selectedFilters[0])?.label;
       } else {
         return t(`${selectedFilters.length} selected`);
       }
@@ -157,6 +157,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             } else {
               return 0;
             }
+
           default:
             return 0;
         }
@@ -164,7 +165,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [poolInfo, sortSelection]);
 
   const sortingLabel = useMemo(() => {
-    return sortingOptions.find(item => item.value === sortSelection)?.label || '';
+    return sortingOptions.find((item) => item.value === sortSelection)?.label || '';
   }, [selectedFilters, filterOptions, t]);
 
   return (
@@ -183,31 +184,76 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: token.padding }}>
           <div>
-            <EarningBtn network={'polkadot'} size={'xs'}>
+            <EarningBtn
+              network={'polkadot'}
+              size={'xs'}
+            >
               {'DOT'}
             </EarningBtn>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXS }}>
-            <Button size={'xs'} type={'ghost'} icon={<Icon phosphorIcon={Question} iconColor={token.colorTextLight4} weight={'duotone'} />} >{t('Help')}</Button>
-            <Button onClick={() => activeModal(FILTER_MODAL_ID)} size={'xs'} schema='secondary' shape={'round'} icon={<BackgroundIcon size={'sm'} phosphorIcon={FadersHorizontal} backgroundColor={token.colorTextLight4} iconColor={token.colorWhite} />} >
+            <Button
+              icon={<Icon
+                iconColor={token.colorTextLight4}
+                phosphorIcon={Question}
+                weight={'duotone'}
+              />}
+              size={'xs'}
+              type={'ghost'}
+            >{t('Help')}</Button>
+            <Button
+              icon={<BackgroundIcon
+                backgroundColor={token.colorTextLight4}
+                iconColor={token.colorWhite}
+                phosphorIcon={FadersHorizontal}
+                size={'sm'}
+              />}
+              onClick={() => activeModal(FILTER_MODAL_ID)}
+              schema='secondary'
+              shape={'round'}
+              size={'xs'}
+            >
               <div style={{ display: 'flex', gap: token.paddingXS, alignItems: 'center', paddingLeft: token.paddingXS }}>
                 <Typography.Text>{filterLabel}</Typography.Text>
-                <Icon className={'earning-filter-icon'} phosphorIcon={CaretDown} customSize={'12px'} iconColor={token.colorTextLight4} weight={'bold'} />
+                <Icon
+                  className={'earning-filter-icon'}
+                  customSize={'12px'}
+                  iconColor={token.colorTextLight4}
+                  phosphorIcon={CaretDown}
+                  weight={'bold'}
+                />
               </div>
             </Button>
-            <Button onClick={() => activeModal(SORTING_MODAL_ID)} size={'xs'} schema='secondary' shape={'round'} icon={<BackgroundIcon size={'sm'} phosphorIcon={SortAscending} backgroundColor={token.colorTextLight4} iconColor={token.colorWhite} />} >
+            <Button
+              icon={<BackgroundIcon
+                backgroundColor={token.colorTextLight4}
+                iconColor={token.colorWhite}
+                phosphorIcon={SortAscending}
+                size={'sm'}
+              />}
+              onClick={() => activeModal(SORTING_MODAL_ID)}
+              schema='secondary'
+              shape={'round'}
+              size={'xs'}
+            >
               <div style={{ display: 'flex', gap: token.paddingXS, alignItems: 'center', paddingLeft: token.paddingXS }}>
                 <Typography.Text>{sortingLabel}</Typography.Text>
-                <Icon className={'earning-filter-icon'} phosphorIcon={CaretDown} customSize={'12px'} iconColor={token.colorTextLight4} weight={'bold'} />
+                <Icon
+                  className={'earning-filter-icon'}
+                  customSize={'12px'}
+                  iconColor={token.colorTextLight4}
+                  phosphorIcon={CaretDown}
+                  weight={'bold'}
+                />
               </div>
             </Button>
           </div>
         </div>
         <SwList.Section
           className={CN('earning-management__container')}
-          filterBy={filterFunction}
           enableSearchInput={false}
+          filterBy={filterFunction}
           list={resultList}
           renderItem={renderEarningItem}
           renderOnScroll={true}
@@ -255,7 +301,7 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
 
     '.earning-filter-icon': {
       width: '12px',
-      height: '12px',
+      height: '12px'
     }
   });
 });

@@ -3,12 +3,15 @@
 
 import '@polkadot/types-augment';
 
+import { EVM_PASS_CONNECT_STATUS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainConnectionStatus, _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { BehaviorSubject } from 'rxjs';
 import Web3 from 'web3';
 import { HttpProvider, WebsocketProvider } from 'web3-core';
+
+const acalaEvmNetworks: string[] = EVM_PASS_CONNECT_STATUS.acala;
 
 export class EvmApi implements _EvmApi {
   chainSlug: string;
@@ -93,12 +96,16 @@ export class EvmApi implements _EvmApi {
     this.clearIntervalCheckApi();
 
     return setInterval(() => {
-      this.api.eth.net.isListening()
-        .then(() => {
-          this.onConnect();
-        }).catch(() => {
-          this.onDisconnect();
-        });
+      if (!acalaEvmNetworks.includes(this.chainSlug)) {
+        this.api.eth.net.isListening()
+          .then(() => {
+            this.onConnect();
+          }).catch(() => {
+            this.onDisconnect();
+          });
+      } else {
+        this.onConnect();
+      }
     }, 10000);
   }
 
@@ -112,18 +119,24 @@ export class EvmApi implements _EvmApi {
 
     wsProvider.connect && wsProvider.connect();
     this.updateConnectionStatus(_ChainConnectionStatus.CONNECTING);
+
     // Check if api is ready
-    this.api.eth.net.isListening()
-      .then(() => {
-        this.isApiReadyOnce = true;
-        this.onConnect();
-      }).catch((error) => {
-        this.isApiReadyOnce = false;
-        this.isApiReady = false;
-        this.isReadyHandler.reject(error);
-        this.updateConnectionStatus(_ChainConnectionStatus.DISCONNECTED);
-        console.warn(`Can not connect to ${this.chainSlug} (EVM) at ${this.apiUrl}`);
-      });
+    if (!acalaEvmNetworks.includes(this.chainSlug)) {
+      this.api.eth.net.isListening()
+        .then(() => {
+          this.isApiReadyOnce = true;
+          this.onConnect();
+        }).catch((error) => {
+          this.isApiReadyOnce = false;
+          this.isApiReady = false;
+          this.isReadyHandler.reject(error);
+          this.updateConnectionStatus(_ChainConnectionStatus.DISCONNECTED);
+          console.warn(`Can not connect to ${this.chainSlug} (EVM) at ${this.apiUrl}`);
+        });
+    } else {
+      this.isApiReadyOnce = true;
+      this.onConnect();
+    }
 
     // Interval to check connecting status
     this.intervalCheckApi = this.createIntervalCheckApi();

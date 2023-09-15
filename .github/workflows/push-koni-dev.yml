@@ -19,9 +19,19 @@ jobs:
       with:
         fetch-depth: 0
         token: ${{ secrets.GH_PAT }}
-    - name: Set current datetime
-      id: inputs_data
-      run: echo "::set-output name=current_datetime::$(date +'%Y-%m-%d-%H-%M')"
+    - name: Set Params
+      id: setup_params
+      run: |
+        time_tag="$(date +'%Y-%m-%d_%H-%M')"
+        ref_with_prefix="${{ github.ref }}"
+        ref_without_prefix="${ref_with_prefix#refs/heads/}"
+
+        echo "time_tag=$time_tag" >> $GITHUB_OUTPUT
+        if [[ -n "${{ github.event.pull_request }}" ]]; then
+          echo "ref=pr-${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+        else
+          echo "ref=$ref_without_prefix" >> $GITHUB_OUTPUT
+        fi
     - name: Setup Node
       uses: actions/setup-node@v3
       with:
@@ -48,7 +58,7 @@ jobs:
       id: nextcloud_upload
       uses: trympet/nextcloud-artifacts-action@v2
       with:
-        name: 'build-${{ steps.inputs_data.outputs.current_datetime }}'
+        name: '${{ steps.setup_params.outputs.ref }}-build-${{ steps.setup_params.outputs.time_tag }}'
         path: 'master-build.zip'
         nextcloud-url: 'https://file.cdmteck.com'
         nextcloud-username: ${{ secrets.NEXTCLOUD_USERNAME }}
@@ -58,7 +68,7 @@ jobs:
       uses: nwtgck/actions-netlify@v2.0
       with:
         publish-dir: './packages/web-runner/build'
-        alias: ${{ github.head_ref }}
+        alias: ${{ steps.setup_params.outputs.ref }}
         github-token: ${{ secrets.GH_PAT }}
         deploy-message: ${{ github.event.head_commit.message }}
         enable-pull-request-comment: true

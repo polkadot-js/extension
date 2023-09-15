@@ -1,14 +1,17 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomizeModalSetting } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModalSetting';
+import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ModalContext, SwModal } from '@subwallet/react-ui';
+import { saveShowZeroBalance } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { BackgroundIcon, ModalContext, SettingItem, Switch } from '@subwallet/react-ui';
+import { Wallet } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
-import styled from 'styled-components';
+import { useSelector } from 'react-redux';
+import styled, { useTheme } from 'styled-components';
 
 import CustomizeModalContent from './CustomizeModalContent';
 
@@ -17,14 +20,19 @@ type Props = ThemeProps;
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
+  const { token } = useTheme() as Theme;
+  const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
+
+  const onChangeZeroBalance = useCallback(() => {
+    saveShowZeroBalance(!isShowZeroBalance).catch(console.error);
+  }, [isShowZeroBalance]);
 
   const onCancel = useCallback(() => {
     inactiveModal(CUSTOMIZE_MODAL);
   }, [inactiveModal]);
 
   return (
-    <SwModal
+    <BaseModal
       className={className}
       destroyOnClose={true}
       id={CUSTOMIZE_MODAL}
@@ -33,31 +41,50 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     >
       <div className={'__group-label'}>{t('Balance')}</div>
       <div className={'__group-content'}>
-        <CustomizeModalSetting />
+        <SettingItem
+          className={'__setting-item'}
+          leftItemIcon={
+            <BackgroundIcon
+              backgroundColor={token['green-6']}
+              iconColor={token.colorTextLight1}
+              phosphorIcon={Wallet}
+              size='sm'
+              type='phosphor'
+              weight='fill'
+            />
+          }
+          name={t('Show zero balance')}
+          rightItem={
+            <Switch
+              checked={isShowZeroBalance}
+              onClick={onChangeZeroBalance}
+              style={{ marginRight: 8 }}
+            />}
+        />
       </div>
-      {!isWebUI && (
-        <>
-          <div className={'__group-label'}>{t('Chains')}</div>
 
-          <CustomizeModalContent />
-        </>)}
-    </SwModal>
+      <div className={'__group-label'}>{t('Networks')}</div>
+
+      <CustomizeModalContent />
+    </BaseModal>
   );
 }
 
 export const CustomizeModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-modal-content': {
-      maxHeight: 586,
+      display: 'flex',
+      flexDirection: 'column',
       overflow: 'hidden'
     },
 
     '.ant-sw-modal-body': {
       paddingLeft: 0,
       paddingRight: 0,
-      paddingBottom: 0,
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      flex: 1,
+      paddingBottom: token.size
     },
 
     '.__group-label': {
@@ -87,8 +114,18 @@ export const CustomizeModal = styled(Component)<Props>(({ theme: { token } }: Pr
       flex: 1
     },
 
+    '.ant-sw-list-section .ant-sw-list-wrapper.ant-sw-list-wrapper': {
+      flexBasis: '100vh'
+    },
+
     '.network_item__container .ant-web3-block-right-item': {
       marginRight: 0
+    },
+
+    '.ant-sw-list': {
+      height: '100vh',
+      maxHeight: '100%',
+      display: 'block'
     }
   });
 });

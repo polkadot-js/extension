@@ -5,6 +5,7 @@ import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistor
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { EmptyList, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
@@ -111,6 +112,8 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
 const FILTER_MODAL_ID = 'history-filter-id';
 
 enum FilterValue {
+  ALL = 'all',
+  TOKENS = 'tokens',
   SEND = 'send',
   RECEIVED = 'received',
   NFT = 'nft',
@@ -127,6 +130,8 @@ function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'addres
 
 const modalId = HISTORY_DETAIL_MODAL;
 
+const LIST_KEY = 'history-list';
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
@@ -137,6 +142,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [searchInput, setSearchInput] = useState<string>('');
   const { chainInfoMap } = useSelector((root) => root.chainStore);
   const { language } = useSelector((root) => root.settings);
+  const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
+  const [listKey, setListKey] = useState<string>(LIST_KEY);
 
   const isActive = checkActive(modalId);
 
@@ -379,24 +386,90 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
+  const onSelectFilterTab = useCallback((value: string) => {
+    setSelectedFilterTab(value);
+    setListKey(`${LIST_KEY}-${Date.now()}`);
+  }, []);
+
+  const filterTabItems = useMemo<FilterTabItemType[]>(() => {
+    return [
+      {
+        label: t('All'),
+        value: FilterValue.ALL
+      },
+      {
+        label: t('Tokens'),
+        value: FilterValue.TOKENS
+      },
+      {
+        label: t('NFT'),
+        value: FilterValue.NFT
+      },
+      {
+        label: t('Staking'),
+        value: FilterValue.STAKE
+      }
+    ];
+  }, [t]);
+
+  const webUiFilterFunction = useCallback((item: TransactionHistoryDisplayItem) => {
+    const filterTabFunction = (_item: TransactionHistoryDisplayItem) => {
+      if (selectedFilterTab === FilterValue.ALL) {
+        return true;
+      }
+
+      if (selectedFilterTab === FilterValue.TOKENS) {
+        return isTypeTransfer(_item.type);
+      }
+
+      if (selectedFilterTab === FilterValue.NFT) {
+        return _item.type === ExtrinsicType.SEND_NFT;
+      }
+
+      if (selectedFilterTab === FilterValue.STAKE) {
+        return isTypeStaking(_item.type);
+      }
+
+      return false;
+    };
+
+    return filterTabFunction(item) && filterFunction(item);
+  }, [filterFunction, selectedFilterTab]);
+
+  const _onApplyFilter = useCallback(() => {
+    onApplyFilter();
+    setListKey(`${LIST_KEY}-${Date.now()}`);
+  }, [onApplyFilter]);
+
   const listSection = useMemo(() => {
     if (isWebUI) {
       return (
         <div className='web-list'>
-          <Search
-            actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-            onClickActionBtn={onClickActionBtn}
-            onSearch={setSearchInput}
-            placeholder={'Chain, Address, Type,...'}
-            searchValue={searchInput}
-            showActionBtn
-          />
+          <div className='web-list-tool-area'>
+            <FilterTabs
+              className={'filter-tabs-container'}
+              items={filterTabItems}
+              onSelect={onSelectFilterTab}
+              selectedItem={selectedFilterTab}
+            />
+
+            <Search
+              actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+              onClickActionBtn={onClickActionBtn}
+              onSearch={setSearchInput}
+              placeholder={'Chain, Address, Type,...'}
+              searchValue={searchInput}
+              showActionBtn
+            />
+          </div>
           <SwList
-            filterBy={filterFunction}
+            filterBy={webUiFilterFunction}
             groupBy={groupBy}
             groupSeparator={groupSeparator}
+            key={listKey}
             list={historyList}
             renderItem={renderItem}
+            renderOnScroll={true}
             renderWhenEmpty={emptyList}
             searchBy={searchFunc}
             searchMinCharactersCount={2}
@@ -416,6 +489,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         list={historyList}
         onClickActionBtn={onClickActionBtn}
         renderItem={renderItem}
+        renderOnScroll={true}
         renderWhenEmpty={emptyList}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}
@@ -423,7 +497,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [emptyList, filterFunction, groupBy, groupSeparator, historyList, isWebUI, onClickActionBtn, renderItem, searchFunc, searchInput, t]);
+  }, [emptyList, filterFunction, filterTabItems, groupBy, groupSeparator, historyList, isWebUI, listKey, onClickActionBtn, onSelectFilterTab, renderItem, searchFunc, searchInput, selectedFilterTab, t, webUiFilterFunction]);
 
   return (
     <>
@@ -456,7 +530,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       <FilterModal
         id={FILTER_MODAL_ID}
-        onApplyFilter={onApplyFilter}
+        onApplyFilter={_onApplyFilter}
         onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
@@ -473,10 +547,18 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.web-list': {
       flex: 1,
+      height: '100%',
       display: 'flex',
       flexDirection: 'column',
 
+      '.web-list-tool-area': {
+        display: 'flex',
+        gap: token.size,
+        alignItems: 'center'
+      },
+
       '.ant-sw-list': {
+        overflow: 'auto',
         marginTop: 24,
         flex: 1
       }

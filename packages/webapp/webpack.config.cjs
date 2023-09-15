@@ -116,11 +116,10 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
           TARGET_ENV: JSON.stringify('webapp'),
+          ID_PREFIX: JSON.stringify('sw-app-'),
           TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
           TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
-          BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
-          BANXA_SANDBOX_API_KEY: JSON.stringify(process.env.BANXA_SANDBOX_API_KEY),
-          BANXA_SANBOX_API_SECRET: JSON.stringify(process.env.BANXA_SANBOX_API_SECRET)
+          BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true)
         }
       }),
       new CopyPlugin({
@@ -176,4 +175,4 @@ module.exports = createConfig({
   main: './src/index.tsx'
 }, {
   'manta-extension-sdk': './manta-extension-sdk-empty.ts'
-}, false);
+}, true);

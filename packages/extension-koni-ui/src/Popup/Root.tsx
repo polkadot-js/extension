@@ -5,10 +5,11 @@ import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import BaseWeb from '@subwallet/extension-koni-ui/components/Layout/base/BaseWeb';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
+import { CONFIRMATION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
+import { WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import { useSubscribeLanguage } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
@@ -16,7 +17,7 @@ import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils';
-import { changeHeaderLogo } from '@subwallet/react-ui';
+import { changeHeaderLogo, ModalContext } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import CN from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -79,13 +80,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const screenContext = useContext(ScreenContext);
   const location = useLocation();
   const navigate = useNavigate();
-  const { isOpenPModal, openPModal } = usePredefinedModal();
   const notify = useNotification();
   const [rootLoading, setRootLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
   const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay']));
 
   useSubscribeLanguage();
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { unlockType } = useSelector((state: RootState) => state.settings);
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
@@ -96,7 +98,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   const needMigrate = useMemo(
     () => !!accounts
-      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal)
+      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected)
       .filter((acc) => !acc.isMasterPassword)
       .length
     , [accounts]
@@ -168,19 +170,19 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
         redirectTarget = createPasswordUrl;
       }
     } else if (noAccount) {
-      if (![...allowImportAccountUrls, welcomeUrl, securityUrl].includes(pathName)) {
+      if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
         redirectTarget = welcomeUrl;
       }
     } else if (hasConfirmations) {
-      openPModal('confirmations');
+      activeModal(CONFIRMATION_MODAL);
     } else if (pathName === DEFAULT_ROUTER_PATH) {
       redirectTarget = tokenUrl;
     } else if (pathName === loginUrl && !needUnlock) {
       redirectTarget = DEFAULT_ROUTER_PATH;
     } else if (hasInternalConfirmations) {
-      openPModal('confirmations');
-    } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
-      openPModal(null);
+      activeModal(CONFIRMATION_MODAL);
+    } else if (!hasInternalConfirmations) {
+      inactiveModal(CONFIRMATION_MODAL);
     }
 
     // Remove loading on finished first compute
@@ -199,7 +201,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     } else {
       return null;
     }
-  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, isOpenPModal, rootLoading, openPModal, navigate]);
+  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, rootLoading, activeModal, inactiveModal, navigate]);
 
   if (rootLoading || redirectPath) {
     return <></>;

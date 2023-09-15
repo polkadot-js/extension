@@ -5,6 +5,7 @@ import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseMod
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useClickOutSide, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import usePreloadView from '@subwallet/extension-koni-ui/hooks/router/usePreloadView';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -39,6 +40,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { checkActive, inactiveModal } = useContext(ModalContext);
   const isActive = checkActive(modalId);
   const { isWebUI } = useContext(ScreenContext);
+
+  usePreloadView([
+    'ImportSeedPhrase',
+    'ImportPrivateKey',
+    'RestoreJson',
+    'ImportQrCode'
+  ]);
 
   const isPopup = useIsPopup();
   const onBack = useGoBackSelectAccount(modalId);

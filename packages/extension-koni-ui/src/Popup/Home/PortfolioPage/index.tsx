@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
-import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Input, SwSubHeader } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, Icon, Input, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
+import { ArrowClockwise } from 'phosphor-react';
 import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
@@ -72,30 +74,56 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const goBack = useCallback(() => navigate(-1), [navigate]);
   const [searchInput, setSearchInput] = useState<string>('');
+  const [showSearchInput, setShowSearchInput] = useState<boolean>(true);
   const searchInputRef = useRef<SearchInputRef>(null);
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const notify = useNotification();
 
-  const TAB_LIST = [t('Tokens'), t('NFTs')];
+  const TAB_LIST = useMemo(() => {
+    return [t('Tokens'), t('NFTs'), t('Statistics')];
+  }, [t]);
 
   const handleSelectTab = useCallback((index: number) => {
     if (!index) {
       navigate('tokens');
-    } else {
+    } else if (index === 1) {
       navigate('nfts/collections');
+    } else if (index === 2) {
+      navigate('statistics');
     }
   }, [navigate]);
+
+  const onReloadNft = useCallback(() => {
+    setLoading(true);
+    notify({
+      icon: <ActivityIndicator size={32} />,
+      style: { top: 210 },
+      direction: 'vertical',
+      duration: 1.8,
+      closable: false,
+      message: t('Reloading')
+    });
+
+    reloadCron({ data: 'nft' })
+      .then(() => {
+        setLoading(false);
+      })
+      .catch(console.error);
+  }, [notify, t]);
 
   const activeTabIndex = useMemo(() => {
     const currentTab = pathname.split('/').filter((i) => !!i)[1];
 
     return (TAB_LIST.map((tab) => tab.toLowerCase())).indexOf(currentTab);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [TAB_LIST, pathname]);
 
   const isDetail = useMemo(() => pathname.includes('detail'), [pathname]);
 
   useEffect(() => {
     searchInputRef.current?.setValue('');
   }, [pathname]);
+
+  const isShowReloadNft = useMemo(() => pathname.startsWith('/home/nfts/collections'), [pathname]);
 
   return (
     <div className={CN(className, 'portfolio-container')}>
@@ -122,6 +150,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                     <div style={{ display: 'none' }}>
                       <TabPanel></TabPanel>
                       <TabPanel></TabPanel>
+                      <TabPanel></TabPanel>
                     </div>
                   </Tabs>
                 </>
@@ -138,8 +167,31 @@ function Component ({ className }: Props): React.ReactElement<Props> {
               )
           }
           <div className='right-section'>
+            {
+              isShowReloadNft && (
+                <Button
+                  className={'mr-xs'}
+                  disabled={loading}
+                  icon={
+                    (
+                      <Icon
+                        phosphorIcon={ArrowClockwise}
+                        size='md'
+                        type='phosphor'
+                      />
+                    )
+                  }
+                  onClick={onReloadNft}
+                  size={'sm'}
+                  type={'ghost'}
+                />
+              )
+            }
+
             <SearchInput
-              className='search-input'
+              className={CN('search-input', {
+                hidden: !showSearchInput
+              })}
               onChange={setSearchInput}
               placeholder={searchPlaceholder}
               ref={searchInputRef}
@@ -153,7 +205,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           context={{
             searchInput,
             setDetailTitle,
-            setSearchPlaceholder
+            setSearchPlaceholder,
+            setShowSearchInput
           }}
         />
       </div>
@@ -168,12 +221,12 @@ const PortfolioPage = styled(Component)<Props>(({ theme: { token } }: Props) => 
     height: '100%',
 
     '.portfolio-header': {
-      flex: '0 0 auto',
-      paddingBottom: token.paddingLG
+      flex: '0 0 auto'
     },
 
     '.portfolio-content': {
       flex: '1 1 500px',
+      paddingTop: token.paddingLG,
       paddingBottom: token.paddingLG
     },
 
@@ -181,11 +234,7 @@ const PortfolioPage = styled(Component)<Props>(({ theme: { token } }: Props) => 
       display: 'flex',
       borderRadius: token.borderRadiusLG,
       margin: 0,
-      padding: 0,
-
-      '& > li': {
-        paddingBottom: '8px !important'
-      }
+      padding: 0
     },
 
     '.menu-bar': {
@@ -194,6 +243,7 @@ const PortfolioPage = styled(Component)<Props>(({ theme: { token } }: Props) => 
       alignItems: 'center',
       justifyContent: 'space-between',
       background: 'transparent',
+      minHeight: 50,
 
       '.web-header': {
         flex: 1,
@@ -215,21 +265,23 @@ const PortfolioPage = styled(Component)<Props>(({ theme: { token } }: Props) => 
         outline: 'none',
         position: 'relative',
         listStyle: 'none',
-        fontSize: token.fontSize,
-        lineHeight: token.lineHeight,
-        fontWeight: token.fontWeightStrong,
+        fontSize: token.fontSizeLG,
+        lineHeight: token.lineHeightLG,
+        fontWeight: token.headingFontWeight,
         cursor: 'pointer',
         flex: 'unset',
-        opacity: 0.45,
         borderRadius: 0,
-        color: '#FFFFFF',
+        color: token.colorTextLight4,
         padding: 0,
         marginRight: 16,
+        paddingTop: 10,
+        paddingBottom: token.paddingXS,
+        borderBottom: '2px solid transparent',
 
         '&--selected': {
           background: 'transparent',
-          borderBottom: '2px solid #D9D9D9',
-          opacity: 1
+          color: token.colorTextLight2,
+          borderBottomColor: token.colorTextLight2
         }
       },
 

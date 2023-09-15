@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_ACCOUNT_TYPES, DOWNLOAD_EXTENSION } from '@subwallet/extension-koni-ui/constants';
+import { CONNECT_EXTENSION, DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -12,7 +13,7 @@ import { Button, ButtonProps, Form, Icon, Image, Input, ModalContext } from '@su
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,6 +23,7 @@ import { EXTENSION_URL } from '../constants';
 import { ScreenContext } from '../contexts/ScreenContext';
 import useGetDefaultAccountName from '../hooks/account/useGetDefaultAccountName';
 import useDefaultNavigate from '../hooks/router/useDefaultNavigate';
+import usePreloadView from '../hooks/router/usePreloadView';
 import { convertFieldToObject, isNoAccount, openInNewTab, readOnlyScan, setSelectedAccountTypes, simpleCheckForm } from '../utils';
 
 type Props = ThemeProps;
@@ -36,12 +38,14 @@ interface WelcomeButtonItem {
   schema: ButtonProps['schema'];
   title: string;
   description: string;
+  loading: boolean;
 }
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
+  const { enableInject, initCallback, initEnable, injected, loadingInject } = useContext(InjectContext);
   const navigate = useNavigate();
 
   const [form] = Form.useForm<ReadOnlyAccountInput>();
@@ -50,9 +54,20 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(false);
   const [isAttachAddressEthereum, setAttachAddressEthereum] = useState(false);
   const [isAttachReadonlyAccountButtonDisable, setIsAttachReadonlyAccountButtonDisable] = useState(true);
+  // use for trigger after enable inject
+  const [enInject, setEnInject] = useState({});
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
-  const [isAccountsEmpty] = useState(isNoAccount(accounts));
+  const isAccountsEmpty = useMemo(() => {
+    return isNoAccount(accounts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enInject]);
   const { goHome } = useDefaultNavigate();
+
+  usePreloadView([
+    'CreatePassword',
+    'CreateDone',
+    'NewSeedPhrase'
+  ]);
 
   const formDefault: ReadOnlyAccountInput = {
     address: ''
@@ -147,37 +162,45 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       icon: PlusCircle,
       id: CREATE_ACCOUNT_MODAL,
       schema: isWebUI ? 'secondary' : 'primary',
-      title: t('Create a new account')
+      title: t('Create a new account'),
+      loading: false
     },
     {
       description: t('Import an existing account'),
       icon: FileArrowDown,
       id: IMPORT_ACCOUNT_MODAL,
       schema: 'secondary',
-      title: t('Import an account')
+      title: t('Import an account'),
+      loading: false
     },
     {
       description: t('Attach an account without private key'),
       icon: Swatches,
       id: ATTACH_ACCOUNT_MODAL,
       schema: 'secondary',
-      title: t('Attach an account')
+      title: t('Attach an account'),
+      loading: false
     },
     {
-      description: 'For management of your account keys',
+      description: injected ? t('Connect to your existing extension wallet') : t('For management of your account keys'),
       icon: PuzzlePiece,
-      id: DOWNLOAD_EXTENSION,
+      id: CONNECT_EXTENSION,
       schema: 'secondary',
-      title: t('Download SubWallet extension')
+      title: injected ? t('Connect extension wallet') : t('Download SubWallet extension'),
+      loading: loadingInject
     }
-  ], [isWebUI, t]);
+  ], [injected, isWebUI, t, loadingInject]);
 
   const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI, items]);
 
   const openModal = useCallback((id: string) => {
     return () => {
-      if (id === DOWNLOAD_EXTENSION) {
-        openInNewTab(EXTENSION_URL)();
+      if (id === CONNECT_EXTENSION) {
+        if (injected) {
+          enableInject(() => setEnInject({}));
+        } else {
+          openInNewTab(EXTENSION_URL)();
+        }
 
         return;
       }
@@ -190,7 +213,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         activeModal(id);
       }
     };
-  }, [activeModal, inactiveModal, navigate]
+  }, [activeModal, enableInject, inactiveModal, injected, navigate]
   );
 
   useLayoutEffect(() => {
@@ -198,6 +221,13 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       goHome();
     }
   }, [goHome, isAccountsEmpty]);
+
+  // Go root after inject
+  useEffect(() => {
+    if (initEnable) {
+      initCallback(() => setEnInject({}));
+    }
+  }, [initCallback, initEnable]);
 
   return (
     <Layout.Base
@@ -247,6 +277,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                   />
                 }
                 key={item.id}
+                loading={item.loading}
                 onClick={openModal(item.id)}
                 schema={item.schema}
               >
@@ -483,6 +514,14 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
           gridTemplateColumns: '1fr 1fr',
           gap: token.sizeMS,
 
+          '.ant-btn:not(.-icon-only) .ant-btn-loading-icon>.anticon': {
+            fontSize: 24,
+            height: 24,
+            width: 24,
+            marginLeft: 4,
+            marginRight: 0
+          },
+
           [`.type-${CREATE_ACCOUNT_MODAL}`]: {
             color: token['green-6']
           },
@@ -494,8 +533,10 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
           [`.type-${ATTACH_ACCOUNT_MODAL}`]: {
             color: token['magenta-6']
           },
-          [`.type-${DOWNLOAD_EXTENSION}`]: {
-            color: token.colorSuccess
+
+          [`.type-${CONNECT_EXTENSION}`]: {
+            color: token.colorSuccess,
+            order: -1
           },
 
           '.welcome-import-button': {

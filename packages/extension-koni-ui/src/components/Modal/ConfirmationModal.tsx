@@ -22,6 +22,7 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
     <BaseModal
       className={CN('confirmation-modal', className)}
       closable={false}
+      destroyOnClose={true}
       id={id}
       onCancel={onCancel}
       transitionName={'fade'}

@@ -1,21 +1,23 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, DISCONNECT_EXTENSION_MODAL, EXTENSION_URL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
-import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
+import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-type Props = ThemeProps & {
-  extraAction?: (value: boolean) => void;
-};
+type Props = ThemeProps;
 
-const Component: React.FC<Props> = ({ className, extraAction }: Props) => {
+const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { enableInject, enabled, injected, loadingInject } = useContext(InjectContext);
+
   const openModal = useCallback((id: string) => {
     inactiveModal(SELECT_ACCOUNT_MODAL);
     activeModal(id);
@@ -23,18 +25,27 @@ const Component: React.FC<Props> = ({ className, extraAction }: Props) => {
 
   const openCreateAccount = useCallback(() => {
     openModal(CREATE_ACCOUNT_MODAL);
-    extraAction && extraAction(false);
-  }, [extraAction, openModal]);
+  }, [openModal]);
 
   const openImportAccount = useCallback(() => {
     openModal(IMPORT_ACCOUNT_MODAL);
-    extraAction && extraAction(false);
-  }, [extraAction, openModal]);
+  }, [openModal]);
 
   const openAttachAccount = useCallback(() => {
     openModal(ATTACH_ACCOUNT_MODAL);
-    extraAction && extraAction(false);
-  }, [extraAction, openModal]);
+  }, [openModal]);
+
+  const onClickExtension = useCallback(() => {
+    if (enabled) {
+      activeModal(DISCONNECT_EXTENSION_MODAL);
+    } else {
+      if (injected) {
+        enableInject();
+      } else {
+        openInNewTab(EXTENSION_URL)();
+      }
+    }
+  }, [activeModal, enableInject, enabled, injected]);
 
   return (
     <div className={className}>
@@ -49,7 +60,7 @@ const Component: React.FC<Props> = ({ className, extraAction }: Props) => {
         onClick={openCreateAccount}
         schema='secondary'
       >
-        {t('Create a new account')}
+        {t('Create new')}
       </Button>
       <Button
         className='btn-min-width'
@@ -74,6 +85,19 @@ const Component: React.FC<Props> = ({ className, extraAction }: Props) => {
         onClick={openAttachAccount}
         schema='secondary'
         tooltip={t('Attach account')}
+      />
+      <Button
+        className='btn-min-width'
+        icon={(
+          <Icon
+            phosphorIcon={PuzzlePiece}
+            weight={'fill'}
+          />
+        )}
+        loading={loadingInject}
+        onClick={onClickExtension}
+        schema={ enabled ? 'danger' : 'secondary'}
+        tooltip={ enabled ? t('Disconnect extension') : injected ? t('Connect extension') : t('Download extension')}
       />
     </div>
   );

@@ -1,184 +1,19 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes, WindowOpenParams } from '@subwallet/extension-base/background/types';
-import type { Message } from '@subwallet/extension-base/types';
-import type { Chain } from '@subwallet/extension-chains/types';
+import type { AccountJson, AuthorizeRequest, MetadataRequest, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, SigningRequest, WindowOpenParams } from '@subwallet/extension-base/background/types';
 import type { KeyringPair$Json } from '@subwallet/keyring/types';
-import type { KeyringAddress, KeyringPairs$Json } from '@subwallet/ui-keyring/types';
+import type { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
-import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
+import { AccountsWithCurrentAddress, AllLogoMap, AmountData, AssetSettingUpdateReq, BalanceJson, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CronReloadRequest, CrowdloanJson, KeyringState, MantaPayConfig, MantaPayEnableParams, MantaPaySyncState, NftCollection, NftJson, NftTransactionRequest, NominationPoolInfo, NominatorMetadata, Notification, OptionInputAddress, PriceJson, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestChangeMasterPassword, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrSignEvm, RequestQrSignSubstrate, RequestResetWallet, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResolveAddressToDomainRequest, ResolveDomainRequest, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseResetWallet, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, TransactionHistoryItem, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountExternalError, AccountsWithCurrentAddress, AllLogoMap, AmountData, AssetSettingUpdateReq, BalanceJson, BrowserConfirmationType, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, KeyringState, LanguageType, MantaPayConfig, MantaPayEnableParams, MantaPaySyncState, NftCollection, NftJson, NftTransactionRequest, NominationPoolInfo, NominatorMetadata, Notification, OptimalYieldPathRequest, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestApproveConnectWalletSession, RequestApproveWalletConnectNotSupport, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestChangeMasterPassword, RequestConnectWalletConnect, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectConnectWalletSession, RequestRejectWalletConnectNotSupport, RequestResetWallet, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestYieldStepSubmit, ResolveAddressToDomainRequest, ResolveDomainRequest, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseResetWallet, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, UiSettings, ValidateNetworkResponse, ValidatorInfo, WalletUnlockType, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
-import { createRegistry } from '@subwallet/extension-base/utils';
-import { getId } from '@subwallet/extension-base/utils/getId';
-import { metadataExpand } from '@subwallet/extension-chains';
-import { MetadataDef } from '@subwallet/extension-inject/types';
-import { findChainInfoByGenesisHash } from '@subwallet/extension-koni-ui/utils';
-
-import { _getKnownHashes, _getKnownNetworks } from './utils/chain/defaultChains';
-import { getSavedMeta, setSavedMeta } from './MetadataCache';
-
-interface Handler {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  resolve: (data: any) => void;
-  reject: (error: Error) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscriber?: (data: any) => void;
-}
-
-type Handlers = Record<string, Handler>;
-
-// const port = chrome.runtime.connect({ name: PORT_EXTENSION });
-const port = window;
-const handlers: Handlers = {};
-
-// setup a listener for messages, any incoming resolves the promise
-// port.onMessage.addListener((response: Record<string, any>): void => {
-//   console.log('=====response', response);
-//   const data = response.data;
-//   const handler = handlers[data.id];
-
-//   if (!handler) {
-//     console.error(`Unknown response: ${JSON.stringify(data)}`);
-
-//     return;
-//   }
-
-//   if (!handler.subscriber) {
-//     delete handlers[data.id];
-//   }
-
-//   if (data.subscription) {
-//     // eslint-disable-next-line @typescript-eslint/ban-types
-//     (handler.subscriber as Function)(data.subscription);
-//   } else if (data.error) {
-//     handler.reject(new Error(data.error));
-//   } else {
-//     handler.resolve(data.response);
-//   }
-// });
-
-port.addEventListener('message', (event: Message) => {
-  const data = event.data;
-  const handler = handlers[data.id];
-
-  if (!handler) {
-    // console.error(`Unknown response: ${JSON.stringify(data)}`)
-
-    return;
-  }
-
-  // delete handlers if handler don't include subscriber with event from BACKGROUND
-  // @ts-ignore
-  if (!handler.subscriber && data.sender === 'BACKGROUND') {
-    delete handlers[data.id];
-  }
-
-  if (data.subscription) {
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    (handler.subscriber as Function)(data.subscription);
-  } else {
-    // @ts-ignore
-    if (data.sender === 'BACKGROUND') {
-      // if (!handler.subscriber) {
-      //   delete handlers[data.id]
-      // }
-
-      // if (data.subscription) {
-      //   // eslint-disable-next-line @typescript-eslint/ban-types
-      //   ;(handler.subscriber as Function)(data.subscription)
-      // }
-      // else
-      if (data.error) {
-        handler.reject(new Error(data.error));
-      } else {
-        handler.resolve(data.response);
-      }
-    }
-  }
-}, false);
-
-function sendMessage<TMessageType extends MessageTypesWithNullRequest> (message: TMessageType): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypesWithSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: unknown) => void): Promise<ResponseTypes[TMessageType]> {
-  return new Promise((resolve, reject): void => {
-    const id = getId();
-
-    handlers[id] = { reject, resolve, subscriber };
-
-    port.postMessage({ id, message, request: request || {} });
-  });
-}
-
-export function lazySendMessage<TMessageType extends MessageTypesWithNoSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType], callback: (data: ResponseTypes[TMessageType]) => void): {promise: Promise<ResponseTypes[TMessageType]>, start: () => void} {
-  const id = getId();
-  const handlePromise = new Promise((resolve, reject): void => {
-    handlers[id] = { reject, resolve };
-  });
-
-  const rs = {
-    promise: handlePromise as Promise<ResponseTypes[TMessageType]>,
-    start: () => {
-      port.postMessage({ id, message, request: request || {} });
-    }
-  };
-
-  rs.promise.then((data) => {
-    callback(data);
-  }).catch(console.error);
-
-  return rs;
-}
-
-export function lazySubscribeMessage<TMessageType extends MessageTypesWithSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType], callback: (data: ResponseTypes[TMessageType]) => void, subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): {promise: Promise<ResponseTypes[TMessageType]>, start: () => void, unsub: () => void} {
-  const id = getId();
-  let cancel = false;
-  const handlePromise = new Promise((resolve, reject): void => {
-    handlers[id] = { reject, resolve, subscriber };
-  });
-
-  const rs = {
-    promise: handlePromise as Promise<ResponseTypes[TMessageType]>,
-    start: () => {
-      port.postMessage({ id, message, request: request || {} });
-    },
-    unsub: () => {
-      const handler = handlers[id];
-
-      cancel = true;
-
-      if (handler) {
-        delete handler.subscriber;
-        handler.resolve(null);
-      }
-    }
-  };
-
-  rs.promise.then((data) => {
-    !cancel && callback(data);
-  }).catch(console.error);
-
-  return rs;
-}
-
-export function subscribeMessage<TMessageType extends MessageTypesWithSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType], callback: (data: ResponseTypes[TMessageType]) => void, subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): {promise: Promise<ResponseTypes[TMessageType]>, unsub: () => void} {
-  const lazyItem = lazySubscribeMessage(message, request, callback, subscriber);
-
-  lazyItem.start();
-
-  return {
-    promise: lazyItem.promise,
-    unsub: lazyItem.unsub
-  };
-}
+import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
 
 export async function editAccount (address: string, name: string): Promise<boolean> {
   return sendMessage('pri(accounts.edit)', { address, name });
@@ -188,78 +23,8 @@ export async function showAccount (address: string, isShowing: boolean): Promise
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }
 
-export async function saveCurrentAccountAddress (data: RequestCurrentAccountAddress): Promise<CurrentAccountInfo> {
-  return sendMessage('pri(currentAccount.saveAddress)', data);
-}
-
-// Settings
-
-export async function toggleBalancesVisibility (): Promise<boolean> {
-  return sendMessage('pri(settings.changeBalancesVisibility)', null);
-}
-
-export async function saveAccountAllLogo (accountAllLogo: string, callback: (data: RequestSettingsType) => void): Promise<boolean> {
-  return sendMessage('pri(settings.saveAccountAllLogo)', accountAllLogo, callback);
-}
-
-export async function saveBrowserConfirmationType (type: BrowserConfirmationType): Promise<boolean> {
-  return sendMessage('pri(settings.saveBrowserConfirmationType)', type);
-}
-
-export async function saveCameraSetting (value: boolean): Promise<boolean> {
-  return sendMessage('pri(settings.saveCamera)', { camera: value });
-}
-
-export async function saveTheme (theme: ThemeNames): Promise<boolean> {
-  return sendMessage('pri(settings.saveTheme)', theme);
-}
-
-export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: UiSettings) => void): Promise<UiSettings> {
-  return sendMessage('pri(settings.subscribe)', data, callback);
-}
-
-export async function saveAutoLockTime (value: number): Promise<boolean> {
-  return sendMessage('pri(settings.saveAutoLockTime)', { autoLockTime: value });
-}
-
-export async function saveUnlockType (unlockType: WalletUnlockType): Promise<boolean> {
-  return sendMessage('pri(settings.saveUnlockType)', { unlockType });
-}
-
-export async function saveEnableChainPatrol (value: boolean): Promise<boolean> {
-  return sendMessage('pri(settings.saveEnableChainPatrol)', { enable: value });
-}
-
-export async function saveLanguage (lang: LanguageType): Promise<boolean> {
-  return sendMessage('pri(settings.saveLanguage)', { language: lang });
-}
-
-export async function saveShowZeroBalance (show: boolean): Promise<boolean> {
-  return sendMessage('pri(settings.saveShowZeroBalance)', { show });
-}
-
-export async function saveShowBalance (value: boolean): Promise<boolean> {
-  return sendMessage('pri(settings.saveShowBalance)', { enable: value });
-}
-
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
   return sendMessage('pri(accounts.tie)', { address, genesisHash });
-}
-
-export async function exportAccount (address: string, password: string): Promise<{ exportedJson: KeyringPair$Json }> {
-  return sendMessage('pri(accounts.export)', { address, password });
-}
-
-export async function exportAccountPrivateKey (address: string, password: string): Promise<ResponseAccountExportPrivateKey> {
-  return sendMessage('pri(accounts.exportPrivateKey)', { address, password });
-}
-
-export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: KeyringPairs$Json }> {
-  return sendMessage('pri(accounts.batchExport)', { addresses, password });
-}
-
-export async function checkPublicAndPrivateKey (publicKey: string, secretKey: string): Promise<ResponseCheckPublicAndSecretKey> {
-  return sendMessage('pri(accounts.checkPublicAndSecretKey)', { publicKey, secretKey });
 }
 
 export async function validateAccount (address: string, password: string): Promise<boolean> {
@@ -302,158 +67,6 @@ export async function approveSignSignature (id: string, signature: HexString): P
   return sendMessage('pri(signing.approve.signature)', { id, signature });
 }
 
-export async function createAccountExternal (name: string, address: string, genesisHash: string): Promise<boolean> {
-  return sendMessage('pri(accounts.create.external)', { address, genesisHash, name });
-}
-
-export async function createAccountExternalV2 (request: RequestAccountCreateExternalV2): Promise<AccountExternalError[]> {
-  return sendMessage('pri(accounts.create.externalV2)', request);
-}
-
-export async function createAccountHardware (address: string, hardwareType: string, accountIndex: number, addressOffset: number, name: string, genesisHash: string): Promise<boolean> {
-  return sendMessage('pri(accounts.create.hardware)', { accountIndex, address, addressOffset, genesisHash, hardwareType, name });
-}
-
-export async function createAccountHardwareV2 (request: RequestAccountCreateHardwareV2): Promise<boolean> {
-  return sendMessage('pri(accounts.create.hardwareV2)', request);
-}
-
-export async function createAccountHardwareMultiple (request: RequestAccountCreateHardwareMultiple): Promise<boolean> {
-  return sendMessage('pri(accounts.create.hardwareMultiple)', request);
-}
-
-export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType, genesisHash?: string): Promise<boolean> {
-  return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
-}
-
-export async function createAccountSuriV2 (request: RequestAccountCreateSuriV2): Promise<ResponseAccountCreateSuriV2> {
-  return sendMessage('pri(accounts.create.suriV2)', request);
-}
-
-export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
-  return sendMessage('pri(seed.create)', { length, seed, type });
-}
-
-export async function createSeedV2 (length?: SeedLengths, seed?: string, types?: Array<KeypairType>): Promise<ResponseSeedCreateV2> {
-  return sendMessage('pri(seed.createV2)', { length, seed, types });
-}
-
-export async function createAccountWithSecret (request: RequestAccountCreateWithSecretKey): Promise<ResponseAccountCreateWithSecretKey> {
-  return sendMessage('pri(accounts.create.withSecret)', request);
-}
-
-export async function getAllMetadata (): Promise<MetadataDef[]> {
-  return sendMessage('pri(metadata.list)');
-}
-
-export async function getMetadata (genesisHash?: string | null, isPartial = false): Promise<Chain | null> {
-  if (!genesisHash) {
-    return null;
-  }
-
-  // const chains = await getNetworkMap();
-  const parsedChains = _getKnownHashes({});
-
-  let request = getSavedMeta(genesisHash);
-
-  if (!request) {
-    request = sendMessage('pri(metadata.get)', genesisHash || null);
-    setSavedMeta(genesisHash, request);
-  }
-
-  const def = await request;
-
-  if (def) {
-    return metadataExpand(def, isPartial);
-  } else if (isPartial) {
-    const chain = parsedChains.find((chain) => chain.genesisHash === genesisHash);
-
-    if (chain) {
-      return metadataExpand({
-        ...chain,
-        specVersion: 0,
-        tokenDecimals: 15,
-        tokenSymbol: 'Unit',
-        types: {}
-      }, isPartial);
-    }
-  }
-
-  return null;
-}
-
-export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, genesisHash?: string | null): Promise<Chain | null> {
-  if (!genesisHash) {
-    return null;
-  }
-
-  const { rawMetadata, specVersion } = await sendMessage('pri(metadata.find)', { genesisHash });
-
-  if (!rawMetadata) {
-    return null;
-  }
-
-  const chainInfo = findChainInfoByGenesisHash(chainInfoMap, genesisHash);
-
-  if (!chainInfo) {
-    return null;
-  }
-
-  const registry = createRegistry(chainInfo, rawMetadata as HexString);
-
-  const tokenInfo = _getChainNativeTokenBasicInfo(chainInfo);
-
-  return {
-    specVersion,
-    genesisHash,
-    name: chainInfo.name,
-    hasMetadata: true,
-    definition: {} as MetadataDef,
-    icon: chainInfo.icon,
-    registry: registry,
-    isUnknown: false,
-    ss58Format: chainInfo.substrateInfo?.addressPrefix || 42,
-    tokenDecimals: tokenInfo.decimals,
-    tokenSymbol: tokenInfo.symbol
-  };
-}
-
-export async function getChainMetadata (genesisHash?: string | null): Promise<Chain | null> {
-  if (!genesisHash) {
-    return null;
-  }
-
-  // const chains = await getNetworkMap();
-  const parsedChains = _getKnownNetworks({});
-
-  let request = getSavedMeta(genesisHash);
-
-  if (!request) {
-    request = sendMessage('pri(metadata.get)', genesisHash || null);
-    setSavedMeta(genesisHash, request);
-  }
-
-  const def = await request;
-
-  if (def) {
-    return metadataExpand(def, false);
-  } else {
-    const chain = parsedChains.find((chain) => chain.genesisHash === genesisHash);
-
-    if (chain) {
-      return metadataExpand({
-        specVersion: 0,
-        tokenDecimals: 15,
-        tokenSymbol: 'Unit',
-        types: {},
-        ...chain
-      }, false);
-    }
-  }
-
-  return null;
-}
-
 export async function rejectAuthRequest (id: string): Promise<boolean> {
   return sendMessage('pri(authorize.reject)', { id });
 }
@@ -480,18 +93,6 @@ export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWi
 
 export async function subscribeAccountsInputAddress (cb: (data: OptionInputAddress) => void): Promise<string> {
   return sendMessage('pri(accounts.subscribeAccountsInputAddress)', {}, cb);
-}
-
-export async function saveRecentAccount (accountId: string): Promise<KeyringAddress> {
-  return sendMessage('pri(accounts.saveRecent)', { accountId });
-}
-
-export async function editContactAddress (address: string, name: string): Promise<boolean> {
-  return sendMessage('pri(accounts.editContact)', { address: address, meta: { name: name } });
-}
-
-export async function removeContactAddress (address: string): Promise<boolean> {
-  return sendMessage('pri(accounts.deleteContact)', { address: address });
 }
 
 export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
@@ -548,18 +149,6 @@ export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[
 
 export async function subscribeSigningRequests (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(signing.requests)', null, cb);
-}
-
-export async function validateSeed (suri: string, type?: KeypairType): Promise<{ address: string; suri: string }> {
-  return sendMessage('pri(seed.validate)', { suri, type });
-}
-
-export async function validateSeedV2 (suri: string, types: Array<KeypairType>): Promise<ResponseSeedValidateV2> {
-  return sendMessage('pri(seed.validateV2)', { suri, types });
-}
-
-export async function validateMetamaskPrivateKeyV2 (suri: string, types: Array<KeypairType>): Promise<ResponsePrivateKeyValidateV2> {
-  return sendMessage('pri(privateKey.validateV2)', { suri, types });
 }
 
 export async function validateDerivationPath (parentAddress: string, suri: string, parentPassword: string): Promise<ResponseDeriveValidate> {
@@ -954,32 +543,6 @@ export async function passPhishingPage (url: string): Promise<boolean> {
   return sendMessage('pri(phishing.pass)', { url });
 }
 
-/// Wallet Connect
-
-export async function addConnection (request: RequestConnectWalletConnect): Promise<boolean> {
-  return sendMessage('pri(walletConnect.connect)', request);
-}
-
-export async function approveWalletConnectSession (request: RequestApproveConnectWalletSession): Promise<boolean> {
-  return sendMessage('pri(walletConnect.session.approve)', request);
-}
-
-export async function rejectWalletConnectSession (request: RequestRejectConnectWalletSession): Promise<boolean> {
-  return sendMessage('pri(walletConnect.session.reject)', request);
-}
-
-export async function disconnectWalletConnectConnection (topic: string): Promise<boolean> {
-  return sendMessage('pri(walletConnect.session.disconnect)', { topic });
-}
-
-export async function approveWalletConnectNotSupport (request: RequestApproveWalletConnectNotSupport): Promise<boolean> {
-  return sendMessage('pri(walletConnect.notSupport.approve)', request);
-}
-
-export async function rejectWalletConnectNotSupport (request: RequestRejectWalletConnectNotSupport): Promise<boolean> {
-  return sendMessage('pri(walletConnect.notSupport.reject)', request);
-}
-
 // Manta pay
 export async function enableMantaPay (params: MantaPayEnableParams) {
   return sendMessage('pri(mantaPay.enable)', params);
@@ -1032,3 +595,9 @@ export async function getYieldNativeStakingValidators (poolInfo: YieldPoolInfo):
 export async function getYieldNominationPools (poolInfo: YieldPoolInfo): Promise<NominationPoolInfo[]> {
   return sendMessage('pri(yield.getStakingNominationPools)', poolInfo);
 }
+
+export * from './accounts';
+export * from './base';
+export * from './metadata';
+export * from './settings';
+export * from './WalletConnect';

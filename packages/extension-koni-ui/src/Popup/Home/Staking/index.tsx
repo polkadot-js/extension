@@ -3,6 +3,7 @@
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenBalance, TokenItem, TokenPrice } from '@subwallet/extension-koni-ui/components';
+import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
@@ -14,9 +15,8 @@ import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { sortStakingByValue, stopClickPropagation } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, Popover, SwList, Table, Tag } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList, Table, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
-import CN from 'classnames';
 import { ArrowClockwise, DotsThree, FadersHorizontal, Plus, Trophy, User, Users } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +30,7 @@ type Props = ThemeProps
 const FILTER_MODAL_ID = 'staking-filter-modal';
 
 enum FilterValue {
+  ALL = 'ALL',
   NOMINATED = 'nominated',
   POOLED = 'pooled'
 }
@@ -77,6 +78,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
+  const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
 
   const items = useMemo<StakingItem[]>(() => {
     const result = stakingItems
@@ -164,13 +166,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       icon: reloadIcon,
       disabled: loading,
       size: 'sm',
-      onClick: onClickReload
+      onClick: onClickReload,
+      tooltip: t('Reload')
     },
     {
       icon: rightIcon,
-      onClick: preCheck(onClickStakeMore, ExtrinsicType.STAKING_BOND)
+      onClick: preCheck(onClickStakeMore, ExtrinsicType.STAKING_BOND),
+      tooltip: t('Add to bond')
     }
-  ]), [loading, onClickReload, preCheck, onClickStakeMore]);
+  ]), [loading, onClickReload, t, preCheck, onClickStakeMore]);
 
   const renderItem = useCallback((item: StakingDataType) => {
     return (
@@ -195,10 +199,28 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const filteredList = useMemo(() => {
-    return items.filter(filterFunction).filter((item: StakingDataType) =>
-      searchFunction(item, searchInput)
-    );
-  }, [filterFunction, searchFunction, searchInput, items]);
+    const filterTabFunction = (_item: StakingDataType) => {
+      if (selectedFilterTab === FilterValue.ALL) {
+        return true;
+      }
+
+      if (selectedFilterTab === FilterValue.NOMINATED) {
+        return _item.staking.type === StakingType.NOMINATED;
+      }
+
+      if (selectedFilterTab === FilterValue.POOLED) {
+        return _item.staking.type === StakingType.POOLED;
+      }
+
+      return false;
+    };
+
+    const _filterFunction = (_item: StakingDataType) => {
+      return filterTabFunction(_item) && filterFunction(_item) && searchFunction(_item, searchInput);
+    };
+
+    return items.filter(_filterFunction);
+  }, [items, selectedFilterTab, filterFunction, searchFunction, searchInput]);
 
   const emptyStakingList = useCallback(() => {
     return (
@@ -218,6 +240,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [address, currentAccount?.address, inactiveModal, navigate]);
 
+  const onClickRowMoreAction = useCallback((item: StakingDataType) => {
+    return (event: React.MouseEvent) => {
+      stopClickPropagation(event);
+      onClickRightIcon(item);
+    };
+  }, [onClickRightIcon]);
+
   const columns = useMemo(() => {
     return [
       {
@@ -231,9 +260,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
           return (
             <TokenItem
-              chainDisplayName={name || ''}
+              chain={chain}
               logoKey={nativeToken}
               networkKey={chain}
+              subTitle={name || ''}
               symbol={nativeToken}
             />
           );
@@ -299,51 +329,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 value={balanceValue}
               />
 
-              <Popover
-                content={
-                  <div
-                    className={CN(className, 'popover')}
-                    onClick={stopClickPropagation}
-                  >
-                    <MoreActionModal
-                      chainStakingMetadata={row.chainStakingMetadata}
-                      nominatorMetadata={row.nominatorMetadata}
-                      reward={row.reward}
-                      showContentOnly={true}
-                      staking={row.staking}
-                    />
-                  </div>
-                }
-                overlayInnerStyle={{
-                  padding: '0',
-                  boxShadow: 'none',
-                  backgroundColor: 'transparent'
-                }}
-                placement='bottomRight'
-                showArrow={false}
-                trigger='click'
-              >
-                <Button
-                  className='extra-button'
-                  icon={(
-                    <Icon
-                      className={'right-icon'}
-                      customSize={'20px'}
-                      phosphorIcon={DotsThree}
-                      type='phosphor'
-                    />
-                  )}
-                  onClick={stopClickPropagation}
-                  size='xs'
-                  type='ghost'
-                />
-              </Popover>
+              <Button
+                className='extra-button'
+                icon={(
+                  <Icon
+                    className={'right-icon'}
+                    customSize={'20px'}
+                    phosphorIcon={DotsThree}
+                    type='phosphor'
+                  />
+                )}
+                onClick={onClickRowMoreAction(row)}
+                size='xs'
+                type='ghost'
+              />
             </div>
           );
         }
       }
     ];
-  }, [className, priceMap]);
+  }, [onClickRowMoreAction, priceMap]);
 
   const onSearch = useCallback((value: string) => setSearchInput(value), []);
 
@@ -358,48 +363,80 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     preCheck(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`), ExtrinsicType.STAKING_BOND)();
   }, [navigate, preCheck]);
 
+  const filterTabItems = useMemo<FilterTabItemType[]>(() => {
+    return [
+      {
+        label: t('All'),
+        value: FilterValue.ALL
+      },
+      {
+        label: t('Pooled'),
+        value: FilterValue.POOLED
+      },
+      {
+        label: t('Nominated'),
+        value: FilterValue.NOMINATED
+      }
+    ];
+  }, [t]);
+
+  const onSelectFilterTab = useCallback((value: string) => {
+    setSelectedFilterTab(value);
+  }, []);
+
   const listSection = useMemo(() => {
     if (isWebUI) {
       return (
         <div className='web-list'>
-          <Search
-            actionBtnIcon={(
-              <Icon
-                phosphorIcon={FadersHorizontal}
-                size='sm'
-              />
-            )}
-            extraButton={
-              <>
-                <Button
-                  icon={(
-                    <Icon
-                      phosphorIcon={ArrowClockwise}
-                      size='sm'
-                    />
-                  )}
-                  onClick={onClickReload}
-                  type='ghost'
+          <div className='web-list-tool-area'>
+            <FilterTabs
+              className={'filter-tabs-container'}
+              items={filterTabItems}
+              onSelect={onSelectFilterTab}
+              selectedItem={selectedFilterTab}
+            />
+
+            <Search
+              actionBtnIcon={(
+                <Icon
+                  phosphorIcon={FadersHorizontal}
+                  size='sm'
                 />
-                <Button
-                  icon={(
-                    <Icon
-                      phosphorIcon={Plus}
-                      size='sm'
-                    />
-                  )}
-                  onClick={onClickStake}
-                  type='ghost'
-                />
-              </>
-            }
-            onClickActionBtn={onClickActionBtn}
-            onSearch={onSearch}
-            placeholder={'Token name'}
-            searchValue={searchInput}
-            showActionBtn
-            showExtraButton
-          />
+              )}
+              extraButton={
+                <>
+                  <Button
+                    icon={(
+                      <Icon
+                        phosphorIcon={ArrowClockwise}
+                        size='md'
+                      />
+                    )}
+                    onClick={onClickReload}
+                    tooltip={t('Reload')}
+                    type='ghost'
+                  />
+                  <Button
+                    icon={(
+                      <Icon
+                        phosphorIcon={Plus}
+                        size='md'
+                      />
+                    )}
+                    onClick={onClickStake}
+                    tooltip={t('Add to bond')}
+                    type='ghost'
+                  />
+                </>
+              }
+              onClickActionBtn={onClickActionBtn}
+              onSearch={onSearch}
+              placeholder={'Token name'}
+              searchValue={searchInput}
+              showActionBtn
+              showExtraButton
+            />
+          </div>
 
           { filteredList.length > 0
             ? (
@@ -438,7 +475,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [columns, emptyStakingList, filterFunction, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, renderItem, searchFunction, searchInput, t]);
+  }, [columns, emptyStakingList, filterFunction, filterTabItems, filteredList, isWebUI, items, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, onSelectFilterTab, renderItem, searchFunction, searchInput, selectedFilterTab, t]);
 
   return (
     <PageWrapper
@@ -514,7 +551,11 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
         '.ant-sw-list': {
           flex: 1
         },
-        '.search-container': {
+
+        '.web-list-tool-area': {
+          display: 'flex',
+          gap: token.size,
+          alignItems: 'center',
           marginBottom: 24
         }
       },

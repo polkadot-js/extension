@@ -11,6 +11,7 @@ const ALLOWED_PATH = [
 ] as const;
 const PHISHING_PAGE_REDIRECT = '/phishing-page-detected';
 const EXTENSION_PREFIX = process.env.EXTENSION_PREFIX as string || '';
+const ID_PREFIX = process.env.ID_PREFIX as string || EXTENSION_PREFIX || '';
 const PORT_MOBILE = `${EXTENSION_PREFIX}mobile`;
 const PORT_CONTENT = `${EXTENSION_PREFIX}koni-content`;
 const PORT_EXTENSION = `${EXTENSION_PREFIX}koni-extension`;
@@ -25,6 +26,7 @@ export {
   PASSWORD_EXPIRY_MS,
   PHISHING_PAGE_REDIRECT,
   EXTENSION_PREFIX,
+  ID_PREFIX,
   PORT_MOBILE,
   PORT_CONTENT,
   PORT_EXTENSION,

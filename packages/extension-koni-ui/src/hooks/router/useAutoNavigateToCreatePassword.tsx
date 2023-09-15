@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ export default function useAutoNavigateToCreatePassword () {
   const hasMasterPassword = useSelector((state: RootState) => state.accountState.hasMasterPassword);
   const location = useLocation();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!hasMasterPassword) {
       console.log('hasMasterPassword useAutoNavigateToCreatePassword', hasMasterPassword);
       navigate('/keyring/create-password', { state: { prevPathname: location.pathname, prevState: location.state as unknown } });

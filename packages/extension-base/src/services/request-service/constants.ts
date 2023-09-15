@@ -8,3 +8,10 @@ export const PREDEFINED_CHAIN_DAPP_CHAIN_MAP: Record<string, string[]> = {
   'apps.moonbeam.network': ['moonbeam', 'moonriver'],
   'app.stellaswap.com': ['moonbeam']
 };
+
+export const WEB_APP_URL = [
+  /// Web app
+  'localhost:9000', // Local
+  'subwallet-webapp.pages.dev', // Pull request build
+  'web.subwallet.app' // Production
+];

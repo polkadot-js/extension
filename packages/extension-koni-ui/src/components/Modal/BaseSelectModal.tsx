@@ -21,8 +21,7 @@ function Component ({ children, className, motion, ...props }: Props): React.Rea
       <SelectModal
         {...props}
         className={CN(className, {
-          '-web-ui': isWebUI,
-          'animation-fade-to-left': isWebUI
+          '-web-ui': isWebUI
         })}
         motion={_motion}
         width={'100%'}
@@ -49,6 +48,7 @@ export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemePro
       top: token.paddingLG,
 
       '.ant-sw-modal-content': {
+        width: '100%',
         height: '100%',
         maxHeight: '100%',
         paddingLeft: token.paddingLG,

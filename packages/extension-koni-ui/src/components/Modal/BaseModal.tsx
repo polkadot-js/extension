@@ -20,8 +20,7 @@ function Component ({ children, className, motion, ...props }: Props): React.Rea
     <SwModal
       {...props}
       className={CN(className, {
-        '-web-ui': isWebUI,
-        'animation-fade-to-left': isWebUI
+        '-web-ui': isWebUI
       })}
       motion={_motion}
       width={'100%'}
@@ -47,6 +46,7 @@ export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) 
       top: token.paddingLG,
 
       '.ant-sw-modal-content': {
+        width: '100%',
         height: '100%',
         maxHeight: '100%',
         paddingLeft: token.paddingLG,

@@ -203,7 +203,6 @@ const CancelUnstake = styled(Component)<Props>(({ theme: { token } }: Props) => 
     flexDirection: 'column',
 
     '.web-ui-enable &': {
-      paddingTop: 24,
       display: 'block',
       maxWidth: 416,
       width: '100%',

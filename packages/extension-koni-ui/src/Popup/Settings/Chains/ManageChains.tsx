@@ -119,10 +119,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         ),
         onClick: () => {
           navigate('/settings/chains/import', { state: { isExternalRequest: false } });
-        }
+        },
+        tooltip: t('Import network')
       }
     ];
-  }, [navigate]);
+  }, [navigate, t]);
 
   const onBack = useCallback(() => {
     navigate(-1);

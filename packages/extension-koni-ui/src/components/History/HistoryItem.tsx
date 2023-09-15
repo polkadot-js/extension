@@ -16,6 +16,7 @@ import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { ArrowSquareOut, CaretRight } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -43,6 +44,7 @@ function getLink (data: TransactionHistoryDisplayItem, chainInfoMap: Record<stri
 
 function Component (
   { className = '', item, onClick }: Props) {
+  const { t } = useTranslation();
   const displayData = item.displayData;
   const { isWebUI } = useContext(ScreenContext);
   const { isShowBalance } = useSelector((state) => state.settings);
@@ -142,7 +144,7 @@ function Component (
           value={item.address}
         />
         <div className='account-info'>
-          <Typography.Text>{item.direction === TransactionDirection.SEND ? (item.fromName || item.from || '') : (item.toName || item.to || '')}</Typography.Text>
+          <Typography.Text className='account-name'>{item.direction === TransactionDirection.SEND ? (item.fromName || item.from || '') : (item.toName || item.to || '')}</Typography.Text>
           <Typography.Text className='account-address'>{toShort(item.address)}</Typography.Text>
         </div>
       </div>
@@ -206,6 +208,7 @@ function Component (
           }
           onClick={handleOnClick}
           size={'xs'}
+          tooltip={t('View on explorer')}
           type='ghost'
         />
       </div>
@@ -362,18 +365,26 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
         flex: 2,
         display: 'inline-flex',
         alignItems: 'center',
+        overflow: 'hidden',
 
         '.account-info': {
           display: 'flex',
           flexDirection: 'column',
           marginLeft: 8,
+          overflow: 'hidden'
+        },
 
-          '.account-address': {
-            color: 'rgba(255, 255, 255, 0.45)',
-            fontSize: '12px',
-            lineHeight: '20px',
-            fontWeight: 500
-          }
+        '.account-name': {
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
+        },
+
+        '.account-address': {
+          color: token.colorTextLight4,
+          fontSize: '12px',
+          lineHeight: '20px',
+          fontWeight: 500
         }
       },
 

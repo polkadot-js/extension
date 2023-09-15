@@ -330,6 +330,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
       <BaseModal
         className={'right-side-modal'}
+        destroyOnClose={true}
         id={TRANSFER_FUND_MODAL}
         onCancel={handleCancelTransfer}
         title={t('Transfer')}
@@ -347,6 +348,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
       <BaseModal
         className={'right-side-modal'}
+        destroyOnClose={true}
         id={BUY_TOKEN_MODAL}
         onCancel={handleCancelBuy}
         title={t('Buy token')}
@@ -381,7 +383,6 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'stretch',
-  marginTop: 24,
   marginBottom: 56,
 
   '.ant-number .ant-typography': {

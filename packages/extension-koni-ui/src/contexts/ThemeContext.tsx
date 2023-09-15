@@ -126,6 +126,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       marginLeft: token.marginXS
     },
 
+    '.mr-xs': {
+      marginRight: token.marginXS
+    },
+
     '.ml-xxs': {
       marginLeft: token.marginXXS
     },
@@ -227,6 +231,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         '.ant-sw-modal-content': {
           height: '100%',
           maxHeight: '100%',
+          width: '100%',
           paddingLeft: token.paddingLG,
           paddingRight: token.paddingLG
         },

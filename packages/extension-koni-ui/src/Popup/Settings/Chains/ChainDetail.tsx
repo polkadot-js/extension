@@ -157,6 +157,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         type='phosphor'
         weight={'light'}
       />,
+      tooltip: t('Delete network'),
       onClick: handleDeleteCustomChain,
       disabled: !(_isCustomChain(chainInfo.slug) && !chainState.active)
     }

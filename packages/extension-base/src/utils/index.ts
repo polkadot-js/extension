@@ -360,3 +360,4 @@ export * from './environment';
 export * from './lazy';
 export * from './registry';
 export * from './translate';
+export * from './object';

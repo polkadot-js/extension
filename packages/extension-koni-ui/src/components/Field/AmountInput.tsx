@@ -77,6 +77,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           onClick={_onClickMaxBtn}
           size='xs'
           type='ghost'
+          disabled={disabled}
         >
           <span className='max-btn-text'>{t('Max')}</span>
         </Button>

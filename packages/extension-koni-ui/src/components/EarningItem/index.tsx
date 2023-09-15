@@ -18,7 +18,6 @@ interface Props extends ThemeProps {
 
 export const TagTypes = () => {
   const { t } = useTranslation();
-  const { token } = useTheme() as Theme;
 
   return {
     LIQUID_STAKING: {
@@ -43,7 +42,7 @@ export const TagTypes = () => {
         phosphorIcon={HandsClapping}
         weight='fill'
       />,
-      color: token.colorSecondary
+      color: 'success'
     },
     NOMINATION_POOL: {
       label: t('Nomination pool'),
@@ -51,7 +50,7 @@ export const TagTypes = () => {
         phosphorIcon={HandsClapping}
         weight='fill'
       />,
-      color: 'success'
+      color: 'secondary'
     },
     PARACHAIN_STAKING: {
       label: t('Parachain staking'),
@@ -59,7 +58,7 @@ export const TagTypes = () => {
         phosphorIcon={HandsClapping}
         weight='fill'
       />,
-      color: token.colorSecondary
+      color: 'yellow'
     },
     NATIVE_STAKING: {
       label: t('Native staking'),

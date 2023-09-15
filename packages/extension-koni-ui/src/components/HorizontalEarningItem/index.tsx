@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainAssetInfo, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
 import { CheckCircle, Database, HandsClapping, Leaf, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
@@ -76,6 +77,8 @@ const Component: React.FC<Props> = ({ className, onClickCalculatorBtn, onClickSt
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { chain, description, name, type } = yieldPoolInfo;
+
+  const tokenInfo = useGetChainAssetInfo(yieldPositionInfo.balance[0].slug) as _ChainAsset;
 
   return (
     <Web3Block
@@ -193,22 +196,22 @@ const Component: React.FC<Props> = ({ className, onClickCalculatorBtn, onClickSt
             <Typography.Text style={{ color: token.colorSuccess, fontWeight: '600' }}>{'Earning reward'}</Typography.Text>
           </div>
           <Number
-            decimal={10}
+            decimal={tokenInfo.decimals || 0}
             decimalOpacity={0.4}
             size={30}
-            suffix={'DOT'}
+            suffix={tokenInfo.symbol}
             unitOpacity={0.4}
-            value={100000}
+            value={yieldPositionInfo.balance[0].totalBalance} // TODO
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
             <Typography.Text style={{ color: token.colorTextLight4 }}>{t('Total rewards:')}</Typography.Text>
             <Number
-              decimal={10}
+              decimal={tokenInfo.decimals || 0}
               decimalColor={token.colorSuccess}
               intColor={token.colorSuccess}
-              suffix={'DOT'}
+              suffix={tokenInfo.symbol}
               unitColor={token.colorSuccess}
-              value={yieldPositionInfo.balance[0].totalBalance} // TODO: improve this
+              value={'0'} // TODO: improve this
             />
           </div>
         </div>

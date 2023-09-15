@@ -148,26 +148,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [selectedFilters, filterOptions, t]);
 
-  const resultList = useMemo((): YieldPoolInfo[] => {
-    return [...Object.values(poolInfo)]
-      .sort((a: YieldPoolInfo, b: YieldPoolInfo) => {
-        switch (sortSelection) {
-          case SortKey.TOTAL_VALUE:
-            if (a.stats && b.stats && a.stats.tvl && b.stats.tvl) {
-              return parseFloat(a.stats.tvl) - parseFloat(b.stats.tvl);
-            } else {
-              return 0;
-            }
-
-          default:
-            return 0;
-        }
-      });
-  }, [poolInfo, sortSelection]);
-
   const sortingLabel = useMemo(() => {
     return sortingOptions.find((item) => item.value === sortSelection)?.label || '';
-  }, [selectedFilters, filterOptions, t]);
+  }, [sortingOptions, sortSelection]);
 
   return (
     <PageWrapper
@@ -255,7 +238,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           className={CN('earning-management__container')}
           enableSearchInput={false}
           filterBy={filterFunction}
-          list={resultList}
+          list={yieldPositionList}
           renderItem={renderEarningItem}
           renderOnScroll={true}
           renderWhenEmpty={<></>}

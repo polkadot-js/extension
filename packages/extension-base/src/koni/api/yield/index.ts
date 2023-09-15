@@ -30,7 +30,7 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
     const chainInfo = chainInfoMap[poolInfo.chain];
 
     if (YieldPoolType.NATIVE_STAKING === poolInfo.type) {
-      const unsub = await subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
+      const unsub = subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
 
       // @ts-ignore
       unsubList.push(unsub);
@@ -40,7 +40,7 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
       // @ts-ignore
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___acala_liquid_staking') {
-      const unsub = subscribeAcalaLiquidStakingStats(poolInfo, callback);
+      const unsub = await subscribeAcalaLiquidStakingStats(poolInfo, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___interlay_lending') {

@@ -7,8 +7,24 @@ import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainInfo } from '@subwallet/chain-list/types';
 
-export function subscribeAcalaLiquidStakingStats (poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
+export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
+  const substrateApi = await chainApi.isReady;
+
+  const [_bumpEraFrequency, _commissionRate, _estimatedRewardRatePerEra] = await Promise.all([
+    substrateApi.api.query.homa.bumpEraFrequency(),
+    substrateApi.api.query.homa.commissionRate(),
+    substrateApi.api.query.homa.estimatedRewardRatePerEra()
+  ]);
+
+  const eraFrequency = _bumpEraFrequency.toPrimitive() as number;
+  const commissionRate = _commissionRate.toPrimitive() as number;
+  const estimatedRewardRate = _estimatedRewardRatePerEra.toPrimitive() as number;
+
+  console.log('here', eraFrequency, commissionRate, estimatedRewardRate);
+
   function getPoolStat () {
     // eslint-disable-next-line node/no-callback-literal
     callback({

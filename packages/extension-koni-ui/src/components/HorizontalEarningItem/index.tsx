@@ -72,7 +72,7 @@ export const TagTypes = () => {
   };
 };
 
-const Component: React.FC<Props> = ({ className, onClickCalculatorBtn, onClickStakeBtn, yieldPoolInfo }: Props) => {
+const Component: React.FC<Props> = ({ className, onClickCalculatorBtn, onClickStakeBtn, yieldPoolInfo, yieldPositionInfo }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { chain, description, name, type } = yieldPoolInfo;
@@ -208,7 +208,7 @@ const Component: React.FC<Props> = ({ className, onClickCalculatorBtn, onClickSt
               intColor={token.colorSuccess}
               suffix={'DOT'}
               unitColor={token.colorSuccess}
-              value={10000000}
+              value={yieldPositionInfo.balance[0].totalBalance} // TODO: improve this
             />
           </div>
         </div>

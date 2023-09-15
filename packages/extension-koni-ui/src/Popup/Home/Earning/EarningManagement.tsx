@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { FilterModal, Layout, PageWrapper, SortingModal } from '@subwallet/extension-koni-ui/components';
 import EarningBtn from '@subwallet/extension-koni-ui/components/EarningBtn';
 import HorizontalEarningItem from '@subwallet/extension-koni-ui/components/HorizontalEarningItem';
@@ -38,7 +38,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
-  const { poolInfo, yieldPosition } = useSelector((state: RootState) => state.yieldPool);
+  const { poolInfo: poolInfoMap, yieldPosition: yieldPositionList } = useSelector((state: RootState) => state.yieldPool);
   const { activeModal } = useContext(ModalContext);
   const [selectedItem, setSelectedItem] = useState<YieldPoolInfo | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
@@ -51,8 +51,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     { label: t('Parachain staking'), value: YieldPoolType.PARACHAIN_STAKING },
     { label: t('Single farming'), value: YieldPoolType.SINGLE_FARMING }
   ], [t]);
-
-  console.log('yieldPosition', yieldPosition);
 
   const sortingOptions: SortOption[] = useMemo(() => {
     return [
@@ -124,16 +122,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     navigate(`/transaction/earn/${item.slug}`);
   }, [navigate]);
 
-  const renderEarningItem = useCallback((item: YieldPoolInfo) => {
+  const renderEarningItem = useCallback((item: YieldPositionInfo) => {
+    const poolInfo = poolInfoMap[item.slug];
+
     return (
       <HorizontalEarningItem
-        item={item}
         key={item.slug}
-        onClickCalculatorBtn={() => onClickCalculatorBtn(item)}
-        onClickStakeBtn={() => onClickStakeBtn(item)}
+        onClickCalculatorBtn={() => onClickCalculatorBtn(poolInfo)}
+        onClickStakeBtn={() => onClickStakeBtn(poolInfo)}
+        yieldPoolInfo={poolInfo}
+        yieldPositionInfo={item}
       />
     );
-  }, [onClickCalculatorBtn, onClickStakeBtn]);
+  }, [onClickCalculatorBtn, onClickStakeBtn, poolInfoMap]);
 
   const filterLabel = useMemo(() => {
     if (!selectedFilters.length) {

@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
-import { _BALANCE_PARSING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _BALANCE_PARSING_CHAIN_GROUP, EVM_REFORMAT_DECIMALS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
@@ -66,9 +66,15 @@ export async function getEVMTransactionObject (
 
   transactionObject.gas = gasLimit;
 
-  const estimateFee = parseInt(gasPrice) * gasLimit;
+  const estimateFee = new BN(gasLimit).mul(new BN(gasPrice));
 
-  transactionObject.value = transferAll ? new BN(value).add(new BN(estimateFee).neg()) : value;
+  transactionObject.value = transferAll ? new BN(value).sub(estimateFee).toString() : value;
+
+  if (EVM_REFORMAT_DECIMALS.acala.includes(networkKey)) {
+    const numberReplace = 18 - 12;
+
+    transactionObject.value = transactionObject.value.substring(0, transactionObject.value.length - 6) + new Array(numberReplace).fill('0').join('');
+  }
 
   return [transactionObject, transactionObject.value.toString()];
 }

@@ -3,6 +3,7 @@
 
 import '@polkadot/types-augment';
 
+import { EVM_PASS_CONNECT_STATUS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainConnectionStatus, _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
@@ -10,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import Web3 from 'web3';
 import { HttpProvider, WebsocketProvider } from 'web3-core';
 
-const acalaEvmNetworks: string[] = ['acala_evm', 'karura_evm'];
+const acalaEvmNetworks: string[] = EVM_PASS_CONNECT_STATUS.acala;
 
 export class EvmApi implements _EvmApi {
   chainSlug: string;

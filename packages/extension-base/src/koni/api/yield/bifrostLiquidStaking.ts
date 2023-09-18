@@ -216,3 +216,11 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
 
   return [ExtrinsicType.MINT_VDOT, extrinsic];
 }
+
+export function getBifrostLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string) {
+  const rewardTokenSlug = params.poolInfo.rewardAssets[0];
+  const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
+  const substrateApi = params.substrateApiMap[params.poolInfo.chain];
+
+  return substrateApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount);
+}

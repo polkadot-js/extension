@@ -4,6 +4,7 @@
 import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -101,6 +102,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [navigate]);
 
   const emptyNft = useCallback(() => {
+    if (isWebUI) {
+      return (
+        <NoContent
+          className={'__no-content-block'}
+          pageType={PAGE_TYPE.NFT_COLLECTION_DETAIL}
+        />
+      );
+    }
+
     return (
       <EmptyList
         emptyMessage={t('Your NFT collectible will appear here!')}
@@ -108,7 +118,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         phosphorIcon={Image}
       />
     );
-  }, [t]);
+  }, [isWebUI, t]);
 
   const handleDeleteNftCollection = useCallback(() => {
     handleSimpleConfirmModal().then(() => {
@@ -180,37 +190,42 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         {isWebUI
           ? (
             <>
-              <div className={'nft-item-list-wrapper'}>
-                <SwList
-                  className={CN('nft_item_list')}
-                  displayGrid={true}
-                  enableSearchInput={true}
-                  gridGap={'14px'}
-                  list={nftList}
-                  minColumnWidth={'160px'}
-                  renderItem={renderNft}
-                  renderOnScroll={true}
-                  renderWhenEmpty={emptyNft}
-                  searchBy={searchNft}
-                  searchMinCharactersCount={2}
-                  searchTerm={outletContext.searchInput}
-                />
-              </div>
-
-              <Button
-                block
-                disabled={!(originAssetInfo && _isSmartContractToken(originAssetInfo) && _isCustomAsset(originAssetInfo.slug))}
-                icon={(
-                  <Icon
-                    phosphorIcon={Trash}
-                    size='xs'
+              {!!nftList.length && (
+                <div className={'nft-item-list-wrapper'}>
+                  <SwList
+                    className={CN('nft_item_list')}
+                    displayGrid={true}
+                    enableSearchInput={true}
+                    gridGap={'14px'}
+                    list={nftList}
+                    minColumnWidth={'160px'}
+                    renderItem={renderNft}
+                    renderOnScroll={true}
+                    renderWhenEmpty={emptyNft}
+                    searchBy={searchNft}
+                    searchMinCharactersCount={2}
+                    searchTerm={outletContext.searchInput}
                   />
-                )}
-                onClick={handleDeleteNftCollection}
-                type='ghost'
-              >
-                {t('Delete this collectible')}
-              </Button>
+                </div>
+              )}
+
+              <div className={'__delete-nft-button-wrapper'}>
+                <Button
+                  block={!isWebUI}
+                  className={'__delete-nft-button'}
+                  disabled={!(originAssetInfo && _isSmartContractToken(originAssetInfo) && _isCustomAsset(originAssetInfo.slug))}
+                  icon={(
+                    <Icon
+                      phosphorIcon={Trash}
+                      size='xs'
+                    />
+                  )}
+                  onClick={handleDeleteNftCollection}
+                  type='ghost'
+                >
+                  {t('Delete this collectible')}
+                </Button>
+              </div>
             </>
           )
           : (
@@ -273,6 +288,29 @@ const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Prop
 
     '.nft-item-list-wrapper': {
       flex: 1
+    },
+
+    '.web-ui-enable &': {
+      '.nft-item-list-wrapper': {
+        flexGrow: 0
+      },
+
+      '.__no-content-block': {
+        paddingTop: 92,
+        paddingBottom: 132,
+        height: 'auto'
+      },
+
+      '.__delete-nft-button-wrapper': {
+        display: 'flex',
+        justifyContent: 'center'
+      },
+
+      '.__delete-nft-button': {
+        '&:not(:hover)': {
+          color: token.colorTextLight4
+        }
+      }
     }
   });
 });

@@ -156,7 +156,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return (
         <NoContent
           className={'__no-content-block'}
-          pageType={PAGE_TYPE.NFT}
+          pageType={PAGE_TYPE.NFT_COLLECTION}
         />
       );
     }
@@ -221,7 +221,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return (
       <NoContent
         className={'__no-content-block'}
-        pageType={PAGE_TYPE.NFT}
+        pageType={PAGE_TYPE.NFT_COLLECTION}
       />
     );
   }, [isWebUI, nftCollections, renderNftCollection, emptyNft, searchCollection, outletContext?.searchInput, t]);

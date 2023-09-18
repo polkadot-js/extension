@@ -1,4 +1,4 @@
-// [object Object]
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
@@ -85,13 +85,14 @@ const Component = ({ className, item }: Props) => {
     }
 
     return { dailyEarnings, weeklyEarnings, monthlyEarnings, yearlyEarnings };
-  }, [currentAmount]);
+  }, [currentAmount, item?.stats?.assetEarning]);
 
   const onCloseModal = useCallback(() => {
     inactiveModal(STAKING_CALCULATOR_MODAL_ID);
   }, [inactiveModal]);
 
   const onFieldsChange: FormCallbacks<EarningCalculatorFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+    // Empty
   }, []);
 
   return (

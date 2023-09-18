@@ -14,7 +14,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetChainPrefixBySlug, useHandleSubmitTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
-import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingProcessModal';
+import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/StakingProcessModal';
 import { fetchEarningChainValidators, handleYieldStep } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/earning/earningHandler';
 import { TransactionContent } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
 import FreeBalanceToStake from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalanceToStake';
@@ -388,7 +388,7 @@ const Component = () => {
           });
           onSuccess(rs);
         })
-        .catch((error) => {
+        .catch((error: Error) => {
           dispatchProcessState({
             type: ProcessReducerActionType.UPDATE_STEP_RESULT,
             payload: processState.stepResults[processState.currentStep].status = ExtrinsicStatus.FAIL
@@ -399,7 +399,17 @@ const Component = () => {
           setSubmitLoading(false);
         });
     }, 300);
-  }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, isProcessDone, onError, onSuccess, processState.currentStep, processState.feeStructure, processState.steps]);
+  }, [
+    currentAmount,
+    currentPoolInfo,
+    form,
+    getSelectedPool,
+    getSelectedValidators,
+    isProcessDone,
+    onError,
+    onSuccess,
+    processState
+  ]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -429,10 +439,12 @@ const Component = () => {
               {processState.steps && (
                 <div style={{ display: 'flex', alignItems: 'center', paddingBottom: token.paddingSM }}>
                   {isLoading
-                    ? <ActivityIndicator
+                    ? (
+                      <ActivityIndicator
                         prefixCls={'ant'}
                         size={'24px'}
                       />
+                    )
                     : (
                       <Typography.Text
                         size={'lg'}
@@ -600,10 +612,10 @@ const Component = () => {
         </div>
       )}
 
-      {<StakingProcessModal
+      <StakingProcessModal
         currentStep={processState.currentStep}
         yieldSteps={processState.steps}
-      />}
+      />
     </div>
   );
 };

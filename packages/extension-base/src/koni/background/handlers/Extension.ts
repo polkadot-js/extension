@@ -3854,7 +3854,7 @@ export default class KoniExtension {
 
   // TODO: subscribe YieldPosition
 
-  private subscribeYieldPosition (id: string, port: chrome.runtime.Port) {
+  private async subscribeYieldPosition (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(yield.subscribeYieldPosition)'>(id, port);
 
     const yieldPositionSubscription = this.#koniState.subscribeYieldPosition().subscribe({
@@ -4060,7 +4060,7 @@ export default class KoniExtension {
       case 'pri(yield.getStakingNominationPools)':
         return await this.getYieldStakingNominationPools(request as YieldPoolInfo);
       case 'pri(yield.subscribeYieldPosition)':
-        return this.subscribeYieldPosition(id, port);
+        return await this.subscribeYieldPosition(id, port);
 
       /* Account management */
       // Add account

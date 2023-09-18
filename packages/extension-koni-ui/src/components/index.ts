@@ -4,6 +4,9 @@
 export { default as AlertBox } from './Alert';
 export { default as BackgroundExpandView } from './BackgroundExpandView';
 export { default as ChainItemFooter } from './ChainItemFooter';
+export { default as EarningBtn } from './EarningBtn';
+export { default as EarningItem } from './EarningItem';
+export { default as EarningProcessItem } from './EarningProcessItem';
 export { default as EmptyList } from './EmptyList';
 export { default as GeneralEmptyList } from './GeneralEmptyList';
 export { default as LoadingScreen } from './LoadingScreen';

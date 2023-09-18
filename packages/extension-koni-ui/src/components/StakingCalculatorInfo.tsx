@@ -3,7 +3,7 @@
 
 import EarningInfoItem from '@subwallet/extension-koni-ui/components/EarningInfoItem';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { TransformAssetEarning } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
+import { TransformAssetEarning } from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/EarningCalculatorModal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Divider, Number, Typography } from '@subwallet/react-ui';

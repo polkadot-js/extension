@@ -5,7 +5,7 @@ import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import ErrorFallback from '@subwallet/extension-koni-ui/Popup/ErrorFallback';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
-import { i18nPromise } from '@subwallet/extension-koni-ui/utils/common/i18n';
+import { i18nPromise } from '@subwallet/extension-koni-ui/utils';
 import React, { ComponentType } from 'react';
 import { createBrowserRouter, IndexRouteObject, Outlet, useLocation, useOutletContext } from 'react-router-dom';
 
@@ -120,8 +120,10 @@ const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import
 const ConnectionList = new LazyLoader('ConnectionList', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
 const ConnectionDetail = new LazyLoader('ConnectionDetail', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
-const Earning = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning'));
-const EarningManagement = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
+const EarningOutlet = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/index'));
+const EarningOverview = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/Overview'));
+const EarningManagement = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/Detail'));
+const EarningNoRouter = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/NoRouter'));
 
 // A Placeholder page
 export function Example () {
@@ -163,8 +165,14 @@ export const router = createBrowserRouter([
           },
           Crowdloans.generateRouterObject('crowdloans'),
           Staking.generateRouterObject('staking'),
-          Earning.generateRouterObject('earning', true),
-          EarningManagement.generateRouterObject('earning-detail', true),
+          {
+            ...EarningOutlet.generateRouterObject('earning'),
+            children: [
+              EarningOverview.generateRouterObject('overview'),
+              EarningManagement.generateRouterObject('detail'),
+              EarningNoRouter.generateRouterObject('')
+            ]
+          },
           History.generateRouterObject('history'),
           History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
           {

@@ -1,25 +1,27 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import { FilterModal, SortingModal } from '@subwallet/extension-koni-ui/components';
-import EarningBtn from '@subwallet/extension-koni-ui/components/EarningBtn';
+import { EarningBtn, FilterModal, SortingModal } from '@subwallet/extension-koni-ui/components';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, ModalContext, Typography } from '@subwallet/react-ui';
 import { ButtonType } from '@subwallet/react-ui/es/button';
-import { CaretDown, FadersHorizontal, IconProps, Question, SortAscending } from 'phosphor-react';
+import CN from 'classnames';
+import { CaretDown, FadersHorizontal, IconProps, Plus, Question, SortAscending } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
   filterSelectionMap: Record<string, boolean>;
   onApplyFilter: () => void;
-  onChangeFilterOption: (value: string, isCheck: boolean) => void
+  onChangeFilterOption: (value: string, isCheck: boolean) => void;
   onCloseFilterModal: () => void;
   selectedFilters: string[];
   onChangeSortOpt: (value: string) => void;
-  onResetSort: () => void
+  onResetSort: () => void;
+  showAdd?: boolean;
 }
 
 const FILTER_MODAL_ID = 'earning-filter-modal';
@@ -83,10 +85,16 @@ const ToolbarBtn = styled(_ToolbarBtn)<ToolbarBtnProps>(({ theme: { token } }: T
   });
 });
 
-function Component ({ className = '', filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters }: Props): React.ReactElement<Props> {
+function Component (props: Props): React.ReactElement<Props> {
+  const { className = '', filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters, showAdd } = props;
+
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
   const { token } = useTheme() as Theme;
+
   const { activeModal } = useContext(ModalContext);
+
   const filterOptions = useMemo(() => [
     { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
     { label: t('Native staking'), value: YieldPoolType.NATIVE_STAKING },
@@ -121,11 +129,17 @@ function Component ({ className = '', filterSelectionMap, onApplyFilter, onChang
 
   const sortingLabel = useMemo(() => {
     return sortingOptions.find((item) => item.value === sortSelection)?.label || '';
-  }, [selectedFilters, filterOptions, t]);
+  }, [sortingOptions, sortSelection]);
 
-  const openFilterModal = useCallback(() => activeModal(FILTER_MODAL_ID), []);
-  const openSortingModal = useCallback(() => activeModal(SORTING_MODAL_ID), []);
-  const onClickHelpBtn = useCallback(() => {}, []);
+  const openFilterModal = useCallback(() => activeModal(FILTER_MODAL_ID), [activeModal]);
+  const openSortingModal = useCallback(() => activeModal(SORTING_MODAL_ID), [activeModal]);
+  const onClickHelpBtn = useCallback(() => {
+    // TODO: Add action
+  }, []);
+
+  const onClickMore = useCallback(() => {
+    navigate('/home/earning/overview');
+  }, [navigate]);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);
@@ -142,7 +156,7 @@ function Component ({ className = '', filterSelectionMap, onApplyFilter, onChang
       phosphorIcon={icon}
       size={'sm'}
     />
-  ), []);
+  ), [token]);
 
   return (
     <div className={className}>
@@ -155,7 +169,22 @@ function Component ({ className = '', filterSelectionMap, onApplyFilter, onChang
         </EarningBtn>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXS }}>
+      <div className={CN('button-group')}>
+        {
+          showAdd && (
+            <Button
+              icon={
+                <Icon
+                  phosphorIcon={Plus}
+                  weight='fill'
+                />
+              }
+              onClick={onClickMore}
+              size='xs'
+              type='ghost'
+            />
+          )
+        }
         <ToolbarBtn
           icon={
             <Icon
@@ -212,8 +241,13 @@ const EarningToolbar = styled(Component)<Props>(({ theme: { token } }: Props) =>
     '.earning-filter-icon': {
       width: '12px',
       height: '12px'
-    }
+    },
 
+    '.button-group': {
+      display: 'flex',
+      alignItems: 'center',
+      gap: token.paddingXS
+    }
   });
 });
 

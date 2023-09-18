@@ -6,18 +6,17 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
-import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { ClaimRewardParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Checkbox, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -25,55 +24,45 @@ import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
-import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
 type Props = ThemeProps;
 
-enum FormFieldName {
-  BOND_REWARD = 'bond-reward'
-}
-
-interface ClaimRewardFormProps extends TransactionFormBaseProps {
-  [FormFieldName.BOND_REWARD]: boolean;
-}
+const hideFields: Array<keyof ClaimRewardParams> = ['chain', 'type', 'asset'];
+const validateFields: Array<keyof ClaimRewardParams> = ['from'];
 
 const Component: React.FC<Props> = (props: Props) => {
+  useSetCurrentPage('/transaction/claim-reward');
   const { className } = props;
-
-  const { chain: stakingChain, type: _stakingType } = useParams();
-  const stakingType = _stakingType as StakingType;
 
   const navigate = useNavigate();
 
   const dataContext = useContext(DataContext);
-  const { asset, chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
+  const { defaultData, onDone, persistData } = useTransactionContext<ClaimRewardParams>();
+  const { chain, type } = defaultData;
 
-  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
+  const [form] = Form.useForm<ClaimRewardParams>();
+  const formDefault = useMemo((): ClaimRewardParams => ({ ...defaultData }), [defaultData]);
+
+  const { isAllAccount } = useSelector((state) => state.accountState);
   const { stakingRewardMap } = useSelector((state) => state.staking);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
-  const allNominatorInfo = useGetNominatorInfo(stakingChain, stakingType);
+  const allNominatorInfo = useGetNominatorInfo(chain, type);
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
 
+  const from = useWatchTransaction('from', form, defaultData);
+
   const reward = useMemo((): StakingRewardItem | undefined => {
-    return stakingRewardMap.find((item) => item.chain === chain && item.address === from && item.type === stakingType);
-  }, [chain, from, stakingRewardMap, stakingType]);
+    return stakingRewardMap.find((item) => item.chain === chain && item.address === from && item.type === type);
+  }, [chain, from, stakingRewardMap, type]);
 
   const rewardList = useMemo((): StakingRewardItem[] => {
-    return stakingRewardMap.filter((item) => item.chain === chain && item.type === stakingType);
-  }, [chain, stakingRewardMap, stakingType]);
+    return stakingRewardMap.filter((item) => item.chain === chain && item.type === type);
+  }, [chain, stakingRewardMap, type]);
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
-
-  const [form] = Form.useForm<ClaimRewardFormProps>();
-  const formDefault = useMemo((): ClaimRewardFormProps => ({
-    from: from,
-    chain: chain,
-    asset: asset,
-    [FormFieldName.BOND_REWARD]: true
-  }), [asset, chain, from]);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
@@ -81,35 +70,29 @@ const Component: React.FC<Props> = (props: Props) => {
     navigate('/home/staking');
   }, [navigate]);
 
-  const onFieldsChange: FormCallbacks<ClaimRewardFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<ClaimRewardParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
-    const { error } = simpleCheckForm(allFields);
+    const { empty, error } = simpleCheckForm(allFields, ['asset']);
 
-    const changesMap = convertFieldToObject<ClaimRewardFormProps>(changedFields);
-    const allMap = convertFieldToObject<ClaimRewardFormProps>(allFields);
+    const allMap = convertFieldToObject<ClaimRewardParams>(allFields);
 
-    const { from } = changesMap;
-
-    if (from !== undefined) {
-      setFrom(from);
-    }
-
-    setIsDisable(error || !(allMap.from ?? true));
-  }, [setFrom]);
+    setIsDisable(error || empty);
+    persistData(allMap);
+  }, [persistData]);
 
   const { t } = useTranslation();
 
-  const onSubmit: FormCallbacks<ClaimRewardFormProps>['onFinish'] = useCallback((values: ClaimRewardFormProps) => {
+  const onSubmit: FormCallbacks<ClaimRewardParams>['onFinish'] = useCallback((values: ClaimRewardParams) => {
     setLoading(true);
 
-    const { [FormFieldName.BOND_REWARD]: bondReward } = values;
+    const { bondReward } = values;
 
     setTimeout(() => {
       submitStakeClaimReward({
         address: from,
         chain: chain,
         bondReward: bondReward,
-        stakingType: stakingType,
+        stakingType: type,
         unclaimedReward: reward?.unclaimedReward
       })
         .then(onSuccess)
@@ -118,19 +101,18 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         });
     }, 300);
-  }, [chain, from, onError, onSuccess, reward?.unclaimedReward, stakingType]);
+  }, [chain, from, onError, onSuccess, reward?.unclaimedReward, type]);
 
   const checkAction = usePreCheckAction(from);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
-    const _stakingChain = stakingChain || '';
-    const chain = chainInfoMap[_stakingChain];
+    const chainInfo = chainInfoMap[chain];
 
-    if (!chain) {
+    if (!chainInfo) {
       return false;
     }
 
-    if (account.originGenesisHash && _getSubstrateGenesisHash(chain) !== account.originGenesisHash) {
+    if (account.originGenesisHash && _getSubstrateGenesisHash(chainInfo) !== account.originGenesisHash) {
       return false;
     }
 
@@ -142,7 +124,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return false;
     }
 
-    const isEvmChain = _isChainEvmCompatible(chain);
+    const isEvmChain = _isChainEvmCompatible(chainInfo);
 
     if (isEvmChain !== isEthereumAddress(account.address)) {
       return false;
@@ -156,33 +138,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
     const reward = rewardList.find((value) => isSameAddress(value.address, account.address));
 
-    const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(_stakingChain);
-    const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(_stakingChain);
+    const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(chain);
+    const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(chain);
     const bnUnclaimedReward = new BN(reward?.unclaimedReward || '0');
 
-    return ((stakingType === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) || (isAstarNetwork && !!nominatorMetadata.nominations.length);
-  }, [allNominatorInfo, chainInfoMap, rewardList, stakingChain, stakingType]);
+    return ((type === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) || (isAstarNetwork && !!nominatorMetadata.nominations.length);
+  }, [allNominatorInfo, chainInfoMap, rewardList, chain, type]);
 
-  useEffect(() => {
-    const address = currentAccount?.address || '';
-
-    if (address) {
-      if (!isAccountAll(address)) {
-        setFrom(address);
-      }
-    }
-  }, [currentAccount?.address, form, setFrom]);
-
-  useEffect(() => {
-    setChain(stakingChain || '');
-  }, [setChain, stakingChain]);
-
-  useEffect(() => {
-    // Trick to trigger validate when case single account
-    setTimeout(() => {
-      form.validateFields().finally(noop);
-    }, 500);
-  }, [form]);
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
 
   return (
     <div className={className}>
@@ -195,6 +159,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
           >
+            <HiddenInput fields={hideFields} />
             <Form.Item
               hidden={!isAllAccount}
               name={'from'}
@@ -229,18 +194,15 @@ const Component: React.FC<Props> = (props: Props) => {
                 }
               </MetaInfo>
             </Form.Item>
-            {
-              stakingType === StakingType.POOLED && (
-                <Form.Item
-                  name={FormFieldName.BOND_REWARD}
-                  valuePropName='checked'
-                >
-                  <Checkbox>
-                    <span className={'__option-label'}>{t('Bond reward after claim')}</span>
-                  </Checkbox>
-                </Form.Item>
-              )
-            }
+            <Form.Item
+              hidden={type !== StakingType.POOLED}
+              name={'bondReward'}
+              valuePropName='checked'
+            >
+              <Checkbox>
+                <span className={'__option-label'}>{t('Bond reward after claim')}</span>
+              </Checkbox>
+            </Form.Item>
           </Form>
         </PageWrapper>
       </TransactionContent>

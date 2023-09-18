@@ -19,6 +19,7 @@ export default class RequestService {
   // Common
   readonly #chainService: ChainService;
   readonly settingService: SettingService;
+  readonly keyringService: KeyringService;
   readonly #popupHandler: PopupHandler;
   readonly #metadataRequestHandler: MetadataRequestHandler;
   readonly #authRequestHandler: AuthRequestHandler;
@@ -28,9 +29,10 @@ export default class RequestService {
   readonly #notSupportWCRequestHandler: NotSupportWCRequestHandler;
 
   // Common
-  constructor (chainService: ChainService, settingService: SettingService, private keyringService: KeyringService) {
+  constructor (chainService: ChainService, settingService: SettingService, keyringService: KeyringService) {
     this.#chainService = chainService;
     this.settingService = settingService;
+    this.keyringService = keyringService;
     this.#popupHandler = new PopupHandler(this);
     this.#metadataRequestHandler = new MetadataRequestHandler(this);
     this.#authRequestHandler = new AuthRequestHandler(this, this.#chainService, this.keyringService);

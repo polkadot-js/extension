@@ -57,7 +57,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       })
         .then((data) => {
           if (!data.status) {
-            onError(data.errors[0]);
+            onError(t(data.errors[0]));
           } else {
             unlock();
           }
@@ -69,7 +69,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }, 500);
-  }, [onError, unlock]);
+  }, [onError, unlock, t]);
 
   const onReset = useCallback(() => {
     activeModal(RESET_WALLET_MODAL);

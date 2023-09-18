@@ -113,7 +113,7 @@ export class InputDataDecoder {
       try {
         this.abi = JSON.parse(prop) as AbiItem[];
       } catch (err) {
-        throw new Error(`Invalid ABI: ${(err as Error).message}`);
+        throw new Error('Invalid ABI: ' + (err as Error).message);
       }
     } else if (checkArrayAbiItems(prop)) {
       this.abi = prop as AbiItem[];

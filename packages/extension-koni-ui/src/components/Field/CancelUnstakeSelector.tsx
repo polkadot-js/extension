@@ -35,7 +35,7 @@ const renderItem = (item: UnstakingInfo, isSelected: boolean) => (
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, id = 'cancel-unstake', label, nominators, placeholder, statusHelp, value } = props;
+  const { chain, className = '', defaultValue, disabled, id = 'cancel-unstake', label, nominators, placeholder, statusHelp, value } = props;
 
   const { token } = useTheme() as Theme;
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
@@ -74,7 +74,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   useEffect(() => {
     if (!value) {
-      onSelect(items[0]?.key || '');
+      if (defaultValue || items[0]?.key) {
+        onSelect(defaultValue || items[0].key);
+      }
     } else {
       const existed = items.find((item) => item.key === value);
 
@@ -82,7 +84,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         onSelect(items[0]?.key || '');
       }
     }
-  }, [value, items, onSelect]);
+  }, [value, items, onSelect, defaultValue]);
 
   return (
     <>

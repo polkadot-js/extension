@@ -1,21 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PREDEFINED_BUY_TOKEN } from '@subwallet/extension-koni-ui/constants';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getAccountType } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Button, Icon, Number } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { CaretLeft, CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
   balanceValue: SwNumberProps['value'];
   symbol: string;
+  isSupportBuyTokens: boolean;
   isShrink: boolean;
   onClickBack: () => void;
   onOpenSendFund: () => void;
@@ -27,38 +26,14 @@ function Component (
   { balanceValue,
     className = '',
     isShrink,
+    isSupportBuyTokens,
     onClickBack,
     onOpenBuyTokens,
     onOpenReceive,
     onOpenSendFund,
     symbol }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const accounts = useSelector((state: RootState) => state.accountState.accounts);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
   const { isShowBalance } = useSelector((state: RootState) => state.settings);
-
-  const isSupportBuyTokens = useMemo(() => {
-    const buyInfo = PREDEFINED_BUY_TOKEN[symbol];
-
-    if (buyInfo) {
-      const supportType = buyInfo.support;
-
-      if (isAllAccount) {
-        for (const account of accounts) {
-          if (supportType === getAccountType(account.address)) {
-            return true;
-          }
-        }
-      } else {
-        if (currentAccount?.address && (supportType === getAccountType(currentAccount?.address))) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }, [accounts, currentAccount?.address, isAllAccount, symbol]);
 
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RequestSignatures, TransportRequestMessage, TransportResponseMessage } from '@subwallet/extension-base/background/types';
-import { PORT_CONTENT, PORT_EXTENSION, PORT_MOBILE } from '@subwallet/extension-base/defaults';
+import { ID_PREFIX, PORT_CONTENT, PORT_EXTENSION, PORT_MOBILE } from '@subwallet/extension-base/defaults';
 import handlers from '@subwallet/extension-base/koni/background/handlers';
 
 export interface CustomResponse<T> {
@@ -38,7 +38,7 @@ export function setupHandlers () {
       }
     };
 
-    if (data.id && data.message) {
+    if (data.id?.startsWith(ID_PREFIX) && data.id && data.message) {
       if (data.message.startsWith('mobile')) {
         port.name = PORT_MOBILE;
       } else if (data.message.startsWith('pri')) {

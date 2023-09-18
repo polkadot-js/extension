@@ -411,7 +411,8 @@ export type LanguageType = 'en'
 |'th'
 |'ur'
 |'vi'
-|'ja';
+|'ja'
+|'ru';
 
 export type LanguageOptionType = {
   text: string;
@@ -490,7 +491,8 @@ export enum ExtrinsicType {
   STAKING_CANCEL_COMPOUNDING = 'staking.cancel_compounding',
   STAKING_CANCEL_UNSTAKE = 'staking.cancel_unstake',
 
-  JOIN_YIELD_POOL = 'earn.join_pool',
+  JOIN_YIELD_POOL = 'earn.join_pool', // TODO: review this
+  MINT_VDOT = 'earn.mint_vdot',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -2170,7 +2172,8 @@ export enum YieldCompoundingPeriod {
 
 export interface YieldAssetEarningStats {
   slug: string
-  apr?: number
+  apr?: number,
+  apy?: number
 }
 
 export interface YieldPoolStats {
@@ -2182,7 +2185,8 @@ export interface YieldPoolStats {
   assetEarning?: YieldAssetEarningStats[],
   farmerCount?: number,
   totalApr?: number,
-  tvl?: string // in $
+  totalApy?: number,
+  tvl?: string // in token
 }
 
 export interface HandleYieldStepParams extends BaseRequestSign {
@@ -2195,7 +2199,11 @@ export interface HandleYieldStepParams extends BaseRequestSign {
 
 export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
 
-export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool;
+export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool | SubmitBifrostLiquidStaking;
+
+export interface SubmitBifrostLiquidStaking {
+  amount: string
+}
 
 export interface SubmitJoinNativeStaking {
   amount: string,

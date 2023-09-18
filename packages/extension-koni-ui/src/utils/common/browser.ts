@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SELECTED_CREATE_ACCOUNT_TYPE_KEY } from '@subwallet/extension-koni-ui/constants';
+import { SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import Bowser from 'bowser';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -21,5 +21,9 @@ export const isFirefox = (): boolean => {
 };
 
 export const setSelectedAccountTypes = (keypairTypes: KeypairType[]) => {
-  localStorage.setItem(SELECTED_CREATE_ACCOUNT_TYPE_KEY, JSON.stringify(keypairTypes));
+  localStorage.setItem(SELECTED_ACCOUNT_TYPE, JSON.stringify(keypairTypes));
+};
+
+export const removeStorage = (key: string) => {
+  localStorage.removeItem(key);
 };

@@ -8,7 +8,7 @@ import { ThemeProvider } from '@subwallet/extension-koni-ui/contexts/ThemeContex
 import { ModalContextProvider } from '@subwallet/react-ui';
 import NotificationProvider from '@subwallet/react-ui/es/notification/NotificationProvider';
 import React from 'react';
-import { RouterProvider } from 'react-router';
+import { RouterProvider } from 'react-router-dom';
 
 import LoadingScreen from '../components/LoadingScreen';
 import { ScreenContextProvider } from '../contexts/ScreenContext';

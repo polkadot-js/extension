@@ -11,7 +11,7 @@ import { Button, Icon, Image } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleLeft, ArrowCircleRight, ArrowSquareUpRight, Clock, Gear, Info, MessengerLogo, Rocket, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export type Props = ThemeProps & {
   isCollapsed: boolean,

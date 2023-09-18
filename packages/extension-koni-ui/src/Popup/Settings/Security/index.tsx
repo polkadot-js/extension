@@ -15,7 +15,7 @@ import { noop } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockLaminated, LockLaminatedOpen, ShieldStar } from 'phosphor-react';
+import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockKeyOpen, LockLaminated, ShieldStar } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -68,10 +68,24 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
 
-  const autoLockOptions = useMemo((): AutoLockOption[] => timeOptions.map((value) => ({
-    value: value,
-    label: t('{{time}} minutes', { replace: { time: value } })
-  })), [t]);
+  const autoLockOptions = useMemo((): AutoLockOption[] => timeOptions.map((value) => {
+    if (value > 0) {
+      return {
+        value: value,
+        label: t('{{time}} minutes', { replace: { time: value } })
+      };
+    } else if (value < 0) {
+      return {
+        value: value,
+        label: t('Required once')
+      };
+    } else {
+      return {
+        value: value,
+        label: t('Always require')
+      };
+    }
+  }), [t]);
 
   const items = useMemo((): SecurityItem[] => [
     {
@@ -89,7 +103,7 @@ const Component: React.FC<Props> = (props: Props) => {
       disabled: false
     },
     {
-      icon: LockLaminatedOpen,
+      icon: LockKeyOpen,
       key: SecurityType.UNLOCK_TYPE,
       title: t('Authenticate with password'),
       url: '',
@@ -320,7 +334,7 @@ const Component: React.FC<Props> = (props: Props) => {
           className={className}
           id={editAutoLockTimeModalId}
           onCancel={onCloseAutoLockTimeModal}
-          title={t('Authenticate with password')}
+          title={t('Wallet auto-lock')}
         >
           <div className='modal-body-container'>
             {
@@ -456,6 +470,14 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '&:hover': {
         '--icon-bg-color': token['green-7']
+      }
+    },
+
+    [`.security-type-${SecurityType.UNLOCK_TYPE}`]: {
+      '--icon-bg-color': token['purple-8'],
+
+      '&:hover': {
+        '--icon-bg-color': token['purple-9']
       }
     },
 

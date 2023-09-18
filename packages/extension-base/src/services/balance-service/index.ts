@@ -9,6 +9,7 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenSlug, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
+import { t } from 'i18next';
 
 export class BalanceService {
   private chainService: ChainService;
@@ -31,14 +32,14 @@ export class BalanceService {
     const chainState = this.chainService.getChainStateByKey(chain);
 
     if (!chainInfo || !chainState || !chainState.active) {
-      return Promise.reject(new BalanceError(BalanceErrorType.NETWORK_ERROR, `Chain ${chain} is not active`));
+      return Promise.reject(new BalanceError(BalanceErrorType.NETWORK_ERROR, t('{{chain}} is inactive. Please enable network', { replace: { chain } })));
     }
 
     const tSlug = tokenSlug || _getChainNativeTokenSlug(chainInfo);
     const tokenInfo = this.chainService.getAssetBySlug(tSlug);
 
     if (!tokenInfo) {
-      return Promise.reject(new BalanceError(BalanceErrorType.TOKEN_ERROR, `Token ${tSlug} is not supported`));
+      return Promise.reject(new BalanceError(BalanceErrorType.TOKEN_ERROR, t('Transfer is currently not available for this token: {{tSlug}}', { replace: { slug: tSlug } })));
     }
 
     return new Promise((resolve, reject) => {
@@ -67,7 +68,7 @@ export class BalanceService {
       setTimeout(() => {
         if (hasError) {
           unsub();
-          reject(new Error('Get Balance Timeout'));
+          reject(new Error(t('Failed to get balance. Please check your internet connection or change your network endpoint')));
         }
       }, 9999);
     });

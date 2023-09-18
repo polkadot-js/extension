@@ -38,9 +38,9 @@ const Component: React.FC<Props> = (props: Props) => {
         signature: signature
       });
     } else {
-      setError('Invalid signature!');
+      setError(t('Invalid signature!'));
     }
-  }, [onSignature, inactiveModal]);
+  }, [onSignature, inactiveModal, t]);
 
   const onError = useCallback((error: string) => {
     setError(error);

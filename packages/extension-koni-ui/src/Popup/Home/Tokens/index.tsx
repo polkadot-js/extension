@@ -8,17 +8,19 @@ import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/Receiv
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
+import { DEFAULT_TRANSFER_PARAMS, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useReceiveQR from '@subwallet/extension-koni-ui/hooks/screen/home/useReceiveQR';
 import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/UpperBlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
+import { isAccountAll, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import classNames from 'classnames';
@@ -27,6 +29,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import { useSelector } from 'react-redux';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import DetailTable from './DetailTable';
 
@@ -42,6 +45,7 @@ const searchFunc = (item: TokenBalanceItemType, searchText: string) => {
 };
 
 const Component = (): React.ReactElement => {
+  useSetCurrentPage('/home/tokens');
   const { t } = useTranslation();
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const [isShrink, setIsShrink] = useState<boolean>(false);
@@ -51,6 +55,8 @@ const Component = (): React.ReactElement => {
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
+  const [, setStorage] = useLocalStorage<TransferParams>(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
 
   const outletContext: {
     searchInput: string,
@@ -170,9 +176,15 @@ const Component = (): React.ReactElement => {
       return;
     }
 
+    const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+    setStorage({
+      ...DEFAULT_TRANSFER_PARAMS,
+      from: address
+    });
     navigate('/transaction/send-fund');
   },
-  [currentAccount, navigate, notify, t]
+  [currentAccount, navigate, notify, t, setStorage]
   );
 
   const onOpenBuyTokens = useCallback(() => {

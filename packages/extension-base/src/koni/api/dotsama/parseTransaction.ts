@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ArgInfo, EraInfo, FormattedMethod, ResponseParseTransactionSubstrate } from '@subwallet/extension-base/background/KoniTypes';
+import { t } from 'i18next';
 
 import { ApiPromise } from '@polkadot/api';
 import { Call } from '@polkadot/types/interfaces';
@@ -84,7 +85,7 @@ export const parseSubstrateTransaction = (data: string, apiPromise: ApiPromise):
     } catch (e) {
       return {
         ...baseInfo,
-        message: 'Unable to decode method',
+        message: t('Unable to decode the information'),
         method: _method
       };
     }

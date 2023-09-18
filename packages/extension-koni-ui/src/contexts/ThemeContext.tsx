@@ -209,6 +209,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
 
       '.ant-input': {
         overflow: 'hidden'
+      },
+
+      '.ant-input-suffix>span:last-child:empty': {
+        marginRight: token.marginXS
       }
     },
 
@@ -305,8 +309,8 @@ export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactEle
       getPopupContainer={getPopupContainer}
       theme={themeConfig}
     >
-      <TooltipContainer id='tooltip-container' />
       <ThemeGenerator themeConfig={themeConfig}>
+        <TooltipContainer id='tooltip-container' />
         {children}
       </ThemeGenerator>
     </ConfigProvider>

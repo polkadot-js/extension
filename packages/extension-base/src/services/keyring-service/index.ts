@@ -135,6 +135,11 @@ export class KeyringService {
 
   /* Inject */
 
+  public lock () {
+    keyring.lockAll();
+    this.updateKeyringState();
+  }
+
   /* Reset */
   async resetWallet (resetAll: boolean) {
     keyring.resetWallet(resetAll);

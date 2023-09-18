@@ -10,7 +10,8 @@ export const CUSTOMIZE_MODAL = 'customize-modal';
 export const RECEIVE_QR_MODAL = 'receive-qr-modal';
 export const IMPORT_ACCOUNT_MODAL = 'import-account-modal';
 export const ATTACH_ACCOUNT_MODAL = 'attach-account-modal';
-export const NEW_ACCOUNT_MODAL = 'new-account-modal';
+export const NEW_SEED_MODAL = 'new-seed-modal';
+export const IMPORT_SEED_MODAL = 'import-seed-modal';
 export const DERIVE_ACCOUNT_MODAL = 'derive-account-modal';
 export const REQUEST_CREATE_PASSWORD_MODAL = 'request-create-password-modal';
 export const CONFIRMATION_DETAIL_MODAL = 'confirmation-detail-modal';
@@ -30,6 +31,8 @@ export const RESET_WALLET_MODAL = 'reset-wallet-modal';
 export const SEED_PHRASE_MODAL = 'seed-phrase-modal';
 export const ADD_CONNECTION_MODAL = 'add-connection-modal';
 export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
+
+export const TRANSFER_NFT_MODAL = 'transfer-nft-modal';
 
 export const ACCOUNT_EXPORT_MODAL = 'account-export-modal';
 

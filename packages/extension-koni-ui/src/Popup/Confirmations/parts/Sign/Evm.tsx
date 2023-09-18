@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ConfirmationDefinitions, ConfirmationResult, EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { ConfirmationDefinitions, ConfirmationResult, EvmSendTransactionRequest, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useGetChainInfoByChainId, useLedger, useNotification } from '@subwallet/extension-koni-ui/hooks';
@@ -10,7 +10,7 @@ import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { EvmSignatureSupportType } from '@subwallet/extension-koni-ui/types/confirmation';
-import { getSignMode, isEvmMessage } from '@subwallet/extension-koni-ui/utils';
+import { getSignMode, isEvmMessage, removeTransactionPersist } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, Wallet, XCircle } from 'phosphor-react';
@@ -26,6 +26,7 @@ interface Props extends ThemeProps {
   id: string;
   type: EvmSignatureSupportType;
   payload: ConfirmationDefinitions[EvmSignatureSupportType][0];
+  extrinsicType?: ExtrinsicType;
 }
 
 const handleConfirm = async (type: EvmSignatureSupportType, id: string, payload: string) => {
@@ -52,7 +53,7 @@ const handleSignature = async (type: EvmSignatureSupportType, id: string, signat
 };
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, id, payload, type } = props;
+  const { className, extrinsicType, id, payload, type } = props;
   const { payload: { account, canSign, hashPayload } } = payload;
   const chainId = (payload.payload as EvmSendTransactionRequest)?.chainId || 1;
 
@@ -201,6 +202,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [account.address, chainId, evmWallet, isMessage, onApproveSignature, payload.payload]);
 
   const onConfirm = useCallback(() => {
+    removeTransactionPersist(extrinsicType);
+
     switch (signMode) {
       case AccountSignMode.QR:
         onConfirmQr();
@@ -218,7 +221,7 @@ const Component: React.FC<Props> = (props: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [checkUnlock, onConfirmInject, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
+  }, [checkUnlock, onConfirmInject, extrinsicType, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
     !!ledgerError && notify({

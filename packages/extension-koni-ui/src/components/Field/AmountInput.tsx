@@ -51,7 +51,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const inputRef = useForwardInputRef(ref);
 
-  const [inputValue, setInputValue] = useState(value);
+  const [inputValue, setInputValue] = useState(value ? getInputValuesFromString(value, decimals) : value);
   const [firstTime, setFirstTime] = useState(true);
 
   const _onClickMaxBtn = useCallback((e: SyntheticEvent) => {

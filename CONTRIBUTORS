@@ -1,6 +1,6 @@
     1860	Nam Phạm                      	[Issue 1821] update nft logic for azero domain
-    1555	AnhMTV                        	Release version 1.1.9
-    1144	S2kael                        	[Issue-1823] Rollback TEST_MODE env
+    1588	AnhMTV                        	Release version 1.1.11
+    1237	S2kael                        	[Issue-1848] [BuyToken] Update token list
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	
@@ -11,7 +11,7 @@
       69	dominhquang                   	Fix bug UI for Staking feature
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
-      23	S2kael                        	
+      24	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

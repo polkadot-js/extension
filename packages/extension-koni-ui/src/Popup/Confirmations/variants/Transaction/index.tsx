@@ -73,6 +73,7 @@ const Component: React.FC<Props> = (props: Props) => {
         type === 'signingRequest' && (
           <SubstrateSignArea
             account={(item as SigningRequest).account}
+            extrinsicType={transaction.extrinsicType}
             id={item.id}
             request={(item as SigningRequest).request}
           />
@@ -81,6 +82,7 @@ const Component: React.FC<Props> = (props: Props) => {
       {
         (type === 'evmSendTransactionRequest' || type === 'evmWatchTransactionRequest') && (
           <EvmSignArea
+            extrinsicType={transaction.extrinsicType}
             id={item.id}
             payload={(item as ConfirmationDefinitions['evmSendTransactionRequest' | 'evmWatchTransactionRequest'][0])}
             type={type}

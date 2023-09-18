@@ -6,22 +6,21 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AmountInput, HiddenInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import NetworkInformation from '@subwallet/extension-koni-ui/components/NetworkInformation';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainAssetInfo';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
-import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { FormCallbacks, FormFieldData, StakeParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
 import styled from 'styled-components';
 
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -29,56 +28,45 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { accountFilterFunc, fetchChainValidators } from '../helper';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
-import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
-type Props = ThemeProps
+type Props = ThemeProps;
 
-enum FormFieldName {
-  VALUE = 'amount',
-  NOMINATE = 'nominate',
-  POOL = 'pool',
-  TYPE = 'type',
-}
+const hiddenFields: Array<keyof StakeParams> = ['chain', 'defaultChain', 'defaultType'];
+const validateFields: Array<keyof StakeParams> = ['value'];
 
-interface StakeFormProps extends TransactionFormBaseProps {
-  [FormFieldName.VALUE]: string;
-  [FormFieldName.NOMINATE]: string;
-  [FormFieldName.POOL]: string;
-  [FormFieldName.TYPE]: StakingType;
-}
-
-const Component: React.FC<Props> = (props: Props) => {
-  const { className } = props;
-
+function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { chain: stakingChain, type: _stakingType } = useParams();
-
-  const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
 
-  const { asset,
-    chain,
-    from,
-    onDone,
-    setAsset,
-    setChain,
-    setDisabledRightBtn,
-    setFrom,
-    setShowRightBtn } = useContext(TransactionContext);
+  useSetCurrentPage('/transaction/stake');
+  const dataContext = useContext(DataContext);
+  const { defaultData, onDone, persistData, setDisabledRightBtn, setShowRightBtn } = useTransactionContext<StakeParams>();
+  const { defaultChain: stakingChain, defaultType: _stakingType } = defaultData;
 
-  // TODO: should do better to get validators info
-  const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state) => state.bonding);
-
-  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
-  const chainState = useFetchChainState(chain);
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
-  const assetInfo = useFetchChainAssetInfo(asset);
-
   const isEthAdr = isEthereumAddress(currentAccount?.address);
 
-  const defaultStakingType: StakingType = useMemo(() => {
+  const defaultPoolTokenList = useGetSupportedStakingTokens(StakingType.POOLED, currentAccount?.address || '', stakingChain);
+
+  const disablePool = useMemo(() => {
     if (isEthAdr) {
+      return true;
+    } else {
+      if (currentAccount?.address) {
+        return !defaultPoolTokenList.length;
+      } else {
+        return false;
+      }
+    }
+  }, [currentAccount?.address, defaultPoolTokenList.length, isEthAdr]);
+
+  const defaultStakingType: StakingType = useMemo(() => {
+    if (disablePool) {
       return StakingType.NOMINATED;
+    }
+
+    if (defaultData.type) {
+      return defaultData.type;
     }
 
     switch (_stakingType) {
@@ -89,14 +77,24 @@ const Component: React.FC<Props> = (props: Props) => {
       default:
         return StakingType.POOLED;
     }
-  }, [_stakingType, isEthAdr]);
+  }, [_stakingType, disablePool, defaultData.type]);
 
-  const [form] = Form.useForm<StakeFormProps>();
+  const [form] = Form.useForm<StakeParams>();
+
+  const from = useWatchTransaction('from', form, defaultData);
+  const chain = useWatchTransaction('chain', form, defaultData);
+  const asset = useWatchTransaction('asset', form, defaultData);
+  const stakingType = useWatchTransaction('type', form, defaultData);
+  const nominate = useWatchTransaction('nominate', form, defaultData);
+
+  // TODO: should do better to get validators info
+  const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state) => state.bonding);
+
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const chainState = useFetchChainState(chain);
+  const assetInfo = useFetchChainAssetInfo(asset);
 
   const [isDisable, setIsDisable] = useState(true);
-
-  const stakingType = Form.useWatch(FormFieldName.TYPE, form);
-  const nominate = Form.useWatch(FormFieldName.NOMINATE, form);
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
   const nominatorMetadataList = useGetNominatorInfo(chain, stakingType, from);
@@ -141,17 +139,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const defaultSlug = useGetNativeTokenSlug(stakingChain || '');
 
-  const formDefault: StakeFormProps = useMemo(() => {
+  const formDefault: StakeParams = useMemo(() => {
     return {
-      asset: defaultSlug,
-      from: from,
-      chain: chain,
-      [FormFieldName.VALUE]: '0',
-      [FormFieldName.POOL]: '',
-      [FormFieldName.NOMINATE]: '',
-      [FormFieldName.TYPE]: defaultStakingType
+      ...defaultData,
+      type: defaultStakingType,
+      asset: defaultData.asset || defaultSlug
     };
-  }, [defaultSlug, from, defaultStakingType, chain]);
+  }, [defaultData, defaultStakingType, defaultSlug]);
+
+  const [isChangeData, setIsChangeData] = useState(false);
 
   const getSelectedValidators = useCallback((nominations: string[]) => {
     const validatorList = validatorInfoMap[chain];
@@ -202,35 +198,50 @@ const Component: React.FC<Props> = (props: Props) => {
     return stakingType === StakingType.NOMINATED ? (chainStakingMetadata?.minStake || '0') : (chainStakingMetadata?.minJoinNominationPool || '0');
   }, [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, stakingType]);
 
+  const persistValidator = useMemo(() => {
+    if (chain === defaultData.chain && from === defaultData.from && !isChangeData) {
+      return defaultData.nominate;
+    } else {
+      return '';
+    }
+  }, [chain, defaultData.chain, defaultData.from, defaultData.nominate, from, isChangeData]);
+
+  const persistPool = useMemo(() => {
+    if (chain === defaultData.chain && from === defaultData.from && !isChangeData) {
+      return defaultData.pool;
+    } else {
+      return '';
+    }
+  }, [chain, defaultData.chain, defaultData.from, defaultData.pool, from, isChangeData]);
+
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
-  const onFieldsChange: FormCallbacks<StakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<StakeParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
 
-    const allMap = convertFieldToObject<StakeFormProps>(allFields);
-    const changesMap = convertFieldToObject<StakeFormProps>(changedFields);
+    const allMap = convertFieldToObject<StakeParams>(allFields);
+    const changesMap = convertFieldToObject<StakeParams>(changedFields);
 
-    const { amount: value, asset, from } = changesMap;
+    const { asset, from, value } = changesMap;
 
     if (value) {
       setValueChange(true);
     }
 
-    if (from) {
-      setFrom(from);
+    if (asset || from) {
+      setIsChangeData(true);
     }
 
     if (asset) {
       const chain = _getOriginChainOfAsset(asset);
 
-      setAsset(asset);
-      setChain(chain);
+      form.setFieldValue('chain', chain);
       form.resetFields(['nominate', 'pool']);
     }
 
     const checkEmpty: Record<string, boolean> = {};
 
-    const stakingType = allMap[FormFieldName.TYPE];
+    const { type: stakingType } = allMap;
 
     for (const [key, value] of Object.entries(allMap)) {
       checkEmpty[key] = !!value;
@@ -243,7 +254,8 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     setIsDisable(error || Object.values(checkEmpty).some((value) => !value));
-  }, [form, setAsset, setChain, setFrom]);
+    persistData(form.getFieldsValue());
+  }, [form, persistData]);
 
   const getSelectedPool = useCallback((poolId?: string) => {
     const nominationPoolList = nominationPoolInfoMap[chain];
@@ -257,13 +269,9 @@ const Component: React.FC<Props> = (props: Props) => {
     return undefined;
   }, [nominationPoolInfoMap, chain]);
 
-  const onSubmit: FormCallbacks<StakeFormProps>['onFinish'] = useCallback((values: StakeFormProps) => {
+  const onSubmit: FormCallbacks<StakeParams>['onFinish'] = useCallback((values: StakeParams) => {
     setLoading(true);
-    const { from,
-      [FormFieldName.NOMINATE]: nominate,
-      [FormFieldName.POOL]: pool,
-      [FormFieldName.VALUE]: value,
-      [FormFieldName.TYPE]: type } = values;
+    const { chain, from, nominate, pool, type, value } = values;
     let bondingPromise: Promise<SWTransactionResponse>;
 
     if (pool && type === StakingType.POOLED) {
@@ -297,7 +305,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         });
     }, 300);
-  }, [getSelectedPool, chain, nominatorMetadata, getSelectedValidators, onSuccess, onError]);
+  }, [getSelectedPool, nominatorMetadata, getSelectedValidators, onSuccess, onError]);
 
   const getMetaInfo = useCallback(() => {
     if (chainStakingMetadata) {
@@ -341,26 +349,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const checkAction = usePreCheckAction(from);
 
   useEffect(() => {
-    const address = currentAccount?.address || '';
-
-    if (address) {
-      if (!isAccountAll(address)) {
-        setFrom(address);
-      }
-    }
-  }, [currentAccount?.address, setFrom]);
-
-  useEffect(() => {
-    if (stakingChain && stakingChain !== ALL_KEY) {
-      setChain(stakingChain);
-    }
-  }, [setChain, stakingChain]);
-
-  useEffect(() => {
-    setAsset(defaultSlug);
-  }, [defaultSlug, setAsset]);
-
-  useEffect(() => {
     setShowRightBtn(true);
   }, [setShowRightBtn]);
 
@@ -388,7 +376,7 @@ const Component: React.FC<Props> = (props: Props) => {
     if (valueChange) {
       if (!cancel) {
         setTimeout(() => {
-          form.validateFields([FormFieldName.VALUE]).finally(() => update({}));
+          form.validateFields(['value']).finally(() => update({}));
         }, 100);
       }
     }
@@ -399,14 +387,15 @@ const Component: React.FC<Props> = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, nativeTokenBalance.value]);
 
+  useRestoreTransaction(form);
+  useInitValidateTransaction(validateFields, form, defaultData);
+
   return (
     <>
       <div className={className}>
         <div className={'__transaction-block'}>
           <TransactionContent>
-            <PageWrapper
-              resolve={dataContext.awaitStores(['staking'])}
-            >
+            <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
               <Form
                 className={'form-container form-space-sm'}
                 form={form}
@@ -414,10 +403,11 @@ const Component: React.FC<Props> = (props: Props) => {
                 onFieldsChange={onFieldsChange}
                 onFinish={onSubmit}
               >
+                <HiddenInput fields={hiddenFields} />
                 <Form.Item
                   className='staking-type'
                   hidden={_stakingType !== ALL_KEY}
-                  name={FormFieldName.TYPE}
+                  name={'type'}
                 >
                   <RadioGroup
                     optionType='button'
@@ -425,7 +415,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       {
                         label: t('Pools'),
                         value: StakingType.POOLED,
-                        disabled: isEthAdr
+                        disabled: disablePool
                       },
                       {
                         label: t('Nominate'),
@@ -477,12 +467,12 @@ const Component: React.FC<Props> = (props: Props) => {
                   }
 
                   <Form.Item
-                    name={FormFieldName.VALUE}
+                    name={'value'}
                     rules={[
                       { required: true, message: t('Amount is required') },
                       ({ getFieldValue }) => ({
                         validator: (_, value: string) => {
-                          const type = getFieldValue(FormFieldName.TYPE) as StakingType;
+                          const type = getFieldValue('type') as StakingType;
                           const val = new BigN(value);
 
                           if (type === StakingType.POOLED) {
@@ -517,10 +507,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
                 <Form.Item
                   hidden={stakingType !== StakingType.POOLED}
-                  name={FormFieldName.POOL}
+                  name={'pool'}
                 >
                   <PoolSelector
-                    chain={chain}
+                    chain={chain}// Not use initialValues of Form, because some state changes by hook, it will be delayed
+                    defaultValue={persistPool}
                     from={from}
                     label={t('Select pool')}
                     loading={poolLoading}
@@ -530,10 +521,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
                 <Form.Item
                   hidden={stakingType !== StakingType.NOMINATED}
-                  name={FormFieldName.NOMINATE}
+                  name={'nominate'}
                 >
                   <MultiValidatorSelector
-                    chain={asset ? chain : ''}
+                    chain={asset ? chain : ''}// Not use initialValues of Form, because some state changes by hook, it will be delayed
+                    defaultValue={persistValidator}
                     from={asset ? from : ''}
                     loading={validatorLoading}
                     setForceFetchValidator={setForceFetchValidator}
@@ -595,7 +587,7 @@ const Component: React.FC<Props> = (props: Props) => {
       }
     </>
   );
-};
+}
 
 const Stake = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {

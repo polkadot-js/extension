@@ -3,9 +3,9 @@
 
 import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { isSameAddress, TARGET_ENV } from '@subwallet/extension-base/utils';
 import BaseWeb from '@subwallet/extension-koni-ui/components/Layout/base/BaseWeb';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
-import { CONFIRMATION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -16,15 +16,16 @@ import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isNoAccount } from '@subwallet/extension-koni-ui/utils';
+import { isNoAccount, removeStorage } from '@subwallet/extension-koni-ui/utils';
 import { changeHeaderLogo, ModalContext } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import CN from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { CONFIRMATION_MODAL, TRANSACTION_STORAGES } from '../constants';
 import { WebUIContextProvider } from '../contexts/WebUIContext';
 
 changeHeaderLogo(<Logo2D />);
@@ -75,15 +76,20 @@ function removeLoadingPlaceholder (): void {
   }
 }
 
+interface RedirectProps {
+  redirect: string|null;
+  modal: string|null;
+}
+
 function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
   const dataContext = useContext(DataContext);
   const screenContext = useContext(ScreenContext);
   const location = useLocation();
-  const navigate = useNavigate();
   const notify = useNotification();
   const [rootLoading, setRootLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
   const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay']));
+  const firstRender = useRef(true);
 
   useSubscribeLanguage();
 
@@ -91,7 +97,8 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   const { unlockType } = useSelector((state: RootState) => state.settings);
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
-  const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
+  const { accounts, currentAccount, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
+  const [initAccount, setInitAccount] = useState(currentAccount);
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
   const { isUILocked } = useUILock();
   const needUnlock = isUILocked || (isLocked && unlockType === WalletUnlockType.ALWAYS_REQUIRED);
@@ -148,63 +155,84 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     RouteState.lastPathName = location.pathname;
   }, [location]);
 
-  const redirectPath = useMemo<string | null>(() => {
+  const redirectTarget = useMemo(() => {
     const pathName = location.pathname;
-    let redirectTarget: string | null = null;
+    const redirectObj: RedirectProps = { redirect: null, modal: null };
 
     // Wait until data loaded
     if (!dataLoaded) {
-      return null;
+      return redirectObj;
     }
 
     if (needMigrate && hasMasterPassword && !needUnlock) {
-      redirectTarget = migratePasswordUrl;
+      redirectObj.redirect = migratePasswordUrl;
     } else if (hasMasterPassword && needUnlock) {
-      redirectTarget = loginUrl;
+      redirectObj.redirect = loginUrl;
     } else if (!hasMasterPassword) {
       if (noAccount) {
         if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
-          redirectTarget = welcomeUrl;
+          redirectObj.redirect = welcomeUrl;
         }
       } else if (pathName !== createDoneUrl) {
-        redirectTarget = createPasswordUrl;
+        redirectObj.redirect = createPasswordUrl;
       }
     } else if (noAccount) {
       if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
-        redirectTarget = welcomeUrl;
+        redirectObj.redirect = welcomeUrl;
       }
     } else if (hasConfirmations) {
-      activeModal(CONFIRMATION_MODAL);
+      redirectObj.modal = `open:${CONFIRMATION_MODAL}`;
     } else if (pathName === DEFAULT_ROUTER_PATH) {
-      redirectTarget = tokenUrl;
+      redirectObj.redirect = tokenUrl;
     } else if (pathName === loginUrl && !needUnlock) {
-      redirectTarget = DEFAULT_ROUTER_PATH;
+      redirectObj.redirect = DEFAULT_ROUTER_PATH;
     } else if (hasInternalConfirmations) {
-      activeModal(CONFIRMATION_MODAL);
+      redirectObj.modal = `open:${CONFIRMATION_MODAL}`;
     } else if (!hasInternalConfirmations) {
-      inactiveModal(CONFIRMATION_MODAL);
+      redirectObj.modal = `close:${CONFIRMATION_MODAL}`;
     }
 
     // Remove loading on finished first compute
-    rootLoading && setRootLoading((val) => {
+    firstRender.current && setRootLoading((val) => {
       if (val) {
         removeLoadingPlaceholder();
+        firstRender.current = false;
       }
 
       return false;
     });
 
-    if (redirectTarget && redirectTarget !== pathName) {
-      navigate(redirectTarget);
+    redirectObj.redirect = redirectObj.redirect !== pathName ? redirectObj.redirect : null;
 
-      return redirectTarget;
-    } else {
-      return null;
+    return redirectObj;
+  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations]);
+
+  // Active or inactive confirmation modal
+  useEffect(() => {
+    if (redirectTarget.modal) {
+      const [action, modalName] = redirectTarget.modal.split(':');
+
+      if (action === 'open') {
+        activeModal(modalName);
+      } else {
+        inactiveModal(modalName);
+      }
     }
-  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations, rootLoading, activeModal, inactiveModal, navigate]);
+  }, [activeModal, inactiveModal, redirectTarget.modal]);
 
-  if (rootLoading || redirectPath) {
-    return <></>;
+  // Remove transaction persist state
+  useEffect(() => {
+    if (TARGET_ENV === 'extension' && !isSameAddress(initAccount?.address || '', currentAccount?.address || '')) {
+      for (const key of TRANSACTION_STORAGES) {
+        removeStorage(key);
+      }
+
+      setInitAccount(currentAccount);
+    }
+  }, [currentAccount, initAccount]);
+
+  if (rootLoading || redirectTarget.redirect) {
+    return <>{redirectTarget.redirect && <Navigate to={redirectTarget.redirect} />}</>;
   } else {
     return <MainWrapper className={CN('main-page-container', `screen-size-${screenContext.screenType}`, { 'web-ui-enable': screenContext.isWebUI })}>
       {children}

@@ -9,7 +9,7 @@ import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/No
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
@@ -76,6 +76,7 @@ const BN_0 = new BigN(0);
 const BN_100 = new BigN(100);
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  useSetCurrentPage('/home/crowdloans');
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);

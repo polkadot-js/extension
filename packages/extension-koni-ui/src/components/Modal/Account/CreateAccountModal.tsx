@@ -7,7 +7,7 @@ import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
-import { CREATE_ACCOUNT_MODAL, DERIVE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { CREATE_ACCOUNT_MODAL, DERIVE_ACCOUNT_MODAL, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
@@ -81,7 +81,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       label: t('Create with new seed phrase'),
       onClick: () => {
         inactiveModal(modalId);
-        activeModal(NEW_ACCOUNT_MODAL);
+        activeModal(NEW_SEED_MODAL);
       }
     },
     {

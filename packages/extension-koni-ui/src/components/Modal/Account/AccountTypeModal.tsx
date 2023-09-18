@@ -6,52 +6,57 @@ import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
-import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL, SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { setSelectedAccountTypes } from '@subwallet/extension-koni-ui/utils';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-type Props = ThemeProps & {
-  setAccountTypes?: React.Dispatch<React.SetStateAction<KeypairType[]>>
-};
+interface Props extends ThemeProps {
+  id: string;
+  previousId: string;
+  nextId?: string;
+  url: string;
+  label: string;
+  icon?: PhosphorIcon;
+}
 
-const modalId = NEW_ACCOUNT_MODAL;
-
-const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
+const Component: React.FC<Props> = (props: Props) => {
+  const { className, icon = CheckCircle, id, label, nextId, previousId, url } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
-  const isActive = checkActive(modalId);
+  const isActive = checkActive(id);
+  const navigate = useNavigate();
   const { isWebUI } = useContext(ScreenContext);
   const [selectedItems, setSelectedItems] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
 
   const onCancel = useCallback(() => {
-    inactiveModal(modalId);
-  }, [inactiveModal]);
+    inactiveModal(id);
+  }, [id, inactiveModal]);
 
   const onSubmit = useCallback(() => {
-    if (isWebUI) {
-      activeModal(SEED_PHRASE_MODAL);
+    setSelectedAccountTypes(selectedItems);
 
-      setAccountTypes && setAccountTypes(selectedItems);
+    if (isWebUI && nextId) {
+      activeModal(nextId);
     } else {
-      setSelectedAccountTypes(selectedItems);
+      navigate(url);
     }
 
-    inactiveModal(modalId);
-  }, [isWebUI, inactiveModal, activeModal, setAccountTypes, selectedItems]);
+    inactiveModal(id);
+  }, [selectedItems, isWebUI, inactiveModal, id, activeModal, navigate, url, nextId]);
 
-  const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL);
+  const onBack = useSwitchModal(id, previousId);
 
   useClickOutSide(isActive, renderModalSelector(className), onCancel);
 
@@ -65,7 +70,7 @@ const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
     <BaseModal
       className={CN(className)}
       closeIcon={(<BackIcon />)}
-      id={modalId}
+      id={id}
       maskClosable={false}
       onCancel={onBack}
       rightIconProps={{
@@ -86,19 +91,19 @@ const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
         icon={(
           <Icon
             className={'icon-submit'}
-            phosphorIcon={CheckCircle}
+            phosphorIcon={icon}
             weight='fill'
           />
         )}
         onClick={onSubmit}
       >
-        {t('Confirm')}
+        {label}
       </Button>
     </BaseModal>
   );
 };
 
-const CreateAccountModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const AccountTypeModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.__select-account-type': {
       marginBottom: token.size
@@ -106,4 +111,4 @@ const CreateAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
   };
 });
 
-export default CreateAccountModal;
+export default AccountTypeModal;

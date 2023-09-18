@@ -74,10 +74,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     showMaxButton
       ? (
         <Button
+          disabled={disabled}
           onClick={_onClickMaxBtn}
           size='xs'
           type='ghost'
-          disabled={disabled}
         >
           <span className='max-btn-text'>{t('Max')}</span>
         </Button>
@@ -85,7 +85,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       : (
         <span />
       )
-  ), [showMaxButton, _onClickMaxBtn, t]);
+  ), [disabled, showMaxButton, _onClickMaxBtn, t]);
 
   const onChangeInput: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     let value = event.target.value;

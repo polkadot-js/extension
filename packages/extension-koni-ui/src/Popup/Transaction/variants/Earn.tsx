@@ -2,18 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  ExtrinsicStatus,
-  SubmitJoinNativeStaking,
-  SubmitJoinNominationPool,
-  ValidatorInfo,
-  YieldAssetExpectedEarning,
-  YieldCompoundingPeriod,
-  YieldPoolInfo,
-  YieldPoolType,
-  YieldStepDetail,
-  YieldTokenBaseInfo
-} from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicStatus, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepDetail, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -107,14 +96,17 @@ function processReducer (state: YieldProcessState, action: ProcessReducerAction)
         feeStructure: fee as YieldTokenBaseInfo[]
       };
     }
+
     case ProcessReducerActionType.UPDATE_STEP_RESULT: {
-      const _stepResult = action.payload as SWTransactionResponse
+      const _stepResult = action.payload as SWTransactionResponse;
       const result = state.stepResults;
-      result.push(_stepResult)
+
+      result.push(_stepResult);
+
       return {
         ...state,
         stepResults: result
-      }
+      };
     }
 
     default:
@@ -347,7 +339,7 @@ const Component = () => {
     dispatchProcessState({
       type: ProcessReducerActionType.UPDATE_STEP_RESULT,
       payload: { status: ExtrinsicStatus.QUEUED }
-    })
+    });
 
     const { from, nominate, pool } = form.getFieldsValue();
     let data;
@@ -389,18 +381,18 @@ const Component = () => {
 
     setTimeout(() => {
       submitPromise
-        .then(rs => {
+        .then((rs) => {
           dispatchProcessState({
             type: ProcessReducerActionType.UPDATE_STEP_RESULT,
             payload: processState.stepResults[processState.currentStep].status = ExtrinsicStatus.SUCCESS
-          })
-          onSuccess(rs)
+          });
+          onSuccess(rs);
         })
-        .catch(error => {
+        .catch((error) => {
           dispatchProcessState({
             type: ProcessReducerActionType.UPDATE_STEP_RESULT,
             payload: processState.stepResults[processState.currentStep].status = ExtrinsicStatus.FAIL
-          })
+          });
           onError(error);
         })
         .finally(() => {
@@ -436,20 +428,21 @@ const Component = () => {
 
               {processState.steps && (
                 <div style={{ display: 'flex', alignItems: 'center', paddingBottom: token.paddingSM }}>
-                  {isLoading ?
-                    <ActivityIndicator
-                      prefixCls={'ant'}
-                      size={'24px'}
-                    /> : (
-                    <Typography.Text
-                      size={'lg'}
-                      style={{ fontWeight: '600' }}
-                    >
-                      {t('Step {{step}}: {{label}}', {
-                        replace: { step: processState.currentStep + 1, label: processState.steps[processState.currentStep]?.name }
-                      })}
-                    </Typography.Text>
-                  )}
+                  {isLoading
+                    ? <ActivityIndicator
+                        prefixCls={'ant'}
+                        size={'24px'}
+                      />
+                    : (
+                      <Typography.Text
+                        size={'lg'}
+                        style={{ fontWeight: '600' }}
+                      >
+                        {t('Step {{step}}: {{label}}', {
+                          replace: { step: processState.currentStep + 1, label: processState.steps[processState.currentStep]?.name }
+                        })}
+                      </Typography.Text>
+                    )}
                 </div>
               )}
 
@@ -493,8 +486,8 @@ const Component = () => {
                     >
                       <AmountInput
                         decimals={decimals}
-                        maxValue={'1'}
                         disabled={processState.currentStep !== 0}
+                        maxValue={'1'}
                         prefix={<Logo
                           className={'amount-prefix'}
                           size={20}
@@ -524,10 +517,10 @@ const Component = () => {
               >
                 <PoolSelector
                   chain={currentPoolInfo.chain}
+                  disabled={processState.currentStep !== 0}
                   from={currentFrom}
                   label={t('Select pool')}
                   loading={poolLoading}
-                  disabled={processState.currentStep !== 0}
                   setForceFetchValidator={setForceFetchValidator}
                 />
               </Form.Item>

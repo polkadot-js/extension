@@ -115,7 +115,7 @@ function Component ({ children, className, modalContent = false }: Props) {
       case 'send-nft':
         return ExtrinsicType.SEND_NFT;
       case 'earn':
-        return ExtrinsicType.MINT_LDOT; //TODO: change this
+        return ExtrinsicType.MINT_LDOT; // TODO: change this
       case 'send-fund':
       default:
         return ExtrinsicType.TRANSFER_BALANCE;

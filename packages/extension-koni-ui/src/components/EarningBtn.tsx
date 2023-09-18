@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {Button, Logo} from '@subwallet/react-ui';
+import { Button, Logo } from '@subwallet/react-ui';
 import { SizeType } from '@subwallet/react-ui/es/config-provider/SizeContext';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -14,7 +14,7 @@ interface Props extends ThemeProps {
   children?: React.ReactNode,
 }
 
-const Component = ({ children, className, network, token, size = 'xs' }: Props) => {
+const Component = ({ children, className, network, size = 'xs', token }: Props) => {
   const _borderRadius = useMemo(() => {
     if (size === 'xs') {
       return '20px';
@@ -31,7 +31,12 @@ const Component = ({ children, className, network, token, size = 'xs' }: Props) 
     <Button
       block={false}
       className={className}
-      icon={<Logo className={'earning-btn-icon'} size={16} network={network} token={token} />}
+      icon={<Logo
+        className={'earning-btn-icon'}
+        network={network}
+        size={16}
+        token={token}
+      />}
       shape={'round'}
       size={size}
       style={{ borderRadius: _borderRadius }}
@@ -55,7 +60,7 @@ const EarningBtn = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '.ant-image-img': {
         marginBottom: '2px'
       }
-    },
+    }
   };
 });
 

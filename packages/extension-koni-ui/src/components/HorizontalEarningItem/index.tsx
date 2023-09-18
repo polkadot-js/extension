@@ -2,19 +2,24 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { useGetChainAssetInfo, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { StakingStatus, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
+import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
-import { CheckCircle, Database, HandsClapping, Leaf, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
-import React from 'react';
+import { Database, HandsClapping, Leaf, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
+import React, { useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+
+import MetaInfo from '../MetaInfo/MetaInfo';
 
 interface Props extends ThemeProps {
   yieldPoolInfo: YieldPoolInfo;
   yieldPositionInfo: YieldPositionInfo;
   onClickCalculatorBtn: () => void;
   onClickStakeBtn: () => void;
+  onClickItem?: () => void;
 }
 
 export const TagTypes = () => {
@@ -73,17 +78,33 @@ export const TagTypes = () => {
   };
 };
 
-const Component: React.FC<Props> = ({ className, onClickCalculatorBtn, onClickStakeBtn, yieldPoolInfo, yieldPositionInfo }: Props) => {
+const Component: React.FC<Props> = ({ className, onClickCalculatorBtn, onClickItem, onClickStakeBtn, yieldPoolInfo, yieldPositionInfo }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { chain, description, name, type } = yieldPoolInfo;
+  const yieldPositionInfoBalance = yieldPositionInfo.balance[0];
+  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const tokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
 
-  const tokenInfo = useGetChainAssetInfo(yieldPositionInfo.balance[0].slug) as _ChainAsset;
+  const getStakingStatus = useCallback((status: StakingStatus) => {
+    if (status === StakingStatus.EARNING_REWARD) {
+      return StakingStatusUi.active;
+    }
+
+    if (status === StakingStatus.PARTIALLY_EARNING) {
+      return StakingStatusUi.partialEarning;
+    }
+
+    if (status === StakingStatus.WAITING) {
+      return StakingStatusUi.waiting;
+    }
+
+    return StakingStatusUi.inactive;
+  }, []);
 
   return (
     <Web3Block
       className={className}
-
       leftItem={(
         <Logo
           network={chain}
@@ -184,24 +205,24 @@ const Component: React.FC<Props> = ({ className, onClickCalculatorBtn, onClickSt
           </div>
         </>
       )}
+      onClick={onClickItem}
       rightItem={(
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
-            <Icon
-              iconColor={token.colorSuccess}
-              phosphorIcon={CheckCircle}
-              size={'sm'}
-              weight={'fill'}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <MetaInfo>
+            <MetaInfo.Status
+              className={'earning-status-item'}
+              statusIcon={getStakingStatus(yieldPositionInfo.metadata.status).icon}
+              statusName={t(getStakingStatus(yieldPositionInfo.metadata.status).name)}
+              valueColorSchema={getStakingStatus(yieldPositionInfo.metadata.status).schema}
             />
-            <Typography.Text style={{ color: token.colorSuccess, fontWeight: '600' }}>{'Earning reward'}</Typography.Text>
-          </div>
+          </MetaInfo>
           <Number
-            decimal={tokenInfo.decimals || 0}
+            decimal={tokenInfo ? tokenInfo.decimals || 0 : 0}
             decimalOpacity={0.4}
             size={30}
-            suffix={tokenInfo.symbol}
+            suffix={tokenInfo ? tokenInfo.symbol : ''}
             unitOpacity={0.4}
-            value={yieldPositionInfo.balance[0].totalBalance} // TODO
+            value={yieldPositionInfoBalance.totalBalance} // TODO
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
             <Typography.Text style={{ color: token.colorTextLight4 }}>{t('Total rewards:')}</Typography.Text>
@@ -285,6 +306,10 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
 
     '.ant-web3-block-left-item': {
       alignItems: 'flex-start'
+    },
+
+    '.earning-status-item': {
+      display: 'block'
     }
   });
 });

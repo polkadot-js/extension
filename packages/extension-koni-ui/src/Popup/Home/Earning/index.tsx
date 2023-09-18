@@ -2,67 +2,37 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import {FilterModal, Layout, PageWrapper, SortingModal} from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EarningItem from '@subwallet/extension-koni-ui/components/EarningItem';
-import {DataContext} from '@subwallet/extension-koni-ui/contexts/DataContext';
-import {useFilterModal, useTranslation} from '@subwallet/extension-koni-ui/hooks';
-import EarningCalculatorModal, {
-  STAKING_CALCULATOR_MODAL_ID
-} from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
-import {RootState} from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps} from '@subwallet/extension-koni-ui/types';
-import {BackgroundIcon, Button, Icon, ModalContext, SwList, Typography} from '@subwallet/react-ui';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import EarningCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
+import EarningToolbar from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningToolBar';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, {useCallback, useContext, useMemo, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {useNavigate} from 'react-router-dom';
-import styled, {useTheme} from 'styled-components';
-import EarningBtn from "@subwallet/extension-koni-ui/components/EarningBtn";
-import {CaretDown, FadersHorizontal, Question, SortAscending} from "phosphor-react";
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 type Props = ThemeProps;
 
 const FILTER_MODAL_ID = 'earning-filter-modal';
-const SORTING_MODAL_ID = 'earning-sorting-modal';
 
 enum SortKey {
   TOTAL_VALUE = 'total-value',
 }
 
-interface SortOption {
-  label: string;
-  value: SortKey;
-  desc: boolean;
-}
-
-function Component ({ className = '' }: Props): React.ReactElement<Props> {
+const Component = () => {
   const { t } = useTranslation();
-  const { token } = useTheme() as Theme;
   const navigate = useNavigate();
-  const dataContext = useContext(DataContext);
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { activeModal } = useContext(ModalContext);
   const [selectedItem, setSelectedItem] = useState<YieldPoolInfo | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
-  const filterOptions = useMemo(() => [
-    { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
-    { label: t('Native staking'), value: YieldPoolType.NATIVE_STAKING },
-    { label: t('Liquid staking'), value: YieldPoolType.LIQUID_STAKING },
-    { label: t('Lending'), value: YieldPoolType.LENDING },
-    { label: t('Parachain staking'), value: YieldPoolType.PARACHAIN_STAKING },
-    { label: t('Single farming'), value: YieldPoolType.SINGLE_FARMING }
-  ], [t]);
-
-  const sortingOptions: SortOption[] = useMemo(() => {
-    return [
-      {
-        desc: true,
-        label: t('Sort by total value'),
-        value: SortKey.TOTAL_VALUE
-      }
-    ];
-  }, [t]);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);
@@ -135,18 +105,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [onClickCalculatorBtn, onClickStakeBtn]);
 
-  const filterLabel = useMemo(() => {
-    if (!selectedFilters.length) {
-      return t('All type');
-    } else {
-      if (selectedFilters.length === 1) {
-        return filterOptions.find(opt => opt.value === selectedFilters[0])?.label
-      } else {
-        return t(`${selectedFilters.length} selected`);
-      }
-    }
-  }, [selectedFilters, filterOptions, t]);
-
   const resultList = useMemo((): YieldPoolInfo[] => {
     return [...Object.values(poolInfo)]
       .sort((a: YieldPoolInfo, b: YieldPoolInfo) => {
@@ -157,100 +115,80 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             } else {
               return 0;
             }
+
           default:
             return 0;
         }
       });
   }, [poolInfo, sortSelection]);
 
-  const sortingLabel = useMemo(() => {
-    return sortingOptions.find(item => item.value === sortSelection)?.label || '';
-  }, [selectedFilters, filterOptions, t]);
+  return (
+    <Layout.Base
+      showSubHeader={true}
+      subHeaderBackground={'transparent'}
+      subHeaderCenter={false}
+      // subHeaderIcons={subHeaderButton}
+      subHeaderPaddingVertical={true}
+      title={t('Earning')}
+    >
+
+      <EarningToolbar
+        filterSelectionMap={filterSelectionMap}
+        onApplyFilter={onApplyFilter}
+        onChangeFilterOption={onChangeFilterOption}
+        onChangeSortOpt={onChangeSortOpt}
+        onCloseFilterModal={onCloseFilterModal}
+        onResetSort={onResetSort}
+        selectedFilters={selectedFilters}
+      />
+      <SwList.Section
+        className={CN('nft_collection_list__container')}
+        displayGrid={true}
+        enableSearchInput={false}
+        filterBy={filterFunction}
+        gridGap={'14px'}
+        list={resultList}
+        minColumnWidth={'384px'}
+        renderItem={renderEarningItem}
+        renderOnScroll={true}
+        renderWhenEmpty={<></>}
+        searchMinCharactersCount={2}
+      />
+
+      {selectedItem && <EarningCalculatorModal item={selectedItem} />}
+    </Layout.Base>
+  );
+};
+
+const Wrapper: React.FC<Props> = (props: Props) => {
+  const { className } = props;
+
+  const dataContext = useContext(DataContext);
 
   return (
     <PageWrapper
-      className={`earning ${className}`}
-      resolve={dataContext.awaitStores(['yieldPool', 'price'])}
+      className={CN(className, 'page-wrapper')}
+      resolve={dataContext.awaitStores(['yieldPool', 'price', 'chainStore', 'assetRegistry'])}
     >
-      <Layout.Base
-        showSubHeader={true}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={false}
-        // subHeaderIcons={subHeaderButton}
-        subHeaderPaddingVertical={true}
-        title={t('Earning')}
-      >
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: token.padding }}>
-          <div>
-            <EarningBtn network={'polkadot'} size={'xs'}>
-              {'DOT'}
-            </EarningBtn>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXS }}>
-            <Button size={'xs'} type={'ghost'} icon={<Icon phosphorIcon={Question} iconColor={token.colorTextLight4} weight={'duotone'} />} >{t('Help')}</Button>
-            <Button onClick={() => activeModal(FILTER_MODAL_ID)} size={'xs'} schema='secondary' shape={'round'} icon={<BackgroundIcon size={'sm'} phosphorIcon={FadersHorizontal} backgroundColor={token.colorTextLight4} iconColor={token.colorWhite} />} >
-              <div style={{ display: 'flex', gap: token.paddingXS, alignItems: 'center', paddingLeft: token.paddingXS }}>
-                <Typography.Text>{filterLabel}</Typography.Text>
-                <Icon className={'earning-filter-icon'} phosphorIcon={CaretDown} customSize={'12px'} iconColor={token.colorTextLight4} weight={'bold'} />
-              </div>
-            </Button>
-            <Button onClick={() => activeModal(SORTING_MODAL_ID)} size={'xs'} schema='secondary' shape={'round'} icon={<BackgroundIcon size={'sm'} phosphorIcon={SortAscending} backgroundColor={token.colorTextLight4} iconColor={token.colorWhite} />} >
-              <div style={{ display: 'flex', gap: token.paddingXS, alignItems: 'center', paddingLeft: token.paddingXS }}>
-                <Typography.Text>{sortingLabel}</Typography.Text>
-                <Icon className={'earning-filter-icon'} phosphorIcon={CaretDown} customSize={'12px'} iconColor={token.colorTextLight4} weight={'bold'} />
-              </div>
-            </Button>
-          </div>
-        </div>
-        <SwList.Section
-          className={CN('nft_collection_list__container')}
-          displayGrid={true}
-          filterBy={filterFunction}
-          enableSearchInput={false}
-          gridGap={'14px'}
-          list={resultList}
-          minColumnWidth={'384px'}
-          renderItem={renderEarningItem}
-          renderOnScroll={true}
-          renderWhenEmpty={<></>}
-          searchMinCharactersCount={2}
-        />
-
-        {selectedItem && <EarningCalculatorModal item={selectedItem} />}
-
-        <FilterModal
-          applyFilterButtonTitle={t('Apply filter')}
-          id={FILTER_MODAL_ID}
-          onApplyFilter={onApplyFilter}
-          onCancel={onCloseFilterModal}
-          onChangeOption={onChangeFilterOption}
-          optionSelectionMap={filterSelectionMap}
-          options={filterOptions}
-          title={t('Filter')}
-        />
-
-        <SortingModal
-          id={SORTING_MODAL_ID}
-          onChangeOption={onChangeSortOpt}
-          onReset={onResetSort}
-          optionSelection={sortSelection}
-          options={sortingOptions}
-        />
-      </Layout.Base>
+      <Component />
     </PageWrapper>
-
   );
-}
+};
 
-const Earning = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Earning = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
 
     '.earning-filter-icon': {
       width: '12px',
-      height: '12px',
+      height: '12px'
+    },
+
+    '.earning-wrapper': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingBottom: token.padding
     }
   });
 });

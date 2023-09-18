@@ -104,7 +104,10 @@ const Component = ({ className, item }: Props) => {
       title={t('Staking calculator')}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
-        <EarningBtn network={'polkadot'} size={'xs'}>
+        <EarningBtn
+          network={'polkadot'}
+          size={'xs'}
+        >
           {'DOT'}
         </EarningBtn>
 

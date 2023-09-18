@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {Theme, ThemeProps} from '@subwallet/extension-koni-ui/types';
-import {ActivityIndicator, BackgroundIcon, Typography} from '@subwallet/react-ui';
-import {CheckCircle, PlusCircle, WarningCircle, XCircle} from 'phosphor-react';
-import React, {useMemo} from 'react';
-import {useTranslation} from 'react-i18next';
-import styled, {useTheme} from 'styled-components';
-import {ExtrinsicStatus} from "@subwallet/extension-base/background/KoniTypes";
+import { ExtrinsicStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ActivityIndicator, BackgroundIcon, Typography } from '@subwallet/react-ui';
+import { CheckCircle, PlusCircle, WarningCircle, XCircle } from 'phosphor-react';
+import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
   isSelected: boolean;
@@ -24,7 +24,10 @@ const Component = ({ className, index, isSelected, stepName, stepStatus }: Props
     if (stepStatus === ExtrinsicStatus.QUEUED) {
       return (
         <div style={{ width: '32px', height: '32px', justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size={'24px'} prefixCls={'ant'} />
+          <ActivityIndicator
+            prefixCls={'ant'}
+            size={'24px'}
+          />
         </div>
       );
     }
@@ -73,8 +76,8 @@ const Component = ({ className, index, isSelected, stepName, stepStatus }: Props
         size={'lg'}
         weight={'fill'}
       />
-    )
-  }, [isSelected, stepStatus]);
+    );
+  }, [token, isSelected, stepStatus]);
 
   const stepTextClassName = useMemo(() => {
     if (stepStatus === ExtrinsicStatus.QUEUED) {
@@ -93,7 +96,7 @@ const Component = ({ className, index, isSelected, stepName, stepStatus }: Props
       return 'staking-process-selected-text';
     }
 
-    return ''
+    return '';
   }, [isSelected, stepStatus]);
 
   return (
@@ -140,7 +143,7 @@ const EarningProcessItem = styled(Component)<Props>(({ theme: { token } }: Props
     },
 
     '.staking-process-loading-text': {
-      color: token.colorTextLight4,
+      color: token.colorTextLight4
     },
 
     '.staking-process-flex-wrapper': {

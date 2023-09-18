@@ -8,6 +8,7 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Logo, Number, Tag, Web3Block } from '@subwallet/react-ui';
 import { Database, HandsClapping, Leaf, PlusCircle, PlusMinus, Question } from 'phosphor-react';
 import React, { useMemo } from 'react';
+import { TFunction } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -16,9 +17,7 @@ interface Props extends ThemeProps {
   onClickStakeBtn: () => void;
 }
 
-export const TagTypes = () => {
-  const { t } = useTranslation();
-
+export const TagTypes = (t: TFunction) => {
   return {
     LIQUID_STAKING: {
       label: t('Liquid staking'),
@@ -99,9 +98,9 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onC
 
           <Tag
             bgType={'default'}
-            color={TagTypes()[type].color}
-            icon={TagTypes()[type].icon}
-          >{TagTypes()[type].label}</Tag>
+            color={TagTypes(t)[type].color}
+            icon={TagTypes(t)[type].icon}
+          >{TagTypes(t)[type].label}</Tag>
 
           <div className={'earning-item-reward'}>
             <Number

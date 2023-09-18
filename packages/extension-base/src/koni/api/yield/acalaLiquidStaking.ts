@@ -10,6 +10,8 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
+const YEAR = 365 * 24 * 60 * 60 * 1000;
+
 export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
   const substrateApi = await chainApi.isReady;
 
@@ -23,7 +25,7 @@ export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi,
   const commissionRate = _commissionRate.toPrimitive() as number;
   const estimatedRewardRate = _estimatedRewardRatePerEra.toPrimitive() as number;
 
-  console.log('here', eraFrequency, commissionRate, estimatedRewardRate);
+  console.log('here', eraFrequency, commissionRate, estimatedRewardRate, YEAR);
 
   function getPoolStat () {
     // eslint-disable-next-line node/no-callback-literal

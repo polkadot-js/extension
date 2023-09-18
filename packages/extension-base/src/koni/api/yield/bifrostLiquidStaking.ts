@@ -1,14 +1,39 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { OptimalYieldPath, OptimalYieldPathParams, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, SubmitBifrostLiquidStaking, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
+import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import fetch from 'cross-fetch';
 
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
-export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
-  function getPoolStat () {
+const STATS_URL = 'https://api.bifrost.app/api/site';
+
+export interface BifrostLiquidStakingMeta {
+  apy: string,
+  apyBase: string,
+  apyReward: string,
+  tvl: number,
+  tvm: number,
+  holders: number
+}
+
+export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPoolInfo) => void) {
+  async function getPoolStat () {
+    const response = await fetch(STATS_URL, {
+      method: 'GET'
+    })
+      .then((res) => res.json()) as Record<string, BifrostLiquidStakingMeta>;
+
+    const vDOTStats = response.vDOT;
+    const assetInfo = assetInfoMap[poolInfo.inputAssets[0]];
+    const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
+
     // eslint-disable-next-line node/no-callback-literal
     callback({
       ...poolInfo,
@@ -16,39 +41,57 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, cal
         assetEarning: [
           {
             slug: poolInfo.inputAssets[0],
-            apr: 18.38
+            apy: parseFloat(vDOTStats.apyBase)
           }
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '10000000000',
+        minJoinPool: '0',
         minWithdrawal: '0',
-        totalApr: 18.38,
-        tvl: '13095111106588368'
+        totalApy: parseFloat(vDOTStats.apyBase),
+        tvl: (vDOTStats.tvm * assetDecimals).toString()
       }
     });
   }
 
-  // eslint-disable-next-line node/no-callback-literal
-  callback({
-    ...poolInfo,
-    stats: {
-      assetEarning: [
-        {
-          slug: poolInfo.inputAssets[0],
-          apr: 18.38
-        }
-      ],
-      maxCandidatePerFarmer: 1,
-      maxWithdrawalRequestPerFarmer: 1,
-      minJoinPool: '10000000000',
-      minWithdrawal: '0',
-      totalApr: 18.38,
-      tvl: '13095111106588368'
-    }
-  });
+  function getStatInterval () {
+    getPoolStat().catch(console.error);
+  }
 
-  const interval = setInterval(getPoolStat, 3000000);
+  fetch(STATS_URL, {
+    method: 'GET'
+  })
+    .then((res) => {
+      res.json()
+        .then((data: Record<string, BifrostLiquidStakingMeta>) => {
+          const vDOTStats = data.vDOT;
+          const assetInfo = assetInfoMap[poolInfo.inputAssets[0]];
+          const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
+
+          // eslint-disable-next-line node/no-callback-literal
+          callback({
+            ...poolInfo,
+            stats: {
+              assetEarning: [
+                {
+                  slug: poolInfo.inputAssets[0],
+                  apy: parseFloat(vDOTStats.apyBase)
+                }
+              ],
+              maxCandidatePerFarmer: 1,
+              maxWithdrawalRequestPerFarmer: 1,
+              minJoinPool: '0',
+              minWithdrawal: '0',
+              totalApy: parseFloat(vDOTStats.apyBase),
+              tvl: (vDOTStats.tvm * assetDecimals).toString()
+            }
+          });
+        })
+        .catch(console.error);
+    })
+    .catch(console.error);
+
+  const interval = setInterval(getStatInterval, 30000);
 
   return () => {
     clearInterval(interval);
@@ -143,4 +186,33 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
   }
 
   return result;
+}
+
+export async function getBifrostLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitBifrostLiquidStaking): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+  if (path.steps[currentStep].type === YieldStepType.XCM) {
+    const destinationTokenSlug = params.poolInfo.inputAssets[0];
+    const originChainInfo = params.chainInfoMap[COMMON_CHAIN_SLUGS.POLKADOT];
+    const originTokenSlug = _getChainNativeTokenSlug(originChainInfo);
+    const originTokenInfo = params.assetInfoMap[originTokenSlug];
+    const destinationTokenInfo = params.assetInfoMap[destinationTokenSlug];
+    const substrateApi = params.substrateApiMap[originChainInfo.slug];
+
+    const extrinsic = await createXcmExtrinsic({
+      chainInfoMap: params.chainInfoMap,
+      destinationTokenInfo,
+      originTokenInfo,
+      recipient: address,
+      sendingValue: inputData.amount,
+      substrateApi
+    });
+
+    return [ExtrinsicType.TRANSFER_XCM, extrinsic];
+  }
+
+  const substrateApi = params.substrateApiMap[params.poolInfo.chain];
+  const inputTokenSlug = params.poolInfo.inputAssets[0];
+  const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
+  const extrinsic = substrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), inputData.amount);
+
+  return [ExtrinsicType.MINT_VDOT, extrinsic];
 }

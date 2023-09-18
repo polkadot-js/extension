@@ -148,7 +148,6 @@ export class KoniSubscription {
 
   initYieldPositionSubscription (addresses: string[], substrateApiMap: Record<string, SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, onlyRunOnFirstTime?: boolean) {
     const updateYieldPoolStats = (data: YieldPositionInfo) => {
-      console.log('yieldPosition', data);
       this.state.updateYieldPosition(data);
     };
 
@@ -170,7 +169,7 @@ export class KoniSubscription {
       this.state.updateYieldPoolInfo(data);
     };
 
-    const unsub = subscribeYieldPoolStats(substrateApiMap, this.state.getActiveChainInfoMap(), updateYieldPoolStats);
+    const unsub = subscribeYieldPoolStats(substrateApiMap, this.state.getActiveChainInfoMap(), this.state.getAssetRegistry(), updateYieldPoolStats);
 
     if (onlyRunOnFirstTime) {
       unsub && unsub();

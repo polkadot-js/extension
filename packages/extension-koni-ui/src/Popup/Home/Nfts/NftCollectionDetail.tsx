@@ -21,11 +21,14 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Image, Trash } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
 
-type Props = ThemeProps
+type WrapperProps = ThemeProps;
+type Props = ThemeProps & {
+  collectionDetail: INftCollectionDetail
+};
 
 const subHeaderRightButton = (
   <Icon
@@ -36,9 +39,8 @@ const subHeaderRightButton = (
   />
 );
 
-function Component ({ className = '' }: Props): React.ReactElement<Props> {
-  const location = useLocation();
-  const { collectionInfo, nftList } = location.state as INftCollectionDetail;
+function Component ({ className = '', collectionDetail }: Props): React.ReactElement<Props> {
+  const { collectionInfo, nftList } = collectionDetail;
   const outletContext: {
     searchInput: string,
     setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>,
@@ -249,7 +251,30 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
+function WrapperComponent (props: WrapperProps): React.ReactElement<WrapperProps> {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [collectionDetail] = useState((location.state as INftCollectionDetail));
+
+  useEffect(() => {
+    if (!collectionDetail) {
+      navigate('/home/nfts/collections');
+    }
+  }, [collectionDetail, navigate]);
+
+  if (!collectionDetail) {
+    return <></>;
+  }
+
+  return (
+    <Component
+      {...props}
+      collectionDetail={collectionDetail}
+    />
+  );
+}
+
+const NftCollectionDetail = styled(WrapperComponent)<Props>(({ theme: { token } }: Props) => {
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,

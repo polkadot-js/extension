@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
@@ -34,7 +36,12 @@ import Transaction from '../../Transaction/Transaction';
 import SendNFT from '../../Transaction/variants/SendNFT';
 import { INftItemDetail } from '.';
 
-type Props = ThemeProps
+type WrapperProps = ThemeProps;
+type Props = WrapperProps & {
+  collectionInfo: NftCollection,
+  nftItem: NftItem,
+  originChainInfo: _ChainInfo
+};
 
 const NFT_DESCRIPTION_MAX_LENGTH = 70;
 
@@ -48,11 +55,9 @@ const modalCloseButton =
 
 const modalId = TRANSFER_NFT_MODAL;
 
-function Component ({ className = '' }: Props): React.ReactElement<Props> {
-  const location = useLocation();
-  const [collectionInfo] = useState((location.state as INftItemDetail)?.collectionInfo);
-  const [nftItem] = useState((location.state as INftItemDetail)?.nftItem);
-
+function Component ({ className = '', collectionInfo,
+  nftItem,
+  originChainInfo }: Props): React.ReactElement<Props> {
   const outletContext: {
     searchInput: string,
     setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
@@ -73,7 +78,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
 
-  const originChainInfo = useGetChainInfo(nftItem.chain);
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
   const accountExternalUrl = getExplorerLink(originChainInfo, nftItem.owner, 'account');
   const [sendNftKey, setSendNftKey] = useState<string>('sendNftKey');
@@ -433,7 +437,38 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
+function WrapperComponent (props: WrapperProps): React.ReactElement<WrapperProps> {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [itemDetail] = useState((location.state as INftItemDetail));
+
+  const collectionInfo = itemDetail?.collectionInfo;
+  const nftItem = itemDetail?.nftItem;
+  const originChainInfo = useGetChainInfo(nftItem.chain || '');
+
+  const isEmptyInfo = !collectionInfo || !nftItem || !originChainInfo;
+
+  useEffect(() => {
+    if (isEmptyInfo) {
+      navigate('/home/nfts/collections');
+    }
+  }, [isEmptyInfo, navigate]);
+
+  if (isEmptyInfo) {
+    return <></>;
+  }
+
+  return (
+    <Component
+      {...props}
+      collectionInfo={collectionInfo}
+      nftItem={nftItem}
+      originChainInfo={originChainInfo}
+    />
+  );
+}
+
+const NftItemDetail = styled(WrapperComponent)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.nft_item_detail__container': {
       marginTop: token.marginSM,

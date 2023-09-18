@@ -113,15 +113,15 @@ const Unstake = new LazyLoader('Unstake', () => import('@subwallet/extension-kon
 const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/CancelUnstake'));
 const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/ClaimReward'));
 const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Withdraw'));
-const Earn = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Earn'));
+const Earn = new LazyLoader('Earn',() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Earn'));
 
 // Wallet Connect
 const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
 const ConnectionList = new LazyLoader('ConnectionList', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
 const ConnectionDetail = new LazyLoader('ConnectionDetail', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
-const Earning = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Earning'));
-const EarningManagement = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
+const Earning = new LazyLoader('Earning',() => import('@subwallet/extension-koni-ui/Popup/Home/Earning'));
+const EarningManagement = new LazyLoader('EarningManagement',() => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
 
 // A Placeholder page
 export function Example () {
@@ -163,8 +163,8 @@ export const router = createBrowserRouter([
           },
           Crowdloans.generateRouterObject('crowdloans'),
           Staking.generateRouterObject('staking'),
-          Earning.generateRouterObject('earning', true),
-          EarningManagement.generateRouterObject('earning-detail', true),
+          Earning.generateRouterObject('earning'),
+          EarningManagement.generateRouterObject('earning-detail'),
           History.generateRouterObject('history'),
           History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
           {

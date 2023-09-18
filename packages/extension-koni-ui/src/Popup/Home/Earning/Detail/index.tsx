@@ -2,14 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import HorizontalEarningItem from '@subwallet/extension-koni-ui/components/HorizontalEarningItem';
-import { EARNING_MANAGEMENT_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { EarningCalculatorModal, HorizontalEarningItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EARNING_MANAGEMENT_DETAIL_MODAL, STAKING_CALCULATOR_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import EarningManagementDetailModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/Detail/EarningManagementDetailModal';
-import EarningCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/EarningCalculatorModal';
-import EarningToolbar from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/EarningToolBar';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList } from '@subwallet/react-ui';
@@ -18,6 +14,9 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import EarningToolbar from '../Overview/EarningToolBar';
+import EarningManagementDetailModal from './EarningManagementDetailModal';
 
 type Props = ThemeProps;
 
@@ -91,7 +90,7 @@ const Component = () => {
       const poolInfo = poolInfoMap[item.slug];
 
       setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
-      activeModal(STAKING_CALCULATOR_MODAL_ID);
+      activeModal(STAKING_CALCULATOR_MODAL);
     };
   }, [activeModal, poolInfoMap]);
 
@@ -178,7 +177,7 @@ const Component = () => {
         searchMinCharactersCount={2}
       />
 
-      {selectedYieldPoolInfo && <EarningCalculatorModal item={selectedYieldPoolInfo} />}
+      {selectedYieldPoolInfo && <EarningCalculatorModal defaultItem={selectedYieldPoolInfo} />}
 
       {
         selectedYieldPosition && selectedYieldPoolInfo && (

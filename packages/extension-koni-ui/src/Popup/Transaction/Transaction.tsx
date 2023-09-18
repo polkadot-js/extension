@@ -61,8 +61,8 @@ function Component ({ children, className, modalContent }: Props) {
         return ExtrinsicType.STAKING_COMPOUNDING;
       case 'send-nft':
         return ExtrinsicType.SEND_NFT;
-      // case 'earn':
-      //   return ExtrinsicType.MINT_LDOT; // TODO: change this
+      case 'earn':
+        return ExtrinsicType.JOIN_YIELD_POOL; // TODO: change this
       case 'send-fund':
       default:
         return ExtrinsicType.TRANSFER_BALANCE;

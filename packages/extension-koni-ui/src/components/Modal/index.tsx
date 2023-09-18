@@ -13,6 +13,7 @@ export * from './ActionModal';
 export * from './BaseModal';
 export * from './BaseSelectModal';
 export * from './Customize/CustomizeModal';
+export * from './Earning';
 export * from './FilterModal';
 export * from './GlobalSearchTokenModal';
 export * from './ReceiveModal';

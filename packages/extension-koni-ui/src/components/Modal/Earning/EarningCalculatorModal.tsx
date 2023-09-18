@@ -3,11 +3,7 @@
 
 import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
-import { AmountInput } from '@subwallet/extension-koni-ui/components';
-import EarningBtn from '@subwallet/extension-koni-ui/components/EarningBtn';
-import { EarningMethodSelector } from '@subwallet/extension-koni-ui/components/Field/EarningMethodSelector';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import EarningCalculatorInfo from '@subwallet/extension-koni-ui/components/StakingCalculatorInfo';
+import { STAKING_CALCULATOR_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Divider, Form, Icon, ModalContext, Typography } from '@subwallet/react-ui';
@@ -16,10 +12,16 @@ import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
+import EarningBtn from '../../EarningBtn';
+import { AmountInput, EarningMethodSelector } from '../../Field';
+import EarningCalculatorInfo from '../../StakingCalculatorInfo';
+import { BaseModal } from '../BaseModal';
+
 interface Props extends ThemeProps {
-  item: YieldPoolInfo;
+  defaultItem: YieldPoolInfo;
 }
 
 enum FormFieldName {
@@ -40,14 +42,23 @@ interface EarningCalculatorFormProps {
   [FormFieldName.METHOD]: string;
 }
 
-export const STAKING_CALCULATOR_MODAL_ID = 'staking-calculator-modal-id';
+const modalId = STAKING_CALCULATOR_MODAL;
 
-const Component = ({ className, item }: Props) => {
+const Component = (props: Props) => {
+  const { className, defaultItem } = props;
+
   const { t } = useTranslation();
-  const { inactiveModal } = useContext(ModalContext);
+  const navigate = useNavigate();
   const { token } = useTheme() as Theme;
+
+  const { addExclude, checkActive, inactiveModal, removeExclude } = useContext(ModalContext);
+
+  const isActive = checkActive(modalId);
+
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
+
   const [form] = Form.useForm<EarningCalculatorFormProps>();
+
   const formDefault: EarningCalculatorFormProps = useMemo(() => {
     return {
       [FormFieldName.VALUE]: '0',
@@ -55,11 +66,10 @@ const Component = ({ className, item }: Props) => {
     };
   }, []);
 
-  useEffect(() => {
-    form.setFieldValue(FormFieldName.METHOD, item.slug);
-  }, [form, item]);
-
   const currentAmount = Form.useWatch(FormFieldName.VALUE, form);
+  const currentMethod = Form.useWatch(FormFieldName.METHOD, form);
+
+  const currentItem = useMemo(() => currentMethod ? poolInfo[currentMethod] : defaultItem, [currentMethod, poolInfo, defaultItem]);
 
   const transformAssetEarnings: TransformAssetEarningMap = useMemo(() => {
     const dailyEarnings: Record<string, YieldAssetExpectedEarning> = {};
@@ -67,8 +77,8 @@ const Component = ({ className, item }: Props) => {
     const monthlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
     const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
 
-    if (item?.stats?.assetEarning) {
-      item?.stats?.assetEarning.forEach((assetEarningStats) => {
+    if (currentItem?.stats?.assetEarning) {
+      currentItem?.stats?.assetEarning.forEach((assetEarningStats) => {
         const assetApr = assetEarningStats?.apr || 0;
         const assetSlug = assetEarningStats.slug;
 
@@ -85,21 +95,40 @@ const Component = ({ className, item }: Props) => {
     }
 
     return { dailyEarnings, weeklyEarnings, monthlyEarnings, yearlyEarnings };
-  }, [currentAmount, item?.stats?.assetEarning]);
+  }, [currentAmount, currentItem?.stats?.assetEarning]);
 
   const onCloseModal = useCallback(() => {
-    inactiveModal(STAKING_CALCULATOR_MODAL_ID);
+    inactiveModal(modalId);
   }, [inactiveModal]);
 
   const onFieldsChange: FormCallbacks<EarningCalculatorFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // Empty
   }, []);
 
+  const onSubmit: FormCallbacks<EarningCalculatorFormProps>['onFinish'] = useCallback((values: EarningCalculatorFormProps) => {
+    const { method } = values;
+
+    inactiveModal(modalId);
+    navigate(`/transaction/earn/${method}`);
+  }, [navigate, inactiveModal]);
+
+  useEffect(() => {
+    addExclude(modalId);
+
+    return () => {
+      removeExclude(modalId);
+    };
+  }, [addExclude, removeExclude]);
+
+  useEffect(() => {
+    form.setFieldValue(FormFieldName.METHOD, defaultItem.slug);
+  }, [form, defaultItem, isActive]);
+
   return (
     <BaseModal
       className={className}
       closable
-      id={STAKING_CALCULATOR_MODAL_ID}
+      id={modalId}
       maskClosable
       onCancel={onCloseModal}
       title={t('Staking calculator')}
@@ -119,6 +148,7 @@ const Component = ({ className, item }: Props) => {
           form={form}
           initialValues={formDefault}
           onFieldsChange={onFieldsChange}
+          onFinish={onSubmit}
         >
           <Form.Item
             colon={false}
@@ -183,12 +213,17 @@ const Component = ({ className, item }: Props) => {
 
       <Button
         block
-        icon={<Icon
-          phosphorIcon={PlusCircle}
-          weight={'fill'}
-        />}
-        style={{ marginTop: token.paddingXL }}
-      >{t('Stake now')}</Button>
+        className='submit-button'
+        icon={(
+          <Icon
+            phosphorIcon={PlusCircle}
+            weight='fill'
+          />
+        )}
+        onClick={form.submit}
+      >
+        {t('Stake now')}
+      </Button>
     </BaseModal>
   );
 };
@@ -216,6 +251,10 @@ const EarningCalculatorModal = styled(Component)<Props>(({ theme: { token } }: P
       '.ant-form-item-label > label': {
         color: token.colorTextLight4
       }
+    },
+
+    '.submit-button': {
+      marginTop: token.paddingXL
     }
   };
 });

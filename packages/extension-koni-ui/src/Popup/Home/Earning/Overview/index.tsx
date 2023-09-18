@@ -14,8 +14,9 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import EarningCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from './EarningCalculatorModal';
+import EarningCalculatorModal from '../../../../components/Modal/Earning/EarningCalculatorModal';
 import EarningToolbar from './EarningToolBar';
+import { STAKING_CALCULATOR_MODAL } from '@subwallet/extension-koni-ui/constants';
 
 type Props = ThemeProps;
 
@@ -87,7 +88,7 @@ const Component = () => {
   const onClickCalculatorBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
       setSelectedItem(item);
-      activeModal(STAKING_CALCULATOR_MODAL_ID);
+      activeModal(STAKING_CALCULATOR_MODAL);
     };
   }, [activeModal]);
 
@@ -159,7 +160,7 @@ const Component = () => {
         searchMinCharactersCount={2}
       />
 
-      {selectedItem && <EarningCalculatorModal item={selectedItem} />}
+      {selectedItem && <EarningCalculatorModal defaultItem={selectedItem} />}
     </Layout.Base>
   );
 };

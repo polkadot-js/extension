@@ -12,11 +12,13 @@ export { default as PhraseNumberSelector } from './PhraseNumberSelector';
 export { default as PoolSelector } from './PoolSelector';
 export { default as PrivateKeyInput } from './PrivateKeyInput';
 export { default as SeedPhraseInput } from './SeedPhraseInput';
-
+export { default as YieldMultiValidatorSelector } from './YieldMultiValidatorSelector';
 export * from './AccountSelector';
+
 export * from './AddressInput';
 export * from './BuyTokens/ServiceSelector';
 export * from './ChainSelector';
+export * from './EarningMethodSelector';
 export * from './ProviderSelector';
 export * from './TokenSelector';
 export * from './TokenTypeSelector';

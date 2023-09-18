@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
+import { useSelectModalInputHelper, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, InputRef, Logo, Web3Block } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 import GeneralEmptyList from '../GeneralEmptyList';
+import { BaseSelectModal } from '../Modal';
+import { BasicInputWrapper } from './Base';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   items: YieldPoolInfo[];
@@ -59,7 +59,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const renderItem = useCallback((item: YieldPoolInfo, selected: boolean) => {
     return (
       <Web3Block
-        className={'earning-method-item'}
+        className={CN('earning-method-item', { selected: selected })}
         leftItem={(
           <Logo
             network={item.chain}
@@ -187,6 +187,11 @@ export const EarningMethodSelector = styled(forwardRef(Component))<Props>(({ the
 
     '.earning-method-item': {
       borderRadius: token.borderRadiusLG,
+      backgroundColor: token.colorBgSecondary,
+
+      '&.selected, &:hover': {
+        backgroundColor: token.colorBgInput
+      },
 
       '.ant-web3-block-right-item': {
         marginRight: 0

@@ -8,3 +8,4 @@ export { default as useTransactionContext } from './useTransactionContext';
 export { default as useWatchTransaction } from './useWatchTransaction';
 
 export * from './confirmation';
+export * from './earning';

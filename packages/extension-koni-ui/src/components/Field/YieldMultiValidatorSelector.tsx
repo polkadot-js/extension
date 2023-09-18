@@ -6,7 +6,7 @@ import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bo
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useFilterModal, useGetChainStakingMetadata, useGetNominatorInfo, useGetValidatorList, useSelectValidators, ValidatorDataType } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetValidatorList, useGetYieldInfo, useGetYieldMetadata, useSelectValidators, ValidatorDataType } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getValidatorKey } from '@subwallet/extension-koni-ui/utils';
 import { Badge, Button, Icon, InputRef, ModalContext, SwList, useExcludeModal } from '@subwallet/react-ui';
@@ -27,6 +27,7 @@ import { BasicInputWrapper } from './Base';
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
   from: string;
+  slug?: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
   onClickLightningBtn?: (e: SyntheticEvent) => void;
   isSingleSelect?: boolean;
@@ -71,7 +72,7 @@ const filterOptions = [
 const defaultModalId = 'multi-validator-selector';
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, loading, onChange, setForceFetchValidator, value, defaultValue } = props;
+  const { chain, className = '', disabled, from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, loading, onChange, setForceFetchValidator, value, defaultValue, slug } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
 
@@ -79,15 +80,22 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const isActive = checkActive(id);
 
   const items = useGetValidatorList(chain, StakingType.NOMINATED) as ValidatorDataType[];
-  const nominatorMetadata = useGetNominatorInfo(chain, StakingType.NOMINATED, from);
-  const chainStakingMetadata = useGetChainStakingMetadata(chain);
+  const yieldInfo = useGetYieldInfo(slug, from);
+
+  const chainStakingMetadata = useGetYieldMetadata(slug);
 
   const sectionRef = useRef<SwListSectionRef>(null);
 
-  const maxCount = chainStakingMetadata?.maxValidatorPerNominator || 1;
+  const maxCount = chainStakingMetadata?.metadata?.maxValidatorPerNominator || 1;
 
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
-  const nominations = useMemo(() => from ? nominatorMetadata[0]?.nominations : [], [from, nominatorMetadata]);
+  const nominations = useMemo(() => {
+    if (from) {
+      return yieldInfo[0]?.metadata?.nominations;
+    } else {
+      return [];
+    }
+  }, [from, yieldInfo]);
   const isSingleSelect = useMemo(() => _isSingleSelect || !isRelayChain, [_isSingleSelect, isRelayChain]);
   const hasReturn = useMemo(() => items[0]?.expectedReturn !== undefined, [items]);
 
@@ -364,7 +372,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   );
 };
 
-const MultiValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
+const YieldMultiValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
     '&.ant-sw-modal': {
       '.ant-sw-modal-header': {
@@ -400,4 +408,4 @@ const MultiValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { 
   };
 });
 
-export default MultiValidatorSelector;
+export default YieldMultiValidatorSelector;

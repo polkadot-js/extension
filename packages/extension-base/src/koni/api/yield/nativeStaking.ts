@@ -82,37 +82,41 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
       } as ChainStakingMetadata
     });
 
-    // eslint-disable-next-line node/no-callback-literal
-    callback({ // TODO
-      ...YIELD_POOLS_INFO.DOT___nomination_pool,
-      stats: {
-        assetEarning: [
-          {
-            slug: _getChainNativeTokenSlug(chainInfo),
-            apr: expectedReturn
-          }
-        ],
-        maxCandidatePerFarmer: parseInt(maxNominations),
-        maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks),
-        minJoinPool: minPoolJoin || '0',
-        minWithdrawal: '0',
-        totalApr: expectedReturn,
-        tvl: bnTotalEraStake.toString()
-      },
-      metadata: {
-        chain: chainInfo.slug,
-        type: StakingType.NOMINATED,
-        expectedReturn: !_STAKING_CHAIN_GROUP.ternoa.includes(chainInfo.slug) ? expectedReturn : undefined, // in %, annually
-        inflation,
-        era: parseInt(currentEra),
-        minStake: minStake.toString(),
-        maxValidatorPerNominator: parseInt(maxNominations),
-        maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
-        allowCancelUnstaking: true,
-        unstakingPeriod: unlockingPeriod,
-        minJoinNominationPool: minPoolJoin
-      } as ChainStakingMetadata
-    });
+    if (substrateApi.api.query.nominationPools) {
+      const nominationPoolSlug = `${poolInfo.slug.slice(0, 3)}___nomination_pool`;
+
+      // eslint-disable-next-line node/no-callback-literal
+      callback({ // TODO
+        ...YIELD_POOLS_INFO[nominationPoolSlug],
+        stats: {
+          assetEarning: [
+            {
+              slug: _getChainNativeTokenSlug(chainInfo),
+              apr: expectedReturn
+            }
+          ],
+          maxCandidatePerFarmer: parseInt(maxNominations),
+          maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks),
+          minJoinPool: minPoolJoin || '0',
+          minWithdrawal: '0',
+          totalApr: expectedReturn,
+          tvl: bnTotalEraStake.toString()
+        },
+        metadata: {
+          chain: chainInfo.slug,
+          type: StakingType.NOMINATED,
+          expectedReturn: !_STAKING_CHAIN_GROUP.ternoa.includes(chainInfo.slug) ? expectedReturn : undefined, // in %, annually
+          inflation,
+          era: parseInt(currentEra),
+          minStake: minStake.toString(),
+          maxValidatorPerNominator: parseInt(maxNominations),
+          maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
+          allowCancelUnstaking: true,
+          unstakingPeriod: unlockingPeriod,
+          minJoinNominationPool: minPoolJoin
+        } as ChainStakingMetadata
+      });
+    }
   });
 }
 

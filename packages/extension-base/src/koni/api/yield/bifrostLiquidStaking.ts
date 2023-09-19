@@ -41,14 +41,14 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
         assetEarning: [
           {
             slug: poolInfo.inputAssets[0],
-            apy: parseFloat(vDOTStats.apyBase)
+            apy: parseFloat(vDOTStats.apyBase) / 100
           }
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '0',
         minWithdrawal: '0',
-        totalApy: parseFloat(vDOTStats.apyBase),
+        totalApy: parseFloat(vDOTStats.apyBase) / 100,
         tvl: (vDOTStats.tvm * assetDecimals).toString()
       }
     });
@@ -215,4 +215,12 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
   const extrinsic = substrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), inputData.amount);
 
   return [ExtrinsicType.MINT_VDOT, extrinsic];
+}
+
+export function getBifrostLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string) {
+  const rewardTokenSlug = params.poolInfo.rewardAssets[0];
+  const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
+  const substrateApi = params.substrateApiMap[params.poolInfo.chain];
+
+  return substrateApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount);
 }

@@ -1267,7 +1267,7 @@ export default class KoniExtension {
             address: ALL_ACCOUNT_KEY,
             currentGenesisHash: allGenesisHash || null,
             allGenesisHash
-          });
+          }, undefined, true);
         }
 
         changedAccount = true;

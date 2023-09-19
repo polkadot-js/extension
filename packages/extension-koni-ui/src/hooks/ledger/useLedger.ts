@@ -147,10 +147,10 @@ export function useLedger (slug?: string, active = true): Result {
       return ledger.getAddress(false, accountIndex, 0);
     } else {
       return new Promise((resolve, reject) => {
-        reject(new Error("Can't find ledger"));
+        reject(new Error(t("Can't find Ledger device")));
       });
     }
-  }, [ledger]);
+  }, [ledger, t]);
 
   const signTransaction = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     if (ledger) {
@@ -168,10 +168,10 @@ export function useLedger (slug?: string, active = true): Result {
       });
     } else {
       return new Promise((resolve, reject) => {
-        reject(new Error("Can't find ledger device"));
+        reject(new Error(t("Can't find Ledger device")));
       });
     }
-  }, [handleError, ledger]);
+  }, [handleError, ledger, t]);
 
   const signMessage = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     if (ledger) {
@@ -189,10 +189,10 @@ export function useLedger (slug?: string, active = true): Result {
       });
     } else {
       return new Promise((resolve, reject) => {
-        reject(new Error("Can't find ledger device"));
+        reject(new Error(t("Can't find Ledger device")));
       });
     }
-  }, [handleError, ledger]);
+  }, [handleError, ledger, t]);
 
   useEffect(() => {
     if (!ledger || !slug || !active) {

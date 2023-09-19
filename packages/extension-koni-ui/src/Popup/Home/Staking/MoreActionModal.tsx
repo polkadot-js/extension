@@ -4,11 +4,12 @@
 import { ChainStakingMetadata, ExtrinsicType, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
+import { CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_STAKE_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, STAKE_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, BackgroundIcon, ModalContext, SettingItem } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowArcLeft, ArrowCircleDown, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
@@ -16,6 +17,7 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps & {
   staking: StakingItem;
@@ -47,6 +49,11 @@ const Component: React.FC<Props> = (props: Props) => {
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
 
   const [selected, setSelected] = useState<StakingAction | undefined>();
+  const [, setStakeStorage] = useLocalStorage(STAKE_TRANSACTION, DEFAULT_STAKE_PARAMS);
+  const [, setUnStakeStorage] = useLocalStorage(UN_STAKE_TRANSACTION, DEFAULT_UN_STAKE_PARAMS);
+  const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
+  const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
+  const [, setClaimRewardStorage] = useLocalStorage(CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS);
 
   const onCancel = useCallback(
     () => {
@@ -72,7 +79,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
     if (isAllAccount) {
       setSelected(undefined);
-      navigate(`/transaction/withdraw/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
+
+      setWithdrawStorage({
+        ...DEFAULT_WITHDRAW_PARAMS,
+        type: nominatorMetadata.type,
+        chain: nominatorMetadata.chain
+      });
+
+      navigate('/transaction/withdraw');
 
       return;
     }
@@ -101,7 +115,7 @@ const Component: React.FC<Props> = (props: Props) => {
       .finally(() => {
         setSelected(undefined);
       });
-  }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess]);
+  }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess, setWithdrawStorage]);
 
   const handleClaimRewardAction = useCallback(() => {
     if (!nominatorMetadata) {
@@ -112,7 +126,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
     if (nominatorMetadata.type === StakingType.POOLED || isAllAccount) {
       setSelected(undefined);
-      navigate(`/transaction/claim-reward/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
+      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+      setClaimRewardStorage({
+        ...DEFAULT_CLAIM_REWARD_PARAMS,
+        from: address,
+        type: nominatorMetadata.type,
+        chain: nominatorMetadata.chain
+      });
+      navigate('/transaction/claim-reward');
 
       return;
     }
@@ -128,7 +150,7 @@ const Component: React.FC<Props> = (props: Props) => {
       .finally(() => {
         setSelected(undefined);
       });
-  }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward]);
+  }, [currentAccount, isAllAccount, navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward, setClaimRewardStorage]);
 
   const availableActions = useMemo(() => {
     if (!nominatorMetadata) {
@@ -151,6 +173,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     const actionListByChain = getStakingAvailableActionsByChain(chainStakingMetadata.chain, chainStakingMetadata.type);
+    const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
     return actionListByChain.map((action) => {
       if (action === StakingAction.UNSTAKE) {
@@ -159,7 +182,15 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'magenta-6',
           icon: MinusCircle,
           label: t('Unstake'),
-          onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
+          onClick: () => {
+            setUnStakeStorage({
+              ...DEFAULT_UN_STAKE_PARAMS,
+              from: address,
+              type: chainStakingMetadata.type,
+              chain: chainStakingMetadata.chain
+            });
+            onNavigate('/transaction/unstake')();
+          }
         };
       } else if (action === StakingAction.WITHDRAW) {
         return {
@@ -183,7 +214,15 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'purple-8',
           icon: ArrowArcLeft,
           label: t('Cancel unstaking'),
-          onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
+          onClick: () => {
+            setCancelUnStakeStorage({
+              ...DEFAULT_CANCEL_UN_STAKE_PARAMS,
+              from: address,
+              type: chainStakingMetadata.type,
+              chain: chainStakingMetadata.chain
+            });
+            onNavigate('/transaction/cancel-unstake')();
+          }
         };
       }
 
@@ -192,10 +231,20 @@ const Component: React.FC<Props> = (props: Props) => {
         backgroundIconColor: 'green-6',
         icon: PlusCircle,
         label: t('Stake more'),
-        onClick: onNavigate(`/transaction/stake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
+        onClick: () => {
+          setStakeStorage({
+            ...DEFAULT_STAKE_PARAMS,
+            from: address,
+            defaultChain: chainStakingMetadata.chain,
+            defaultType: chainStakingMetadata.type,
+            type: chainStakingMetadata.type,
+            chain: chainStakingMetadata.chain
+          });
+          onNavigate('/transaction/stake')();
+        }
       };
     });
-  }, [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, onNavigate, t]);
+  }, [chainStakingMetadata, currentAccount, handleClaimRewardAction, handleWithdrawalAction, onNavigate, setCancelUnStakeStorage, setStakeStorage, setUnStakeStorage, t]);
 
   const onPreCheck = usePreCheckAction(currentAccount?.address, false);
 

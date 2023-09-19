@@ -27,3 +27,4 @@ export const IGNORE_QR_SIGNER: string[] = [];
 export const XCM_MIN_AMOUNT_RATIO = 1.2;
 
 export * from './staking';
+export * from './storage';

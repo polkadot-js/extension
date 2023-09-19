@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import DefaultLogosMap, { IconMap } from '@subwallet/extension-koni-ui/assets/logo';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
@@ -23,7 +24,7 @@ import { Button, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react
 import CN from 'classnames';
 import { QrCode, Scan, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -42,7 +43,7 @@ const checkAccount = (qrAccount: QrAccount): Promise<boolean> => {
         if (isValid) {
           resolve(isEthereum);
         } else {
-          reject(new Error('Invalid qr'));
+          reject(new Error('Invalid QR code'));
         }
       })
       .catch((e: Error) => {
@@ -110,13 +111,13 @@ const Component: React.FC<Props> = (props: Props) => {
         })
         .catch((error: Error) => {
           setValidateState({
-            message: error.message,
+            message: t(error.message),
             status: 'error'
           });
           setLoading(false);
         });
     }, 300);
-  }, [inactiveModal, accountName, onComplete]);
+  }, [accountName, onComplete, inactiveModal, t]);
 
   const { onClose, onError, onSuccess, openCamera } = useScanAccountQr(modalId, importQrScan, setValidateState, onSubmit);
 
@@ -192,15 +193,17 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           <div className='instruction'>
             <div className='instruction'>
-              <span>{t('Click the "Scan QR" button, or read')}&nbsp;</span>
-              <a
-                className='link'
-                href='#'
-              >
-                {t('this instruction')}
-              </a>
-              <span>,&nbsp;</span>
-              <span>{t('for more details.')}</span>
+              <Trans
+                components={{
+                  highlight: (
+                    <a
+                      className='link'
+                      href='https://docs.subwallet.app/main/extension-user-guide/account-management/import-and-restore-an-account#import-by-qr-code'
+                    />
+                  )
+                }}
+                i18nKey={detectTranslate('Click the "Scan QR" button, or read <highlight>this instruction</highlight>, for more details.')}
+              />
             </div>
           </div>
           {

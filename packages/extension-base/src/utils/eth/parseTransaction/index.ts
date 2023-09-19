@@ -10,6 +10,7 @@ import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwall
 import { InputDataDecoder } from '@subwallet/extension-base/utils/eth/parseTransaction/base';
 import axios from 'axios';
 import BigN from 'bignumber.js';
+import { t } from 'i18next';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 const ABIs = [_ERC20_ABI, _ERC721_ABI];
@@ -221,7 +222,7 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, _Chai
   const tx: QrTransaction | null = createTransactionFromRLP(data);
 
   if (!tx) {
-    throw new Error(`Cannot create tx from ${data}`);
+    throw new Error(t('Failed to decode data. Please use a valid QR code'));
   }
 
   const result: ResponseQrParseRLP = {

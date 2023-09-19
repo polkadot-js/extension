@@ -99,7 +99,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       setReformatAddress('');
 
       if (value !== '') {
-        return Promise.reject(t('Invalid address'));
+        return Promise.reject(t('This is not an address'));
       }
     }
 

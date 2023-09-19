@@ -188,7 +188,7 @@ function Component ({ className }: Props): JSX.Element {
         } catch (e) {
           setFileValidateState({
             status: 'error',
-            message: t<string>('Invalid Json file')
+            message: t<string>('Invalid JSON file')
           });
           setValidating(false);
           setRequirePassword(false);

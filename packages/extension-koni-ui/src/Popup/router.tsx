@@ -171,12 +171,12 @@ export const router = createBrowserRouter([
         ...Transaction.generateRouterObject('/transaction'),
         children: [
           SendFund.generateRouterObject('send-fund'),
-          SendNFT.generateRouterObject('send-nft/:owner/:chain/:collectionId/:itemId'),
-          Stake.generateRouterObject('stake/:type/:chain'),
-          Unstake.generateRouterObject('unstake/:type/:chain'),
-          CancelUnstake.generateRouterObject('cancel-unstake/:type/:chain'),
-          ClaimReward.generateRouterObject('claim-reward/:type/:chain'),
-          Withdraw.generateRouterObject('withdraw/:type/:chain'),
+          SendNFT.generateRouterObject('send-nft'),
+          Stake.generateRouterObject('stake'),
+          Unstake.generateRouterObject('unstake'),
+          CancelUnstake.generateRouterObject('cancel-unstake'),
+          ClaimReward.generateRouterObject('claim-reward'),
+          Withdraw.generateRouterObject('withdraw'),
           {
             path: 'compound',
             element: <Example />

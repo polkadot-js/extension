@@ -143,6 +143,14 @@ const Component: React.FC<Props> = (props: Props) => {
     setIsDisable(error || empty);
   }, []);
 
+  const convertError = useCallback((error: string) => {
+    if (error === 'Unable to decode using the supplied passphrase') {
+      return t('Wrong password');
+    } else {
+      return t(error);
+    }
+  }, [t]);
+
   const onSubmit: FormCallbacks<MigratePasswordFormState>['onFinish'] = useCallback((values: MigratePasswordFormState) => {
     const password = values[FormFieldName.PASSWORD];
 
@@ -154,7 +162,7 @@ const Component: React.FC<Props> = (props: Props) => {
           password: password
         }).then((res) => {
           if (!res?.status) {
-            form.setFields([{ name: FormFieldName.PASSWORD, errors: [res.errors[0]] }]);
+            form.setFields([{ name: FormFieldName.PASSWORD, errors: [convertError(res.errors[0])] }]);
             selectPassword();
             setIsError(true);
           } else {
@@ -162,14 +170,14 @@ const Component: React.FC<Props> = (props: Props) => {
           }
         }).catch((e: Error) => {
           setIsError(true);
-          form.setFields([{ name: FormFieldName.PASSWORD, errors: [e.message] }]);
+          form.setFields([{ name: FormFieldName.PASSWORD, errors: [convertError(e.message)] }]);
           selectPassword();
         }).finally(() => {
           setLoading(false);
         });
       }, 500);
     }
-  }, [currentAccount?.address, form]);
+  }, [currentAccount?.address, form, convertError]);
 
   const title = useMemo((): string => {
     const migrated = canMigrate.length - needMigrate.length;

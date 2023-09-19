@@ -1,18 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, NewAccountModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
+import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
 import { ConfirmationModal } from '@subwallet/extension-koni-ui/components/Modal/ConfirmationModal';
 import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModal';
 import { BUY_TOKEN_MODAL, CONFIRMATION_MODAL, CREATE_ACCOUNT_MODAL, SEED_PHRASE_MODAL, TRANSFER_FUND_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext, useExcludeModal } from '@subwallet/react-ui';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-
-import { KeypairType } from '@polkadot/util-crypto/types';
 
 import SeedPhraseModal from '../components/Modal/Account/SeedPhraseModal';
 import { UnlockModal } from '../components/Modal/UnlockModal';
@@ -59,7 +57,6 @@ export const WalletModalContext = ({ children }: Props) => {
   const navigate = useNavigate();
   const { activeModal, hasActiveModal, inactiveAll, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [accountTypes, setAccountTypes] = useState<KeypairType[]>([]);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useExcludeModal(CONFIRMATION_MODAL);
@@ -109,14 +106,14 @@ export const WalletModalContext = ({ children }: Props) => {
     />
     <CreateAccountModal />
     <SeedPhraseModal
-      accountTypes={accountTypes}
       modalId={SEED_PHRASE_MODAL}
       onBack={onSeedPhraseModalBack}
       onSubmitSuccess={onSeedPhraseModalSubmitSuccess}
     />
+    <NewSeedModal />
     <ImportAccountModal />
     <AttachAccountModal />
-    <NewAccountModal setAccountTypes={setAccountTypes} />
+    <ImportSeedModal />
     <DeriveAccountModal />
     <RequestCreatePasswordModal />
     <RequestCameraAccessModal />

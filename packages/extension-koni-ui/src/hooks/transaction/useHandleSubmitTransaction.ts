@@ -4,16 +4,17 @@
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { useCallback, useMemo } from 'react';
 
-import { useNotification } from '../common';
+import { useNotification, useTranslation } from '../common';
 
 const useHandleSubmitTransaction = (onDone: (extrinsicHash: string) => void, setIgnoreWarnings?: (value: boolean) => void) => {
   const notify = useNotification();
+  const { t } = useTranslation();
 
   const onSuccess = useCallback((rs: SWTransactionResponse) => {
     const { errors, id, warnings } = rs;
 
     if (errors.length || warnings.length) {
-      if (errors[0]?.message !== 'User reject request') {
+      if (![t('Rejected by user'), 'Rejected by user'].includes(errors[0]?.message)) {
         notify({
           message: errors[0]?.message || warnings[0]?.message,
           type: errors.length ? 'error' : 'warning'
@@ -26,14 +27,14 @@ const useHandleSubmitTransaction = (onDone: (extrinsicHash: string) => void, set
     } else if (id) {
       onDone(id);
     }
-  }, [notify, onDone, setIgnoreWarnings]);
+  }, [t, notify, onDone, setIgnoreWarnings]);
 
   const onError = useCallback((error: Error) => {
     notify({
-      message: error.message,
+      message: t(error.message),
       type: 'error'
     });
-  }, [notify]);
+  }, [t, notify]);
 
   return useMemo(() => ({
     onSuccess,

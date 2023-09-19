@@ -137,7 +137,9 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
   useEffect(() => {
     if (!value) {
-      onSelect(filteredItems[0]?.slug || '');
+      if (filteredItems[0]?.slug) {
+        onSelect(filteredItems[0].slug);
+      }
     } else {
       const existed = filteredItems.find((item) => item.slug === value);
 

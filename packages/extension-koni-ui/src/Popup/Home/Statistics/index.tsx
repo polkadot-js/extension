@@ -322,7 +322,7 @@ const Statistics = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__present-item-right-part': {
-      minWidth: 70
+      minWidth: 84
     },
 
     '.__present-item-percent, .__legend-item-percent': {

@@ -7,7 +7,7 @@ import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseMod
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useGetNftByAccount, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNftByAccount, useNotification, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
@@ -42,6 +42,7 @@ const rightIcon = (
 const IMPORT_NFT_MODAL = 'import-nft-modal';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  useSetCurrentPage('/home/nfts/collections');
   const { t } = useTranslation();
   const navigate = useNavigate();
   const outletContext: {

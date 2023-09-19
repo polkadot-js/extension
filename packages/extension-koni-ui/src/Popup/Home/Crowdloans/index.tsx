@@ -167,8 +167,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     () => {
       return (
         <EmptyList
-          emptyMessage={t('Your crowdloan will appear here!')}
-          emptyTitle={t('No crowdloan')}
+          emptyMessage={t('Your crowdloans will show up here')}
+          emptyTitle={t('No crowdloans found')}
           phosphorIcon={Rocket}
         />
       );

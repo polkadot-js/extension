@@ -175,7 +175,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const renderEmptyList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Your list of approved dApps will appear here.')}
+        emptyMessage={t('Your dApps will show up here')}
         emptyTitle={t('No dApps found')}
         phosphorIcon={GlobeHemisphereWest}
       />

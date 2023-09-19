@@ -130,7 +130,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           weight='fill'
         />
       ),
-      children: t('Import NFT'),
+      children: t('Add NFT'),
       shape: 'circle',
       size: 'xs',
       onClick: () => {
@@ -143,7 +143,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return (
       <EmptyList
         buttonProps={emptyButtonProps}
-        emptyMessage={t('Click [+] on the top right corner to import your NFT')}
+        emptyMessage={t('Try adding one manually')}
         emptyTitle={t('No NFTs found')}
         phosphorIcon={Image}
       />

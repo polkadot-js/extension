@@ -199,8 +199,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return (
       <EmptyList
         buttonProps={emptyButtonProps}
-        emptyMessage={t('Click [+] to get started.')}
-        emptyTitle={t('You have not staked yet')}
+        emptyMessage={t('You can stake in-app easily')}
+        emptyTitle={t('No staking found')}
         phosphorIcon={Database}
       />
     );

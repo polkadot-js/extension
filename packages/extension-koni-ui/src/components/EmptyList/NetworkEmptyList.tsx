@@ -29,7 +29,7 @@ const NetworkEmptyList: React.FC<Props> = (props: Props) => {
           weight='fill'
         />
       ),
-      children: t('Import network'),
+      children: t('Add network'),
       shape: 'circle',
       size: 'xs',
       onClick: () => {
@@ -45,7 +45,7 @@ const NetworkEmptyList: React.FC<Props> = (props: Props) => {
   return (
     <EmptyList
       buttonProps={buttonProps}
-      emptyMessage={t('You can import one manually')}
+      emptyMessage={t('Try adding one manually')}
       emptyTitle={t('No networks found')}
       phosphorIcon={ListChecks}
     />

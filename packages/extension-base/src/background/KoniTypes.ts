@@ -493,6 +493,7 @@ export enum ExtrinsicType {
 
   JOIN_YIELD_POOL = 'earn.join_pool', // TODO: review this
   MINT_VDOT = 'earn.mint_vdot',
+  REDEEM_VDOT = 'earn.redeem_vdot',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -516,6 +517,8 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.STAKING_POOL_WITHDRAW]: any,
 
   [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_VDOT]: SubmitBifrostLiquidStaking,
+  [ExtrinsicType.REDEEM_VDOT]: SubmitBifrostRedeemLiquidStaking,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.UNKNOWN]: any
@@ -571,11 +574,19 @@ export interface NFTTransactionAdditionalInfo {
   collectionName: string
 }
 
-export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
-  ? XCMTransactionAdditionalInfo
-  : T extends ExtrinsicType.SEND_NFT
-    ? NFTTransactionAdditionalInfo
-    : undefined;
+export type TransactionAdditionalInfo = {
+  [ExtrinsicType.TRANSFER_XCM]: XCMTransactionAdditionalInfo,
+  [ExtrinsicType.SEND_NFT]: NFTTransactionAdditionalInfo,
+  [ExtrinsicType.MINT_VDOT]: Pick<SubmitBifrostLiquidStaking, 'rewardTokenSlug' | 'estimatedAmountReceived'>
+}
+
+// export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
+//   ? XCMTransactionAdditionalInfo
+//   : T extends ExtrinsicType.SEND_NFT
+//     ? NFTTransactionAdditionalInfo
+//     : T extends ExtrinsicType.MINT_VDOT
+//       ? Pick<SubmitBifrostLiquidStaking, 'rewardTokenSlug' | 'estimatedAmountReceived'>
+//       : undefined;
 export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType.TRANSFER_BALANCE> {
   origin?: 'app' | 'migration' | 'subsquid', // 'app' or history source
   callhash?: string,
@@ -601,7 +612,7 @@ export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType
   tip?: AmountData,
   fee?: AmountData,
   explorerUrl?: string,
-  additionalInfo?: TransactionAdditionalInfo<ET>,
+  additionalInfo?: any,
   startBlock?: number,
   nonce?: number,
 }
@@ -2202,6 +2213,14 @@ export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
 export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool | SubmitBifrostLiquidStaking;
 
 export interface SubmitBifrostLiquidStaking {
+  feePaidWithInputAsset: boolean,
+  inputTokenSlug: string,
+  amount: string,
+  rewardTokenSlug: string,
+  estimatedAmountReceived: string
+}
+
+export interface SubmitBifrostRedeemLiquidStaking {
   amount: string
 }
 

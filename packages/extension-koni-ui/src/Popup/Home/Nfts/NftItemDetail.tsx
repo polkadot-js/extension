@@ -24,7 +24,7 @@ import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
 import { CaretLeft, Info, PaperPlaneTilt } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -58,12 +58,6 @@ const modalId = TRANSFER_NFT_MODAL;
 function Component ({ className = '', collectionInfo,
   nftItem,
   originChainInfo }: Props): React.ReactElement<Props> {
-  const outletContext: {
-    searchInput: string,
-    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
-  } = useOutletContext();
-  const setDetailTitle = outletContext?.setDetailTitle;
-
   const { isWebUI } = useContext(ScreenContext);
 
   const { t } = useTranslation();
@@ -73,7 +67,6 @@ function Component ({ className = '', collectionInfo,
   const { goBack } = useDefaultNavigate();
   const { token } = useTheme() as Theme;
 
-  const dataContext = useContext(DataContext);
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
 
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
@@ -222,10 +215,6 @@ function Component ({ className = '', collectionInfo,
     }
   }, [nftItem.externalUrl]);
 
-  useEffect(() => {
-    setDetailTitle?.(nftItem.name || nftItem.id);
-  }, [nftItem, setDetailTitle]);
-
   const handleCancelModal = useCallback(() => {
     inactiveModal(modalId);
     setSendNftKey(`sendNftKey-${Date.now()}`);
@@ -236,10 +225,7 @@ function Component ({ className = '', collectionInfo,
   const imageSize = isWebUI ? 384 : 358;
 
   return (
-    <PageWrapper
-      className={`${className}`}
-      resolve={dataContext.awaitStores(['nft', 'accountState', 'chainStore'])}
-    >
+    <>
       <Layout.Base
         {...!isWebUI && {
           onBack: goBack,
@@ -433,7 +419,7 @@ function Component ({ className = '', collectionInfo,
           </div>
         </BaseModal>
       </Layout.Base>
-    </PageWrapper>
+    </>
   );
 }
 
@@ -444,27 +430,57 @@ function WrapperComponent (props: WrapperProps): React.ReactElement<WrapperProps
 
   const collectionInfo = itemDetail?.collectionInfo;
   const nftItem = itemDetail?.nftItem;
-  const originChainInfo = useGetChainInfo(nftItem.chain || '');
+  const originChainInfo = useGetChainInfo(nftItem?.chain || '');
+  const dataContext = useContext(DataContext);
+
+  const outletContext: {
+    setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>,
+    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
+  } = useOutletContext();
+
+  const setDetailTitle = outletContext?.setDetailTitle;
+  const setShowSearchInput = outletContext?.setShowSearchInput;
+
+  useEffect(() => {
+    if (!collectionInfo || !nftItem) {
+      navigate('/home/nfts/collections');
+    }
+  }, [collectionInfo, navigate, nftItem]);
+
+  useEffect(() => {
+    setShowSearchInput?.(false);
+
+    if (nftItem) {
+      setDetailTitle?.(nftItem.name || nftItem.id);
+    }
+  }, [nftItem, setDetailTitle, setShowSearchInput]);
 
   const isEmptyInfo = !collectionInfo || !nftItem || !originChainInfo;
 
-  useEffect(() => {
-    if (isEmptyInfo) {
-      navigate('/home/nfts/collections');
-    }
-  }, [isEmptyInfo, navigate]);
-
-  if (isEmptyInfo) {
-    return <></>;
-  }
+  const waitReady = useMemo(() => {
+    return new Promise((resolve, reject) => {
+      dataContext.awaitStores(['nft', 'accountState', 'chainStore']).then(() => {
+        if (!isEmptyInfo) {
+          resolve(true);
+        }
+      }).catch(reject);
+    });
+  }, [dataContext, isEmptyInfo]);
 
   return (
-    <Component
-      {...props}
-      collectionInfo={collectionInfo}
-      nftItem={nftItem}
-      originChainInfo={originChainInfo}
-    />
+    <PageWrapper
+      className={`${props.className || ''}`}
+      resolve={waitReady}
+    >
+      {!isEmptyInfo && (
+        <Component
+          {...props}
+          collectionInfo={collectionInfo}
+          nftItem={nftItem}
+          originChainInfo={originChainInfo}
+        />
+      )}
+    </PageWrapper>
   );
 }
 

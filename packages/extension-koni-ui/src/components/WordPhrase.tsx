@@ -71,6 +71,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <Icon phosphorIcon={CopySimple} />
         )}
         onClick={onClick}
+        size='xs'
         type='ghost'
       >
         {enableDownload ? t('Copy & Save to the clipboard') : t('Copy to clipboard')}

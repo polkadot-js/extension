@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { StakingStatusType, StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
+import { POOL_DETAIL_MODAL, StakingStatusType, StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
+import { NominationPoolDataType, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';
 import styled from 'styled-components';
+
+import { MetaInfo } from '../../MetaInfo';
+import { BaseModal } from '../BaseModal';
 
 type Props = ThemeProps & {
   decimals: number,
@@ -17,7 +17,7 @@ type Props = ThemeProps & {
   selectedNominationPool?: NominationPoolDataType
 };
 
-export const PoolDetailModalId = 'poolDetailModalId';
+const modalId = POOL_DETAIL_MODAL;
 
 function Component ({ className, decimals, onCancel, selectedNominationPool, status }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -26,7 +26,7 @@ function Component ({ className, decimals, onCancel, selectedNominationPool, sta
   return (
     <BaseModal
       className={className}
-      id={PoolDetailModalId}
+      id={modalId}
       onCancel={onCancel}
       title={t('Pool details')}
     >

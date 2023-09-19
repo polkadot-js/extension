@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicStatus, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepDetail, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -12,9 +12,10 @@ import { AccountSelector, AmountInput, EarningProcessItem, MetaInfo, PageWrapper
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
-import { useFetchChainState, useGetChainPrefixBySlug, useGetNativeTokenBasicInfo, useHandleSubmitTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetChainPrefixBySlug, useGetNativeTokenBasicInfo, useNotification } from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/StakingProcessModal';
+import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -51,70 +52,9 @@ interface StakingFormProps extends Record<`amount-${number}`, string> {
   [FormFieldName.POOL]: string;
 }
 
-interface YieldProcessState {
-  steps: YieldStepDetail[],
-  feeStructure: YieldTokenBaseInfo[],
-  currentStep: number,
-  stepResults: SWTransactionResponse[]
-}
-
-const DEFAULT_YIELD_PROCESS: YieldProcessState = {
-  steps: [],
-  feeStructure: [],
-  currentStep: 0,
-  stepResults: []
-};
-
-enum ProcessReducerActionType {
-  SET_CURRENT_STEP = 'SET_CURRENT_STEP',
-  SET_YIELD_PROCESS = 'SET_YIELD_PROCESS',
-  UPDATE_STEP_RESULT = 'UPDATE_STEP_RESULT'
-}
-
-interface ProcessReducerAction {
-  payload: unknown,
-  type: ProcessReducerActionType
-}
-
-function processReducer (state: YieldProcessState, action: ProcessReducerAction): YieldProcessState {
-  console.log(action.payload);
-
-  switch (action.type) {
-    case ProcessReducerActionType.SET_CURRENT_STEP:
-      return {
-        ...state,
-        currentStep: action.payload as number
-      };
-
-    case ProcessReducerActionType.SET_YIELD_PROCESS: {
-      const { fee, steps } = action.payload as Record<string, unknown>;
-
-      return {
-        ...state,
-        steps: steps as YieldStepDetail[],
-        feeStructure: fee as YieldTokenBaseInfo[]
-      };
-    }
-
-    case ProcessReducerActionType.UPDATE_STEP_RESULT: {
-      const _stepResult = action.payload as SWTransactionResponse;
-      const result = state.stepResults;
-
-      result.push(_stepResult);
-
-      return {
-        ...state,
-        stepResults: result
-      };
-    }
-
-    default:
-      throw Error('Unknown action');
-  }
-}
-
 const Component = () => {
   const { t } = useTranslation();
+  const notify = useNotification();
   const { token } = useTheme() as Theme;
   const { slug: _methodSlug } = useParams();
 
@@ -131,7 +71,7 @@ const Component = () => {
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
 
-  const [processState, dispatchProcessState] = useReducer(processReducer, DEFAULT_YIELD_PROCESS);
+  const [processState, dispatchProcessState] = useReducer(earningReducer, DEFAULT_YIELD_PROCESS);
 
   const [isBalanceReady, setIsBalanceReady] = useState<boolean>(true);
 
@@ -158,7 +98,41 @@ const Component = () => {
     navigate(`/transaction-done/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
   }, [currentFrom, currentPoolInfo.chain, navigate]);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+  const onError = useCallback((error: Error) => {
+    notify({
+      message: t(error.message),
+      type: 'error'
+    });
+    dispatchProcessState({
+      type: EarningActionType.STEP_ERROR_ROLLBACK,
+      payload: error
+    });
+  }, [t, notify]);
+
+  const onSuccess = useCallback((rs: SWTransactionResponse) => {
+    const { errors, id, warnings } = rs;
+
+    if (errors.length || warnings.length) {
+      if (![t('Rejected by user'), 'Rejected by user'].includes(errors[0]?.message)) {
+        notify({
+          message: errors[0]?.message || warnings[0]?.message,
+          type: errors.length ? 'error' : 'warning'
+        });
+        onError(errors[0]);
+      } else {
+        dispatchProcessState({
+          type: EarningActionType.STEP_ERROR_ROLLBACK,
+          payload: errors[0]
+        });
+      }
+    } else if (id) {
+      dispatchProcessState({
+        type: EarningActionType.STEP_COMPLETE,
+        payload: rs
+      });
+      onDone(id);
+    }
+  }, [t, notify, onError, onDone]);
 
   const formDefault: StakingFormProps = useMemo(() => {
     return {
@@ -197,9 +171,9 @@ const Component = () => {
         dispatchProcessState({
           payload: {
             steps: res.steps,
-            fee: res.totalFee
+            feeStructure: res.totalFee
           },
-          type: ProcessReducerActionType.SET_YIELD_PROCESS
+          type: EarningActionType.STEP_CREATE
         });
       })
       .catch(console.error)
@@ -332,9 +306,22 @@ const Component = () => {
   const onClick = useCallback(() => {
     setSubmitLoading(true);
     dispatchProcessState({
-      type: ProcessReducerActionType.UPDATE_STEP_RESULT,
-      payload: { status: ExtrinsicStatus.QUEUED }
+      type: EarningActionType.STEP_SUBMIT,
+      payload: null
     });
+
+    const isFirstStep = processState.currentStep === 0;
+
+    if (isFirstStep) {
+      dispatchProcessState({
+        type: EarningActionType.STEP_COMPLETE,
+        payload: true
+      });
+      dispatchProcessState({
+        type: EarningActionType.STEP_SUBMIT,
+        payload: null
+      });
+    }
 
     const { from, nominate, pool } = form.getFieldsValue();
     let data;
@@ -355,7 +342,7 @@ const Component = () => {
       } as SubmitJoinNativeStaking;
     }
 
-    const nextStep = processState.currentStep === processState.steps.length - 1 ? processState.currentStep : processState.currentStep + 1;
+    const submitStep = isFirstStep ? processState.currentStep + 1 : processState.currentStep;
 
     const submitPromise: Promise<SWTransactionResponse> = handleYieldStep(
       from,
@@ -364,31 +351,16 @@ const Component = () => {
         steps: processState.steps,
         totalFee: processState.feeStructure
       },
-      nextStep,
+      submitStep,
       data);
 
-    if (!isProcessDone) {
-      dispatchProcessState({
-        type: ProcessReducerActionType.SET_CURRENT_STEP,
-        payload: nextStep
-      });
-    }
-
     const _onError = (error: Error) => {
-      dispatchProcessState({
-        type: ProcessReducerActionType.UPDATE_STEP_RESULT,
-        payload: processState.stepResults[processState.currentStep].status = ExtrinsicStatus.FAIL
-      });
       onError(error);
     };
 
     setTimeout(() => {
       submitPromise
         .then((rs) => {
-          dispatchProcessState({
-            type: ProcessReducerActionType.UPDATE_STEP_RESULT,
-            payload: processState.stepResults[processState.currentStep].status = ExtrinsicStatus.SUCCESS
-          });
           onSuccess(rs);
         })
         .catch(_onError)
@@ -396,17 +368,7 @@ const Component = () => {
           setSubmitLoading(false);
         });
     }, 300);
-  }, [
-    currentAmount,
-    currentPoolInfo,
-    form,
-    getSelectedPool,
-    getSelectedValidators,
-    isProcessDone,
-    onError,
-    onSuccess,
-    processState
-  ]);
+  }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, processState]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -497,11 +459,13 @@ const Component = () => {
                         decimals={decimals}
                         disabled={processState.currentStep !== 0}
                         maxValue={'1'}
-                        prefix={<Logo
-                          className={'amount-prefix'}
-                          size={20}
-                          token={asset.split('-')[2].toLowerCase()}
-                        />}
+                        prefix={(
+                          <Logo
+                            className={'amount-prefix'}
+                            size={20}
+                            token={asset.split('-')[2].toLowerCase()}
+                          />
+                        )}
                         showMaxButton={true}
                         tooltip={t('Amount')}
                       />
@@ -592,7 +556,7 @@ const Component = () => {
                   isSelected={isSelected}
                   key={index}
                   stepName={item.name}
-                  stepStatus={processState.stepResults[index] ? processState.stepResults[index].status : undefined}
+                  stepStatus={processState.stepResults[index]?.status}
                 />
               );
             })}

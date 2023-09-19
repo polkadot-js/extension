@@ -6,6 +6,7 @@ export { default as useGetChainStakingMetadata } from './useGetChainStakingMetad
 export { default as useGetNominatorInfo } from './useGetNominatorInfo';
 export { default as useGetStakingList } from './useGetStakingList';
 export { default as useGetSupportedStakingTokens } from './useGetSupportedStakingTokens';
-export { default as useGetValidatorList, ValidatorDataType, NominationPoolDataType } from './useGetValidatorList';
+export { default as useGetValidatorList } from './useGetValidatorList';
+export type { ValidatorDataType, NominationPoolDataType } from './useGetValidatorList';
 
 export * from './useGetStakeData';

@@ -4,16 +4,8 @@
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
-import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
-import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
-import { PoolDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal';
-import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
-import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
-import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
-import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
+import { NominationPoolDataType, useFilterModal, useGetNominatorInfo, useGetValidatorList } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { Badge, Button, Icon, InputRef, ModalContext, useExcludeModal } from '@subwallet/react-ui';
@@ -26,6 +18,10 @@ import styled from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import EmptyValidator from '../Account/EmptyValidator';
+import { Avatar } from '../Avatar';
+import { BaseSelectModal, FilterModal, PoolDetailModal, SortingModal } from '../Modal';
+import StakingPoolItem from '../StakingItem/StakingPoolItem';
+import { POOL_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
@@ -157,7 +153,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return (e: SyntheticEvent) => {
       e.stopPropagation();
       setViewDetailItem(item);
-      activeModal(PoolDetailModalId);
+      activeModal(POOL_DETAIL_MODAL);
     };
   }, [activeModal]);
 
@@ -212,7 +208,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal]);
 
   const onCloseDetail = useCallback(() => {
-    inactiveModal(PoolDetailModalId);
+    inactiveModal(POOL_DETAIL_MODAL);
   }, [inactiveModal]);
 
   useEffect(() => {

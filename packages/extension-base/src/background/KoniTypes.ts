@@ -518,7 +518,8 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
-  [ExtrinsicType.UNKNOWN]: any
+  [ExtrinsicType.UNKNOWN]: any,
+  [ExtrinsicType.MINT_VDOT]: any
 }
 
 export enum ExtrinsicStatus {

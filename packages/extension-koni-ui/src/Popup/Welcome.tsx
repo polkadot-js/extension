@@ -45,7 +45,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { enableInject, initCallback, initEnable, injected, loadingInject } = useContext(InjectContext);
+  const { enableInject, injected, loadingInject } = useContext(InjectContext);
   const navigate = useNavigate();
 
   const [form] = Form.useForm<ReadOnlyAccountInput>();
@@ -55,12 +55,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const [isAttachAddressEthereum, setAttachAddressEthereum] = useState(false);
   const [isAttachReadonlyAccountButtonDisable, setIsAttachReadonlyAccountButtonDisable] = useState(true);
   // use for trigger after enable inject
-  const [enInject, setEnInject] = useState({});
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
-  const isAccountsEmpty = useMemo(() => {
-    return isNoAccount(accounts);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enInject]);
   const { goHome } = useDefaultNavigate();
 
   usePreloadView([
@@ -197,7 +192,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     return () => {
       if (id === CONNECT_EXTENSION) {
         if (injected) {
-          enableInject(() => setEnInject({}));
+          enableInject();
         } else {
           openInNewTab(EXTENSION_URL)();
         }
@@ -217,17 +212,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   );
 
   useLayoutEffect(() => {
-    if (!isAccountsEmpty) {
+    if (!isNoAccount(accounts)) {
       goHome();
     }
-  }, [goHome, isAccountsEmpty]);
-
-  // Go root after inject
-  useEffect(() => {
-    if (initEnable) {
-      initCallback(() => setEnInject({}));
-    }
-  }, [initCallback, initEnable]);
+  }, [accounts, goHome]);
 
   return (
     <Layout.Base

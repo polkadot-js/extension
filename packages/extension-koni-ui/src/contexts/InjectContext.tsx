@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { enable } from '@subwallet/extension-base/page';
 import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvmProvider';
 import { addLazy } from '@subwallet/extension-base/utils';
 import { EvmProvider, Injected, InjectedAccountWithMeta, InjectedWindowProvider, Unsubcall } from '@subwallet/extension-inject/types';
@@ -9,8 +10,11 @@ import { ENABLE_INJECT } from '@subwallet/extension-koni-ui/constants';
 import { useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
 import { noop, toShort } from '@subwallet/extension-koni-ui/utils';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
+import EventEmitter from 'eventemitter3';
+import React, { useCallback, useEffect, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
+
+import { createPromiseHandler } from '../../../extension-base/src/utils/promise';
 
 interface Props {
   children: React.ReactNode;
@@ -37,12 +41,9 @@ interface InjectContextProps {
 type This = typeof globalThis;
 type AccountArrayMap = Record<string, InjectedAccountWithMeta[]>;
 type AccountMap = Record<string, InjectedAccountWithMeta>;
-type WalletState = 'PENDING' | 'FAIL' | 'SUCCESS';
-type WalletPromiseMap = Record<string, WalletState>;
 
 const win = window as Window & InjectedWindow;
-const updateStatePromiseKey = 'updateInjectState';
-const injectPromiseKey = 'injectAccount';
+const updateInjectAccountPromiseKey = 'updateInjectAccounts';
 
 const evmConvertToInject = (address: string): InjectedAccountWithMeta => {
   return {
@@ -67,46 +68,6 @@ const parseAccountMap = (values: AccountArrayMap): InjectedAccountWithMeta[] => 
   return Object.values(result);
 };
 
-const updateInjected = (oldMap: AccountArrayMap, newMap: AccountArrayMap, callback: VoidFunction) => {
-  const oldArray = parseAccountMap(oldMap);
-  const newArray = parseAccountMap(newMap);
-
-  const addArray: InjectedAccountWithMeta[] = [];
-  const removeArray: InjectedAccountWithMeta[] = [];
-
-  for (const account of newArray) {
-    const exists = oldArray.find((acc) => acc.address === account.address);
-
-    if (!exists) {
-      addArray.push(account);
-    } else {
-      if (exists.meta.source !== account.meta.source) {
-        addArray.push(account);
-      }
-    }
-  }
-
-  for (const account of oldArray) {
-    const exists = newArray.some((acc) => acc.address === account.address);
-
-    if (!exists) {
-      removeArray.push(account);
-    }
-  }
-
-  const promises: Array<Promise<unknown>> = [];
-
-  if (addArray.length) {
-    promises.push(addInjects(addArray));
-  }
-
-  if (removeArray.length) {
-    promises.push(removeInjects(removeArray.map((acc) => acc.address)));
-  }
-
-  Promise.all(promises).finally(callback);
-};
-
 export const InjectContext = React.createContext<InjectContextProps>({
   disableInject: noop,
   enableInject: noop,
@@ -117,203 +78,315 @@ export const InjectContext = React.createContext<InjectContextProps>({
   loadingInject: false
 });
 
+interface InjectErrorMap {
+  substrate?: Error;
+  evm?: Error;
+}
+
+class InjectHandler {
+  hasInjected: boolean;
+  isInitEnable: boolean;
+  enableSubject: BehaviorSubject<boolean>;
+  loadingSubject: BehaviorSubject<boolean>;
+  errorSubject = new BehaviorSubject<InjectErrorMap>({});
+  loadingPromiseHandler = createPromiseHandler<boolean>();
+
+  substrateKey = 'subwallet-js'; // Can be update later
+  substrateWallet?: Injected;
+  substratePromiseHandler = createPromiseHandler<Injected | undefined>();
+  substrateAccounts: InjectedAccountWithMeta[] = [];
+  substrateAccountUnsubcall?: Unsubcall;
+  substrateEnableCompleted = false;
+
+  evmKey = 'SubWallet'; // Can be update later
+  evmWallet?: SubWalletEvmProvider;
+  evmPromiseHandler = createPromiseHandler<SubWalletEvmProvider | undefined>();
+  evmAccounts: InjectedAccountWithMeta[] = [];
+  evmAccountUnsubcall?: () => void;
+  evmEnableCompleted = false;
+
+  oldAccountArrayMap: AccountArrayMap = {};
+  accountArrayMap: AccountArrayMap = {};
+
+  constructor () {
+    this.enableSubject = new BehaviorSubject<boolean>(localStorage.getItem(ENABLE_INJECT) === 'true');
+    this.isInitEnable = this.enableSubject.value;
+    this.loadingSubject = new BehaviorSubject<boolean>(true);
+    this.hasInjected = !!win.injectedWeb3 || !!win.SubWallet;
+
+    // Start to connect with injected wallet
+    if (this.enableSubject.value) {
+      this.enable().then(() => {
+        this.loadingPromiseHandler.resolve(this.enableSubject.value);
+      }).catch(console.error);
+    } else {
+      this.disable();
+      this.loadingPromiseHandler.resolve(this.enableSubject.value);
+      this.loadingSubject.next(false);
+    }
+  }
+
+  onLoaded (callback?: VoidFunction) {
+    this.loadingPromiseHandler.promise
+      .then(callback)
+      .catch(console.error);
+  }
+
+  async enable () {
+    this.loadingSubject.next(true);
+    this.errorSubject.next({
+      substrate: undefined,
+      evm: undefined
+    });
+
+    const finishAction = () => {
+      this.enableSubject.next(true);
+      localStorage.setItem(ENABLE_INJECT, 'true');
+    };
+
+    try {
+      this.enableSubstrate()
+        .then(() => {
+          this.substratePromiseHandler.resolve(this.substrateWallet);
+
+          if (this.evmEnableCompleted || this.errorSubject.value.evm) {
+            finishAction();
+          }
+        })
+        .catch((e: Error) => {
+          this.errorSubject.next({ ...this.errorSubject.value, substrate: e });
+          this.substratePromiseHandler.reject(e);
+        });
+
+      this.enableEvm()
+        .then(() => {
+          this.evmPromiseHandler.resolve(this.evmWallet);
+
+          if (this.substrateEnableCompleted || this.errorSubject.value.substrate) {
+            finishAction();
+          }
+        })
+        .catch((e: Error) => {
+          this.errorSubject.next({ ...this.errorSubject.value, evm: e });
+          this.evmPromiseHandler.reject(e);
+        });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTimeout(() => {
+        this.loadingSubject.next(false);
+      }, 900);
+    }
+
+    // async placeholer for future
+    await Promise.resolve();
+  }
+
+  disable () {
+    this.unsubscribeSubstrateAccount();
+    this.unsubscribeEvmAccount();
+    this.substrateAccounts = [];
+    this.evmAccounts = [];
+    this.substrateEnableCompleted = false;
+    this.evmEnableCompleted = false;
+    this.updateInjectedAccount(this.substrateKey, []);
+    this.updateInjectedAccount(this.evmKey, []);
+    this.enableSubject.next(false);
+    localStorage.setItem(ENABLE_INJECT, 'false');
+  }
+
+  async enableSubstrate () {
+    if (this.substrateEnableCompleted) {
+      return;
+    }
+
+    let injectedWallet = win.injectedWeb3?.[this.substrateKey];
+
+    // wait a little bit for injected wallet
+    if (!injectedWallet) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 600);
+      });
+      injectedWallet = win.injectedWeb3?.[this.substrateKey];
+    }
+
+    const wallet = await injectedWallet?.enable('web-app');
+
+    this.substrateWallet = wallet;
+    this.subscribeSubstrateAccount();
+    this.substrateEnableCompleted = true;
+  }
+
+  subscribeSubstrateAccount () {
+    this.substrateAccountUnsubcall = this.substrateWallet?.accounts.subscribe((accounts) => {
+      this.substrateAccounts = accounts.map((account) => ({
+        address: account.address,
+        meta: {
+          genesisHash: account.genesisHash,
+          name: account.name || toShort(account.address, 4, 4),
+          source: 'SubWallet'
+        },
+        type: account.type
+      }));
+      this.updateInjectedAccount(this.substrateKey, this.substrateAccounts);
+    });
+  }
+
+  unsubscribeSubstrateAccount () {
+    this.substrateAccountUnsubcall?.();
+  }
+
+  async enableEvm () {
+    if (this.evmEnableCompleted) {
+      return;
+    }
+
+    // @ts-ignore
+    const injectedWallet = win[this.evmKey] as SubWalletEvmProvider;
+
+    await injectedWallet?.enable();
+    this.evmWallet = injectedWallet;
+    this.subscribeEvmAccount();
+    this.evmEnableCompleted = true;
+  }
+
+  subscribeEvmAccount () {
+    const listener = (addresses: string[]) => {
+      this.evmAccounts = addresses.map((adr) => evmConvertToInject(adr));
+      this.updateInjectedAccount(this.evmKey, this.evmAccounts);
+    };
+
+    if (this.evmWallet) {
+      // Some wallet not fire event on first time
+      this.evmWallet.request<string[]>({ method: 'eth_accounts' }).then(listener).catch(console.warn);
+      this.evmWallet.on('accountsChanged', listener);
+    }
+
+    this.evmAccountUnsubcall = () => {
+      this.evmWallet?.removeListener('accountsChanged', listener);
+    };
+  }
+
+  unsubscribeEvmAccount () {
+    this.substrateAccountUnsubcall?.();
+  }
+
+  updateInjectedAccount (key: string, accounts: InjectedAccountWithMeta[]) {
+    const oldArray = parseAccountMap(this.oldAccountArrayMap);
+
+    if (accounts.length === 0) {
+      if (key === this.evmKey) {
+        this.evmEnableCompleted = false;
+      }
+
+      if (key === this.substrateKey) {
+        this.substrateEnableCompleted = false;
+      }
+    }
+
+    this.accountArrayMap = { ...this.accountArrayMap, [key]: accounts };
+
+    addLazy(updateInjectAccountPromiseKey, () => {
+      const newArray = parseAccountMap(this.accountArrayMap);
+
+      const addArray: InjectedAccountWithMeta[] = [];
+      const removeArray: InjectedAccountWithMeta[] = [];
+
+      for (const account of newArray) {
+        const exists = oldArray.find((acc) => acc.address === account.address);
+
+        if (!exists) {
+          addArray.push(account);
+        } else {
+          if (exists.meta.source !== account.meta.source) {
+            addArray.push(account);
+          }
+        }
+      }
+
+      for (const account of oldArray) {
+        const exists = newArray.some((acc) => acc.address === account.address);
+
+        if (!exists) {
+          removeArray.push(account);
+        }
+      }
+
+      const promises: Array<Promise<unknown>> = [];
+
+      if (addArray.length) {
+        promises.push(addInjects(addArray));
+      }
+
+      if (removeArray.length) {
+        promises.push(removeInjects(removeArray.map((acc) => acc.address)));
+      }
+
+      // Promise.all(promises).finally(callback);
+      this.oldAccountArrayMap = { ...this.accountArrayMap };
+    }, 300, 900, false);
+  }
+}
+
+const injectHandler = new InjectHandler();
+
 export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const notification = useNotification();
   const { t } = useTranslation();
+  const [enabled, setEnabled] = useState<boolean>(injectHandler.enableSubject.value);
+  const [evmWallet, setEvmWallet] = useState(injectHandler.evmWallet);
+  const [substrateWallet, setSubstrateWallet] = useState(injectHandler.substrateWallet);
+  const [loadingInject, setLoadingInject] = useState(injectHandler.loadingSubject.value);
 
-  const injected = useMemo(() => {
-    return !!win.injectedWeb3?.['subwallet-js'] || !!win.SubWallet;
+  useEffect(() => {
+    injectHandler.enableSubject.subscribe(setEnabled);
+    injectHandler.loadingSubject.subscribe(setLoadingInject);
   }, []);
 
-  const [substrateWallet, setSubstrateWallet] = useState<Injected | undefined>();
-  const [evmWallet, setEvmWallet] = useState<SubWalletEvmProvider | undefined>();
-  const [update, setUpdate] = useState({});
-  const [storage, setStorage] = useLocalStorage<boolean>(ENABLE_INJECT, false);
-  const [initEnable] = useState(storage);
-
-  const accountsRef = useRef<AccountArrayMap>({});
-  const [cacheAccounts, setCacheAccounts] = useState<AccountArrayMap>(accountsRef.current);
-  const previousRef = useRef<AccountArrayMap>({});
-  const promiseMapRef = useRef<WalletPromiseMap>({});
-  const enablePromise = useRef<VoidFunction | undefined>();
-
-  const [loadingInject, setLoadingInject] = useState(initEnable && injected);
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
-
-  const enabled = useMemo(() => storage && injected, [injected, storage]);
-
-  const checkLoading = useCallback(() => {
-    const values = promiseMapRef.current;
-
-    const hasDone = Object.values(values).some((v) => v === 'SUCCESS');
-    const allError = Object.values(values).every((v) => v === 'FAIL');
-
-    if (hasDone || allError) {
-      setLoadingInject(false);
-
-      if (allError) {
-        setStorage(false);
+  useEffect(() => {
+    const subscription = injectHandler.errorSubject.subscribe((error) => {
+      if (error.substrate && error.evm) {
+        notification({
+          message: t('Fail to connect. Please try again later'),
+          type: 'warning'
+        });
       }
-    }
-  }, [setStorage]);
-
-  const updateState = useCallback(() => {
-    addLazy(updateStatePromiseKey, () => {
-      setCacheAccounts((prevState) => {
-        previousRef.current = prevState;
-
-        return { ...accountsRef.current };
-      });
-    }, 200, undefined, false);
-  }, []);
-
-  const enableInject = useCallback((callback?: VoidFunction) => {
-    setStorage(true);
-    enablePromise.current = callback;
-    setUpdate({});
-    setLoadingInject(true);
-  }, [setStorage]);
-
-  const disableInject = useCallback(() => {
-    setStorage(false);
-    setSubstrateWallet(undefined);
-    setEvmWallet(undefined);
-    accountsRef.current = {};
-    updateState();
-  }, [setStorage, updateState]);
-
-  const initCallback = useCallback((callback?: VoidFunction) => {
-    enablePromise.current = callback;
-  }, []);
-
-  const handleConnectFail = useCallback(() => {
-    notification({
-      message: t('Fail to connect. Please try again later'),
-      type: 'warning'
     });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [notification, t]);
 
-  useEffect(() => {
-    const wallet = win.injectedWeb3?.['subwallet-js'];
+  const enableInject = useCallback((callback?: VoidFunction) => {
+    injectHandler.enable()
+      .then(() => {
+        setEvmWallet(injectHandler.evmWallet);
+        setSubstrateWallet(injectHandler.substrateWallet);
+        callback?.();
+      }).catch(console.error);
+  }, []);
 
-    if (wallet && enabled) {
-      promiseMapRef.current = { ...promiseMapRef.current, 'subwallet-js': 'PENDING' };
-      checkLoading();
-      wallet.enable('web-app')
-        .then((inject) => {
-          setSubstrateWallet(inject);
-        })
-        .catch((e) => {
-          console.error(e);
-          promiseMapRef.current = { ...promiseMapRef.current, 'subwallet-js': 'FAIL' };
-          handleConnectFail();
-          checkLoading();
-        })
-      ;
-    }
-  }, [enabled, update, checkLoading, handleConnectFail]);
+  const disableInject = useCallback(() => {
+    injectHandler.disable();
+  }, []);
 
-  useEffect(() => {
-    const wallet = win.SubWallet;
-
-    if (wallet && enabled) {
-      promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'PENDING' };
-      checkLoading();
-
-      wallet.enable()
-        .then(() => {
-          setEvmWallet(wallet);
-        })
-        .catch((e) => {
-          console.error(e);
-          promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'FAIL' };
-          handleConnectFail();
-          checkLoading();
-        })
-      ;
-    }
-  }, [enabled, update, checkLoading, handleConnectFail]);
-
-  useEffect(() => {
-    let unsubscribe: Unsubcall | undefined;
-
-    if (substrateWallet) {
-      unsubscribe = substrateWallet.accounts.subscribe((value) => {
-        promiseMapRef.current = { ...promiseMapRef.current, 'subwallet-js': 'SUCCESS' };
-
-        const newState: AccountArrayMap = { ...accountsRef.current };
-
-        newState['subwallet-js'] = value.map((account) => ({
-          address: account.address,
-          meta: {
-            genesisHash: account.genesisHash,
-            name: account.name || toShort(account.address, 4, 4),
-            source: 'SubWallet'
-          },
-          type: account.type
-        }));
-        accountsRef.current = newState;
-        updateState();
-      });
-    }
-
-    return () => {
-      unsubscribe?.();
-    };
-  }, [substrateWallet, updateState]);
-
-  useEffect(() => {
-    const listener = (addresses: string[]) => {
-      const newState: AccountArrayMap = { ...accountsRef.current };
-
-      newState.SubWallet = addresses.map((adr) => evmConvertToInject(adr));
-      accountsRef.current = newState;
-      promiseMapRef.current = { ...promiseMapRef.current, SubWallet: 'SUCCESS' };
-
-      updateState();
-    };
-
-    if (evmWallet) {
-      // Some wallet not fire event on first time
-      evmWallet.request<string[]>({ method: 'eth_accounts' }).then(listener).catch(console.warn);
-      evmWallet.on('accountsChanged', listener);
-    }
-
-    return () => {
-      evmWallet?.removeListener('accountsChanged', listener);
-    };
-  }, [evmWallet, updateState]);
-
-  useEffect(() => {
-    if (!isFirstLoad) {
-      addLazy(injectPromiseKey, () => {
-        const callback = () => {
-          enablePromise.current?.();
-          enablePromise.current = undefined;
-        };
-
-        updateInjected(previousRef.current, cacheAccounts, callback);
-        checkLoading();
-      }, 500, 1000, false);
-    }
-
-    return () => {
-      setIsFirstLoad(false);
-    };
-  }, [cacheAccounts, isFirstLoad, checkLoading]);
+  const initCallback = useCallback(() => {
+    injectHandler.onLoaded();
+  }, []);
 
   return (
     <InjectContext.Provider
       value={{
-        disableInject,
-        enableInject,
-        enabled,
         evmWallet,
-        initCallback,
-        initEnable,
-        injected,
+        substrateWallet,
+        enableInject,
         loadingInject,
-        substrateWallet
+        enabled,
+        disableInject,
+        initCallback,
+        initEnable: injectHandler.isInitEnable,
+        injected: injectHandler.hasInjected
       }}
     >
       {children}

@@ -2038,7 +2038,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@equilab/api@npm:~1.14.25":
+"@equilab/api@npm:^1.14.25":
   version: 1.14.25
   resolution: "@equilab/api@npm:1.14.25"
   dependencies:
@@ -2651,15 +2651,6 @@ __metadata:
   version: 1.1.3
   resolution: "@gar/promisify@npm:1.1.3"
   checksum: 4059f790e2d07bf3c3ff3e0fec0daa8144fe35c1f6e0111c9921bd32106adaa97a4ab096ad7dab1e28ee6a9060083c4d1a4ada42a7f5f3f7a96b8812e2b757c1
-  languageName: node
-  linkType: hard
-
-"@garvae/react-pie-donut-chart@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@garvae/react-pie-donut-chart@npm:1.0.0"
-  peerDependencies:
-    react: ">=16"
-  checksum: d806accc7b71fd9a4b2bace6f65e442337aab66f4844d8d8b6467ea33b1e69775577b025e3d178bd4b26c12a677661ae0dcd3779f20fca1bb84f3da041a44ac1
   languageName: node
   linkType: hard
 
@@ -3575,7 +3566,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-app-eth@npm:6.33.4":
+"@ledgerhq/hw-app-eth@npm:^6.33.4":
   version: 6.33.4
   resolution: "@ledgerhq/hw-app-eth@npm:6.33.4"
   dependencies:
@@ -5863,25 +5854,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.13":
-  version: 0.2.13
-  resolution: "@subwallet/chain-list@npm:0.2.13"
+"@subwallet/chain-list@npm:0.2.14":
+  version: 0.2.14
+  resolution: "@subwallet/chain-list@npm:0.2.14"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: 700d4f4fa022e945533c7963067114a0418dea91a44fd6dc9226d99fb9ab489d93234675039b95b783d38115cce8e12c5ed9eb5883f5b417da2648f6f9fe6477
+  checksum: f06f5747e56fbe7ba1ce337bac166f397365fd4460183c42ec8a1b68fd27b2c8385567d8d67aacc8c6858f8236b664d6d7f12de77faf001af243dd16ce5b08e3
   languageName: node
   linkType: hard
 
-"@subwallet/extension-base@^1.1.11-0, @subwallet/extension-base@^1.1.11-1, @subwallet/extension-base@workspace:packages/extension-base":
+"@subwallet/extension-base@^1.1.12-1, @subwallet/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-base@workspace:packages/extension-base"
   dependencies:
     "@acala-network/api": ^5.0.2
     "@apollo/client": ^3.7.14
     "@azns/resolver-core": ^1.4.0
-    "@equilab/api": ~1.14.25
+    "@equilab/api": ^1.14.25
     "@ethereumjs/common": ^2.6.5
     "@ethereumjs/tx": ^4.0.2
     "@ethersproject/abi": ^5.7.0
@@ -5905,12 +5896,12 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.2.13
-    "@subwallet/extension-base": ^1.1.11-1
-    "@subwallet/extension-chains": ^1.1.11-1
-    "@subwallet/extension-dapp": ^1.1.11-1
-    "@subwallet/extension-inject": ^1.1.11-1
-    "@subwallet/extension-mocks": ^1.1.11-1
+    "@subwallet/chain-list": ^0.2.14
+    "@subwallet/extension-base": ^1.1.12-1
+    "@subwallet/extension-chains": ^1.1.12-1
+    "@subwallet/extension-dapp": ^1.1.12-1
+    "@subwallet/extension-inject": ^1.1.12-1
+    "@subwallet/extension-mocks": ^1.1.12-1
     "@subwallet/keyring": ^0.1.1
     "@subwallet/ui-keyring": ^0.1.1
     "@types/uuid": ^9.0.1
@@ -5949,7 +5940,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-chains@^1.1.11-1, @subwallet/extension-chains@workspace:packages/extension-chains":
+"@subwallet/extension-chains@^1.1.12-1, @subwallet/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-chains@workspace:packages/extension-chains"
   dependencies:
@@ -5957,7 +5948,7 @@ __metadata:
     "@polkadot/networks": ^12.3.2
     "@polkadot/util": ^12.3.2
     "@polkadot/util-crypto": ^12.3.2
-    "@subwallet/extension-inject": ^1.1.11-1
+    "@subwallet/extension-inject": ^1.1.12-1
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/types": "*"
@@ -5972,21 +5963,21 @@ __metadata:
     "@metamask/detect-provider": ^1.2.0
     "@polkadot/types": ^10.9.1
     "@polkadot/util": ^12.3.2
-    "@subwallet/extension-inject": ^1.1.11-1
+    "@subwallet/extension-inject": ^1.1.12-1
     web3: ^1.10.0
   peerDependencies:
     "@polkadot/util": "*"
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-dapp@^1.1.11-1, @subwallet/extension-dapp@workspace:packages/extension-dapp":
+"@subwallet/extension-dapp@^1.1.12-1, @subwallet/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/util": ^12.3.2
     "@polkadot/util-crypto": ^12.3.2
-    "@subwallet/extension-inject": ^1.1.11-1
+    "@subwallet/extension-inject": ^1.1.12-1
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/util": "*"
@@ -5994,7 +5985,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-inject@^1.1.11-0, @subwallet/extension-inject@^1.1.11-1, @subwallet/extension-inject@workspace:packages/extension-inject":
+"@subwallet/extension-inject@^1.1.12-1, @subwallet/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -6012,7 +6003,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-koni-ui@^1.1.11-0, @subwallet/extension-koni-ui@^1.1.11-1, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
+"@subwallet/extension-koni-ui@^1.1.12-1, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
@@ -6023,7 +6014,6 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^6.2.1
     "@fortawesome/free-solid-svg-icons": ^6.2.1
     "@fortawesome/react-fontawesome": ^0.2.0
-    "@garvae/react-pie-donut-chart": 1.0.0
     "@ledgerhq/hw-app-eth": ^6.33.4
     "@polkadot/api-contract": ^10.9.1
     "@polkadot/hw-ledger": ^12.3.2
@@ -6035,12 +6025,12 @@ __metadata:
     "@polkadot/util-crypto": ^12.3.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.13
-    "@subwallet/extension-base": ^1.1.11-1
-    "@subwallet/extension-chains": ^1.1.11-1
-    "@subwallet/extension-dapp": ^1.1.11-1
-    "@subwallet/extension-inject": ^1.1.11-1
-    "@subwallet/extension-mocks": ^1.1.11-1
+    "@subwallet/chain-list": ^0.2.14
+    "@subwallet/extension-base": ^1.1.12-1
+    "@subwallet/extension-chains": ^1.1.12-1
+    "@subwallet/extension-dapp": ^1.1.12-1
+    "@subwallet/extension-inject": ^1.1.12-1
+    "@subwallet/extension-mocks": ^1.1.12-1
     "@subwallet/keyring": ^0.1.1
     "@subwallet/react-ui": 5.1.2-b72
     "@subwallet/ui-keyring": ^0.1.1
@@ -6082,14 +6072,15 @@ __metadata:
     react-qr-code: ^2.0.11
     react-qr-reader: ^3.0.0-beta-1
     react-redux: ^8.0.5
-    react-router-dom: ~6.9.0
+    react-router: ^6.8.2
+    react-router-dom: ^6.8.2
     react-select: ^5.7.0
     react-tabs: ^6.0.0
     react-tooltip: 4.5.1
     react-transition-group: ^4.4.5
     redux: ^4.2.0
     redux-persist: ^6.0.0
-    redux-toolkit: ^1.1.2-1
+    redux-toolkit: ^1.1.2
     semantic-ui-react: ^2.1.4
     sinon-chrome: ^3.0.1
     styled-components: ^5.3.6
@@ -6103,9 +6094,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.11-1
-    "@subwallet/extension-inject": ^1.1.11-1
-    "@subwallet/extension-koni-ui": ^1.1.11-1
+    "@subwallet/extension-base": ^1.1.12-1
+    "@subwallet/extension-inject": ^1.1.12-1
+    "@subwallet/extension-koni-ui": ^1.1.12-1
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -6131,7 +6122,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-mocks@^1.1.11-1, @subwallet/extension-mocks@workspace:packages/extension-mocks":
+"@subwallet/extension-mocks@^1.1.12-1, @subwallet/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
@@ -6255,9 +6246,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.11-1
-    "@subwallet/extension-inject": ^1.1.11-1
-    "@subwallet/extension-koni-ui": ^1.1.11-1
+    "@subwallet/extension-base": ^1.1.12-1
+    "@subwallet/extension-inject": ^1.1.12-1
+    "@subwallet/extension-koni-ui": ^1.1.12-1
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -6272,42 +6263,6 @@ __metadata:
     os-browserify: ^0.3.0
     path-browserify: ^1.0.1
     process: ^0.11.10
-    stream-browserify: ^3.0.0
-    stream-http: ^3.2.0
-    thread-loader: ^3.0.4
-    url-loader: ^4.1.1
-    webpack: ^5.74.0
-    webpack-cli: ^4.10.0
-    webpack-dev-server: ^4.11.1
-  languageName: unknown
-  linkType: soft
-
-"@subwallet/webapp@workspace:packages/webapp":
-  version: 0.0.0-use.local
-  resolution: "@subwallet/webapp@workspace:packages/webapp"
-  dependencies:
-    "@babel/runtime": ^7.20.6
-    "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.11-0
-    "@subwallet/extension-inject": ^1.1.11-0
-    "@subwallet/extension-koni-ui": ^1.1.11-0
-    assert: ^2.0.0
-    babel-loader: ^8.2.5
-    browser-resolve: ^2.0.0
-    buffer: ^6.0.3
-    copy-webpack-plugin: ^11.0.0
-    crypto-browserify: ^3.12.0
-    dotenv: ^16.3.1
-    extract-loader: ^5.1.0
-    file-loader: ^6.2.0
-    html-loader: ^4.2.0
-    html-webpack-plugin: ^5.5.0
-    https-browserify: ^1.0.0
-    os-browserify: ^0.3.0
-    path-browserify: ^1.0.1
-    process: ^0.11.10
-    sass: ^1.62.0
-    sass-loader: ^13.2.2
     stream-browserify: ^3.0.0
     stream-http: ^3.2.0
     thread-loader: ^3.0.4
@@ -10418,7 +10373,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:>=3.0.0 <4.0.0, chokidar@npm:^3.4.0, chokidar@npm:^3.5.3":
+"chokidar@npm:^3.4.0, chokidar@npm:^3.5.3":
   version: 3.5.3
   resolution: "chokidar@npm:3.5.3"
   dependencies:
@@ -15038,13 +14993,6 @@ __metadata:
   version: 9.0.16
   resolution: "immer@npm:9.0.16"
   checksum: e9a5ca65c929b329da7a3b7beccf7984271cda7bdd47b2cab619eac3277dcd56598c211b55cc340786b6eff0c06652ac018808d9fd744443f06882364dece6bc
-  languageName: node
-  linkType: hard
-
-"immutable@npm:^4.0.0":
-  version: 4.3.4
-  resolution: "immutable@npm:4.3.4"
-  checksum: de3edd964c394bab83432429d3fb0b4816b42f56050f2ca913ba520bd3068ec3e504230d0800332d3abc478616e8f55d3787424a90d0952e6aba864524f1afc3
   languageName: node
   linkType: hard
 
@@ -21342,7 +21290,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:~6.9.0":
+"react-router-dom@npm:^6.8.2":
   version: 6.9.0
   resolution: "react-router-dom@npm:6.9.0"
   dependencies:
@@ -21355,7 +21303,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:6.9.0":
+"react-router@npm:6.9.0, react-router@npm:^6.8.2":
   version: 6.9.0
   resolution: "react-router@npm:6.9.0"
   dependencies:
@@ -21619,7 +21567,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"redux-toolkit@npm:^1.1.2-1":
+"redux-toolkit@npm:^1.1.2":
   version: 1.1.2
   resolution: "redux-toolkit@npm:1.1.2"
   dependencies:
@@ -22245,7 +22193,6 @@ __metadata:
   bin:
     koni-ci-build-dev: ./scripts/koni-ci-build-dev.mjs
     koni-ci-build-i18n: ./scripts/koni-ci-build-i18n.mjs
-    koni-ci-build-webapp: ./scripts/koni-ci-build-webapp.mjs
     koni-ci-ghact-build: ./scripts/koni-ci-ghact-build.mjs
     koni-dev-build-ts: ./scripts/koni-dev-build-ts.mjs
   languageName: unknown
@@ -22325,30 +22272,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass-loader@npm:^13.2.2":
-  version: 13.3.2
-  resolution: "sass-loader@npm:13.3.2"
-  dependencies:
-    neo-async: ^2.6.2
-  peerDependencies:
-    fibers: ">= 3.1.0"
-    node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
-    sass: ^1.3.0
-    sass-embedded: "*"
-    webpack: ^5.0.0
-  peerDependenciesMeta:
-    fibers:
-      optional: true
-    node-sass:
-      optional: true
-    sass:
-      optional: true
-    sass-embedded:
-      optional: true
-  checksum: 7394a8d1b818a289b9caabd979543c907b83e28ae08bc80ccb836e0ccabc4ae574c077ab2fa520ba5fb8abb2ec3e7c9822a1cbd8c58a28ff30018be9d1dc6c27
-  languageName: node
-  linkType: hard
-
 "sass-lookup@npm:^3.0.0":
   version: 3.0.0
   resolution: "sass-lookup@npm:3.0.0"
@@ -22357,19 +22280,6 @@ __metadata:
   bin:
     sass-lookup: bin/cli.js
   checksum: fd4bf1ad9c54111617dec30dd90aff083e87c96aef50aff6cec443ad2fbbfa65da09f6e67a7e5ef99fa39dff65c937dc7358f18d319e083c6031f21def85ce6d
-  languageName: node
-  linkType: hard
-
-"sass@npm:^1.62.0":
-  version: 1.66.1
-  resolution: "sass@npm:1.66.1"
-  dependencies:
-    chokidar: ">=3.0.0 <4.0.0"
-    immutable: ^4.0.0
-    source-map-js: ">=0.6.2 <2.0.0"
-  bin:
-    sass: sass.js
-  checksum: 74fc11d0fcd5e16c5331b57dd59865705a299c64e89f2b99646869caeb011dc8d0b6144a6c74a90c264e9ef70654207dbf44fc9b7e3393f8bd14809b904c8a52
   languageName: node
   linkType: hard
 
@@ -22922,7 +22832,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-js@npm:>=0.6.2 <2.0.0, source-map-js@npm:^1.0.2":
+"source-map-js@npm:^1.0.2":
   version: 1.0.2
   resolution: "source-map-js@npm:1.0.2"
   checksum: c049a7fc4deb9a7e9b481ae3d424cc793cb4845daa690bc5a05d428bf41bf231ced49b4cf0c9e77f9d42fdb3d20d6187619fc586605f5eabe995a316da8d377c

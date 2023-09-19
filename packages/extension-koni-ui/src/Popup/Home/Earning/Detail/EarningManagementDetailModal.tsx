@@ -7,14 +7,10 @@ import { getValidatorLabel, isShowNominationByValidator } from '@subwallet/exten
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { detectTranslate } from '@subwallet/extension-base/utils';
+import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { TagTypes } from '@subwallet/extension-koni-ui/components/EarningItem';
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
-import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
-import { useGetAccountByAddress, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
-import useGetAccountsByStaking from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetAccountsByStaking';
+import { EARNING_MANAGEMENT_DETAIL_MODAL, StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
+import { useFetchChainInfo, useGetAccountsByStaking, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -34,8 +30,6 @@ interface Props extends ThemeProps {
   yieldPoolInfo: YieldPoolInfo;
   // rewardItem?: StakingRewardItem;
 }
-
-export const EARNING_MANAGEMENT_DETAIL_MODAL_ID = 'earning-management-detail-modal-id';
 
 export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) => {
   return unstakings.find((item) => item.validatorAddress === address);
@@ -60,25 +54,25 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
   const chainInfo = useFetchChainInfo(yieldPoolInfo.chain);
   const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
   const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
-  const account = isAllAccount ? useGetAccountByAddress() : currentAccount;
+  const account = isAllAccount ? null : currentAccount;
 
   const stakingAccounts = useGetAccountsByStaking(chain, type);
 
   const onClickStakeMoreBtn = useCallback(() => {
-    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL_ID);
+    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL);
     setTimeout(() => {
       navigate(`/transaction/stake/${yieldPositionMetadata.type}/${yieldPositionMetadata.chain}`);
     }, 300);
   }, [inactiveModal, navigate, yieldPositionMetadata]);
 
   const onClickUnstakeBtn = useCallback(() => {
-    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL_ID);
+    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL);
     setTimeout(() => navigate(`/transaction/unstake/${yieldPositionMetadata.type}/${yieldPositionMetadata.chain}`), 300);
   }, [inactiveModal, navigate, yieldPositionMetadata]);
 
   const onClickMoreAction = useCallback(() => {
     activeModal(MORE_ACTION_MODAL);
-    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL_ID);
+    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL);
   }, [activeModal, inactiveModal]);
 
   const footer = () => {
@@ -115,7 +109,7 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
 
   const onCloseModal = useCallback(() => {
     setSeeMore(false);
-    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL_ID);
+    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL);
   }, [inactiveModal]);
 
   const getStakingStatus = useCallback((status: StakingStatus) => {
@@ -205,7 +199,7 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
       className={className}
       closable={true}
       footer={footer()}
-      id={EARNING_MANAGEMENT_DETAIL_MODAL_ID}
+      id={EARNING_MANAGEMENT_DETAIL_MODAL}
       maskClosable={true}
       onCancel={onCloseModal}
       title={t(modalTitle)}
@@ -349,7 +343,7 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
                         className={CN('__nomination-field', 'stand-alone')}
                         key={`${item.validatorAddress}-${item.activeStake}-${item.validatorIdentity || item.validatorMinStake || item.chain}`}
                         label={(
-                          <AccountItem
+                          <MetaInfo.Account
                             address={item.validatorAddress}
                             className={'__nomination-label'}
                             name={item.validatorIdentity}
@@ -365,11 +359,13 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
                       className={'__nomination-field'}
                       decimals={decimals}
                       key={`${item.validatorAddress}-${item.activeStake}-${item.validatorIdentity || item.validatorMinStake || item.chain}`}
-                      label={<AccountItem
-                        address={item.validatorAddress}
-                        className={'__nomination-label'}
-                        name={item.validatorIdentity}
-                      />}
+                      label={(
+                        <MetaInfo.Account
+                          address={item.validatorAddress}
+                          className={'__nomination-label'}
+                          name={item.validatorIdentity}
+                        />
+                      )}
                       suffix={symbol}
                       value={item.activeStake || ''}
                       valueColorSchema={'gray'}

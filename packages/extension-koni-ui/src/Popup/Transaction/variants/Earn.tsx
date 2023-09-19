@@ -8,17 +8,13 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector } from '@subwallet/extension-koni-ui/components';
-import EarningProcessItem from '@subwallet/extension-koni-ui/components/EarningProcessItem';
+import { AccountSelector, AmountInput, EarningProcessItem, MetaInfo, PageWrapper, PoolSelector, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFetchChainState, useGetChainPrefixBySlug, useHandleSubmitTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
+import { useFetchChainState, useGetChainPrefixBySlug, useGetNativeTokenBasicInfo, useHandleSubmitTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
-import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingProcessModal';
-import { fetchEarningChainValidators, handleYieldStep } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/earning/earningHandler';
-import { TransactionContent } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
-import FreeBalanceToStake from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalanceToStake';
-import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
+import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/StakingProcessModal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -34,7 +30,8 @@ import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import useGetNativeTokenBasicInfo from '../../../hooks/common/useGetNativeTokenBasicInfo';
+import { fetchEarningChainValidators, handleYieldStep } from '../helper';
+import { FreeBalanceToStake, TransactionContent } from '../parts';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -80,6 +77,8 @@ interface ProcessReducerAction {
 }
 
 function processReducer (state: YieldProcessState, action: ProcessReducerAction): YieldProcessState {
+  console.log(action.payload);
+
   switch (action.type) {
     case ProcessReducerActionType.SET_CURRENT_STEP:
       return {
@@ -128,7 +127,7 @@ const Component = () => {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainAsset = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const { setChain, setShowRightBtn } = useContext(TransactionContext);
+  const { setShowRightBtn } = useContext(TransactionContext);
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
 
@@ -168,10 +167,6 @@ const Component = () => {
       [FormFieldName.NOMINATE]: ''
     };
   }, [currentAccount?.address, isAllAccount]);
-
-  useEffect(() => {
-    setChain(currentPoolInfo.chain);
-  }, [currentPoolInfo, setChain]);
 
   useEffect(() => {
     setShowRightBtn(true);
@@ -379,6 +374,14 @@ const Component = () => {
       });
     }
 
+    const _onError = (error: Error) => {
+      dispatchProcessState({
+        type: ProcessReducerActionType.UPDATE_STEP_RESULT,
+        payload: processState.stepResults[processState.currentStep].status = ExtrinsicStatus.FAIL
+      });
+      onError(error);
+    };
+
     setTimeout(() => {
       submitPromise
         .then((rs) => {
@@ -388,18 +391,22 @@ const Component = () => {
           });
           onSuccess(rs);
         })
-        .catch((error) => {
-          dispatchProcessState({
-            type: ProcessReducerActionType.UPDATE_STEP_RESULT,
-            payload: processState.stepResults[processState.currentStep].status = ExtrinsicStatus.FAIL
-          });
-          onError(error);
-        })
+        .catch(_onError)
         .finally(() => {
           setSubmitLoading(false);
         });
     }, 300);
-  }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, isProcessDone, onError, onSuccess, processState.currentStep, processState.feeStructure, processState.steps]);
+  }, [
+    currentAmount,
+    currentPoolInfo,
+    form,
+    getSelectedPool,
+    getSelectedValidators,
+    isProcessDone,
+    onError,
+    onSuccess,
+    processState
+  ]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -429,10 +436,12 @@ const Component = () => {
               {processState.steps && (
                 <div style={{ display: 'flex', alignItems: 'center', paddingBottom: token.paddingSM }}>
                   {isLoading
-                    ? <ActivityIndicator
+                    ? (
+                      <ActivityIndicator
                         prefixCls={'ant'}
                         size={'24px'}
                       />
+                    )
                     : (
                       <Typography.Text
                         size={'lg'}
@@ -529,12 +538,13 @@ const Component = () => {
                 hidden={currentPoolInfo.type !== YieldPoolType.NATIVE_STAKING}
                 name={FormFieldName.NOMINATE}
               >
-                <MultiValidatorSelector
+                <YieldMultiValidatorSelector
                   chain={currentPoolInfo.chain}
                   disabled={processState.currentStep !== 0}
                   from={currentFrom}
                   loading={validatorLoading}
                   setForceFetchValidator={setForceFetchValidator}
+                  slug={currentPoolInfo.slug}
                 />
               </Form.Item>
             </Form>
@@ -587,10 +597,14 @@ const Component = () => {
               );
             })}
 
-            {isLoading && <ActivityIndicator
-              prefixCls={'ant'}
-              size={'32px'}
-            />}
+            {
+              isLoading && (
+                <ActivityIndicator
+                  prefixCls={'ant'}
+                  size={'32px'}
+                />
+              )
+            }
           </div>
           <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
 
@@ -600,10 +614,10 @@ const Component = () => {
         </div>
       )}
 
-      {<StakingProcessModal
+      <StakingProcessModal
         currentStep={processState.currentStep}
         yieldSteps={processState.steps}
-      />}
+      />
     </div>
   );
 };

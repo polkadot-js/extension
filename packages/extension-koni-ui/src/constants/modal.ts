@@ -42,3 +42,11 @@ export const WALLET_CONNECT_LIST_MODAL = 'wallet-connect-list-modal';
 export const CONFIRMATION_MODAL = 'confirmation-modal';
 export const TRANSFER_FUND_MODAL = 'transfer-fund-modal';
 export const BUY_TOKEN_MODAL = 'buy-token-modal';
+
+/* Earning */
+
+export const STAKING_PROCESS_MODAL = 'staking-process-modal';
+export const EARNING_MANAGEMENT_DETAIL_MODAL = 'earning-management-detail-modal';
+export const STAKING_CALCULATOR_MODAL = 'staking-calculator-modal';
+
+/* Earning */

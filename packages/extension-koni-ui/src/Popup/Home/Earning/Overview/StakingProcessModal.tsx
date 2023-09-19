@@ -1,9 +1,9 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldStepDetail } from '@subwallet/extension-base/background/KoniTypes';
-import EarningProcessItem from '@subwallet/extension-koni-ui/components/EarningProcessItem';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
+import { BaseModal, EarningProcessItem } from '@subwallet/extension-koni-ui/components';
+import { STAKING_PROCESS_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Divider, ModalContext, Typography } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
@@ -15,21 +15,21 @@ interface Props extends ThemeProps {
   yieldSteps?: YieldStepDetail[];
 }
 
-export const STAKING_PROCESS_MODAL_ID = 'staking-process-modal-id';
+const modalId = STAKING_PROCESS_MODAL;
 
 const Component = ({ className, currentStep, yieldSteps }: Props) => {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
   const { token } = useTheme() as Theme;
   const onCloseModal = useCallback(() => {
-    inactiveModal(STAKING_PROCESS_MODAL_ID);
+    inactiveModal(modalId);
   }, [inactiveModal]);
 
   return (
     <BaseModal
       className={className}
       closable
-      id={STAKING_PROCESS_MODAL_ID}
+      id={modalId}
       maskClosable
       onCancel={onCloseModal}
       title={t('Staking process')}
@@ -38,16 +38,20 @@ const Component = ({ className, currentStep, yieldSteps }: Props) => {
 
         <Typography.Text className={'earning-calculator-message'}>{t('Staking process:')}</Typography.Text>
 
-        {yieldSteps && yieldSteps.map((item, index) => {
-          const isSelected = currentStep === index;
+        {
+          yieldSteps && yieldSteps.map((item, index) => {
+            const isSelected = currentStep === index;
 
-          return <EarningProcessItem
-            index={index}
-            isSelected={isSelected}
-            key={index}
-            stepName={item.name}
-          />;
-        })}
+            return (
+              <EarningProcessItem
+                index={index}
+                isSelected={isSelected}
+                key={index}
+                stepName={item.name}
+              />
+            );
+          })
+        }
       </div>
       <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
 

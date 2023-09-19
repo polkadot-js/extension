@@ -3,9 +3,11 @@
 
 import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
-import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
+import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Logo, Number, Tag, Web3Block } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import { Database, HandsClapping, Leaf, PlusCircle, PlusMinus, Question } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import { TFunction } from 'react-i18next';
@@ -73,13 +75,29 @@ export const TagTypes = (t: TFunction) => {
 const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onClickStakeBtn }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { chain, description, name, stats, type } = item;
+  const { chain, description, inputAssets, name, stats, type } = item;
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+  const { priceMap } = useSelector((state) => state.price);
+
+  const tokenSlug = useMemo(() => inputAssets[0] || '', [inputAssets]);
+
+  const decimals = useMemo(() => {
+    return assetRegistry[tokenSlug]?.decimals || 0;
+  }, [assetRegistry, tokenSlug]);
+
+  const price = useMemo(() => {
+    const priceId = assetRegistry[tokenSlug]?.priceId || '';
+
+    return priceMap[priceId] || 0;
+  }, [assetRegistry, priceMap, tokenSlug]);
+
+  const tvl = useMemo(() => new BigN(stats?.tvl || 0).div(BN_TEN.pow(decimals)).multipliedBy(price).toString(), [decimals, price, stats?.tvl]);
 
   const totalApy = useMemo(() => {
-    const apy = calculateReward(stats?.totalApr || 0, 100, YieldCompoundingPeriod.YEARLY).apy;
+    const apy = stats?.totalApy ?? calculateReward(stats?.totalApr || 0, 100, YieldCompoundingPeriod.YEARLY).apy;
 
     return apy ? (apy * 100) : 0;
-  }, [stats?.totalApr]);
+  }, [stats?.totalApr, stats?.totalApy]);
 
   return (
     <Web3Block
@@ -122,7 +140,7 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onC
               prefix={'$'}
               size={14}
               unitColor={token.colorSuccess}
-              value={stats?.tvl || 0}
+              value={tvl}
             />
           </div>
 

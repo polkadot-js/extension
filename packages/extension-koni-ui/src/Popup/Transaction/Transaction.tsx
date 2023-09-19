@@ -9,7 +9,6 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
 import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { STAKING_PROCESS_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/StakingProcessModal';
 import { Theme, ThemeProps, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
 import { detectTransactionPersistKey } from '@subwallet/extension-koni-ui/utils';
 import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
@@ -63,7 +62,7 @@ function Component ({ children, className, modalContent }: Props) {
       case 'send-nft':
         return ExtrinsicType.SEND_NFT;
       case 'earn':
-        return ExtrinsicType.MINT_LDOT; // TODO: change this
+        return ExtrinsicType.JOIN_YIELD_POOL; // TODO: change this
       case 'send-fund':
       default:
         return ExtrinsicType.TRANSFER_BALANCE;
@@ -143,9 +142,9 @@ function Component ({ children, className, modalContent }: Props) {
       activeModal(StakingNetworkDetailModalId);
     }
 
-    if (transactionType === ExtrinsicType.EARN) {
-      activeModal(STAKING_PROCESS_MODAL_ID);
-    }
+    // if (transactionType === ExtrinsicType.EARN) {
+    //   activeModal(STAKING_PROCESS_MODAL);
+    // }
   }, [activeModal, transactionType]);
 
   const subHeaderButton: ButtonProps[] = useMemo(() => {

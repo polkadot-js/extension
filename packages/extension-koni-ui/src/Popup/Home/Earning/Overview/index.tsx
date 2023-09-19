@@ -1,14 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import HorizontalEarningItem from '@subwallet/extension-koni-ui/components/HorizontalEarningItem';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { EarningItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import EarningCalculatorModal, { STAKING_CALCULATOR_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningCalculatorModal';
-import EarningManagementDetailModal, { EARNING_MANAGEMENT_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagementDetailModal';
-import EarningToolbar from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningToolBar';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList } from '@subwallet/react-ui';
@@ -17,6 +13,10 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import EarningCalculatorModal from '../../../../components/Modal/Earning/EarningCalculatorModal';
+import EarningToolbar from './EarningToolBar';
+import { STAKING_CALCULATOR_MODAL } from '@subwallet/extension-koni-ui/constants';
 
 type Props = ThemeProps;
 
@@ -29,9 +29,9 @@ enum SortKey {
 const Component = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { poolInfo: poolInfoMap, yieldPosition: yieldPositionList } = useSelector((state: RootState) => state.yieldPool);
+  const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { activeModal } = useContext(ModalContext);
-  const [{ selectedYieldPoolInfo, selectedYieldPosition }, setSelectedItem] = useState<{ selectedYieldPosition: YieldPositionInfo | undefined, selectedYieldPoolInfo: YieldPoolInfo | undefined }>({ selectedYieldPosition: undefined, selectedYieldPoolInfo: undefined });
+  const [selectedItem, setSelectedItem] = useState<YieldPoolInfo | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
@@ -85,52 +85,38 @@ const Component = () => {
     };
   }, [selectedFilters]);
 
-  const onClickCalculatorBtn = useCallback((item: YieldPositionInfo) => {
-    const poolInfo = poolInfoMap[item.slug];
-
-    setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
-    activeModal(STAKING_CALCULATOR_MODAL_ID);
+  const onClickCalculatorBtn = useCallback((item: YieldPoolInfo) => {
+    return () => {
+      setSelectedItem(item);
+      activeModal(STAKING_CALCULATOR_MODAL);
+    };
   }, [activeModal]);
 
-  const onClickStakeBtn = useCallback((item: YieldPositionInfo) => {
-    const poolInfo = poolInfoMap[item.slug];
-
-    setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
-    navigate(`/transaction/earn/${item.slug}`);
+  const onClickStakeBtn = useCallback((item: YieldPoolInfo) => {
+    return () => {
+      setSelectedItem(item);
+      navigate(`/transaction/earn/${item.slug}`);
+    };
   }, [navigate]);
 
-  const onClickItem = useCallback((item: YieldPositionInfo) => {
-    const poolInfo = poolInfoMap[item.slug];
-
-    setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
-    activeModal(EARNING_MANAGEMENT_DETAIL_MODAL_ID);
-  }, [activeModal]);
-
-  const renderEarningItem = useCallback((item: YieldPositionInfo) => {
-    const poolInfo = poolInfoMap[item.slug];
-
+  const renderEarningItem = useCallback((item: YieldPoolInfo) => {
     return (
-      <HorizontalEarningItem
+      <EarningItem
+        item={item}
         key={item.slug}
-        onClickCalculatorBtn={() => onClickCalculatorBtn(item)}
-        onClickItem={() => onClickItem(item)}
-        onClickStakeBtn={() => onClickStakeBtn(item)}
-        yieldPoolInfo={poolInfo}
-        yieldPositionInfo={item}
+        onClickCalculatorBtn={onClickCalculatorBtn(item)}
+        onClickStakeBtn={onClickStakeBtn(item)}
       />
     );
-  }, [onClickCalculatorBtn, onClickStakeBtn, poolInfoMap]);
+  }, [onClickCalculatorBtn, onClickStakeBtn]);
 
-  const resultList = useMemo((): YieldPositionInfo[] => {
-    return yieldPositionList
-      .sort((a: YieldPositionInfo, b: YieldPositionInfo) => {
-        const aPoolInfo = poolInfoMap[a.slug];
-        const bPoolInfo = poolInfoMap[b.slug];
-
+  const resultList = useMemo((): YieldPoolInfo[] => {
+    return [...Object.values(poolInfo)]
+      .sort((a: YieldPoolInfo, b: YieldPoolInfo) => {
         switch (sortSelection) {
           case SortKey.TOTAL_VALUE:
-            if (aPoolInfo.stats && bPoolInfo.stats && aPoolInfo.stats.tvl && bPoolInfo.stats.tvl) {
-              return parseFloat(aPoolInfo.stats.tvl) - parseFloat(bPoolInfo.stats.tvl);
+            if (a.stats && b.stats && a.stats.tvl && b.stats.tvl) {
+              return parseFloat(a.stats.tvl) - parseFloat(b.stats.tvl);
             } else {
               return 0;
             }
@@ -139,7 +125,7 @@ const Component = () => {
             return 0;
         }
       });
-  }, [yieldPositionList, sortSelection]);
+  }, [poolInfo, sortSelection]);
 
   return (
     <Layout.Base
@@ -150,6 +136,7 @@ const Component = () => {
       subHeaderPaddingVertical={true}
       title={t('Earning')}
     >
+
       <EarningToolbar
         filterSelectionMap={filterSelectionMap}
         onApplyFilter={onApplyFilter}
@@ -160,22 +147,20 @@ const Component = () => {
         selectedFilters={selectedFilters}
       />
       <SwList.Section
-        className={CN('earning-management__container')}
+        className={CN('nft_collection_list__container')}
+        displayGrid={true}
         enableSearchInput={false}
         filterBy={filterFunction}
+        gridGap={'14px'}
         list={resultList}
+        minColumnWidth={'384px'}
         renderItem={renderEarningItem}
         renderOnScroll={true}
         renderWhenEmpty={<></>}
         searchMinCharactersCount={2}
       />
 
-      {selectedYieldPoolInfo && <EarningCalculatorModal item={selectedYieldPoolInfo} />}
-
-      {selectedYieldPosition && selectedYieldPoolInfo && <EarningManagementDetailModal
-        yieldPoolInfo={selectedYieldPoolInfo}
-        yieldPositionMetadata={selectedYieldPosition.metadata}
-                                                         />}
+      {selectedItem && <EarningCalculatorModal defaultItem={selectedItem} />}
     </Layout.Base>
   );
 };
@@ -195,23 +180,22 @@ const Wrapper: React.FC<Props> = (props: Props) => {
   );
 };
 
-const EarningManagement = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
+const Earning = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
-
-    '.earning-management__container .ant-sw-list': {
-      paddingLeft: 0,
-      paddingRight: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: token.padding
-    },
 
     '.earning-filter-icon': {
       width: '12px',
       height: '12px'
+    },
+
+    '.earning-wrapper': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingBottom: token.padding
     }
   });
 });
 
-export default EarningManagement;
+export default Earning;

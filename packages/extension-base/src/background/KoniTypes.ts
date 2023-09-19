@@ -2211,6 +2211,12 @@ export interface HandleYieldStepParams extends BaseRequestSign {
 
 export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
 
+export interface HandleYieldRedeemParams extends BaseRequestSign {
+  address: string;
+  yieldPoolInfo: YieldPoolInfo;
+  amount: string;
+}
+
 export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool | SubmitBifrostLiquidStaking;
 
 export interface SubmitBifrostLiquidStaking {

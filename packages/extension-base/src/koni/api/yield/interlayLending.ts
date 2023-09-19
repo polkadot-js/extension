@@ -86,6 +86,7 @@ export async function generatePathForInterlayLending (params: OptimalYieldPathPa
         const xcmAmount = bnAltInputTokenBalance.sub(remainingAmount);
 
         result.steps.push({
+          id: 0,
           metadata: {
             sendingValue: xcmAmount.toString(),
             originTokenInfo: altInputTokenInfo,
@@ -119,6 +120,7 @@ export async function generatePathForInterlayLending (params: OptimalYieldPathPa
   }
 
   result.steps.push({
+    id: 0,
     name: 'Mint qDOT',
     type: YieldStepType.MINT_QDOT
   });

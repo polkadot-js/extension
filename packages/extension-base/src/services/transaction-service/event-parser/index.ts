@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import { _getAssetDecimals, _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { ExtrinsicType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { EventRecord } from '@polkadot/types/interfaces';
 
@@ -60,6 +60,36 @@ export function parseTransferEventLogs (historyItem: Partial<TransactionHistoryI
           symbol: nativeSymbol,
           decimals: nativeDecimals
         };
+      }
+    }
+  }
+}
+
+export function parseBifrostLiquidStakingEvents (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], inputTokenInfo: _ChainAsset, chainInfo: _ChainInfo, feePaidWithInputAsset: boolean, extrinsicType: ExtrinsicType) {
+  if (feePaidWithInputAsset) {
+    historyItem.fee = {
+      value: '0', // TODO
+      symbol: _getAssetSymbol(inputTokenInfo),
+      decimals: _getAssetDecimals(inputTokenInfo)
+    };
+  } else {
+    for (let index = 0; index < eventLogs.length; index++) {
+      const record = eventLogs[index];
+
+      const { decimals: nativeDecimals, symbol: nativeSymbol } = _getChainNativeTokenBasicInfo(chainInfo);
+
+      const eventMethod = extrinsicType === ExtrinsicType.MINT_VDOT ? 'deposit' : 'withdraw';
+
+      if (record.event.section === 'balances' &&
+        record.event.method.toLowerCase() === eventMethod) {
+        if (record.event.data[2]?.toString()) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          historyItem.fee = {
+            value: record.event.data[2]?.toString() || '0',
+            symbol: nativeSymbol,
+            decimals: nativeDecimals
+          };
+        }
       }
     }
   }

@@ -91,7 +91,7 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
     })
     .catch(console.error);
 
-  const interval = setInterval(getStatInterval, 30000);
+  const interval = setInterval(getStatInterval, 300000);
 
   return () => {
     clearInterval(interval);
@@ -168,7 +168,7 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
     type: YieldStepType.MINT_VDOT
   });
 
-  const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.vtokenMinting.mint({ VToken: 'DOT' }, params.amount).paymentInfo(fakeAddress);
+  const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.vtokenMinting.mint({ VToken: 'DOT' }, params.amount, null).paymentInfo(fakeAddress);
   const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
   if (bnDefaultFeeTokenBalance.gt(BN_ZERO)) {
@@ -209,7 +209,7 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
     return [ExtrinsicType.TRANSFER_XCM, extrinsic];
   }
 
-  const substrateApi = params.substrateApiMap[params.poolInfo.chain];
+  const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
   const inputTokenSlug = params.poolInfo.inputAssets[0];
   const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
   const extrinsic = substrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), inputData.amount);
@@ -217,10 +217,12 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
   return [ExtrinsicType.MINT_VDOT, extrinsic];
 }
 
-export function getBifrostLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string) {
+export async function getBifrostLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+  const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
   const rewardTokenSlug = params.poolInfo.rewardAssets[0];
   const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
-  const substrateApi = params.substrateApiMap[params.poolInfo.chain];
 
-  return substrateApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount);
+  const extrinsic = substrateApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount);
+
+  return [ExtrinsicType.REDEEM_VDOT, extrinsic];
 }

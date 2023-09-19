@@ -59,7 +59,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <MetaInfo.Default
           label={t('Collection Name')}
         >
-          {(data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.SEND_NFT>).collectionName}
+          {(data.additionalInfo as TransactionAdditionalInfo[ExtrinsicType.SEND_NFT]).collectionName}
         </MetaInfo.Default>
       )}
     </>

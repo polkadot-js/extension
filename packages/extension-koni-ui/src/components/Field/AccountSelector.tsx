@@ -15,7 +15,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { AccountItemWithName } from '../Account';
 import { Avatar } from '../Avatar';
-import GeneralEmptyList from '../GeneralEmptyList';
+import { GeneralEmptyList } from '../EmptyList';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   externalAccounts?: AccountJson[];

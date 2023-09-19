@@ -10,7 +10,7 @@ import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll, sortStakingByValue } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
-import { ArrowClockwise, FadersHorizontal, Plus, Trophy } from 'phosphor-react';
+import { ArrowClockwise, Database, FadersHorizontal, Plus, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -180,15 +180,31 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
+  const emptyButtonProps = useMemo((): ButtonProps => {
+    return {
+      icon: (
+        <Icon
+          phosphorIcon={PlusCircle}
+          weight='fill'
+        />
+      ),
+      children: t('Start staking'),
+      shape: 'circle',
+      size: 'xs',
+      onClick: onClickStakeMore
+    };
+  }, [onClickStakeMore, t]);
+
   const emptyStakingList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Your staking accounts will appear here!')}
-        emptyTitle={t('No staking')}
-        phosphorIcon={Trophy}
+        buttonProps={emptyButtonProps}
+        emptyMessage={t('You can stake in-app easily')}
+        emptyTitle={t('No staking found')}
+        phosphorIcon={Database}
       />
     );
-  }, [t]);
+  }, [emptyButtonProps, t]);
 
   useEffect(() => {
     if (currentAccount?.address !== address) {

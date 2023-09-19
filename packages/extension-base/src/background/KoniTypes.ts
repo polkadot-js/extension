@@ -518,7 +518,7 @@ export interface ExtrinsicDataTypeMap {
 
   [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_VDOT]: SubmitBifrostLiquidStaking,
-  [ExtrinsicType.REDEEM_VDOT]: SubmitBifrostRedeemLiquidStaking,
+  [ExtrinsicType.REDEEM_VDOT]: SubmitBifrostLiquidStaking,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.UNKNOWN]: any
@@ -577,7 +577,8 @@ export interface NFTTransactionAdditionalInfo {
 export type TransactionAdditionalInfo = {
   [ExtrinsicType.TRANSFER_XCM]: XCMTransactionAdditionalInfo,
   [ExtrinsicType.SEND_NFT]: NFTTransactionAdditionalInfo,
-  [ExtrinsicType.MINT_VDOT]: Pick<SubmitBifrostLiquidStaking, 'rewardTokenSlug' | 'estimatedAmountReceived'>
+  [ExtrinsicType.MINT_VDOT]: Pick<SubmitBifrostLiquidStaking, 'rewardTokenSlug' | 'estimatedAmountReceived'>,
+  [ExtrinsicType.REDEEM_VDOT]: Pick<SubmitBifrostLiquidStaking, 'inputTokenSlug' | 'estimatedAmountReceived'>
 }
 
 // export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
@@ -2218,10 +2219,6 @@ export interface SubmitBifrostLiquidStaking {
   amount: string,
   rewardTokenSlug: string,
   estimatedAmountReceived: string
-}
-
-export interface SubmitBifrostRedeemLiquidStaking {
-  amount: string
 }
 
 export interface SubmitJoinNativeStaking {

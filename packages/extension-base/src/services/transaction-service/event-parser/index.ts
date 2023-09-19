@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { EventRecord } from '@polkadot/types/interfaces';
@@ -65,7 +65,7 @@ export function parseTransferEventLogs (historyItem: Partial<TransactionHistoryI
   }
 }
 
-export function parseBifrostLiquidStakingEvents (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], inputTokenInfo: _ChainAsset, chainInfo: _ChainInfo, feePaidWithInputAsset: boolean) {
+export function parseBifrostLiquidStakingEvents (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], inputTokenInfo: _ChainAsset, chainInfo: _ChainInfo, feePaidWithInputAsset: boolean, extrinsicType: ExtrinsicType) {
   if (feePaidWithInputAsset) {
     historyItem.fee = {
       value: '0', // TODO
@@ -78,8 +78,10 @@ export function parseBifrostLiquidStakingEvents (historyItem: Partial<Transactio
 
       const { decimals: nativeDecimals, symbol: nativeSymbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
+      const eventMethod = extrinsicType === ExtrinsicType.MINT_VDOT ? 'deposit' : 'withdraw';
+
       if (record.event.section === 'balances' &&
-        record.event.method.toLowerCase() === 'deposit') {
+        record.event.method.toLowerCase() === eventMethod) {
         if (record.event.data[2]?.toString()) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           historyItem.fee = {

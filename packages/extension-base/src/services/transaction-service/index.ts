@@ -530,10 +530,24 @@ export default class TransactionService {
 
         historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
         historyItem.additionalInfo = {
-          rewardTokenSlug: '',
-          estimatedAmountReceived: ''
+          rewardTokenSlug: data.rewardTokenSlug,
+          estimatedAmountReceived: data.estimatedAmountReceived
         } as TransactionAdditionalInfo[ExtrinsicType.MINT_VDOT];
-        eventLogs && parseBifrostLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, data.feePaidWithInputAsset);
+        eventLogs && parseBifrostLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, data.feePaidWithInputAsset, extrinsicType);
+
+        break;
+      }
+
+      case ExtrinsicType.REDEEM_VDOT: {
+        const data = parseTransactionData<ExtrinsicType.REDEEM_VDOT>(transaction.data);
+        const inputTokenInfo = this.chainService.getAssetBySlug(data.inputTokenSlug);
+
+        historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
+        historyItem.additionalInfo = {
+          inputTokenSlug: data.inputTokenSlug,
+          estimatedAmountReceived: data.estimatedAmountReceived
+        } as TransactionAdditionalInfo[ExtrinsicType.REDEEM_VDOT];
+        eventLogs && parseBifrostLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, data.feePaidWithInputAsset, extrinsicType);
 
         break;
       }

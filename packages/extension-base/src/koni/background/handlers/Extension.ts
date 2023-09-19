@@ -1656,7 +1656,7 @@ export default class KoniExtension {
           [
             transaction,
             transferAmount.value
-          ] = await getEVMTransactionObject(chainInfo, to, txVal, !!transferAll, evmApiMap);
+          ] = await getEVMTransactionObject(chainInfo, from, to, txVal, !!transferAll, evmApiMap);
         }
       } else if (_isMantaZkAsset(tokenInfo)) { // TODO
         transaction = undefined;

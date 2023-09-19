@@ -24,7 +24,7 @@ import { copyToClipboard } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/form';
 import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, SettingItem, SwAlert, Switch, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, GitMerge, QrCode, ShieldCheck, Swatches, Trash, User, Warning } from 'phosphor-react';
+import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, GitMerge, QrCode, ShieldCheck, Swatches, Trash, User, Wallet, Warning } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -203,6 +203,8 @@ const Component: React.FC<Props> = (props: Props) => {
         return QrCode;
       case AccountSignMode.READ_ONLY:
         return Eye;
+      case AccountSignMode.INJECTED:
+        return Wallet;
       default:
         return User;
     }
@@ -458,7 +460,7 @@ const Component: React.FC<Props> = (props: Props) => {
             >
               <Input
                 className='account-name-input'
-                disabled={deriving || zkModeSyncState.isSyncing}
+                disabled={deriving || zkModeSyncState.isSyncing || account.isInjected}
                 label={t('Account name')}
                 onBlur={form.submit}
                 placeholder={t('Account name')}
@@ -545,7 +547,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className={CN('account-detail___action-footer')}>
           <Button
             className={CN('account-button')}
-            disabled={deriving || zkModeSyncState.isSyncing}
+            disabled={deriving || zkModeSyncState.isSyncing || account.isInjected}
             icon={(
               <Icon
                 phosphorIcon={Trash}
@@ -558,7 +560,7 @@ const Component: React.FC<Props> = (props: Props) => {
           />
           <Button
             className={CN('account-button')}
-            disabled={!canDerive || zkModeSyncState.isSyncing}
+            disabled={!canDerive || zkModeSyncState.isSyncing || account.isInjected}
             icon={(
               <Icon
                 phosphorIcon={GitMerge}
@@ -573,7 +575,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </Button>
           <Button
             className={CN('account-button')}
-            disabled={account.isExternal || deriving || zkModeSyncState.isSyncing}
+            disabled={account.isExternal || deriving || zkModeSyncState.isSyncing || account.isInjected}
             icon={(
               <Icon
                 phosphorIcon={Export}

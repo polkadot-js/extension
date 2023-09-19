@@ -1,5 +1,48 @@
 # CHANGELOG
 
+## 1.1.12
+Build date: Sep 15, 2023.
+
+Features & Update:
+- Handle the case of signing transactions from dApp using a Ledger account (#1874)
+- Update web-runner for i18n for background (#1815)
+- Update chain list (#1896)
+  - Update block explorer for Avalanche C
+  - Add support USDC for Polkadot Asset Hub
+  - Add support Acala EVM network
+
+Bugs fixed:
+- Fixed bug Show incorrect message when the minimum active stake is a real number (#1901)
+- Fixed bug Create incorrect account when connect dApp (#1912)
+
+
+## 1.1.11
+Build date: Sep 09, 2023.
+
+Features & Update:
+- Support Ledger for Astar (#1814)
+- Integrate Coinbase Pay fiat on-ramp feature (#1834)
+- Support staking in app for Creditcoin (#1891)
+- Support new language: Russia (#1658)
+- Update list of tokens supported on fiat-onramp feature (#1848)
+- Improve auto-lock feature for mobile app (#1763)
+- Update chain list (#1861)
+  - Add new tokens
+    - USDD on Ethereum, BSC
+    - DOT tokens:
+      - DOT (Bifrost Polkadot)
+      - sDOT, DOT (Parallel)
+      - DOT (Interlay)
+      - DOT (HydraDX)
+    - ASTR on Moonbeam
+  - Add new networks
+    - Base
+    - Avalanche C
+
+Bugs fixed:
+- Fixed bug The network address displayed is incorrect (#1866)
+- Fixed bug bug related to web runner v1.1.10 when used for mobile applications (#1882)
+
 ## 1.1.10
 Build date: Aug 26, 2023.
 

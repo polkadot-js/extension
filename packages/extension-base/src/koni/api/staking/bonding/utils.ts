@@ -7,6 +7,7 @@ import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { t } from 'i18next';
 
 import { ApiPromise } from '@polkadot/api';
@@ -469,7 +470,7 @@ export function getValidatorLabel (chain: string) {
 
 export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {
   const tokenInfo = _getChainNativeTokenBasicInfo(chainInfo);
-  const number = bnMinStake.div(new BN(10).pow(new BN(tokenInfo.decimals))).toString();
+  const number = formatNumber(bnMinStake.toString(), tokenInfo.decimals || 0, balanceFormatter);
 
   return t('Insufficient stake. Please stake at least {{number}} {{tokenSymbol}} to get rewards', { replace: { tokenSymbol: tokenInfo.symbol, number } });
 };

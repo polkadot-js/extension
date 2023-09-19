@@ -53,7 +53,7 @@ export const _NFT_CHAIN_GROUP = {
 // Staking--------------------------------------------------------------------------------------------------------------
 
 export const _STAKING_CHAIN_GROUP = {
-  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend', 'kate', 'edgeware'],
+  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend', 'kate', 'edgeware', 'creditcoin'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
   astar: ['astar', 'shiden', 'shibuya'],
   amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine', 'pendulum'], // amplitude and kilt only share some common logic
@@ -91,7 +91,8 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   kilt: 2,
   kilt_peregrine: 2,
   edgeware: 6,
-  kate: 6
+  kate: 6,
+  creditcoin: 24
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
@@ -219,6 +220,14 @@ export const _XCM_TYPE = {
 export const _DEFAULT_ACTIVE_CHAINS = [
   ..._DEFAULT_CHAINS
 ];
+
+export const EVM_PASS_CONNECT_STATUS = {
+  acala: ['acala_evm', 'karura_evm']
+};
+
+export const EVM_REFORMAT_DECIMALS = {
+  acala: ['acala_evm', 'karura_evm']
+};
 
 // TODO: review
 const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni-dev' : 'master';

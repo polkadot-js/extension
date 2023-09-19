@@ -12,7 +12,7 @@ function Component (props: _AccountCardProps): React.ReactElement<_AccountCardPr
       addressPreLength={9}
       addressSufLength={9}
       preventPrefix
-      showMoreBtn
+      showMoreBtn={true}
     />
   );
 }

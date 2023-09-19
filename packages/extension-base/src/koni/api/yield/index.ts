@@ -93,8 +93,8 @@ export function calculateReward (apr: number, amount = 0, compoundingPeriod = Yi
   }
 
   const periodApr = apr / 365 * compoundingPeriod; // APR is always annually
-
   const earningRatio = (periodApr / 100) / compoundingPeriod;
+
   const periodApy = (1 + earningRatio) ** compoundingPeriod - 1;
 
   const reward = periodApy * amount;

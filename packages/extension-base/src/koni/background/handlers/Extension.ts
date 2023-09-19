@@ -2919,7 +2919,7 @@ export default class KoniExtension {
 
     this.#koniState.updateKeyringState();
 
-    if (this.#alwaysLock) {
+    if (this.#alwaysLock && !createNew) {
       this.keyringLock();
     }
 

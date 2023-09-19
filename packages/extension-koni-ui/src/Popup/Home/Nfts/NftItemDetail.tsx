@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
@@ -22,7 +24,7 @@ import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
 import { CaretLeft, Info, PaperPlaneTilt } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -34,7 +36,12 @@ import Transaction from '../../Transaction/Transaction';
 import SendNFT from '../../Transaction/variants/SendNFT';
 import { INftItemDetail } from '.';
 
-type Props = ThemeProps
+type WrapperProps = ThemeProps;
+type Props = WrapperProps & {
+  collectionInfo: NftCollection,
+  nftItem: NftItem,
+  originChainInfo: _ChainInfo
+};
 
 const NFT_DESCRIPTION_MAX_LENGTH = 70;
 
@@ -48,17 +55,9 @@ const modalCloseButton =
 
 const modalId = TRANSFER_NFT_MODAL;
 
-function Component ({ className = '' }: Props): React.ReactElement<Props> {
-  const location = useLocation();
-  const [collectionInfo] = useState((location.state as INftItemDetail)?.collectionInfo);
-  const [nftItem] = useState((location.state as INftItemDetail)?.nftItem);
-
-  const outletContext: {
-    searchInput: string,
-    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
-  } = useOutletContext();
-  const setDetailTitle = outletContext?.setDetailTitle;
-
+function Component ({ className = '', collectionInfo,
+  nftItem,
+  originChainInfo }: Props): React.ReactElement<Props> {
   const { isWebUI } = useContext(ScreenContext);
 
   const { t } = useTranslation();
@@ -68,12 +67,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { goBack } = useDefaultNavigate();
   const { token } = useTheme() as Theme;
 
-  const dataContext = useContext(DataContext);
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
 
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
 
-  const originChainInfo = useGetChainInfo(nftItem.chain);
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
   const accountExternalUrl = getExplorerLink(originChainInfo, nftItem.owner, 'account');
   const [sendNftKey, setSendNftKey] = useState<string>('sendNftKey');
@@ -218,10 +215,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [nftItem.externalUrl]);
 
-  useEffect(() => {
-    setDetailTitle?.(nftItem.name || nftItem.id);
-  }, [nftItem, setDetailTitle]);
-
   const handleCancelModal = useCallback(() => {
     inactiveModal(modalId);
     setSendNftKey(`sendNftKey-${Date.now()}`);
@@ -232,10 +225,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const imageSize = isWebUI ? 384 : 358;
 
   return (
-    <PageWrapper
-      className={`${className}`}
-      resolve={dataContext.awaitStores(['nft', 'accountState', 'chainStore'])}
-    >
+    <>
       <Layout.Base
         {...!isWebUI && {
           onBack: goBack,
@@ -429,11 +419,72 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           </div>
         </BaseModal>
       </Layout.Base>
+    </>
+  );
+}
+
+function WrapperComponent (props: WrapperProps): React.ReactElement<WrapperProps> {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [itemDetail] = useState((location.state as INftItemDetail));
+
+  const collectionInfo = itemDetail?.collectionInfo;
+  const nftItem = itemDetail?.nftItem;
+  const originChainInfo = useGetChainInfo(nftItem?.chain || '');
+  const dataContext = useContext(DataContext);
+
+  const outletContext: {
+    setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>,
+    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
+  } = useOutletContext();
+
+  const setDetailTitle = outletContext?.setDetailTitle;
+  const setShowSearchInput = outletContext?.setShowSearchInput;
+
+  useEffect(() => {
+    if (!collectionInfo || !nftItem) {
+      navigate('/home/nfts/collections');
+    }
+  }, [collectionInfo, navigate, nftItem]);
+
+  useEffect(() => {
+    setShowSearchInput?.(false);
+
+    if (nftItem) {
+      setDetailTitle?.(nftItem.name || nftItem.id);
+    }
+  }, [nftItem, setDetailTitle, setShowSearchInput]);
+
+  const isEmptyInfo = !collectionInfo || !nftItem || !originChainInfo;
+
+  const waitReady = useMemo(() => {
+    return new Promise((resolve, reject) => {
+      dataContext.awaitStores(['nft', 'accountState', 'chainStore']).then(() => {
+        if (!isEmptyInfo) {
+          resolve(true);
+        }
+      }).catch(reject);
+    });
+  }, [dataContext, isEmptyInfo]);
+
+  return (
+    <PageWrapper
+      className={`${props.className || ''}`}
+      resolve={waitReady}
+    >
+      {!isEmptyInfo && (
+        <Component
+          {...props}
+          collectionInfo={collectionInfo}
+          nftItem={nftItem}
+          originChainInfo={originChainInfo}
+        />
+      )}
     </PageWrapper>
   );
 }
 
-const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const NftItemDetail = styled(WrapperComponent)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.nft_item_detail__container': {
       marginTop: token.marginSM,

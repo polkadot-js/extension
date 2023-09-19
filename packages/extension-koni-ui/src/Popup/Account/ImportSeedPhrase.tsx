@@ -285,6 +285,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 {...buttonProps}
                 block={true}
                 className='__submit-button'
+                disabled={disabled || !keyTypes.length}
               />
             </>
           )}

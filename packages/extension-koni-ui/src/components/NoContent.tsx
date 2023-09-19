@@ -11,7 +11,8 @@ import styled from 'styled-components';
 import { PhosphorIcon, ThemeProps } from '../types';
 
 export enum PAGE_TYPE {
-  NFT = 'nft',
+  NFT_COLLECTION = 'nft_collection',
+  NFT_COLLECTION_DETAIL = 'nft_collection_detail',
   TOKEN = 'token',
   SEARCH = 'search',
   CROWDLOANS = 'crowdloans',
@@ -40,10 +41,15 @@ const Component: React.FC<Props> = ({ className, pageType }: Props) => {
 
   const pageContents = useMemo<Record<string, PageContent>>(() => {
     return {
-      [PAGE_TYPE.NFT]: {
+      [PAGE_TYPE.NFT_COLLECTION]: {
         icon: Image,
         title: t('No collectible found'),
         content: t('Your collectibles will appear here')
+      },
+      [PAGE_TYPE.NFT_COLLECTION_DETAIL]: {
+        icon: Image,
+        title: t('No NFT collectible'),
+        content: t('Your NFT collectible will appear here!')
       },
       [PAGE_TYPE.TOKEN]: {
         icon: Coin,

@@ -36,8 +36,7 @@ const Component: React.FC<Props> = ({ className, modalId, onBack, onSubmitSucces
   const accountName = useGetDefaultAccountName();
   const checkUnlock = useUnlockChecker();
 
-  const [storage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
-  const [accountTypes] = useState(storage);
+  const [accountTypes] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);

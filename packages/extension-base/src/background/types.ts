@@ -264,6 +264,7 @@ export interface RequestAccountEdit {
 
 export interface RequestAccountForget {
   address: string;
+  lockAfter: boolean;
 }
 
 export interface RequestAccountShow {

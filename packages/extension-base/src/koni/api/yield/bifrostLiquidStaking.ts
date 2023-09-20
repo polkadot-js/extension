@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, SubmitBifrostLiquidStaking, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitAcalaLiquidStaking, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
 import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -188,7 +188,7 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
   return result;
 }
 
-export async function getBifrostLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitBifrostLiquidStaking): Promise<[string, ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+export async function getBifrostLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitAcalaLiquidStaking): Promise<[string, ExtrinsicType, SubmittableExtrinsic<'promise'>, any]> {
   if (path.steps[currentStep].type === YieldStepType.XCM) {
     const destinationTokenSlug = params.poolInfo.inputAssets[0];
     const originChainInfo = params.chainInfoMap[COMMON_CHAIN_SLUGS.POLKADOT];
@@ -206,7 +206,16 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
       substrateApi
     });
 
-    return [originChainInfo.slug, ExtrinsicType.TRANSFER_XCM, extrinsic];
+    const xcmData: RequestCrossChainTransfer = {
+      originNetworkKey: originChainInfo.slug,
+      destinationNetworkKey: destinationTokenInfo.originChain,
+      from: address,
+      to: address,
+      value: inputData.amount,
+      tokenSlug: originTokenSlug
+    };
+
+    return [originChainInfo.slug, ExtrinsicType.TRANSFER_XCM, extrinsic, xcmData];
   }
 
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
@@ -214,7 +223,7 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
   const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
   const extrinsic = substrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), inputData.amount);
 
-  return [params.poolInfo.chain, ExtrinsicType.MINT_VDOT, extrinsic];
+  return [params.poolInfo.chain, ExtrinsicType.MINT_VDOT, extrinsic, undefined];
 }
 
 export async function getBifrostLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {

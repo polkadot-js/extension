@@ -22,7 +22,7 @@ import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, getRelayPools
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { convertYieldTxData, generateNaiveOptimalPath, handleYieldRedeem, handleYieldStep, validateYieldProcess, validateYieldRedeem } from '@subwallet/extension-base/koni/api/yield';
+import { generateNaiveOptimalPath, handleYieldRedeem, handleYieldStep, validateYieldProcess, validateYieldRedeem } from '@subwallet/extension-base/koni/api/yield';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
@@ -3853,7 +3853,8 @@ export default class KoniExtension {
         .generateBeforeHandleResponseErrors(yieldValidation);
     }
 
-    const [txChain, extrinsicType, extrinsic] = await handleYieldStep(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const [txChain, extrinsicType, extrinsic, txData] = await handleYieldStep(
       address,
       yieldPoolInfo,
       {
@@ -3873,11 +3874,11 @@ export default class KoniExtension {
       chain: txChain,
       transaction: extrinsic,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      data: isBasicStaking ? convertYieldTxData(address, yieldPoolInfo, data) : inputData,
+      data: txData,
       extrinsicType, // change this depends on step
       chainType: ChainType.SUBSTRATE,
       resolveOnDone: !isLastStep,
-      transferNativeAmount: isBasicStaking ? (data?.amount || '0') : undefined
+      transferNativeAmount: isBasicStaking ? (data?.amount || '0') : undefined // TODO
     });
   }
 

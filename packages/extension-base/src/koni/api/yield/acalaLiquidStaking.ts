@@ -1,13 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
+import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { OptimalYieldPath, OptimalYieldPathParams, YieldPoolInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitAcalaLiquidStaking, YieldPoolInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
 const YEAR = 365 * 24 * 60 * 60 * 1000;
@@ -243,4 +246,40 @@ export function validateProcessForAcalaLiquidStaking (params: OptimalYieldPathPa
   }
 
   return errors;
+}
+
+export async function getAcalaLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitAcalaLiquidStaking): Promise<[string, ExtrinsicType, SubmittableExtrinsic<'promise'>, any]> {
+  if (path.steps[currentStep].type === YieldStepType.XCM) {
+    const destinationTokenSlug = params.poolInfo.inputAssets[0];
+    const originChainInfo = params.chainInfoMap[COMMON_CHAIN_SLUGS.POLKADOT];
+    const originTokenSlug = _getChainNativeTokenSlug(originChainInfo);
+    const originTokenInfo = params.assetInfoMap[originTokenSlug];
+    const destinationTokenInfo = params.assetInfoMap[destinationTokenSlug];
+    const substrateApi = params.substrateApiMap[originChainInfo.slug];
+
+    const extrinsic = await createXcmExtrinsic({
+      chainInfoMap: params.chainInfoMap,
+      destinationTokenInfo,
+      originTokenInfo,
+      recipient: address,
+      sendingValue: inputData.amount,
+      substrateApi
+    });
+
+    const xcmData: RequestCrossChainTransfer = {
+      originNetworkKey: originChainInfo.slug,
+      destinationNetworkKey: destinationTokenInfo.originChain,
+      from: address,
+      to: address,
+      value: inputData.amount,
+      tokenSlug: originTokenSlug
+    };
+
+    return [originChainInfo.slug, ExtrinsicType.TRANSFER_XCM, extrinsic, xcmData];
+  }
+
+  const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
+  const extrinsic = substrateApi.api.tx.homa.mint(inputData.amount);
+
+  return [params.poolInfo.chain, ExtrinsicType.MINT_LDOT, extrinsic, undefined];
 }

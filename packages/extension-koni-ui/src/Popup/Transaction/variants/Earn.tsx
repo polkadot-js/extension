@@ -142,7 +142,6 @@ const Component = () => {
     };
   }, [currentAccount?.address, isAllAccount]);
 
-
   const _assetEarnings: Record<string, YieldAssetExpectedEarning> = useMemo(() => {
     const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
     const currentAmountNumb = currentAmount ? parseFloat(currentAmount) / (10 ** decimals) : 0;
@@ -176,7 +175,7 @@ const Component = () => {
     return _totalFee;
   }, [chainAsset, priceMap, processState.feeStructure]);
 
-  const accountFilterFunc = (chainInfoMap: Record<string, _ChainInfo>): ((account: AccountJson) => boolean) => {
+  const accountFilterFunc = useCallback((chainInfoMap: Record<string, _ChainInfo>): ((account: AccountJson) => boolean) => {
     return (account: AccountJson) => {
       const chain = chainInfoMap[currentPoolInfo.chain];
       const isEvmChain = _isChainEvmCompatible(chain);
@@ -184,7 +183,7 @@ const Component = () => {
 
       return isEvmChain === isEvmAddress;
     };
-  };
+  }, [currentPoolInfo.chain]);
 
   const onFieldsChange: FormCallbacks<StakingFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
@@ -364,7 +363,6 @@ const Component = () => {
       }, 300);
     }
   }, [currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, processState]);
-
 
   useEffect(() => {
     setShowRightBtn(true);

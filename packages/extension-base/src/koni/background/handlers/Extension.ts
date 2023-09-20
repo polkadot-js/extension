@@ -3822,7 +3822,7 @@ export default class KoniExtension {
   private async handleYieldStep (inputData: RequestYieldStepSubmit): Promise<SWTransactionResponse> {
     const { address, data, path, yieldPoolInfo } = inputData;
 
-    if (!data || !yieldPoolInfo.metadata) {
+    if (!data) {
       return this.#koniState.transactionService
         .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
@@ -3853,7 +3853,7 @@ export default class KoniExtension {
         .generateBeforeHandleResponseErrors(yieldValidation);
     }
 
-    const [extrinsicType, extrinsic] = await handleYieldStep(
+    const [txChain, extrinsicType, extrinsic] = await handleYieldStep(
       address,
       yieldPoolInfo,
       {
@@ -3870,7 +3870,7 @@ export default class KoniExtension {
 
     return await this.#koniState.transactionService.handleTransaction({
       address,
-      chain: yieldPoolInfo.chain,
+      chain: txChain,
       transaction: extrinsic,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: isBasicStaking ? convertYieldTxData(address, yieldPoolInfo, data) : inputData,

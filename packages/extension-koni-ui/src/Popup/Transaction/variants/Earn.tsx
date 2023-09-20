@@ -31,7 +31,7 @@ import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import { fetchEarningChainValidators, handleYieldStep } from '../helper';
+import { fetchEarningChainValidators, handleValidateYield, handleYieldStep } from '../helper';
 import { FreeBalanceToStake, TransactionContent } from '../parts';
 
 interface Props extends ThemeProps {
@@ -238,6 +238,9 @@ const Component = () => {
       checkEmpty.nominate = true;
     } else if (currentPoolInfo.type === YieldPoolType.NATIVE_STAKING) {
       checkEmpty.pool = true;
+    } else {
+      checkEmpty.pool = true;
+      checkEmpty.nominate = true;
     }
 
     setIsSubmitDisable(error || Object.values(checkEmpty).some((value) => !value));
@@ -310,20 +313,10 @@ const Component = () => {
       payload: null
     });
 
-    const isFirstStep = processState.currentStep === 0;
+    const values = form.getFieldsValue();
+    const { from, nominate, pool } = values;
+    const currentAmount = values[`${formFieldPrefix}0`];
 
-    if (isFirstStep) {
-      dispatchProcessState({
-        type: EarningActionType.STEP_COMPLETE,
-        payload: true
-      });
-      dispatchProcessState({
-        type: EarningActionType.STEP_SUBMIT,
-        payload: null
-      });
-    }
-
-    const { from, nominate, pool } = form.getFieldsValue();
     let data;
 
     if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL && pool) {
@@ -342,6 +335,8 @@ const Component = () => {
       } as SubmitJoinNativeStaking;
     }
 
+    const isFirstStep = processState.currentStep === 0;
+
     const submitStep = isFirstStep ? processState.currentStep + 1 : processState.currentStep;
 
     const submitPromise: Promise<SWTransactionResponse> = handleYieldStep(
@@ -354,21 +349,58 @@ const Component = () => {
       submitStep,
       data);
 
-    const _onError = (error: Error) => {
-      onError(error);
-    };
+    if (isFirstStep) {
+      const validatePromise = handleValidateYield(
+        from,
+        currentPoolInfo,
+        {
+          steps: processState.steps,
+          totalFee: processState.feeStructure
+        },
+        currentAmount,
+        data);
 
-    setTimeout(() => {
-      submitPromise
-        .then((rs) => {
-          onSuccess(rs);
-        })
-        .catch(_onError)
-        .finally(() => {
-          setSubmitLoading(false);
-        });
-    }, 300);
-  }, [currentAmount, currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, processState]);
+      setTimeout(() => {
+        validatePromise
+          .then((errors) => {
+            if (errors.length) {
+              onError(errors[0]);
+
+              return undefined;
+            } else {
+              dispatchProcessState({
+                type: EarningActionType.STEP_COMPLETE,
+                payload: true
+              });
+              dispatchProcessState({
+                type: EarningActionType.STEP_SUBMIT,
+                payload: null
+              });
+
+              return submitPromise;
+            }
+          })
+          .then((rs) => {
+            if (rs) {
+              onSuccess(rs);
+            }
+          })
+          .catch(onError)
+          .finally(() => {
+            setSubmitLoading(false);
+          });
+      }, 300);
+    } else {
+      setTimeout(() => {
+        submitPromise
+          .then(onSuccess)
+          .catch(onError)
+          .finally(() => {
+            setSubmitLoading(false);
+          });
+      }, 300);
+    }
+  }, [currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, processState]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -456,7 +488,7 @@ const Component = () => {
                       statusHelpAsTooltip={true}
                     >
                       <AmountInput
-                        decimals={decimals}
+                        decimals={assetDecimals}
                         disabled={processState.currentStep !== 0}
                         maxValue={'1'}
                         prefix={(

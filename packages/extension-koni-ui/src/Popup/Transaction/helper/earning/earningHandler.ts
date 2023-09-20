@@ -3,8 +3,14 @@
 
 import { NominationPoolInfo, OptimalYieldPath, SubmitYieldStep, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { getYieldNativeStakingValidators, getYieldNominationPools, submitJoinYieldPool } from '@subwallet/extension-koni-ui/messaging';
+import {
+  getYieldNativeStakingValidators,
+  getYieldNominationPools,
+  submitJoinYieldPool,
+  validateYieldProcess
+} from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 
 export function fetchEarningChainValidators (
   poolInfo: YieldPoolInfo,
@@ -59,5 +65,21 @@ export async function handleYieldStep (
     yieldPoolInfo,
     currentStep,
     data
+  });
+}
+
+export async function handleValidateYield (
+  address: string,
+  yieldPoolInfo: YieldPoolInfo,
+  path: OptimalYieldPath,
+  amount: string,
+  data: SubmitYieldStep
+): Promise<TransactionError[]> {
+  return validateYieldProcess({
+    address,
+    path: path,
+    yieldPoolInfo,
+    data,
+    amount
   });
 }

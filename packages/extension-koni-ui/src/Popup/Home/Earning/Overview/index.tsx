@@ -2,21 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import { EarningItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { EarningCalculatorModal, EarningItem, EmptyList, Layout } from '@subwallet/extension-koni-ui/components';
+import { STAKING_CALCULATOR_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
+import { Vault } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import EarningCalculatorModal from '../../../../components/Modal/Earning/EarningCalculatorModal';
 import EarningToolbar from './EarningToolBar';
-import { STAKING_CALCULATOR_MODAL } from '@subwallet/extension-koni-ui/constants';
 
 type Props = ThemeProps;
 
@@ -26,7 +25,8 @@ enum SortKey {
   TOTAL_VALUE = 'total-value',
 }
 
-const Component = () => {
+const Component: React.FC<Props> = (props: Props) => {
+  const { className } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
@@ -127,8 +127,19 @@ const Component = () => {
       });
   }, [poolInfo, sortSelection]);
 
+  const renderWhenEmpty = useCallback(() => {
+    return (
+      <EmptyList
+        emptyMessage={t('Need message')}
+        emptyTitle={t('Need message')}
+        phosphorIcon={Vault}
+      />
+    );
+  }, [t]);
+
   return (
     <Layout.Base
+      className={className}
       showSubHeader={true}
       subHeaderBackground={'transparent'}
       subHeaderCenter={false}
@@ -136,7 +147,6 @@ const Component = () => {
       subHeaderPaddingVertical={true}
       title={t('Earning')}
     >
-
       <EarningToolbar
         filterSelectionMap={filterSelectionMap}
         onApplyFilter={onApplyFilter}
@@ -156,7 +166,7 @@ const Component = () => {
         minColumnWidth={'384px'}
         renderItem={renderEarningItem}
         renderOnScroll={true}
-        renderWhenEmpty={<></>}
+        renderWhenEmpty={renderWhenEmpty}
         searchMinCharactersCount={2}
       />
 
@@ -165,22 +175,7 @@ const Component = () => {
   );
 };
 
-const Wrapper: React.FC<Props> = (props: Props) => {
-  const { className } = props;
-
-  const dataContext = useContext(DataContext);
-
-  return (
-    <PageWrapper
-      className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['yieldPool', 'price', 'chainStore', 'assetRegistry'])}
-    >
-      <Component />
-    </PageWrapper>
-  );
-};
-
-const Earning = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
+const Earning = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
 

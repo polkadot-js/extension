@@ -500,11 +500,15 @@ export enum ExtrinsicType {
 }
 
 export interface ExtrinsicDataTypeMap {
+  // Transfer
   [ExtrinsicType.TRANSFER_BALANCE]: RequestTransfer,
   [ExtrinsicType.TRANSFER_TOKEN]: RequestTransfer,
   [ExtrinsicType.TRANSFER_XCM]: RequestCrossChainTransfer,
+
+  // NFT
   [ExtrinsicType.SEND_NFT]: NftTransactionRequest,
-  [ExtrinsicType.CROWDLOAN]: any,
+
+  // Staking
   [ExtrinsicType.STAKING_JOIN_POOL]: RequestStakePoolingBonding,
   [ExtrinsicType.STAKING_LEAVE_POOL]: RequestStakePoolingUnbonding,
   [ExtrinsicType.STAKING_BOND]: RequestStakePoolingBonding,
@@ -516,13 +520,14 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: RequestStakeCancelWithdrawal,
   [ExtrinsicType.STAKING_POOL_WITHDRAW]: any,
 
+  // Yield
   [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_VDOT]: SubmitBifrostLiquidStaking,
   [ExtrinsicType.REDEEM_VDOT]: SubmitBifrostLiquidStaking,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
-  [ExtrinsicType.UNKNOWN]: any,
-  [ExtrinsicType.MINT_VDOT]: any
+  [ExtrinsicType.CROWDLOAN]: any,
+  [ExtrinsicType.UNKNOWN]: any
 }
 
 export enum ExtrinsicStatus {

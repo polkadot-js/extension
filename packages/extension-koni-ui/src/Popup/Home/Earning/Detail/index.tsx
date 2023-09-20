@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { EarningCalculatorModal, HorizontalEarningItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EarningCalculatorModal, HorizontalEarningItem, Layout } from '@subwallet/extension-koni-ui/components';
 import { EARNING_MANAGEMENT_DETAIL_MODAL, STAKING_CALCULATOR_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -26,7 +25,8 @@ enum SortKey {
   TOTAL_VALUE = 'total-value',
 }
 
-const Component = () => {
+const Component: React.FC<Props> = (props: Props) => {
+  const { className } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { poolInfo: poolInfoMap, yieldPosition: yieldPositionList } = useSelector((state: RootState) => state.yieldPool);
@@ -149,6 +149,7 @@ const Component = () => {
 
   return (
     <Layout.Base
+      className={className}
       showSubHeader={true}
       subHeaderBackground={'transparent'}
       subHeaderCenter={false}
@@ -191,22 +192,7 @@ const Component = () => {
   );
 };
 
-const Wrapper: React.FC<Props> = (props: Props) => {
-  const { className } = props;
-
-  const dataContext = useContext(DataContext);
-
-  return (
-    <PageWrapper
-      className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['yieldPool', 'price', 'chainStore', 'assetRegistry'])}
-    >
-      <Component />
-    </PageWrapper>
-  );
-};
-
-const EarningManagement = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
+const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
 

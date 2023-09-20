@@ -167,7 +167,7 @@ const handleStepErrorRollbackAction: ActionHandler<StepErrorRollbackAction> = (o
   result.stepResults = { ...oldState.stepResults };
   result.stepResults[currentStep] = {
     result: payload,
-    status: EarningStepStatus.ERROR
+    status: EarningStepStatus.QUEUED
   };
 
   result.stepResults[previousStep].status = EarningStepStatus.PROCESSING;

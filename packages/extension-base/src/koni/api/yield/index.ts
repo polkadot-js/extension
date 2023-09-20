@@ -3,9 +3,8 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, StakingType, SubmitBifrostLiquidStaking, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { validatePoolBondingCondition, validateRelayBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
-import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats, validateProcessForAcalaLiquidStaking } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestCrossChainTransfer, RequestStakePoolingBonding, StakingType, SubmitAcalaLiquidStaking, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { generatePathForAcalaLiquidStaking, getAcalaLiquidStakingExtrinsic, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { generatePathForInterlayLending, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
@@ -157,43 +156,39 @@ export function validateYieldRedeem (address: string, poolInfo: YieldPoolInfo, a
   return [];
 }
 
-export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStep, path: OptimalYieldPath, currentStep: number): Promise<[string, ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStep, path: OptimalYieldPath, currentStep: number): Promise<[string, ExtrinsicType, SubmittableExtrinsic<'promise'>, any]> {
   if (yieldPoolInfo.type === YieldPoolType.NATIVE_STAKING) {
-    const extrinsic = await getNativeStakingBondExtrinsic(address, params, data as SubmitJoinNativeStaking);
+    const _data = data as SubmitJoinNativeStaking;
+    const extrinsic = await getNativeStakingBondExtrinsic(address, params, _data);
 
-    return [yieldPoolInfo.chain, ExtrinsicType.STAKING_BOND, extrinsic];
+    const bondingData: RequestBondingSubmit = {
+      chain: yieldPoolInfo.chain,
+      type: StakingType.NOMINATED,
+      nominatorMetadata: _data.nominatorMetadata, // undefined if user has no stake
+      amount: _data.amount,
+      address,
+      selectedValidators: _data.selectedValidators
+    };
+
+    return [yieldPoolInfo.chain, ExtrinsicType.STAKING_BOND, extrinsic, bondingData];
+  } else if (yieldPoolInfo.slug === 'DOT___acala_liquid_staking') {
+    return getAcalaLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitAcalaLiquidStaking);
   } else if (yieldPoolInfo.slug === 'DOT___bifrost_liquid_staking') {
-    return getBifrostLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitBifrostLiquidStaking);
+    return getBifrostLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitAcalaLiquidStaking);
   }
 
-  const extrinsic = await getNominationPoolJoinExtrinsic(address, params, data as SubmitJoinNominationPool);
+  const _data = data as SubmitJoinNominationPool;
+  const extrinsic = await getNominationPoolJoinExtrinsic(address, params, _data);
 
-  return [yieldPoolInfo.chain, ExtrinsicType.STAKING_JOIN_POOL, extrinsic];
-}
+  const joinPoolData: RequestStakePoolingBonding = {
+    nominatorMetadata: _data.nominatorMetadata,
+    chain: yieldPoolInfo.chain,
+    selectedPool: _data.selectedPool,
+    amount: _data.amount,
+    address
+  };
 
-export function convertYieldTxData (address: string, poolInfo: YieldPoolInfo, data: SubmitYieldStep): any {
-  if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
-    const inputData = data as SubmitJoinNominationPool;
-
-    return {
-      nominatorMetadata: inputData.nominatorMetadata,
-      chain: poolInfo.chain,
-      selectedPool: inputData.selectedPool,
-      amount: inputData.amount,
-      address
-    } as RequestStakePoolingBonding;
-  }
-
-  const inputData = data as SubmitJoinNativeStaking;
-
-  return {
-    chain: poolInfo.chain,
-    type: StakingType.NOMINATED,
-    nominatorMetadata: inputData.nominatorMetadata, // undefined if user has no stake
-    amount: inputData.amount,
-    address,
-    selectedValidators: inputData.selectedValidators
-  } as RequestBondingSubmit;
+  return [yieldPoolInfo.chain, ExtrinsicType.STAKING_JOIN_POOL, extrinsic, joinPoolData];
 }
 
 export async function handleYieldRedeem (params: OptimalYieldPathParams, address: string, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {

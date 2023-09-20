@@ -1,16 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { NominationPoolInfo, OptimalYieldPath, SubmitYieldStep, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import {
-  getYieldNativeStakingValidators,
-  getYieldNominationPools,
-  submitJoinYieldPool,
-  validateYieldProcess
-} from '@subwallet/extension-koni-ui/messaging';
+import { getYieldNativeStakingValidators, getYieldNominationPools, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
-import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 
 export function fetchEarningChainValidators (
   poolInfo: YieldPoolInfo,

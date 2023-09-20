@@ -494,6 +494,8 @@ export enum ExtrinsicType {
   JOIN_YIELD_POOL = 'earn.join_pool', // TODO: review this
   MINT_VDOT = 'earn.mint_vdot',
   REDEEM_VDOT = 'earn.redeem_vdot',
+  MINT_LDOT = 'earn.mint_ldot',
+  REDEEM_LDOT = 'earn.redeem_ldot',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -522,8 +524,9 @@ export interface ExtrinsicDataTypeMap {
 
   // Yield
   [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_VDOT]: SubmitBifrostLiquidStaking,
-  [ExtrinsicType.REDEEM_VDOT]: SubmitBifrostLiquidStaking,
+  [ExtrinsicType.MINT_VDOT]: SubmitAcalaLiquidStaking,
+  [ExtrinsicType.REDEEM_VDOT]: SubmitAcalaLiquidStaking,
+  [ExtrinsicType.MINT_LDOT]: SubmitAcalaLiquidStaking,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
@@ -583,8 +586,8 @@ export interface NFTTransactionAdditionalInfo {
 export type TransactionAdditionalInfo = {
   [ExtrinsicType.TRANSFER_XCM]: XCMTransactionAdditionalInfo,
   [ExtrinsicType.SEND_NFT]: NFTTransactionAdditionalInfo,
-  [ExtrinsicType.MINT_VDOT]: Pick<SubmitBifrostLiquidStaking, 'rewardTokenSlug' | 'estimatedAmountReceived'>,
-  [ExtrinsicType.REDEEM_VDOT]: Pick<SubmitBifrostLiquidStaking, 'inputTokenSlug' | 'estimatedAmountReceived'>
+  [ExtrinsicType.MINT_VDOT]: Pick<SubmitAcalaLiquidStaking, 'rewardTokenSlug' | 'estimatedAmountReceived'>,
+  [ExtrinsicType.REDEEM_VDOT]: Pick<SubmitAcalaLiquidStaking, 'inputTokenSlug' | 'estimatedAmountReceived'>
 }
 
 // export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
@@ -2231,9 +2234,9 @@ export interface HandleYieldRedeemParams extends BaseRequestSign {
   amount: string;
 }
 
-export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool | SubmitBifrostLiquidStaking;
+export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool | SubmitAcalaLiquidStaking;
 
-export interface SubmitBifrostLiquidStaking {
+export interface SubmitAcalaLiquidStaking {
   feePaidWithInputAsset: boolean,
   inputTokenSlug: string,
   amount: string,

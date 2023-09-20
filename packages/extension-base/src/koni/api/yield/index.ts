@@ -143,6 +143,10 @@ export function validateYieldProcess (address: string, params: OptimalYieldPathP
   return validateRelayBondingCondition(chainInfo, inputData.amount, inputData.selectedValidators, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
 }
 
+export function validateYieldRedeem (address: string, poolInfo: YieldPoolInfo, amount: string): TransactionError[] {
+  return [];
+}
+
 export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStep, path: OptimalYieldPath, currentStep: number): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   if (yieldPoolInfo.type === YieldPoolType.NATIVE_STAKING) {
     const extrinsic = await getNativeStakingBondExtrinsic(address, params, data as SubmitJoinNativeStaking);
@@ -180,4 +184,8 @@ export function convertYieldTxData (address: string, poolInfo: YieldPoolInfo, da
     address,
     selectedValidators: inputData.selectedValidators
   } as RequestBondingSubmit;
+}
+
+export async function handleYieldRedeem (poolInfo: YieldPoolInfo, address: string, amount: string) {
+  if (poolInfo.slug === '')
 }

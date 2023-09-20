@@ -8,16 +8,15 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AmountInput, EarningProcessItem, MetaInfo, PageWrapper, PoolSelector, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, PoolSelector, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
-import { useFetchChainState, useGetChainPrefixBySlug, useGetNativeTokenBasicInfo, useNotification } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetChainPrefixBySlug, useGetNativeTokenBasicInfo, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/StakingProcessModal';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { FormCallbacks, FormFieldData, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -25,7 +24,6 @@ import { ArrowCircleRight, CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -38,37 +36,27 @@ interface Props extends ThemeProps {
   item: YieldPoolInfo;
 }
 
-enum FormFieldName {
-  FROM = 'from',
-  NOMINATE = 'nominate',
-  POOL = 'pool',
-}
-
 const formFieldPrefix = 'amount-';
 
-interface StakingFormProps extends Record<`amount-${number}`, string> {
-  [FormFieldName.FROM]: string;
-  [FormFieldName.NOMINATE]: string;
-  [FormFieldName.POOL]: string;
-}
+const hiddenFields: Array<keyof YieldParams> = ['chain', 'asset', 'method'];
 
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
   const { token } = useTheme() as Theme;
-  const { slug: _methodSlug } = useParams();
 
   const { isWebUI } = useContext(ScreenContext);
-  const methodSlug = useMemo(() => {
-    return _methodSlug || '';
-  }, [_methodSlug]);
+
   const navigate = useNavigate();
+
   const poolInfoMap = useSelector((state: RootState) => state.yieldPool.poolInfo);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainAsset = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const { setShowRightBtn } = useContext(TransactionContext);
-  const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+
+  const { defaultData } = useTransactionContext<YieldParams>();
+  const { method: methodSlug } = defaultData;
+  const { isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
 
   const [processState, dispatchProcessState] = useReducer(earningReducer, DEFAULT_YIELD_PROCESS);
@@ -82,10 +70,10 @@ const Component = () => {
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [form] = Form.useForm<StakingFormProps>();
+  const [form] = Form.useForm<YieldParams>();
 
-  const currentAmount = Form.useWatch(`${formFieldPrefix}0`, form);
-  const currentFrom = Form.useWatch(FormFieldName.FROM, form);
+  const currentAmount = useWatchTransaction(`${formFieldPrefix}0`, form, defaultData);
+  const currentFrom = useWatchTransaction('from', form, defaultData);
   const currentPoolInfo = useMemo(() => poolInfoMap[methodSlug], [methodSlug, poolInfoMap]);
 
   const chainState = useFetchChainState(currentPoolInfo.chain);
@@ -134,14 +122,9 @@ const Component = () => {
     }
   }, [t, notify, onError, onDone]);
 
-  const formDefault: StakingFormProps = useMemo(() => {
-    return {
-      [FormFieldName.FROM]: !isAllAccount ? currentAccount?.address || '' : '',
-      [FormFieldName.POOL]: '',
-      [FormFieldName.NOMINATE]: ''
-    };
-  }, [currentAccount?.address, isAllAccount]);
-
+  const formDefault: YieldParams = useMemo(() => ({
+    ...defaultData
+  }), [defaultData]);
 
   const _assetEarnings: Record<string, YieldAssetExpectedEarning> = useMemo(() => {
     const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
@@ -176,20 +159,18 @@ const Component = () => {
     return _totalFee;
   }, [chainAsset, priceMap, processState.feeStructure]);
 
-  const accountFilterFunc = (chainInfoMap: Record<string, _ChainInfo>): ((account: AccountJson) => boolean) => {
-    return (account: AccountJson) => {
-      const chain = chainInfoMap[currentPoolInfo.chain];
-      const isEvmChain = _isChainEvmCompatible(chain);
-      const isEvmAddress = isEthereumAddress(account.address);
+  const accountFilterFunc = useCallback((account: AccountJson): boolean => {
+    const chain = chainInfoMap[currentPoolInfo.chain];
+    const isEvmChain = _isChainEvmCompatible(chain);
+    const isEvmAddress = isEthereumAddress(account.address);
 
-      return isEvmChain === isEvmAddress;
-    };
-  };
+    return isEvmChain === isEvmAddress;
+  }, [chainInfoMap, currentPoolInfo.chain]);
 
-  const onFieldsChange: FormCallbacks<StakingFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<YieldParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
 
-    const allMap = convertFieldToObject<StakingFormProps>(allFields);
+    const allMap = convertFieldToObject<YieldParams>(allFields);
     // const changesMap = convertFieldToObject<StakingFormProps>(changedFields);
     const checkEmpty: Record<string, boolean> = {};
 
@@ -365,11 +346,6 @@ const Component = () => {
     }
   }, [currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, processState]);
 
-
-  useEffect(() => {
-    setShowRightBtn(true);
-  }, [setShowRightBtn]);
-
   useEffect(() => {
     let unmount = false;
 
@@ -421,6 +397,7 @@ const Component = () => {
               initialValues={formDefault}
               onFieldsChange={onFieldsChange}
             >
+              <HiddenInput fields={hiddenFields} />
               {/* <Form.Item */}
               {/*  name={FormFieldName.METHOD} */}
               {/*  label={t('Select method')} */}
@@ -460,7 +437,7 @@ const Component = () => {
                 <AccountSelector
                   addressPrefix={chainNetworkPrefix}
                   disabled={!isAllAccount || processState.currentStep !== 0}
-                  filter={accountFilterFunc(chainInfoMap)}
+                  filter={accountFilterFunc}
                 />
               </Form.Item>
 
@@ -522,7 +499,7 @@ const Component = () => {
 
               <Form.Item
                 hidden={currentPoolInfo.type !== YieldPoolType.NOMINATION_POOL}
-                name={FormFieldName.POOL}
+                name={'pool'}
               >
                 <PoolSelector
                   chain={currentPoolInfo.chain}
@@ -536,7 +513,7 @@ const Component = () => {
 
               <Form.Item
                 hidden={currentPoolInfo.type !== YieldPoolType.NATIVE_STAKING}
-                name={FormFieldName.NOMINATE}
+                name={'nominate'}
               >
                 <YieldMultiValidatorSelector
                   chain={currentPoolInfo.chain}

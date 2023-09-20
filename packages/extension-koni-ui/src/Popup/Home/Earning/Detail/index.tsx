@@ -2,20 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { EarningCalculatorModal, HorizontalEarningItem, Layout } from '@subwallet/extension-koni-ui/components';
-import { EARNING_MANAGEMENT_DETAIL_MODAL, STAKING_CALCULATOR_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { EarningCalculatorModal, EmptyList, HorizontalEarningItem, Layout } from '@subwallet/extension-koni-ui/components';
+import { DEFAULT_YIELD_PARAMS, EARNING_MANAGEMENT_DETAIL_MODAL, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import EarningToolbar from '../Overview/EarningToolBar';
 import EarningManagementDetailModal from './EarningManagementDetailModal';
+import { Vault } from 'phosphor-react';
 
 type Props = ThemeProps;
 
@@ -30,10 +33,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { poolInfo: poolInfoMap, yieldPosition: yieldPositionList } = useSelector((state: RootState) => state.yieldPool);
+  const { currentAccount } = useSelector((state: RootState) => state.accountState);
   const { activeModal } = useContext(ModalContext);
   const [{ selectedYieldPoolInfo, selectedYieldPosition }, setSelectedItem] = useState<{ selectedYieldPosition: YieldPositionInfo | undefined, selectedYieldPoolInfo: YieldPoolInfo | undefined }>({ selectedYieldPosition: undefined, selectedYieldPoolInfo: undefined });
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const [, setStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);
@@ -99,9 +104,20 @@ const Component: React.FC<Props> = (props: Props) => {
       const poolInfo = poolInfoMap[item.slug];
 
       setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
-      navigate(`/transaction/earn/${item.slug}`);
+
+      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+      setStorage({
+        ...DEFAULT_YIELD_PARAMS,
+        method: poolInfo.slug,
+        from: address,
+        chain: poolInfo.chain,
+        asset: poolInfo.inputAssets[0]
+      });
+
+      navigate('/transaction/earn');
     };
-  }, [navigate, poolInfoMap]);
+  }, [currentAccount, navigate, poolInfoMap, setStorage]);
 
   const onClickItem = useCallback((item: YieldPositionInfo) => {
     return () => {
@@ -147,6 +163,16 @@ const Component: React.FC<Props> = (props: Props) => {
       });
   }, [yieldPositionList, poolInfoMap, sortSelection]);
 
+  const renderWhenEmpty = useCallback(() => {
+    return (
+      <EmptyList
+        emptyMessage={t('Need message')}
+        emptyTitle={t('Need message')}
+        phosphorIcon={Vault}
+      />
+    );
+  }, [t]);
+
   return (
     <Layout.Base
       className={className}
@@ -174,7 +200,7 @@ const Component: React.FC<Props> = (props: Props) => {
         list={resultList}
         renderItem={renderEarningItem}
         renderOnScroll={true}
-        renderWhenEmpty={<></>}
+        renderWhenEmpty={renderWhenEmpty}
         searchMinCharactersCount={2}
       />
 

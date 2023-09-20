@@ -374,6 +374,7 @@ function Component ({ className = '', collectionInfo,
         </div>
 
         <BaseModal
+          destroyOnClose
           id={modalId}
           onCancel={handleCancelModal}
           title={t('Transfer')}

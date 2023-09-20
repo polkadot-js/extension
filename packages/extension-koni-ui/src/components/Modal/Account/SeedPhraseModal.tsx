@@ -152,7 +152,7 @@ const SeedPhraseModal = styled(Component)<Props>(({ theme: { token } }: Props) =
     },
 
     '.__description': {
-      fontSize: token.size,
+      fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       color: token.colorTextLight4,
       textAlign: 'center'

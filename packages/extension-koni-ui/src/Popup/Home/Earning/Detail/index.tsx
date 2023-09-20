@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import { EarningCalculatorModal, EmptyList, HorizontalEarningItem, Layout } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_YIELD_PARAMS, EARNING_MANAGEMENT_DETAIL_MODAL, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -10,6 +11,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
+import { Vault } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +20,6 @@ import { useLocalStorage } from 'usehooks-ts';
 
 import EarningToolbar from '../Overview/EarningToolBar';
 import EarningManagementDetailModal from './EarningManagementDetailModal';
-import { Vault } from 'phosphor-react';
 
 type Props = ThemeProps;
 
@@ -130,10 +131,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const renderEarningItem = useCallback((item: YieldPositionInfo) => {
     const poolInfo = poolInfoMap[item.slug];
+    const key = [item.slug, item.address].join('-');
 
     return (
       <HorizontalEarningItem
-        key={item.slug}
+        key={key}
         onClickCalculatorBtn={onClickCalculatorBtn(item)}
         onClickItem={onClickItem(item)}
         onClickStakeBtn={onClickStakeBtn(item)}
@@ -145,6 +147,16 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const resultList = useMemo((): YieldPositionInfo[] => {
     return [...yieldPositionList]
+      .filter((item) => {
+        const address = currentAccount?.address || '';
+        const isAll = isAccountAll(address);
+
+        if (isAll) {
+          return true;
+        } else {
+          return isSameAddress(address, item.address);
+        }
+      })
       .sort((a: YieldPositionInfo, b: YieldPositionInfo) => {
         const aPoolInfo = poolInfoMap[a.slug];
         const bPoolInfo = poolInfoMap[b.slug];
@@ -161,7 +173,7 @@ const Component: React.FC<Props> = (props: Props) => {
             return 0;
         }
       });
-  }, [yieldPositionList, poolInfoMap, sortSelection]);
+  }, [yieldPositionList, currentAccount?.address, poolInfoMap, sortSelection]);
 
   const renderWhenEmpty = useCallback(() => {
     return (

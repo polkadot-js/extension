@@ -11,7 +11,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, PoolSelector, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFetchChainState, useGetChainPrefixBySlug, useGetNativeTokenBasicInfo, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetChainPrefixBySlug, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/StakingProcessModal';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
@@ -39,6 +39,10 @@ interface Props extends ThemeProps {
 const formFieldPrefix = 'amount-';
 
 const hiddenFields: Array<keyof YieldParams> = ['chain', 'asset', 'method'];
+
+interface _YieldAssetExpectedEarning extends YieldAssetExpectedEarning {
+  symbol: string;
+}
 
 const Component = () => {
   const { t } = useTranslation();
@@ -77,7 +81,6 @@ const Component = () => {
   const currentPoolInfo = useMemo(() => poolInfoMap[methodSlug], [methodSlug, poolInfoMap]);
 
   const chainState = useFetchChainState(currentPoolInfo.chain);
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
 
   const onDone = useCallback((extrinsicHash: string) => {
@@ -125,21 +128,41 @@ const Component = () => {
   const formDefault: YieldParams = useMemo(() => ({
     ...defaultData
   }), [defaultData]);
-  const _assetEarnings: Record<string, YieldAssetExpectedEarning> = useMemo(() => {
-    const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
-    const currentAmountNumb = currentAmount ? parseFloat(currentAmount) / (10 ** decimals) : 0;
+  const _assetEarnings: Record<string, _YieldAssetExpectedEarning> = useMemo(() => {
+    const yearlyEarnings: Record<string, _YieldAssetExpectedEarning> = {};
 
-    if (currentPoolInfo?.stats?.assetEarning) {
-      currentPoolInfo?.stats?.assetEarning.forEach((assetEarningStats) => {
-        const assetApr = assetEarningStats?.apr || 0;
-        const assetSlug = assetEarningStats.slug;
+    if (currentPoolInfo) {
+      const inputAsset = chainAsset[currentPoolInfo.inputAssets[0] || ''];
+      const decimals = _getAssetDecimals(inputAsset);
+      const currentAmountNumb = currentAmount ? parseFloat(currentAmount) / (10 ** decimals) : 0;
 
-        yearlyEarnings[assetSlug] = calculateReward(assetApr, currentAmountNumb, YieldCompoundingPeriod.YEARLY);
-      });
+      console.debug(currentAmountNumb);
+
+      if (currentPoolInfo.stats?.assetEarning) {
+        currentPoolInfo.stats?.assetEarning.forEach((assetEarningStats) => {
+          const assetSlug = assetEarningStats.slug;
+          const rewardAsset = chainAsset[assetSlug];
+
+          if (assetEarningStats.apy !== undefined) {
+            yearlyEarnings[assetSlug] = {
+              apy: assetEarningStats.apy,
+              rewardInToken: assetEarningStats.apy * currentAmountNumb,
+              symbol: rewardAsset.symbol
+            };
+          } else {
+            const assetApr = assetEarningStats?.apr || 0;
+
+            yearlyEarnings[assetSlug] = {
+              ...calculateReward(assetApr, currentAmountNumb, YieldCompoundingPeriod.YEARLY),
+              symbol: rewardAsset.symbol
+            };
+          }
+        });
+      }
     }
 
     return yearlyEarnings;
-  }, [currentAmount, currentPoolInfo?.stats?.assetEarning, decimals]);
+  }, [chainAsset, currentAmount, currentPoolInfo]);
 
   const estimatedFee = useMemo(() => {
     let _totalFee = 0;
@@ -195,16 +218,24 @@ const Component = () => {
         labelColorScheme={'gray'}
         valueColorScheme={'gray'}
       >
-        <MetaInfo.Number
-          label={t('Yearly rewards')}
-          suffix={'%'}
-          value={(Object.values(_assetEarnings)[0].apy || 0) * 100}
-        />
-        <MetaInfo.Number
-          label={t('Estimated earnings')}
-          suffix={`${symbol}/Year`}
-          value={Object.values(_assetEarnings)[0].rewardInToken || 0}
-        />
+        {
+          Object.values(_assetEarnings).map((value) => {
+            return (
+              <>
+                <MetaInfo.Number
+                  label={t('Yearly rewards')}
+                  suffix={'%'}
+                  value={(value.apy || 0) * 100}
+                />
+                <MetaInfo.Number
+                  label={t('Estimated earnings')}
+                  suffix={`${value.symbol}/Year`}
+                  value={value.rewardInToken || 0}
+                />
+              </>
+            );
+          })
+        }
         <MetaInfo.Number
           decimals={0}
           label={t('Estimated fee')}
@@ -213,7 +244,7 @@ const Component = () => {
         />
       </MetaInfo>
     );
-  }, [t, _assetEarnings, symbol, estimatedFee]);
+  }, [t, _assetEarnings, estimatedFee]);
 
   const getSelectedValidators = useCallback((nominations: string[]) => {
     const validatorList = validatorInfoMap[currentPoolInfo.chain];

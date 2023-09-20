@@ -142,43 +142,6 @@ const Component = () => {
     };
   }, [currentAccount?.address, isAllAccount]);
 
-  useEffect(() => {
-    setShowRightBtn(true);
-  }, [setShowRightBtn]);
-
-  useEffect(() => {
-    let unmount = false;
-
-    // fetch validators when change chain
-    // _stakingType is predefined form start
-    if ((!!currentPoolInfo.chain && !!currentFrom && chainState?.active) || forceFetchValidator) {
-      fetchEarningChainValidators(currentPoolInfo, unmount, setPoolLoading, setValidatorLoading, setForceFetchValidator);
-    }
-
-    return () => {
-      unmount = true;
-    };
-  }, [currentPoolInfo, currentFrom, chainState?.active, forceFetchValidator]);
-
-  useEffect(() => {
-    setIsLoading(true);
-
-    getOptimalYieldPath({
-      amount: currentAmount,
-      poolInfo: currentPoolInfo
-    })
-      .then((res) => {
-        dispatchProcessState({
-          payload: {
-            steps: res.steps,
-            feeStructure: res.totalFee
-          },
-          type: EarningActionType.STEP_CREATE
-        });
-      })
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, [currentPoolInfo, currentAmount]);
 
   const _assetEarnings: Record<string, YieldAssetExpectedEarning> = useMemo(() => {
     const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
@@ -401,6 +364,47 @@ const Component = () => {
       }, 300);
     }
   }, [currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, processState]);
+
+
+  useEffect(() => {
+    setShowRightBtn(true);
+  }, [setShowRightBtn]);
+
+  useEffect(() => {
+    let unmount = false;
+
+    if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(currentPoolInfo.type)) {
+      // fetch validators when change chain
+      // _stakingType is predefined form start
+      if ((!!currentPoolInfo.chain && !!currentFrom && chainState?.active) || forceFetchValidator) {
+        fetchEarningChainValidators(currentPoolInfo, unmount, setPoolLoading, setValidatorLoading, setForceFetchValidator);
+      }
+    }
+
+    return () => {
+      unmount = true;
+    };
+  }, [currentPoolInfo, currentFrom, chainState?.active, forceFetchValidator]);
+
+  useEffect(() => {
+    setIsLoading(true);
+
+    getOptimalYieldPath({
+      amount: currentAmount,
+      poolInfo: currentPoolInfo
+    })
+      .then((res) => {
+        dispatchProcessState({
+          payload: {
+            steps: res.steps,
+            feeStructure: res.totalFee
+          },
+          type: EarningActionType.STEP_CREATE
+        });
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, [currentPoolInfo, currentAmount]);
 
   return (
     <div className={'earning-wrapper'}>

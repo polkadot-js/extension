@@ -128,7 +128,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [onClickCalculatorBtn, onClickItem, onClickStakeBtn, poolInfoMap]);
 
   const resultList = useMemo((): YieldPositionInfo[] => {
-    return yieldPositionList
+    return [...yieldPositionList]
       .sort((a: YieldPositionInfo, b: YieldPositionInfo) => {
         const aPoolInfo = poolInfoMap[a.slug];
         const bPoolInfo = poolInfoMap[b.slug];

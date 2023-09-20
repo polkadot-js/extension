@@ -2401,6 +2401,7 @@ export interface KoniRequestSignatures {
   'pri(yield.getNativeStakingValidators)': [YieldPoolInfo, ValidatorInfo[]];
   'pri(yield.getStakingNominationPools)': [YieldPoolInfo, NominationPoolInfo[]];
   'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
+  'pri(yield.submitRedeem)': [HandleYieldRedeemParams, SWTransactionResponse];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

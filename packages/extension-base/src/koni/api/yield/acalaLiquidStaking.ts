@@ -6,11 +6,11 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitAcalaLiquidStaking, YieldPoolInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
+import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 
-import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
 const YEAR = 365 * 24 * 60 * 60 * 1000;
@@ -248,7 +248,7 @@ export function validateProcessForAcalaLiquidStaking (params: OptimalYieldPathPa
   return errors;
 }
 
-export async function getAcalaLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitAcalaLiquidStaking): Promise<[string, ExtrinsicType, SubmittableExtrinsic<'promise'>, any]> {
+export async function getAcalaLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitAcalaLiquidStaking): Promise<HandleYieldStepData> {
   if (path.steps[currentStep].type === YieldStepType.XCM) {
     const destinationTokenSlug = params.poolInfo.inputAssets[0];
     const originChainInfo = params.chainInfoMap[COMMON_CHAIN_SLUGS.POLKADOT];
@@ -275,11 +275,23 @@ export async function getAcalaLiquidStakingExtrinsic (address: string, params: O
       tokenSlug: originTokenSlug
     };
 
-    return [originChainInfo.slug, ExtrinsicType.TRANSFER_XCM, extrinsic, xcmData];
+    return {
+      txChain: originChainInfo.slug,
+      extrinsicType: ExtrinsicType.TRANSFER_XCM,
+      extrinsic,
+      txData: xcmData,
+      transferNativeAmount: inputData.amount
+    };
   }
 
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
   const extrinsic = substrateApi.api.tx.homa.mint(inputData.amount);
 
-  return [params.poolInfo.chain, ExtrinsicType.MINT_LDOT, extrinsic, undefined];
+  return {
+    txChain: params.poolInfo.chain,
+    extrinsicType: ExtrinsicType.MINT_LDOT,
+    extrinsic,
+    txData: undefined,
+    transferNativeAmount: '0'
+  };
 }

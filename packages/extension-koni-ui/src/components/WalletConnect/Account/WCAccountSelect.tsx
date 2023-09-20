@@ -16,7 +16,7 @@ import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import GeneralEmptyList from '../../GeneralEmptyList';
+import { GeneralEmptyList } from '../../EmptyList';
 import WCAccountInput from './WCAccountInput';
 
 interface Props extends ThemeProps {

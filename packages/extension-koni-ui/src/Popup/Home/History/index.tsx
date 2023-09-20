@@ -342,8 +342,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     return (
       <EmptyList
-        emptyMessage={t('Your transaction history will appear here!')}
-        emptyTitle={t('No transaction found')}
+        emptyMessage={t('Your transactions will show up here')}
+        emptyTitle={t('No transactions found')}
         phosphorIcon={Clock}
       />
     );

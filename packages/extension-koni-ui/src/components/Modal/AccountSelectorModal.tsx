@@ -10,7 +10,7 @@ import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import GeneralEmptyList from '../GeneralEmptyList';
+import { GeneralEmptyList } from '../EmptyList';
 import { BaseModal } from './BaseModal';
 
 interface Props extends ThemeProps {

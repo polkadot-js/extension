@@ -13,6 +13,7 @@ import MigrateImportedToken from './MigrateImportedToken';
 import MigrateLedgerAccount from './MigrateLedgerAccount';
 import MigrateNetworkSettings from './MigrateNetworkSettings';
 import MigrateSettings from './MigrateSettings';
+import MigrateTokenDecimals from './MigrateTokenDecimals';
 import MigrateTransactionHistory from './MigrateTransactionHistory';
 import MigrateWalletReference from './MigrateWalletReference';
 
@@ -30,6 +31,7 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.0.9-01': MigrateLedgerAccount,
   '1.0.12-02': MigrateEthProvider,
   '1.1.6-01': MigrateWalletReference,
-  '1.1.7': DeleteChain
+  '1.1.7': DeleteChain,
+  '1.1.13-01': MigrateTokenDecimals
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

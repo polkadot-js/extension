@@ -617,7 +617,7 @@ export default class KoniState {
     return this.stakingRewardSubject;
   }
 
-  public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
+  public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void, preventOneAccount?: boolean): void {
     const { address, currentGenesisHash } = data;
 
     const result: CurrentAccountInfo = { ...data };
@@ -630,9 +630,13 @@ export default class KoniState {
       if (pairs.length > 1 || !pair) {
         result.allGenesisHash = currentGenesisHash || undefined;
       } else {
-        result.address = pair.address;
-        result.currentGenesisHash = pairGenesisHash || '';
-        result.allGenesisHash = pairGenesisHash || undefined;
+        if (!preventOneAccount) {
+          result.address = pair.address;
+          result.currentGenesisHash = pairGenesisHash || '';
+          result.allGenesisHash = pairGenesisHash || undefined;
+        } else {
+          result.allGenesisHash = currentGenesisHash || undefined;
+        }
       }
     }
 

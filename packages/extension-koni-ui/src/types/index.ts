@@ -101,6 +101,7 @@ export * from './confirmation';
 export * from './crowdloan';
 export * from './form';
 export * from './history';
+export * from './hook';
 export * from './ledger';
 export * from './navigation';
 export * from './staking';

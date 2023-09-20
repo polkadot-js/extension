@@ -17,7 +17,7 @@ import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import GeneralEmptyList from '../GeneralEmptyList';
+import { GeneralEmptyList } from '../EmptyList';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   nominators: NominationInfo[];

@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ChainStakingMetadata, ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, StakingType, SubmitBifrostLiquidStaking, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, StakingType, SubmitBifrostLiquidStaking, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { validatePoolBondingCondition, validateRelayBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { generatePathForAcalaLiquidStaking, subscribeAcalaLiquidStakingStats, validateProcessForAcalaLiquidStaking } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
@@ -126,16 +126,24 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams):
 // TODO: compare to ED
 // TODO: compare to minAmount
 // TODO: simulate the whole process, compare to fee (step by step)
-export function validateYieldProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data: SubmitYieldStep): TransactionError[] {
+export function validateYieldProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data?: SubmitYieldStep): TransactionError[] {
   const poolInfo = params.poolInfo;
   const chainInfo = params.chainInfoMap[poolInfo.chain];
 
   if (['DOT___bifrost_liquid_staking', 'DOT___acala_liquid_staking'].includes(params.poolInfo.slug)) {
     return validateProcessForAcalaLiquidStaking(params, path);
   } else if (params.poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+    if (!data) {
+      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+    }
+
     const inputData = data as SubmitJoinNominationPool;
 
     return validatePoolBondingCondition(chainInfo, inputData.amount, inputData.selectedPool, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
+  }
+
+  if (!data) {
+    return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
   }
 
   const inputData = data as SubmitJoinNativeStaking;

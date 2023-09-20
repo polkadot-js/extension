@@ -2211,6 +2211,14 @@ export interface HandleYieldStepParams extends BaseRequestSign {
 
 export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
 
+export interface ValidateYieldProcessParams {
+  yieldPoolInfo: YieldPoolInfo,
+  path: OptimalYieldPath;
+  address: string;
+  amount: string;
+  data?: SubmitYieldStep;
+}
+
 export interface HandleYieldRedeemParams extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
@@ -2402,6 +2410,7 @@ export interface KoniRequestSignatures {
   'pri(yield.getStakingNominationPools)': [YieldPoolInfo, NominationPoolInfo[]];
   'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
   'pri(yield.submitRedeem)': [HandleYieldRedeemParams, SWTransactionResponse];
+  'pri(yield.validateProcess)': [ValidateYieldProcessParams, TransactionError[]];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

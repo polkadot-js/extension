@@ -188,7 +188,7 @@ export async function generatePathForBifrostLiquidStaking (params: OptimalYieldP
   return result;
 }
 
-export async function getBifrostLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitBifrostLiquidStaking): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+export async function getBifrostLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitBifrostLiquidStaking): Promise<[string, ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   if (path.steps[currentStep].type === YieldStepType.XCM) {
     const destinationTokenSlug = params.poolInfo.inputAssets[0];
     const originChainInfo = params.chainInfoMap[COMMON_CHAIN_SLUGS.POLKADOT];
@@ -206,7 +206,7 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
       substrateApi
     });
 
-    return [ExtrinsicType.TRANSFER_XCM, extrinsic];
+    return [originChainInfo.slug, ExtrinsicType.TRANSFER_XCM, extrinsic];
   }
 
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
@@ -214,7 +214,7 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
   const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
   const extrinsic = substrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), inputData.amount);
 
-  return [ExtrinsicType.MINT_VDOT, extrinsic];
+  return [params.poolInfo.chain, ExtrinsicType.MINT_VDOT, extrinsic];
 }
 
 export async function getBifrostLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {

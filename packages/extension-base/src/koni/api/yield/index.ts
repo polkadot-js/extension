@@ -127,46 +127,48 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams):
 // TODO: compare to minAmount
 // TODO: simulate the whole process, compare to fee (step by step)
 export function validateYieldProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data?: SubmitYieldStep): TransactionError[] {
-  const poolInfo = params.poolInfo;
-  const chainInfo = params.chainInfoMap[poolInfo.chain];
+  return [];
 
-  if (['DOT___bifrost_liquid_staking', 'DOT___acala_liquid_staking'].includes(params.poolInfo.slug)) {
-    return validateProcessForAcalaLiquidStaking(params, path);
-  } else if (params.poolInfo.type === YieldPoolType.NOMINATION_POOL) {
-    if (!data) {
-      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
-    }
-
-    const inputData = data as SubmitJoinNominationPool;
-
-    return validatePoolBondingCondition(chainInfo, inputData.amount, inputData.selectedPool, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
-  }
-
-  if (!data) {
-    return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
-  }
-
-  const inputData = data as SubmitJoinNativeStaking;
-
-  return validateRelayBondingCondition(chainInfo, inputData.amount, inputData.selectedValidators, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
+  // const poolInfo = params.poolInfo;
+  // const chainInfo = params.chainInfoMap[poolInfo.chain];
+  //
+  // if (['DOT___bifrost_liquid_staking', 'DOT___acala_liquid_staking'].includes(params.poolInfo.slug)) {
+  //   return validateProcessForAcalaLiquidStaking(params, path);
+  // } else if (params.poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+  //   if (!data) {
+  //     return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+  //   }
+  //
+  //   const inputData = data as SubmitJoinNominationPool;
+  //
+  //   return validatePoolBondingCondition(chainInfo, inputData.amount, inputData.selectedPool, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
+  // }
+  //
+  // if (!data) {
+  //   return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+  // }
+  //
+  // const inputData = data as SubmitJoinNativeStaking;
+  //
+  // return validateRelayBondingCondition(chainInfo, inputData.amount, inputData.selectedValidators, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
 }
 
 export function validateYieldRedeem (address: string, poolInfo: YieldPoolInfo, amount: string): TransactionError[] {
   return [];
 }
 
-export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStep, path: OptimalYieldPath, currentStep: number): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStep, path: OptimalYieldPath, currentStep: number): Promise<[string, ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   if (yieldPoolInfo.type === YieldPoolType.NATIVE_STAKING) {
     const extrinsic = await getNativeStakingBondExtrinsic(address, params, data as SubmitJoinNativeStaking);
 
-    return [ExtrinsicType.STAKING_BOND, extrinsic];
+    return [yieldPoolInfo.chain, ExtrinsicType.STAKING_BOND, extrinsic];
   } else if (yieldPoolInfo.slug === 'DOT___bifrost_liquid_staking') {
     return getBifrostLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitBifrostLiquidStaking);
   }
 
   const extrinsic = await getNominationPoolJoinExtrinsic(address, params, data as SubmitJoinNominationPool);
 
-  return [ExtrinsicType.STAKING_JOIN_POOL, extrinsic];
+  return [yieldPoolInfo.chain, ExtrinsicType.STAKING_JOIN_POOL, extrinsic];
 }
 
 export function convertYieldTxData (address: string, poolInfo: YieldPoolInfo, data: SubmitYieldStep): any {

@@ -125,7 +125,6 @@ const Component = () => {
   const formDefault: YieldParams = useMemo(() => ({
     ...defaultData
   }), [defaultData]);
-
   const _assetEarnings: Record<string, YieldAssetExpectedEarning> = useMemo(() => {
     const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
     const currentAmountNumb = currentAmount ? parseFloat(currentAmount) / (10 ** decimals) : 0;

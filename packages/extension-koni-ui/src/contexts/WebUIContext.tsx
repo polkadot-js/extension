@@ -77,7 +77,11 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
       setShowSidebar(true);
       !isPortfolio && setBackground(BackgroundColorMap.COMMON);
 
-      if (pathName.startsWith('/home') || pathName === '/settings' || pathName === '/settings/list') {
+      if (pathName.startsWith('/home') ||
+        pathName === '/settings' ||
+        pathName === '/settings/list' ||
+        pathName === '/dapps'
+      ) {
         setHeaderType(HeaderType.COMMON);
       } else if (pathName.startsWith('/transaction-done')) {
         setHeaderType(HeaderType.COMMON_BACK_TO_HOME);

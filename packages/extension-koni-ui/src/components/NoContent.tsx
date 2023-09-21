@@ -4,7 +4,7 @@
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ChartBar, Coin, Image, ListBullets, MagnifyingGlass, RocketLaunch, SlidersHorizontal, Trophy } from 'phosphor-react';
+import { ChartBar, Coin, GlobeHemisphereWest, Image, ListBullets, MagnifyingGlass, RocketLaunch, SlidersHorizontal, Trophy } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -19,6 +19,7 @@ export enum PAGE_TYPE {
   HISTORY = 'history',
   STAKING = 'staking',
   STATISTIC = 'statistic',
+  DAPPS = 'dapps'
 }
 
 type Props = ThemeProps & {
@@ -84,6 +85,11 @@ const Component: React.FC<Props> = ({ className, pageType }: Props) => {
         icon: ChartBar,
         title: t('There is no data'),
         content: t('The data will automatically appear when your portfolio has assets')
+      },
+      [PAGE_TYPE.DAPPS]: {
+        icon: GlobeHemisphereWest,
+        title: t('No dApps found'),
+        content: t('Your dApps will show up here')
       }
     };
   }, [t]);

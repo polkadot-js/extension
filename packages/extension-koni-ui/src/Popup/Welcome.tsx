@@ -13,7 +13,7 @@ import { Button, ButtonProps, Form, Icon, Image, Input, ModalContext } from '@su
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useLayoutEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';

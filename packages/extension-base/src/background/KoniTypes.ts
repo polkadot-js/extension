@@ -496,6 +496,10 @@ export enum ExtrinsicType {
   REDEEM_VDOT = 'earn.redeem_vdot',
   MINT_LDOT = 'earn.mint_ldot',
   REDEEM_LDOT = 'earn.redeem_ldot',
+  MINT_SDOT = 'earn.mint_sdot',
+  REDEEM_SDOT = 'earn.redeem_sdot',
+  MINT_QDOT = 'earn.mint_qdot',
+  REDEEM_QDOT = 'earn.redeem_qdot',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -2151,7 +2155,9 @@ export enum YieldStepType {
   MINT_LDOT = 'MINT_LDOT',
 
   // interlay
-  MINT_QDOT = 'MINT_QDOT'
+  MINT_QDOT = 'MINT_QDOT',
+
+  MINT_SDOT = 'MINT_SDOT'
 }
 
 export interface YieldStepDetail {
@@ -2234,10 +2240,23 @@ export interface HandleYieldRedeemParams extends BaseRequestSign {
   amount: string;
 }
 
-export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool | SubmitAcalaLiquidStaking;
+export type SubmitYieldStep = { // TODO
+  exchangeRate: number, // reward token = input token * exchange rate
+  inputTokenSlug: string,
+  rewardTokenSlug: string,
+  amount: string,
+  feeTokenSlug: string
+};
 
 export interface SubmitAcalaLiquidStaking {
   feePaidWithInputAsset: boolean,
+  inputTokenSlug: string,
+  amount: string,
+  rewardTokenSlug: string,
+  estimatedAmountReceived: string
+}
+
+export interface SubmitParallelLiquidStaking {
   inputTokenSlug: string,
   amount: string,
   rewardTokenSlug: string,

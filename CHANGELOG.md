@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.1.13
+Build date: Sep 21, 2023.
+
+Features & Update:
+- Update empty list screens (#1857)
+- Allow paste Amount to send (#1872)
+- Add injected placeholder to avoid extension cannot load in the first time (#1906)
+
+Bugs fixed:
+- Fixed bug Do not show status of the crowd loans item (Acala) (#1860)
+- Fixed bug Do not auto-lock after imported multiple account (#1910)
+- Fixed bug Do not show selected account (#1919)
+
+
 ## 1.1.12
 Build date: Sep 15, 2023.
 

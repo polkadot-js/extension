@@ -3264,11 +3264,14 @@ export default class KoniExtension {
   }
 
   // ChainService -------------------------------------------------
-  private subscribeChainInfoMap (id: string, port: chrome.runtime.Port): Record<string, _ChainInfo> {
+  private async subscribeChainInfoMap (id: string, port: chrome.runtime.Port): Promise<Record<string, _ChainInfo>> {
     const cb = createSubscription<'pri(chainService.subscribeChainInfoMap)'>(id, port);
+    let ready = false;
     const chainInfoMapSubscription = this.#koniState.subscribeChainInfoMap().subscribe({
       next: (rs) => {
-        cb(rs);
+        if (ready) {
+          cb(rs);
+        }
       }
     });
 
@@ -3277,6 +3280,9 @@ export default class KoniExtension {
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
+
+    await this.#koniState.eventService.waitChainReady;
+    ready = true;
 
     return this.#koniState.getChainInfoMap();
   }
@@ -3298,11 +3304,14 @@ export default class KoniExtension {
     return this.#koniState.getChainStateMap();
   }
 
-  private subscribeAssetRegistry (id: string, port: chrome.runtime.Port): Record<string, _ChainAsset> {
+  private async subscribeAssetRegistry (id: string, port: chrome.runtime.Port): Promise<Record<string, _ChainAsset>> {
     const cb = createSubscription<'pri(chainService.subscribeAssetRegistry)'>(id, port);
+    let ready = false;
     const assetRegistrySubscription = this.#koniState.subscribeAssetRegistry().subscribe({
       next: (rs) => {
-        cb(rs);
+        if (ready) {
+          cb(rs);
+        }
       }
     });
 
@@ -3311,6 +3320,9 @@ export default class KoniExtension {
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
+
+    await this.#koniState.eventService.waitAssetReady;
+    ready = true;
 
     return this.#koniState.getAssetRegistry();
   }

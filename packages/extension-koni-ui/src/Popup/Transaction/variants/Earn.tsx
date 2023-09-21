@@ -74,6 +74,9 @@ const Component = () => {
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  const currentStep = processState.currentStep;
+
   const [form] = Form.useForm<YieldParams>();
 
   const currentAmount = useWatchTransaction(`${formFieldPrefix}0`, form, defaultData);
@@ -135,8 +138,6 @@ const Component = () => {
       const inputAsset = chainAsset[currentPoolInfo.inputAssets[0] || ''];
       const decimals = _getAssetDecimals(inputAsset);
       const currentAmountNumb = currentAmount ? parseFloat(currentAmount) / (10 ** decimals) : 0;
-
-      console.debug(currentAmountNumb);
 
       if (currentPoolInfo.stats?.assetEarning) {
         currentPoolInfo.stats?.assetEarning.forEach((assetEarningStats) => {
@@ -393,24 +394,26 @@ const Component = () => {
   }, [currentPoolInfo, currentFrom, chainState?.active, forceFetchValidator]);
 
   useEffect(() => {
-    setIsLoading(true);
+    if (currentStep === 0) {
+      setIsLoading(true);
 
-    getOptimalYieldPath({
-      amount: currentAmount,
-      poolInfo: currentPoolInfo
-    })
-      .then((res) => {
-        dispatchProcessState({
-          payload: {
-            steps: res.steps,
-            feeStructure: res.totalFee
-          },
-          type: EarningActionType.STEP_CREATE
-        });
+      getOptimalYieldPath({
+        amount: currentAmount,
+        poolInfo: currentPoolInfo
       })
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, [currentPoolInfo, currentAmount]);
+        .then((res) => {
+          dispatchProcessState({
+            payload: {
+              steps: res.steps,
+              feeStructure: res.totalFee
+            },
+            type: EarningActionType.STEP_CREATE
+          });
+        })
+        .catch(console.error)
+        .finally(() => setIsLoading(false));
+    }
+  }, [currentPoolInfo, currentAmount, currentStep]);
 
   return (
     <div className={'earning-wrapper'}>

@@ -573,6 +573,10 @@ export interface AmountData extends BasicTokenInfo {
   value: string;
 }
 
+export interface AmountDataWithId extends AmountData {
+  id: string;
+}
+
 export interface XCMTransactionAdditionalInfo {
   destinationChain: string,
   originalChain: string,
@@ -2430,7 +2434,7 @@ export interface KoniRequestSignatures {
   'pri(transfer.getMaxTransferable)': [RequestMaxTransferable, AmountData];
   'pri(subscription.cancel)': [string, boolean];
   'pri(freeBalance.get)': [RequestFreeBalance, AmountData];
-  'pri(freeBalance.subscribe)': [RequestFreeBalance, AmountData, AmountData];
+  'pri(freeBalance.subscribe)': [RequestFreeBalance, AmountDataWithId, AmountDataWithId];
 
   // Transfer
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ValidateTransactionResponse];

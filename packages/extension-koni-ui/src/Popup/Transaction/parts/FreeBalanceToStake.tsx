@@ -20,7 +20,7 @@ type Props = ThemeProps & {
 const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug);
+  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug, true);
 
   useEffect(() => {
     onBalanceReady?.(!isLoading && !error);
@@ -65,7 +65,7 @@ const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug
   );
 };
 
-const FreeBalance = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const FreeBalanceToStake = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     display: 'flex',
     flexWrap: 'wrap',
@@ -85,4 +85,4 @@ const FreeBalance = styled(Component)<Props>(({ theme: { token } }: Props) => {
   };
 });
 
-export default FreeBalance;
+export default FreeBalanceToStake;

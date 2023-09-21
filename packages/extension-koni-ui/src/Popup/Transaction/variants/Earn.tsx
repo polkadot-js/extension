@@ -16,9 +16,10 @@ import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/StakingProcessModal';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { FormCallbacks, FormFieldData, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
+import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react';
@@ -277,6 +278,20 @@ const Component = () => {
     return undefined;
   }, [nominationPoolInfoMap, currentPoolInfo.chain]);
 
+  const amountValidator = useMemo((): FormRule => ({
+    validator: (rule, value: string) => {
+      if (!value) {
+        return Promise.reject(t('Amount is required'));
+      } else {
+        if (new BigN(value).lte(0)) {
+          return Promise.reject(t('Amount must be greater than 0'));
+        } else {
+          return Promise.resolve();
+        }
+      }
+    }
+  }), [t]);
+
   const isProcessDone = useMemo(() => {
     return processState.currentStep === processState.steps.length - 1;
   }, [processState.currentStep, processState.steps.length]);
@@ -498,7 +513,9 @@ const Component = () => {
                     <Form.Item
                       colon={false}
                       name={name}
-                      rules={[{ required: true, message: t('Amount is required') }]}
+                      rules={[
+                        amountValidator
+                      ]}
                       statusHelpAsTooltip={true}
                     >
                       <AmountInput
@@ -512,7 +529,7 @@ const Component = () => {
                             token={asset.split('-')[2].toLowerCase()}
                           />
                         )}
-                        showMaxButton={true}
+                        showMaxButton={false}
                         tooltip={t('Amount')}
                       />
                     </Form.Item>

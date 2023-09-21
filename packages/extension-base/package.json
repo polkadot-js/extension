@@ -70,7 +70,7 @@
     "ethereumjs-util": "^7.1.5",
     "ethers": "^6.4.2",
     "eventemitter3": "^5.0.0",
-    "graphql": "^16.6.0",
+    "graphql": "^16.8.1",
     "i18next": "^21.9.2",
     "is-buffer": "^2.0.5",
     "json-rpc-engine": "^6.1.0",

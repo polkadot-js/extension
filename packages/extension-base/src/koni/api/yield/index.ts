@@ -4,7 +4,12 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, StakingType, SubmitAcalaLiquidStaking, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { generatePathForAcalaLiquidStaking, getAcalaLiquidStakingExtrinsic, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
+import {
+  generatePathForAcalaLiquidStaking,
+  getAcalaLiquidStakingExtrinsic,
+  getAcalaLiquidStakingRedeem,
+  subscribeAcalaLiquidStakingStats
+} from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { generatePathForInterlayLending, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
@@ -212,5 +217,9 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
 }
 
 export async function handleYieldRedeem (params: OptimalYieldPathParams, address: string, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+  if (params.poolInfo.slug === 'DOT___acala_liquid_staking') {
+    return getAcalaLiquidStakingRedeem(params, amount);
+  }
+
   return getBifrostLiquidStakingRedeem(params, amount);
 }

@@ -228,7 +228,7 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
   const inputTokenSlug = params.poolInfo.inputAssets[0];
   const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
-  const extrinsic = substrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), inputData.amount);
+  const extrinsic = substrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), inputData.amount, undefined);
 
   return {
     txChain: params.poolInfo.chain,

@@ -4,14 +4,30 @@
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitAcalaLiquidStaking, YieldPoolInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  ExtrinsicType,
+  OptimalYieldPath,
+  OptimalYieldPathParams,
+  RequestCrossChainTransfer,
+  SubmitAcalaLiquidStaking,
+  YieldPoolInfo,
+  YieldProcessValidation,
+  YieldStepType,
+  YieldValidationStatus
+} from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
-import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/utils';
+import {
+  calculateAlternativeFee,
+  DEFAULT_YIELD_FIRST_STEP,
+  fakeAddress,
+  RuntimeDispatchInfo
+} from '@subwallet/extension-base/koni/api/yield/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 
 const YEAR = 365 * 24 * 60 * 60 * 1000;
 
@@ -294,4 +310,27 @@ export async function getAcalaLiquidStakingExtrinsic (address: string, params: O
     txData: undefined,
     transferNativeAmount: '0'
   };
+}
+
+export async function getAcalaLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+  const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
+
+  const extrinsic = substrateApi.api.tx.aggregatedDex.swapWithExactSupply(
+    // Swap path
+    [
+      {
+        Taiga: [
+          0, /* pool id */
+          1, /* supply asset */
+          0 /* target asset */
+        ]
+      }
+    ],
+    // Supply amount
+    amount,
+    // Min target amount
+    0 // should always set a min target to prevent unexpected result
+  );
+
+  return [ExtrinsicType.REDEEM_LDOT, extrinsic];
 }

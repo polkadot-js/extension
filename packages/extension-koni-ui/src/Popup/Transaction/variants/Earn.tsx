@@ -8,24 +8,23 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AmountInput, EarningProcessItem, MetaInfo, PageWrapper, PoolSelector, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, PoolSelector, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
-import { useFetchChainState, useGetChainPrefixBySlug, useGetNativeTokenBasicInfo, useNotification } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetChainPrefixBySlug, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/StakingProcessModal';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -38,37 +37,31 @@ interface Props extends ThemeProps {
   item: YieldPoolInfo;
 }
 
-enum FormFieldName {
-  FROM = 'from',
-  NOMINATE = 'nominate',
-  POOL = 'pool',
-}
-
 const formFieldPrefix = 'amount-';
 
-interface StakingFormProps extends Record<`amount-${number}`, string> {
-  [FormFieldName.FROM]: string;
-  [FormFieldName.NOMINATE]: string;
-  [FormFieldName.POOL]: string;
+const hiddenFields: Array<keyof YieldParams> = ['chain', 'asset', 'method'];
+
+interface _YieldAssetExpectedEarning extends YieldAssetExpectedEarning {
+  symbol: string;
 }
 
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
   const { token } = useTheme() as Theme;
-  const { slug: _methodSlug } = useParams();
 
   const { isWebUI } = useContext(ScreenContext);
-  const methodSlug = useMemo(() => {
-    return _methodSlug || '';
-  }, [_methodSlug]);
+
   const navigate = useNavigate();
+
   const poolInfoMap = useSelector((state: RootState) => state.yieldPool.poolInfo);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainAsset = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const { setShowRightBtn } = useContext(TransactionContext);
-  const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+
+  const { defaultData } = useTransactionContext<YieldParams>();
+  const { method: methodSlug } = defaultData;
+  const { isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
 
   const [processState, dispatchProcessState] = useReducer(earningReducer, DEFAULT_YIELD_PROCESS);
@@ -82,14 +75,16 @@ const Component = () => {
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [form] = Form.useForm<StakingFormProps>();
 
-  const currentAmount = Form.useWatch(`${formFieldPrefix}0`, form);
-  const currentFrom = Form.useWatch(FormFieldName.FROM, form);
+  const currentStep = processState.currentStep;
+
+  const [form] = Form.useForm<YieldParams>();
+
+  const currentAmount = useWatchTransaction(`${formFieldPrefix}0`, form, defaultData);
+  const currentFrom = useWatchTransaction('from', form, defaultData);
   const currentPoolInfo = useMemo(() => poolInfoMap[methodSlug], [methodSlug, poolInfoMap]);
 
   const chainState = useFetchChainState(currentPoolInfo.chain);
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
 
   const onDone = useCallback((extrinsicHash: string) => {
@@ -134,29 +129,42 @@ const Component = () => {
     }
   }, [t, notify, onError, onDone]);
 
-  const formDefault: StakingFormProps = useMemo(() => {
-    return {
-      [FormFieldName.FROM]: !isAllAccount ? currentAccount?.address || '' : '',
-      [FormFieldName.POOL]: '',
-      [FormFieldName.NOMINATE]: ''
-    };
-  }, [currentAccount?.address, isAllAccount]);
+  const formDefault: YieldParams = useMemo(() => ({
+    ...defaultData
+  }), [defaultData]);
+  const _assetEarnings: Record<string, _YieldAssetExpectedEarning> = useMemo(() => {
+    const yearlyEarnings: Record<string, _YieldAssetExpectedEarning> = {};
 
-  const _assetEarnings: Record<string, YieldAssetExpectedEarning> = useMemo(() => {
-    const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
-    const currentAmountNumb = currentAmount ? parseFloat(currentAmount) / (10 ** decimals) : 0;
+    if (currentPoolInfo) {
+      const inputAsset = chainAsset[currentPoolInfo.inputAssets[0] || ''];
+      const decimals = _getAssetDecimals(inputAsset);
+      const currentAmountNumb = currentAmount ? parseFloat(currentAmount) / (10 ** decimals) : 0;
 
-    if (currentPoolInfo?.stats?.assetEarning) {
-      currentPoolInfo?.stats?.assetEarning.forEach((assetEarningStats) => {
-        const assetApr = assetEarningStats?.apr || 0;
-        const assetSlug = assetEarningStats.slug;
+      if (currentPoolInfo.stats?.assetEarning) {
+        currentPoolInfo.stats?.assetEarning.forEach((assetEarningStats) => {
+          const assetSlug = assetEarningStats.slug;
+          const rewardAsset = chainAsset[assetSlug];
 
-        yearlyEarnings[assetSlug] = calculateReward(assetApr, currentAmountNumb, YieldCompoundingPeriod.YEARLY);
-      });
+          if (assetEarningStats.apy !== undefined) {
+            yearlyEarnings[assetSlug] = {
+              apy: assetEarningStats.apy,
+              rewardInToken: assetEarningStats.apy * currentAmountNumb,
+              symbol: rewardAsset.symbol
+            };
+          } else {
+            const assetApr = assetEarningStats?.apr || 0;
+
+            yearlyEarnings[assetSlug] = {
+              ...calculateReward(assetApr, currentAmountNumb, YieldCompoundingPeriod.YEARLY),
+              symbol: rewardAsset.symbol
+            };
+          }
+        });
+      }
     }
 
     return yearlyEarnings;
-  }, [currentAmount, currentPoolInfo?.stats?.assetEarning, decimals]);
+  }, [chainAsset, currentAmount, currentPoolInfo]);
 
   const estimatedFee = useMemo(() => {
     let _totalFee = 0;
@@ -175,20 +183,18 @@ const Component = () => {
     return _totalFee;
   }, [chainAsset, priceMap, processState.feeStructure]);
 
-  const accountFilterFunc = useCallback((chainInfoMap: Record<string, _ChainInfo>): ((account: AccountJson) => boolean) => {
-    return (account: AccountJson) => {
-      const chain = chainInfoMap[currentPoolInfo.chain];
-      const isEvmChain = _isChainEvmCompatible(chain);
-      const isEvmAddress = isEthereumAddress(account.address);
+  const accountFilterFunc = useCallback((account: AccountJson): boolean => {
+    const chain = chainInfoMap[currentPoolInfo.chain];
+    const isEvmChain = _isChainEvmCompatible(chain);
+    const isEvmAddress = isEthereumAddress(account.address);
 
-      return isEvmChain === isEvmAddress;
-    };
-  }, [currentPoolInfo.chain]);
+    return isEvmChain === isEvmAddress;
+  }, [chainInfoMap, currentPoolInfo.chain]);
 
-  const onFieldsChange: FormCallbacks<StakingFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<YieldParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
 
-    const allMap = convertFieldToObject<StakingFormProps>(allFields);
+    const allMap = convertFieldToObject<YieldParams>(allFields);
     // const changesMap = convertFieldToObject<StakingFormProps>(changedFields);
     const checkEmpty: Record<string, boolean> = {};
 
@@ -214,16 +220,24 @@ const Component = () => {
         labelColorScheme={'gray'}
         valueColorScheme={'gray'}
       >
-        <MetaInfo.Number
-          label={t('Yearly rewards')}
-          suffix={'%'}
-          value={(Object.values(_assetEarnings)[0].apy || 0) * 100}
-        />
-        <MetaInfo.Number
-          label={t('Estimated earnings')}
-          suffix={`${symbol}/Year`}
-          value={Object.values(_assetEarnings)[0].rewardInToken || 0}
-        />
+        {
+          Object.values(_assetEarnings).map((value) => {
+            return (
+              <>
+                <MetaInfo.Number
+                  label={t('Yearly rewards')}
+                  suffix={'%'}
+                  value={(value.apy || 0) * 100}
+                />
+                <MetaInfo.Number
+                  label={t('Estimated earnings')}
+                  suffix={`${value.symbol}/Year`}
+                  value={value.rewardInToken || 0}
+                />
+              </>
+            );
+          })
+        }
         <MetaInfo.Number
           decimals={0}
           label={t('Estimated fee')}
@@ -232,7 +246,7 @@ const Component = () => {
         />
       </MetaInfo>
     );
-  }, [t, _assetEarnings, symbol, estimatedFee]);
+  }, [t, _assetEarnings, estimatedFee]);
 
   const getSelectedValidators = useCallback((nominations: string[]) => {
     const validatorList = validatorInfoMap[currentPoolInfo.chain];
@@ -263,6 +277,20 @@ const Component = () => {
 
     return undefined;
   }, [nominationPoolInfoMap, currentPoolInfo.chain]);
+
+  const amountValidator = useMemo((): FormRule => ({
+    validator: (rule, value: string) => {
+      if (!value) {
+        return Promise.reject(t('Amount is required'));
+      } else {
+        if (new BigN(value).lte(0)) {
+          return Promise.reject(t('Amount must be greater than 0'));
+        } else {
+          return Promise.resolve();
+        }
+      }
+    }
+  }), [t]);
 
   const isProcessDone = useMemo(() => {
     return processState.currentStep === processState.steps.length - 1;
@@ -365,10 +393,6 @@ const Component = () => {
   }, [currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, processState]);
 
   useEffect(() => {
-    setShowRightBtn(true);
-  }, [setShowRightBtn]);
-
-  useEffect(() => {
     let unmount = false;
 
     if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(currentPoolInfo.type)) {
@@ -385,24 +409,26 @@ const Component = () => {
   }, [currentPoolInfo, currentFrom, chainState?.active, forceFetchValidator]);
 
   useEffect(() => {
-    setIsLoading(true);
+    if (currentStep === 0) {
+      setIsLoading(true);
 
-    getOptimalYieldPath({
-      amount: currentAmount,
-      poolInfo: currentPoolInfo
-    })
-      .then((res) => {
-        dispatchProcessState({
-          payload: {
-            steps: res.steps,
-            feeStructure: res.totalFee
-          },
-          type: EarningActionType.STEP_CREATE
-        });
+      getOptimalYieldPath({
+        amount: currentAmount,
+        poolInfo: currentPoolInfo
       })
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, [currentPoolInfo, currentAmount]);
+        .then((res) => {
+          dispatchProcessState({
+            payload: {
+              steps: res.steps,
+              feeStructure: res.totalFee
+            },
+            type: EarningActionType.STEP_CREATE
+          });
+        })
+        .catch(console.error)
+        .finally(() => setIsLoading(false));
+    }
+  }, [currentPoolInfo, currentAmount, currentStep]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -419,6 +445,7 @@ const Component = () => {
               initialValues={formDefault}
               onFieldsChange={onFieldsChange}
             >
+              <HiddenInput fields={hiddenFields} />
               {/* <Form.Item */}
               {/*  name={FormFieldName.METHOD} */}
               {/*  label={t('Select method')} */}
@@ -458,7 +485,7 @@ const Component = () => {
                 <AccountSelector
                   addressPrefix={chainNetworkPrefix}
                   disabled={!isAllAccount || processState.currentStep !== 0}
-                  filter={accountFilterFunc(chainInfoMap)}
+                  filter={accountFilterFunc}
                 />
               </Form.Item>
 
@@ -486,7 +513,9 @@ const Component = () => {
                     <Form.Item
                       colon={false}
                       name={name}
-                      rules={[{ required: true, message: t('Amount is required') }]}
+                      rules={[
+                        amountValidator
+                      ]}
                       statusHelpAsTooltip={true}
                     >
                       <AmountInput
@@ -500,7 +529,7 @@ const Component = () => {
                             token={asset.split('-')[2].toLowerCase()}
                           />
                         )}
-                        showMaxButton={true}
+                        showMaxButton={false}
                         tooltip={t('Amount')}
                       />
                     </Form.Item>
@@ -520,7 +549,7 @@ const Component = () => {
 
               <Form.Item
                 hidden={currentPoolInfo.type !== YieldPoolType.NOMINATION_POOL}
-                name={FormFieldName.POOL}
+                name={'pool'}
               >
                 <PoolSelector
                   chain={currentPoolInfo.chain}
@@ -534,7 +563,7 @@ const Component = () => {
 
               <Form.Item
                 hidden={currentPoolInfo.type !== YieldPoolType.NATIVE_STAKING}
-                name={FormFieldName.NOMINATE}
+                name={'nominate'}
               >
                 <YieldMultiValidatorSelector
                   chain={currentPoolInfo.chain}

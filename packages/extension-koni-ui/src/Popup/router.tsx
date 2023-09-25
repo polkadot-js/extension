@@ -191,7 +191,7 @@ export const router = createBrowserRouter([
           CancelUnstake.generateRouterObject('cancel-unstake'),
           ClaimReward.generateRouterObject('claim-reward'),
           Withdraw.generateRouterObject('withdraw'),
-          Earn.generateRouterObject('earn/:slug'),
+          Earn.generateRouterObject('earn'),
           {
             path: 'compound',
             element: <Example />

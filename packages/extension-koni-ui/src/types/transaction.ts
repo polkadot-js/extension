@@ -50,3 +50,9 @@ export interface ClaimRewardParams extends TransactionFormBaseProps {
   type: StakingType;
   bondReward: boolean;
 }
+
+export interface YieldParams extends TransactionFormBaseProps, Record<`amount-${number}`, string> {
+  method: string;
+  nominate: string;
+  pool: string;
+}

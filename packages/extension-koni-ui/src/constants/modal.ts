@@ -52,3 +52,4 @@ export const STAKING_CALCULATOR_MODAL = 'staking-calculator-modal';
 /* Earning */
 
 export const POOL_DETAIL_MODAL = 'pool-detail-modal';
+export const STAKING_NETWORK_DETAIL_MODAL = 'staking-network-detail-modal';

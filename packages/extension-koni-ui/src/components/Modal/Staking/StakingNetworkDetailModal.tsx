@@ -5,6 +5,7 @@ import { AmountData, StakingType } from '@subwallet/extension-base/background/Ko
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
+import { STAKING_NETWORK_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -23,7 +24,7 @@ type Props = ThemeProps & {
   stakingType: StakingType;
 };
 
-export const StakingNetworkDetailModalId = 'stakingNetworkDetailModalId';
+const modalId = STAKING_NETWORK_DETAIL_MODAL;
 
 function Component ({ activeNominators,
   className,
@@ -37,13 +38,13 @@ function Component ({ activeNominators,
   const { inactiveModal } = useContext(ModalContext);
 
   const onCancel = useCallback(() => {
-    inactiveModal(StakingNetworkDetailModalId);
+    inactiveModal(modalId);
   }, [inactiveModal]);
 
   return (
     <BaseModal
       className={className}
-      id={StakingNetworkDetailModalId}
+      id={modalId}
       onCancel={onCancel}
       rightIconProps={{
         icon: <InfoIcon />

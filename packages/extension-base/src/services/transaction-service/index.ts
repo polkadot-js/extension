@@ -10,7 +10,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
@@ -524,30 +524,34 @@ export default class TransactionService {
         break;
       }
 
-      case ExtrinsicType.MINT_VDOT: {
+      case ExtrinsicType.MINT_VDOT || ExtrinsicType.MINT_SDOT || ExtrinsicType.MINT_LDOT || ExtrinsicType.MINT_QDOT: {
         const data = parseTransactionData<ExtrinsicType.MINT_VDOT>(transaction.data);
-        const inputTokenInfo = this.chainService.getAssetBySlug(data.inputTokenSlug);
+        const params = data.data;
+        const inputTokenInfo = this.chainService.getAssetBySlug(params.inputTokenSlug);
+        const isFeePaidWithInputAsset = params.feeTokenSlug === params.inputTokenSlug;
 
-        historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
+        historyItem.amount = { value: params.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
         historyItem.additionalInfo = {
-          rewardTokenSlug: data.rewardTokenSlug,
-          estimatedAmountReceived: data.estimatedAmountReceived
+          rewardTokenSlug: params.rewardTokenSlug,
+          exchangeRate: params.exchangeRate
         } as TransactionAdditionalInfo[ExtrinsicType.MINT_VDOT];
-        eventLogs && parseBifrostLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, data.feePaidWithInputAsset, extrinsicType);
+        eventLogs && parseBifrostLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
 
         break;
       }
 
       case ExtrinsicType.REDEEM_VDOT: {
         const data = parseTransactionData<ExtrinsicType.REDEEM_VDOT>(transaction.data);
-        const inputTokenInfo = this.chainService.getAssetBySlug(data.inputTokenSlug);
+        const params = data.data;
+        const inputTokenInfo = this.chainService.getAssetBySlug(params.inputTokenSlug);
+        const isFeePaidWithInputAsset = params.feeTokenSlug === params.inputTokenSlug;
 
-        historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
+        historyItem.amount = { value: params.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
         historyItem.additionalInfo = {
-          inputTokenSlug: data.inputTokenSlug,
-          estimatedAmountReceived: data.estimatedAmountReceived
+          inputTokenSlug: params.inputTokenSlug,
+          exchangeRate: params.exchangeRate
         } as TransactionAdditionalInfo[ExtrinsicType.REDEEM_VDOT];
-        eventLogs && parseBifrostLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, data.feePaidWithInputAsset, extrinsicType);
+        eventLogs && parseBifrostLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
 
         break;
       }

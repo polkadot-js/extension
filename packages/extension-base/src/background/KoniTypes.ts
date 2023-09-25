@@ -528,9 +528,9 @@ export interface ExtrinsicDataTypeMap {
 
   // Yield
   [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_VDOT]: SubmitAcalaLiquidStaking,
-  [ExtrinsicType.REDEEM_VDOT]: SubmitAcalaLiquidStaking,
-  [ExtrinsicType.MINT_LDOT]: SubmitAcalaLiquidStaking,
+  [ExtrinsicType.MINT_VDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.REDEEM_VDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_LDOT]: RequestYieldStepSubmit,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
@@ -590,8 +590,8 @@ export interface NFTTransactionAdditionalInfo {
 export type TransactionAdditionalInfo = {
   [ExtrinsicType.TRANSFER_XCM]: XCMTransactionAdditionalInfo,
   [ExtrinsicType.SEND_NFT]: NFTTransactionAdditionalInfo,
-  [ExtrinsicType.MINT_VDOT]: Pick<SubmitAcalaLiquidStaking, 'rewardTokenSlug' | 'estimatedAmountReceived'>,
-  [ExtrinsicType.REDEEM_VDOT]: Pick<SubmitAcalaLiquidStaking, 'inputTokenSlug' | 'estimatedAmountReceived'>
+  [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.REDEEM_VDOT]: Pick<SubmitYieldStepData, 'inputTokenSlug' | 'exchangeRate'>
 }
 
 // export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
@@ -2241,7 +2241,7 @@ export interface HandleYieldRedeemParams extends BaseRequestSign {
 }
 
 export type SubmitYieldStepData = { // TODO
-  exchangeRate: number, // reward token = input token * exchange rate
+  exchangeRate: number, // reward token amount = input token amount * exchange rate
   inputTokenSlug: string,
   rewardTokenSlug: string,
   amount: string,

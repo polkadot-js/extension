@@ -531,6 +531,9 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.MINT_VDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.REDEEM_VDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_LDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_SDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_QDOT]: RequestYieldStepSubmit,
+  // TODO: add redeem
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
@@ -2251,21 +2254,6 @@ export type SubmitYieldStepData = { // TODO
   amount: string,
   feeTokenSlug: string
 };
-
-export interface SubmitAcalaLiquidStaking {
-  feePaidWithInputAsset: boolean,
-  inputTokenSlug: string,
-  amount: string,
-  rewardTokenSlug: string,
-  estimatedAmountReceived: string
-}
-
-export interface SubmitParallelLiquidStaking {
-  inputTokenSlug: string,
-  amount: string,
-  rewardTokenSlug: string,
-  estimatedAmountReceived: string
-}
 
 export interface SubmitJoinNativeStaking {
   amount: string,

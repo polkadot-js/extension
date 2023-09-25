@@ -234,7 +234,7 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
     txChain: params.poolInfo.chain,
     extrinsicType: ExtrinsicType.MINT_VDOT,
     extrinsic,
-    txData: undefined,
+    txData: inputData,
     transferNativeAmount: '0'
   };
 }

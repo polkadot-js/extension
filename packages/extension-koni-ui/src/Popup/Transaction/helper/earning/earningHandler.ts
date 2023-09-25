@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { NominationPoolInfo, OptimalYieldPath, SubmitYieldStep, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationPoolInfo, OptimalYieldPath, SubmitYieldStepData, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { getYieldNativeStakingValidators, getYieldNominationPools, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -52,7 +52,7 @@ export async function handleYieldStep (
   yieldPoolInfo: YieldPoolInfo,
   path: OptimalYieldPath,
   currentStep: number,
-  data: SubmitYieldStep
+  data: SubmitYieldStepData
 ): Promise<SWTransactionResponse> {
   return submitJoinYieldPool({
     address,
@@ -68,7 +68,7 @@ export async function handleValidateYield (
   yieldPoolInfo: YieldPoolInfo,
   path: OptimalYieldPath,
   amount: string,
-  data: SubmitYieldStep
+  data: SubmitYieldStepData
 ): Promise<TransactionError[]> {
   return validateYieldProcess({
     address,

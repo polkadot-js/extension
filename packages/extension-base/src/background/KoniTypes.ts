@@ -2220,7 +2220,7 @@ export interface HandleYieldStepParams extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
   path: OptimalYieldPath;
-  data: SubmitYieldStep;
+  data: SubmitYieldStepData;
   currentStep: number;
 }
 
@@ -2231,7 +2231,7 @@ export interface ValidateYieldProcessParams {
   path: OptimalYieldPath;
   address: string;
   amount: string;
-  data?: SubmitYieldStep;
+  data?: SubmitYieldStepData;
 }
 
 export interface HandleYieldRedeemParams extends BaseRequestSign {
@@ -2240,7 +2240,7 @@ export interface HandleYieldRedeemParams extends BaseRequestSign {
   amount: string;
 }
 
-export type SubmitYieldStep = { // TODO
+export type SubmitYieldStepData = { // TODO
   exchangeRate: number, // reward token = input token * exchange rate
   inputTokenSlug: string,
   rewardTokenSlug: string,

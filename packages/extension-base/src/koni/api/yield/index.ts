@@ -3,22 +3,13 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, StakingType, SubmitAcalaLiquidStaking, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitParallelLiquidStaking, SubmitYieldStep, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { generatePathForAcalaLiquidStaking, getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingRedeem, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { generatePathForBifrostLiquidStaking, getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
-import {
-  generatePathForInterlayLending,
-  getInterlayLendingExtrinsic, getInterlayLendingRedeem,
-  subscribeInterlayLendingStats
-} from '@subwallet/extension-base/koni/api/yield/interlayLending';
+import { generatePathForInterlayLending, getInterlayLendingExtrinsic, getInterlayLendingRedeem, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
 import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
-import {
-  generatePathForParallelLiquidStaking,
-  getParallelLiquidStakingExtrinsic,
-  getParallelLiquidStakingRedeem,
-  subscribeParallelLiquidStakingStats
-} from '@subwallet/extension-base/koni/api/yield/parallelLiquidStaking';
+import { generatePathForParallelLiquidStaking, getParallelLiquidStakingExtrinsic, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallelLiquidStaking';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
@@ -141,7 +132,7 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams):
 // TODO: compare to ED
 // TODO: compare to minAmount
 // TODO: simulate the whole process, compare to fee (step by step)
-export function validateYieldProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data?: SubmitYieldStep): TransactionError[] {
+export function validateYieldProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data?: SubmitYieldStepData): TransactionError[] {
   return [];
 
   // const poolInfo = params.poolInfo;
@@ -180,7 +171,7 @@ export interface HandleYieldStepData {
   transferNativeAmount: string
 }
 
-export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStep, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
+export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
   if (yieldPoolInfo.type === YieldPoolType.NATIVE_STAKING) {
     const _data = data as SubmitJoinNativeStaking;
     const extrinsic = await getNativeStakingBondExtrinsic(address, params, _data);
@@ -202,13 +193,13 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
       transferNativeAmount: _data.amount
     };
   } else if (yieldPoolInfo.slug === 'DOT___acala_liquid_staking') {
-    return getAcalaLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitAcalaLiquidStaking);
+    return getAcalaLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitYieldStepData);
   } else if (yieldPoolInfo.slug === 'DOT___bifrost_liquid_staking') {
-    return getBifrostLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitAcalaLiquidStaking);
+    return getBifrostLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitYieldStepData);
   } else if (yieldPoolInfo.slug === 'DOT___parallel_liquid_staking') {
-    return getParallelLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitParallelLiquidStaking);
+    return getParallelLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitYieldStepData);
   } else if (yieldPoolInfo.slug === 'DOT___interlay_lending') {
-    return getInterlayLendingExtrinsic(address, params, path, currentStep, data as SubmitAcalaLiquidStaking);
+    return getInterlayLendingExtrinsic(address, params, path, currentStep, data as SubmitYieldStepData);
   }
 
   const _data = data as SubmitJoinNominationPool;

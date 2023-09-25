@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitYieldStepData, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
-import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
-import { _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
-export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
+export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
   function getPoolStat () {
     // eslint-disable-next-line node/no-callback-literal
     callback({
@@ -27,7 +28,7 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '10000000000',
         minWithdrawal: '0',
-        totalApr: 18.38,
+        totalApr: 18.4,
         tvl: '13095111106588368'
       }
     });
@@ -40,7 +41,7 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
       assetEarning: [
         {
           slug: poolInfo.inputAssets[0],
-          apr: 18.38
+          apr: 18.4
         }
       ],
       maxCandidatePerFarmer: 1,
@@ -59,11 +60,11 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
   };
 }
 
-export async function generatePathForInterlayLending (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
+export async function generatePathForParallelLiquidStaking (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
   const bnAmount = new BN(params.amount);
   const result: OptimalYieldPath = {
     totalFee: [],
-    steps: []
+    steps: [DEFAULT_YIELD_FIRST_STEP]
   };
 
   const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
@@ -72,7 +73,11 @@ export async function generatePathForInterlayLending (params: OptimalYieldPathPa
   const inputTokenBalance = params.balanceMap[inputTokenSlug]?.free || '0';
   const bnInputTokenBalance = new BN(inputTokenBalance);
 
-  const feeTokenSlug = params.poolInfo.feeAssets[0];
+  const defaultFeeTokenSlug = params.poolInfo.feeAssets[0];
+  const defaultFeeTokenBalance = params.balanceMap[defaultFeeTokenSlug]?.free || '0';
+  const bnDefaultFeeTokenBalance = new BN(defaultFeeTokenBalance);
+
+  const canPayFeeWithInputToken = params.poolInfo.feeAssets.includes(inputTokenSlug); // TODO
 
   const poolOriginSubstrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
 
@@ -90,7 +95,7 @@ export async function generatePathForInterlayLending (params: OptimalYieldPathPa
         const xcmAmount = bnAltInputTokenBalance.sub(remainingAmount);
 
         result.steps.push({
-          id: 0,
+          id: result.steps.length,
           metadata: {
             sendingValue: xcmAmount.toString(),
             originTokenInfo: altInputTokenInfo,
@@ -124,23 +129,32 @@ export async function generatePathForInterlayLending (params: OptimalYieldPathPa
   }
 
   result.steps.push({
-    id: 0,
-    name: 'Mint qDOT',
-    type: YieldStepType.MINT_QDOT
+    id: result.steps.length,
+    name: 'Mint sDOT',
+    type: YieldStepType.MINT_SDOT
   });
 
-  const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.loans.mint({ Token: 'DOT' }, params.amount).paymentInfo(fakeAddress);
+  const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.liquidStaking.stake(params.amount).paymentInfo(fakeAddress);
   const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-  result.totalFee.push({
-    slug: feeTokenSlug,
-    amount: mintFeeInfo.partialFee.toString()
-  });
+  if (bnDefaultFeeTokenBalance.gte(BN_ZERO)) {
+    result.totalFee.push({
+      slug: defaultFeeTokenSlug,
+      amount: mintFeeInfo.partialFee.toString()
+    });
+  } else {
+    if (canPayFeeWithInputToken) {
+      result.totalFee.push({
+        slug: inputTokenSlug, // TODO
+        amount: calculateAlternativeFee(mintFeeInfo).toString()
+      });
+    }
+  }
 
   return result;
 }
 
-export async function getInterlayLendingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitYieldStepData): Promise<HandleYieldStepData> {
+export async function getParallelLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitYieldStepData) {
   if (path.steps[currentStep].type === YieldStepType.XCM) {
     const destinationTokenSlug = params.poolInfo.inputAssets[0];
     const originChainInfo = params.chainInfoMap[COMMON_CHAIN_SLUGS.POLKADOT];
@@ -177,27 +191,23 @@ export async function getInterlayLendingExtrinsic (address: string, params: Opti
   }
 
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
-  const inputTokenSlug = params.poolInfo.inputAssets[0];
-  const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
-  const extrinsic = substrateApi.api.tx.loans.mint(_getTokenOnChainInfo(inputTokenInfo), inputData.amount);
+  const extrinsic = substrateApi.api.tx.liquidStaking.stake(inputData.amount);
 
   return {
     txChain: params.poolInfo.chain,
-    extrinsicType: ExtrinsicType.MINT_QDOT,
+    extrinsicType: ExtrinsicType.MINT_SDOT,
     extrinsic,
     txData: undefined,
     transferNativeAmount: '0'
   };
 }
 
-export async function getInterlayLendingRedeem (params: OptimalYieldPathParams, amount: string, redeemAll?: boolean): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+export async function getParallelLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string, address: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
-  const rewardTokenSlug = params.poolInfo.rewardAssets[0];
-  const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
+  // const rewardTokenSlug = params.poolInfo.rewardAssets[0];
+  // const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
 
-  const extrinsic = redeemAll
-    ? substrateApi.api.tx.loans.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount)
-    : substrateApi.api.tx.loans.redeemAll(_getTokenOnChainInfo(rewardTokenInfo));
+  const extrinsic = substrateApi.api.tx.liquidStaking.fastMatchUnstake([address]);
 
-  return [ExtrinsicType.REDEEM_QDOT, extrinsic];
+  return [ExtrinsicType.REDEEM_SDOT, extrinsic];
 }

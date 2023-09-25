@@ -496,6 +496,10 @@ export enum ExtrinsicType {
   REDEEM_VDOT = 'earn.redeem_vdot',
   MINT_LDOT = 'earn.mint_ldot',
   REDEEM_LDOT = 'earn.redeem_ldot',
+  MINT_SDOT = 'earn.mint_sdot',
+  REDEEM_SDOT = 'earn.redeem_sdot',
+  MINT_QDOT = 'earn.mint_qdot',
+  REDEEM_QDOT = 'earn.redeem_qdot',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -524,9 +528,9 @@ export interface ExtrinsicDataTypeMap {
 
   // Yield
   [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_VDOT]: SubmitAcalaLiquidStaking,
-  [ExtrinsicType.REDEEM_VDOT]: SubmitAcalaLiquidStaking,
-  [ExtrinsicType.MINT_LDOT]: SubmitAcalaLiquidStaking,
+  [ExtrinsicType.MINT_VDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.REDEEM_VDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_LDOT]: RequestYieldStepSubmit,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
@@ -590,8 +594,8 @@ export interface NFTTransactionAdditionalInfo {
 export type TransactionAdditionalInfo = {
   [ExtrinsicType.TRANSFER_XCM]: XCMTransactionAdditionalInfo,
   [ExtrinsicType.SEND_NFT]: NFTTransactionAdditionalInfo,
-  [ExtrinsicType.MINT_VDOT]: Pick<SubmitAcalaLiquidStaking, 'rewardTokenSlug' | 'estimatedAmountReceived'>,
-  [ExtrinsicType.REDEEM_VDOT]: Pick<SubmitAcalaLiquidStaking, 'inputTokenSlug' | 'estimatedAmountReceived'>
+  [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.REDEEM_VDOT]: Pick<SubmitYieldStepData, 'inputTokenSlug' | 'exchangeRate'>
 }
 
 // export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
@@ -2155,7 +2159,9 @@ export enum YieldStepType {
   MINT_LDOT = 'MINT_LDOT',
 
   // interlay
-  MINT_QDOT = 'MINT_QDOT'
+  MINT_QDOT = 'MINT_QDOT',
+
+  MINT_SDOT = 'MINT_SDOT'
 }
 
 export interface YieldStepDetail {
@@ -2218,7 +2224,7 @@ export interface HandleYieldStepParams extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
   path: OptimalYieldPath;
-  data: SubmitYieldStep;
+  data: SubmitYieldStepData;
   currentStep: number;
 }
 
@@ -2229,7 +2235,7 @@ export interface ValidateYieldProcessParams {
   path: OptimalYieldPath;
   address: string;
   amount: string;
-  data?: SubmitYieldStep;
+  data?: SubmitYieldStepData;
 }
 
 export interface HandleYieldRedeemParams extends BaseRequestSign {
@@ -2238,10 +2244,23 @@ export interface HandleYieldRedeemParams extends BaseRequestSign {
   amount: string;
 }
 
-export type SubmitYieldStep = SubmitJoinNativeStaking | SubmitJoinNominationPool | SubmitAcalaLiquidStaking;
+export type SubmitYieldStepData = { // TODO
+  exchangeRate: number, // reward token amount = input token amount * exchange rate
+  inputTokenSlug: string,
+  rewardTokenSlug: string,
+  amount: string,
+  feeTokenSlug: string
+};
 
 export interface SubmitAcalaLiquidStaking {
   feePaidWithInputAsset: boolean,
+  inputTokenSlug: string,
+  amount: string,
+  rewardTokenSlug: string,
+  estimatedAmountReceived: string
+}
+
+export interface SubmitParallelLiquidStaking {
   inputTokenSlug: string,
   amount: string,
   rewardTokenSlug: string,

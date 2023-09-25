@@ -2227,7 +2227,7 @@ export interface HandleYieldStepParams extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
   path: OptimalYieldPath;
-  data: SubmitYieldStepData;
+  data: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool;
   currentStep: number;
 }
 
@@ -2238,7 +2238,7 @@ export interface ValidateYieldProcessParams {
   path: OptimalYieldPath;
   address: string;
   amount: string;
-  data?: SubmitYieldStepData;
+  data?: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool;
 }
 
 export interface HandleYieldRedeemParams extends BaseRequestSign {

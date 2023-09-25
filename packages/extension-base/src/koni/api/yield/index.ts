@@ -132,7 +132,7 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams):
 // TODO: compare to ED
 // TODO: compare to minAmount
 // TODO: simulate the whole process, compare to fee (step by step)
-export function validateYieldProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data?: SubmitYieldStepData): TransactionError[] {
+export function validateYieldProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data?: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool): TransactionError[] {
   return [];
 
   // const poolInfo = params.poolInfo;

@@ -2,15 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import {
-  NominationPoolInfo,
-  OptimalYieldPath,
-  SubmitJoinNativeStaking, SubmitJoinNominationPool,
-  SubmitYieldStepData,
-  ValidatorInfo,
-  YieldPoolInfo,
-  YieldPoolType
-} from '@subwallet/extension-base/background/KoniTypes';
+import { NominationPoolInfo, OptimalYieldPath, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, ValidatorInfo, YieldPoolInfo, YieldPoolType, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { getYieldNativeStakingValidators, getYieldNominationPools, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -69,6 +61,19 @@ export async function handleYieldStep (
     currentStep,
     data
   });
+}
+
+export function getJoinYieldParams (yieldPoolInfo: YieldPoolInfo, amount: string, feeStructure: YieldTokenBaseInfo): SubmitYieldStepData {
+  // @ts-ignore
+  const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 0;
+
+  return {
+    exchangeRate,
+    inputTokenSlug: yieldPoolInfo.inputAssets[0],
+    rewardTokenSlug: yieldPoolInfo.rewardAssets[0],
+    amount,
+    feeTokenSlug: feeStructure.slug
+  };
 }
 
 export async function handleValidateYield (

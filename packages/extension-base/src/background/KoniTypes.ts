@@ -2207,7 +2207,8 @@ export enum YieldCompoundingPeriod {
 export interface YieldAssetEarningStats {
   slug: string
   apr?: number,
-  apy?: number
+  apy?: number,
+  exchangeRate?: number
 }
 
 export interface YieldPoolStats {

@@ -3886,6 +3886,7 @@ export default class KoniExtension {
       }, data, path, inputData.currentStep);
 
     console.log('extrinsic', extrinsic.toHex());
+    console.log('txData', txData);
 
     return await this.#koniState.transactionService.handleTransaction({
       address,

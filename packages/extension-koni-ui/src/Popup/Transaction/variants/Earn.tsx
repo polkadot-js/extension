@@ -30,7 +30,7 @@ import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import { fetchEarningChainValidators, handleValidateYield, handleYieldStep } from '../helper';
+import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../helper';
 import { FreeBalanceToStake, TransactionContent } from '../parts';
 
 interface Props extends ThemeProps {
@@ -171,12 +171,14 @@ const Component = () => {
 
     if (processState.feeStructure) {
       processState.feeStructure.forEach((fee) => {
-        const asset = chainAsset[fee.slug];
-        const feeDecimals = _getAssetDecimals(asset);
-        const priceValue = asset.priceId ? priceMap[asset.priceId] : 0;
-        const feeNumb = priceValue * (fee.amount ? (parseFloat(fee.amount) / (10 ** feeDecimals)) : 0);
+        if (fee.slug !== '') {
+          const asset = chainAsset[fee.slug];
+          const feeDecimals = _getAssetDecimals(asset);
+          const priceValue = asset.priceId ? priceMap[asset.priceId] : 0;
+          const feeNumb = priceValue * (fee.amount ? (parseFloat(fee.amount) / (10 ** feeDecimals)) : 0);
 
-        _totalFee += feeNumb;
+          _totalFee += feeNumb;
+        }
       });
     }
 
@@ -308,6 +310,9 @@ const Component = () => {
     const currentAmount = values[`${formFieldPrefix}0`];
 
     let data;
+    const isFirstStep = processState.currentStep === 0;
+
+    const submitStep = isFirstStep ? processState.currentStep + 1 : processState.currentStep;
 
     if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL && pool) {
       const selectedPool = getSelectedPool(pool);
@@ -316,18 +321,16 @@ const Component = () => {
         amount: currentAmount,
         selectedPool
       } as SubmitJoinNominationPool;
-    } else {
+    } else if (currentPoolInfo.type === YieldPoolType.NATIVE_STAKING && pool) {
       const selectedValidators = getSelectedValidators(parseNominations(nominate));
 
       data = {
         amount: currentAmount,
         selectedValidators
       } as SubmitJoinNativeStaking;
+    } else {
+      data = getJoinYieldParams(currentPoolInfo, currentAmount, processState.feeStructure[submitStep]);
     }
-
-    const isFirstStep = processState.currentStep === 0;
-
-    const submitStep = isFirstStep ? processState.currentStep + 1 : processState.currentStep;
 
     const submitPromise: Promise<SWTransactionResponse> = handleYieldStep(
       from,

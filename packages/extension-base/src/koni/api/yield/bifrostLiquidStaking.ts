@@ -102,7 +102,7 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
 export async function generatePathForBifrostLiquidStaking (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
   const bnAmount = new BN(params.amount);
   const result: OptimalYieldPath = {
-    totalFee: [],
+    totalFee: [{ slug: '' }],
     steps: [DEFAULT_YIELD_FIRST_STEP]
   };
 

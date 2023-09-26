@@ -191,9 +191,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       children: t('Start staking'),
       shape: 'circle',
       size: 'xs',
-      onClick: onClickStakeMore
+      onClick: preCheck(onClickStakeMore, ExtrinsicType.STAKING_BOND)
     };
-  }, [onClickStakeMore, t]);
+  }, [onClickStakeMore, preCheck, t]);
 
   const emptyStakingList = useCallback(() => {
     return (

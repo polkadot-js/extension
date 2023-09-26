@@ -19,12 +19,13 @@ import styled from 'styled-components';
 type Props = TokenItemProps & ThemeProps & {
   address?: string;
   chain?: string;
+  slug: string;
   onClickCopyBtn?: () => void;
   onClickQrBtn?: () => void;
 };
 
-function Component (
-  { address, chain, className, name, onClickCopyBtn, onClickQrBtn, onPressItem, symbol, ...restProps }: Props) {
+const Component = (props: Props) => {
+  const { address, chain, className, name, onClickCopyBtn, onClickQrBtn, onPressItem, slug, symbol, ...restProps } = props;
   const chainInfo = useFetchChainInfo(chain || '');
   const notify = useNotification();
   const { t } = useTranslation();
@@ -101,11 +102,11 @@ function Component (
           )
         }
         subName={chainInfo.name}
-        symbol={symbol?.toLowerCase()}
+        symbol={slug.toLowerCase()}
       />
     </div>
   );
-}
+};
 
 export const TokenSelectionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({

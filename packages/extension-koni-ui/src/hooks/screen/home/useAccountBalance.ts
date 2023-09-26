@@ -61,16 +61,21 @@ function getDefaultTokenGroupBalance (
   multiChainAsset?: _MultiChainAsset
 ): TokenBalanceItemType {
   let symbol: string;
+  let logoKey: string;
 
   // note: tokenGroupKey is either multiChainAsset or a tokenSlug
   // Thus, multiChainAsset may be undefined
   if (multiChainAsset) {
     symbol = _getMultiChainAssetSymbol(multiChainAsset);
+    logoKey = multiChainAsset.slug;
   } else {
-    symbol = _getAssetSymbol(assetRegistryMap[tokenGroupKey]);
+    const asset = assetRegistryMap[tokenGroupKey];
+
+    symbol = _getAssetSymbol(asset);
+    logoKey = asset.slug;
   }
 
-  return getDefaultBalanceItem(tokenGroupKey, symbol, symbol.toLowerCase());
+  return getDefaultBalanceItem(tokenGroupKey, symbol, logoKey.toLowerCase());
 }
 
 function getDefaultTokenBalance (
@@ -79,7 +84,7 @@ function getDefaultTokenBalance (
 ): TokenBalanceItemType {
   const symbol = _getAssetSymbol(chainAsset);
 
-  return getDefaultBalanceItem(tokenSlug, symbol, symbol.toLowerCase());
+  return getDefaultBalanceItem(tokenSlug, symbol, chainAsset.slug.toLowerCase());
 }
 
 function getAccountBalance (

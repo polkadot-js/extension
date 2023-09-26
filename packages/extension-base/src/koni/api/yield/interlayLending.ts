@@ -185,7 +185,7 @@ export async function getInterlayLendingExtrinsic (address: string, params: Opti
     txChain: params.poolInfo.chain,
     extrinsicType: ExtrinsicType.MINT_QDOT,
     extrinsic,
-    txData: undefined,
+    txData: inputData,
     transferNativeAmount: '0'
   };
 }

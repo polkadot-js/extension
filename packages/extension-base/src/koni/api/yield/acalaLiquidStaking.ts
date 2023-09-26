@@ -292,7 +292,7 @@ export async function getAcalaLiquidStakingExtrinsic (address: string, params: O
     txChain: params.poolInfo.chain,
     extrinsicType: ExtrinsicType.MINT_LDOT,
     extrinsic,
-    txData: undefined,
+    txData: inputData,
     transferNativeAmount: '0'
   };
 }

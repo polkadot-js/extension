@@ -21,6 +21,7 @@ function Component (
     onPressItem,
     priceChangeStatus,
     priceValue,
+    slug,
     symbol,
     total }: Props) {
   // todo: Update BalanceItem in react-ui lib

@@ -14,6 +14,7 @@ import BondingReducer from './feature/Bonding';
 import AssetRegistryReducer from './feature/common/AssetRegistry';
 import ChainStoreReducer from './feature/common/ChainStore';
 import CrowdloanReducer from './feature/Crowdloan';
+import DAppReducer from './feature/DApp';
 import MantaPayReducer from './feature/MantaPay';
 import NftReducer from './feature/Nft';
 import PriceReducer from './feature/Price';
@@ -54,7 +55,10 @@ const rootReducers = combineReducers({
   uiViewState: UIViewStateReducer,
 
   // wallet connect
-  walletConnect: WalletConnectReducer
+  walletConnect: WalletConnectReducer,
+
+  // dApp
+  dApp: DAppReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducers);

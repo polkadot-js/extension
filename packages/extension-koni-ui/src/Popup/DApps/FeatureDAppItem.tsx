@@ -1,21 +1,24 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DAppInfo } from '@subwallet/extension-koni-ui/Popup/DApps/predefined';
+import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Image } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { GlobeHemisphereWest } from 'phosphor-react';
-import React from 'react';
+import React, { Context, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 type Props = ThemeProps & DAppInfo;
 
 function Component (props: Props): React.ReactElement<Props> {
-  const { className = '', description, icon, name, previewImage,
-    subTitle, url } = props;
+  const { className = '', description, icon, preview_image: previewImage, subtitle,
+    title, url } = props;
+
+  const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
 
   const { t } = useTranslation();
 
@@ -51,15 +54,15 @@ function Component (props: Props): React.ReactElement<Props> {
           <Image
             className={CN('__item-logo')}
             height={'100%'}
-            src={icon}
+            src={icon || logoMap.default as string}
             width={'100%'}
           />
           <div className={'__item-title-group'}>
             <div className='__item-title'>
-              {name}
+              {title}
             </div>
             <div className='__item-subtitle'>
-              {subTitle}
+              {subtitle}
             </div>
           </div>
         </div>

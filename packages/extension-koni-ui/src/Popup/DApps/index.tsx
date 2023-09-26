@@ -7,11 +7,13 @@ import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/No
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
-import { useFilterModal } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import DAppItem from '@subwallet/extension-koni-ui/Popup/DApps/DAppItem';
 import FeatureDAppItem from '@subwallet/extension-koni-ui/Popup/DApps/FeatureDAppItem';
-import { DAppCategoryType, DAppInfo, predefinedDApps } from '@subwallet/extension-koni-ui/Popup/DApps/predefined';
+import { dAppCategories } from '@subwallet/extension-koni-ui/Popup/DApps/predefined';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { DAppCategoryType, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { ButtonProps, Icon, ModalContext, SwHeader } from '@subwallet/react-ui';
 import { FadersHorizontal, X } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -26,9 +28,6 @@ type Props = ThemeProps;
 
 const FILTER_MODAL_ID = 'dapp-filter-modal';
 
-const items = predefinedDApps.dApps;
-const featureItems = predefinedDApps.featureDApps;
-
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { setTitle } = useContext(WebUIContext);
@@ -40,6 +39,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { activeModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
   const { goHome } = useDefaultNavigate();
+  const { dApps, featureDApps } = useSelector((state: RootState) => state.dApp);
 
   useEffect(() => {
     if (location.pathname === '/dapps') {
@@ -48,7 +48,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [location.pathname, setTitle, t]);
 
   const filterOptions = useMemo(() => [
-    ...predefinedDApps.categories.map((c) => ({
+    ...dAppCategories.map((c) => ({
       label: t(c.name),
       value: c.id
     }))
@@ -84,8 +84,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
     return (
-      item.name.toLowerCase().includes(searchTextLowerCase)
-      // || item.subTitle.toLowerCase().includes(searchTextLowerCase)
+      item.title.toLowerCase().includes(searchTextLowerCase) ||
+      item.subtitle.toLowerCase().includes(searchTextLowerCase)
     );
   }, []);
 
@@ -102,8 +102,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       return filterTabFunction(_item) && filterFunction(_item) && searchFunction(_item, searchInput);
     };
 
-    return items.filter(_filterFunction);
-  }, [filterFunction, searchFunction, searchInput, selectedFilterTab]);
+    return dApps.filter(_filterFunction);
+  }, [dApps, filterFunction, searchFunction, searchInput, selectedFilterTab]);
 
   const onSelectFilterTab = useCallback((value: string) => {
     setSelectedFilterTab(value);
@@ -151,7 +151,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       >
         <div className={'__feature-area'}>
           {
-            featureItems.map((i, index) => (
+            featureDApps.map((i, index) => (
               <FeatureDAppItem
                 className={'__feature-dapp-item'}
                 key={`${i.id}-${index}`}

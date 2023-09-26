@@ -4,26 +4,29 @@
 import NetworkGroup from '@subwallet/extension-koni-ui/components/MetaInfo/parts/NetworkGroup';
 import { DAPPS_FAVORITE } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_DAPPS_FAVORITE } from '@subwallet/extension-koni-ui/constants/dapps';
-import { dAppCategoryMap, DAppInfo } from '@subwallet/extension-koni-ui/Popup/DApps/predefined';
+import { dAppCategoryMap } from '@subwallet/extension-koni-ui/Popup/DApps/predefined';
+import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Image, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import CN from 'classnames';
 import { Star } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import React, { Context, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps & DAppInfo;
 
 function Component (props: Props): React.ReactElement<Props> {
   const { categories, chains,
-    className = '', description, icon, id, name,
-    subTitle, url } = props;
+    className = '', description, icon, id, subtitle,
+    title, url } = props;
   const { t } = useTranslation();
   const [dAppsFavorite, setDAppsFavorite] = useLocalStorage(DAPPS_FAVORITE, DEFAULT_DAPPS_FAVORITE);
+  const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
 
   const onClickStar = useCallback((event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
@@ -44,15 +47,15 @@ function Component (props: Props): React.ReactElement<Props> {
         <Image
           className={CN('__item-logo')}
           height={'100%'}
-          src={icon}
+          src={icon || logoMap.default as string}
           width={'100%'}
         />
         <div className={'__item-title-group'}>
           <div className='__item-title'>
-            {name}
+            {title}
           </div>
           <div className='__item-subtitle'>
-            {subTitle}
+            {subtitle}
           </div>
         </div>
         <Button

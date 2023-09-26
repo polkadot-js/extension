@@ -63,7 +63,7 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
 export async function generatePathForParallelLiquidStaking (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
   const bnAmount = new BN(params.amount);
   const result: OptimalYieldPath = {
-    totalFee: [],
+    totalFee: [{ slug: '' }],
     steps: [DEFAULT_YIELD_FIRST_STEP]
   };
 
@@ -197,7 +197,7 @@ export async function getParallelLiquidStakingExtrinsic (address: string, params
     txChain: params.poolInfo.chain,
     extrinsicType: ExtrinsicType.MINT_SDOT,
     extrinsic,
-    txData: undefined,
+    txData: inputData,
     transferNativeAmount: '0'
   };
 }

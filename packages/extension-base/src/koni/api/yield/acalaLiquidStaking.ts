@@ -81,7 +81,7 @@ export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi,
 export async function generatePathForAcalaLiquidStaking (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
   const bnAmount = new BN(params.amount);
   const result: OptimalYieldPath = {
-    totalFee: [],
+    totalFee: [{ slug: '' }],
     steps: [DEFAULT_YIELD_FIRST_STEP]
   };
 
@@ -292,7 +292,7 @@ export async function getAcalaLiquidStakingExtrinsic (address: string, params: O
     txChain: params.poolInfo.chain,
     extrinsicType: ExtrinsicType.MINT_LDOT,
     extrinsic,
-    txData: undefined,
+    txData: inputData,
     transferNativeAmount: '0'
   };
 }

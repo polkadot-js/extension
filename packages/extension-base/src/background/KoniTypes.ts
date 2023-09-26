@@ -531,6 +531,9 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.MINT_VDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.REDEEM_VDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_LDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_SDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_QDOT]: RequestYieldStepSubmit,
+  // TODO: add redeem
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
@@ -2204,7 +2207,8 @@ export enum YieldCompoundingPeriod {
 export interface YieldAssetEarningStats {
   slug: string
   apr?: number,
-  apy?: number
+  apy?: number,
+  exchangeRate?: number
 }
 
 export interface YieldPoolStats {
@@ -2224,7 +2228,7 @@ export interface HandleYieldStepParams extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
   path: OptimalYieldPath;
-  data: SubmitYieldStepData;
+  data: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool;
   currentStep: number;
 }
 
@@ -2235,7 +2239,7 @@ export interface ValidateYieldProcessParams {
   path: OptimalYieldPath;
   address: string;
   amount: string;
-  data?: SubmitYieldStepData;
+  data?: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool;
 }
 
 export interface HandleYieldRedeemParams extends BaseRequestSign {
@@ -2251,21 +2255,6 @@ export type SubmitYieldStepData = { // TODO
   amount: string,
   feeTokenSlug: string
 };
-
-export interface SubmitAcalaLiquidStaking {
-  feePaidWithInputAsset: boolean,
-  inputTokenSlug: string,
-  amount: string,
-  rewardTokenSlug: string,
-  estimatedAmountReceived: string
-}
-
-export interface SubmitParallelLiquidStaking {
-  inputTokenSlug: string,
-  amount: string,
-  rewardTokenSlug: string,
-  estimatedAmountReceived: string
-}
 
 export interface SubmitJoinNativeStaking {
   amount: string,

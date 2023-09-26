@@ -4,7 +4,7 @@
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitYieldStepData, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 
@@ -62,8 +62,8 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
 export async function generatePathForInterlayLending (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
   const bnAmount = new BN(params.amount);
   const result: OptimalYieldPath = {
-    totalFee: [],
-    steps: []
+    totalFee: [{ slug: '' }],
+    steps: [DEFAULT_YIELD_FIRST_STEP]
   };
 
   const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
@@ -185,7 +185,7 @@ export async function getInterlayLendingExtrinsic (address: string, params: Opti
     txChain: params.poolInfo.chain,
     extrinsicType: ExtrinsicType.MINT_QDOT,
     extrinsic,
-    txData: undefined,
+    txData: inputData,
     transferNativeAmount: '0'
   };
 }

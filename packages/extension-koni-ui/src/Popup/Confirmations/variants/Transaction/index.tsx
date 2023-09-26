@@ -41,7 +41,10 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
       return ClaimRewardTransactionConfirmation;
     case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
       return CancelUnstakeTransactionConfirmation;
-    case ExtrinsicType.JOIN_YIELD_POOL:
+    case ExtrinsicType.MINT_QDOT:
+    case ExtrinsicType.MINT_LDOT:
+    case ExtrinsicType.MINT_SDOT:
+    case ExtrinsicType.MINT_VDOT:
       return JoinYieldPoolConfirmation;
     default:
       return BaseTransactionConfirmation;

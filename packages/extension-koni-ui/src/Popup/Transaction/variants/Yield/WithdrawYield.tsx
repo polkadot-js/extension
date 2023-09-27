@@ -10,7 +10,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetNativeTokenBasicInfo, useGetYieldInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import { yieldSubmitStakingWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, WithdrawYieldParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
@@ -106,7 +106,7 @@ const Component: React.FC = () => {
     }
 
     setTimeout(() => {
-      submitStakeWithdrawal(params)
+      yieldSubmitStakingWithdrawal(params)
         .then(onSuccess)
         .catch(onError)
         .finally(() => {

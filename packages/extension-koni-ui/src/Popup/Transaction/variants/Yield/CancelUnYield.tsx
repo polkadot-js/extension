@@ -7,7 +7,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, CancelUnstakeSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetYieldInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import { yieldSubmitStakingCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { CancelUnYieldParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
@@ -87,7 +87,7 @@ const Component: React.FC = () => {
     const { chain, from, unstake: unstakeIndex } = values;
 
     setTimeout(() => {
-      submitStakeCancelWithdrawal({
+      yieldSubmitStakingCancelWithdrawal({
         address: from,
         chain: chain,
         selectedUnstaking: nominatorMetadata.metadata.unstakings[parseInt(unstakeIndex)]

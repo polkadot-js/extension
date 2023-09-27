@@ -220,6 +220,10 @@ const Component = () => {
   }, [currentPoolInfo.type]);
 
   const renderMetaInfo = useCallback(() => {
+    const asset = currentPoolInfo?.inputAssets[0] || '';
+    const assetDecimals = chainAsset[asset].decimals || 0;
+    const value = currentAmount ? parseFloat(currentAmount) / (10 ** assetDecimals) : 0;
+
     return (
       <MetaInfo
         labelColorScheme={'gray'}
@@ -243,6 +247,23 @@ const Component = () => {
             );
           })
         }
+        {
+          currentPoolInfo?.stats?.assetEarning?.map((item) => {
+            if (item.exchangeRate === undefined) {
+              return null;
+            }
+
+            return (
+              <MetaInfo.Number
+                decimals={0}
+                key={item.slug}
+                label={t('Earn')}
+                prefix={chainAsset[item.slug].symbol}
+                value={value * item.exchangeRate}
+              />
+            );
+          })
+        }
         <MetaInfo.Number
           decimals={0}
           label={t('Estimated fee')}
@@ -251,7 +272,7 @@ const Component = () => {
         />
       </MetaInfo>
     );
-  }, [t, _assetEarnings, estimatedFee]);
+  }, [currentPoolInfo, chainAsset, currentAmount, _assetEarnings, t, estimatedFee]);
 
   const getSelectedValidators = useCallback((nominations: string[]) => {
     const validatorList = validatorInfoMap[currentPoolInfo.chain];
@@ -500,7 +521,8 @@ const Component = () => {
                 const _asset = chainAsset[asset];
                 const assetDecimals = _asset ? _getAssetDecimals(_asset) : 0;
                 const priceValue = _asset && _asset.priceId ? priceMap[_asset.priceId] : 0;
-                const transformAmount = currentAmount ? (parseFloat(currentAmount) / (10 ** assetDecimals)) * priceValue : 0;
+                const value = currentAmount ? parseFloat(currentAmount) / (10 ** assetDecimals) : 0;
+                const transformAmount = value * priceValue;
 
                 return (
                   <div
@@ -552,7 +574,6 @@ const Component = () => {
                   </div>
                 );
               })}
-
               <Form.Item
                 hidden={currentPoolInfo.type !== YieldPoolType.NOMINATION_POOL}
                 name={'pool'}

@@ -7,7 +7,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AddressBookInfo, AmountData, AmountDataWithId, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BasicTxWarningCode, BondingOptionParams, BrowserConfirmationType, ChainStakingMetadata, ChainType, CreateDeriveAccountInfo, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, HandleYieldRedeemParams, KeyringState, MantaPayEnableMessage, MantaPayEnableParams, MantaPayEnableResponse, MantaPaySyncState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptimalYieldPathParams, OptimalYieldPathRequest, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAddInjectedAccounts, RequestApproveConnectWalletSession, RequestApproveWalletConnectNotSupport, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeEnableChainPatrol, RequestChangeLanguage, RequestChangeMasterPassword, RequestChangeShowBalance, RequestChangeShowZeroBalance, RequestChangeTimeAutoLock, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestConnectWalletConnect, RequestCrossChainTransfer, RequestDeleteContactAccount, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestDisconnectWalletConnectSession, RequestEditContactAccount, RequestFindRawMetadata, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestPassPhishingPage, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectConnectWalletSession, RequestRejectExternalRequest, RequestRejectWalletConnectNotSupport, RequestRemoveInjectedAccounts, RequestResetWallet, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestUnlockType, RequestYieldStepSubmit, ResolveAddressToDomainRequest, ResolveDomainRequest, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseFindRawMetadata, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResetWallet, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidateYieldProcessParams, ValidatorInfo, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AddressBookInfo, AmountData, AmountDataWithId, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BasicTxWarningCode, BondingOptionParams, BrowserConfirmationType, ChainStakingMetadata, ChainType, CreateDeriveAccountInfo, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, HandleYieldRedeemParams, KeyringState, MantaPayEnableMessage, MantaPayEnableParams, MantaPayEnableResponse, MantaPaySyncState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptimalYieldPathParams, OptimalYieldPathRequest, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAddInjectedAccounts, RequestApproveConnectWalletSession, RequestApproveWalletConnectNotSupport, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeEnableChainPatrol, RequestChangeLanguage, RequestChangeMasterPassword, RequestChangeShowBalance, RequestChangeShowZeroBalance, RequestChangeTimeAutoLock, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestConnectWalletConnect, RequestCrossChainTransfer, RequestDeleteContactAccount, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestDisconnectWalletConnectSession, RequestEditContactAccount, RequestFindRawMetadata, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestPassPhishingPage, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectConnectWalletSession, RequestRejectExternalRequest, RequestRejectWalletConnectNotSupport, RequestRemoveInjectedAccounts, RequestResetWallet, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestUnlockType, RequestYieldStepSubmit, ResolveAddressToDomainRequest, ResolveDomainRequest, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseFindRawMetadata, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResetWallet, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidateYieldProcessParams, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeCancel, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApproveSignature, RequestSigningCancel, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseType, SigningRequest, WindowOpenParams } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, XCM_MIN_AMOUNT_RATIO } from '@subwallet/extension-base/constants';
@@ -3994,6 +3994,126 @@ export default class KoniExtension {
     );
   }
 
+  private async yieldSubmitNominationPoolUnstaking (inputData: RequestStakePoolingUnbonding): Promise<SWTransactionResponse> {
+    const { amount, chain, nominatorMetadata } = inputData;
+
+    const yieldPoolInfo = await this.#koniState.getYieldPoolStakingInfo(chain, YieldPoolType.NOMINATION_POOL);
+    const chainStakingMetadata = yieldPoolInfo?.metadata as ChainStakingMetadata;
+
+    if (!chainStakingMetadata || !nominatorMetadata) {
+      return this.#koniState.transactionService
+        .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const unbondingValidation = validateRelayUnbondingCondition(amount, chainStakingMetadata, nominatorMetadata);
+
+    if (!amount || unbondingValidation.length > 0) {
+      return this.#koniState.transactionService
+        .generateBeforeHandleResponseErrors(unbondingValidation);
+    }
+
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getPoolingUnbondingExtrinsic(substrateApi, amount, nominatorMetadata);
+
+    return await this.#koniState.transactionService.handleTransaction({
+      address: nominatorMetadata.address,
+      chain,
+      transaction: extrinsic,
+      data: inputData,
+      extrinsicType: ExtrinsicType.STAKING_LEAVE_POOL,
+      chainType: ChainType.SUBSTRATE
+    });
+  }
+
+  private async yieldSubmitUnstaking (inputData: RequestUnbondingSubmit): Promise<SWTransactionResponse> {
+    const { amount, chain, nominatorMetadata, validatorAddress } = inputData;
+
+    const yieldPoolInfo = await this.#koniState.getYieldPoolStakingInfo(chain, YieldPoolType.NATIVE_STAKING);
+    const chainStakingMetadata = yieldPoolInfo?.metadata as ChainStakingMetadata;
+
+    if (!chainStakingMetadata || !nominatorMetadata) {
+      return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const unbondingValidation = validateUnbondingCondition(nominatorMetadata, amount, chain, chainStakingMetadata, validatorAddress);
+
+    if (!amount || unbondingValidation.length > 0) {
+      return this.#koniState.transactionService.generateBeforeHandleResponseErrors(unbondingValidation);
+    }
+
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
+
+    return await this.#koniState.transactionService.handleTransaction({
+      address: nominatorMetadata.address,
+      chain: chain,
+      transaction: extrinsic,
+      data: inputData,
+      extrinsicType: ExtrinsicType.STAKING_UNBOND,
+      chainType: ChainType.SUBSTRATE
+    });
+  }
+
+  private async yieldSubmitWithdrawal (inputData: RequestStakeWithdrawal): Promise<SWTransactionResponse> {
+    const { chain, nominatorMetadata, validatorAddress } = inputData;
+
+    if (!nominatorMetadata) {
+      return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
+    }
+
+    const dotSamaApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, chain, nominatorMetadata, validatorAddress);
+
+    return await this.#koniState.transactionService.handleTransaction({
+      address: nominatorMetadata.address,
+      chain: chain,
+      transaction: extrinsic,
+      data: inputData,
+      extrinsicType: ExtrinsicType.STAKING_WITHDRAW,
+      chainType: ChainType.SUBSTRATE
+    });
+  }
+
+  private async yieldSubmitCancelWithdrawal (inputData: RequestStakeCancelWithdrawal): Promise<SWTransactionResponse> {
+    const { address, chain, selectedUnstaking } = inputData;
+
+    if (!chain || !selectedUnstaking) {
+      return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
+    }
+
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getCancelWithdrawalExtrinsic(substrateApi, chain, selectedUnstaking);
+
+    return await this.#koniState.transactionService.handleTransaction({
+      address,
+      chain,
+      transaction: extrinsic,
+      data: inputData,
+      extrinsicType: ExtrinsicType.STAKING_CANCEL_UNSTAKE,
+      chainType: ChainType.SUBSTRATE
+    });
+  }
+
+  private async yieldSubmitClaimReward (inputData: RequestStakeClaimReward): Promise<SWTransactionResponse> {
+    const { address, bondReward, chain, stakingType } = inputData;
+
+    if (!address) {
+      return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
+    }
+
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getClaimRewardExtrinsic(substrateApi, chain, address, stakingType, bondReward);
+
+    return await this.#koniState.transactionService.handleTransaction({
+      address,
+      chain: chain,
+      transaction: extrinsic,
+      data: inputData,
+      extrinsicType: ExtrinsicType.STAKING_CLAIM_REWARD,
+      chainType: ChainType.SUBSTRATE
+    });
+  }
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -4189,6 +4309,16 @@ export default class KoniExtension {
         return await this.handleYieldRedeem(request as HandleYieldRedeemParams);
       case 'pri(yield.validateProcess)':
         return this.handleValidateYieldProcess(request as ValidateYieldProcessParams);
+      case 'pri(yield.staking.submitUnstaking)':
+        return await this.yieldSubmitUnstaking(request as RequestUnbondingSubmit);
+      case 'pri(yield.staking.submitWithdraw)':
+        return await this.yieldSubmitWithdrawal(request as RequestStakeWithdrawal);
+      case 'pri(yield.staking.submitCancelWithdrawal)':
+        return await this.yieldSubmitCancelWithdrawal(request as RequestStakeCancelWithdrawal);
+      case 'pri(yield.staking.submitClaimReward)':
+        return await this.yieldSubmitClaimReward(request as RequestStakeClaimReward);
+      case 'pri(yield.nominationPool.submitUnstaking)':
+        return await this.yieldSubmitNominationPoolUnstaking(request as RequestStakePoolingUnbonding);
 
       /* Account management */
       // Add account

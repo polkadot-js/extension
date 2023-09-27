@@ -9,7 +9,7 @@ import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { TagTypes } from '@subwallet/extension-koni-ui/components/EarningItem';
-import { EARNING_MANAGEMENT_DETAIL_MODAL, StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MANAGEMENT_DETAIL_MODAL, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useFetchChainInfo, useGetAccountsByStaking, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
@@ -24,6 +24,7 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
   yieldPositionMetadata: YieldPositionMetadata;
@@ -34,6 +35,8 @@ interface Props extends ThemeProps {
 export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) => {
   return unstakings.find((item) => item.validatorAddress === address);
 };
+
+const modalId = EARNING_MANAGEMENT_DETAIL_MODAL;
 
 const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMetadata }: Props) => {
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
@@ -56,23 +59,46 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
   const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
   const account = isAllAccount ? null : currentAccount;
 
+  const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
+  const [, setUnStakeStorage] = useLocalStorage(UN_YIELD_TRANSACTION, DEFAULT_UN_YIELD_PARAMS);
+
   const stakingAccounts = useGetAccountsByStaking(chain, type);
 
   const onClickStakeMoreBtn = useCallback(() => {
-    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL);
+    inactiveModal(modalId);
     setTimeout(() => {
-      navigate(`/transaction/stake/${yieldPositionMetadata.type}/${yieldPositionMetadata.chain}`);
+      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+      setYieldStorage({
+        ...DEFAULT_YIELD_PARAMS,
+        method: yieldPoolInfo.slug,
+        from: address,
+        chain: yieldPoolInfo.chain,
+        asset: yieldPoolInfo.inputAssets[0]
+      });
+      navigate('/transaction/earn');
     }, 300);
-  }, [inactiveModal, navigate, yieldPositionMetadata]);
+  }, [currentAccount, inactiveModal, navigate, setYieldStorage, yieldPoolInfo]);
 
   const onClickUnstakeBtn = useCallback(() => {
-    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL);
-    setTimeout(() => navigate(`/transaction/unstake/${yieldPositionMetadata.type}/${yieldPositionMetadata.chain}`), 300);
-  }, [inactiveModal, navigate, yieldPositionMetadata]);
+    inactiveModal(modalId);
+    setTimeout(() => {
+      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+      setUnStakeStorage({
+        ...DEFAULT_UN_YIELD_PARAMS,
+        from: address,
+        chain: yieldPoolInfo.chain,
+        method: yieldPoolInfo.slug,
+        asset: yieldPoolInfo.inputAssets[0]
+      });
+      navigate('/transaction/un-yield');
+    }, 300);
+  }, [currentAccount, inactiveModal, navigate, setUnStakeStorage, yieldPoolInfo]);
 
   const onClickMoreAction = useCallback(() => {
     activeModal(MORE_ACTION_MODAL);
-    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL);
+    inactiveModal(modalId);
   }, [activeModal, inactiveModal]);
 
   const footer = () => {
@@ -109,7 +135,7 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
 
   const onCloseModal = useCallback(() => {
     setSeeMore(false);
-    inactiveModal(EARNING_MANAGEMENT_DETAIL_MODAL);
+    inactiveModal(modalId);
   }, [inactiveModal]);
 
   const getStakingStatus = useCallback((status: StakingStatus) => {
@@ -199,7 +225,7 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
       className={className}
       closable={true}
       footer={footer()}
-      id={EARNING_MANAGEMENT_DETAIL_MODAL}
+      id={modalId}
       maskClosable={true}
       onCancel={onCloseModal}
       title={t(modalTitle)}

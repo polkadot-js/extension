@@ -17,7 +17,7 @@ import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -30,8 +30,8 @@ import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../helper';
-import { FreeBalanceToStake, TransactionContent } from '../parts';
+import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../../helper';
+import { FreeBalanceToStake, TransactionContent } from '../../parts';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -186,6 +186,10 @@ const Component = () => {
   }, [chainAsset, priceMap, processState.feeStructure]);
 
   const accountFilterFunc = useCallback((account: AccountJson): boolean => {
+    if (isAccountAll(account.address)) {
+      return false;
+    }
+
     const chain = chainInfoMap[currentPoolInfo.chain];
     const isEvmChain = _isChainEvmCompatible(chain);
     const isEvmAddress = isEthereumAddress(account.address);

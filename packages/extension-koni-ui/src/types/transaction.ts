@@ -56,3 +56,23 @@ export interface YieldParams extends TransactionFormBaseProps, Record<`amount-${
   nominate: string;
   pool: string;
 }
+
+export interface UnYieldParams extends TransactionFormBaseProps {
+  value: string;
+  validator: string;
+  method: string;
+}
+
+export interface WithdrawYieldParams extends TransactionFormBaseProps {
+  method: string;
+}
+
+export interface ClaimYieldParams extends TransactionFormBaseProps {
+  method: string;
+  bondReward: boolean;
+}
+
+export interface CancelUnYieldParams extends TransactionFormBaseProps {
+  unstake: string;
+  method: string;
+}

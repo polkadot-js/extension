@@ -213,7 +213,8 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
       from: address,
       to: address,
       value: inputData.amount,
-      tokenSlug: originTokenSlug
+      tokenSlug: originTokenSlug,
+      showExtraWarning: true
     };
 
     return {

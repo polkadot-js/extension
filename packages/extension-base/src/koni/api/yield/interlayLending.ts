@@ -164,7 +164,8 @@ export async function getInterlayLendingExtrinsic (address: string, params: Opti
       from: address,
       to: address,
       value: inputData.amount,
-      tokenSlug: originTokenSlug
+      tokenSlug: originTokenSlug,
+      showExtraWarning: true
     };
 
     return {

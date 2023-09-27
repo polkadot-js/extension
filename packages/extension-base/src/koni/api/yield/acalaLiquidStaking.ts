@@ -273,7 +273,8 @@ export async function getAcalaLiquidStakingExtrinsic (address: string, params: O
       from: address,
       to: address,
       value: inputData.amount,
-      tokenSlug: originTokenSlug
+      tokenSlug: originTokenSlug,
+      showExtraWarning: true
     };
 
     return {

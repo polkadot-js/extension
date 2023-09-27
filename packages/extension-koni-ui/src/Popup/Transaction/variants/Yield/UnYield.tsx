@@ -10,7 +10,7 @@ import { AccountSelector, AmountInput, HiddenInput, NominationSelector, PageWrap
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetNativeTokenBasicInfo, useGetYieldInfo, useGetYieldMetadata, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
+import { yieldSubmitNominationPoolUnstaking, yieldSubmitUnstaking } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams, UnYieldParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
@@ -183,7 +183,7 @@ const Component: React.FC = () => {
         nominatorMetadata: nominatorMetadata.metadata
       };
 
-      unbondingPromise = submitPoolUnbonding(params);
+      unbondingPromise = yieldSubmitNominationPoolUnstaking(params);
     } else {
       const params: RequestUnbondingSubmit = {
         amount: value,
@@ -195,7 +195,7 @@ const Component: React.FC = () => {
         params.validatorAddress = selectedValidator || '';
       }
 
-      unbondingPromise = submitUnbonding(params);
+      unbondingPromise = yieldSubmitUnstaking(params);
     }
 
     setLoading(true);

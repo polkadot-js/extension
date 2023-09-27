@@ -599,6 +599,26 @@ export async function validateYieldProcess (data: ValidateYieldProcessParams): P
   return sendMessage('pri(yield.validateProcess)', data);
 }
 
+export async function yieldSubmitUnstaking (data: RequestUnbondingSubmit) {
+  return sendMessage('pri(yield.staking.submitUnstaking)', data);
+}
+
+export async function yieldSubmitStakingWithdrawal (data: RequestStakeWithdrawal) {
+  return sendMessage('pri(yield.staking.submitWithdraw)', data);
+}
+
+export async function yieldSubmitStakingCancelWithdrawal (data: RequestStakeCancelWithdrawal) {
+  return sendMessage('pri(yield.staking.submitCancelWithdrawal)', data);
+}
+
+export async function yieldSubmitStakingClaimReward (data: RequestStakeClaimReward) {
+  return sendMessage('pri(yield.staking.submitClaimReward)', data);
+}
+
+export async function yieldSubmitNominationPoolUnstaking (data: RequestStakePoolingUnbonding) {
+  return sendMessage('pri(yield.nominationPool.submitUnstaking)', data);
+}
+
 export * from './accounts';
 export * from './base';
 export * from './metadata';

@@ -2427,11 +2427,18 @@ export interface KoniRequestSignatures {
   'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
   'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalYieldPath];
   'pri(yield.handleStep)': [HandleYieldStepParams, SWTransactionResponse];
-  'pri(yield.getNativeStakingValidators)': [YieldPoolInfo, ValidatorInfo[]];
-  'pri(yield.getStakingNominationPools)': [YieldPoolInfo, NominationPoolInfo[]];
   'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
   'pri(yield.submitRedeem)': [HandleYieldRedeemParams, SWTransactionResponse];
   'pri(yield.validateProcess)': [ValidateYieldProcessParams, TransactionError[]];
+
+  'pri(yield.getNativeStakingValidators)': [YieldPoolInfo, ValidatorInfo[]];
+  'pri(yield.getStakingNominationPools)': [YieldPoolInfo, NominationPoolInfo[]];
+
+  'pri(yield.staking.submitUnstaking)': [RequestUnbondingSubmit, SWTransactionResponse];
+  'pri(yield.staking.submitWithdraw)': [RequestStakeWithdrawal, SWTransactionResponse];
+  'pri(yield.staking.submitCancelWithdrawal)': [RequestStakeCancelWithdrawal, SWTransactionResponse];
+  'pri(yield.staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
+  'pri(yield.nominationPool.submitUnstaking)': [RequestStakePoolingUnbonding, SWTransactionResponse];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

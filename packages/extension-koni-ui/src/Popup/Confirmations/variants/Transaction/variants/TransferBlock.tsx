@@ -103,6 +103,17 @@ const Component: React.FC<Props> = ({ className, transaction }: Props) => {
           />
         )
       }
+      {
+        transaction.extrinsicType === ExtrinsicType.TRANSFER_XCM && xcmData?.showExtraWarning &&
+        (
+          <SwAlert
+            className={CN(className, 'alert-area')}
+            description={t('Need to add message')}
+            title={t('Need to add message')}
+            type='warning'
+          />
+        )
+      }
     </>
   );
 };

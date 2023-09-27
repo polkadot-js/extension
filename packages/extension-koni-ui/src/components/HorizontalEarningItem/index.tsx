@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingStatus, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
 import { Database, HandsClapping, Leaf, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
@@ -23,6 +24,15 @@ interface Props extends ThemeProps {
   onClickWithdrawBtn: () => void;
   yieldPoolInfo: YieldPoolInfo;
   yieldPositionInfo: YieldPositionInfo;
+}
+
+interface ButtonOptionProps {
+  icon: PhosphorIcon;
+  label?: string;
+  key: string;
+  onClick?: React.MouseEventHandler;
+  disable: boolean;
+  hidden: boolean;
 }
 
 export const TagTypes = () => {
@@ -107,11 +117,14 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { chain, description, name, type } = yieldPoolInfo;
+  const { metadata: nominatorMetadata } = yieldPositionInfo;
   const yieldPositionInfoBalance = yieldPositionInfo.balance[0];
   const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const tokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
 
-  const getStakingStatus = useCallback((status: StakingStatus) => {
+  const getStakingStatus = useMemo(() => {
+    const status = yieldPositionInfo.metadata.status;
+
     if (status === StakingStatus.EARNING_REWARD) {
       return StakingStatusUi.active;
     }
@@ -125,7 +138,88 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return StakingStatusUi.inactive;
+  }, [yieldPositionInfo.metadata.status]);
+
+  const onClickButton = useCallback((callback: VoidFunction): React.MouseEventHandler => {
+    return (event) => {
+      event.preventDefault();
+      callback();
+    };
   }, []);
+
+  const availableActions = useMemo(() => {
+    if (!nominatorMetadata) {
+      return [];
+    }
+
+    return getStakingAvailableActionsByNominator(nominatorMetadata);
+  }, [nominatorMetadata]);
+
+  const buttons = useMemo((): ButtonOptionProps[] => {
+    const result: ButtonOptionProps[] = [];
+
+    // Calculator
+    result.push({
+      disable: false,
+      icon: PlusMinus,
+      onClick: onClickButton(onClickCalculatorBtn),
+      key: 'calculator',
+      hidden: false
+    });
+
+    // Info
+    result.push({
+      disable: false,
+      icon: Question,
+      onClick: onClickItem && onClickButton(onClickItem),
+      key: 'info',
+      hidden: false
+    });
+
+    if (yieldPoolInfo.metadata) {
+      const actionListByChain = getStakingAvailableActionsByChain(chain, yieldPoolInfo.metadata.type);
+
+      actionListByChain.forEach((item) => {
+        const temp: ButtonOptionProps = {
+          disable: !availableActions.includes(item),
+          key: item,
+          hidden: false
+        } as ButtonOptionProps;
+
+        switch (item) {
+          case StakingAction.STAKE:
+            temp.icon = PlusCircle;
+            temp.label = t('Stake now');
+            temp.onClick = onClickButton(onClickStakeBtn);
+            break;
+          case StakingAction.CLAIM_REWARD:
+            temp.icon = Wallet;
+            temp.onClick = onClickButton(noop);
+            temp.label = t('Claim rewards');
+            break;
+          case StakingAction.WITHDRAW:
+            temp.icon = StopCircle;
+            temp.onClick = onClickButton(onClickWithdrawBtn);
+            temp.label = t('Withdraw');
+            break;
+          case StakingAction.UNSTAKE:
+            temp.icon = MinusCircle;
+            temp.onClick = onClickButton(onClickUnStakeBtn);
+            temp.label = t('Unstake');
+            break;
+          case StakingAction.CANCEL_UNSTAKE:
+            temp.icon = MinusCircle;
+            temp.onClick = onClickButton(onClickCancelUnStakeBtn);
+            temp.label = t('Cancel Unstake');
+            break;
+        }
+
+        result.push(temp);
+      });
+    }
+
+    return result;
+  }, [availableActions, chain, onClickButton, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo.metadata]);
 
   return (
     <Web3Block
@@ -152,119 +246,39 @@ const Component: React.FC<Props> = (props: Props) => {
           </>
 
           <div className='earning-item-footer'>
-            <Button
-              className='earning-item-icon-btn'
-              icon={(
-                <Icon
-                  phosphorIcon={PlusMinus}
-                  size={'sm'}
-                />
-              )}
-              onClick={onClickCalculatorBtn}
-              shape={'circle'}
-              size={'xs'}
-              type={'ghost'}
-            />
-            <Button
-              className='earning-item-icon-btn'
-              icon={(
-                <Icon
-                  phosphorIcon={Question}
-                  size={'sm'}
-                  weight={'fill'}
-                />
-              )}
-              onClick={onClickItem}
-              shape={'circle'}
-              size={'xs'}
-              type={'ghost'}
-            />
-            <Button
-              icon={(
-                <Icon
-                  className={'earning-item-stake-btn'}
-                  phosphorIcon={PlusCircle}
-                  size={'sm'}
-                  weight={'fill'}
-                />
-              )}
-              onClick={onClickStakeBtn}
-              shape={'circle'}
-              size={'xs'}
-            >
-              {t('Stake now')}
-            </Button>
-            <Button
-              icon={(
-                <Icon
-                  className={'earning-item-stake-btn'}
-                  phosphorIcon={Wallet}
-                  size={'sm'}
-                  weight={'fill'}
-                />
-              )}
-              onClick={noop}
-              shape={'circle'}
-              size={'xs'}
-            >
-              {t('Claim rewards')}
-            </Button>
-            <Button
-              icon={(
-                <Icon
-                  className={'earning-item-stake-btn'}
-                  phosphorIcon={StopCircle}
-                  size={'sm'}
-                  weight={'fill'}
-                />
-              )}
-              onClick={onClickWithdrawBtn}
-              shape={'circle'}
-              size={'xs'}
-            >
-              {t('Withdraw')}
-            </Button>
-            <Button
-              icon={(
-                <Icon
-                  className={'earning-item-stake-btn'}
-                  phosphorIcon={MinusCircle}
-                  size={'sm'}
-                  weight={'fill'}
-                />
-              )}
-              onClick={onClickUnStakeBtn}
-              shape={'circle'}
-              size={'xs'}
-            >
-              {t('Unstake')}
-            </Button>
-            <Button
-              icon={(
-                <Icon
-                  className={'earning-item-stake-btn'}
-                  phosphorIcon={MinusCircle}
-                  size={'sm'}
-                  weight={'fill'}
-                />
-              )}
-              onClick={onClickCancelUnStakeBtn}
-              shape={'circle'}
-              size={'xs'}
-            >
-              {t('Cancel Unstake')}
-            </Button>
+            {buttons.map((item) => {
+              return (
+                <Button
+                  disabled={item.disable}
+                  icon={(
+                    <Icon
+                      className={'earning-item-stake-btn'}
+                      phosphorIcon={item.icon}
+                      size='sm'
+                      weight='fill'
+                    />
+                  )}
+                  key={item.key}
+                  onClick={item.onClick}
+                  shape='circle'
+                  size='xs'
+                >
+                  {item.label}
+                </Button>
+              );
+            })}
           </div>
         </>
       )}
+      onClick={onClickItem}
       rightItem={(
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
           <MetaInfo>
             <MetaInfo.Status
               className={'earning-status-item'}
-              statusIcon={getStakingStatus(yieldPositionInfo.metadata.status).icon}
-              statusName={t(getStakingStatus(yieldPositionInfo.metadata.status).name)}
-              valueColorSchema={getStakingStatus(yieldPositionInfo.metadata.status).schema}
+              statusIcon={getStakingStatus.icon}
+              statusName={t(getStakingStatus.name)}
+              valueColorSchema={getStakingStatus.schema}
             />
           </MetaInfo>
           <Number

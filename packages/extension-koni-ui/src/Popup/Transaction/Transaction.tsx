@@ -48,13 +48,17 @@ function Component ({ children, className, modalContent }: Props) {
     switch (action) {
       case 'stake':
         return ExtrinsicType.STAKING_JOIN_POOL;
+      case 'un-yield':
       case 'unstake':
         return ExtrinsicType.STAKING_LEAVE_POOL;
       case 'cancel-unstake':
+      case 'cancel-un-yield':
         return ExtrinsicType.STAKING_CANCEL_UNSTAKE;
       case 'claim-reward':
+      case 'claim-yield':
         return ExtrinsicType.STAKING_CLAIM_REWARD;
       case 'withdraw':
+      case 'withdraw-yield':
         return ExtrinsicType.STAKING_WITHDRAW;
       case 'compound':
         return ExtrinsicType.STAKING_COMPOUNDING;
@@ -96,6 +100,9 @@ function Component ({ children, className, modalContent }: Props) {
       case 'send-nft':
         return '/home/nfts/collections';
       case 'earn':
+      case 'un-yield':
+      case 'withdraw-yield':
+      case 'claim-yield':
         return '/home/earning';
       case 'send-fund':
       default:

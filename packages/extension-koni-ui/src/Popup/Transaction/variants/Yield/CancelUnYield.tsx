@@ -6,47 +6,46 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, CancelUnstakeSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetYieldInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
-import { CancelUnStakeParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { CancelUnYieldParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { accountFilterFunc } from '../helper';
-import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
+import { accountFilterFunc } from '../../helper';
+import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
 
 type Props = ThemeProps;
 
-const hideFields: Array<keyof CancelUnStakeParams> = ['type', 'chain', 'asset'];
-const validateFields: Array<keyof CancelUnStakeParams> = ['from'];
+const hideFields: Array<keyof CancelUnYieldParams> = ['method', 'chain', 'asset'];
+const validateFields: Array<keyof CancelUnYieldParams> = ['from'];
 
-const Component: React.FC<Props> = (props: Props) => {
-  useSetCurrentPage('/transaction/cancel-unstake');
-  const { className = '' } = props;
-
+const Component: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const dataContext = useContext(DataContext);
-  const { defaultData, onDone, persistData } = useTransactionContext<CancelUnStakeParams>();
-  const { chain, type } = defaultData;
+  const { defaultData, onDone, persistData } = useTransactionContext<CancelUnYieldParams>();
+  const { chain, method } = defaultData;
 
-  const [form] = Form.useForm<CancelUnStakeParams>();
-  const formDefault = useMemo((): CancelUnStakeParams => ({ ...defaultData }), [defaultData]);
+  const [form] = Form.useForm<CancelUnYieldParams>();
+  const formDefault = useMemo((): CancelUnYieldParams => ({ ...defaultData }), [defaultData]);
 
   const { isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
   const from = useWatchTransaction('from', form, defaultData);
 
-  const allNominatorInfo = useGetNominatorInfo(chain, type);
-  const nominatorInfo = useGetNominatorInfo(chain, type, from);
+  const allNominatorInfo = useGetYieldInfo(method);
+  const nominatorInfo = useGetYieldInfo(method, from);
   const nominatorMetadata = nominatorInfo[0];
+  const type = nominatorMetadata.metadata.type;
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -54,7 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [isChangeData, setIsChangeData] = useState(false);
 
   const goHome = useCallback(() => {
-    navigate('/home/staking');
+    navigate('/home/earning');
   }, [navigate]);
 
   const persistUnstake = useMemo(() => {
@@ -65,12 +64,12 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [defaultData.from, defaultData.unstake, from, isChangeData]);
 
-  const onFieldsChange: FormCallbacks<CancelUnStakeParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<CancelUnYieldParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
     const { empty, error } = simpleCheckForm(allFields, ['asset']);
 
-    const values = convertFieldToObject<CancelUnStakeParams>(allFields);
-    const changes = convertFieldToObject<CancelUnStakeParams>(changedFields);
+    const values = convertFieldToObject<CancelUnYieldParams>(allFields);
+    const changes = convertFieldToObject<CancelUnYieldParams>(changedFields);
 
     if (changes.from) {
       setIsChangeData(true);
@@ -82,7 +81,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
-  const onSubmit: FormCallbacks<CancelUnStakeParams>['onFinish'] = useCallback((values: CancelUnStakeParams) => {
+  const onSubmit: FormCallbacks<CancelUnYieldParams>['onFinish'] = useCallback((values: CancelUnYieldParams) => {
     setLoading(true);
 
     const { chain, from, unstake: unstakeIndex } = values;
@@ -91,7 +90,7 @@ const Component: React.FC<Props> = (props: Props) => {
       submitStakeCancelWithdrawal({
         address: from,
         chain: chain,
-        selectedUnstaking: nominatorMetadata.unstakings[parseInt(unstakeIndex)]
+        selectedUnstaking: nominatorMetadata.metadata.unstakings[parseInt(unstakeIndex)]
       })
         .then(onSuccess)
         .catch(onError)
@@ -99,12 +98,12 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         });
     }, 300);
-  }, [nominatorMetadata.unstakings, onError, onSuccess]);
+  }, [nominatorMetadata.metadata.unstakings, onError, onSuccess]);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const nomination = allNominatorInfo.find((data) => isSameAddress(data.address, account.address));
 
-    return (nomination ? nomination.unstakings.length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
+    return (nomination ? nomination.metadata.unstakings.length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
   }, [chainInfoMap, allNominatorInfo, chain, type]);
 
   const onPreCheck = usePreCheckAction(from);
@@ -113,7 +112,7 @@ const Component: React.FC<Props> = (props: Props) => {
   useInitValidateTransaction(validateFields, form, defaultData);
 
   return (
-    <div className={className}>
+    <>
       <TransactionContent>
         <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
           <Form
@@ -143,7 +142,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 defaultValue={persistUnstake}
                 disabled={!from}
                 label={t('Select an unstake request')}
-                nominators={from ? nominatorMetadata?.unstakings || [] : []}
+                nominators={from ? nominatorMetadata?.metadata.unstakings || [] : []}
               />
             </Form.Item>
           </Form>
@@ -181,11 +180,28 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Approve')}
         </Button>
       </TransactionFooter>
-    </div>
+    </>
   );
 };
 
-const CancelUnstake = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Wrapper: React.FC<Props> = (props: Props) => {
+  const { className } = props;
+
+  useSetCurrentPage('/transaction/cancel-un-yield');
+
+  const dataContext = useContext(DataContext);
+
+  return (
+    <PageWrapper
+      className={CN(className, 'page-wrapper')}
+      resolve={dataContext.awaitStores(['yieldPool'])}
+    >
+      <Component />
+    </PageWrapper>
+  );
+};
+
+const CancelUnYield = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
     flex: 1,
     display: 'flex',
@@ -219,4 +235,4 @@ const CancelUnstake = styled(Component)<Props>(({ theme: { token } }: Props) => 
   };
 });
 
-export default CancelUnstake;
+export default CancelUnYield;

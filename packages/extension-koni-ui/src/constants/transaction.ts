@@ -3,17 +3,7 @@
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import {
-  CancelUnStakeParams,
-  ClaimRewardParams,
-  SendNftParams,
-  StakeParams,
-  TransactionFormBaseProps,
-  TransferParams,
-  UnStakeParams,
-  WithdrawParams,
-  YieldParams
-} from '@subwallet/extension-koni-ui/types';
+import { CancelUnStakeParams, CancelUnYieldParams, ClaimRewardParams, ClaimYieldParams, SendNftParams, StakeParams, TransactionFormBaseProps, TransferParams, UnStakeParams, UnYieldParams, WithdrawParams, WithdrawYieldParams, YieldParams } from '@subwallet/extension-koni-ui/types';
 
 import { ALL_KEY } from './common';
 
@@ -38,8 +28,15 @@ export const TRANSACTION_TITLE_MAP: Record<ExtrinsicType, string> = {
   [ExtrinsicType.EVM_EXECUTE]: detectTranslate('Execute'),
   [ExtrinsicType.UNKNOWN]: detectTranslate('Unknown'),
 
+  [ExtrinsicType.MINT_LDOT]: detectTranslate('Mint vDOT'), // TODO: Change this
+  [ExtrinsicType.MINT_QDOT]: detectTranslate('Mint qDOT'), // TODO: Change this
+  [ExtrinsicType.MINT_SDOT]: detectTranslate('Mint sDOT'), // TODO: Change this
   [ExtrinsicType.MINT_VDOT]: detectTranslate('Mint vDOT'), // TODO: Change this
-  [ExtrinsicType.REDEEM_VDOT]: detectTranslate('Redeem vDOT')
+
+  [ExtrinsicType.REDEEM_LDOT]: detectTranslate('Redeem lDOT'), // TODO: Change this
+  [ExtrinsicType.REDEEM_QDOT]: detectTranslate('Redeem qDOT'), // TODO: Change this
+  [ExtrinsicType.REDEEM_SDOT]: detectTranslate('Redeem sDOT'), // TODO: Change this
+  [ExtrinsicType.REDEEM_VDOT]: detectTranslate('Redeem vDOT') // TODO: Change this
 };
 
 export const ALL_STAKING_ACTIONS: ExtrinsicType[] = [
@@ -116,4 +113,28 @@ export const DEFAULT_YIELD_PARAMS: YieldParams = {
   method: '',
   nominate: '',
   pool: ''
+};
+
+export const DEFAULT_UN_YIELD_PARAMS: UnYieldParams = {
+  ...DEFAULT_TRANSACTION_PARAMS,
+  method: '',
+  validator: '',
+  value: ''
+};
+
+export const DEFAULT_WITHDRAW_YIELD_PARAMS: WithdrawYieldParams = {
+  ...DEFAULT_TRANSACTION_PARAMS,
+  method: ''
+};
+
+export const DEFAULT_CLAIM_YIELD_PARAMS: ClaimYieldParams = {
+  ...DEFAULT_TRANSACTION_PARAMS,
+  method: '',
+  bondReward: true
+};
+
+export const DEFAULT_CANCEL_UN_YIELD_PARAMS: CancelUnYieldParams = {
+  ...DEFAULT_TRANSACTION_PARAMS,
+  method: '',
+  unstake: ''
 };

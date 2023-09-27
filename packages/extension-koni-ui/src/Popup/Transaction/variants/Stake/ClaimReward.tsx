@@ -23,7 +23,7 @@ import styled from 'styled-components';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
+import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
 
 type Props = ThemeProps;
 

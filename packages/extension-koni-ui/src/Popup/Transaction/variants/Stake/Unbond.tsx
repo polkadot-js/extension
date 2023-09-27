@@ -21,8 +21,8 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { accountFilterFunc } from '../helper';
-import { BondedBalance, FreeBalance, TransactionContent, TransactionFooter } from '../parts';
+import { accountFilterFunc } from '../../helper';
+import { BondedBalance, FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
 
 type Props = ThemeProps;
 

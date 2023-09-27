@@ -26,8 +26,8 @@ import styled from 'styled-components';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import { accountFilterFunc, fetchChainValidators } from '../helper';
-import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
+import { accountFilterFunc, fetchChainValidators } from '../../helper';
+import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
 
 type Props = ThemeProps;
 

@@ -2,26 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import { EarningCalculatorModal, EarningItem, EmptyList, Layout } from '@subwallet/extension-koni-ui/components';
-import {
-  DEFAULT_YIELD_PARAMS,
-  STAKING_CALCULATOR_MODAL,
-  YIELD_TRANSACTION
-} from '@subwallet/extension-koni-ui/constants';
-import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { EarningCalculatorModal, EarningItem, EarningToolbar, EmptyList, Layout } from '@subwallet/extension-koni-ui/components';
+import { DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
+import { useFilterModal, useGetYieldPositions, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Vault } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
-
-import EarningToolbar from './EarningToolBar';
 
 type Props = ThemeProps;
 
@@ -33,15 +28,21 @@ enum SortKey {
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
+
   const { t } = useTranslation();
   const navigate = useNavigate();
+
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount } = useSelector((state: RootState) => state.accountState);
+
   const { activeModal } = useContext(ModalContext);
+  const { setHeaderType } = useContext(WebUIContext);
+
   const [selectedItem, setSelectedItem] = useState<YieldPoolInfo | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const [, setStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
+  const yieldPositions = useGetYieldPositions();
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);
@@ -155,13 +156,23 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [t]);
 
+  const onBack = useCallback(() => {
+    navigate('/home/earning/detail');
+  }, [navigate]);
+
+  useEffect(() => {
+    if (yieldPositions.length) {
+      setHeaderType(HeaderType.COMMON_BACK);
+    }
+  }, [setHeaderType, yieldPositions.length]);
+
   return (
     <Layout.Base
       className={className}
+      onBack={onBack}
       showSubHeader={true}
       subHeaderBackground={'transparent'}
       subHeaderCenter={false}
-      // subHeaderIcons={subHeaderButton}
       subHeaderPaddingVertical={true}
       title={t('Earning')}
     >
@@ -193,9 +204,14 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const Earning = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const EarningOverview = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
+
+    '.ant-sw-list-wrapper': {
+      marginLeft: -token.margin,
+      marginRight: -token.margin
+    },
 
     '.earning-filter-icon': {
       width: '12px',
@@ -211,4 +227,4 @@ const Earning = styled(Component)<Props>(({ theme: { token } }: Props) => {
   });
 });
 
-export default Earning;
+export default EarningOverview;

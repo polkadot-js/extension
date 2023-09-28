@@ -124,8 +124,8 @@ const ConnectionList = new LazyLoader('ConnectionList', () => import('@subwallet
 const ConnectionDetail = new LazyLoader('ConnectionDetail', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
 const EarningOutlet = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/index'));
-const EarningOverview = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/Overview'));
-const EarningManagement = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/Detail'));
+const EarningOverview = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningOverview'));
+const EarningManagement = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
 const EarningNoRouter = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/NoRouter'));
 
 // A Placeholder page

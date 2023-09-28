@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
@@ -147,37 +147,42 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onC
           <div className='earning-item-footer'>
             <Button
               className='earning-item-icon-btn'
-              icon={
+              icon={(
                 <Icon
                   phosphorIcon={PlusMinus}
-                  size={'sm'}
-                />}
+                  size='sm'
+                />
+              )}
               onClick={onClickCalculatorBtn}
-              shape={'circle'}
-              size={'xs'}
-              type={'ghost'}
+              shape='circle'
+              size='xs'
+              tooltip={t('Staking calculator')}
+              type='ghost'
             />
             <Button
               className='earning-item-icon-btn'
-              icon={<Icon
-                phosphorIcon={Question}
-                size={'sm'}
-                weight={'fill'}
-              />}
-              shape={'circle'}
-              size={'xs'}
-              type={'ghost'}
+              icon={(
+                <Icon
+                  phosphorIcon={Question}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+              shape='circle'
+              size='xs'
+              tooltip={t('FAQs')}
+              type='ghost'
             />
             <Button
               icon={<Icon
                 className={'earning-item-stake-btn'}
                 phosphorIcon={PlusCircle}
-                size={'sm'}
-                weight={'fill'}
+                size='sm'
+                weight='fill'
               />}
               onClick={onClickStakeBtn}
-              shape={'circle'}
-              size={'xs'}
+              shape='circle'
+              size='xs'
             >
               {t('Stake now')}
             </Button>

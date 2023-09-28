@@ -16,6 +16,8 @@ import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
 const STATS_URL = 'https://api.bifrost.app/api/site';
+const BIFROST_GRAPHQL_ENDPOINT = 'https://bifrost-subsql.liebi.com/v1/graphql';
+const BIFROST_EXCHANGE_RATE_REQUEST = 'query MyQuery{slp_polkadot_ratio(limit:1 where:{key:{_eq:"0"}} order_by:{timestamp:desc_nulls_first}){ratio key timestamp total_issuance token_pool}}';
 
 export interface BifrostLiquidStakingMeta {
   apy: string,
@@ -26,14 +28,53 @@ export interface BifrostLiquidStakingMeta {
   holders: number
 }
 
+export interface BifrostVtokenExchangeRateResp {
+  data: {
+    slp_polkadot_ratio: BifrostVtokenExchangeRate[]
+  }
+}
+
+export interface BifrostVtokenExchangeRate {
+  ratio: string,
+  key: string,
+  timestamp: string,
+  total_issuance: number,
+  token_pool: number
+}
+
 export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPoolInfo) => void) {
   async function getPoolStat () {
-    const response = await fetch(STATS_URL, {
-      method: 'GET'
-    })
-      .then((res) => res.json()) as Record<string, BifrostLiquidStakingMeta>;
+    const stakingMetaPromise = new Promise(function (resolve) {
+      fetch(STATS_URL, {
+        method: 'GET'
+      }).then((res) => {
+        resolve(res.json());
+      }).catch(console.error);
+    });
 
-    const vDOTStats = response.vDOT;
+    const exchangeRatePromise = new Promise(function (resolve) {
+      fetch(BIFROST_GRAPHQL_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: BIFROST_EXCHANGE_RATE_REQUEST
+        })
+      }).then((resp) => {
+        resolve(resp.json());
+      }).catch(console.error);
+    });
+
+    const [_stakingMeta, _exchangeRate] = await Promise.all([
+      stakingMetaPromise,
+      exchangeRatePromise
+    ]);
+
+    const stakingMeta = _stakingMeta as Record<string, BifrostLiquidStakingMeta>;
+    const exchangeRate = _exchangeRate as BifrostVtokenExchangeRateResp;
+
+    const vDOTStats = stakingMeta.vDOT;
     const assetInfo = assetInfoMap[poolInfo.inputAssets[0]];
     const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
 
@@ -44,7 +85,8 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
         assetEarning: [
           {
             slug: poolInfo.inputAssets[0],
-            apy: parseFloat(vDOTStats.apyBase) / 100
+            apy: parseFloat(vDOTStats.apyBase) / 100,
+            exchangeRate: parseFloat(exchangeRate.data.slp_polkadot_ratio[0].ratio)
           }
         ],
         maxCandidatePerFarmer: 1,
@@ -61,38 +103,7 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
     getPoolStat().catch(console.error);
   }
 
-  fetch(STATS_URL, {
-    method: 'GET'
-  })
-    .then((res) => {
-      res.json()
-        .then((data: Record<string, BifrostLiquidStakingMeta>) => {
-          const vDOTStats = data.vDOT;
-          const assetInfo = assetInfoMap[poolInfo.inputAssets[0]];
-          const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
-
-          // eslint-disable-next-line node/no-callback-literal
-          callback({
-            ...poolInfo,
-            stats: {
-              assetEarning: [
-                {
-                  slug: poolInfo.inputAssets[0],
-                  apy: parseFloat(vDOTStats.apyBase) / 100
-                }
-              ],
-              maxCandidatePerFarmer: 1,
-              maxWithdrawalRequestPerFarmer: 1,
-              minJoinPool: '0',
-              minWithdrawal: '0',
-              totalApy: parseFloat(vDOTStats.apyBase) / 100,
-              tvl: (vDOTStats.tvm * assetDecimals).toString()
-            }
-          });
-        })
-        .catch(console.error);
-    })
-    .catch(console.error);
+  getStatInterval();
 
   const interval = setInterval(getStatInterval, 300000);
 

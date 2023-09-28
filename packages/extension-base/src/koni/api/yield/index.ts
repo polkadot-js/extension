@@ -94,7 +94,6 @@ export function subscribeYieldPosition (substrateApiMap: Record<string, Substrat
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
-      console.log('parallel here');
       const unsub = getParallelLiquidStakingPosition(substrateApi, ['p8ErK3S7WqHGLKfiyDaH2rfWnG1cgs5TnSh8892G7jQ6eM86Q'], chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);

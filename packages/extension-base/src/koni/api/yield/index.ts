@@ -29,7 +29,7 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
     const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
     const chainInfo = chainInfoMap[poolInfo.chain];
 
-    if (YieldPoolType.NATIVE_STAKING === poolInfo.type) {
+    if (YieldPoolType.NOMINATION_POOL === poolInfo.type) {
       const unsub = subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
 
       // @ts-ignore

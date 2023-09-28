@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitYieldStepData, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitYieldStepData, TokenBalanceRaw, YieldLiquidStakingMetadata, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { sumBN } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -53,6 +56,47 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
   });
 
   const interval = setInterval(getPoolStat, 3000000);
+
+  return () => {
+    clearInterval(interval);
+  };
+}
+
+export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void) {
+  const rewardTokenSlug = poolInfo.rewardAssets[0];
+  const rewardTokenInfo = assetInfoMap[rewardTokenSlug];
+
+  async function getQtokenBalance () {
+    const balances = (await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(rewardTokenInfo)]))) as unknown as TokenBalanceRaw[];
+    const totalBalance = sumBN(balances.map((b) => (b.free || new BN(0))));
+
+    if (totalBalance.gt(BN_ZERO)) {
+      positionCallback({
+        slug: poolInfo.slug,
+        chain: chainInfo.slug,
+        address: useAddresses[0], // TODO
+        balance: [
+          {
+            slug: rewardTokenSlug, // token slug
+            totalBalance: totalBalance.toString(),
+            activeBalance: totalBalance.toString()
+          }
+        ],
+
+        metadata: {
+          exchangeRate: 1
+        } as YieldLiquidStakingMetadata
+      } as YieldPositionInfo);
+    }
+  }
+
+  function getPositionInterval () {
+    getQtokenBalance().catch(console.error);
+  }
+
+  getPositionInterval();
+
+  const interval = setInterval(getPositionInterval, 90000);
 
   return () => {
     clearInterval(interval);

@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitYieldStepData, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitYieldStepData, YieldLiquidStakingMetadata, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenSlug, _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -54,6 +54,63 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
   });
 
   const interval = setInterval(getPoolStat, 3000000);
+
+  return () => {
+    clearInterval(interval);
+  };
+}
+
+export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void) {
+  const rewardTokenSlug = poolInfo.rewardAssets[0];
+  const rewardTokenInfo = assetInfoMap[rewardTokenSlug];
+
+  async function getStokenBalance () {
+    const balances = await substrateApi.api.query.assets.account.multi(useAddresses.map((address) => [_getTokenOnChainAssetId(rewardTokenInfo), address]));
+
+    let totalBalance = new BN(0);
+
+    balances.forEach((b) => {
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+      const bdata = b?.toHuman();
+
+      if (bdata) {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+        const addressBalance = new BN(String(bdata?.balance).replaceAll(',', '') || '0');
+
+        // @ts-ignore
+        totalBalance = totalBalance.add(addressBalance);
+      }
+    });
+
+    if (totalBalance.gt(BN_ZERO)) {
+      positionCallback({
+        slug: poolInfo.slug,
+        chain: chainInfo.slug,
+        address: useAddresses[0], // TODO
+        balance: [
+          {
+            slug: rewardTokenSlug, // token slug
+            totalBalance: totalBalance.toString(),
+            activeBalance: totalBalance.toString()
+          }
+        ],
+
+        metadata: {
+          exchangeRate: 1
+        } as YieldLiquidStakingMetadata
+      } as YieldPositionInfo);
+    }
+  }
+
+  function getPositionInterval () {
+    getStokenBalance().catch(console.error);
+  }
+
+  getPositionInterval();
+
+  const interval = setInterval(getPositionInterval, 90000);
 
   return () => {
     clearInterval(interval);

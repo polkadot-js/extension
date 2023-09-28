@@ -2122,7 +2122,11 @@ export interface YieldPositionInfo {
 
 export type YieldPoolMetadata = ChainStakingMetadata;
 
-export type YieldPositionMetadata = NominatorMetadata;
+export type YieldPositionMetadata = NominatorMetadata | YieldLiquidStakingMetadata;
+
+export interface YieldLiquidStakingMetadata {
+  exchangeRate: number
+}
 
 export interface OptimalYieldPathRequest {
   amount: string,

@@ -29,6 +29,7 @@ interface Props extends ThemeProps {
 interface ButtonOptionProps {
   icon: PhosphorIcon;
   label?: string;
+  tooltip?: string;
   key: string;
   onClick?: React.MouseEventHandler;
   disable: boolean;
@@ -97,7 +98,9 @@ const Component: React.FC<Props> = (props: Props) => {
       icon: PlusMinus,
       onClick: onClickButton(onClickCalculatorBtn),
       key: 'calculator',
-      hidden: false
+      hidden: false,
+      schema: 'secondary',
+      tooltip: t('Calculator')
     });
 
     // Info
@@ -106,7 +109,9 @@ const Component: React.FC<Props> = (props: Props) => {
       icon: Question,
       onClick: onClickItem && onClickButton(onClickItem),
       key: 'info',
-      hidden: false
+      hidden: false,
+      schema: 'secondary',
+      tooltip: t('FAQs')
     });
 
     if (yieldPoolInfo.metadata) {
@@ -206,6 +211,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   schema={item.schema}
                   shape='circle'
                   size='xs'
+                  tooltip={item.tooltip}
                 >
                   {item.label}
                 </Button>
@@ -254,7 +260,7 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
   return ({
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
-    padding: `${token.paddingXL}px ${token.paddingLG}px ${token.padding}px`,
+    padding: `${token.paddingXL}px ${token.paddingMD}px ${token.padding}px`,
 
     '.earning-item-name-wrapper': {
       display: 'flex',
@@ -313,7 +319,12 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
       height: token.sizeMD
     },
 
-    '.ant-web3-block-left-item': {
+    '& > .ant-web3-block-left-item': {
+      alignItems: 'flex-start'
+    },
+
+    '& > .ant-web3-block-right-item': {
+      marginRight: 0,
       alignItems: 'flex-start'
     },
 

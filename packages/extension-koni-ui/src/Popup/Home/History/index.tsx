@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { EmptyList, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
@@ -122,6 +123,7 @@ enum FilterValue {
   CROWDLOAN = 'crowdloan',
   SUCCESSFUL = 'successful',
   FAILED = 'failed',
+  EARN = 'earn'
 }
 
 function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'address' | 'extrinsicHash' | 'transactionId'>) {
@@ -189,6 +191,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           if (item.status === ExtrinsicStatus.FAIL) {
             return true;
           }
+        } else if (filter === FilterValue.EARN) {
+          if (YIELD_EXTRINSIC_TYPES.includes(item.type)) {
+            return true;
+          }
         }
       }
 
@@ -205,7 +211,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       { label: t('Claim staking reward'), value: FilterValue.CLAIM },
       // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
       { label: t('Successful'), value: FilterValue.SUCCESSFUL },
-      { label: t('Failed'), value: FilterValue.FAILED }
+      { label: t('Failed'), value: FilterValue.FAILED },
+      { label: t('Join earning'), value: FilterValue.EARN }
     ];
   }, [t]);
 

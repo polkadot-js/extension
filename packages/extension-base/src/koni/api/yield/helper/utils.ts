@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldStepDetail, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 
 export interface RuntimeDispatchInfo {
   weight: {
@@ -42,3 +42,5 @@ export const DEFAULT_YIELD_FIRST_STEP: YieldStepDetail = {
   name: 'Fill information',
   type: YieldStepType.DEFAULT
 };
+
+export const YIELD_EXTRINSIC_TYPES = [ExtrinsicType.MINT_VDOT, ExtrinsicType.MINT_LDOT, ExtrinsicType.MINT_SDOT, ExtrinsicType.MINT_QDOT];

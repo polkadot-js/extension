@@ -30,13 +30,13 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const { inputTokenDecimals, inputTokenSymbol } = useMemo(() => {
-    const rewardTokenInfo = tokenInfoMap[txParams.rewardTokenSlug];
+    const inputTokenInfo = tokenInfoMap[txParams.inputTokenSlug];
 
     return {
-      inputTokenSymbol: _getAssetSymbol(rewardTokenInfo),
-      inputTokenDecimals: _getAssetDecimals(rewardTokenInfo)
+      inputTokenSymbol: _getAssetSymbol(inputTokenInfo),
+      inputTokenDecimals: _getAssetDecimals(inputTokenInfo)
     };
-  }, [tokenInfoMap, txParams.rewardTokenSlug]);
+  }, [tokenInfoMap, txParams.inputTokenSlug]);
 
   const { rewardTokenDecimals, rewardTokenSymbol } = useMemo(() => {
     const rewardTokenInfo = tokenInfoMap[txParams.rewardTokenSlug];

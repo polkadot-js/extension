@@ -10,7 +10,7 @@ export const dAppCategoryMap: Record<string, DAppCategory> = {
     theme: 'cyan'
   },
   [DAppCategoryType.NFT]: {
-    name: 'Nft',
+    name: 'NFT',
     id: DAppCategoryType.NFT,
     theme: 'primary'
   },

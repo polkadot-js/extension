@@ -15,13 +15,13 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { DAppCategoryType, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { ButtonProps, Icon, ModalContext, SwHeader } from '@subwallet/react-ui';
-import { FadersHorizontal, X } from 'phosphor-react';
+import { Carousel } from '@trendyol-js/react-carousel';
+import { ArrowCircleLeft, ArrowCircleRight, FadersHorizontal, X } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import PageWrapper from '../../components/Layout/PageWrapper';
 import useDefaultNavigate from '../../hooks/router/useDefaultNavigate';
 
 type Props = ThemeProps;
@@ -40,6 +40,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { isWebUI } = useContext(ScreenContext);
   const { goHome } = useDefaultNavigate();
   const { dApps, featureDApps } = useSelector((state: RootState) => state.dApp);
+  const [sliderDisplayCount, setSliderDisplayCount] = useState<number>(0);
 
   useEffect(() => {
     if (location.pathname === '/dapps') {
@@ -85,7 +86,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
     return (
       item.title.toLowerCase().includes(searchTextLowerCase) ||
-      item.subtitle.toLowerCase().includes(searchTextLowerCase)
+      (item.subtitle && item.subtitle.toLowerCase().includes(searchTextLowerCase))
     );
   }, []);
 
@@ -135,8 +136,30 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     ];
   }, [goHome]);
 
+  const updateSliderDisplayCount = () => {
+    const element = document.getElementById('feature-dapp-slider-wrapper'); // Replace with your element's ID
+
+    if (element) {
+      const width = element.clientWidth;
+
+      const count = Math.floor((width - 16 * 3) / 360) || 1;
+
+      setSliderDisplayCount(count);
+    }
+  };
+
+  useEffect(() => {
+    updateSliderDisplayCount();
+
+    window.addEventListener('resize', updateSliderDisplayCount);
+
+    return () => {
+      window.removeEventListener('resize', updateSliderDisplayCount);
+    };
+  }, []);
+
   return (
-    <PageWrapper className={className}>
+    <div className={className}>
       {!isWebUI && <SwHeader
         left='logo'
         onClickLeft={goHome}
@@ -150,15 +173,52 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         className={'__scroll-container'}
       >
         <div className={'__feature-area'}>
-          {
-            featureDApps.map((i, index) => (
-              <FeatureDAppItem
-                className={'__feature-dapp-item'}
-                key={`${i.id}-${index}`}
-                {...i}
-              />
-            ))
-          }
+          <div
+            className={'__feature-area-inner'}
+            id={'feature-dapp-slider-wrapper'}
+          >
+            {
+              !!featureDApps.length && !!sliderDisplayCount && (
+                <Carousel
+                  className={'__carousel-container'}
+                  infinite={false}
+                  key={`feature-dapp-slider-${sliderDisplayCount}`}
+                  leftArrow={(
+                    <div className={'__left-arrow'}>
+                      <Icon
+                        customSize={'28px'}
+                        phosphorIcon={ArrowCircleLeft}
+                        weight={'fill'}
+                      />
+                    </div>
+                  )}
+                  responsive={true}
+                  rightArrow={(
+                    <div className={'__right-arrow'}>
+                      <Icon
+                        customSize={'28px'}
+                        phosphorIcon={ArrowCircleRight}
+                        weight={'fill'}
+                      />
+                    </div>
+                  )}
+                  show={sliderDisplayCount}
+                  slide={1}
+                >
+                  {
+                    // [featureDApps[0]].map((i, index) => (
+                    featureDApps.map((i, index) => (
+                      <FeatureDAppItem
+                        className={'__feature-dapp-item'}
+                        key={`${i.id}-${index}`}
+                        {...i}
+                      />
+                    ))
+                  }
+                </Carousel>
+              )
+            }
+          </div>
         </div>
 
         <div className={'__tool-area'}>
@@ -215,12 +275,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         options={filterOptions}
         title={t('Filter')}
       />
-    </PageWrapper>
+    </div>
   );
 };
 
 const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    height: '100%',
+
     '.ant-sw-header-container': {
       paddingTop: token.padding,
       paddingBottom: token.padding,
@@ -244,11 +306,11 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__feature-area': {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      alignItems: 'stretch',
-      gap: token.size,
-      marginBottom: 40
+      overflow: 'hidden'
+    },
+
+    '.__feature-area-inner': {
+      marginRight: -token.size
     },
 
     '.__tool-area': {
@@ -285,6 +347,17 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
       }
     },
 
+    '.__feature-dapp-item': {
+      marginRight: token.size,
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+
+      '.__item-meta-area': {
+        flex: 1
+      }
+    },
+
     '.__dapp-list-area': {
       marginTop: 32,
       marginBottom: 40
@@ -301,11 +374,45 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
       order: -1
     },
 
-    '@media (min-width: 1600px)': {
-      '.__feature-area': {
-        gridTemplateColumns: 'repeat(auto-fill, minmax(410px, 1fr))'
+    '.__carousel-container': {
+      marginBottom: 40,
+
+      '> div:first-of-type, > div:last-of-type': {
+        '&:not(.styles-module_item-provider__YgMwz)': {
+          position: 'relative',
+          zIndex: 10
+        }
       },
 
+      '.styles-module_item-provider__YgMwz': {
+        cursor: 'default'
+      },
+
+      '.styles-module_item-tracker__3bypy': {
+        alignItems: 'stretch'
+      },
+
+      '.__left-arrow, .__right-arrow': {
+        width: 40,
+        display: 'flex',
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer'
+      },
+
+      '.__left-arrow': {
+        left: 0
+      },
+
+      '.__right-arrow': {
+        right: token.size
+      }
+    },
+
+    '@media (min-width: 1600px)': {
       '.__dapp-list-container': {
         gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))'
       }
@@ -325,13 +432,13 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
         paddingRight: token.padding
       },
 
-      '.__feature-area, .__dapp-list-container': {
+      '.__dapp-list-container': {
         gridTemplateColumns: 'repeat(2, 1fr)'
       }
     },
 
     '@media (max-width: 767px)': {
-      '.__feature-area, .__dapp-list-container': {
+      '.__dapp-list-container': {
         gridTemplateColumns: 'repeat(1, 1fr)'
       }
     }

@@ -82,7 +82,7 @@ const FeatureDAppItem = styled(Component)<Props>(({ theme: { token } }: Props) =
 
     '.__item-preview-area': {
       backgroundSize: 'cover',
-      backgroundPosition: 'center'
+      backgroundPosition: 'top center'
     },
 
     '.__item-overlay': {
@@ -141,7 +141,8 @@ const FeatureDAppItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       display: '-webkit-box',
       '-webkit-line-clamp': '2',
       '-webkit-box-orient': 'vertical',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      height: token.fontSizeSM * token.lineHeightSM * 2
     },
 
     '&:hover': {

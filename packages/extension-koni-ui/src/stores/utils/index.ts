@@ -327,7 +327,7 @@ export const getDAppsData = (() => {
   const rs = {
     promise,
     start: () => {
-      axios.get('https://static-data.subwallet.app/dapps/list.json').then((rs) => {
+      axios.get('https://content-cache.subwallet.app/api/strapi/dapps').then((rs) => {
         handler.resolve?.(rs.data);
       }).catch((reason) => {
         handler.reject?.(reason);

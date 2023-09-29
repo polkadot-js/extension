@@ -78,17 +78,21 @@ function Component (props: Props): React.ReactElement<Props> {
         {description}
       </div>
       <div className={'__item-footer'}>
-        <div className='__item-tags-area'>
-          {categories.map((c) => (
-            <Tag
-              className='__item-tag'
-              color={dAppCategoryMap[c]?.theme || 'gray'}
-              key={c}
-            >
-              {t(dAppCategoryMap[c]?.name || capitalize(c))}
-            </Tag>
-          ))}
-        </div>
+        {
+          !!categories && !!categories.length && (
+            <div className='__item-tags-area'>
+              {categories.map((c) => (
+                <Tag
+                  className='__item-tag'
+                  color={dAppCategoryMap[c]?.theme || 'gray'}
+                  key={c}
+                >
+                  {t(dAppCategoryMap[c]?.name || capitalize(c))}
+                </Tag>
+              ))}
+            </div>
+          )
+        }
         {
           !!chains && !!chains.length && (
             <div className='__item-chains-area'>

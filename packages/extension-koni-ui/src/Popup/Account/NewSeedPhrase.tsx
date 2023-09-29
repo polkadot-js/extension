@@ -6,14 +6,14 @@ import { DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SELECTED_AC
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetDefaultAccountName, useIsPopup, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { CreateNewSeedParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isFirefox, isNoAccount } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -31,8 +31,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const notify = useNotification();
   const navigate = useNavigate();
+  const locationState = useLocation().state as CreateNewSeedParam;
+  const useGoBack = locationState?.useGoBack;
 
-  const { goHome } = useDefaultNavigate();
+  const { goBack, goHome } = useDefaultNavigate();
   const { activeModal } = useContext(ModalContext);
   const checkUnlock = useUnlockChecker();
 
@@ -54,12 +56,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
 
   const onBack = useCallback(() => {
-    navigate(DEFAULT_ROUTER_PATH);
+    if (useGoBack) {
+      goBack();
+    } else {
+      navigate(DEFAULT_ROUTER_PATH);
 
-    if (!noAccount) {
-      activeModal(NEW_SEED_MODAL);
+      if (!noAccount) {
+        activeModal(NEW_SEED_MODAL);
+      }
     }
-  }, [navigate, activeModal, noAccount]);
+  }, [useGoBack, goBack, navigate, noAccount, activeModal]);
 
   const _onCreate = useCallback((): void => {
     if (!seedPhrase) {

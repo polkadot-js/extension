@@ -97,7 +97,7 @@ function Component ({ className, request }: Props) {
 
   const onAddAccount = useCallback(() => {
     setSelectedAccountTypes(convertKeyTypes(missingType));
-    navigate('/accounts/new-seed-phrase');
+    navigate('/accounts/new-seed-phrase', { state: { useGoBack: true } });
   }, [navigate, missingType]);
 
   const onApplyModal = useCallback((namespace: string) => {

@@ -7,6 +7,7 @@ import { _getBlockExplorerFromChain, _isPureEvmChain } from '@subwallet/extensio
 
 // @ts-ignore
 export function parseTransactionData<T extends ExtrinsicType> (data: unknown): ExtrinsicDataTypeMap[T] {
+  // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return data as ExtrinsicDataTypeMap[T];
 }

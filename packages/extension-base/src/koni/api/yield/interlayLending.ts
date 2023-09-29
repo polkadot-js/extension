@@ -22,38 +22,25 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
       stats: {
         assetEarning: [
           {
-            slug: poolInfo.inputAssets[0],
-            apr: 18.38
+            slug: poolInfo.rewardAssets[0],
+            apr: 1.29
+          },
+          {
+            slug: poolInfo.rewardAssets[1],
+            apr: 12.32
           }
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '10000000000',
         minWithdrawal: '0',
-        totalApr: 18.38,
+        totalApr: 13.61,
         tvl: '13095111106588368'
       }
     });
   }
 
-  // eslint-disable-next-line node/no-callback-literal
-  callback({
-    ...poolInfo,
-    stats: {
-      assetEarning: [
-        {
-          slug: poolInfo.inputAssets[0],
-          apr: 18.38
-        }
-      ],
-      maxCandidatePerFarmer: 1,
-      maxWithdrawalRequestPerFarmer: 1,
-      minJoinPool: '10000000000',
-      minWithdrawal: '0',
-      totalApr: 18.38,
-      tvl: '13095111106588368'
-    }
-  });
+  getPoolStat();
 
   const interval = setInterval(getPoolStat, 3000000);
 

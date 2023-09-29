@@ -212,7 +212,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
       { label: t('Successful'), value: FilterValue.SUCCESSFUL },
       { label: t('Failed'), value: FilterValue.FAILED },
-      { label: t('Join earning'), value: FilterValue.EARN }
+      { label: t('Start earning'), value: FilterValue.EARN }
     ];
   }, [t]);
 
@@ -239,7 +239,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),
     [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake'),
-    [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction')
+    [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction'),
+    [ExtrinsicType.MINT_QDOT]: t('Mint qDOT'),
+    [ExtrinsicType.MINT_SDOT]: t('Mint sDOT'),
+    [ExtrinsicType.MINT_LDOT]: t('Mint LDOT'),
+    [ExtrinsicType.MINT_VDOT]: t('Mint vDOT')
   }), [t]);
 
   const typeTitleMap: Record<string, string> = useMemo(() => ({
@@ -255,7 +259,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward transaction'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw transaction'),
     [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake transaction'),
-    [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction')
+    [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction'),
+    [ExtrinsicType.MINT_QDOT]: t('Mint qDOT transaction'),
+    [ExtrinsicType.MINT_SDOT]: t('Mint sDOT transaction'),
+    [ExtrinsicType.MINT_LDOT]: t('Mint LDOT transaction'),
+    [ExtrinsicType.MINT_VDOT]: t('Mint vDOT transaction')
   }), [t]);
 
   // Fill display data to history list
@@ -414,8 +422,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         value: FilterValue.NFT
       },
       {
-        label: t('Staking'),
-        value: FilterValue.STAKE
+        label: t('Earning'),
+        value: FilterValue.EARN
       }
     ];
   }, [t]);
@@ -434,8 +442,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         return _item.type === ExtrinsicType.SEND_NFT;
       }
 
-      if (selectedFilterTab === FilterValue.STAKE) {
-        return isTypeStaking(_item.type);
+      if (selectedFilterTab === FilterValue.EARN) {
+        return YIELD_EXTRINSIC_TYPES.includes(_item.type);
       }
 
       return false;

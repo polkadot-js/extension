@@ -20,7 +20,11 @@ export const TxTypeNameMap: Record<string, string> = {
   [ExtrinsicType.STAKING_WITHDRAW]: detectTranslate('Withdraw'),
   [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: detectTranslate('Cancel unstake'),
   [ExtrinsicType.STAKING_COMPOUNDING]: detectTranslate('Stake compound'),
-  [ExtrinsicType.EVM_EXECUTE]: detectTranslate('EVM Execute')
+  [ExtrinsicType.EVM_EXECUTE]: detectTranslate('EVM Execute'),
+  [ExtrinsicType.MINT_VDOT]: detectTranslate('Mint vDOT'),
+  [ExtrinsicType.MINT_LDOT]: detectTranslate('Mint LDOT'),
+  [ExtrinsicType.MINT_SDOT]: detectTranslate('Mint sDOT'),
+  [ExtrinsicType.MINT_QDOT]: detectTranslate('Mint qDOT')
 };
 
 export const StakingTypeNameMap: Record<string, string> = {

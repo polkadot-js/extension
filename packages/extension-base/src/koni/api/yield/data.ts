@@ -4,35 +4,12 @@
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 
 export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
-  DOT___native_staking: {
-    slug: 'DOT___native_staking',
-    chain: 'polkadot',
-    name: 'Polkadot Native Staking',
-    description: 'Staking DOT by directly nominating validators',
-    type: YieldPoolType.NATIVE_STAKING,
-    inputAssets: [
-      'polkadot-NATIVE-DOT'
-    ],
-    rewardAssets: [
-      'polkadot-NATIVE-DOT'
-    ],
-    feeAssets: [
-      'polkadot-NATIVE-DOT'
-    ],
-    withdrawalMethods: [
-      {
-        name: 'Default Unstaking',
-        description: 'Wait 28 days to get your tokens back',
-        waitingTime: 28 * 24 // 0 means immediately
-      }
-    ]
-  },
-  WND___native_staking: {
-    slug: 'WND___native_staking',
+  WND___nomination_pool: {
+    slug: 'WND___nomination_pool',
     chain: 'westend',
-    name: 'Westend Native Staking',
-    description: 'Staking WND by directly nominating validators',
-    type: YieldPoolType.NATIVE_STAKING,
+    name: 'Westend Nomination Pool',
+    description: 'Start staking with just 1 WND',
+    type: YieldPoolType.NOMINATION_POOL,
     inputAssets: [
       'westend-NATIVE-WND'
     ],
@@ -178,8 +155,8 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
       'interlay-LOCAL-DOT'
     ],
     rewardAssets: [
-      'interlay-NATIVE-INTR',
-      'interlay-LOCAL-DOT'
+      'interlay-LOCAL-qDOT',
+      'interlay-NATIVE-INTR'
     ],
     feeAssets: [
       'interlay-NATIVE-INTR',

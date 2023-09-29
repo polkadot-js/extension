@@ -2109,6 +2109,7 @@ export interface YieldAssetBalance {
   slug: string, // token slug
   totalBalance: string,
   activeBalance: string,
+  exchangeRate?: number
 }
 
 export interface YieldPositionInfo {
@@ -2122,7 +2123,12 @@ export interface YieldPositionInfo {
 
 export type YieldPoolMetadata = ChainStakingMetadata;
 
-export type YieldPositionMetadata = NominatorMetadata;
+export type YieldPositionMetadata = NominatorMetadata | YieldPositionStats;
+
+export interface YieldPositionStats {
+  rewards: YieldTokenBaseInfo[],
+  initialExchangeRate?: number
+}
 
 export interface OptimalYieldPathRequest {
   amount: string,
@@ -2209,7 +2215,7 @@ export interface YieldAssetEarningStats {
   slug: string
   apr?: number,
   apy?: number,
-  exchangeRate?: number
+  exchangeRate?: number // reward token amount = input token amount * exchange rate
 }
 
 export interface YieldPoolStats {

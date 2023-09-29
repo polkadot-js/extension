@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
-import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitYieldStepData, YieldPoolInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { calculateAlternativeFee, DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { sumBN } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -28,8 +29,6 @@ export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi,
   const eraFrequency = _bumpEraFrequency.toPrimitive() as number;
   const commissionRate = _commissionRate.toPrimitive() as number;
   const estimatedRewardRate = _estimatedRewardRatePerEra.toPrimitive() as number;
-
-  console.log('here', eraFrequency, commissionRate, estimatedRewardRate, YEAR);
 
   function getPoolStat () {
     // eslint-disable-next-line node/no-callback-literal
@@ -72,6 +71,48 @@ export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi,
   });
 
   const interval = setInterval(getPoolStat, 3000000);
+
+  return () => {
+    clearInterval(interval);
+  };
+}
+
+export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void) {
+  const rewardTokenSlug = poolInfo.rewardAssets[0];
+  const rewardTokenInfo = assetInfoMap[rewardTokenSlug];
+
+  async function getLtokenBalance () {
+    const balances = (await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(rewardTokenInfo)]))) as unknown as TokenBalanceRaw[];
+    const totalBalance = sumBN(balances.map((b) => (b.free || new BN(0))));
+
+    if (totalBalance.gt(BN_ZERO)) {
+      positionCallback({
+        slug: poolInfo.slug,
+        chain: chainInfo.slug,
+        address: useAddresses[0], // TODO
+        balance: [
+          {
+            slug: rewardTokenSlug, // token slug
+            totalBalance: totalBalance.toString(),
+            activeBalance: totalBalance.toString()
+          }
+        ],
+
+        metadata: {
+          rewards: [],
+          exchangeRate: 1
+        } as YieldPositionStats
+      } as YieldPositionInfo);
+    }
+  }
+
+  function getPositionInterval () {
+    getLtokenBalance().catch(console.error);
+  }
+
+  getPositionInterval();
+
+  const interval = setInterval(getPositionInterval, 90000);
 
   return () => {
     clearInterval(interval);
@@ -249,7 +290,9 @@ export function validateProcessForAcalaLiquidStaking (params: OptimalYieldPathPa
   return errors;
 }
 
-export async function getAcalaLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitYieldStepData): Promise<HandleYieldStepData> {
+export async function getAcalaLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): Promise<HandleYieldStepData> {
+  const inputData = requestData.data as SubmitYieldStepData;
+
   if (path.steps[currentStep].type === YieldStepType.XCM) {
     const destinationTokenSlug = params.poolInfo.inputAssets[0];
     const originChainInfo = params.chainInfoMap[COMMON_CHAIN_SLUGS.POLKADOT];
@@ -293,7 +336,7 @@ export async function getAcalaLiquidStakingExtrinsic (address: string, params: O
     txChain: params.poolInfo.chain,
     extrinsicType: ExtrinsicType.MINT_LDOT,
     extrinsic,
-    txData: inputData,
+    txData: requestData,
     transferNativeAmount: '0'
   };
 }

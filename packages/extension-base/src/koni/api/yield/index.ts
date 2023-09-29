@@ -3,13 +3,13 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { generatePathForAcalaLiquidStaking, getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingRedeem, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
-import { generatePathForBifrostLiquidStaking, getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { generatePathForAcalaLiquidStaking, getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
+import { generatePathForBifrostLiquidStaking, getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingPosition, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
-import { generatePathForInterlayLending, getInterlayLendingExtrinsic, getInterlayLendingRedeem, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
+import { generatePathForInterlayLending, getInterlayLendingExtrinsic, getInterlayLendingPosition, getInterlayLendingRedeem, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
 import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
-import { generatePathForParallelLiquidStaking, getParallelLiquidStakingExtrinsic, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallelLiquidStaking';
+import { generatePathForParallelLiquidStaking, getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallelLiquidStaking';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
@@ -29,7 +29,7 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
     const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
     const chainInfo = chainInfoMap[poolInfo.chain];
 
-    if (YieldPoolType.NATIVE_STAKING === poolInfo.type) {
+    if (YieldPoolType.NOMINATION_POOL === poolInfo.type) {
       const unsub = subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
 
       // @ts-ignore
@@ -61,7 +61,7 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
   };
 }
 
-export function subscribeYieldPosition (substrateApiMap: Record<string, SubstrateApi>, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, callback: (rs: YieldPositionInfo) => void) {
+export function subscribeYieldPosition (substrateApiMap: Record<string, SubstrateApi>, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPositionInfo) => void) {
   const unsubList: VoidFunction[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -79,6 +79,22 @@ export function subscribeYieldPosition (substrateApiMap: Record<string, Substrat
       unsubList.push(unsub);
     } else if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
       const unsub = await getNominationPoolPosition(substrateApi, addresses, chainInfo, poolInfo, callback);
+
+      unsubList.push(unsub);
+    } else if (poolInfo.slug === 'DOT___bifrost_liquid_staking') {
+      const unsub = getBifrostLiquidStakingPosition(substrateApi, ['5HU2x1QiUW4jJ5ykD1KLoVE8zryQkQcGAvbyD5rn7SyJedA9'], chainInfo, poolInfo, assetInfoMap, callback);
+
+      unsubList.push(unsub);
+    } else if (poolInfo.slug === 'DOT___acala_liquid_staking') {
+      const unsub = getAcalaLiquidStakingPosition(substrateApi, ['5FRFxnokxd96gGF95BGcDVY4hnA1bd9GCoyMfTG2T23YdmeB'], chainInfo, poolInfo, assetInfoMap, callback);
+
+      unsubList.push(unsub);
+    } else if (poolInfo.slug === 'DOT___interlay_lending') {
+      const unsub = getInterlayLendingPosition(substrateApi, ['wdCMiZ5wHTKM7qZUhjYNJNVhMCscsfKz27e1HHqyz9rSYf78A'], chainInfo, poolInfo, assetInfoMap, callback);
+
+      unsubList.push(unsub);
+    } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
+      const unsub = getParallelLiquidStakingPosition(substrateApi, ['p8ErK3S7WqHGLKfiyDaH2rfWnG1cgs5TnSh8892G7jQ6eM86Q'], chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     }
@@ -180,9 +196,9 @@ export interface HandleYieldStepData {
   transferNativeAmount: string
 }
 
-export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, data: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
+export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
   if (yieldPoolInfo.type === YieldPoolType.NATIVE_STAKING) {
-    const _data = data as SubmitJoinNativeStaking;
+    const _data = requestData.data as SubmitJoinNativeStaking;
     const extrinsic = await getNativeStakingBondExtrinsic(address, params, _data);
 
     const bondingData: RequestBondingSubmit = {
@@ -202,16 +218,16 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
       transferNativeAmount: _data.amount
     };
   } else if (yieldPoolInfo.slug === 'DOT___acala_liquid_staking') {
-    return getAcalaLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitYieldStepData);
+    return getAcalaLiquidStakingExtrinsic(address, params, path, currentStep, requestData);
   } else if (yieldPoolInfo.slug === 'DOT___bifrost_liquid_staking') {
-    return getBifrostLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitYieldStepData);
+    return getBifrostLiquidStakingExtrinsic(address, params, path, currentStep, requestData);
   } else if (yieldPoolInfo.slug === 'DOT___parallel_liquid_staking') {
-    return getParallelLiquidStakingExtrinsic(address, params, path, currentStep, data as SubmitYieldStepData);
+    return getParallelLiquidStakingExtrinsic(address, params, path, currentStep, requestData);
   } else if (yieldPoolInfo.slug === 'DOT___interlay_lending') {
-    return getInterlayLendingExtrinsic(address, params, path, currentStep, data as SubmitYieldStepData);
+    return getInterlayLendingExtrinsic(address, params, path, currentStep, requestData);
   }
 
-  const _data = data as SubmitJoinNominationPool;
+  const _data = requestData.data as SubmitJoinNominationPool;
   const extrinsic = await getNominationPoolJoinExtrinsic(address, params, _data);
 
   const joinPoolData: RequestStakePoolingBonding = {

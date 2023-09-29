@@ -3,13 +3,11 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, SubmitYieldStepData, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
@@ -28,7 +26,6 @@ import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import keyring from '@subwallet/ui-keyring';
-import BigN from 'bignumber.js';
 import { addHexPrefix } from 'ethereumjs-util';
 import { ethers, TransactionLike } from 'ethers';
 import EventEmitter from 'eventemitter3';
@@ -187,6 +184,7 @@ export default class TransactionService {
     const edNum = parseInt(existentialDeposit);
     const transferNativeNum = parseInt(transferNative);
 
+    // TODO
     // if (!new BigN(balance.value).gt(0)) {
     //   validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
     // }
@@ -296,7 +294,6 @@ export default class TransactionService {
           validatedTransaction.id = data.id;
           validatedTransaction.extrinsicHash = data.extrinsicHash;
           resolve();
-          console.log('tx success');
         });
       } else {
         emitter.on('signed', (data: TransactionEventResponse) => {
@@ -531,7 +528,7 @@ export default class TransactionService {
       // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.MINT_VDOT: {
         const data = parseTransactionData<ExtrinsicType.MINT_VDOT>(transaction.data);
-        const params = data.data;
+        const params = data.data as SubmitYieldStepData;
         const inputTokenInfo = this.chainService.getAssetBySlug(params.inputTokenSlug);
         const isFeePaidWithInputAsset = params.feeTokenSlug === params.inputTokenSlug;
 
@@ -547,7 +544,7 @@ export default class TransactionService {
 
       case ExtrinsicType.REDEEM_VDOT: {
         const data = parseTransactionData<ExtrinsicType.REDEEM_VDOT>(transaction.data);
-        const params = data.data;
+        const params = data.data as SubmitYieldStepData;
         const inputTokenInfo = this.chainService.getAssetBySlug(params.inputTokenSlug);
         const isFeePaidWithInputAsset = params.feeTokenSlug === params.inputTokenSlug;
 

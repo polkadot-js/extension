@@ -3883,10 +3883,9 @@ export default class KoniExtension {
         chainInfoMap: this.#koniState.getChainInfoMap(),
         poolInfo: yieldPoolInfo,
         substrateApiMap: this.#koniState.getSubstrateApiMap()
-      }, data, path, inputData.currentStep);
+      }, inputData, path, inputData.currentStep);
 
     console.log('extrinsic', extrinsic.toHex());
-    console.log('txData', txData);
 
     return await this.#koniState.transactionService.handleTransaction({
       address,

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SubmitYieldStepData } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestYieldStepSubmit, SubmitYieldStepData } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
@@ -18,7 +18,13 @@ type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
-  const txParams = transaction.data as SubmitYieldStepData;
+
+  const txParams = useMemo((): SubmitYieldStepData => {
+    const txData = transaction.data as RequestYieldStepSubmit;
+
+    return txData.data as SubmitYieldStepData;
+  }, [transaction.data]);
+
   const tokenInfoMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
 
   const { t } = useTranslation();

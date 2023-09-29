@@ -83,7 +83,7 @@ export class KoniSubscription {
 
     if (currentAddress) {
       this.subscribeBalancesAndCrowdloans(currentAddress, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
-      this.subscribeYieldPools(currentAddress, this.state.getChainInfoMap(), this.state.getSubstrateApiMap());
+      this.subscribeYieldPools(currentAddress, this.state.getChainInfoMap(), this.state.getAssetRegistry(), this.state.getSubstrateApiMap());
     }
 
     this.eventHandler = (events, eventTypes) => {
@@ -102,7 +102,7 @@ export class KoniSubscription {
 
       this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
       // @ts-ignore
-      this.subscribeYieldPools(address, serviceInfo.chainInfoMap, serviceInfo.chainApiMap.substrate);
+      this.subscribeYieldPools(address, serviceInfo.chainInfoMap, serviceInfo.assetRegistry, serviceInfo.chainApiMap.substrate);
     };
 
     this.state.eventService.onLazy(this.eventHandler);
@@ -132,7 +132,7 @@ export class KoniSubscription {
     }).catch((err) => this.logger.warn(err));
   }
 
-  subscribeYieldPools (address: string, chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, SubstrateApi>, onlyRunOnFirstTime?: boolean) {
+  subscribeYieldPools (address: string, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, substrateApiMap: Record<string, SubstrateApi>, onlyRunOnFirstTime?: boolean) {
     this.updateSubscription('yieldPoolStats', this.initYieldPoolStatsSubscription(substrateApiMap, onlyRunOnFirstTime));
 
     this.state.handleSwitchAccount(address).then(() => {
@@ -142,16 +142,16 @@ export class KoniSubscription {
         return;
       }
 
-      this.updateSubscription('yieldPosition', this.initYieldPositionSubscription(addresses, substrateApiMap, chainInfoMap));
+      this.updateSubscription('yieldPosition', this.initYieldPositionSubscription(addresses, substrateApiMap, chainInfoMap, assetInfoMap));
     }).catch((e) => this.logger.warn(e));
   }
 
-  initYieldPositionSubscription (addresses: string[], substrateApiMap: Record<string, SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, onlyRunOnFirstTime?: boolean) {
+  initYieldPositionSubscription (addresses: string[], substrateApiMap: Record<string, SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, onlyRunOnFirstTime?: boolean) {
     const updateYieldPoolStats = (data: YieldPositionInfo) => {
       this.state.updateYieldPosition(data);
     };
 
-    const unsub = subscribeYieldPosition(substrateApiMap, addresses, chainInfoMap, updateYieldPoolStats);
+    const unsub = subscribeYieldPosition(substrateApiMap, addresses, chainInfoMap, assetInfoMap, updateYieldPoolStats);
 
     if (onlyRunOnFirstTime) {
       unsub && unsub();

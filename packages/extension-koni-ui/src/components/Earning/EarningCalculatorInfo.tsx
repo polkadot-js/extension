@@ -9,8 +9,8 @@ import { CalendarCheck } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
-import { EarningInfoItem } from './index';
 import { TransformAssetEarning } from '../Modal';
+import EarningInfoItem from './EarningInfoItem';
 
 interface Props extends ThemeProps {
   label: string,
@@ -61,12 +61,16 @@ const Component: React.FC<Props> = ({ className, earningAssets, label }: Props) 
         </div>
       </div>
 
-      <div style={{ display: 'flex' }}>
-        {Object.keys(earningAssets).map((key) => <EarningInfoItem
-          asset={earningAssets[key]}
-          key={key}
-          tokenSlug={key}
-        />)}
+      <div className='earning-token-container'>
+        {
+          Object.keys(earningAssets).map((key) => (
+            <EarningInfoItem
+              asset={earningAssets[key]}
+              key={key}
+              tokenSlug={key}
+            />
+          ))
+        }
       </div>
 
       <Divider className={'earning-calculator-info-divider'} />
@@ -98,6 +102,13 @@ const EarningCalculatorInfo = styled(Component)<Props>(({ theme: { token } }: Pr
       backgroundColor: token.colorBgDivider,
       marginTop: token.marginSM,
       marginBottom: token.marginSM
+    },
+
+    '.earning-token-container': {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: token.sizeXS
     }
   });
 });

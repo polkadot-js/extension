@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, SubmitYieldStepData, TokenBalanceRaw, YieldLiquidStakingMetadata, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
@@ -84,8 +84,9 @@ export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddr
         ],
 
         metadata: {
+          rewards: [],
           exchangeRate: 1
-        } as YieldLiquidStakingMetadata
+        } as YieldPositionStats
       } as YieldPositionInfo);
     }
   }
@@ -184,7 +185,9 @@ export async function generatePathForInterlayLending (params: OptimalYieldPathPa
   return result;
 }
 
-export async function getInterlayLendingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, inputData: SubmitYieldStepData): Promise<HandleYieldStepData> {
+export async function getInterlayLendingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): Promise<HandleYieldStepData> {
+  const inputData = requestData.data as SubmitYieldStepData;
+
   if (path.steps[currentStep].type === YieldStepType.XCM) {
     const destinationTokenSlug = params.poolInfo.inputAssets[0];
     const originChainInfo = params.chainInfoMap[COMMON_CHAIN_SLUGS.POLKADOT];
@@ -230,7 +233,7 @@ export async function getInterlayLendingExtrinsic (address: string, params: Opti
     txChain: params.poolInfo.chain,
     extrinsicType: ExtrinsicType.MINT_QDOT,
     extrinsic,
-    txData: inputData,
+    txData: requestData,
     transferNativeAmount: '0'
   };
 }

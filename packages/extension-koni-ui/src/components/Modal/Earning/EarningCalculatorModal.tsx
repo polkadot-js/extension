@@ -121,6 +121,8 @@ const Component = (props: Props) => {
   }, []);
 
   const onSubmit: FormCallbacks<EarningCalculatorFormProps>['onFinish'] = useCallback((values: EarningCalculatorFormProps) => {
+    const { amount } = values;
+
     inactiveModal(modalId);
 
     const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
@@ -130,7 +132,8 @@ const Component = (props: Props) => {
       method: currentItem.slug,
       from: address,
       chain: currentItem.chain,
-      asset: currentItem.inputAssets[0]
+      asset: currentItem.inputAssets[0],
+      'amount-0': amount
     });
 
     navigate('/transaction/earn');

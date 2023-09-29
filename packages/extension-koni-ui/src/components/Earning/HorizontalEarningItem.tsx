@@ -74,7 +74,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClickButton = useCallback((callback: VoidFunction): React.MouseEventHandler => {
     return (event) => {
-      event.preventDefault();
+      event.stopPropagation();
       callback();
     };
   }, []);

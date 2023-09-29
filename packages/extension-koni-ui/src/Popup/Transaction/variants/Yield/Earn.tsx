@@ -71,7 +71,7 @@ const Component = () => {
   const [validatorLoading, setValidatorLoading] = useState<boolean>(false);
 
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
 
   const currentStep = processState.currentStep;
@@ -436,7 +436,7 @@ const Component = () => {
 
   useEffect(() => {
     if (currentStep === 0) {
-      setIsLoading(true);
+      setStepLoading(true);
 
       getOptimalYieldPath({
         amount: currentAmount,
@@ -452,7 +452,7 @@ const Component = () => {
           });
         })
         .catch(console.error)
-        .finally(() => setIsLoading(false));
+        .finally(() => setStepLoading(false));
     }
   }, [currentPoolInfo, currentAmount, currentStep]);
 
@@ -484,7 +484,7 @@ const Component = () => {
 
               {processState.steps && (
                 <div style={{ display: 'flex', alignItems: 'center', paddingBottom: token.paddingSM }}>
-                  {isLoading
+                  {stepLoading
                     ? (
                       <ActivityIndicator
                         prefixCls={'ant'}
@@ -605,7 +605,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}
@@ -636,7 +636,7 @@ const Component = () => {
 
             <Typography.Text className={'earning-calculator-message'}>{t('Staking process:')}</Typography.Text>
 
-            {!isLoading && processState.steps.map((item, index) => {
+            {!stepLoading && processState.steps.map((item, index) => {
               const isSelected = processState.currentStep === index;
 
               return (
@@ -651,7 +651,7 @@ const Component = () => {
             })}
 
             {
-              isLoading && (
+              stepLoading && (
                 <ActivityIndicator
                   prefixCls={'ant'}
                   size={'32px'}

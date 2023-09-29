@@ -8,7 +8,7 @@ import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks'
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTagTypes, noop } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
 import { MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -33,6 +33,7 @@ interface ButtonOptionProps {
   onClick?: React.MouseEventHandler;
   disable: boolean;
   hidden: boolean;
+  schema?: ButtonProps['schema'];
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -133,16 +134,18 @@ const Component: React.FC<Props> = (props: Props) => {
             temp.icon = StopCircle;
             temp.onClick = onClickButton(onClickWithdrawBtn);
             temp.label = t('Withdraw');
+            temp.schema = 'secondary';
             break;
           case StakingAction.UNSTAKE:
             temp.icon = MinusCircle;
             temp.onClick = onClickButton(onClickUnStakeBtn);
             temp.label = t('Unstake');
+            temp.schema = 'secondary';
             break;
           case StakingAction.CANCEL_UNSTAKE:
             temp.icon = MinusCircle;
             temp.onClick = onClickButton(onClickCancelUnStakeBtn);
-            temp.label = t('Cancel Unstake');
+            temp.label = t('Cancel unstake');
             break;
         }
 
@@ -188,6 +191,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {buttons.map((item) => {
               return (
                 <Button
+                  className='earning-action'
                   disabled={item.disable}
                   icon={(
                     <Icon
@@ -199,6 +203,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   )}
                   key={item.key}
                   onClick={item.onClick}
+                  schema={item.schema}
                   shape='circle'
                   size='xs'
                 >
@@ -314,6 +319,18 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
 
     '.earning-status-item': {
       display: 'block'
+    },
+
+    '.earning-action': {
+      '&.ant-btn-default.-schema-secondary': {
+        borderWidth: '2px',
+        borderStyle: 'solid',
+        borderColor: token.colorBgBorder,
+
+        '&:hover:not(:disabled)': {
+          borderColor: token['gray-2']
+        }
+      }
     }
   });
 });

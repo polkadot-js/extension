@@ -18,7 +18,6 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
-
 type Props = ThemeProps;
 
 const FILTER_MODAL_ID = 'earning-filter-modal';

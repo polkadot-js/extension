@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingStatus, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
@@ -7,9 +7,9 @@ import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { noop } from '@subwallet/extension-koni-ui/utils';
+import { createEarningTagTypes, noop } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
-import { Database, HandsClapping, Leaf, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
+import { MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
@@ -34,74 +34,6 @@ interface ButtonOptionProps {
   disable: boolean;
   hidden: boolean;
 }
-
-export const TagTypes = () => {
-  const { t } = useTranslation();
-  const { token } = useTheme() as Theme;
-
-  return {
-    LIQUID_STAKING: {
-      label: t('Liquid staking'),
-      icon: (
-        <Icon
-          phosphorIcon={Leaf}
-          weight='fill'
-        />
-      ),
-      color: 'magenta'
-    },
-    LENDING: {
-      label: t('Lending'),
-      icon: (
-        <Icon
-          phosphorIcon={HandsClapping}
-          weight='fill'
-        />
-      ),
-      color: 'success'
-    },
-    SINGLE_FARMING: {
-      label: t('Single farming'),
-      icon: (
-        <Icon
-          phosphorIcon={HandsClapping}
-          weight='fill'
-        />
-      ),
-      color: token.colorSecondary
-    },
-    NOMINATION_POOL: {
-      label: t('Nomination pool'),
-      icon: (
-        <Icon
-          phosphorIcon={HandsClapping}
-          weight='fill'
-        />
-      ),
-      color: 'success'
-    },
-    PARACHAIN_STAKING: {
-      label: t('Parachain staking'),
-      icon: (
-        <Icon
-          phosphorIcon={HandsClapping}
-          weight='fill'
-        />
-      ),
-      color: token.colorSecondary
-    },
-    NATIVE_STAKING: {
-      label: t('Native staking'),
-      icon: (
-        <Icon
-          phosphorIcon={Database}
-          weight='fill'
-        />
-      ),
-      color: 'gold'
-    }
-  };
-};
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className,
@@ -221,6 +153,8 @@ const Component: React.FC<Props> = (props: Props) => {
     return result;
   }, [availableActions, chain, onClickButton, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo.metadata]);
 
+  const tagType = useMemo(() => createEarningTagTypes(t, token)[type], [t, token, type]);
+
   return (
     <Web3Block
       className={className}
@@ -237,9 +171,14 @@ const Component: React.FC<Props> = (props: Props) => {
               <div className={'earning-item-name'}>{name}</div>
               <Tag
                 bgType={'default'}
-                color={TagTypes()[type].color}
-                icon={TagTypes()[type].icon}
-              >{TagTypes()[type].label}</Tag>
+                color={tagType.color}
+                icon={(
+                  <Icon
+                    phosphorIcon={tagType.icon}
+                    weight='fill'
+                  />
+                )}
+              >{tagType.label}</Tag>
             </div>
 
             <div className={'earning-item-description'}>{description}</div>

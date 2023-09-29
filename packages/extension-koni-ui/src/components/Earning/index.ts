@@ -9,3 +9,4 @@ export { default as EarningItem } from './EarningItem';
 export { default as EarningProcessItem } from './EarningProcessItem';
 export { default as EarningTokenList } from './EarningTokenList';
 export { default as EarningToolbar } from './EarningToolbar';
+export { default as HorizontalEarningItem } from './HorizontalEarningItem';

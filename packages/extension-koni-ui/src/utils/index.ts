@@ -218,6 +218,7 @@ export * from './chain';
 export * from './confirmation';
 export * from './connector';
 export * from './common';
+export * from './earning';
 export * from './form';
 export * from './qr';
 export * from './scanner';

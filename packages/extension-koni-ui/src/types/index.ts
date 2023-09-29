@@ -99,6 +99,7 @@ export * from './buy';
 export * from './chain';
 export * from './confirmation';
 export * from './crowdloan';
+export * from './earning';
 export * from './form';
 export * from './history';
 export * from './ledger';

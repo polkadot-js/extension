@@ -6,7 +6,6 @@ export { default as BackgroundExpandView } from './BackgroundExpandView';
 export { default as ChainItemFooter } from './ChainItemFooter';
 export { default as EmptyList } from './EmptyList';
 export { default as GeneralEmptyList } from './GeneralEmptyList';
-export { default as HorizontalEarningItem } from './HorizontalEarningItem';
 export { default as LoadingScreen } from './LoadingScreen';
 export { default as NetworkToggleItem } from './NetworkToggleItem';
 export { default as PinExtensionMessage } from './PinExtensionMessage';

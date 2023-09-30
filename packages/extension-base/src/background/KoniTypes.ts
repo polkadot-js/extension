@@ -493,13 +493,14 @@ export enum ExtrinsicType {
 
   JOIN_YIELD_POOL = 'earn.join_pool', // TODO: review this
   MINT_VDOT = 'earn.mint_vdot',
-  REDEEM_VDOT = 'earn.redeem_vdot',
   MINT_LDOT = 'earn.mint_ldot',
-  REDEEM_LDOT = 'earn.redeem_ldot',
   MINT_SDOT = 'earn.mint_sdot',
-  REDEEM_SDOT = 'earn.redeem_sdot',
   MINT_QDOT = 'earn.mint_qdot',
+
   REDEEM_QDOT = 'earn.redeem_qdot',
+  REDEEM_VDOT = 'earn.redeem_vdot',
+  REDEEM_LDOT = 'earn.redeem_ldot',
+  REDEEM_SDOT = 'earn.redeem_sdot',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -529,11 +530,14 @@ export interface ExtrinsicDataTypeMap {
   // Yield
   [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_VDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.REDEEM_VDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_LDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_SDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_QDOT]: RequestYieldStepSubmit,
-  // TODO: add redeem
+
+  [ExtrinsicType.REDEEM_VDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.REDEEM_QDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.REDEEM_LDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.REDEEM_SDOT]: RequestYieldFastWithdrawal,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
@@ -2240,6 +2244,14 @@ export interface HandleYieldStepParams extends BaseRequestSign {
 }
 
 export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
+
+export interface HandleYieldFastWithdrawal extends BaseRequestSign {
+  address: string,
+  yieldPoolInfo: YieldPoolInfo,
+  amount: string
+}
+
+export type RequestYieldFastWithdrawal = InternalRequestSign<HandleYieldFastWithdrawal>;
 
 export interface ValidateYieldProcessParams {
   yieldPoolInfo: YieldPoolInfo,

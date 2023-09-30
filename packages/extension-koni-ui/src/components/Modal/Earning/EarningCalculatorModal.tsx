@@ -3,7 +3,8 @@
 
 import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
-import { DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
+import { BN_TEN, DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
@@ -17,9 +18,8 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
-import EarningBtn from '../../EarningBtn';
+import { EarningCalculatorInfo, EarningTokenList } from '../../Earning';
 import { AmountInput, EarningMethodSelector } from '../../Field';
-import EarningCalculatorInfo from '../../StakingCalculatorInfo';
 import { BaseModal } from '../BaseModal';
 
 interface Props extends ThemeProps {
@@ -59,6 +59,7 @@ const Component = (props: Props) => {
 
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount } = useSelector((state: RootState) => state.accountState);
+  const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
 
   const [, setStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [form] = Form.useForm<EarningCalculatorFormProps>();
@@ -75,21 +76,31 @@ const Component = (props: Props) => {
 
   const currentItem = useMemo(() => currentMethod ? poolInfo[currentMethod] : defaultItem, [currentMethod, poolInfo, defaultItem]);
 
+  const currentDecimal = useMemo(() => {
+    const asset = assetRegistry[currentItem.inputAssets[0]];
+
+    return asset ? _getAssetDecimals(asset) : 0;
+  }, [assetRegistry, currentItem.inputAssets]);
+
   const transformAssetEarnings: TransformAssetEarningMap = useMemo(() => {
     const dailyEarnings: Record<string, YieldAssetExpectedEarning> = {};
     const weeklyEarnings: Record<string, YieldAssetExpectedEarning> = {};
     const monthlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
     const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
 
+    const amount = new BigN(currentAmount).div(BN_TEN.pow(currentDecimal)).toNumber();
+
     if (currentItem?.stats?.assetEarning) {
       currentItem?.stats?.assetEarning.forEach((assetEarningStats) => {
         const assetApr = assetEarningStats?.apr || 0;
+        const assetApy = assetEarningStats?.apy || 0;
+        const apr = assetApr || assetApy;
         const assetSlug = assetEarningStats.slug;
 
-        const _1dEarning = calculateReward(assetApr, parseFloat(currentAmount), YieldCompoundingPeriod.DAILY);
-        const _7dEarning = calculateReward(assetApr, parseFloat(currentAmount), YieldCompoundingPeriod.WEEKLY);
-        const _monthlyEarning = calculateReward(assetApr, parseFloat(currentAmount), YieldCompoundingPeriod.MONTHLY);
-        const _yearlyEarning = calculateReward(assetApr, parseFloat(currentAmount), YieldCompoundingPeriod.YEARLY);
+        const _1dEarning = calculateReward(apr, amount, YieldCompoundingPeriod.DAILY, assetApr === 0);
+        const _7dEarning = calculateReward(apr, amount, YieldCompoundingPeriod.WEEKLY, assetApr === 0);
+        const _monthlyEarning = calculateReward(apr, amount, YieldCompoundingPeriod.MONTHLY, assetApr === 0);
+        const _yearlyEarning = calculateReward(apr, amount, YieldCompoundingPeriod.YEARLY, assetApr === 0);
 
         dailyEarnings[assetSlug] = _1dEarning;
         weeklyEarnings[assetSlug] = _7dEarning;
@@ -99,7 +110,7 @@ const Component = (props: Props) => {
     }
 
     return { dailyEarnings, weeklyEarnings, monthlyEarnings, yearlyEarnings };
-  }, [currentAmount, currentItem?.stats?.assetEarning]);
+  }, [currentAmount, currentDecimal, currentItem?.stats?.assetEarning]);
 
   const onCloseModal = useCallback(() => {
     inactiveModal(modalId);
@@ -110,6 +121,8 @@ const Component = (props: Props) => {
   }, []);
 
   const onSubmit: FormCallbacks<EarningCalculatorFormProps>['onFinish'] = useCallback((values: EarningCalculatorFormProps) => {
+    const { amount } = values;
+
     inactiveModal(modalId);
 
     const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
@@ -119,7 +132,8 @@ const Component = (props: Props) => {
       method: currentItem.slug,
       from: address,
       chain: currentItem.chain,
-      asset: currentItem.inputAssets[0]
+      asset: currentItem.inputAssets[0],
+      'amount-0': amount
     });
 
     navigate('/transaction/earn');
@@ -137,6 +151,12 @@ const Component = (props: Props) => {
     form.setFieldValue(FormFieldName.METHOD, defaultItem.slug);
   }, [form, defaultItem, isActive]);
 
+  useEffect(() => {
+    if (!isActive) {
+      form.resetFields([FormFieldName.VALUE]);
+    }
+  }, [form, isActive]);
+
   return (
     <BaseModal
       className={className}
@@ -147,12 +167,7 @@ const Component = (props: Props) => {
       title={t('Staking calculator')}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
-        <EarningBtn
-          network={'polkadot'}
-          size={'xs'}
-        >
-          {'DOT'}
-        </EarningBtn>
+        <EarningTokenList />
 
         <Typography.Text className={'earning-calculator-message'}>{t('Enter the number of tokens to estimate the rewards')}</Typography.Text>
 
@@ -194,8 +209,8 @@ const Component = (props: Props) => {
             statusHelpAsTooltip={true}
           >
             <AmountInput
-              decimals={0}
-              maxValue={'1'}
+              decimals={currentDecimal}
+              maxValue=''
               showMaxButton={false}
             />
           </Form.Item>
@@ -263,6 +278,12 @@ const EarningCalculatorModal = styled(Component)<Props>(({ theme: { token } }: P
 
       '.ant-form-item-label > label': {
         color: token.colorTextLight4
+      },
+
+      '.ant-form-item-control': {
+        '& > div:nth-child(2)': {
+          display: 'none !important'
+        }
       }
     },
 

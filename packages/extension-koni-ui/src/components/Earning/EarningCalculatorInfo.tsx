@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import EarningInfoItem from '@subwallet/extension-koni-ui/components/EarningInfoItem';
-import { TransformAssetEarning } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningCalculatorModal';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -10,6 +8,9 @@ import { BackgroundIcon, Divider, Number, Typography } from '@subwallet/react-ui
 import { CalendarCheck } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+
+import { TransformAssetEarning } from '../Modal';
+import EarningInfoItem from './EarningInfoItem';
 
 interface Props extends ThemeProps {
   label: string,
@@ -60,12 +61,16 @@ const Component: React.FC<Props> = ({ className, earningAssets, label }: Props) 
         </div>
       </div>
 
-      <div style={{ display: 'flex' }}>
-        {Object.keys(earningAssets).map((key) => <EarningInfoItem
-          asset={earningAssets[key]}
-          key={key}
-          tokenSlug={key}
-        />)}
+      <div className='earning-token-container'>
+        {
+          Object.keys(earningAssets).map((key) => (
+            <EarningInfoItem
+              asset={earningAssets[key]}
+              key={key}
+              tokenSlug={key}
+            />
+          ))
+        }
       </div>
 
       <Divider className={'earning-calculator-info-divider'} />
@@ -97,6 +102,13 @@ const EarningCalculatorInfo = styled(Component)<Props>(({ theme: { token } }: Pr
       backgroundColor: token.colorBgDivider,
       marginTop: token.marginSM,
       marginBottom: token.marginSM
+    },
+
+    '.earning-token-container': {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: token.sizeXS
     }
   });
 });

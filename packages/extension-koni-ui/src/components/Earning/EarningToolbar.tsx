@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import { EarningBtn, FilterModal, SortingModal } from '@subwallet/extension-koni-ui/components';
+import { FilterModal, SortingModal } from '@subwallet/extension-koni-ui/components';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, ModalContext, Typography } from '@subwallet/react-ui';
@@ -12,6 +12,8 @@ import { CaretDown, FadersHorizontal, IconProps, Plus, Question, SortAscending }
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+
+import EarningTokenList from './EarningTokenList';
 
 interface Props extends ThemeProps {
   filterSelectionMap: Record<string, boolean>;
@@ -44,7 +46,7 @@ interface ToolbarBtnProps extends ThemeProps {
   onClick: () => void;
 }
 
-function _ToolbarBtn ({ className, icon, label, onClick, type }: ToolbarBtnProps): React.ReactElement<ToolbarBtnProps> {
+const _ToolbarBtn: React.FC<ToolbarBtnProps> = ({ className, icon, label, onClick, type }: ToolbarBtnProps) => {
   const { token } = useTheme() as Theme;
 
   return (
@@ -68,7 +70,7 @@ function _ToolbarBtn ({ className, icon, label, onClick, type }: ToolbarBtnProps
       </div>
     </Button>
   );
-}
+};
 
 const ToolbarBtn = styled(_ToolbarBtn)<ToolbarBtnProps>(({ theme: { token } }: ToolbarBtnProps) => {
   return ({
@@ -85,7 +87,7 @@ const ToolbarBtn = styled(_ToolbarBtn)<ToolbarBtnProps>(({ theme: { token } }: T
   });
 });
 
-function Component (props: Props): React.ReactElement<Props> {
+const Component: React.FC<Props> = (props: Props) => {
   const { className = '', filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters, showAdd } = props;
 
   const { t } = useTranslation();
@@ -160,14 +162,7 @@ function Component (props: Props): React.ReactElement<Props> {
 
   return (
     <div className={className}>
-      <div>
-        <EarningBtn
-          network={'polkadot'}
-          size={'xs'}
-        >
-          {'DOT'}
-        </EarningBtn>
-      </div>
+      <EarningTokenList />
 
       <div className={CN('button-group')}>
         {
@@ -229,7 +224,7 @@ function Component (props: Props): React.ReactElement<Props> {
       />
     </div>
   );
-}
+};
 
 const EarningToolbar = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({

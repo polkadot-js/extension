@@ -7,12 +7,11 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, PoolSelector, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, PoolSelector, StakingProcessModal, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetChainPrefixBySlug, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
-import StakingProcessModal from '@subwallet/extension-koni-ui/Popup/Home/Earning/Overview/StakingProcessModal';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
@@ -72,7 +71,7 @@ const Component = () => {
   const [validatorLoading, setValidatorLoading] = useState<boolean>(false);
 
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
 
   const currentStep = processState.currentStep;
@@ -221,6 +220,10 @@ const Component = () => {
   }, [currentPoolInfo.type]);
 
   const renderMetaInfo = useCallback(() => {
+    const asset = currentPoolInfo?.inputAssets[0] || '';
+    const assetDecimals = chainAsset[asset].decimals || 0;
+    const value = currentAmount ? parseFloat(currentAmount) / (10 ** assetDecimals) : 0;
+
     return (
       <MetaInfo
         labelColorScheme={'gray'}
@@ -244,6 +247,23 @@ const Component = () => {
             );
           })
         }
+        {
+          currentPoolInfo?.stats?.assetEarning?.map((item) => {
+            if (item.exchangeRate === undefined) {
+              return null;
+            }
+
+            return (
+              <MetaInfo.Number
+                decimals={0}
+                key={item.slug}
+                label={t('Earn')}
+                prefix={chainAsset[item.slug].symbol}
+                value={value * item.exchangeRate}
+              />
+            );
+          })
+        }
         <MetaInfo.Number
           decimals={0}
           label={t('Estimated fee')}
@@ -252,7 +272,7 @@ const Component = () => {
         />
       </MetaInfo>
     );
-  }, [t, _assetEarnings, estimatedFee]);
+  }, [currentPoolInfo, chainAsset, currentAmount, _assetEarnings, t, estimatedFee]);
 
   const getSelectedValidators = useCallback((nominations: string[]) => {
     const validatorList = validatorInfoMap[currentPoolInfo.chain];
@@ -417,7 +437,7 @@ const Component = () => {
 
   useEffect(() => {
     if (currentStep === 0) {
-      setIsLoading(true);
+      setStepLoading(true);
 
       getOptimalYieldPath({
         amount: currentAmount,
@@ -433,7 +453,7 @@ const Component = () => {
           });
         })
         .catch(console.error)
-        .finally(() => setIsLoading(false));
+        .finally(() => setStepLoading(false));
     }
   }, [currentPoolInfo, currentAmount, currentStep]);
 
@@ -465,7 +485,7 @@ const Component = () => {
 
               {processState.steps && (
                 <div style={{ display: 'flex', alignItems: 'center', paddingBottom: token.paddingSM }}>
-                  {isLoading
+                  {stepLoading
                     ? (
                       <ActivityIndicator
                         prefixCls={'ant'}
@@ -501,7 +521,8 @@ const Component = () => {
                 const _asset = chainAsset[asset];
                 const assetDecimals = _asset ? _getAssetDecimals(_asset) : 0;
                 const priceValue = _asset && _asset.priceId ? priceMap[_asset.priceId] : 0;
-                const transformAmount = currentAmount ? (parseFloat(currentAmount) / (10 ** assetDecimals)) * priceValue : 0;
+                const value = currentAmount ? parseFloat(currentAmount) / (10 ** assetDecimals) : 0;
+                const transformAmount = value * priceValue;
 
                 return (
                   <div
@@ -553,7 +574,6 @@ const Component = () => {
                   </div>
                 );
               })}
-
               <Form.Item
                 hidden={currentPoolInfo.type !== YieldPoolType.NOMINATION_POOL}
                 name={'pool'}
@@ -586,7 +606,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}
@@ -617,7 +637,7 @@ const Component = () => {
 
             <Typography.Text className={'earning-calculator-message'}>{t('Staking process:')}</Typography.Text>
 
-            {!isLoading && processState.steps.map((item, index) => {
+            {!stepLoading && processState.steps.map((item, index) => {
               const isSelected = processState.currentStep === index;
 
               return (
@@ -632,7 +652,7 @@ const Component = () => {
             })}
 
             {
-              isLoading && (
+              stepLoading && (
                 <ActivityIndicator
                   prefixCls={'ant'}
                   size={'32px'}

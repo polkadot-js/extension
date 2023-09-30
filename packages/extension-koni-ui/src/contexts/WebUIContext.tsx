@@ -27,18 +27,19 @@ export enum HeaderType {
 }
 
 type WebUIContext = {
-  background: string
-  setBackground: (background: BackgroundColorMap) => void
-  title: string | React.ReactNode
-  setTitle: (title: string | React.ReactNode) => void
-  headerType: HeaderType
-  showSidebar: boolean
-  sidebarCollapsed: boolean
-  setSidebarCollapsed: React.Dispatch<React.SetStateAction<boolean>>
-  isSettingPage: boolean,
-  isPortfolio: boolean
-  showBackButtonOnHeader?: boolean
-  setShowBackButtonOnHeader: (show?: boolean) => void
+  background: string;
+  setBackground: (background: BackgroundColorMap) => void;
+  title: string | React.ReactNode;
+  setTitle: (title: string | React.ReactNode) => void;
+  headerType: HeaderType;
+  showSidebar: boolean;
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  isSettingPage: boolean;
+  isPortfolio: boolean;
+  showBackButtonOnHeader?: boolean;
+  setShowBackButtonOnHeader: (show?: boolean) => void;
+  setHeaderType: React.Dispatch<React.SetStateAction<HeaderType>>;
 }
 
 export const WebUIContext = React.createContext({} as WebUIContext);
@@ -107,7 +108,8 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
         isSettingPage,
         isPortfolio,
         showBackButtonOnHeader,
-        setShowBackButtonOnHeader
+        setShowBackButtonOnHeader,
+        setHeaderType
       }}
     >
       {children}

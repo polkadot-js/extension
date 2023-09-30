@@ -107,22 +107,31 @@ export function subscribeYieldPosition (substrateApiMap: Record<string, Substrat
   };
 }
 
-export function calculateReward (apr: number, amount = 0, compoundingPeriod = YieldCompoundingPeriod.YEARLY): YieldAssetExpectedEarning {
+export function calculateReward (apr: number, amount = 0, compoundingPeriod = YieldCompoundingPeriod.YEARLY, isApy = false): YieldAssetExpectedEarning {
   if (!apr) {
     return {};
   }
 
-  const periodApr = apr / 365 * compoundingPeriod; // APR is always annually
-  const earningRatio = (periodApr / 100) / compoundingPeriod;
+  if (!isApy) {
+    const periodApr = apr / 365 * compoundingPeriod; // APR is always annually
+    const earningRatio = (periodApr / 100) / compoundingPeriod;
 
-  const periodApy = (1 + earningRatio) ** compoundingPeriod - 1;
+    const periodApy = (1 + earningRatio) ** compoundingPeriod - 1;
 
-  const reward = periodApy * amount;
+    const reward = periodApy * amount;
 
-  return {
-    apy: periodApy,
-    rewardInToken: reward
-  };
+    return {
+      apy: periodApy,
+      rewardInToken: reward
+    };
+  } else {
+    const reward = apr * amount;
+
+    return {
+      apy: apr,
+      rewardInToken: reward * (compoundingPeriod / YieldCompoundingPeriod.YEARLY)
+    };
+  }
 }
 
 export async function generateNaiveOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {

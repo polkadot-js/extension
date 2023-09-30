@@ -8,14 +8,13 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { TagTypes } from '@subwallet/extension-koni-ui/components/EarningItem';
 import { DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MANAGEMENT_DETAIL_MODAL, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useFetchChainInfo, useGetAccountsByStaking, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
+import { createEarningTagTypes, isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -63,6 +62,8 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
   const [, setUnStakeStorage] = useLocalStorage(UN_YIELD_TRANSACTION, DEFAULT_UN_YIELD_PARAMS);
 
   const stakingAccounts = useGetAccountsByStaking(chain, type);
+
+  const tagTypes = useMemo(() => createEarningTagTypes(t, token), [t, token]);
 
   const onClickStakeMoreBtn = useCallback(() => {
     inactiveModal(modalId);
@@ -243,7 +244,7 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
 
         <MetaInfo.DisplayType
           label={t('Staking type')}
-          typeName={TagTypes(t)[yieldPoolInfo.type].label}
+          typeName={tagTypes[yieldPoolInfo.type].label}
         />
         <MetaInfo.Status
           label={t('Staking status')}

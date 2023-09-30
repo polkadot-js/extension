@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
@@ -6,11 +6,11 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { createEarningTagTypes } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Logo, Number, Tag, Web3Block } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import { Database, HandsClapping, Leaf, PlusCircle, PlusMinus, Question } from 'phosphor-react';
+import { PlusCircle, PlusMinus, Question } from 'phosphor-react';
 import React, { useMemo } from 'react';
-import { TFunction } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -18,59 +18,6 @@ interface Props extends ThemeProps {
   onClickCalculatorBtn: () => void;
   onClickStakeBtn: () => void;
 }
-
-export const TagTypes = (t: TFunction) => {
-  return {
-    LIQUID_STAKING: {
-      label: t('Liquid staking'),
-      icon: <Icon
-        phosphorIcon={Leaf}
-        weight='fill'
-      />,
-      color: 'magenta'
-    },
-    LENDING: {
-      label: t('Lending'),
-      icon: <Icon
-        phosphorIcon={HandsClapping}
-        weight='fill'
-      />,
-      color: 'success'
-    },
-    SINGLE_FARMING: {
-      label: t('Single farming'),
-      icon: <Icon
-        phosphorIcon={HandsClapping}
-        weight='fill'
-      />,
-      color: 'success'
-    },
-    NOMINATION_POOL: {
-      label: t('Nomination pool'),
-      icon: <Icon
-        phosphorIcon={HandsClapping}
-        weight='fill'
-      />,
-      color: 'secondary'
-    },
-    PARACHAIN_STAKING: {
-      label: t('Parachain staking'),
-      icon: <Icon
-        phosphorIcon={HandsClapping}
-        weight='fill'
-      />,
-      color: 'yellow'
-    },
-    NATIVE_STAKING: {
-      label: t('Native staking'),
-      icon: <Icon
-        phosphorIcon={Database}
-        weight='fill'
-      />,
-      color: 'gold'
-    }
-  };
-};
 
 const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onClickStakeBtn }: Props) => {
   const { t } = useTranslation();
@@ -99,6 +46,8 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onC
     return apy ? (apy * 100) : 0;
   }, [stats?.totalApr, stats?.totalApy]);
 
+  const tagTypes = useMemo(() => createEarningTagTypes(t, token)[type], [t, token, type]);
+
   return (
     <Web3Block
       className={className}
@@ -116,9 +65,14 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onC
 
           <Tag
             bgType={'default'}
-            color={TagTypes(t)[type].color}
-            icon={TagTypes(t)[type].icon}
-          >{TagTypes(t)[type].label}</Tag>
+            color={tagTypes.color}
+            icon={(
+              <Icon
+                phosphorIcon={tagTypes.icon}
+                weight='fill'
+              />
+            )}
+          >{tagTypes.label}</Tag>
 
           <div className={'earning-item-reward'}>
             <Number
@@ -147,37 +101,42 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onC
           <div className='earning-item-footer'>
             <Button
               className='earning-item-icon-btn'
-              icon={
+              icon={(
                 <Icon
                   phosphorIcon={PlusMinus}
-                  size={'sm'}
-                />}
+                  size='sm'
+                />
+              )}
               onClick={onClickCalculatorBtn}
-              shape={'circle'}
-              size={'xs'}
-              type={'ghost'}
+              shape='circle'
+              size='xs'
+              tooltip={t('Staking calculator')}
+              type='ghost'
             />
             <Button
               className='earning-item-icon-btn'
-              icon={<Icon
-                phosphorIcon={Question}
-                size={'sm'}
-                weight={'fill'}
-              />}
-              shape={'circle'}
-              size={'xs'}
-              type={'ghost'}
+              icon={(
+                <Icon
+                  phosphorIcon={Question}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+              shape='circle'
+              size='xs'
+              tooltip={t('FAQs')}
+              type='ghost'
             />
             <Button
               icon={<Icon
                 className={'earning-item-stake-btn'}
                 phosphorIcon={PlusCircle}
-                size={'sm'}
-                weight={'fill'}
+                size='sm'
+                weight='fill'
               />}
               onClick={onClickStakeBtn}
-              shape={'circle'}
-              size={'xs'}
+              shape='circle'
+              size='xs'
             >
               {t('Stake now')}
             </Button>

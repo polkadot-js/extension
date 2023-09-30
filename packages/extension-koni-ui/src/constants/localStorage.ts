@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 export const THEME_BACKGROUND_COLOR = 'theme-background-color';
@@ -19,3 +19,4 @@ export const CLAIM_REWARD_TRANSACTION = 'transaction.claim-reward';
 export const TRANSACTION_STORAGES = [TRANSFER_TRANSACTION, NFT_TRANSACTION, STAKE_TRANSACTION, UN_STAKE_TRANSACTION, CANCEL_UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION, CLAIM_REWARD_TRANSACTION];
 
 export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';
+export const SEED_PREVENT_MODAL = 'seed.prevent-modal';

@@ -1,15 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
-import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
-import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
-import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
-import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
+import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants';
+import { useClickOutSide, useSetSelectedAccountTypes, useSwitchModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { setSelectedAccountTypes } from '@subwallet/extension-koni-ui/utils';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -19,6 +13,9 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
+
+import { SelectAccountType } from '../../Account';
+import { BackIcon, CloseIcon } from '../../Icon';
 
 interface Props extends ThemeProps {
   id: string;
@@ -35,6 +32,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
   const isActive = checkActive(id);
 
+  const setSelectedAccountTypes = useSetSelectedAccountTypes(false);
+
   const [selectedItems, setSelectedItems] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
 
   const onCancel = useCallback(() => {
@@ -45,7 +44,7 @@ const Component: React.FC<Props> = (props: Props) => {
     setSelectedAccountTypes(selectedItems);
     navigate(url);
     inactiveModal(id);
-  }, [selectedItems, navigate, url, inactiveModal, id]);
+  }, [setSelectedAccountTypes, selectedItems, navigate, url, inactiveModal, id]);
 
   const onBack = useSwitchModal(id, previousId);
 

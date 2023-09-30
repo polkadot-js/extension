@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants';
-import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, DEFAULT_ACCOUNT_TYPES, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { useSetSelectedAccountTypes, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { setSelectedAccountTypes } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Image, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
@@ -28,6 +26,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
+  const setSelectedAccountTypes = useSetSelectedAccountTypes(false);
 
   const items = useMemo((): WelcomeButtonItem[] => [
     {
@@ -63,7 +62,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         activeModal(id);
       }
     };
-  }, [activeModal, inactiveModal, navigate]);
+  }, [activeModal, inactiveModal, navigate, setSelectedAccountTypes]);
 
   return (
     <Layout.Base

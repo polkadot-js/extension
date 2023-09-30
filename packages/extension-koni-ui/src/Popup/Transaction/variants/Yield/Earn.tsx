@@ -258,7 +258,7 @@ const Component = () => {
                 decimals={0}
                 key={item.slug}
                 label={t('Earn')}
-                prefix={chainAsset[item.slug].symbol}
+                suffix={chainAsset[item.slug].symbol}
                 value={value * item.exchangeRate}
               />
             );

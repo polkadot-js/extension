@@ -156,8 +156,18 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     // @ts-ignore
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
     transferAmount = value;
-  } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
-    transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
+  } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey)) {
+    if (!_isNativeToken(tokenInfo)) {
+      if (isTxCurrenciesSupported) {
+        transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
+      }
+    } else {
+      if (transferAll) {
+        transfer = api.tx.balances.transferAll(to, false);
+      } else if (value) {
+        transfer = api.tx.balances.transferKeepAlive(to, new BN(value));
+      }
+    }
   } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && isTxTokensSupported) {
     if (transferAll) {
       transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), false);

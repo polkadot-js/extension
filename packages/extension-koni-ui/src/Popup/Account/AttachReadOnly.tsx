@@ -11,7 +11,7 @@ import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/accou
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
+import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
@@ -59,7 +59,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const [reformatAddress, setReformatAddress] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isEthereum, setIsEthereum] = useState(false);
+  const [, setIsEthereum] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
 
   const handleResult = useCallback((val: string) => {
@@ -110,20 +110,37 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     setLoading(true);
 
     if (reformatAddress) {
-      createAccountExternalV2({
-        name: accountName,
-        address: reformatAddress,
-        genesisHash: '',
-        isEthereum: isEthereum,
-        isAllowed: true,
-        isReadOnly: true
+      // createAccountExternalV2({
+      //   name: accountName,
+      //   address: reformatAddress,
+      //   genesisHash: '',
+      //   isEthereum: isEthereum,
+      //   isAllowed: true,
+      //   isReadOnly: true
+      // })
+      createAccountHardwareMultiple({
+        accounts: [{
+          //   name: accountName,
+          //   address: reformatAddress,
+          //   genesisHash: '',
+          //   isEthereum: isEthereum,
+          //   isAllowed: true,
+          //   isReadOnly: true,
+          accountIndex: 0,
+          address: reformatAddress,
+          addressOffset: 0, // don't change
+          genesisHash: '0x6fbd74e5e1d0a61d52ccfe9d4adaed16dd3a7caa37c6bc4d0c2fa12e8b2f4063',
+          hardwareType: 'ledger',
+          name: accountName,
+          isEthereum: false
+        }]
       })
         .then((errors) => {
-          if (errors.length) {
-            form.setFields([{ name: fieldName, errors: errors.map((e) => e.message) }]);
-          } else {
-            onComplete();
-          }
+          // if (errors.length) {
+          //   form.setFields([{ name: fieldName, errors: errors.map((e) => e.message) }]);
+          // } else {
+          onComplete();
+          // }
         })
         .catch((error: Error) => {
           form.setFields([{ name: fieldName, errors: [error.message] }]);
@@ -134,7 +151,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     } else {
       setLoading(false);
     }
-  }, [form, reformatAddress, accountName, isEthereum, onComplete]);
+  }, [form, reformatAddress, accountName, onComplete]);
 
   useFocusById(modalId);
 

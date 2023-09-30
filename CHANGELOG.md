@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.1.14
+Build date: Sep 26, 2023.
+
+Features & Update:
+- Improve network and asset subscription (#1939)
+- Update transfer function for Pendulum (#1950)
+
 ## 1.1.13
 Build date: Sep 21, 2023.
 

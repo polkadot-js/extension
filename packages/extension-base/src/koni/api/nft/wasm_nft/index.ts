@@ -6,7 +6,7 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { AZERO_DOMAIN_CONTRACTS } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { collectionApiFromArtZero, collectionDetailApiFromArtZero, externalUrlOnArtZero, ipfsApiFromArtZero, itemImageApiFromArtZero } from '@subwallet/extension-base/koni/api/nft/wasm_nft/utils';
-import { getPSP34ContractPromise, isAzeroDomainNft, isPinkRoboNft } from '@subwallet/extension-base/koni/api/tokens/wasm';
+import { getPSP34ContractPromise, getTokenUriMethod, isAzeroDomainNft, isPinkRoboNft } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
@@ -300,7 +300,7 @@ export class WasmNftApi extends BaseNftApi {
     const nftItem: NftItem = { chain: '', collectionId: '', id: '', owner: '', name: tokenId };
     const _isFeatured = isFeatured && !AZERO_DOMAIN_CONTRACTS.includes(contractPromise.address.toString());
 
-    const _tokenUri = await contractPromise.query[isPinkRoboNft(contractPromise.address.toString()) ? 'pinkMint::tokenUri' : 'psp34Traits::tokenUri'](
+    const _tokenUri = await contractPromise.query[getTokenUriMethod(contractPromise.address.toString())](
       address,
       { gasLimit: getDefaultWeightV2(this.substrateApi?.api as ApiPromise) },
       isAzeroDomainNft(contractPromise.address.toString()) ? { bytes: tokenId } : tokenId);

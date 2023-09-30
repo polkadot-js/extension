@@ -70,6 +70,50 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.ethereum.slug,
     isDevMode: false,
     isEthereum: true
+  },
+  {
+    accountName: 'Karura',
+    appName: 'Karura',
+    networkName: 'Karura network',
+    genesisHash: ChainInfoMap.karura.substrateInfo?.genesisHash || '0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b',
+    icon: 'substrate',
+    network: 'karura',
+    slug: ChainInfoMap.karura.slug,
+    isDevMode: false,
+    isEthereum: false
+  },
+  {
+    accountName: 'Edgeware',
+    appName: 'Edgeware',
+    networkName: 'Edgeware network',
+    genesisHash: ChainInfoMap.edgeware.substrateInfo?.genesisHash || '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b',
+    icon: 'substrate',
+    network: 'edgeware',
+    slug: ChainInfoMap.edgeware.slug,
+    isDevMode: true,
+    isEthereum: false
+  },
+  {
+    accountName: 'XX Network',
+    appName: 'XX Network',
+    networkName: 'XX network',
+    genesisHash: ChainInfoMap.xx_network.substrateInfo?.genesisHash || '0x50dd5d206917bf10502c68fb4d18a59fc8aa31586f4e8856b493e43544aa82aa',
+    icon: 'substrate',
+    network: 'xxnetwork',
+    slug: ChainInfoMap.xx_network.slug,
+    isDevMode: true,
+    isEthereum: false
+  },
+  {
+    accountName: 'Polymesh',
+    appName: 'Polymesh',
+    networkName: 'Polymesh network',
+    genesisHash: ChainInfoMap.polymesh.substrateInfo?.genesisHash || '0x6fbd74e5e1d0a61d52ccfe9d4adaed16dd3a7caa37c6bc4d0c2fa12e8b2f4063',
+    icon: 'substrate',
+    network: 'polymesh',
+    slug: ChainInfoMap.polymesh.slug,
+    isDevMode: true,
+    isEthereum: false
   }
   // {
   //   displayName: 'Centrifuge',
@@ -79,24 +123,10 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   //   isDevMode: false
   // },
   // {
-  //   displayName: 'Edgeware',
-  //   genesisHash: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b',
-  //   icon: 'substrate',
-  //   network: 'edgeware',
-  //   isDevMode: true
-  // },
-  // {
   //   displayName: 'Genshiro',
   //   genesisHash: '0x9b8cefc0eb5c568b527998bdd76c184e2b76ae561be76e4667072230217ea243',
   //   icon: 'substrate',
   //   network: 'genshiro',
-  //   isDevMode: true
-  // },
-  // {
-  //   displayName: 'Karura',
-  //   genesisHash: '0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b',
-  //   icon: 'substrate',
-  //   network: 'karura',
   //   isDevMode: true
   // },
   // {

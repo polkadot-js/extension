@@ -89,6 +89,7 @@ const WCNetworkBase = styled(Component)<Props>(({ theme: { token } }: Props) => 
       },
 
       '.ant-sw-list-wrapper': {
+        overflow: 'auto',
         flexBasis: 'auto'
       },
 

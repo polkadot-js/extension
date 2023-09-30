@@ -28,8 +28,3 @@ export type SendFundParam = {
 export type BuyTokensParam = {
   symbol: string,
 };
-
-// Create new seed
-export type CreateNewSeedParam = {
-  useGoBack?: boolean;
-};

@@ -3,12 +3,11 @@
 
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected } from '@subwallet/extension-koni-ui/components';
-import WCNetworkSupported from '@subwallet/extension-koni-ui/components/WalletConnect/Network/WCNetworkSupported';
-import { useNotification, useSelectWalletConnectAccount } from '@subwallet/extension-koni-ui/hooks';
+import { AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected, WCNetworkSupported } from '@subwallet/extension-koni-ui/components';
+import { useNotification, useSelectWalletConnectAccount, useSetSelectedAccountTypes } from '@subwallet/extension-koni-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertKeyTypes, isAccountAll, setSelectedAccountTypes } from '@subwallet/extension-koni-ui/utils';
+import { convertKeyTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
@@ -40,6 +39,7 @@ function Component ({ className, request }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const notification = useNotification();
+  const setSelectedAccountTypes = useSetSelectedAccountTypes(true);
 
   const nameSpaceNameMap = useMemo((): Record<string, string> => ({
     [WALLET_CONNECT_EIP155_NAMESPACE]: t('EVM networks'),
@@ -98,7 +98,7 @@ function Component ({ className, request }: Props) {
   const onAddAccount = useCallback(() => {
     setSelectedAccountTypes(convertKeyTypes(missingType));
     navigate('/accounts/new-seed-phrase', { state: { useGoBack: true } });
-  }, [navigate, missingType]);
+  }, [setSelectedAccountTypes, missingType, navigate]);
 
   const onApplyModal = useCallback((namespace: string) => {
     return () => {

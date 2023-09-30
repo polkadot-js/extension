@@ -2,18 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SEED_PREVENT_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetDefaultAccountName, useIsPopup, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { CreateNewSeedParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isFirefox, isNoAccount } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -31,10 +31,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const notify = useNotification();
   const navigate = useNavigate();
-  const locationState = useLocation().state as CreateNewSeedParam;
-  const useGoBack = locationState?.useGoBack;
 
-  const { goBack, goHome } = useDefaultNavigate();
+  const { goHome } = useDefaultNavigate();
   const { activeModal } = useContext(ModalContext);
   const checkUnlock = useUnlockChecker();
 
@@ -46,9 +44,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const isOpenWindowRef = useRef(false);
 
-  const [storage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
+  const [typesStorage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
+  const [preventModalStorage] = useLocalStorage(SEED_PREVENT_MODAL, false);
+  const [preventModal] = useState(preventModalStorage);
 
-  const [accountTypes] = useState(storage);
+  const [accountTypes] = useState(typesStorage);
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);
@@ -56,16 +56,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
 
   const onBack = useCallback(() => {
-    if (useGoBack) {
-      goBack();
-    } else {
-      navigate(DEFAULT_ROUTER_PATH);
+    navigate(DEFAULT_ROUTER_PATH);
 
+    if (!preventModal) {
       if (!noAccount) {
         activeModal(NEW_SEED_MODAL);
       }
     }
-  }, [useGoBack, goBack, navigate, noAccount, activeModal]);
+  }, [preventModal, navigate, noAccount, activeModal]);
 
   const _onCreate = useCallback((): void => {
     if (!seedPhrase) {

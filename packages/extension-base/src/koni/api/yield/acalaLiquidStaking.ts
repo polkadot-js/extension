@@ -37,7 +37,7 @@ export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi,
       stats: {
         assetEarning: [
           {
-            slug: poolInfo.inputAssets[0],
+            slug: poolInfo.rewardAssets[0],
             apr: 18.38
           }
         ],
@@ -61,11 +61,12 @@ export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi,
 }
 
 export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void) {
-  const rewardTokenSlug = poolInfo.rewardAssets[0];
-  const rewardTokenInfo = assetInfoMap[rewardTokenSlug];
+  // @ts-ignore
+  const derivativeTokenSlug = poolInfo.derivativeAssets[0];
+  const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
 
   async function getLtokenBalance () {
-    const balances = (await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(rewardTokenInfo)]))) as unknown as TokenBalanceRaw[];
+    const balances = (await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]))) as unknown as TokenBalanceRaw[];
     const totalBalance = sumBN(balances.map((b) => (b.free || new BN(0))));
 
     if (totalBalance.gt(BN_ZERO)) {
@@ -75,7 +76,7 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
         address: useAddresses[0], // TODO
         balance: [
           {
-            slug: rewardTokenSlug, // token slug
+            slug: derivativeTokenSlug, // token slug
             totalBalance: totalBalance.toString(),
             activeBalance: totalBalance.toString()
           }

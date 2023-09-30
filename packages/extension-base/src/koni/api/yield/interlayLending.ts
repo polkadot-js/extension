@@ -50,11 +50,12 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
 }
 
 export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void) {
-  const rewardTokenSlug = poolInfo.rewardAssets[0];
-  const rewardTokenInfo = assetInfoMap[rewardTokenSlug];
+  // @ts-ignore
+  const derivativeTokenSlug = poolInfo.derivativeAssets[0];
+  const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
 
   async function getQtokenBalance () {
-    const balances = (await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(rewardTokenInfo)]))) as unknown as TokenBalanceRaw[];
+    const balances = (await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]))) as unknown as TokenBalanceRaw[];
     const totalBalance = sumBN(balances.map((b) => (b.free || new BN(0))));
 
     if (totalBalance.gt(BN_ZERO)) {
@@ -64,7 +65,7 @@ export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddr
         address: useAddresses[0], // TODO
         balance: [
           {
-            slug: rewardTokenSlug, // token slug
+            slug: derivativeTokenSlug, // token slug
             totalBalance: totalBalance.toString(),
             activeBalance: totalBalance.toString()
           }
@@ -227,12 +228,13 @@ export async function getInterlayLendingExtrinsic (address: string, params: Opti
 
 export async function getInterlayLendingRedeem (params: OptimalYieldPathParams, amount: string, redeemAll?: boolean): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
-  const rewardTokenSlug = params.poolInfo.rewardAssets[0];
-  const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
+  // @ts-ignore
+  const derivativeTokenSlug = params.poolInfo.derivativeAssets[0];
+  const derivativeTokenInfo = params.assetInfoMap[derivativeTokenSlug];
 
   const extrinsic = redeemAll
-    ? substrateApi.api.tx.loans.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount)
-    : substrateApi.api.tx.loans.redeemAll(_getTokenOnChainInfo(rewardTokenInfo));
+    ? substrateApi.api.tx.loans.redeem(_getTokenOnChainInfo(derivativeTokenInfo), amount)
+    : substrateApi.api.tx.loans.redeemAll(_getTokenOnChainInfo(derivativeTokenInfo));
 
   return [ExtrinsicType.REDEEM_QDOT, extrinsic];
 }

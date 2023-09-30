@@ -2097,6 +2097,7 @@ export interface YieldWithdrawalMethod {
 export interface YieldPoolInfo {
   slug: string,
   chain: string,
+  derivativeAssets?: string[],
   inputAssets: string[], // slug
   rewardAssets: string[], // slug
   altInputAssets?: string[], // TODO
@@ -2270,6 +2271,7 @@ export interface HandleYieldRedeemParams extends BaseRequestSign {
 export type SubmitYieldStepData = { // TODO
   exchangeRate: number, // reward token amount = input token amount * exchange rate
   inputTokenSlug: string,
+  derivativeTokenSlug?: string,
   rewardTokenSlug: string,
   amount: string,
   feeTokenSlug: string

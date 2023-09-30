@@ -59,8 +59,11 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     inputAssets: [
       'acala-LOCAL-DOT'
     ],
-    rewardAssets: [
+    derivativeAssets: [
       'acala-LOCAL-LDOT'
+    ],
+    rewardAssets: [
+      'acala-LOCAL-DOT'
     ],
     feeAssets: [
       'acala-NATIVE-ACA',
@@ -91,8 +94,11 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     inputAssets: [
       'bifrost_dot-LOCAL-DOT'
     ],
-    rewardAssets: [
+    derivativeAssets: [
       'bifrost_dot-LOCAL-vDOT'
+    ],
+    rewardAssets: [
+      'bifrost_dot-LOCAL-DOT'
     ],
     feeAssets: [
       'bifrost_dot-NATIVE-BNC',
@@ -123,8 +129,11 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     inputAssets: [
       'parallel-LOCAL-DOT'
     ],
-    rewardAssets: [
+    derivativeAssets: [
       'parallel-LOCAL-sDOT'
+    ],
+    rewardAssets: [
+      'parallel-LOCAL-DOT'
     ],
     feeAssets: [
       'parallel-NATIVE-PARA'
@@ -154,8 +163,11 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     inputAssets: [
       'interlay-LOCAL-DOT'
     ],
+    derivativeAssets: [
+      'interlay-LOCAL-qDOT'
+    ],
     rewardAssets: [
-      'interlay-LOCAL-qDOT',
+      'interlay-LOCAL-DOT',
       'interlay-NATIVE-INTR'
     ],
     feeAssets: [

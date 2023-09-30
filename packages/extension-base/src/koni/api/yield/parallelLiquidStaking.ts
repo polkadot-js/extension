@@ -20,7 +20,7 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
       stats: {
         assetEarning: [
           {
-            slug: poolInfo.inputAssets[0],
+            slug: poolInfo.rewardAssets[0],
             apr: 18.38
           }
         ],
@@ -44,11 +44,12 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
 }
 
 export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void) {
-  const rewardTokenSlug = poolInfo.rewardAssets[0];
-  const rewardTokenInfo = assetInfoMap[rewardTokenSlug];
+  // @ts-ignore
+  const derivativeTokenSlug = poolInfo.derivativeAssets[0];
+  const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
 
   async function getStokenBalance () {
-    const balances = await substrateApi.api.query.assets.account.multi(useAddresses.map((address) => [_getTokenOnChainAssetId(rewardTokenInfo), address]));
+    const balances = await substrateApi.api.query.assets.account.multi(useAddresses.map((address) => [_getTokenOnChainAssetId(derivativeTokenInfo), address]));
 
     let totalBalance = new BN(0);
 
@@ -74,7 +75,7 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
         address: useAddresses[0], // TODO
         balance: [
           {
-            slug: rewardTokenSlug, // token slug
+            slug: derivativeTokenSlug, // token slug
             totalBalance: totalBalance.toString(),
             activeBalance: totalBalance.toString()
           }
@@ -248,7 +249,7 @@ export async function getParallelLiquidStakingExtrinsic (address: string, params
 
 export async function getParallelLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string, address: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
-  // const rewardTokenSlug = params.poolInfo.rewardAssets[0];
+  // const rewardTokenSlug = params.poolInfo.derivativeAssets[0];
   // const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
 
   const extrinsic = substrateApi.api.tx.liquidStaking.fastMatchUnstake([address]);

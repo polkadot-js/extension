@@ -84,7 +84,7 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
       stats: {
         assetEarning: [
           {
-            slug: poolInfo.inputAssets[0],
+            slug: poolInfo.rewardAssets[0],
             apy: parseFloat(vDOTStats.apyBase) / 100,
             exchangeRate: parseFloat(exchangeRate.data.slp_polkadot_ratio[0].ratio)
           }
@@ -113,12 +113,13 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
 }
 
 export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void, initialExchangeRate?: number) {
-  const rewardTokenSlug = poolInfo.rewardAssets[0];
+  // @ts-ignore
+  const derivativeTokenSlug = poolInfo.derivativeAssets[0];
   const inputTokenSlug = poolInfo.inputAssets[0];
-  const rewardTokenInfo = assetInfoMap[rewardTokenSlug];
+  const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
 
   async function getVtokenBalance () {
-    const balancePromise = substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(rewardTokenInfo)]));
+    const balancePromise = substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]));
     const exchangeRatePromise = new Promise(function (resolve) {
       fetch(BIFROST_GRAPHQL_ENDPOINT, {
         method: 'POST',
@@ -330,7 +331,8 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
 
 export async function getBifrostLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
-  const rewardTokenSlug = params.poolInfo.rewardAssets[0];
+  // @ts-ignore
+  const rewardTokenSlug = params.poolInfo.derivativeAssets[0];
   const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
 
   const extrinsic = substrateApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount);

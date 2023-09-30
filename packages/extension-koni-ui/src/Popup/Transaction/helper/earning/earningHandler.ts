@@ -70,6 +70,7 @@ export function getJoinYieldParams (yieldPoolInfo: YieldPoolInfo, amount: string
   return {
     exchangeRate,
     inputTokenSlug: yieldPoolInfo.inputAssets[0],
+    derivativeTokenSlug: yieldPoolInfo?.derivativeAssets ? yieldPoolInfo.derivativeAssets[0] : undefined, // TODO
     rewardTokenSlug: yieldPoolInfo.rewardAssets[0],
     amount,
     feeTokenSlug: feeStructure.slug

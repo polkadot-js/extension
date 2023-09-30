@@ -38,14 +38,18 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [tokenInfoMap, txParams.inputTokenSlug]);
 
-  const { rewardTokenDecimals, rewardTokenSymbol } = useMemo(() => {
-    const rewardTokenInfo = tokenInfoMap[txParams.rewardTokenSlug];
+  const derivativeTokenBasicInfo = useMemo(() => {
+    if (!txParams.derivativeTokenSlug) {
+      return;
+    }
+
+    const derivativeTokenInfo = tokenInfoMap[txParams.derivativeTokenSlug];
 
     return {
-      rewardTokenSymbol: _getAssetSymbol(rewardTokenInfo),
-      rewardTokenDecimals: _getAssetDecimals(rewardTokenInfo)
+      symbol: _getAssetSymbol(derivativeTokenInfo),
+      decimals: _getAssetDecimals(derivativeTokenInfo)
     };
-  }, [txParams.rewardTokenSlug, tokenInfoMap]);
+  }, [txParams.derivativeTokenSlug, tokenInfoMap]);
 
   const { feeTokenDecimals, feeTokenSymbol } = useMemo(() => {
     const feeTokenInfo = tokenInfoMap[txParams.feeTokenSlug];
@@ -77,12 +81,14 @@ const Component: React.FC<Props> = (props: Props) => {
           value={txParams.amount}
         />
 
-        <MetaInfo.Number
-          decimals={rewardTokenDecimals}
-          label={t('Estimated receivables')}
-          suffix={rewardTokenSymbol}
-          value={estimatedReceivables.toString()}
-        />
+        {
+          derivativeTokenBasicInfo && <MetaInfo.Number
+            decimals={derivativeTokenBasicInfo.decimals}
+            label={t('Estimated receivables')}
+            suffix={derivativeTokenBasicInfo.symbol}
+            value={estimatedReceivables.toString()}
+          />
+        }
 
         <MetaInfo.Number
           decimals={feeTokenDecimals}

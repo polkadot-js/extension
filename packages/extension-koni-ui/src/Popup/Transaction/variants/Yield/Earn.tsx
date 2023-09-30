@@ -131,6 +131,7 @@ const Component = () => {
   const formDefault: YieldParams = useMemo(() => ({
     ...defaultData
   }), [defaultData]);
+
   const _assetEarnings: Record<string, _YieldAssetExpectedEarning> = useMemo(() => {
     const yearlyEarnings: Record<string, _YieldAssetExpectedEarning> = {};
 

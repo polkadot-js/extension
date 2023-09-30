@@ -284,6 +284,10 @@ const EarningCalculatorModal = styled(Component)<Props>(({ theme: { token } }: P
         '& > div:nth-child(2)': {
           display: 'none !important'
         }
+      },
+
+      '.ant-form-item-margin-offset': {
+        marginBottom: '0 !important'
       }
     },
 

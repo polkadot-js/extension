@@ -64,9 +64,10 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
   // @ts-ignore
   const derivativeTokenSlug = poolInfo.derivativeAssets[0];
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
+  const inputTokenSlug = poolInfo.inputAssets[0];
 
   async function getLtokenBalance () {
-    const balances = (await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]))) as unknown as TokenBalanceRaw[];
+    const balances = (await substrateApi.api.query.tokens.accounts.multi(['5FRFxnokxd96gGF95BGcDVY4hnA1bd9GCoyMfTG2T23YdmeB'].map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]))) as unknown as TokenBalanceRaw[];
     const totalBalance = sumBN(balances.map((b) => (b.free || new BN(0))));
 
     if (totalBalance.gt(BN_ZERO)) {
@@ -76,8 +77,8 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
         address: useAddresses[0], // TODO
         balance: [
           {
-            slug: derivativeTokenSlug, // token slug
-            totalBalance: totalBalance.toString(),
+            slug: inputTokenSlug, // token slug
+            totalBalance: totalBalance.toString(), // TODO: convert with exchange rate
             activeBalance: totalBalance.toString()
           }
         ],
@@ -96,7 +97,7 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
 
   getPositionInterval();
 
-  const interval = setInterval(getPositionInterval, 90000);
+  const interval = setInterval(getPositionInterval, 30000);
 
   return () => {
     clearInterval(interval);

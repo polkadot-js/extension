@@ -53,9 +53,10 @@ export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddr
   // @ts-ignore
   const derivativeTokenSlug = poolInfo.derivativeAssets[0];
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
+  const inputTokenSlug = poolInfo.inputAssets[0];
 
   async function getQtokenBalance () {
-    const balances = (await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]))) as unknown as TokenBalanceRaw[];
+    const balances = (await substrateApi.api.query.tokens.accounts.multi(['wdCMiZ5wHTKM7qZUhjYNJNVhMCscsfKz27e1HHqyz9rSYf78A'].map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]))) as unknown as TokenBalanceRaw[];
     const totalBalance = sumBN(balances.map((b) => (b.free || new BN(0))));
 
     if (totalBalance.gt(BN_ZERO)) {
@@ -65,7 +66,7 @@ export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddr
         address: useAddresses[0], // TODO
         balance: [
           {
-            slug: derivativeTokenSlug, // token slug
+            slug: inputTokenSlug, // token slug
             totalBalance: totalBalance.toString(),
             activeBalance: totalBalance.toString()
           }
@@ -85,7 +86,7 @@ export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddr
 
   getPositionInterval();
 
-  const interval = setInterval(getPositionInterval, 90000);
+  const interval = setInterval(getPositionInterval, 30000);
 
   return () => {
     clearInterval(interval);

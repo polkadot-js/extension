@@ -47,9 +47,10 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
   // @ts-ignore
   const derivativeTokenSlug = poolInfo.derivativeAssets[0];
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
+  const inputTokenSlug = poolInfo.inputAssets[0];
 
   async function getStokenBalance () {
-    const balances = await substrateApi.api.query.assets.account.multi(useAddresses.map((address) => [_getTokenOnChainAssetId(derivativeTokenInfo), address]));
+    const balances = await substrateApi.api.query.assets.account.multi(['p8ErK3S7WqHGLKfiyDaH2rfWnG1cgs5TnSh8892G7jQ6eM86Q'].map((address) => [_getTokenOnChainAssetId(derivativeTokenInfo), address]));
 
     let totalBalance = new BN(0);
 
@@ -75,7 +76,7 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
         address: useAddresses[0], // TODO
         balance: [
           {
-            slug: derivativeTokenSlug, // token slug
+            slug: inputTokenSlug, // token slug
             totalBalance: totalBalance.toString(),
             activeBalance: totalBalance.toString()
           }
@@ -95,7 +96,7 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
 
   getPositionInterval();
 
-  const interval = setInterval(getPositionInterval, 90000);
+  const interval = setInterval(getPositionInterval, 30000);
 
   return () => {
     clearInterval(interval);

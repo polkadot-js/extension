@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -341,6 +341,82 @@ export function isUnstakeAll (selectedValidator: string, nominations: Nomination
   }
 
   return isUnstakeAll;
+}
+
+export enum YieldAction {
+  STAKE = 'STAKE',
+  UNSTAKE = 'UNSTAKE',
+  WITHDRAW = 'WITHDRAW',
+  CLAIM_REWARD = 'CLAIM_REWARD',
+  CANCEL_UNSTAKE = 'CANCEL_UNSTAKE',
+
+  START_EARNING = 'EARN',
+  WITHDRAW_EARNING = 'WITHDRAW_EARNING'
+}
+
+export function getYieldAvailableActionsByType (yieldPoolInfo: YieldPoolInfo): YieldAction[] {
+  if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(yieldPoolInfo.type)) {
+    if (yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL) {
+      return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CLAIM_REWARD];
+    }
+
+    const chain = yieldPoolInfo.chain;
+
+    if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+      return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CANCEL_UNSTAKE];
+    } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+      return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CLAIM_REWARD];
+    } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+      return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
+    }
+  }
+
+  if ([YieldPoolType.LIQUID_STAKING, YieldPoolType.LENDING].includes(yieldPoolInfo.type)) {
+    return [YieldAction.START_EARNING, YieldAction.WITHDRAW_EARNING];
+  }
+
+  return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CANCEL_UNSTAKE];
+}
+
+export function getYieldAvailableActionsByPosition (yieldPosition: YieldPositionInfo, yieldPoolInfo: YieldPoolInfo, unclaimedReward?: string): YieldAction[] {
+  const result: YieldAction[] = [];
+
+  if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(yieldPoolInfo.type)) {
+    const nominatorMetadata = yieldPosition.metadata as NominatorMetadata;
+
+    result.push(YieldAction.STAKE);
+
+    const bnActiveStake = new BN(nominatorMetadata.activeStake);
+
+    if (nominatorMetadata.activeStake && bnActiveStake.gt(BN_ZERO)) {
+      result.push(YieldAction.UNSTAKE);
+
+      const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
+      const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain);
+      const bnUnclaimedReward = new BN(unclaimedReward || '0');
+
+      if (
+        ((nominatorMetadata.type === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
+        isAstarNetwork
+      ) {
+        result.push(YieldAction.CLAIM_REWARD);
+      }
+    }
+
+    if (nominatorMetadata.unstakings.length > 0) {
+      result.push(YieldAction.CANCEL_UNSTAKE);
+      const hasClaimable = nominatorMetadata.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
+
+      if (hasClaimable) {
+        result.push(YieldAction.WITHDRAW);
+      }
+    }
+  } else {
+    result.push(YieldAction.START_EARNING);
+    result.push(YieldAction.WITHDRAW_EARNING); // TODO
+  }
+
+  return result;
 }
 
 export enum StakingAction {

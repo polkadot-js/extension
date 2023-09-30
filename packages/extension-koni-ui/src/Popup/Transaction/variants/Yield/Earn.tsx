@@ -230,6 +230,24 @@ const Component = () => {
         valueColorScheme={'gray'}
       >
         {
+          currentPoolInfo?.stats?.assetEarning?.map((item) => {
+            if (item.exchangeRate === undefined) {
+              return null;
+            }
+
+            return (
+              <MetaInfo.Number
+                decimals={0}
+                key={item.slug}
+                label={t('You\'ll receive')}
+                suffix={chainAsset[item.slug].symbol}
+                value={value * item.exchangeRate}
+              />
+            );
+          })
+        }
+
+        {
           Object.values(_assetEarnings).map((value) => {
             return (
               <>
@@ -247,23 +265,7 @@ const Component = () => {
             );
           })
         }
-        {
-          currentPoolInfo?.stats?.assetEarning?.map((item) => {
-            if (item.exchangeRate === undefined) {
-              return null;
-            }
 
-            return (
-              <MetaInfo.Number
-                decimals={0}
-                key={item.slug}
-                label={t('Earn')}
-                prefix={chainAsset[item.slug].symbol}
-                value={value * item.exchangeRate}
-              />
-            );
-          })
-        }
         <MetaInfo.Number
           decimals={0}
           label={t('Estimated fee')}
@@ -635,7 +637,7 @@ const Component = () => {
         <div className={'__transaction-process'}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
 
-            <Typography.Text className={'earning-calculator-message'}>{t('Staking process:')}</Typography.Text>
+            <Typography.Text className={'earning-calculator-message'}>{t(`${currentPoolInfo.name} process:`)}</Typography.Text>
 
             {!stepLoading && processState.steps.map((item, index) => {
               const isSelected = processState.currentStep === index;

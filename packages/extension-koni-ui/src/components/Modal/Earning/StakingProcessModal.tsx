@@ -32,11 +32,11 @@ const Component = ({ className, currentStep, yieldSteps }: Props) => {
       id={modalId}
       maskClosable
       onCancel={onCloseModal}
-      title={t('Staking process')}
+      title={t('Earning process')}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
 
-        <Typography.Text className={'earning-calculator-message'}>{t('Staking process:')}</Typography.Text>
+        <Typography.Text className={'earning-calculator-message'}>{t('Earning process:')}</Typography.Text>
 
         {
           yieldSteps && yieldSteps.map((item, index) => {

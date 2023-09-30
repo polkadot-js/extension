@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 1.1.12
+Build date: Sep 15, 2023.
+
+Features & Update:
+- Handle the case of signing transactions from dApp using a Ledger account (#1874)
+- Update web-runner for i18n for background (#1815)
+- Update chain list (#1896)
+  - Update block explorer for Avalanche C
+  - Add support USDC for Polkadot Asset Hub
+  - Add support Acala EVM network
+
+Bugs fixed:
+- Fixed bug Show incorrect message when the minimum active stake is a real number (#1901)
+- Fixed bug Create incorrect account when connect dApp (#1912)
+
+
 ## 1.1.11
 Build date: Sep 09, 2023.
 

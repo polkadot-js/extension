@@ -17,7 +17,7 @@ import { PhosphorIcon, StakingDataType, ThemeProps } from '@subwallet/extension-
 import { isAccountAll, sortStakingByValue, stopClickPropagation } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList, Table, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
-import { ArrowClockwise, DotsThree, FadersHorizontal, Plus, Trophy, User, Users } from 'phosphor-react';
+import { ArrowClockwise, Database, DotsThree, FadersHorizontal, Plus, PlusCircle, User, Users } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -233,15 +233,31 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return items.filter(_filterFunction);
   }, [items, selectedFilterTab, filterFunction, searchFunction, searchInput]);
 
+  const emptyButtonProps = useMemo((): ButtonProps => {
+    return {
+      icon: (
+        <Icon
+          phosphorIcon={PlusCircle}
+          weight='fill'
+        />
+      ),
+      children: t('Start staking'),
+      shape: 'circle',
+      size: 'xs',
+      onClick: onClickStakeMore
+    };
+  }, [onClickStakeMore, t]);
+
   const emptyStakingList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Your staking accounts will appear here!')}
-        emptyTitle={t('No staking')}
-        phosphorIcon={Trophy}
+        buttonProps={emptyButtonProps}
+        emptyMessage={t('You can stake in-app easily')}
+        emptyTitle={t('No staking found')}
+        phosphorIcon={Database}
       />
     );
-  }, [t]);
+  }, [emptyButtonProps, t]);
 
   useEffect(() => {
     if (currentAccount?.address !== address) {

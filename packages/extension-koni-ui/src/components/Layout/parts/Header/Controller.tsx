@@ -71,6 +71,8 @@ const Controller = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   '.common-header': {
     display: 'flex',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: token.size,
 
     '.title-group': {
       display: 'flex',

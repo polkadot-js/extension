@@ -15,7 +15,7 @@ import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import GeneralEmptyList from '../../GeneralEmptyList';
+import { TokenEmptyList } from '../../EmptyList';
 
 interface Props extends ThemeProps {
   onSelectItem?: (item: _ChainAsset) => void,
@@ -23,9 +23,9 @@ interface Props extends ThemeProps {
   items: _ChainAsset[]
 }
 
-const renderEmpty = () => <GeneralEmptyList />;
-
 const modalId = RECEIVE_TOKEN_SELECTOR_MODAL;
+
+const renderEmpty = () => <TokenEmptyList modalId={modalId} />;
 
 function Component ({ address, className = '', items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();

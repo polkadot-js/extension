@@ -96,8 +96,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         )}
         loading={loadingInject}
         onClick={onClickExtension}
-        schema={ enabled ? 'danger' : 'secondary'}
-        tooltip={ enabled ? t('Disconnect extension') : injected ? t('Connect extension') : t('Download extension')}
+        schema={ (enabled && !loadingInject) ? 'danger' : 'secondary'}
+        tooltip={ (enabled && !loadingInject) ? t('Disconnect extension') : injected ? t('Connect extension') : t('Download extension')}
       />
     </div>
   );

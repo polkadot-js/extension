@@ -9,7 +9,10 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Image } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowCircleLeft, ArrowCircleRight, ArrowSquareUpRight, Clock, Gear, Info, MessengerLogo, Rocket, Vault, Wallet } from 'phosphor-react';
+import { ArrowCircleLeft, ArrowCircleRight, ArrowSquareUpRight, Clock,
+  Gear,
+  Globe, Info, MessengerLogo, Rocket, Vault, Wallet
+} from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -56,6 +59,11 @@ function Component ({ className,
         label: t('Earning'),
         value: '/home/earning',
         icon: Vault
+      },
+      {
+        label: t('DApps'),
+        value: '/dapps',
+        icon: Globe
       },
       {
         label: t('History'),

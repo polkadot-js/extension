@@ -151,24 +151,42 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [getNftsByCollection, handleOnClickCollection]);
 
+  const emptyButtonProps = useMemo((): ButtonProps => {
+    return {
+      icon: (
+        <Icon
+          phosphorIcon={PlusCircle}
+          weight='fill'
+        />
+      ),
+      children: t('Add NFT'),
+      shape: 'circle',
+      size: 'xs',
+      onClick: () => {
+        navigate('/settings/tokens/import-nft', { state: { isExternalRequest: false } });
+      }
+    };
+  }, [navigate, t]);
+
   const emptyNft = useCallback(() => {
     if (isWebUI) {
       return (
         <NoContent
           className={'__no-content-block'}
-          pageType={PAGE_TYPE.NFT}
+          pageType={PAGE_TYPE.NFT_COLLECTION}
         />
       );
     }
 
     return (
       <EmptyList
-        emptyMessage={t('Your NFT collectible will appear here!')}
-        emptyTitle={t('No NFT collectible')}
+        buttonProps={emptyButtonProps}
+        emptyMessage={t('Try adding one manually')}
+        emptyTitle={t('No NFTs found')}
         phosphorIcon={Image}
       />
     );
-  }, [isWebUI, t]);
+  }, [emptyButtonProps, isWebUI, t]);
 
   const openImportModal = useCallback(() => {
     activeModal(IMPORT_NFT_MODAL);
@@ -221,7 +239,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return (
       <NoContent
         className={'__no-content-block'}
-        pageType={PAGE_TYPE.NFT}
+        pageType={PAGE_TYPE.NFT_COLLECTION}
       />
     );
   }, [isWebUI, nftCollections, renderNftCollection, emptyNft, searchCollection, outletContext?.searchInput, t]);

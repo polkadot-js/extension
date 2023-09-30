@@ -11,9 +11,11 @@ import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@su
 import { addLazy, canDerive, isEmptyObject } from '@subwallet/extension-base/utils';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
+import { DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
 import { SessionTypes } from '@walletconnect/types';
+import axios from 'axios';
 
 // Setup redux stores
 
@@ -312,3 +314,42 @@ export const updateYieldPositionInfo = (data: YieldPositionInfo[]) => {
 };
 
 export const subscribeYieldPositionInfo = lazySubscribeMessage('pri(yield.subscribeYieldPosition)', null, updateYieldPositionInfo, updateYieldPositionInfo);
+
+export const updateDAppStore = (dApps: DAppInfo[]) => {
+  const featureDApps: DAppInfo[] = dApps.filter((i) => i.is_featured);
+
+  store.dispatch({ type: 'dApp/update',
+    payload: {
+      featureDApps,
+      dApps
+    } });
+};
+
+export const getDAppsData = (() => {
+  const handler: {
+    resolve?: (value: unknown) => void,
+    reject?: (reason?: any) => void
+  } = {};
+
+  const promise = new Promise((resolve, reject) => {
+    handler.resolve = resolve;
+    handler.reject = reject;
+  });
+
+  const rs = {
+    promise,
+    start: () => {
+      axios.get('https://content-cache.subwallet.app/api/strapi/dapps').then((rs) => {
+        handler.resolve?.(rs.data);
+      }).catch((reason) => {
+        handler.reject?.(reason);
+      });
+    }
+  };
+
+  rs.promise.then((data) => {
+    updateDAppStore(data as DAppInfo[]);
+  }).catch(console.error);
+
+  return rs;
+})();

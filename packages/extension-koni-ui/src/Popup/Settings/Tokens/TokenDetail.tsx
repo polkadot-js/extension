@@ -126,7 +126,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const handleCopyContractAddress = useCallback(() => {
     const contractAddress = _getContractAddressOfToken(tokenInfo);
 
-    navigator.clipboard.writeText(contractAddress).then().catch(console.error);
+    navigator?.clipboard?.writeText(contractAddress).then().catch(console.error);
 
     showNotification({
       message: t('Copied to clipboard')

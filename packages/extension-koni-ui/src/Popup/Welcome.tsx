@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { CONNECT_EXTENSION, DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants';
+import { CONNECT_EXTENSION, DEFAULT_ACCOUNT_TYPES, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -13,10 +13,11 @@ import { Button, ButtonProps, Form, Icon, Image, Input, ModalContext } from '@su
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useLayoutEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import SocialGroup from '../components/SocialGroup';
 import { EXTENSION_URL } from '../constants';
@@ -24,7 +25,7 @@ import { ScreenContext } from '../contexts/ScreenContext';
 import useGetDefaultAccountName from '../hooks/account/useGetDefaultAccountName';
 import useDefaultNavigate from '../hooks/router/useDefaultNavigate';
 import usePreloadView from '../hooks/router/usePreloadView';
-import { convertFieldToObject, isNoAccount, openInNewTab, readOnlyScan, setSelectedAccountTypes, simpleCheckForm } from '../utils';
+import { convertFieldToObject, isNoAccount, openInNewTab, readOnlyScan, simpleCheckForm } from '../utils';
 
 type Props = ThemeProps;
 
@@ -45,7 +46,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { enableInject, initCallback, initEnable, injected, loadingInject } = useContext(InjectContext);
+  const { enableInject, injected, loadingInject } = useContext(InjectContext);
   const navigate = useNavigate();
 
   const [form] = Form.useForm<ReadOnlyAccountInput>();
@@ -55,13 +56,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const [isAttachAddressEthereum, setAttachAddressEthereum] = useState(false);
   const [isAttachReadonlyAccountButtonDisable, setIsAttachReadonlyAccountButtonDisable] = useState(true);
   // use for trigger after enable inject
-  const [enInject, setEnInject] = useState({});
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
-  const isAccountsEmpty = useMemo(() => {
-    return isNoAccount(accounts);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enInject]);
   const { goHome } = useDefaultNavigate();
+  const [, setSelectedAccountTypes] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
 
   usePreloadView([
     'CreatePassword',
@@ -197,7 +194,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     return () => {
       if (id === CONNECT_EXTENSION) {
         if (injected) {
-          enableInject(() => setEnInject({}));
+          enableInject();
         } else {
           openInNewTab(EXTENSION_URL)();
         }
@@ -213,21 +210,14 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         activeModal(id);
       }
     };
-  }, [activeModal, enableInject, inactiveModal, injected, navigate]
+  }, [activeModal, enableInject, inactiveModal, injected, navigate, setSelectedAccountTypes]
   );
 
   useLayoutEffect(() => {
-    if (!isAccountsEmpty) {
+    if (!isNoAccount(accounts)) {
       goHome();
     }
-  }, [goHome, isAccountsEmpty]);
-
-  // Go root after inject
-  useEffect(() => {
-    if (initEnable) {
-      initCallback(() => setEnInject({}));
-    }
-  }, [initCallback, initEnable]);
+  }, [accounts, goHome]);
 
   return (
     <Layout.Base

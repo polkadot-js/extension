@@ -14,10 +14,6 @@ import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _Valida
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
 
-export async function editAccount (address: string, name: string): Promise<boolean> {
-  return sendMessage('pri(accounts.edit)', { address, name });
-}
-
 export async function showAccount (address: string, isShowing: boolean): Promise<boolean> {
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }
@@ -28,10 +24,6 @@ export async function tieAccount (address: string, genesisHash: string | null): 
 
 export async function validateAccount (address: string, password: string): Promise<boolean> {
   return sendMessage('pri(accounts.validate)', { address, password });
-}
-
-export async function forgetAccount (address: string): Promise<boolean> {
-  return sendMessage('pri(accounts.forget)', { address });
 }
 
 export async function approveAuthRequest (id: string): Promise<boolean> {

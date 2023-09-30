@@ -4,6 +4,7 @@
 export * from './addressBook';
 export * from './create';
 export * from './currentAccount';
+export * from './edit';
 export * from './export';
 export * from './inject';
 export * from './validate';

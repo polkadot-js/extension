@@ -1,14 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks/form/useForwardInputRef';
+import { getOS } from '@subwallet/extension-base/utils';
+import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Input, InputRef } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import React, { ChangeEventHandler, ClipboardEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, ClipboardEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import { BasicInputWrapper } from './Base';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   decimals: number;
@@ -44,6 +46,28 @@ export const getOutputValuesFromString: (input: string, power: number) => string
   return valueBigN.toFixed().split('.')[0];
 };
 
+const ctrlKey = 17;
+const cmdLeftKey = 91;
+const cmdRightKey = 93;
+const cmdFirefoxKey = 224;
+
+interface ControlData {
+  [ctrlKey]: boolean;
+  [cmdLeftKey]: boolean;
+  [cmdRightKey]: boolean;
+  [cmdFirefoxKey]: boolean;
+}
+
+const isMacOs = getOS() === 'Mac OS';
+
+const isControlKey = (keycode: number) => {
+  if (isMacOs) {
+    return [cmdLeftKey, cmdRightKey, cmdFirefoxKey].includes(keycode);
+  } else {
+    return [ctrlKey].includes(keycode);
+  }
+};
+
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { className, decimals, disabled, forceUpdateMaxValue, maxValue, onChange, onSetMax, prefix, showMaxButton, statusHelp, tooltip, value } = props;
 
@@ -53,6 +77,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const [inputValue, setInputValue] = useState(value ? getInputValuesFromString(value, decimals) : value);
   const [firstTime, setFirstTime] = useState(true);
+  const controlRef = useRef<ControlData>({
+    [ctrlKey]: false,
+    [cmdLeftKey]: false,
+    [cmdRightKey]: false,
+    [cmdFirefoxKey]: false
+  });
 
   const _onClickMaxBtn = useCallback((e: SyntheticEvent) => {
     e.stopPropagation();
@@ -67,7 +97,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [onSetMax, inputRef, decimals, maxValue, onChange]);
 
   const getMaxLengthText = useCallback((value: string) => {
-    return value.includes('.') ? decimals + 1 + value.split('.')[0].length : 10;
+    return value.includes('.') ? decimals + 1 + value.split('.')[0].length : undefined;
   }, [decimals]);
 
   const suffix = useMemo((): React.ReactNode => (
@@ -91,7 +121,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     let value = event.target.value;
     const maxLength = getMaxLengthText(value);
 
-    if (value.length > maxLength) {
+    if (maxLength && value.length > maxLength) {
       value = value.slice(0, maxLength);
     }
 
@@ -106,12 +136,22 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<Element>): void => {
+      const keycode = event.keyCode;
+
+      if (isControlKey(keycode)) {
+        controlRef.current = { ...controlRef.current, [keycode]: true };
+      }
+
       if (event.key.length === 1) {
+        const isUseControl = Object.values(controlRef.current).some((v) => v);
+
         const { selectionEnd: j, selectionStart: i, value } = event.target as HTMLInputElement;
         const newValue = `${value.substring(0, i || 0)}${event.key}${value.substring(j || 0)}`;
 
-        if (!(/^(0|[1-9]\d*)(\.\d*)?$/).test(newValue)) {
-          event.preventDefault();
+        if (!isUseControl) {
+          if (!(/^(0|[1-9]\d*)(\.\d*)?$/).test(newValue)) {
+            event.preventDefault();
+          }
         }
       }
     },
@@ -119,8 +159,26 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   );
 
   const onPaste = useCallback<ClipboardEventHandler<HTMLInputElement>>((event) => {
-    event.preventDefault();
+    const data = event.clipboardData.getData('text');
+
+    const { selectionEnd: j, selectionStart: i, value } = event.currentTarget;
+    const newValue = `${value.substring(0, i || 0)}${data}${value.substring(j || 0)}`;
+
+    if (!(/^(0|[1-9]\d*)(\.\d*)?$/).test(newValue)) {
+      event.preventDefault();
+    }
   }, []);
+
+  const onKeyUp = useCallback(
+    (event: React.KeyboardEvent<Element>): void => {
+      const keycode = event.keyCode;
+
+      if (isControlKey(keycode)) {
+        controlRef.current = { ...controlRef.current, [keycode]: false };
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     let amount = true;
@@ -162,7 +220,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       onBlur={props.onBlur}
       onChange={onChangeInput}
       onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
       onPaste={onPaste}
+      // onCopy={onPaste}
       placeholder={props.placeholder || t('Amount')}
       prefix={prefix}
       readOnly={props.readOnly}

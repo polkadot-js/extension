@@ -4,20 +4,22 @@
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ChartBar, Coin, Image, ListBullets, MagnifyingGlass, RocketLaunch, SlidersHorizontal, Trophy } from 'phosphor-react';
+import { ChartBar, Coin, GlobeHemisphereWest, Image, ListBullets, MagnifyingGlass, RocketLaunch, SlidersHorizontal, Trophy } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { PhosphorIcon, ThemeProps } from '../types';
 
 export enum PAGE_TYPE {
-  NFT = 'nft',
+  NFT_COLLECTION = 'nft_collection',
+  NFT_COLLECTION_DETAIL = 'nft_collection_detail',
   TOKEN = 'token',
   SEARCH = 'search',
   CROWDLOANS = 'crowdloans',
   HISTORY = 'history',
   STAKING = 'staking',
   STATISTIC = 'statistic',
+  DAPPS = 'dapps'
 }
 
 type Props = ThemeProps & {
@@ -40,10 +42,15 @@ const Component: React.FC<Props> = ({ className, pageType }: Props) => {
 
   const pageContents = useMemo<Record<string, PageContent>>(() => {
     return {
-      [PAGE_TYPE.NFT]: {
+      [PAGE_TYPE.NFT_COLLECTION]: {
         icon: Image,
         title: t('No collectible found'),
         content: t('Your collectibles will appear here')
+      },
+      [PAGE_TYPE.NFT_COLLECTION_DETAIL]: {
+        icon: Image,
+        title: t('No NFT collectible'),
+        content: t('Your NFT collectible will appear here!')
       },
       [PAGE_TYPE.TOKEN]: {
         icon: Coin,
@@ -78,6 +85,11 @@ const Component: React.FC<Props> = ({ className, pageType }: Props) => {
         icon: ChartBar,
         title: t('There is no data'),
         content: t('The data will automatically appear when your portfolio has assets')
+      },
+      [PAGE_TYPE.DAPPS]: {
+        icon: GlobeHemisphereWest,
+        title: t('No dApps found'),
+        content: t('Your dApps will show up here')
       }
     };
   }, [t]);

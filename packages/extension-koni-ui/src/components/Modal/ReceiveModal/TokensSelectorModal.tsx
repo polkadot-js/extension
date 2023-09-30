@@ -80,6 +80,7 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
         name={item.symbol}
         onClickQrBtn={onClickQrBtn(item)}
         onPressItem={onClickQrBtn(item)}
+        slug={item.slug}
         subName={item.name}
         subNetworkKey={item.originChain || ''}
         symbol={item.symbol}

@@ -131,7 +131,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     actionListByChain.forEach((item) => {
       const temp: ButtonOptionProps = {
-        disable: !availableActionsByMetadata.includes(item),
+        // disable: !availableActionsByMetadata.includes(item),
         key: item,
         hidden: false
       } as ButtonOptionProps;

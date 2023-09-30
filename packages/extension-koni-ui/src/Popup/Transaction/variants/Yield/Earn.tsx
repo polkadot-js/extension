@@ -30,6 +30,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../../helper';
 import { FreeBalanceToStake, TransactionContent } from '../../parts';
+import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -247,24 +248,28 @@ const Component = () => {
           })
         }
 
-        {
-          Object.values(_assetEarnings).map((value) => {
-            return (
-              <>
-                <MetaInfo.Number
-                  label={t('Yearly rewards')}
-                  suffix={'%'}
-                  value={(value.apy || 0) * 100}
-                />
-                <MetaInfo.Number
-                  label={t('Estimated earnings')}
-                  suffix={`${value.symbol}/Year`}
-                  value={value.rewardInToken || 0}
-                />
-              </>
-            );
-          })
-        }
+        <MetaInfo.Default label={t('Yearly rewards')}>
+          <div>
+            {
+              Object.values(_assetEarnings).map((value) => {
+                const amount = (value.apy || 0) * 100;
+
+                return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)}% ${value.symbol}`;
+              }).join(' - ')
+            }
+          </div>
+        </MetaInfo.Default>
+        <MetaInfo.Default label={t('Estimated earnings')}>
+          <div>
+            {
+              Object.values(_assetEarnings).map((value) => {
+                const amount = value.rewardInToken || 0;
+
+                return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)} ${value.symbol}`;
+              }).join(' - ').concat('/Year')
+            }
+          </div>
+        </MetaInfo.Default>
 
         <MetaInfo.Number
           decimals={0}

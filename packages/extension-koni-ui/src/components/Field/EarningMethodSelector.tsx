@@ -10,7 +10,7 @@ import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
-import GeneralEmptyList from '../GeneralEmptyList';
+import { GeneralEmptyList } from '../EmptyList';
 import { BaseSelectModal } from '../Modal';
 import { BasicInputWrapper } from './Base';
 

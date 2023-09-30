@@ -6,7 +6,8 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { isSameAddress } from '@subwallet/extension-base/utils';
+import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
+import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, PoolSelector, StakingProcessModal, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -30,7 +31,6 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../../helper';
 import { FreeBalanceToStake, TransactionContent } from '../../parts';
-import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -39,6 +39,8 @@ interface Props extends ThemeProps {
 const formFieldPrefix = 'amount-';
 
 const hiddenFields: Array<keyof YieldParams> = ['chain', 'asset', 'method'];
+
+const loadingStepPromiseKey = 'earning.step.loading';
 
 interface _YieldAssetExpectedEarning extends YieldAssetExpectedEarning {
   symbol: string;
@@ -446,21 +448,23 @@ const Component = () => {
     if (currentStep === 0) {
       setStepLoading(true);
 
-      getOptimalYieldPath({
-        amount: currentAmount,
-        poolInfo: currentPoolInfo
-      })
-        .then((res) => {
-          dispatchProcessState({
-            payload: {
-              steps: res.steps,
-              feeStructure: res.totalFee
-            },
-            type: EarningActionType.STEP_CREATE
-          });
+      addLazy(loadingStepPromiseKey, () => {
+        getOptimalYieldPath({
+          amount: currentAmount,
+          poolInfo: currentPoolInfo
         })
-        .catch(console.error)
-        .finally(() => setStepLoading(false));
+          .then((res) => {
+            dispatchProcessState({
+              payload: {
+                steps: res.steps,
+                feeStructure: res.totalFee
+              },
+              type: EarningActionType.STEP_CREATE
+            });
+          })
+          .catch(console.error)
+          .finally(() => setStepLoading(false));
+      }, 1000, 5000, false);
     }
   }, [currentPoolInfo, currentAmount, currentStep]);
 

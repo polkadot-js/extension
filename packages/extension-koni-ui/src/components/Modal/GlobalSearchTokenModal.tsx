@@ -1,16 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EmptyList } from '@subwallet/extension-koni-ui/components';
-import { TokenBalanceSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceSelectionItem';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { AccountBalanceHookType, TokenGroupHookType } from '@subwallet/extension-koni-ui/types/hook';
+import { TokenBalanceSelectionItem, TokenEmptyList } from '@subwallet/extension-koni-ui/components';
+import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { AccountBalanceHookType, ThemeProps, TokenBalanceItemType, TokenGroupHookType } from '@subwallet/extension-koni-ui/types';
 import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { SwList, SwModal } from '@subwallet/react-ui';
-import { Coins } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -79,14 +74,9 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
     );
   }, [chainInfoMap]);
 
-  const renderEmpty = useCallback(() => (
-    <EmptyList
-      className={'__empty-list'}
-      emptyMessage={t('Add tokens to get started.')}
-      emptyTitle={t('No tokens found')}
-      phosphorIcon={Coins}
-    />
-  ), [t]);
+  const renderEmpty = useCallback(() => {
+    return (<TokenEmptyList modalId={id} />);
+  }, [id]);
 
   return (
     <SwModal

@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
-import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
+import { EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
@@ -224,8 +223,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     () => {
       return (
         <EmptyList
-          emptyMessage={t('Your crowdloan will appear here!')}
-          emptyTitle={t('No crowdloan')}
+          emptyMessage={t('Your crowdloans will show up here')}
+          emptyTitle={t('No crowdloans found')}
           phosphorIcon={Rocket}
         />
       );

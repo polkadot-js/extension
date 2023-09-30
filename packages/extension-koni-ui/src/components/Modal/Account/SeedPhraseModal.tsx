@@ -36,8 +36,7 @@ const Component: React.FC<Props> = ({ className, modalId, onBack, onSubmitSucces
   const accountName = useGetDefaultAccountName();
   const checkUnlock = useUnlockChecker();
 
-  const [storage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
-  const [accountTypes] = useState(storage);
+  const [accountTypes] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);
@@ -153,7 +152,7 @@ const SeedPhraseModal = styled(Component)<Props>(({ theme: { token } }: Props) =
     },
 
     '.__description': {
-      fontSize: token.size,
+      fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       color: token.colorTextLight4,
       textAlign: 'center'

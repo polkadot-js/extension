@@ -102,6 +102,7 @@ export * from './crowdloan';
 export * from './earning';
 export * from './form';
 export * from './history';
+export * from './hook';
 export * from './ledger';
 export * from './navigation';
 export * from './staking';

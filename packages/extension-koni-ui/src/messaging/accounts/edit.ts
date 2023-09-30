@@ -7,6 +7,6 @@ export async function editAccount (address: string, name: string): Promise<boole
   return sendMessage('pri(accounts.edit)', { address, name });
 }
 
-export async function forgetAccount (address: string): Promise<boolean> {
-  return sendMessage('pri(accounts.forget)', { address });
+export async function forgetAccount (address: string, lockAfter = false): Promise<boolean> {
+  return sendMessage('pri(accounts.forget)', { address, lockAfter });
 }

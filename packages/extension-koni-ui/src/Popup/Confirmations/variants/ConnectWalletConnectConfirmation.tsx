@@ -6,6 +6,7 @@ import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/
 import { AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected } from '@subwallet/extension-koni-ui/components';
 import SeedPhraseModal from '@subwallet/extension-koni-ui/components/Modal/Account/SeedPhraseModal';
 import WCNetworkSupported from '@subwallet/extension-koni-ui/components/WalletConnect/Network/WCNetworkSupported';
+import { DEFAULT_ACCOUNT_TYPES, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { useNotification, useSelectWalletConnectAccount } from '@subwallet/extension-koni-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -16,8 +17,7 @@ import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-
-import { KeypairType } from '@polkadot/util-crypto/types';
+import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
   request: WalletConnectSessionRequest
@@ -43,8 +43,8 @@ function Component ({ className, request }: Props) {
 
   const { t } = useTranslation();
   const notification = useNotification();
-  const [missingAccountTypes, setMissingAccountTypes] = useState<KeypairType[]>([]);
   const { activeModal } = useContext(ModalContext);
+  const [, setMissingAccountTypes] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
 
   const nameSpaceNameMap = useMemo((): Record<string, string> => ({
     [WALLET_CONNECT_EIP155_NAMESPACE]: t('EVM networks'),
@@ -103,7 +103,7 @@ function Component ({ className, request }: Props) {
   const onAddAccount = useCallback(() => {
     setMissingAccountTypes(convertKeyTypes(missingType));
     activeModal(createMissingAccountModalId);
-  }, [missingType, activeModal]);
+  }, [setMissingAccountTypes, missingType, activeModal]);
 
   const onApplyModal = useCallback((namespace: string) => {
     return () => {
@@ -282,7 +282,6 @@ function Component ({ className, request }: Props) {
         }
 
         <SeedPhraseModal
-          accountTypes={missingAccountTypes}
           modalId={createMissingAccountModalId}
         />
       </div>

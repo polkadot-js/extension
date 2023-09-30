@@ -37,3 +37,5 @@ export const TRANSACTION_STORAGES = [
 ];
 
 export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';
+
+export const DAPPS_FAVORITE = 'dapps.favorite';

@@ -3,18 +3,13 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
-import { Layout, OptionType, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
-import TokenToggleItem from '@subwallet/extension-koni-ui/components/TokenItem/TokenToggleItem';
+import { FilterModal, Layout, OptionType, PageWrapper, TokenEmptyList, TokenToggleItem } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { useDefaultNavigate, useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
-import { Coin, FadersHorizontal, Plus } from 'phosphor-react';
+import { FadersHorizontal, Plus } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -29,6 +24,8 @@ enum FilterValue {
   DISABLED = 'disabled',
   CUSTOM = 'custom'
 }
+
+const renderEmpty = () => <TokenEmptyList />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -101,16 +98,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [assetSettingMap]);
 
-  const emptyTokenList = useCallback(() => {
-    return (
-      <EmptyList
-        emptyMessage={t<string>('Your token will appear here.')}
-        emptyTitle={t<string>('No token')}
-        phosphorIcon={Coin}
-      />
-    );
-  }, [t]);
-
   const subHeaderButton: ButtonProps[] = useMemo(() => {
     return [
       {
@@ -168,7 +155,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           mode={'boxed'}
           onClickActionBtn={openFilterModal}
           renderItem={renderTokenItem}
-          renderWhenEmpty={emptyTokenList}
+          renderWhenEmpty={renderEmpty}
           searchFunction={searchToken}
           searchMinCharactersCount={2}
           searchPlaceholder={t<string>('Search token')}

@@ -11,7 +11,7 @@ import { CheckCircle, Coin } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback } from 'react';
 import styled from 'styled-components';
 
-import GeneralEmptyList from '../GeneralEmptyList';
+import { GeneralEmptyList } from '../EmptyList';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   items: TokenTypeItem[];

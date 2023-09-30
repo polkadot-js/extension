@@ -399,7 +399,7 @@ const Component = (): React.ReactElement => {
           !tokenGroupBalanceItems.length && (
             <EmptyList
               className={'__empty-list'}
-              emptyMessage={t('Add tokens to get started.')}
+              emptyMessage={t('Try searching or importing one')}
               emptyTitle={t('No tokens found')}
               phosphorIcon={Coins}
             />

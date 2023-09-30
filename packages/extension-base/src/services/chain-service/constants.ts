@@ -221,6 +221,14 @@ export const _DEFAULT_ACTIVE_CHAINS = [
   ..._DEFAULT_CHAINS
 ];
 
+export const EVM_PASS_CONNECT_STATUS = {
+  acala: ['acala_evm', 'karura_evm']
+};
+
+export const EVM_REFORMAT_DECIMALS = {
+  acala: ['acala_evm', 'karura_evm']
+};
+
 // TODO: review
 const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni-dev' : 'master';
 

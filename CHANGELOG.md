@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## 1.1.15
+Build date: Sep 30, 2023.
+
+Features & Update:
+- Update token’s logo retrieval mechanism (#1947)
+- Support Ledger for more chains (#1942)
+  - Karura
+  - xx network
+  - Polymesh
+  - Edgeware
+- Update chain list (#1941)
+  - Add XCM support for more tokens:
+    - KSM: Kusma —> Amplitude
+    - USDC: Polkadot Asset Hub <—> HydraDX
+  - Integrated Neuroguns NFT Collection on the Astar network
+  - Integrated new networks: Bittensor, Dancebox
+  - Add staking support for Vara network
+  - Update price for some tokens: PANX, VARA
+  - Update RPC for Imbue network
+
+Bugs fixed:
+- Fixed bug Do not scroll the network list in case of connecting dApp via WalletConnect (#1926)
+- Fixed bug Navigate incorrect in case Create one when connect dApp (#1930)
+
 ## 1.1.14
 Build date: Sep 26, 2023.
 

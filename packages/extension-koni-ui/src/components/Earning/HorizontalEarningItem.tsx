@@ -95,12 +95,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, []);
 
   const availableActionsByMetadata = useMemo(() => {
-    if (!nominatorMetadata) {
-      return [];
-    }
-
     return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo);
-  }, [nominatorMetadata, yieldPoolInfo, yieldPositionInfo]);
+  }, [yieldPoolInfo, yieldPositionInfo]);
 
   const buttons = useMemo((): ButtonOptionProps[] => {
     const result: ButtonOptionProps[] = [];
@@ -131,7 +127,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     actionListByChain.forEach((item) => {
       const temp: ButtonOptionProps = {
-        // disable: !availableActionsByMetadata.includes(item),
+        disable: !availableActionsByMetadata.includes(item),
         key: item,
         hidden: false
       } as ButtonOptionProps;
@@ -166,12 +162,12 @@ const Component: React.FC<Props> = (props: Props) => {
           break;
         case YieldAction.START_EARNING:
           temp.icon = PlusCircle;
-          temp.onClick = onClickButton(onClickCancelUnStakeBtn);
+          temp.onClick = onClickButton(onClickStakeBtn);
           temp.label = t('Earn now');
           break;
         case YieldAction.WITHDRAW_EARNING:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickCancelUnStakeBtn);
+          temp.onClick = onClickButton(onClickWithdrawBtn); // TODO
           temp.label = t('Withdraw');
           temp.schema = 'secondary';
           break;

@@ -50,7 +50,7 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
   const inputTokenSlug = poolInfo.inputAssets[0];
 
   async function getStokenBalance () {
-    const balances = await substrateApi.api.query.assets.account.multi(['p8ErK3S7WqHGLKfiyDaH2rfWnG1cgs5TnSh8892G7jQ6eM86Q'].map((address) => [_getTokenOnChainAssetId(derivativeTokenInfo), address]));
+    const balances = await substrateApi.api.query.assets.account.multi(useAddresses.map((address) => [_getTokenOnChainAssetId(derivativeTokenInfo), address]));
 
     let totalBalance = new BN(0);
 

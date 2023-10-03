@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, CancelUnstakeSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
@@ -44,8 +44,8 @@ const Component: React.FC = () => {
 
   const allNominatorInfo = useGetYieldInfo(method);
   const nominatorInfo = useGetYieldInfo(method, from);
-  const nominatorMetadata = nominatorInfo[0];
-  const type = nominatorMetadata.metadata.type;
+  const nominatorMetadata = nominatorInfo[0].metadata as NominatorMetadata;
+  const type = nominatorMetadata.type;
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -90,7 +90,7 @@ const Component: React.FC = () => {
       yieldSubmitStakingCancelWithdrawal({
         address: from,
         chain: chain,
-        selectedUnstaking: nominatorMetadata.metadata.unstakings[parseInt(unstakeIndex)]
+        selectedUnstaking: nominatorMetadata.unstakings[parseInt(unstakeIndex)]
       })
         .then(onSuccess)
         .catch(onError)
@@ -98,12 +98,12 @@ const Component: React.FC = () => {
           setLoading(false);
         });
     }, 300);
-  }, [nominatorMetadata.metadata.unstakings, onError, onSuccess]);
+  }, [nominatorMetadata.unstakings, onError, onSuccess]);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const nomination = allNominatorInfo.find((data) => isSameAddress(data.address, account.address));
 
-    return (nomination ? nomination.metadata.unstakings.length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
+    return (nomination ? (nomination.metadata as NominatorMetadata).unstakings.length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
   }, [chainInfoMap, allNominatorInfo, chain, type]);
 
   const onPreCheck = usePreCheckAction(from);
@@ -142,7 +142,7 @@ const Component: React.FC = () => {
                 defaultValue={persistUnstake}
                 disabled={!from}
                 label={t('Select an unstake request')}
-                nominators={from ? nominatorMetadata?.metadata.unstakings || [] : []}
+                nominators={from ? nominatorMetadata?.unstakings || [] : []}
               />
             </Form.Item>
           </Form>

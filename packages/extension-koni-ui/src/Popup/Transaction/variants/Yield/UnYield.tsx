@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominationInfo, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { getValidatorLabel, isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -35,7 +35,7 @@ const _accountFilterFunc = (
   return (account: AccountJson): boolean => {
     const nominator = allNominator.find((item) => item.address.toLowerCase() === account.address.toLowerCase());
 
-    return new BigN(nominator?.metadata.activeStake || BN_ZERO).gt(BN_ZERO) && accountFilterFunc(chainInfoMap, stakingType, stakingChain)(account);
+    return new BigN((nominator?.metadata as NominatorMetadata)?.activeStake || BN_ZERO).gt(BN_ZERO) && accountFilterFunc(chainInfoMap, stakingType, stakingChain)(account);
   };
 };
 
@@ -67,12 +67,12 @@ const Component: React.FC = () => {
   const chainStakingMetadata = useGetYieldMetadata(method);
   const allNominatorInfo = useGetYieldInfo(method);
   const nominatorInfo = useGetYieldInfo(method, from);
-  const nominatorMetadata = nominatorInfo[0];
-  const type = nominatorMetadata.metadata.type;
+  const nominatorMetadata = nominatorInfo[0].metadata as NominatorMetadata;
+  const type = nominatorMetadata.type;
 
   const selectedValidator = useMemo((): NominationInfo | undefined => {
     if (nominatorMetadata) {
-      return nominatorMetadata.metadata.nominations.find((item) => item.validatorAddress === currentValidator);
+      return nominatorMetadata.nominations.find((item) => item.validatorAddress === currentValidator);
     } else {
       return undefined;
     }
@@ -84,11 +84,11 @@ const Component: React.FC = () => {
 
   const bondedValue = useMemo((): string => {
     if (!mustChooseValidator) {
-      return nominatorMetadata?.metadata.activeStake || '0';
+      return nominatorMetadata?.activeStake || '0';
     } else {
       return selectedValidator?.activeStake || '0';
     }
-  }, [mustChooseValidator, nominatorMetadata?.metadata.activeStake, selectedValidator?.activeStake]);
+  }, [mustChooseValidator, nominatorMetadata?.activeStake, selectedValidator?.activeStake]);
 
   const [isChangeData, setIsChangeData] = useState(false);
 
@@ -176,11 +176,11 @@ const Component: React.FC = () => {
 
     let unbondingPromise: Promise<SWTransactionResponse>;
 
-    if (nominatorMetadata.metadata.type === StakingType.POOLED) {
+    if (nominatorMetadata.type === StakingType.POOLED) {
       const params: RequestStakePoolingUnbonding = {
         amount: value,
         chain: nominatorMetadata.chain,
-        nominatorMetadata: nominatorMetadata.metadata
+        nominatorMetadata: nominatorMetadata
       };
 
       unbondingPromise = yieldSubmitNominationPoolUnstaking(params);
@@ -188,7 +188,7 @@ const Component: React.FC = () => {
       const params: RequestUnbondingSubmit = {
         amount: value,
         chain: nominatorMetadata.chain,
-        nominatorMetadata: nominatorMetadata.metadata
+        nominatorMetadata: nominatorMetadata
       };
 
       if (mustChooseValidator) {
@@ -271,7 +271,7 @@ const Component: React.FC = () => {
               defaultValue={persistValidator}
               disabled={!from}
               label={t(`Select ${getValidatorLabel(chain)}`)}
-              nominators={ from ? nominatorMetadata?.metadata.nominations || [] : []}
+              nominators={ from ? nominatorMetadata?.nominations || [] : []}
             />
           </Form.Item>
 

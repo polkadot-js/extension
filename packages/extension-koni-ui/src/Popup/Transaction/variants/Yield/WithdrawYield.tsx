@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, RequestStakeWithdrawal, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, RequestStakeWithdrawal, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
@@ -50,16 +50,16 @@ const Component: React.FC = () => {
 
   const allNominatorInfo = useGetYieldInfo(method);
   const nominatorInfo = useGetYieldInfo(method, from);
-  const nominatorMetadata = nominatorInfo[0];
-  const type = nominatorMetadata.metadata.type;
+  const nominatorMetadata = nominatorInfo[0].metadata as NominatorMetadata;
+  const type = nominatorMetadata.type;
 
   const unstakingInfo = useMemo((): UnstakingInfo | undefined => {
     if (from && !isAccountAll(from)) {
       if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain)) {
-        return getAstarWithdrawable(nominatorMetadata.metadata);
+        return getAstarWithdrawable(nominatorMetadata);
       }
 
-      return nominatorMetadata.metadata.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE)[0];
+      return nominatorMetadata.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE)[0];
     }
 
     return undefined;
@@ -98,7 +98,7 @@ const Component: React.FC = () => {
     const params: RequestStakeWithdrawal = {
       unstakingInfo: unstakingInfo,
       chain: nominatorMetadata.chain,
-      nominatorMetadata: nominatorMetadata.metadata
+      nominatorMetadata: nominatorMetadata
     };
 
     if (isActionFromValidator(type, chain)) {
@@ -120,7 +120,7 @@ const Component: React.FC = () => {
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const nomination = allNominatorInfo.find((data) => isSameAddress(data.address, account.address));
 
-    return (nomination ? nomination.metadata.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE).length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
+    return (nomination ? (nomination.metadata as NominatorMetadata)?.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE).length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
   }, [chainInfoMap, allNominatorInfo, chain, type]);
 
   useRestoreTransaction(form);

@@ -5,6 +5,7 @@ import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
+import { POOL_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { NominationPoolDataType, useFilterModal, useGetNominatorInfo, useGetValidatorList } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
@@ -21,7 +22,6 @@ import EmptyValidator from '../Account/EmptyValidator';
 import { Avatar } from '../Avatar';
 import { BaseSelectModal, FilterModal, PoolDetailModal, SortingModal } from '../Modal';
 import StakingPoolItem from '../StakingItem/StakingPoolItem';
-import { POOL_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;

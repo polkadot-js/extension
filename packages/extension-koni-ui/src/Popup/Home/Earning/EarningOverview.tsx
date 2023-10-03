@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { EarningCalculatorModal, EarningItem, EarningToolbar, EmptyList, Layout } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
@@ -17,6 +18,8 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps;
 
@@ -34,6 +37,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount } = useSelector((state: RootState) => state.accountState);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
   const { activeModal } = useContext(ModalContext);
   const { setHeaderType } = useContext(WebUIContext);
@@ -131,6 +135,28 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const resultList = useMemo((): YieldPoolInfo[] => {
     return [...Object.values(poolInfo)]
+      .filter((value) => {
+        if (!currentAccount) {
+          return false;
+        }
+
+        const availableGen: string[] = currentAccount.availableGenesisHashes || [];
+        const isEvmAddress = isEthereumAddress(currentAccount.address);
+
+        if (currentAccount?.isHardware) {
+          if (isEvmAddress) {
+            return false;
+          } else {
+            const chain = chainInfoMap[value.chain];
+
+            if (chain && !availableGen.includes(_getSubstrateGenesisHash(chain))) {
+              return false;
+            }
+          }
+        }
+
+        return true;
+      })
       .sort((a: YieldPoolInfo, b: YieldPoolInfo) => {
         switch (sortSelection) {
           case SortKey.TOTAL_VALUE:
@@ -144,7 +170,7 @@ const Component: React.FC<Props> = (props: Props) => {
             return 0;
         }
       });
-  }, [poolInfo, sortSelection]);
+  }, [chainInfoMap, currentAccount, poolInfo, sortSelection]);
 
   const renderWhenEmpty = useCallback(() => {
     return (

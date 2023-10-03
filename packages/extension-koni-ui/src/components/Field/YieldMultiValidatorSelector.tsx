@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { detectTranslate } from '@subwallet/extension-base/utils';
@@ -91,7 +91,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
   const nominations = useMemo(() => {
     if (from) {
-      return yieldInfo[0]?.metadata?.nominations;
+      return (yieldInfo[0]?.metadata as NominatorMetadata)?.nominations;
     } else {
       return [];
     }

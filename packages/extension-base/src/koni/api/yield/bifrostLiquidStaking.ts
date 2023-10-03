@@ -178,7 +178,7 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
 
   getPositionInterval();
 
-  const interval = setInterval(getPositionInterval, 90000);
+  const interval = setInterval(getPositionInterval, 30000);
 
   return () => {
     clearInterval(interval);

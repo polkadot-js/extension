@@ -82,19 +82,19 @@ export function subscribeYieldPosition (substrateApiMap: Record<string, Substrat
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___bifrost_liquid_staking') {
-      const unsub = getBifrostLiquidStakingPosition(substrateApi, ['5HU2x1QiUW4jJ5ykD1KLoVE8zryQkQcGAvbyD5rn7SyJedA9'], chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = getBifrostLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___acala_liquid_staking') {
-      const unsub = getAcalaLiquidStakingPosition(substrateApi, ['5FRFxnokxd96gGF95BGcDVY4hnA1bd9GCoyMfTG2T23YdmeB'], chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = getAcalaLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___interlay_lending') {
-      const unsub = getInterlayLendingPosition(substrateApi, ['wdCMiZ5wHTKM7qZUhjYNJNVhMCscsfKz27e1HHqyz9rSYf78A'], chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = getInterlayLendingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
-      const unsub = getParallelLiquidStakingPosition(substrateApi, ['p8ErK3S7WqHGLKfiyDaH2rfWnG1cgs5TnSh8892G7jQ6eM86Q'], chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = getParallelLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     }

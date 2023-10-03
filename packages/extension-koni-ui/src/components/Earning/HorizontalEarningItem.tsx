@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingStatus, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { NominatorMetadata, StakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -51,28 +52,40 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { chain, description, name, type } = yieldPoolInfo;
-  const { metadata: nominatorMetadata } = yieldPositionInfo;
-  const yieldPositionInfoBalance = yieldPositionInfo.balance[0];
+
+  const nominatorMetadata = useMemo((): NominatorMetadata | undefined => {
+    if (![YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(yieldPoolInfo.type)) {
+      return;
+    }
+
+    return yieldPositionInfo.metadata as NominatorMetadata;
+  }, [yieldPoolInfo.type, yieldPositionInfo.metadata]);
+  const yieldPositionInfoBalance = useMemo(() => {
+    return yieldPositionInfo.balance[0];
+  }, [yieldPositionInfo.balance]);
+
   const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const tokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
+  const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
 
   const getStakingStatus = useMemo(() => {
-    const status = yieldPositionInfo.metadata.status;
-
-    if (status === StakingStatus.EARNING_REWARD) {
+    if (!nominatorMetadata) {
       return StakingStatusUi.active;
     }
 
-    if (status === StakingStatus.PARTIALLY_EARNING) {
+    if (nominatorMetadata.status === StakingStatus.EARNING_REWARD) {
+      return StakingStatusUi.active;
+    }
+
+    if (nominatorMetadata.status === StakingStatus.PARTIALLY_EARNING) {
       return StakingStatusUi.partialEarning;
     }
 
-    if (status === StakingStatus.WAITING) {
+    if (nominatorMetadata.status === StakingStatus.WAITING) {
       return StakingStatusUi.waiting;
     }
 
     return StakingStatusUi.inactive;
-  }, [yieldPositionInfo.metadata.status]);
+  }, [nominatorMetadata]);
 
   const onClickButton = useCallback((callback: VoidFunction): React.MouseEventHandler => {
     return (event) => {
@@ -81,13 +94,9 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
-  const availableActions = useMemo(() => {
-    if (!nominatorMetadata) {
-      return [];
-    }
-
-    return getStakingAvailableActionsByNominator(nominatorMetadata);
-  }, [nominatorMetadata]);
+  const availableActionsByMetadata = useMemo(() => {
+    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo);
+  }, [yieldPoolInfo, yieldPositionInfo]);
 
   const buttons = useMemo((): ButtonOptionProps[] => {
     const result: ButtonOptionProps[] = [];
@@ -114,54 +123,87 @@ const Component: React.FC<Props> = (props: Props) => {
       tooltip: t('FAQs')
     });
 
-    if (yieldPoolInfo.metadata) {
-      const actionListByChain = getStakingAvailableActionsByChain(chain, yieldPoolInfo.metadata.type);
+    const actionListByChain = getYieldAvailableActionsByType(yieldPoolInfo);
 
-      actionListByChain.forEach((item) => {
-        const temp: ButtonOptionProps = {
-          disable: !availableActions.includes(item),
-          key: item,
-          hidden: false
-        } as ButtonOptionProps;
+    actionListByChain.forEach((item) => {
+      const temp: ButtonOptionProps = {
+        disable: !availableActionsByMetadata.includes(item),
+        key: item,
+        hidden: false
+      } as ButtonOptionProps;
 
-        switch (item) {
-          case StakingAction.STAKE:
-            temp.icon = PlusCircle;
-            temp.label = t('Stake now');
-            temp.onClick = onClickButton(onClickStakeBtn);
-            break;
-          case StakingAction.CLAIM_REWARD:
-            temp.icon = Wallet;
-            temp.onClick = onClickButton(noop);
-            temp.label = t('Claim rewards');
-            break;
-          case StakingAction.WITHDRAW:
-            temp.icon = StopCircle;
-            temp.onClick = onClickButton(onClickWithdrawBtn);
-            temp.label = t('Withdraw');
-            temp.schema = 'secondary';
-            break;
-          case StakingAction.UNSTAKE:
-            temp.icon = MinusCircle;
-            temp.onClick = onClickButton(onClickUnStakeBtn);
-            temp.label = t('Unstake');
-            temp.schema = 'secondary';
-            break;
-          case StakingAction.CANCEL_UNSTAKE:
-            temp.icon = MinusCircle;
-            temp.onClick = onClickButton(onClickCancelUnStakeBtn);
-            temp.label = t('Cancel unstake');
-            break;
-        }
+      switch (item) {
+        case YieldAction.STAKE:
+          temp.icon = PlusCircle;
+          temp.label = t('Stake now');
+          temp.onClick = onClickButton(onClickStakeBtn);
+          break;
+        case YieldAction.CLAIM_REWARD:
+          temp.icon = Wallet;
+          temp.onClick = onClickButton(noop);
+          temp.label = t('Claim rewards');
+          break;
+        case YieldAction.WITHDRAW:
+          temp.icon = StopCircle;
+          temp.onClick = onClickButton(onClickWithdrawBtn);
+          temp.label = t('Withdraw');
+          temp.schema = 'secondary';
+          break;
+        case YieldAction.UNSTAKE:
+          temp.icon = MinusCircle;
+          temp.onClick = onClickButton(onClickUnStakeBtn);
+          temp.label = t('Unstake');
+          temp.schema = 'secondary';
+          break;
+        case YieldAction.CANCEL_UNSTAKE:
+          temp.icon = MinusCircle;
+          temp.onClick = onClickButton(onClickCancelUnStakeBtn);
+          temp.label = t('Cancel unstake');
+          break;
+        case YieldAction.START_EARNING:
+          temp.icon = PlusCircle;
+          temp.onClick = onClickButton(onClickStakeBtn);
+          temp.label = t('Earn now');
+          break;
+        case YieldAction.WITHDRAW_EARNING:
+          temp.icon = MinusCircle;
+          temp.onClick = onClickButton(onClickWithdrawBtn); // TODO
+          temp.label = t('Withdraw');
+          temp.schema = 'secondary';
+          break;
+      }
 
-        result.push(temp);
-      });
-    }
+      result.push(temp);
+    });
 
     return result;
-  }, [availableActions, chain, onClickButton, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo.metadata]);
+  }, [availableActionsByMetadata, onClickButton, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo]);
 
-  const tagType = useMemo(() => createEarningTagTypes(t, token)[type], [t, token, type]);
+  const tagType = useMemo(() => {
+    const tagTypeMap = createEarningTagTypes(t, token);
+
+    return tagTypeMap[type];
+  }, [t, token, type]);
+
+  const derivativeTokenState = useMemo(() => {
+    if (!yieldPoolInfo.derivativeAssets) {
+      return;
+    }
+
+    const derivativeTokenSlug = yieldPoolInfo.derivativeAssets[0];
+
+    const derivativeTokenInfo = assetRegistry[derivativeTokenSlug];
+
+    // @ts-ignore
+    const exchangeRate = yieldPoolInfo.stats?.assetEarning[0].exchangeRate || 1;
+    const convertedAmount = Math.floor(parseInt(yieldPositionInfoBalance.totalBalance) * exchangeRate);
+
+    return {
+      symbol: _getAssetSymbol(derivativeTokenInfo),
+      decimals: _getAssetDecimals(derivativeTokenInfo),
+      amount: convertedAmount.toString()
+    };
+  }, [assetRegistry, yieldPoolInfo.derivativeAssets, yieldPoolInfo.stats?.assetEarning, yieldPositionInfoBalance.totalBalance]);
 
   return (
     <Web3Block
@@ -232,24 +274,42 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </MetaInfo>
           <Number
-            decimal={tokenInfo ? tokenInfo.decimals || 0 : 0}
+            decimal={inputTokenInfo ? inputTokenInfo.decimals || 0 : 0}
             decimalOpacity={0.4}
             size={30}
-            suffix={tokenInfo ? tokenInfo.symbol : ''}
+            suffix={inputTokenInfo ? inputTokenInfo.symbol : ''}
             unitOpacity={0.4}
             value={yieldPositionInfoBalance.totalBalance} // TODO
           />
-          <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
-            <Typography.Text style={{ color: token.colorTextLight4 }}>{t('Total rewards:')}</Typography.Text>
-            <Number
-              decimal={tokenInfo.decimals || 0}
-              decimalColor={token.colorSuccess}
-              intColor={token.colorSuccess}
-              suffix={tokenInfo.symbol}
-              unitColor={token.colorSuccess}
-              value={'0'} // TODO: improve this
-            />
-          </div>
+
+          {/* TODO: move to a useCallBack */}
+          {
+            derivativeTokenState && <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
+              <Typography.Text style={{ color: token.colorTextLight4 }}>{t('Equivalent to:')}</Typography.Text>
+              <Number
+                decimal={derivativeTokenState.decimals}
+                decimalColor={token.colorSuccess}
+                intColor={token.colorSuccess}
+                suffix={derivativeTokenState.symbol}
+                unitColor={token.colorSuccess}
+                value={derivativeTokenState.amount}
+              />
+            </div>
+          }
+
+          {
+            yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL && <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
+              <Typography.Text style={{ color: token.colorTextLight4 }}>{t('Unclaimed rewards:')}</Typography.Text>
+              <Number
+                decimal={_getAssetDecimals(inputTokenInfo)}
+                decimalColor={token.colorSuccess}
+                intColor={token.colorSuccess}
+                suffix={_getAssetSymbol(inputTokenInfo)}
+                unitColor={token.colorSuccess}
+                value={'0'} // TODO: improve this
+              />
+            </div>
+          }
         </div>
       )}
     />

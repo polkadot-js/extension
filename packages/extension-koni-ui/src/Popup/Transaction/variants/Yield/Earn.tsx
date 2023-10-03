@@ -8,7 +8,7 @@ import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-b
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
-import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, PoolSelector, StakingProcessModal, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, StakingProcessModal, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetChainPrefixBySlug, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import YieldPoolSelector from '../../../../components/Field/YieldPoolSelector';
 
 import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../../helper';
 import { FreeBalanceToStake, TransactionContent } from '../../parts';
@@ -595,7 +596,8 @@ const Component = () => {
                 hidden={currentPoolInfo.type !== YieldPoolType.NOMINATION_POOL}
                 name={'pool'}
               >
-                <PoolSelector
+                <YieldPoolSelector
+                  method={currentPoolInfo.slug}
                   chain={currentPoolInfo.chain}
                   disabled={processState.currentStep !== 0}
                   from={currentFrom}

@@ -89,7 +89,7 @@ export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeReques
   return sendMessage('pri(authorize.requests)', null, cb);
 }
 
-export async function subscribeAuthorizeRequestsV2 (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
+export async function subscribeAuthorizeRequestsV2 (cb: (accounts: AuthorizeRequest[]) => void): Promise<AuthorizeRequest[]> {
   return sendMessage('pri(authorize.requestsV2)', null, cb);
 }
 
@@ -133,11 +133,11 @@ export async function forgetAllSite (callback: (data: AuthUrls) => void): Promis
   return sendMessage('pri(authorize.forgetAllSite)', null, callback);
 }
 
-export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
+export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<MetadataRequest[]> {
   return sendMessage('pri(metadata.requests)', null, cb);
 }
 
-export async function subscribeSigningRequests (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
+export async function subscribeSigningRequests (cb: (accounts: SigningRequest[]) => void): Promise<SigningRequest[]> {
   return sendMessage('pri(signing.requests)', null, cb);
 }
 

@@ -60,6 +60,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return yieldPositionInfo.metadata as NominatorMetadata;
   }, [yieldPoolInfo.type, yieldPositionInfo.metadata]);
+
   const yieldPositionInfoBalance = useMemo(() => {
     return yieldPositionInfo.balance[0];
   }, [yieldPositionInfo.balance]);

@@ -159,6 +159,7 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.icon = MinusCircle;
           temp.onClick = onClickButton(onClickCancelUnStakeBtn);
           temp.label = t('Cancel unstake');
+          temp.schema = 'secondary';
           break;
         case YieldAction.START_EARNING:
           temp.icon = PlusCircle;

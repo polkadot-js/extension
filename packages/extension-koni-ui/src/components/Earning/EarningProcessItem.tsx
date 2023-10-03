@@ -46,8 +46,8 @@ const Component = ({ className, index, isSelected, stepName, stepStatus }: Props
       case EarningStepStatus.SUCCESS:
         return (
           <BackgroundIcon
-            backgroundColor={convertHexColorToRGBA(token['green-6'], 0.1)}
-            iconColor={token['green-6']}
+            backgroundColor={convertHexColorToRGBA(token.colorSuccess, 0.1)}
+            iconColor={token.colorSuccess}
             phosphorIcon={CheckCircle}
             size={'lg'}
             weight={'fill'}
@@ -129,7 +129,7 @@ const EarningProcessItem = styled(Component)<Props>(({ theme: { token } }: Props
     },
 
     '.staking-process-success-text': {
-      color: token['green-6']
+      color: token.colorSuccess
     },
 
     '.staking-process-fail-text': {
@@ -137,7 +137,7 @@ const EarningProcessItem = styled(Component)<Props>(({ theme: { token } }: Props
     },
 
     '.staking-process-loading-text': {
-      color: token.colorTextLight4
+      color: token['gold-6']
     },
 
     '.staking-process-flex-wrapper': {

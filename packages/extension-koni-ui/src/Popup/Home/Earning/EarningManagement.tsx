@@ -174,7 +174,12 @@ const Component: React.FC<Props> = (props: Props) => {
         method: poolInfo.slug,
         asset: poolInfo.inputAssets[0]
       });
-      navigate('/transaction/withdraw-yield');
+
+      if (![YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolInfo.type)) {
+        navigate('/transaction/yield-withdraw-position');
+      } else {
+        navigate('/transaction/withdraw-yield');
+      }
     };
   }, [currentAccount, navigate, poolInfoMap, setWithdrawStorage]);
 

@@ -9,6 +9,7 @@ import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useGetYieldPositionByAddressAndSlug from '@subwallet/extension-koni-ui/hooks/screen/earning/useGetYieldPositionByAddressAndSlug';
+import { yieldSubmitRedeem } from '@subwallet/extension-koni-ui/messaging';
 import { FreeBalance, TransactionFooter } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -93,33 +94,27 @@ const Component: React.FC = () => {
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   const onSubmit: FormCallbacks<YieldFastWithdrawParams>['onFinish'] = useCallback((values: YieldFastWithdrawParams) => {
-    // setLoading(true);
-    //
-    // if (!unstakingInfo) {
-    //   setLoading(false);
-    //
-    //   return;
-    // }
-    //
-    // const params: RequestStakeWithdrawal = {
-    //   unstakingInfo: unstakingInfo,
-    //   chain: nominatorMetadata.chain,
-    //   nominatorMetadata: nominatorMetadata
-    // };
-    //
-    // if (isActionFromValidator(type, chain)) {
-    //   params.validatorAddress = unstakingInfo.validatorAddress;
-    // }
-    //
-    // setTimeout(() => {
-    //   yieldSubmitStakingWithdrawal(params)
-    //     .then(onSuccess)
-    //     .catch(onError)
-    //     .finally(() => {
-    //       setLoading(false);
-    //     });
-    // }, 300);
-  }, []);
+    setLoading(true);
+
+    if (!yieldPosition || !yieldPoolInfo) {
+      setLoading(false);
+
+      return;
+    }
+
+    setTimeout(() => {
+      yieldSubmitRedeem({
+        address: from,
+        amount: values.amount,
+        yieldPoolInfo
+      })
+        .then(onSuccess)
+        .catch(onError)
+        .finally(() => {
+          setLoading(false);
+        });
+    }, 300);
+  }, [from, onError, onSuccess, yieldPoolInfo, yieldPosition]);
 
   const onPreCheck = usePreCheckAction(from);
 

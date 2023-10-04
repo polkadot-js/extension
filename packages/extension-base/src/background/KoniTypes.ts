@@ -2246,14 +2246,6 @@ export interface HandleYieldStepParams extends BaseRequestSign {
 
 export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
 
-export interface HandleYieldFastWithdrawal extends BaseRequestSign {
-  address: string,
-  yieldPoolInfo: YieldPoolInfo,
-  amount: string
-}
-
-export type RequestYieldFastWithdrawal = InternalRequestSign<HandleYieldFastWithdrawal>;
-
 export interface ValidateYieldProcessParams {
   yieldPoolInfo: YieldPoolInfo,
   path: OptimalYieldPath;
@@ -2262,7 +2254,7 @@ export interface ValidateYieldProcessParams {
   data?: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool;
 }
 
-export interface HandleYieldRedeemParams extends BaseRequestSign {
+export interface RequestYieldFastWithdrawal extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
   amount: string;
@@ -2449,7 +2441,7 @@ export interface KoniRequestSignatures {
   'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalYieldPath];
   'pri(yield.handleStep)': [HandleYieldStepParams, SWTransactionResponse];
   'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
-  'pri(yield.submitRedeem)': [HandleYieldRedeemParams, SWTransactionResponse];
+  'pri(yield.submitRedeem)': [RequestYieldFastWithdrawal, SWTransactionResponse];
   'pri(yield.validateProcess)': [ValidateYieldProcessParams, TransactionError[]];
 
   'pri(yield.getNativeStakingValidators)': [YieldPoolInfo, ValidatorInfo[]];

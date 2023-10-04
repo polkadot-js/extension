@@ -7,6 +7,7 @@ export { default as EarningFilter } from './EarningFilter';
 export { default as EarningInfoItem } from './EarningInfoItem';
 export { default as EarningItem } from './EarningItem';
 export { default as EarningProcessItem } from './EarningProcessItem';
+export { default as EarningTokenItem } from './EarningTokenItem';
 export { default as EarningTokenList } from './EarningTokenList';
 export { default as EarningToolbar } from './EarningToolbar';
 export { default as HorizontalEarningItem } from './HorizontalEarningItem';

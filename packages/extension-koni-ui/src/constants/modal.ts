@@ -48,6 +48,7 @@ export const BUY_TOKEN_MODAL = 'buy-token-modal';
 export const STAKING_PROCESS_MODAL = 'staking-process-modal';
 export const EARNING_MANAGEMENT_DETAIL_MODAL = 'earning-management-detail-modal';
 export const STAKING_CALCULATOR_MODAL = 'staking-calculator-modal';
+export const EARNING_INFO_MODAL = 'earning-info-modal';
 
 /* Earning */
 

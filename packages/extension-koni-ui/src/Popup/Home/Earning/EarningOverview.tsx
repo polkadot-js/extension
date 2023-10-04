@@ -4,7 +4,7 @@
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { EarningCalculatorModal, EarningItem, EarningToolbar, EmptyList, Layout } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { useFilterModal, useGetYieldPositions, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import EarningInfoModal from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInfoModal';
 
 type Props = ThemeProps;
 
@@ -105,6 +106,13 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [activeModal]);
 
+  const onClickInfoBtn = useCallback((item: YieldPoolInfo) => {
+    return () => {
+      setSelectedItem(item);
+      activeModal(EARNING_INFO_MODAL);
+    };
+  }, [activeModal]);
+
   const onClickStakeBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
       setSelectedItem(item);
@@ -128,10 +136,11 @@ const Component: React.FC<Props> = (props: Props) => {
         item={item}
         key={item.slug}
         onClickCalculatorBtn={onClickCalculatorBtn(item)}
+        onClickInfoBtn={onClickInfoBtn(item)}
         onClickStakeBtn={onClickStakeBtn(item)}
       />
     );
-  }, [onClickCalculatorBtn, onClickStakeBtn]);
+  }, [onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn]);
 
   const resultList = useMemo((): YieldPoolInfo[] => {
     return [...Object.values(poolInfo)]
@@ -226,6 +235,7 @@ const Component: React.FC<Props> = (props: Props) => {
       />
 
       {selectedItem && <EarningCalculatorModal defaultItem={selectedItem} />}
+      {selectedItem && <EarningInfoModal defaultItem={selectedItem} />}
     </Layout.Base>
   );
 };

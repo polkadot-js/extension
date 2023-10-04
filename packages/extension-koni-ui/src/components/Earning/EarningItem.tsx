@@ -16,10 +16,12 @@ import styled, { useTheme } from 'styled-components';
 interface Props extends ThemeProps {
   item: YieldPoolInfo,
   onClickCalculatorBtn: () => void;
+  onClickInfoBtn: () => void;
   onClickStakeBtn: () => void;
 }
 
-const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onClickStakeBtn }: Props) => {
+const Component: React.FC<Props> = (props: Props) => {
+  const { className, item, onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { chain, description, inputAssets, name, stats, type } = item;
@@ -122,18 +124,21 @@ const Component: React.FC<Props> = ({ className, item, onClickCalculatorBtn, onC
                   weight='fill'
                 />
               )}
+              onClick={onClickInfoBtn}
               shape='circle'
               size='xs'
               tooltip={t('FAQs')}
               type='ghost'
             />
             <Button
-              icon={<Icon
-                className={'earning-item-stake-btn'}
-                phosphorIcon={PlusCircle}
-                size='sm'
-                weight='fill'
-              />}
+              icon={(
+                <Icon
+                  className={'earning-item-stake-btn'}
+                  phosphorIcon={PlusCircle}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
               onClick={onClickStakeBtn}
               shape='circle'
               size='xs'

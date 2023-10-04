@@ -355,7 +355,7 @@ const Wrapper: React.FC<Props> = (props: Props) => {
   );
 };
 
-const UnYield = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
+const YieldUnstake = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
     flex: 1,
     display: 'flex',
@@ -383,4 +383,4 @@ const UnYield = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   };
 });
 
-export default UnYield;
+export default YieldUnstake;

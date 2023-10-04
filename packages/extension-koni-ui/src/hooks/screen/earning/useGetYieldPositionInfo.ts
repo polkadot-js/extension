@@ -7,7 +7,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-export default function useGetYieldInfo (slug?: string, address?: string): YieldPositionInfo[] {
+export default function useGetYieldPositionInfo (slug?: string, address?: string): YieldPositionInfo[] {
   const { yieldPosition } = useSelector((state: RootState) => state.yieldPool);
 
   return useMemo(() => {

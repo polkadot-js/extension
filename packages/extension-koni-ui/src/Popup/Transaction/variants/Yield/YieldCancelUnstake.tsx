@@ -1,18 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, NominatorMetadata, RequestStakeWithdrawal, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
-import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, CancelUnstakeSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNativeTokenBasicInfo, useGetYieldInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { yieldSubmitStakingWithdrawal } from '@subwallet/extension-koni-ui/messaging';
-import { FormCallbacks, FormFieldData, ThemeProps, WithdrawYieldParams } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { useGetYieldInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { yieldSubmitStakingCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import { CancelUnYieldParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
@@ -26,25 +23,22 @@ import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts'
 
 type Props = ThemeProps;
 
-const hideFields: Array<keyof WithdrawYieldParams> = ['chain', 'asset', 'method'];
-const validateFields: Array<keyof WithdrawYieldParams> = ['from'];
+const hideFields: Array<keyof CancelUnYieldParams> = ['method', 'chain', 'asset'];
+const validateFields: Array<keyof CancelUnYieldParams> = ['from'];
 
 const Component: React.FC = () => {
-  useSetCurrentPage('/transaction/withdraw-yield');
-
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const dataContext = useContext(DataContext);
-  const { defaultData, onDone, persistData } = useTransactionContext<WithdrawYieldParams>();
+  const { defaultData, onDone, persistData } = useTransactionContext<CancelUnYieldParams>();
   const { chain, method } = defaultData;
 
-  const [form] = Form.useForm<WithdrawYieldParams>();
-  const formDefault = useMemo((): WithdrawYieldParams => ({ ...defaultData }), [defaultData]);
+  const [form] = Form.useForm<CancelUnYieldParams>();
+  const formDefault = useMemo((): CancelUnYieldParams => ({ ...defaultData }), [defaultData]);
 
   const { isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
-  const [isBalanceReady, setIsBalanceReady] = useState(true);
 
   const from = useWatchTransaction('from', form, defaultData);
 
@@ -53,32 +47,33 @@ const Component: React.FC = () => {
   const nominatorMetadata = nominatorInfo[0].metadata as NominatorMetadata;
   const type = nominatorMetadata.type;
 
-  const unstakingInfo = useMemo((): UnstakingInfo | undefined => {
-    if (from && !isAccountAll(from)) {
-      if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain)) {
-        return getAstarWithdrawable(nominatorMetadata);
-      }
-
-      return nominatorMetadata.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE)[0];
-    }
-
-    return undefined;
-  }, [from, nominatorMetadata]);
-
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
-
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
+  const [isBalanceReady, setIsBalanceReady] = useState(true);
+  const [isChangeData, setIsChangeData] = useState(false);
 
   const goHome = useCallback(() => {
     navigate('/home/earning');
   }, [navigate]);
 
-  const onFieldsChange: FormCallbacks<WithdrawYieldParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const persistUnstake = useMemo(() => {
+    if (from === defaultData.from && !isChangeData) {
+      return defaultData.unstake;
+    } else {
+      return '';
+    }
+  }, [defaultData.from, defaultData.unstake, from, isChangeData]);
+
+  const onFieldsChange: FormCallbacks<CancelUnYieldParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
     const { empty, error } = simpleCheckForm(allFields, ['asset']);
 
-    const values = convertFieldToObject<WithdrawYieldParams>(allFields);
+    const values = convertFieldToObject<CancelUnYieldParams>(allFields);
+    const changes = convertFieldToObject<CancelUnYieldParams>(changedFields);
+
+    if (changes.from) {
+      setIsChangeData(true);
+    }
 
     setIsDisable(empty || error);
     persistData(values);
@@ -86,42 +81,32 @@ const Component: React.FC = () => {
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
-  const onSubmit: FormCallbacks<WithdrawYieldParams>['onFinish'] = useCallback((values: WithdrawYieldParams) => {
+  const onSubmit: FormCallbacks<CancelUnYieldParams>['onFinish'] = useCallback((values: CancelUnYieldParams) => {
     setLoading(true);
 
-    if (!unstakingInfo) {
-      setLoading(false);
-
-      return;
-    }
-
-    const params: RequestStakeWithdrawal = {
-      unstakingInfo: unstakingInfo,
-      chain: nominatorMetadata.chain,
-      nominatorMetadata: nominatorMetadata
-    };
-
-    if (isActionFromValidator(type, chain)) {
-      params.validatorAddress = unstakingInfo.validatorAddress;
-    }
+    const { chain, from, unstake: unstakeIndex } = values;
 
     setTimeout(() => {
-      yieldSubmitStakingWithdrawal(params)
+      yieldSubmitStakingCancelWithdrawal({
+        address: from,
+        chain: chain,
+        selectedUnstaking: nominatorMetadata.unstakings[parseInt(unstakeIndex)]
+      })
         .then(onSuccess)
         .catch(onError)
         .finally(() => {
           setLoading(false);
         });
     }, 300);
-  }, [chain, nominatorMetadata, onError, onSuccess, type, unstakingInfo]);
-
-  const onPreCheck = usePreCheckAction(from);
+  }, [nominatorMetadata.unstakings, onError, onSuccess]);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const nomination = allNominatorInfo.find((data) => isSameAddress(data.address, account.address));
 
-    return (nomination ? (nomination.metadata as NominatorMetadata).unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE).length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
+    return (nomination ? (nomination.metadata as NominatorMetadata).unstakings.length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
   }, [chainInfoMap, allNominatorInfo, chain, type]);
+
+  const onPreCheck = usePreCheckAction(from);
 
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);
@@ -129,7 +114,7 @@ const Component: React.FC = () => {
   return (
     <>
       <TransactionContent>
-        <PageWrapper resolve={dataContext.awaitStores(['yieldPool'])}>
+        <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
           <Form
             className={'form-container form-space-sm'}
             form={form}
@@ -151,26 +136,14 @@ const Component: React.FC = () => {
               label={t('Available balance:')}
               onBalanceReady={setIsBalanceReady}
             />
-            <Form.Item>
-              <MetaInfo
-                className='withdraw-meta-info'
-                hasBackgroundWrapper={true}
-              >
-                <MetaInfo.Chain
-                  chain={chain}
-                  label={t('Network')}
-                />
-                {
-                  unstakingInfo && (
-                    <MetaInfo.Number
-                      decimals={decimals}
-                      label={t('Amount')}
-                      suffix={symbol}
-                      value={unstakingInfo.claimable}
-                    />
-                  )
-                }
-              </MetaInfo>
+            <Form.Item name={'unstake'}>
+              <CancelUnstakeSelector
+                chain={chain}
+                defaultValue={persistUnstake}
+                disabled={!from}
+                label={t('Select an unstake request')}
+                nominators={from ? nominatorMetadata?.unstakings || [] : []}
+              />
             </Form.Item>
           </Form>
         </PageWrapper>
@@ -202,9 +175,9 @@ const Component: React.FC = () => {
             />
           )}
           loading={loading}
-          onClick={onPreCheck(form.submit, type === StakingType.POOLED ? ExtrinsicType.STAKING_POOL_WITHDRAW : ExtrinsicType.STAKING_WITHDRAW)}
+          onClick={onPreCheck(form.submit, ExtrinsicType.STAKING_CANCEL_UNSTAKE)}
         >
-          {t('Continue')}
+          {t('Approve')}
         </Button>
       </TransactionFooter>
     </>
@@ -214,7 +187,7 @@ const Component: React.FC = () => {
 const Wrapper: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
-  useSetCurrentPage('/transaction/withdraw-yield');
+  useSetCurrentPage('/transaction/cancel-un-yield');
 
   const dataContext = useContext(DataContext);
 
@@ -228,7 +201,7 @@ const Wrapper: React.FC<Props> = (props: Props) => {
   );
 };
 
-const WithdrawYield = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
+const YieldCancelUnstake = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
     flex: 1,
     display: 'flex',
@@ -247,14 +220,19 @@ const WithdrawYield = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       }
     },
 
-    '.free-balance': {
+    '.unstaked-field, .free-balance': {
       marginBottom: token.marginXS
     },
 
     '.meta-info': {
       marginTop: token.paddingSM
+    },
+
+    '.cancel-unstake-info-item > .__col': {
+      flex: 'initial',
+      paddingRight: token.paddingXXS
     }
   };
 });
 
-export default WithdrawYield;
+export default YieldCancelUnstake;

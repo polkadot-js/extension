@@ -259,6 +259,8 @@ const Transaction = styled(Component)(({ theme }) => {
     },
 
     '&.__modal-content': {
+      margin: `0 -${token.margin}px`,
+
       '.transaction-content': {
         flex: '1 1 auto'
       }

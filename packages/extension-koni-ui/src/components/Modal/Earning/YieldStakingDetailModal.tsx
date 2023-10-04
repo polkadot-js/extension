@@ -41,7 +41,7 @@ const Component: React.FC<Props> = ({ className, nominatorMetadata, yieldPoolInf
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const chainStakingMetadata = useMemo(() => yieldPoolInfo.metadata, [yieldPoolInfo]);
   const { expectedReturn, minJoinNominationPool, minStake, unstakingPeriod } = chainStakingMetadata || {};
-  const { activeStake, address, chain, nominations, status, type, unstakings } = yieldPositionMetadata as NominatorMetadata;
+  const { activeStake, address, chain, nominations, status, type, unstakings } = nominatorMetadata;
   const showingOption = isShowNominationByValidator(chain);
   const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
   const modalTitle = type === StakingType.NOMINATED.valueOf() ? detectTranslate('Nomination details') : detectTranslate('Pooled details');

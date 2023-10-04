@@ -63,7 +63,7 @@ export interface UnYieldParams extends TransactionFormBaseProps {
   method: string;
 }
 
-export interface WithdrawYieldParams extends TransactionFormBaseProps {
+export interface YieldStakingWithdrawParams extends TransactionFormBaseProps {
   method: string;
 }
 
@@ -75,4 +75,9 @@ export interface ClaimYieldParams extends TransactionFormBaseProps {
 export interface CancelUnYieldParams extends TransactionFormBaseProps {
   unstake: string;
   method: string;
+}
+
+export interface YieldFastWithdrawParams extends TransactionFormBaseProps {
+  amount: string;
+  selectedYieldPool: string;
 }

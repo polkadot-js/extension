@@ -3,7 +3,7 @@
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import { CancelUnStakeParams, CancelUnYieldParams, ClaimRewardParams, ClaimYieldParams, SendNftParams, StakeParams, TransactionFormBaseProps, TransferParams, UnStakeParams, UnYieldParams, WithdrawParams, WithdrawYieldParams, YieldParams } from '@subwallet/extension-koni-ui/types';
+import { CancelUnStakeParams, CancelUnYieldParams, ClaimRewardParams, ClaimYieldParams, SendNftParams, StakeParams, TransactionFormBaseProps, TransferParams, UnStakeParams, UnYieldParams, WithdrawParams, YieldStakingWithdrawParams, YieldParams } from '@subwallet/extension-koni-ui/types';
 
 import { ALL_KEY } from './common';
 
@@ -122,7 +122,7 @@ export const DEFAULT_UN_YIELD_PARAMS: UnYieldParams = {
   value: ''
 };
 
-export const DEFAULT_WITHDRAW_YIELD_PARAMS: WithdrawYieldParams = {
+export const DEFAULT_WITHDRAW_YIELD_PARAMS: YieldStakingWithdrawParams = {
   ...DEFAULT_TRANSACTION_PARAMS,
   method: ''
 };

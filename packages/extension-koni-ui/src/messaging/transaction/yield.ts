@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { NominationPoolInfo, OptimalYieldPathRequest, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestUnbondingSubmit, RequestYieldStepSubmit, ValidateYieldProcessParams, ValidatorInfo, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationPoolInfo, OptimalYieldPathRequest, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestUnbondingSubmit, RequestYieldFastWithdrawal, RequestYieldStepSubmit, ValidateYieldProcessParams, ValidatorInfo, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 
 import { sendMessage } from '../base';
@@ -49,4 +49,8 @@ export async function yieldSubmitStakingClaimReward (data: RequestStakeClaimRewa
 
 export async function yieldSubmitNominationPoolUnstaking (data: RequestStakePoolingUnbonding) {
   return sendMessage('pri(yield.nominationPool.submitUnstaking)', data);
+}
+
+export async function yieldSubmitRedeem (data: RequestYieldFastWithdrawal) {
+  return sendMessage('pri(yield.submitRedeem)', data);
 }

@@ -114,9 +114,10 @@ const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/e
 const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/ClaimReward'));
 const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/Withdraw'));
 const Earn = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/Earn'));
-const UnYield = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/UnYield'));
-const WithdrawYield = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/WithdrawYield'));
-const CancelUnYield = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/CancelUnYield'));
+const UnYield = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldUnstake'));
+const WithdrawYield = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldWithdraw'));
+const CancelUnYield = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldCancelUnstake'));
+const YieldWithdrawPosition = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldWithdrawPosition'));
 
 // Wallet Connect
 const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
@@ -203,6 +204,7 @@ export const router = createBrowserRouter([
           UnYield.generateRouterObject('un-yield'),
           WithdrawYield.generateRouterObject('withdraw-yield'),
           CancelUnYield.generateRouterObject('cancel-un-yield'),
+          YieldWithdrawPosition.generateRouterObject('yield-withdraw-position'),
           {
             path: 'compound',
             element: <Example />

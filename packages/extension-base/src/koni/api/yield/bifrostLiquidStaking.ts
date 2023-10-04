@@ -119,7 +119,7 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
 
   async function getVtokenBalance () {
-    const balancePromise = substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]));
+    const balancePromise = substrateApi.api.query.tokens.accounts.multi(['5HU2x1QiUW4jJ5ykD1KLoVE8zryQkQcGAvbyD5rn7SyJedA9'].map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]));
     const exchangeRatePromise = new Promise(function (resolve) {
       fetch(BIFROST_GRAPHQL_ENDPOINT, {
         method: 'POST',

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, ExtrinsicType, NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { getValidatorLabel, isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -64,7 +64,8 @@ const Component: React.FC = () => {
   const currentValidator = useWatchTransaction('validator', form, defaultData);
 
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain || '');
-  const chainStakingMetadata = useGetYieldMetadata(method);
+  const yieldPoolInfo = useGetYieldMetadata(method);
+  const chainStakingMetadata = yieldPoolInfo?.metadata as ChainStakingMetadata;
   const allNominatorInfo = useGetYieldInfo(method);
   const nominatorInfo = useGetYieldInfo(method, from);
   const nominatorMetadata = nominatorInfo[0].metadata as NominatorMetadata;
@@ -102,18 +103,18 @@ const Component: React.FC = () => {
 
   const minValue = useMemo((): string => {
     if (type === StakingType.POOLED) {
-      return chainStakingMetadata?.metadata?.minJoinNominationPool || '0';
+      return chainStakingMetadata?.minJoinNominationPool || '0';
     } else {
-      const minChain = new BigN(chainStakingMetadata?.metadata?.minStake || '0');
+      const minChain = new BigN(chainStakingMetadata?.minStake || '0');
       const minValidator = new BigN(selectedValidator?.validatorMinStake || '0');
 
       return minChain.gt(minValidator) ? minChain.toString() : minValidator.toString();
     }
-  }, [chainStakingMetadata?.metadata?.minJoinNominationPool, chainStakingMetadata?.metadata?.minStake, selectedValidator?.validatorMinStake, type]);
+  }, [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, selectedValidator?.validatorMinStake, type]);
 
   const unBondedTime = useMemo((): string => {
     if (chainStakingMetadata) {
-      const time = chainStakingMetadata.metadata?.unstakingPeriod || 0;
+      const time = chainStakingMetadata?.unstakingPeriod || 0;
 
       if (time >= 24) {
         const days = Math.floor(time / 24);

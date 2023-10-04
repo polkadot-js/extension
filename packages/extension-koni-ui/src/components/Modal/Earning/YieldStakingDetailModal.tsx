@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionMetadata } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { getValidatorLabel, isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MANAGEMENT_DETAIL_MODAL, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useFetchChainInfo, useGetAccountsByStaking, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
@@ -26,7 +26,7 @@ import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
-  yieldPositionMetadata: YieldPositionMetadata;
+  nominatorMetadata: NominatorMetadata;
   yieldPoolInfo: YieldPoolInfo;
   // rewardItem?: StakingRewardItem;
 }
@@ -35,9 +35,9 @@ export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) =
   return unstakings.find((item) => item.validatorAddress === address);
 };
 
-const modalId = EARNING_MANAGEMENT_DETAIL_MODAL;
+const modalId = YIELD_STAKING_DETAIL_MODAL;
 
-const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMetadata }: Props) => {
+const Component: React.FC<Props> = ({ className, nominatorMetadata, yieldPoolInfo }: Props) => {
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const chainStakingMetadata = useMemo(() => yieldPoolInfo.metadata, [yieldPoolInfo]);
   const { expectedReturn, minJoinNominationPool, minStake, unstakingPeriod } = chainStakingMetadata || {};
@@ -452,7 +452,7 @@ const Component: React.FC<Props> = ({ className, yieldPoolInfo, yieldPositionMet
   );
 };
 
-const EarningManagementDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const YieldStakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.expected-return div:first-child': {
       flex: 2
@@ -527,4 +527,4 @@ const EarningManagementDetailModal = styled(Component)<Props>(({ theme: { token 
   };
 });
 
-export default EarningManagementDetailModal;
+export default YieldStakingDetailModal;

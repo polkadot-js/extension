@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { EarningCalculatorModal, EarningManagementDetailModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout } from '@subwallet/extension-koni-ui/components';
-import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MANAGEMENT_DETAIL_MODAL, STAKING_CALCULATOR_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import YieldStakingDetailModal from '@subwallet/extension-koni-ui/components/Modal/Earning/YieldPositionDetailModal';
+import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -182,9 +183,14 @@ const Component: React.FC<Props> = (props: Props) => {
       const poolInfo = poolInfoMap[item.slug];
 
       setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
-      activeModal(EARNING_MANAGEMENT_DETAIL_MODAL);
+
+      if (selectedYieldPoolInfo && [YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(selectedYieldPoolInfo.type)) {
+        activeModal(YIELD_STAKING_DETAIL_MODAL);
+      } else {
+        activeModal(YIELD_POSITION_DETAIL_MODAL);
+      }
     };
-  }, [activeModal, poolInfoMap]);
+  }, [activeModal, poolInfoMap, selectedYieldPoolInfo]);
 
   const renderEarningItem = useCallback((item: YieldPositionInfo) => {
     const poolInfo = poolInfoMap[item.slug];
@@ -280,10 +286,19 @@ const Component: React.FC<Props> = (props: Props) => {
 
       {
         selectedYieldPosition && selectedYieldPoolInfo && (
-          <EarningManagementDetailModal
-            yieldPoolInfo={selectedYieldPoolInfo}
-            yieldPositionMetadata={selectedYieldPosition.metadata}
-          />
+          [YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(selectedYieldPoolInfo.type)
+            ? (
+              <EarningManagementDetailModal
+                nominatorMetadata={selectedYieldPosition.metadata as NominatorMetadata}
+                yieldPoolInfo={selectedYieldPoolInfo}
+              />
+            )
+            : (
+              <YieldStakingDetailModal
+                positionInfo={selectedYieldPosition}
+                yieldPoolInfo={selectedYieldPoolInfo}
+              />
+            )
         )
       }
     </Layout.Base>

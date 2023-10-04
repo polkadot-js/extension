@@ -52,7 +52,7 @@ function checkPortfolioPage (pathname: string) {
   return pathname.startsWith('/home/tokens') || pathname.startsWith('/home/nfts') || pathname.startsWith('/home/statistics');
 }
 
-const simplePages = ['/', '/welcome', '/keyring/login', '/keyring/create-password', '/keyring/migrate-password', '/create-done'];
+const simplePages = ['/', '/welcome', '/keyring/login', '/keyring/create-password', '/keyring/migrate-password', '/create-done', '/earning-demo'];
 
 export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) => {
   const [background, setBackground] = useState<BackgroundColorMap>(BackgroundColorMap.INFO);

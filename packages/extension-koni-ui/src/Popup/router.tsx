@@ -127,8 +127,9 @@ const ConnectionDetail = new LazyLoader('ConnectionDetail', () => import('@subwa
 
 const DApps = new LazyLoader('DApps', () => import('@subwallet/extension-koni-ui/Popup/DApps'));
 
-const EarningOutlet = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/index'));
+const EarningOutlet = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/Outlet'));
 const EarningOverview = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningOverview'));
+const EarningDemo = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningDemo'));
 const EarningManagement = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
 const EarningNoRouter = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/NoRouter'));
 
@@ -283,6 +284,12 @@ export const router = createBrowserRouter([
         path: '/dapps',
         children: [
           DApps.generateRouterObject('/dapps')
+        ]
+      },
+      {
+        ...EarningOutlet.generateRouterObject('earning-demo'),
+        children: [
+          EarningDemo.generateRouterObject('')
         ]
       }
     ]

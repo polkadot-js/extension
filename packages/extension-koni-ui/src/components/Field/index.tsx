@@ -8,6 +8,7 @@ export { default as CancelUnstakeSelector } from './CancelUnstakeSelector';
 export { default as HiddenInput } from './HiddenInput';
 export { default as MultiValidatorSelector } from './MultiValidatorSelector';
 export { default as NominationSelector } from './NominationSelector';
+export { default as RadioGroup } from './RadioGroup';
 export { default as PhraseNumberSelector } from './PhraseNumberSelector';
 export { default as PoolSelector } from './PoolSelector';
 export { default as PrivateKeyInput } from './PrivateKeyInput';

@@ -2,32 +2,39 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { Layout, SocialButtonGroup } from '@subwallet/extension-koni-ui/components';
+import { CREATE_RETURN, DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import MigrateDone from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Done';
+import { useAutoNavigateToCreatePassword } from '@subwallet/extension-koni-ui/hooks';
 import { CreateDoneParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle, Wallet, X } from 'phosphor-react';
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
-import { Layout, SocialButtonGroup } from '../components';
-import useAutoNavigateToCreatePassword from '../hooks/router/useAutoNavigateToCreatePassword';
+import MigrateDone from './Keyring/ApplyMasterPassword/Done';
 
 type Props = ThemeProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
+  const navigate = useNavigate();
+
   const { isWebUI } = useContext(ScreenContext);
   const locationState = useLocation().state as CreateDoneParam;
   const [accounts] = useState<AccountJson[] | undefined>(locationState?.accounts);
+  const [returnPath, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
 
   const { className } = props;
 
-  const { goHome } = useDefaultNavigate();
+  const onDone = useCallback(() => {
+    navigate(returnPath);
+    setReturnStorage(DEFAULT_ROUTER_PATH);
+  }, [navigate, returnPath, setReturnStorage]);
 
   const { t } = useTranslation();
 
@@ -54,7 +61,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 )
               }
-              onClick={goHome}
+              onClick={onDone}
             >
               {t('Finish')}
             </Button>
@@ -69,7 +76,7 @@ const Component: React.FC<Props> = (props: Props) => {
       rightFooterButton={!isWebUI
         ? {
           children: t('Go to home'),
-          onClick: goHome,
+          onClick: onDone,
           icon: <Icon
             phosphorIcon={ArrowCircleRight}
             weight={'fill'}
@@ -115,7 +122,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     weight='fill'
                   />
                 )}
-                onClick={goHome}
+                onClick={onDone}
                 schema={'primary'}
               >
                 {t('Go to portfolio')}

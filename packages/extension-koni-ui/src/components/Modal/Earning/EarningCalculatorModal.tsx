@@ -4,7 +4,7 @@
 import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { BN_TEN, DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
@@ -58,10 +58,11 @@ const Component = (props: Props) => {
   const isActive = checkActive(modalId);
 
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
-  const { currentAccount } = useSelector((state: RootState) => state.accountState);
+  const { currentAccount, isNoAccount } = useSelector((state: RootState) => state.accountState);
   const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
 
-  const [, setStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
+  const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
+  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
   const [form] = Form.useForm<EarningCalculatorFormProps>();
 
   const formDefault: EarningCalculatorFormProps = useMemo(() => {
@@ -121,23 +122,28 @@ const Component = (props: Props) => {
   }, []);
 
   const onSubmit: FormCallbacks<EarningCalculatorFormProps>['onFinish'] = useCallback((values: EarningCalculatorFormProps) => {
-    const { amount } = values;
+    if (isNoAccount) {
+      setReturnStorage('/home/earning');
+      navigate('/welcome');
+    } else {
+      const { amount } = values;
 
-    inactiveModal(modalId);
+      inactiveModal(modalId);
 
-    const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
-    setStorage({
-      ...DEFAULT_YIELD_PARAMS,
-      method: currentItem.slug,
-      from: address,
-      chain: currentItem.chain,
-      asset: currentItem.inputAssets[0],
-      'amount-0': amount
-    });
+      setYieldStorage({
+        ...DEFAULT_YIELD_PARAMS,
+        method: currentItem.slug,
+        from: address,
+        chain: currentItem.chain,
+        asset: currentItem.inputAssets[0],
+        'amount-0': amount
+      });
 
-    navigate('/transaction/earn');
-  }, [inactiveModal, currentAccount, setStorage, currentItem, navigate]);
+      navigate('/transaction/earn');
+    }
+  }, [isNoAccount, setReturnStorage, navigate, inactiveModal, currentAccount, setYieldStorage, currentItem.slug, currentItem.chain, currentItem.inputAssets]);
 
   useEffect(() => {
     addExclude(modalId);

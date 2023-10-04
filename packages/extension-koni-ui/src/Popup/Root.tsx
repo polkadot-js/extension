@@ -41,6 +41,7 @@ const loginUrl = '/keyring/login';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
 const securityUrl = '/settings/security';
+const earningDemoUrl = '/earning-demo';
 const createDoneUrl = '/create-done';
 
 const baseAccountPath = '/accounts';
@@ -170,14 +171,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       redirectObj.redirect = loginUrl;
     } else if (!hasMasterPassword) {
       if (noAccount) {
-        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
+        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl, earningDemoUrl].includes(pathName)) {
           redirectObj.redirect = welcomeUrl;
         }
       } else if (pathName !== createDoneUrl) {
         redirectObj.redirect = createPasswordUrl;
       }
     } else if (noAccount) {
-      if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
+      if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl, earningDemoUrl].includes(pathName)) {
         redirectObj.redirect = welcomeUrl;
       }
     } else if (hasConfirmations) {

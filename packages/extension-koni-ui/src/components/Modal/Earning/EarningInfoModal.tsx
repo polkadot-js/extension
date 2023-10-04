@@ -5,7 +5,7 @@ import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils';
-import { DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -60,11 +60,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const isActive = checkActive(modalId);
 
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
-  const { currentAccount } = useSelector((state: RootState) => state.accountState);
+  const { currentAccount, isNoAccount } = useSelector((state: RootState) => state.accountState);
   const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
   const { priceMap } = useSelector((state: RootState) => state.price);
 
-  const [, setStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
+  const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
+  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
   const [form] = Form.useForm<EarningInfoFormProps>();
 
   const formDefault: EarningInfoFormProps = useMemo(() => {
@@ -133,18 +134,23 @@ const Component: React.FC<Props> = (props: Props) => {
   const onSubmit: FormCallbacks<EarningInfoFormProps>['onFinish'] = useCallback(() => {
     inactiveModal(modalId);
 
-    const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+    if (isNoAccount) {
+      setReturnStorage('/home/earning');
+      navigate('/welcome');
+    } else {
+      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
-    setStorage({
-      ...DEFAULT_YIELD_PARAMS,
-      method: currentItem.slug,
-      from: address,
-      chain: currentItem.chain,
-      asset: currentItem.inputAssets[0]
-    });
+      setYieldStorage({
+        ...DEFAULT_YIELD_PARAMS,
+        method: currentItem.slug,
+        from: address,
+        chain: currentItem.chain,
+        asset: currentItem.inputAssets[0]
+      });
 
-    navigate('/transaction/earn');
-  }, [inactiveModal, currentAccount, setStorage, currentItem, navigate]);
+      navigate('/transaction/earn');
+    }
+  }, [inactiveModal, isNoAccount, setReturnStorage, navigate, currentAccount, setYieldStorage, currentItem.slug, currentItem.chain, currentItem.inputAssets]);
 
   useEffect(() => {
     addExclude(modalId);

@@ -79,5 +79,5 @@ export interface CancelUnYieldParams extends TransactionFormBaseProps {
 
 export interface YieldFastWithdrawParams extends TransactionFormBaseProps {
   amount: string;
-  selectedYieldPool: string;
+  method: string;
 }

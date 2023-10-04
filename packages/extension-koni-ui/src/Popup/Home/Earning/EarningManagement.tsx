@@ -3,9 +3,10 @@
 
 import { NominatorMetadata, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { EarningCalculatorModal, EarningManagementDetailModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout } from '@subwallet/extension-koni-ui/components';
+import { BaseModal, EarningCalculatorModal, EarningManagementDetailModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout } from '@subwallet/extension-koni-ui/components';
 import YieldStakingDetailModal from '@subwallet/extension-koni-ui/components/Modal/Earning/YieldPositionDetailModal';
-import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -19,6 +20,12 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
+import Transaction from '../../Transaction/Transaction';
+import YieldCancelUnstake from '../../Transaction/variants/Yield/YieldCancelUnstake';
+import YieldUnstake from '../../Transaction/variants/Yield/YieldUnstake';
+import YieldWithdraw from '../../Transaction/variants/Yield/YieldWithdraw';
+import YieldWithdrawPosition from '../../Transaction/variants/Yield/YieldWithdrawPosition';
+
 type Props = ThemeProps;
 
 const FILTER_MODAL_ID = 'earning-filter-modal';
@@ -29,26 +36,25 @@ enum SortKey {
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
+
   const { t } = useTranslation();
   const navigate = useNavigate();
+
   const { poolInfo: poolInfoMap, yieldPosition: yieldPositionList } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount } = useSelector((state: RootState) => state.accountState);
-  const { activeModal } = useContext(ModalContext);
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
+
   const [{ selectedYieldPoolInfo, selectedYieldPosition }, setSelectedItem] = useState<{ selectedYieldPosition: YieldPositionInfo | undefined, selectedYieldPoolInfo: YieldPoolInfo | undefined }>({ selectedYieldPosition: undefined, selectedYieldPoolInfo: undefined });
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setUnYieldStorage] = useLocalStorage(UN_YIELD_TRANSACTION, DEFAULT_UN_YIELD_PARAMS);
-  const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_YIELD_TRANSACTION, DEFAULT_WITHDRAW_YIELD_PARAMS);
   const [, setCancelUnYieldStorage] = useLocalStorage(CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS);
-
-  const onChangeSortOpt = useCallback((value: string) => {
-    setSortSelection(value as SortKey);
-  }, []);
-
-  const onResetSort = useCallback(() => {
-    setSortSelection(SortKey.TOTAL_VALUE);
-  }, []);
+  const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_YIELD_TRANSACTION, DEFAULT_WITHDRAW_YIELD_PARAMS);
+  const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
 
   const filterFunction = useMemo<(item: YieldPoolInfo) => boolean>(() => {
     return (item) => {
@@ -91,6 +97,14 @@ const Component: React.FC<Props> = (props: Props) => {
       return false;
     };
   }, [selectedFilters]);
+
+  const onChangeSortOpt = useCallback((value: string) => {
+    setSortSelection(value as SortKey);
+  }, []);
+
+  const onResetSort = useCallback(() => {
+    setSortSelection(SortKey.TOTAL_VALUE);
+  }, []);
 
   const onClickCalculatorBtn = useCallback((item: YieldPositionInfo) => {
     return () => {
@@ -136,9 +150,14 @@ const Component: React.FC<Props> = (props: Props) => {
         method: poolInfo.slug,
         asset: poolInfo.inputAssets[0]
       });
-      navigate('/transaction/un-yield');
+
+      if (isWebUI) {
+        activeModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
+      } else {
+        navigate('/transaction/un-yield');
+      }
     };
-  }, [currentAccount, navigate, poolInfoMap, setUnYieldStorage]);
+  }, [activeModal, currentAccount, isWebUI, navigate, poolInfoMap, setUnYieldStorage]);
 
   const onClickCancelUnStakeBtn = useCallback((item: YieldPositionInfo) => {
     return () => {
@@ -155,9 +174,14 @@ const Component: React.FC<Props> = (props: Props) => {
         method: poolInfo.slug,
         asset: poolInfo.inputAssets[0]
       });
-      navigate('/transaction/cancel-un-yield');
+
+      if (isWebUI) {
+        activeModal(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL);
+      } else {
+        navigate('/transaction/cancel-un-yield');
+      }
     };
-  }, [currentAccount, navigate, poolInfoMap, setCancelUnYieldStorage]);
+  }, [activeModal, currentAccount, isWebUI, navigate, poolInfoMap, setCancelUnYieldStorage]);
 
   const onClickWithdrawBtn = useCallback((item: YieldPositionInfo) => {
     return () => {
@@ -167,21 +191,39 @@ const Component: React.FC<Props> = (props: Props) => {
 
       const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
-      setWithdrawStorage({
-        ...DEFAULT_WITHDRAW_YIELD_PARAMS,
-        from: address,
-        chain: poolInfo.chain,
-        method: poolInfo.slug,
-        asset: poolInfo.inputAssets[0]
-      });
+      const isStaking = [YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolInfo.type);
 
-      if (![YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolInfo.type)) {
-        navigate('/transaction/yield-withdraw-position');
+      if (isStaking) {
+        setWithdrawStorage({
+          ...DEFAULT_WITHDRAW_YIELD_PARAMS,
+          from: address,
+          chain: poolInfo.chain,
+          method: poolInfo.slug,
+          asset: poolInfo.inputAssets[0]
+        });
+
+        if (isWebUI) {
+          activeModal(TRANSACTION_YIELD_WITHDRAW_MODAL);
+        } else {
+          navigate('/transaction/withdraw-yield');
+        }
       } else {
-        navigate('/transaction/withdraw-yield');
+        setFastWithdrawStorage({
+          ...DEFAULT_FAST_WITHDRAW_YIELD_PARAMS,
+          from: address,
+          chain: poolInfo.chain,
+          method: poolInfo.slug,
+          asset: poolInfo.inputAssets[0]
+        });
+
+        if (isWebUI) {
+          activeModal(TRANSACTION_YIELD_FAST_WITHDRAW_MODAL);
+        } else {
+          navigate('/transaction/yield-withdraw-position');
+        }
       }
     };
-  }, [currentAccount, navigate, poolInfoMap, setWithdrawStorage]);
+  }, [activeModal, currentAccount, isWebUI, navigate, poolInfoMap, setFastWithdrawStorage, setWithdrawStorage]);
 
   const onClickItem = useCallback((item: YieldPositionInfo) => {
     return () => {
@@ -256,6 +298,22 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [t]);
 
+  const handleCloseUnstake = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
+  }, [inactiveModal]);
+
+  const handleCloseCancelUnstake = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL);
+  }, [inactiveModal]);
+
+  const handleCloseWithdraw = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_WITHDRAW_MODAL);
+  }, [inactiveModal]);
+
+  const handleCloseFastWithdraw = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_FAST_WITHDRAW_MODAL);
+  }, [inactiveModal]);
+
   return (
     <Layout.Base
       className={className}
@@ -306,6 +364,58 @@ const Component: React.FC<Props> = (props: Props) => {
             )
         )
       }
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_UNSTAKE_MODAL}
+        onCancel={handleCloseUnstake}
+        title={t('Unbond')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+        >
+          <YieldUnstake />
+        </Transaction>
+      </BaseModal>
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL}
+        onCancel={handleCloseCancelUnstake}
+        title={t('Cancel unstake')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+        >
+          <YieldCancelUnstake />
+        </Transaction>
+      </BaseModal>
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_WITHDRAW_MODAL}
+        onCancel={handleCloseWithdraw}
+        title={t('Withdraw')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+        >
+          <YieldWithdraw />
+        </Transaction>
+      </BaseModal>
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_FAST_WITHDRAW_MODAL}
+        onCancel={handleCloseFastWithdraw}
+        title={t('Withdraw')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+        >
+          <YieldWithdrawPosition />
+        </Transaction>
+      </BaseModal>
     </Layout.Base>
   );
 };

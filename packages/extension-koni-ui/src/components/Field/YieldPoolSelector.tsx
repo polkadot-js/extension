@@ -68,7 +68,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const nominationPoolValueList = useMemo((): string[] => {
-    return (nominatorMetadata[0]?.metadata as NominatorMetadata)?.nominations.map((item) => item.validatorAddress) || [];
+    return (nominatorMetadata[0]?.metadata as NominatorMetadata)?.nominations?.map((item) => item.validatorAddress) || [];
   }, [nominatorMetadata]);
 
   const isDisabled = useMemo(() =>

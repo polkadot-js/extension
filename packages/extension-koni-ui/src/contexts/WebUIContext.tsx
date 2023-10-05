@@ -3,7 +3,7 @@
 
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils';
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
@@ -32,6 +32,7 @@ type WebUIContext = {
   title: string | React.ReactNode;
   setTitle: (title: string | React.ReactNode) => void;
   headerType: HeaderType;
+  setHeaderType: React.Dispatch<React.SetStateAction<HeaderType>>;
   showSidebar: boolean;
   sidebarCollapsed: boolean;
   setSidebarCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
@@ -39,7 +40,8 @@ type WebUIContext = {
   isPortfolio: boolean;
   showBackButtonOnHeader?: boolean;
   setShowBackButtonOnHeader: (show?: boolean) => void;
-  setHeaderType: React.Dispatch<React.SetStateAction<HeaderType>>;
+  onBack?: VoidFunction;
+  setOnBack: (func?: VoidFunction) => void;
 }
 
 export const WebUIContext = React.createContext({} as WebUIContext);
@@ -61,11 +63,18 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showBackButtonOnHeader, setShowBackButtonOnHeader] = useState<boolean | undefined>(undefined);
   const [title, setTitle] = useState<string | React.ReactNode>('');
+  const [onBack, _setOnBack] = useState<VoidFunction | undefined>(undefined);
   const pathname = useLocation().pathname;
   const { accounts } = useSelector((state: RootState) => state.accountState);
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
   const isSettingPage = useMemo(() => checkSettingPage(pathname), [pathname]);
   const isPortfolio = useMemo(() => checkPortfolioPage(pathname), [pathname]);
+
+  const setOnBack = useCallback((func?: VoidFunction) => {
+    _setOnBack(() => {
+      return func;
+    });
+  }, []);
 
   useLayoutEffect(() => {
     const pathName = pathname;
@@ -102,6 +111,7 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
         title,
         setTitle,
         headerType,
+        setHeaderType,
         showSidebar,
         sidebarCollapsed,
         setSidebarCollapsed,
@@ -109,7 +119,8 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
         isPortfolio,
         showBackButtonOnHeader,
         setShowBackButtonOnHeader,
-        setHeaderType
+        onBack,
+        setOnBack
       }}
     >
       {children}

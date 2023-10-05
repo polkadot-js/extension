@@ -2220,7 +2220,7 @@ export interface YieldAssetEarningStats {
   slug: string
   apr?: number,
   apy?: number,
-  exchangeRate?: number // reward token amount = input token amount * exchange rate
+  exchangeRate?: number // input token amount = reward token amount * exchange rate
 }
 
 export interface YieldPoolStats {

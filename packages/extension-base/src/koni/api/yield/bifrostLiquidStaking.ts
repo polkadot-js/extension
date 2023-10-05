@@ -119,33 +119,10 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
 
   async function getVtokenBalance () {
-    const balancePromise = substrateApi.api.query.tokens.accounts.multi(['5HU2x1QiUW4jJ5ykD1KLoVE8zryQkQcGAvbyD5rn7SyJedA9'].map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]));
-    const exchangeRatePromise = new Promise(function (resolve) {
-      fetch(BIFROST_GRAPHQL_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: BIFROST_EXCHANGE_RATE_REQUEST
-        })
-      }).then((resp) => {
-        resolve(resp.json());
-      }).catch(console.error);
-    });
-
-    const [_balances, _exchangeRate] = await Promise.all([
-      balancePromise,
-      exchangeRatePromise
-    ]);
-
-    const balances = _balances as unknown as TokenBalanceRaw[];
-    const exchangeRateInfo = _exchangeRate as BifrostVtokenExchangeRateResp;
+    const balancePromise = await substrateApi.api.query.tokens.accounts.multi(['5HU2x1QiUW4jJ5ykD1KLoVE8zryQkQcGAvbyD5rn7SyJedA9'].map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]));
+    const balances = balancePromise as unknown as TokenBalanceRaw[];
 
     const totalBalance = sumBN(balances.map((b) => (b.free || new BN(0))));
-    const exchangeRate = parseFloat(exchangeRateInfo.data.slp_polkadot_ratio[0].ratio);
-
-    const inputTokenBalance = Math.floor(totalBalance.toNumber() * exchangeRate);
 
     if (totalBalance.gt(BN_ZERO)) {
       positionCallback({
@@ -154,9 +131,9 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
         address: useAddresses[0], // TODO
         balance: [
           {
-            slug: inputTokenSlug, // token slug
-            totalBalance: inputTokenBalance.toString(),
-            activeBalance: inputTokenBalance.toString()
+            slug: derivativeTokenSlug, // token slug
+            totalBalance: totalBalance.toString(),
+            activeBalance: totalBalance.toString()
           }
         ],
 

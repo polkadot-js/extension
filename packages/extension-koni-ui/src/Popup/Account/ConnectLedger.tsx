@@ -420,8 +420,6 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
     },
 
     '.ant-sw-list': {
-      gap: token.sizeXS,
-
       '.ant-web3-block': {
         display: 'flex',
         overflow: 'visible',

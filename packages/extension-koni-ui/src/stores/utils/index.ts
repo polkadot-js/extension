@@ -11,11 +11,11 @@ import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@su
 import { addLazy, canDerive, isEmptyObject } from '@subwallet/extension-base/utils';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
-import { DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
+import { DAppCategory, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
 import { SessionTypes } from '@walletconnect/types';
-import axios from 'axios';
+import fetch from 'cross-fetch';
 
 // Setup redux stores
 
@@ -303,11 +303,12 @@ export const updateWCNotSupportRequests = (data: WalletConnectNotSupportRequest[
 
 export const subscribeWCNotSupportRequests = lazySubscribeMessage('pri(walletConnect.requests.notSupport.subscribe)', null, updateWCNotSupportRequests, updateWCNotSupportRequests);
 
-export const updateDAppStore = (dApps: DAppInfo[]) => {
+export const updateDAppStore = (dApps: DAppInfo[], categories: DAppCategory[]) => {
   const featureDApps: DAppInfo[] = dApps.filter((i) => i.is_featured);
 
   store.dispatch({ type: 'dApp/update',
     payload: {
+      categories,
       featureDApps,
       dApps
     } });
@@ -315,11 +316,11 @@ export const updateDAppStore = (dApps: DAppInfo[]) => {
 
 export const getDAppsData = (() => {
   const handler: {
-    resolve?: (value: unknown) => void,
+    resolve?: (value: unknown[]) => void,
     reject?: (reason?: any) => void
   } = {};
 
-  const promise = new Promise((resolve, reject) => {
+  const promise = new Promise<any[]>((resolve, reject) => {
     handler.resolve = resolve;
     handler.reject = reject;
   });
@@ -327,16 +328,27 @@ export const getDAppsData = (() => {
   const rs = {
     promise,
     start: () => {
-      axios.get('https://content-cache.subwallet.app/api/strapi/dapps').then((rs) => {
-        handler.resolve?.(rs.data);
-      }).catch((reason) => {
-        handler.reject?.(reason);
-      });
+      Promise.all([
+        (async () => {
+          const res = await fetch('https://content-cache.subwallet.app/api/strapi/dapps');
+
+          return await res.json() as [];
+        })(),
+        (async () => {
+          const res = await fetch('https://content-cache.subwallet.app/api/strapi/categories');
+
+          return await res.json() as [];
+        })()
+      ])
+        .then((data) => {
+          handler.resolve?.(data);
+        })
+        .catch(handler.reject);
     }
   };
 
   rs.promise.then((data) => {
-    updateDAppStore(data as DAppInfo[]);
+    updateDAppStore(data[0] as DAppInfo[], data[1] as DAppCategory[]);
   }).catch(console.error);
 
   return rs;

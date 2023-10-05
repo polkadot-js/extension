@@ -360,6 +360,7 @@ export * from './array';
 export * from './environment';
 export * from './number';
 export * from './lazy';
+export * from './promise';
 export * from './registry';
 export * from './translate';
 export * from './object';

@@ -1,20 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { enable } from '@subwallet/extension-base/page';
 import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvmProvider';
-import { addLazy } from '@subwallet/extension-base/utils';
+import { addLazy, createPromiseHandler } from '@subwallet/extension-base/utils';
 import { EvmProvider, Injected, InjectedAccountWithMeta, InjectedWindowProvider, Unsubcall } from '@subwallet/extension-inject/types';
 import { DisconnectExtensionModal } from '@subwallet/extension-koni-ui/components';
 import { ENABLE_INJECT } from '@subwallet/extension-koni-ui/constants';
 import { useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
 import { noop, toShort } from '@subwallet/extension-koni-ui/utils';
-import EventEmitter from 'eventemitter3';
 import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-
-import { createPromiseHandler } from '../../../extension-base/src/utils/promise';
 
 interface Props {
   children: React.ReactNode;

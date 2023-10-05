@@ -4,8 +4,9 @@
 import { NominatorMetadata, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BaseModal, EarningCalculatorModal, EarningManagementDetailModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout } from '@subwallet/extension-koni-ui/components';
+import EarningInfoModal from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInfoModal';
 import YieldStakingDetailModal from '@subwallet/extension-koni-ui/components/Modal/Earning/YieldPositionDetailModal';
-import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -112,6 +113,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
       setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
       activeModal(STAKING_CALCULATOR_MODAL);
+    };
+  }, [activeModal, poolInfoMap]);
+
+  const onClickInfoBtn = useCallback((item: YieldPositionInfo) => {
+    return () => {
+      const poolInfo = poolInfoMap[item.slug];
+
+      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      activeModal(EARNING_INFO_MODAL);
     };
   }, [activeModal, poolInfoMap]);
 
@@ -248,6 +258,7 @@ const Component: React.FC<Props> = (props: Props) => {
         key={key}
         onClickCalculatorBtn={onClickCalculatorBtn(item)}
         onClickCancelUnStakeBtn={onClickCancelUnStakeBtn(item)}
+        onClickInfoBtn={onClickInfoBtn(item)}
         onClickItem={onClickItem(item)}
         onClickStakeBtn={onClickStakeBtn(item)}
         onClickUnStakeBtn={onClickUnStakeBtn(item)}
@@ -256,7 +267,7 @@ const Component: React.FC<Props> = (props: Props) => {
         yieldPositionInfo={item}
       />
     );
-  }, [poolInfoMap, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn]);
+  }, [poolInfoMap, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn]);
 
   const resultList = useMemo((): YieldPositionInfo[] => {
     return [...yieldPositionList]
@@ -346,6 +357,7 @@ const Component: React.FC<Props> = (props: Props) => {
       />
 
       {selectedYieldPoolInfo && <EarningCalculatorModal defaultItem={selectedYieldPoolInfo} />}
+      {selectedYieldPoolInfo && <EarningInfoModal defaultItem={selectedYieldPoolInfo} />}
 
       {
         selectedYieldPosition && selectedYieldPoolInfo && (

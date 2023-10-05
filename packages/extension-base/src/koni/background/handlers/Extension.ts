@@ -3874,6 +3874,7 @@ export default class KoniExtension {
 
     const params: OptimalYieldPathParams = {
       // @ts-ignore
+      address,
       amount: data?.amount || '0',
       assetInfoMap: this.#koniState.getAssetRegistry(),
       balanceMap: this.#koniState.getBalance().details,
@@ -3899,6 +3900,7 @@ export default class KoniExtension {
       yieldPoolInfo,
       {
         // @ts-ignore
+        address,
         amount: data?.amount || '0',
         assetInfoMap: this.#koniState.getAssetRegistry(),
         balanceMap: this.#koniState.getBalance().details,
@@ -3943,6 +3945,7 @@ export default class KoniExtension {
 
     const [extrinsicType, extrinsic] = await handleYieldRedeem(
       {
+        address,
         amount,
         assetInfoMap: this.#koniState.getAssetRegistry(),
         balanceMap: this.#koniState.getBalance().details,
@@ -3999,6 +4002,7 @@ export default class KoniExtension {
 
   private handleValidateYieldProcess (inputData: ValidateYieldProcessParams) {
     const params: OptimalYieldPathParams = {
+      address: inputData.address,
       amount: inputData.amount || '0',
       assetInfoMap: this.#koniState.getAssetRegistry(),
       balanceMap: this.#koniState.getBalance().details,

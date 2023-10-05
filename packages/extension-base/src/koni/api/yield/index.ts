@@ -176,14 +176,10 @@ export async function generatePathForLiquidStaking (params: OptimalYieldPathPara
   const altInputTokenSlug = params.poolInfo.altInputAssets ? params.poolInfo?.altInputAssets[0] : '';
   const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
 
-  console.log('fuck', inputTokenInfo, altInputTokenInfo);
-
   const [inputTokenBalance, altInputTokenBalance] = await Promise.all([
     balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug),
     balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug)
   ]);
-
-  console.log('ok', inputTokenBalance, altInputTokenBalance);
 
   const bnInputTokenBalance = new BN(inputTokenBalance.value);
   const defaultFeeTokenSlug = params.poolInfo.feeAssets[0];

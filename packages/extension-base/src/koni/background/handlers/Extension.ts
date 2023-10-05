@@ -3851,6 +3851,7 @@ export default class KoniExtension {
     const chainInfoMap = this.#koniState.getChainInfoMap();
     const balanceMap = this.#koniState.getBalance().details;
     const substrateApiMap = this.#koniState.getSubstrateApiMap();
+    const balanceService = this.#koniState.balanceService;
 
     return await generateNaiveOptimalPath({
       ...request,
@@ -3858,7 +3859,7 @@ export default class KoniExtension {
       balanceMap,
       chainInfoMap,
       substrateApiMap
-    });
+    }, balanceService);
   }
 
   private async handleYieldStep (inputData: RequestYieldStepSubmit): Promise<SWTransactionResponse> {

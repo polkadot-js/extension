@@ -8,6 +8,7 @@ import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { i18nPromise } from '@subwallet/extension-koni-ui/utils';
 import React, { ComponentType } from 'react';
 import { createBrowserRouter, IndexRouteObject, Outlet, useLocation, useOutletContext } from 'react-router-dom';
+import CrowdloanUnlockCampaign from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign';
 
 export const lazyLoaderMap: Record<string, LazyLoader> = {};
 
@@ -132,6 +133,8 @@ const EarningOutlet = new LazyLoader('Earning', () => import('@subwallet/extensi
 const EarningOverview = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningOverview'));
 const EarningManagement = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
 const EarningNoRouter = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/NoRouter'));
+const CheckCrowdloanContributions = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CheckCrowdloanContributions'));
+const CrowdloanContributionsResult = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CrowdloanContributionsResult'));
 
 // A Placeholder page
 export function Example () {
@@ -285,6 +288,14 @@ export const router = createBrowserRouter([
         path: '/dapps',
         children: [
           DApps.generateRouterObject('/dapps')
+        ]
+      },
+      {
+        path: '/crowdloan-unlock-campaign',
+        element: <CrowdloanUnlockCampaign />,
+        children: [
+          CheckCrowdloanContributions.generateRouterObject('check-contributions'),
+          CrowdloanContributionsResult.generateRouterObject('contributions-result')
         ]
       }
     ]

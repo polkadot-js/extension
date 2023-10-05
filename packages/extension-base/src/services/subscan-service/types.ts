@@ -30,3 +30,25 @@ export interface IMultiChainBalance {
   democracy_lock: string,
   election_lock: string
 }
+
+export interface CrowdloanContributionItem {
+  fund_id: string,
+  para_id: number,
+  contributed: string,
+  block_num: number,
+  block_timestamp: number,
+  extrinsic_index: string,
+  event_index: string,
+  status: number,
+  memo: string,
+  fund_status: number,
+  fund_event_index: string,
+  unlocking_block: number,
+  fund_auction_status: number
+}
+
+export interface CrowdloanContributionsResponse {
+  count: number,
+  list: null | CrowdloanContributionItem[],
+  total: string
+}

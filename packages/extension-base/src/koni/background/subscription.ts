@@ -81,9 +81,10 @@ export class KoniSubscription {
     await Promise.all([this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
     const currentAddress = this.state.keyringService.currentAccount?.address;
 
+    this.subscribeYieldPools(this.state.getChainInfoMap(), this.state.getAssetRegistry(), this.state.getSubstrateApiMap(), currentAddress);
+
     if (currentAddress) {
       this.subscribeBalancesAndCrowdloans(currentAddress, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
-      this.subscribeYieldPools(currentAddress, this.state.getChainInfoMap(), this.state.getAssetRegistry(), this.state.getSubstrateApiMap());
     }
 
     this.eventHandler = (events, eventTypes) => {
@@ -96,13 +97,14 @@ export class KoniSubscription {
 
       const address = serviceInfo.currentAccountInfo?.address;
 
+      // @ts-ignore
+      this.subscribeYieldPools(serviceInfo.chainInfoMap, serviceInfo.assetRegistry, serviceInfo.chainApiMap.substrate, address);
+
       if (!address) {
         return;
       }
 
       this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
-      // @ts-ignore
-      this.subscribeYieldPools(address, serviceInfo.chainInfoMap, serviceInfo.assetRegistry, serviceInfo.chainApiMap.substrate);
     };
 
     this.state.eventService.onLazy(this.eventHandler);
@@ -132,18 +134,20 @@ export class KoniSubscription {
     }).catch((err) => this.logger.warn(err));
   }
 
-  subscribeYieldPools (address: string, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, substrateApiMap: Record<string, SubstrateApi>, onlyRunOnFirstTime?: boolean) {
+  subscribeYieldPools (chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, substrateApiMap: Record<string, SubstrateApi>, address?: string, onlyRunOnFirstTime?: boolean) {
     this.updateSubscription('yieldPoolStats', this.initYieldPoolStatsSubscription(substrateApiMap, onlyRunOnFirstTime));
 
-    this.state.handleSwitchAccount(address).then(() => {
-      const addresses = this.state.getDecodedAddresses(address);
+    if (address) {
+      this.state.handleSwitchAccount(address).then(() => {
+        const addresses = this.state.getDecodedAddresses(address);
 
-      if (!addresses.length) {
-        return;
-      }
+        if (!addresses.length) {
+          return;
+        }
 
-      this.updateSubscription('yieldPosition', this.initYieldPositionSubscription(addresses, substrateApiMap, chainInfoMap, assetInfoMap));
-    }).catch((e) => this.logger.warn(e));
+        this.updateSubscription('yieldPosition', this.initYieldPositionSubscription(addresses, substrateApiMap, chainInfoMap, assetInfoMap));
+      }).catch((e) => this.logger.warn(e));
+    }
   }
 
   initYieldPositionSubscription (addresses: string[], substrateApiMap: Record<string, SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, onlyRunOnFirstTime?: boolean) {

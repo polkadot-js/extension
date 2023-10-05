@@ -10,7 +10,6 @@ import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext
 import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import DAppItem from '@subwallet/extension-koni-ui/Popup/DApps/DAppItem';
 import FeatureDAppItem from '@subwallet/extension-koni-ui/Popup/DApps/FeatureDAppItem';
-import { dAppCategories } from '@subwallet/extension-koni-ui/Popup/DApps/predefined';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { DAppCategoryType, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
@@ -39,7 +38,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { activeModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
   const { goHome } = useDefaultNavigate();
-  const { dApps, featureDApps } = useSelector((state: RootState) => state.dApp);
+  const { categories, dApps, featureDApps } = useSelector((state: RootState) => state.dApp);
   const [sliderDisplayCount, setSliderDisplayCount] = useState<number>(0);
 
   useEffect(() => {
@@ -49,11 +48,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [location.pathname, setTitle, t]);
 
   const filterOptions = useMemo(() => [
-    ...dAppCategories.map((c) => ({
+    ...categories.map((c) => ({
       label: t(c.name),
-      value: c.id
+      value: c.slug
     }))
-  ], [t]);
+  ], [categories, t]);
 
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {
     return [
@@ -165,7 +164,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         onClickLeft={goHome}
         rightButtons={headerIcons}
         showLeftButton={true}
-      >
+                   >
         {t('DApps')}
       </SwHeader>}
 

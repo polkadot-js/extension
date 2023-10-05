@@ -7,7 +7,7 @@ import { _getAssetDecimals, _getAssetPriceId, _getChainNativeTokenSlug } from '@
 import { CrowdloanContributionItem } from '@subwallet/extension-base/services/subscan-service/types';
 import { AddressInput, TokenBalance } from '@subwallet/extension-koni-ui/components';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
-import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
+import { CREATE_RETURN, DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { getCrowdloanContributions, getParaChainInfoMap } from '@subwallet/extension-koni-ui/messaging';
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
@@ -18,14 +18,17 @@ import { customFormatDate } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Logo, Table, Tag } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
-import { Vault, Wallet } from 'phosphor-react';
+import { ArrowCounterClockwise, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { isAddress } from '@polkadot/util-crypto';
+
+import EmptyList from '../../components/EmptyList/EmptyList';
 
 type Props = ThemeProps;
 
@@ -150,6 +153,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
+  const { isNoAccount } = useSelector((state: RootState) => state.accountState);
+  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
 
   const [contributionsMap, setContributionsMap] = useState<CrowdloanContributionsMap>({
     polkadot: [],
@@ -157,6 +162,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   });
 
   const [form] = Form.useForm<FormParams>();
+  const addressValue = Form.useWatch('address', form);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const formDefault = useMemo((): FormParams => {
     return {
@@ -321,15 +328,26 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     });
   }, []);
 
+  const fetchTableData = useCallback((address: string) => {
+    setLoading(true);
+    fetchContributionsMap(address).then((rs) => {
+      setContributionsMap(rs);
+    }).catch((e) => {
+      console.log('fetchContributionsMap Error', e);
+    }).finally(() => {
+      setLoading(false);
+    });
+  }, []);
+
   useEffect(() => {
     if (propAddress) {
-      fetchContributionsMap(propAddress).then((rs) => {
-        setContributionsMap(rs);
-      }).catch((e) => {
-        console.log('fetchContributionsMap Error', e);
-      });
+      fetchTableData(propAddress);
     }
-  }, [propAddress]);
+  }, [fetchTableData, propAddress]);
+
+  const onClickCheckAgain = useCallback(() => {
+    fetchTableData(addressValue);
+  }, [addressValue, fetchTableData]);
 
   const validateAddress = useCallback((rule: Rule, address: string): Promise<void> => {
     if (!address) {
@@ -340,55 +358,63 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       return Promise.reject(t('Invalid address'));
     }
 
-    fetchContributionsMap(address).then((rs) => {
-      setContributionsMap(rs);
-    }).catch((e) => {
-      console.log('fetchContributionsMap Error', e);
-    });
+    fetchTableData(address);
 
     return Promise.resolve();
-  }, [t]);
+  }, [fetchTableData, t]);
+
+  const isCheckAgainDisabled = loading || !addressValue || !isAddress(addressValue);
+
+  const onClickCreateNewWallet = useCallback(() => {
+    if (isNoAccount) {
+      setReturnStorage('/home/earning');
+      navigate('/welcome');
+    }
+  }, [isNoAccount, navigate, setReturnStorage]);
 
   return (
     <div className={className}>
-      <FilterTabs
-        className={'filter-tabs-container'}
-        items={filterTabItems}
-        onSelect={onSelectFilterTab}
-        selectedItem={selectedFilterTab}
-      />
+      <div className='__tool-area'>
+        <FilterTabs
+          className={'__filter-tabs-container'}
+          items={filterTabItems}
+          onSelect={onSelectFilterTab}
+          selectedItem={selectedFilterTab}
+        />
 
-      <div className={'__form-area'}>
-        <Form
-          className={'__form-container'}
-          form={form}
-          initialValues={formDefault}
-        >
-          <Form.Item
-            name={'address'}
-            rules={[
-              {
-                validator: validateAddress
-              }
-            ]}
-            statusHelpAsTooltip
-            validateTrigger='onBlur'
+        <div className={'__form-area'}>
+          <Form
+            className={'__form-container'}
+            form={form}
+            initialValues={formDefault}
           >
-            <AddressInput
-              placeholder={t('Enter your Polkadot wallet address')}
-              prefix={(
-                <Icon
-                  className={'address-input-icon'}
-                  phosphorIcon={Wallet}
-                  size='md'
-                />
-              )}
-              showLabel={false}
-              showPlainAddressOnly
-              showScanner
-            />
-          </Form.Item>
-        </Form>
+            <Form.Item
+              className={'__form-item'}
+              name={'address'}
+              rules={[
+                {
+                  validator: validateAddress
+                }
+              ]}
+              statusHelpAsTooltip
+              validateTrigger='onBlur'
+            >
+              <AddressInput
+                placeholder={t('Enter your Polkadot wallet address')}
+                prefix={(
+                  <Icon
+                    className={'address-input-icon'}
+                    phosphorIcon={Wallet}
+                    size='md'
+                  />
+                )}
+                showLabel={false}
+                showPlainAddressOnly
+                showScanner
+              />
+            </Form.Item>
+          </Form>
+        </div>
       </div>
 
       <div className={'__table-area'}>
@@ -401,7 +427,49 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           />
         )}
         {!filteredtableItems.length && (
-          <NoContent pageType={PAGE_TYPE.CROWDLOANS} />
+          <div className={'__empty-list-area'}>
+            <EmptyList
+              className={'__empty-list'}
+              emptyMessage={t('Check again or create a new account.')}
+              emptyTitle={t('We can\'t find any crowdloan contributions from this address.')}
+              phosphorIcon={RocketLaunch}
+            />
+
+            <div className='__buttons-block'>
+              <Button
+                block
+                className='__check-again-button'
+                disabled={isCheckAgainDisabled}
+                icon={
+                  <Icon
+                    customSize={'28px'}
+                    phosphorIcon={ArrowCounterClockwise}
+                    weight='fill'
+                  />
+                }
+                onClick={onClickCheckAgain}
+                schema='secondary'
+              >
+                {t('Check again')}
+              </Button>
+
+              <Button
+                block
+                className='__create-a-wallet-button'
+                icon={
+                  <Icon
+                    customSize={'28px'}
+                    phosphorIcon={PlusCircle}
+                    weight='fill'
+                  />
+                }
+                onClick={onClickCreateNewWallet}
+                schema='primary'
+              >
+                {t('Create a wallet')}
+              </Button>
+            </div>
+          </div>
         )}
       </div>
 
@@ -440,6 +508,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
 const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    paddingTop: 100,
+
     '.project-container': {
       display: 'flex',
       gap: token.sizeXS,
@@ -483,6 +553,40 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
 
     '.address-input-icon': {
       zIndex: 10
+    },
+
+    '.__tool-area': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: token.size,
+      flexWrap: 'wrap'
+    },
+
+    '.__form-area': {
+      maxWidth: 358,
+      flex: 1
+    },
+
+    '.__form-item': {
+      marginBottom: 0
+    },
+
+    '.__empty-list-area': {
+      paddingTop: 96,
+      paddingBottom: 190
+    },
+
+    '.__buttons-block': {
+      display: 'flex',
+      gap: token.size,
+      maxWidth: 584,
+      marginLeft: 'auto',
+      marginRight: 'auto'
+    },
+
+    '.__check-again-button, .__create-a-wallet-button': {
+      flex: 1
     },
 
     '.__footer-area': {

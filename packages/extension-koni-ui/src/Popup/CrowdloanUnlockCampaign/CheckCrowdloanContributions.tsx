@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AddressInput } from '@subwallet/extension-koni-ui/components';
+import { CREATE_RETURN, DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
 import Countdown from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/Countdown';
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Form, Icon } from '@subwallet/react-ui';
@@ -11,8 +13,10 @@ import { ValidateStatus } from '@subwallet/react-ui/es/form/FormItem';
 import { ArrowCounterClockwise, PlusCircle, Question, Rocket, Vault, Wallet } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { ThemeContext } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { isAddress } from '@polkadot/util-crypto';
 
@@ -67,6 +71,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const goEarningDemo = useCallback(() => {
     navigate('/earning-demo');
   }, [navigate]);
+
+  const { isNoAccount } = useSelector((state: RootState) => state.accountState);
+  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
+
+  const onClickCreateNewWallet = useCallback(() => {
+    if (isNoAccount) {
+      setReturnStorage('/home/earning');
+      navigate('/welcome');
+    }
+  }, [isNoAccount, navigate, setReturnStorage]);
 
   return (
     <div className={className}>
@@ -157,6 +171,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                       weight='fill'
                     />
                   }
+                  onClick={onClickCreateNewWallet}
                   schema='primary'
                 >
                   {t('Create a wallet')}

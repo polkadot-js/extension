@@ -67,7 +67,7 @@ function Component ({ className = '', collectionInfo,
   const { goBack } = useDefaultNavigate();
   const { token } = useTheme() as Theme;
 
-  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const { activeModal, addExclude, checkActive, inactiveModal, removeExclude } = useContext(ModalContext);
 
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
 
@@ -223,6 +223,14 @@ function Component ({ className = '', collectionInfo,
   const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
 
   const imageSize = isWebUI ? 384 : 358;
+
+  useEffect(() => {
+    addExclude(modalId);
+
+    return () => {
+      removeExclude(modalId);
+    };
+  }, [addExclude, removeExclude]);
 
   return (
     <>

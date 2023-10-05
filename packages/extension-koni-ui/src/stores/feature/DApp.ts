@@ -5,6 +5,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DAppStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: DAppStore = {
+  categories: [],
   featureDApps: [],
   dApps: [],
   reduxStatus: ReduxStatus.INIT

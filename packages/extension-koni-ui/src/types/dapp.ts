@@ -18,6 +18,7 @@ export enum DAppCategoryType {
 
 export type DAppCategory = {
   name: string;
+  slug: string;
   id: DAppCategoryType;
   theme?: TagProps['color'];
 };

@@ -1,20 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainInfoMap } from '@subwallet/chain-list';
+import { ChainInfoMap, COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CrowdloanParaState, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, ParaChainInfoMap, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
+import { getCrowdloanFundsStatus } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getEvmChainId, _getSubstrateGenesisHash, _getTokenOnChainAssetId, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParaChain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getEvmChainId, _getSubstrateGenesisHash, _getSubstrateParaId, _getSubstrateRelayParent, _getTokenOnChainAssetId, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParaChain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
@@ -2088,5 +2089,64 @@ export default class KoniState {
 
   public getYieldPoolStakingInfo (chain: string, poolType: YieldPoolType) {
     return this.dbService.getYieldPoolStakingInfo(chain, poolType);
+  }
+
+  public getCrowdloanContributions ({ address, page, relayChain }: RequestCrowdloanContributions) {
+    return this.subscanService.getCrowdloanContributions(relayChain, address, page);
+  }
+
+  public async getParaChainInfoMap (): Promise<ParaChainInfoMap> {
+    const result: ParaChainInfoMap = {};
+    const substrateApiMap = this.getSubstrateApiMap();
+    const chainInfoMap = this.getChainInfoMap();
+
+    if (Object.keys(substrateApiMap).includes(COMMON_CHAIN_SLUGS.KUSAMA) && Object.keys(substrateApiMap).includes(COMMON_CHAIN_SLUGS.POLKADOT)) {
+      const polkadotAPI = await substrateApiMap[COMMON_CHAIN_SLUGS.POLKADOT].isReady;
+      const polkadotFundsStatusMap = await getCrowdloanFundsStatus(polkadotAPI.api);
+      const kusamaAPI = await substrateApiMap[COMMON_CHAIN_SLUGS.KUSAMA].isReady;
+      const kusamaFundsStatusMap = await getCrowdloanFundsStatus(kusamaAPI.api);
+
+      Object.entries(chainInfoMap).forEach(([chainSlug, chainInfo]) => {
+        if (_isSubstrateParaChain(chainInfo)) {
+          const paraId = _getSubstrateParaId(chainInfo);
+          const parentChain = _getSubstrateRelayParent(chainInfo);
+
+          if (paraId <= -1 || !parentChain) {
+            return;
+          }
+
+          if (!result[parentChain]) {
+            result[parentChain] = {};
+          }
+
+          if (chainSlug === COMMON_CHAIN_SLUGS.ACALA) {
+            result[parentChain]['2000'] = {
+              slug: chainSlug,
+              name: chainInfo.name,
+              paraState: CrowdloanParaState.COMPLETED,
+              paraId: 2000
+            };
+          } else if (parentChain === COMMON_CHAIN_SLUGS.POLKADOT && polkadotFundsStatusMap[paraId]) {
+            result[parentChain][`${paraId}`] = {
+              slug: chainSlug,
+              name: chainInfo.name,
+              paraState: polkadotFundsStatusMap[paraId],
+              paraId
+            };
+          } else if (parentChain === COMMON_CHAIN_SLUGS.KUSAMA && kusamaFundsStatusMap[paraId]) {
+            result[parentChain][`${paraId}`] = {
+              slug: chainSlug,
+              name: chainInfo.name,
+              paraState: kusamaFundsStatusMap[paraId],
+              paraId
+            };
+          }
+        }
+      });
+
+      return result;
+    }
+
+    return {};
   }
 }

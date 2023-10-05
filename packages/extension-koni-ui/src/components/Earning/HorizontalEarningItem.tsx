@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, StakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, StakingStatus, YieldAssetBalance, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
@@ -61,9 +61,23 @@ const Component: React.FC<Props> = (props: Props) => {
     return yieldPositionInfo.metadata as NominatorMetadata;
   }, [yieldPoolInfo.type, yieldPositionInfo.metadata]);
 
-  const yieldPositionInfoBalance = useMemo(() => {
-    return yieldPositionInfo.balance[0];
-  }, [yieldPositionInfo.balance]);
+  const yieldPositionInfoBalance = useMemo((): YieldAssetBalance => {
+    if (!yieldPoolInfo.derivativeAssets) {
+      return yieldPositionInfo.balance[0];
+    }
+
+    const derivativeTokenBalance = yieldPositionInfo.balance[0].totalBalance;
+    const inputTokenSlug = yieldPoolInfo.inputAssets[0];
+    // @ts-ignore
+    const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 1;
+    const inputTokenBalance = Math.floor(parseInt(derivativeTokenBalance) * exchangeRate);
+
+    return {
+      activeBalance: inputTokenBalance.toString(),
+      slug: inputTokenSlug,
+      totalBalance: inputTokenBalance.toString()
+    };
+  }, [yieldPoolInfo.derivativeAssets, yieldPoolInfo.inputAssets, yieldPoolInfo?.stats?.assetEarning, yieldPositionInfo.balance]);
 
   const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
@@ -195,16 +209,12 @@ const Component: React.FC<Props> = (props: Props) => {
 
     const derivativeTokenInfo = assetRegistry[derivativeTokenSlug];
 
-    // @ts-ignore
-    const exchangeRate = yieldPoolInfo.stats?.assetEarning[0].exchangeRate || 1;
-    const convertedAmount = Math.floor(parseInt(yieldPositionInfoBalance.totalBalance) * exchangeRate);
-
     return {
       symbol: _getAssetSymbol(derivativeTokenInfo),
       decimals: _getAssetDecimals(derivativeTokenInfo),
-      amount: convertedAmount.toString()
+      amount: yieldPositionInfo.balance[0].totalBalance
     };
-  }, [assetRegistry, yieldPoolInfo.derivativeAssets, yieldPoolInfo.stats?.assetEarning, yieldPositionInfoBalance.totalBalance]);
+  }, [assetRegistry, yieldPoolInfo.derivativeAssets, yieldPositionInfo.balance]);
 
   return (
     <Web3Block

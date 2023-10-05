@@ -47,7 +47,6 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
   // @ts-ignore
   const derivativeTokenSlug = poolInfo.derivativeAssets[0];
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
-  const inputTokenSlug = poolInfo.inputAssets[0];
 
   async function getStokenBalance () {
     const balances = await substrateApi.api.query.assets.account.multi(useAddresses.map((address) => [_getTokenOnChainAssetId(derivativeTokenInfo), address]));
@@ -76,15 +75,14 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
         address: useAddresses[0], // TODO
         balance: [
           {
-            slug: inputTokenSlug, // token slug
+            slug: derivativeTokenSlug, // token slug
             totalBalance: totalBalance.toString(),
             activeBalance: totalBalance.toString()
           }
         ],
 
         metadata: {
-          rewards: [],
-          exchangeRate: 1
+          rewards: []
         } as YieldPositionStats
       } as YieldPositionInfo);
     }

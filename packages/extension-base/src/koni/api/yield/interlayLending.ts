@@ -53,7 +53,6 @@ export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddr
   // @ts-ignore
   const derivativeTokenSlug = poolInfo.derivativeAssets[0];
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
-  const inputTokenSlug = poolInfo.inputAssets[0];
 
   async function getQtokenBalance () {
     const balances = (await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]))) as unknown as TokenBalanceRaw[];
@@ -66,15 +65,14 @@ export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddr
         address: useAddresses[0], // TODO
         balance: [
           {
-            slug: inputTokenSlug, // token slug
+            slug: derivativeTokenSlug, // token slug
             totalBalance: totalBalance.toString(),
             activeBalance: totalBalance.toString()
           }
         ],
 
         metadata: {
-          rewards: [],
-          exchangeRate: 1
+          rewards: []
         } as YieldPositionStats
       } as YieldPositionInfo);
     }

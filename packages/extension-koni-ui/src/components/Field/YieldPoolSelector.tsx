@@ -1,12 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { POOL_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { NominationPoolDataType, useFilterModal, useGetNominatorInfo, useGetValidatorList } from '@subwallet/extension-koni-ui/hooks';
+import { NominationPoolDataType, useFilterModal, useGetValidatorList, useGetYieldInfo } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { Badge, Button, Icon, InputRef, ModalContext, useExcludeModal } from '@subwallet/react-ui';
@@ -18,13 +17,15 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import EmptyValidator from '../Account/EmptyValidator';
+import { EmptyValidator } from '../Account';
 import { Avatar } from '../Avatar';
 import { BaseSelectModal, FilterModal, PoolDetailModal, SortingModal } from '../Modal';
-import StakingPoolItem from '../StakingItem/StakingPoolItem';
+import { StakingPoolItem } from '../StakingItem';
+import { BasicInputWrapper } from './Base';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
+  method: string;
   from: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
   setForceFetchValidator: (val: boolean) => void;
@@ -52,7 +53,7 @@ const FILTER_MODAL_ID = 'pool-filter-modal';
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', defaultValue, disabled, from, id = 'pool-selector', label, loading, onChange, onClickBookBtn, placeholder, setForceFetchValidator, statusHelp, value } = props;
+  const { chain, className = '', defaultValue, disabled, from, id = 'pool-selector', label, loading, method, onChange, onClickBookBtn, placeholder, setForceFetchValidator, statusHelp, value } = props;
 
   useExcludeModal(id);
 
@@ -62,12 +63,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const isActive = checkActive(id);
 
-  const nominatorMetadata = useGetNominatorInfo(chain, StakingType.POOLED, from);
+  const nominatorMetadata = useGetYieldInfo(method, from);
   const items = useGetValidatorList(chain, StakingType.POOLED) as NominationPoolDataType[];
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const nominationPoolValueList = useMemo((): string[] => {
-    return nominatorMetadata[0]?.nominations.map((item) => item.validatorAddress) || [];
+    return (nominatorMetadata[0]?.metadata as NominatorMetadata)?.nominations?.map((item) => item.validatorAddress) || [];
   }, [nominatorMetadata]);
 
   const isDisabled = useMemo(() =>
@@ -339,7 +340,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   );
 };
 
-const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
+const YieldPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
     '&.ant-sw-modal': {
       '.ant-sw-modal-header': {
@@ -383,4 +384,4 @@ const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }:
   };
 });
 
-export default PoolSelector;
+export default YieldPoolSelector;

@@ -1,24 +1,22 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CloseIcon, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
+import { CloseIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetDefaultAccountName, useIsPopup, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isFirefox, isNoAccount } from '@subwallet/extension-koni-ui/utils';
+import { isFirefox } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
-
-import InstructionContainer, { InstructionContentType } from '../../components/InstructionContainer';
 
 type Props = ThemeProps;
 
@@ -57,7 +55,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const accountName = useGetDefaultAccountName();
   const isPopup = useIsPopup();
 
-  const { accounts, hasMasterPassword } = useSelector((state: RootState) => state.accountState);
+  const { hasMasterPassword, isNoAccount } = useSelector((state: RootState) => state.accountState);
 
   const isOpenWindowRef = useRef(false);
 
@@ -68,15 +66,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
-
   const onBack = useCallback(() => {
     navigate(DEFAULT_ROUTER_PATH);
 
-    if (!noAccount) {
+    if (!isNoAccount) {
       activeModal(NEW_SEED_MODAL);
     }
-  }, [navigate, activeModal, noAccount]);
+  }, [navigate, activeModal, isNoAccount]);
 
   const _onCreate = useCallback((): void => {
     if (!seedPhrase) {

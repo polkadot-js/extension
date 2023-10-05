@@ -8,11 +8,13 @@ export { default as CancelUnstakeSelector } from './CancelUnstakeSelector';
 export { default as HiddenInput } from './HiddenInput';
 export { default as MultiValidatorSelector } from './MultiValidatorSelector';
 export { default as NominationSelector } from './NominationSelector';
+export { default as RadioGroup } from './RadioGroup';
 export { default as PhraseNumberSelector } from './PhraseNumberSelector';
 export { default as PoolSelector } from './PoolSelector';
 export { default as PrivateKeyInput } from './PrivateKeyInput';
 export { default as SeedPhraseInput } from './SeedPhraseInput';
 export { default as YieldMultiValidatorSelector } from './YieldMultiValidatorSelector';
+export { default as YieldPoolSelector } from './YieldPoolSelector';
 export * from './AccountSelector';
 
 export * from './AddressInput';

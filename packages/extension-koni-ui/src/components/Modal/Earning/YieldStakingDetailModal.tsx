@@ -41,7 +41,7 @@ const Component: React.FC<Props> = ({ className, nominatorMetadata, yieldPoolInf
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const chainStakingMetadata = useMemo(() => yieldPoolInfo.metadata, [yieldPoolInfo]);
   const { expectedReturn, minJoinNominationPool, minStake, unstakingPeriod } = chainStakingMetadata || {};
-  const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
+  const { activeStake, address, chain, nominations, status, type, unstakings } = nominatorMetadata;
   const showingOption = isShowNominationByValidator(chain);
   const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
   const modalTitle = type === StakingType.NOMINATED.valueOf() ? detectTranslate('Nomination details') : detectTranslate('Pooled details');
@@ -246,12 +246,16 @@ const Component: React.FC<Props> = ({ className, nominatorMetadata, yieldPoolInf
           label={t('Staking type')}
           typeName={tagTypes[yieldPoolInfo.type].label}
         />
-        <MetaInfo.Status
-          label={t('Staking status')}
-          statusIcon={getStakingStatus(nominatorMetadata.status).icon}
-          statusName={t(getStakingStatus(nominatorMetadata.status).name)}
-          valueColorSchema={getStakingStatus(nominatorMetadata.status).schema}
-        />
+        {
+          status && (
+            <MetaInfo.Status
+              label={t('Staking status')}
+              statusIcon={getStakingStatus(status).icon}
+              statusName={t(getStakingStatus(status).name)}
+              valueColorSchema={getStakingStatus(status).schema}
+            />
+          )
+        }
 
         {/* {!!rewardItem?.totalReward && parseFloat(rewardItem?.totalReward) > 0 && ( */}
         {/*  <MetaInfo.Number */}

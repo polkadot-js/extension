@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
-import { useGetYieldPositions, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
+import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -19,19 +19,27 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { setHeaderType } = useContext(WebUIContext);
-
-  const yieldPositions = useGetYieldPositions();
+  const { setOnBack } = useContext(WebUIContext);
+  const { isNoAccount } = useSelector((state) => state.accountState);
 
   const onBack = useCallback(() => {
-    navigate('/home/earning/detail');
+    console.log(123123123);
+    navigate('/crowdloan-unlock-campaign/check-contributions');
   }, [navigate]);
 
   useEffect(() => {
-    if (yieldPositions.length) {
-      setHeaderType(HeaderType.COMMON_BACK);
+    if (!isNoAccount) {
+      navigate('/home/earning');
     }
-  }, [setHeaderType, yieldPositions.length]);
+  }, [navigate, isNoAccount]);
+
+  useEffect(() => {
+    setOnBack(onBack);
+
+    return () => {
+      setOnBack(undefined);
+    };
+  }, [onBack, setOnBack]);
 
   return (
     <Layout.Base
@@ -39,17 +47,22 @@ const Component: React.FC<Props> = (props: Props) => {
       onBack={onBack}
       showSubHeader={true}
       subHeaderBackground={'transparent'}
-      subHeaderCenter={false}
+      subHeaderCenter={true}
       subHeaderPaddingVertical={true}
-      title={t('Earning')}
+      title={t('Earning pools')}
     >
       <EarningOverviewContent />
     </Layout.Base>
   );
 };
 
-const EarningOverview = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return ({});
+const EarningDemo = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  return ({
+    '.ant-sw-screen-layout-body': {
+      paddingLeft: 165,
+      paddingRight: 165
+    }
+  });
 });
 
-export default EarningOverview;
+export default EarningDemo;

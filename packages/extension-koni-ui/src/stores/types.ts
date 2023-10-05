@@ -86,9 +86,9 @@ export interface AppSettings extends LocalUiSettings, UiSettings, Omit<SettingsS
 }
 
 export interface AccountState extends AccountsContext, KeyringState, AddressBookState, BaseReduxStore {
-  currentAccount: AccountJson | null
-
-  isAllAccount: boolean
+  currentAccount: AccountJson | null;
+  isAllAccount: boolean;
+  isNoAccount: boolean;
 }
 
 export interface RequestState extends ConfirmationsQueue, BaseReduxStore {

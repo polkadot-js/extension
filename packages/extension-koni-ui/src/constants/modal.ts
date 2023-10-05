@@ -39,8 +39,8 @@ export const ACCOUNT_EXPORT_MODAL = 'account-export-modal';
 export const WALLET_CONNECT_CREATE_MODAL = 'wallet-connect-create-modal';
 export const WALLET_CONNECT_DETAIL_MODAL = 'wallet-connect-detail-modal';
 export const WALLET_CONNECT_LIST_MODAL = 'wallet-connect-list-modal';
+
 export const CONFIRMATION_MODAL = 'confirmation-modal';
-export const TRANSFER_FUND_MODAL = 'transfer-fund-modal';
 export const BUY_TOKEN_MODAL = 'buy-token-modal';
 
 /* Earning */
@@ -51,8 +51,16 @@ export const YIELD_STAKING_DETAIL_MODAL = 'yield-staking-detail-modal';
 export const YIELD_POSITION_DETAIL_MODAL = 'yield-position-detail-modal';
 
 export const STAKING_CALCULATOR_MODAL = 'staking-calculator-modal';
+export const EARNING_INFO_MODAL = 'earning-info-modal';
 
 /* Earning */
 
 export const POOL_DETAIL_MODAL = 'pool-detail-modal';
 export const STAKING_NETWORK_DETAIL_MODAL = 'staking-network-detail-modal';
+
+/* Transaction */
+export const TRANSACTION_TRANSFER_MODAL = 'transfer-fund-modal';
+export const TRANSACTION_YIELD_UNSTAKE_MODAL = 'transaction-yield-unstake-modal';
+export const TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL = 'transaction-yield-cancel-unstake-modal';
+export const TRANSACTION_YIELD_WITHDRAW_MODAL = 'transaction-yield-withdraw-modal';
+export const TRANSACTION_YIELD_FAST_WITHDRAW_MODAL = 'transaction-yield-fast-withdraw-modal';

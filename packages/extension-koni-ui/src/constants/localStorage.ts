@@ -18,6 +18,7 @@ export const CLAIM_REWARD_TRANSACTION = 'transaction.claim-reward';
 export const YIELD_TRANSACTION = 'transaction.yield';
 export const UN_YIELD_TRANSACTION = 'transaction.un-yield';
 export const WITHDRAW_YIELD_TRANSACTION = 'transaction.withdraw-yield';
+export const FAST_WITHDRAW_YIELD_TRANSACTION = 'transaction.fast-withdraw-yield';
 export const CLAIM_YIELD_TRANSACTION = 'transaction.claim-yield';
 export const CANCEL_UN_YIELD_TRANSACTION = 'transaction.cancel-un-yield';
 
@@ -39,3 +40,5 @@ export const TRANSACTION_STORAGES = [
 export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';
 
 export const DAPPS_FAVORITE = 'dapps.favorite';
+
+export const CREATE_RETURN = 'account.create-return';

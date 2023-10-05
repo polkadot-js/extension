@@ -120,7 +120,7 @@ const Component: React.FC = () => {
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const nomination = allNominatorInfo.find((data) => isSameAddress(data.address, account.address));
 
-    return (nomination ? (nomination.metadata as NominatorMetadata).unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE).length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
+    return (nomination ? (nomination.metadata as NominatorMetadata)?.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE).length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
   }, [chainInfoMap, allNominatorInfo, chain, type]);
 
   useRestoreTransaction(form);

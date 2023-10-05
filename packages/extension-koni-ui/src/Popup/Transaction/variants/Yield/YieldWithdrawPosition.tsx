@@ -4,7 +4,7 @@
 import { ExtrinsicType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { AccountSelector, AmountInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AmountInput, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
@@ -39,6 +39,8 @@ const _accountFilterFunc = (
   };
 };
 
+const hideFields: Array<keyof YieldFastWithdrawParams> = ['chain', 'asset', 'method'];
+
 const Component: React.FC = () => {
   useSetCurrentPage('/transaction/yield-withdraw-position');
 
@@ -54,12 +56,12 @@ const Component: React.FC = () => {
   const { isAllAccount } = useSelector((state) => state.accountState);
 
   const from = useWatchTransaction('from', form, defaultData);
-  const selectedYieldPool = useWatchTransaction('selectedYieldPool', form, defaultData);
+  const method = useWatchTransaction('method', form, defaultData);
   const { chain } = defaultData;
 
   const allYieldPosition = useSelector((state: RootState) => state.yieldPool.yieldPosition);
-  const yieldPoolInfo = useGetYieldMetadata(selectedYieldPool);
-  const yieldPosition = useGetYieldPositionByAddressAndSlug(from, selectedYieldPool);
+  const yieldPoolInfo = useGetYieldMetadata(method);
+  const yieldPosition = useGetYieldPositionByAddressAndSlug(from, method);
   const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
 
   const minWithdraw = useMemo((): string => {
@@ -148,12 +150,13 @@ const Component: React.FC = () => {
           onFieldsChange={onFieldsChange}
           onFinish={onSubmit}
         >
+          <HiddenInput fields={hideFields} />
           <Form.Item
             hidden={!isAllAccount}
             name={'from'}
           >
             <AccountSelector
-              filter={_accountFilterFunc(allYieldPosition, selectedYieldPool)}
+              filter={_accountFilterFunc(allYieldPosition, method)}
               label={t('Withdraw from account')}
             />
           </Form.Item>

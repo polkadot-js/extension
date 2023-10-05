@@ -3,7 +3,7 @@
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import SUBSCAN_CHAIN_MAP from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
-import { IMultiChainBalance, SubscanRequest, SubscanResponse } from '@subwallet/extension-base/services/subscan-service/types';
+import { CrowdloanContributionsResponse, IMultiChainBalance, SubscanRequest, SubscanResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import fetch from 'cross-fetch';
 
 export class SubscanService {
@@ -110,6 +110,25 @@ export class SubscanService {
       }
 
       const jsonData = (await rs.json()) as SubscanResponse<IMultiChainBalance[]>;
+
+      return jsonData.data;
+    });
+  }
+
+  public getCrowdloanContributions (relayChain: string, address: string, page = 0): Promise<CrowdloanContributionsResponse> {
+    return this.addRequest<CrowdloanContributionsResponse>(async () => {
+      const rs = await this.postRequest(this.getApiUrl(relayChain, 'api/scan/account/contributions'), {
+        include_total: true,
+        page,
+        row: 100,
+        who: address
+      });
+
+      if (rs.status !== 200) {
+        throw new SWError('SubscanService.getCrowdloanContributions', await rs.text());
+      }
+
+      const jsonData = (await rs.json()) as SubscanResponse<CrowdloanContributionsResponse>;
 
       return jsonData.data;
     });

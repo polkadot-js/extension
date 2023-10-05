@@ -765,20 +765,6 @@ const SendFund = styled(_SendFund)(({ theme }) => {
       marginBottom: 16
     },
 
-    '&.__modal-footer': {
-      padding: 0,
-      margin: 0,
-
-      '.ant-btn': {
-        width: '100%',
-        margin: '16px 0 0'
-      }
-
-    },
-
-    '&.__modal-content': {
-      padding: 0
-    },
     '.form-row': {
       gap: 8
     },

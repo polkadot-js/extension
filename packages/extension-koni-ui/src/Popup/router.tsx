@@ -128,10 +128,15 @@ const ConnectionDetail = new LazyLoader('ConnectionDetail', () => import('@subwa
 
 const DApps = new LazyLoader('DApps', () => import('@subwallet/extension-koni-ui/Popup/DApps'));
 
-const EarningOutlet = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/index'));
-const EarningOverview = new LazyLoader('Earning', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningOverview'));
+const EarningOutlet = new LazyLoader('EarningOutlet', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/Outlet'));
+const EarningOverview = new LazyLoader('EarningOverview', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningOverview'));
+const EarningDemo = new LazyLoader('EarningDemo', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningDemo'));
 const EarningManagement = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
-const EarningNoRouter = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/NoRouter'));
+const EarningNoRouter = new LazyLoader('EarningNoRouter', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/NoRouter'));
+
+const CrowdloanUnlockCampaign = new LazyLoader('CrowdloanUnlockCampaign', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign'));
+const CheckCrowdloanContributions = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CheckCrowdloanContributions'));
+const CrowdloanContributionsResult = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CrowdloanContributionsResult'));
 
 // A Placeholder page
 export function Example () {
@@ -285,6 +290,19 @@ export const router = createBrowserRouter([
         path: '/dapps',
         children: [
           DApps.generateRouterObject('/dapps')
+        ]
+      },
+      {
+        ...EarningOutlet.generateRouterObject('earning-demo'),
+        children: [
+          EarningDemo.generateRouterObject('')
+        ]
+      },
+      {
+        ...CrowdloanUnlockCampaign.generateRouterObject('/crowdloan-unlock-campaign'),
+        children: [
+          CheckCrowdloanContributions.generateRouterObject('check-contributions'),
+          CrowdloanContributionsResult.generateRouterObject('contributions-result')
         ]
       }
     ]

@@ -16,7 +16,7 @@ import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isNoAccount, removeStorage } from '@subwallet/extension-koni-ui/utils';
+import { removeStorage } from '@subwallet/extension-koni-ui/utils';
 import { changeHeaderLogo, ModalContext } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import CN from 'classnames';
@@ -43,10 +43,16 @@ const migratePasswordUrl = '/keyring/migrate-password';
 const securityUrl = '/settings/security';
 const createDoneUrl = '/create-done';
 
+// Campaign
+const earningDemoUrl = '/earning-demo';
+const checkCrowdloanUrl = '/crowdloan-unlock-campaign/check-contributions';
+const crowdloanResultUrl = '/crowdloan-unlock-campaign/contributions-result';
+
 const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
+const allowPreventWelcomeUrls = [...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl, earningDemoUrl, checkCrowdloanUrl, crowdloanResultUrl];
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
   display: 'flex',
@@ -97,9 +103,8 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   const { unlockType } = useSelector((state: RootState) => state.settings);
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
-  const { accounts, currentAccount, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
+  const { accounts, currentAccount, hasMasterPassword, isLocked, isNoAccount } = useSelector((state: RootState) => state.accountState);
   const [initAccount, setInitAccount] = useState(currentAccount);
-  const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
   const { isUILocked } = useUILock();
   const needUnlock = isUILocked || (isLocked && unlockType === WalletUnlockType.ALWAYS_REQUIRED);
 
@@ -169,15 +174,15 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     } else if (hasMasterPassword && needUnlock) {
       redirectObj.redirect = loginUrl;
     } else if (!hasMasterPassword) {
-      if (noAccount) {
-        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
+      if (isNoAccount) {
+        if (!allowPreventWelcomeUrls.includes(pathName)) {
           redirectObj.redirect = welcomeUrl;
         }
       } else if (pathName !== createDoneUrl) {
         redirectObj.redirect = createPasswordUrl;
       }
-    } else if (noAccount) {
-      if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {
+    } else if (isNoAccount) {
+      if (!allowPreventWelcomeUrls.includes(pathName)) {
         redirectObj.redirect = welcomeUrl;
       }
     } else if (hasConfirmations) {
@@ -205,7 +210,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     redirectObj.redirect = redirectObj.redirect !== pathName ? redirectObj.redirect : null;
 
     return redirectObj;
-  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, noAccount, hasConfirmations, hasInternalConfirmations]);
+  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, isNoAccount, hasConfirmations, hasInternalConfirmations]);
 
   // Active or inactive confirmation modal
   useEffect(() => {

@@ -31,16 +31,20 @@ interface Props extends BasicInputWrapper, ThemeProps {
   networkGenesisHash?: string;
   chain?: string;
   allowDomain?: boolean;
+  prefix?: React.ReactNode;
+  showPlainAddressOnly?: boolean;
+  showDisplayOverlay?: boolean; // default: true
+  showLabel?: boolean; // default: true
 }
 
 const defaultScannerModalId = 'input-account-address-scanner-modal';
 const defaultAddressBookModalId = 'input-account-address-book-modal';
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { addressPrefix,
-    allowDomain, chain, className = '', disabled, id, label, networkGenesisHash, onBlur,
-    onChange, onFocus, placeholder, readOnly, saveAddress, showAddressBook, showScanner, status,
-    statusHelp, value } = props;
+  const { addressPrefix, allowDomain, chain,
+    className = '', disabled, id, label, networkGenesisHash, onBlur, onChange, onFocus,
+    placeholder, prefix, readOnly, saveAddress, showAddressBook, showDisplayOverlay = true, showLabel = true, showPlainAddressOnly,
+    showScanner, status, statusHelp, value } = props;
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
 
@@ -178,7 +182,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         })}
         disabled={disabled}
         id={id}
-        label={label || t('Account address')}
+        label={showLabel ? (label || t('Account address')) : undefined}
         onBlur={onBlur}
         onChange={_onChange}
         onFocus={onFocus}
@@ -186,26 +190,40 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         prefix={
           <>
             {
-              value && isAddress(value) && (
+              showDisplayOverlay && value && isAddress(value) && (
                 <div className={'__overlay'}>
-                  <div className={CN('__name common-text', { 'limit-width': !!accountName })}>
-                    {accountName || toShort(value, 9, 9)}
-                  </div>
-                  {(accountName || addressPrefix !== undefined) &&
-                    (
-                      <div className={'__address common-text'}>
-                        ({toShort(formattedAddress, 4, 4)})
+                  {showPlainAddressOnly
+                    ? (
+                      <div className={'__name common-text'}>
+                        {toShort(value, 9, 9)}
                       </div>
                     )
-                  }
+                    : (
+                      <>
+                        <div className={CN('__name common-text', { 'limit-width': !!accountName })}>
+                          {accountName || toShort(value, 9, 9)}
+                        </div>
+                        {(accountName || addressPrefix !== undefined) &&
+                        (
+                          <div className={'__address common-text'}>
+                            ({toShort(formattedAddress, 4, 4)})
+                          </div>
+                        )
+                        }
+                      </>
+                    )}
                 </div>
               )
             }
-            <Avatar
-              size={20}
-              theme={value ? isEthereumAddress(value) ? 'ethereum' : 'polkadot' : undefined}
-              value={value}
-            />
+            {
+              prefix || (
+                <Avatar
+                  size={20}
+                  theme={value ? isEthereumAddress(value) ? 'ethereum' : 'polkadot' : undefined}
+                  value={value}
+                />
+              )
+            }
           </>
         }
         readOnly={readOnly}

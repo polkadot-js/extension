@@ -24,6 +24,7 @@ import { HexString } from '@polkadot/util/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
+import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 
 export enum RuntimeEnvironment {
   Web = 'Web',
@@ -1021,6 +1022,11 @@ export type RequestBalance = null
 export type RequestSubscribeBalance = null
 export type RequestSubscribeBalancesVisibility = null
 export type RequestCrowdloan = null
+export type RequestCrowdloanContributions = {
+  relayChain: string;
+  address: string;
+  page?: number;
+};
 export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
@@ -2283,6 +2289,15 @@ export interface SubmitJoinNominationPool {
   nominatorMetadata?: NominatorMetadata
 }
 
+export interface ParaChainInfo {
+  slug: string,
+  name: string,
+  paraState?: CrowdloanParaState,
+  paraId: number | null
+}
+
+export type ParaChainInfoMap = Record<string, Record<string, ParaChainInfo>>;
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -2321,6 +2336,7 @@ export interface KoniRequestSignatures {
   'pri(chainService.validateCustomChain)': [ValidateNetworkRequest, ValidateNetworkResponse];
   'pri(chainService.recoverSubstrateApi)': [string, boolean];
   'pri(chainService.disableAllChains)': [null, boolean];
+  'pri(chainService.getParaChainInfoMap)': [null, ParaChainInfoMap];
   'pri(assetSetting.getSubscription)': [null, Record<string, AssetSetting>, Record<string, AssetSetting>]
   'pri(assetSetting.update)': [AssetSettingUpdateReq, boolean];
 
@@ -2346,6 +2362,7 @@ export interface KoniRequestSignatures {
   'pri(balance.getBalance)': [RequestBalance, BalanceJson];
   'pri(balance.getSubscription)': [RequestSubscribeBalance, BalanceJson, BalanceJson];
   'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson];
+  'pri(crowdloan.getCrowdloanContributions)': [RequestCrowdloanContributions, CrowdloanContributionsResponse];
   'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson];
 
   // Phishing page

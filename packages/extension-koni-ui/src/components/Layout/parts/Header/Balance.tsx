@@ -4,7 +4,7 @@
 import { ReceiveQrModal, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { DEFAULT_TRANSFER_PARAMS, MAP_PREDEFINED_BUY_TOKEN, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { BUY_TOKEN_MODAL, DEFAULT_TRANSFER_PARAMS, MAP_PREDEFINED_BUY_TOKEN, TRANSACTION_TRANSFER_MODAL, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -25,9 +25,6 @@ import { useSelector } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
-
-const TRANSFER_FUND_MODAL = 'transfer-fund-modal';
-const BUY_TOKEN_MODAL = 'buy-token-modal';
 
 export type Props = ThemeProps
 
@@ -154,7 +151,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       from: address,
       defaultSlug: tokenGroupSlug || ''
     });
-    activeModal(TRANSFER_FUND_MODAL);
+    activeModal(TRANSACTION_TRANSFER_MODAL);
   },
   [currentAccount, setStorage, tokenGroupSlug, activeModal, notify, t]
   );
@@ -171,7 +168,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   }, [isTotalBalanceDecrease, setBackground]);
 
   const handleCancelTransfer = useCallback(() => {
-    inactiveModal(TRANSFER_FUND_MODAL);
+    inactiveModal(TRANSACTION_TRANSFER_MODAL);
     setSendFundKey(`sendFundKey-${Date.now()}`);
   }, [inactiveModal]);
 
@@ -350,7 +347,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       <BaseModal
         className={'right-side-modal'}
         destroyOnClose={true}
-        id={TRANSFER_FUND_MODAL}
+        id={TRANSACTION_TRANSFER_MODAL}
         onCancel={handleCancelTransfer}
         title={t('Transfer')}
       >

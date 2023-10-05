@@ -81,7 +81,7 @@ const EarningBtn = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '&:hover': {
       backgroundColor: token.colorBgSecondary,
-      borderColor: token.colorBgSecondary,
+      borderColor: token.colorBgSecondary
     },
 
     '&.disable': {

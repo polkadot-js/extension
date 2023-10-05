@@ -36,3 +36,7 @@ export type SendFundParam = {
 export type BuyTokensParam = {
   symbol: string,
 };
+
+export type CrowdloanContributionsResultParam = {
+  address: string,
+};

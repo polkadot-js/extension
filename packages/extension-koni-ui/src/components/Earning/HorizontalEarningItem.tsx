@@ -20,6 +20,7 @@ interface Props extends ThemeProps {
   onClickCalculatorBtn: () => void;
   onClickCancelUnStakeBtn: () => void;
   onClickItem?: () => void;
+  onClickInfoBtn: () => void;
   onClickStakeBtn: () => void;
   onClickUnStakeBtn: () => void;
   onClickWithdrawBtn: () => void;
@@ -42,6 +43,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className,
     onClickCalculatorBtn,
     onClickCancelUnStakeBtn,
+    onClickInfoBtn,
     onClickItem,
     onClickStakeBtn,
     onClickUnStakeBtn,
@@ -131,7 +133,7 @@ const Component: React.FC<Props> = (props: Props) => {
     result.push({
       disable: false,
       icon: Question,
-      onClick: onClickItem && onClickButton(onClickItem),
+      onClick: onClickButton(onClickInfoBtn),
       key: 'info',
       hidden: false,
       schema: 'secondary',
@@ -174,6 +176,7 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.icon = MinusCircle;
           temp.onClick = onClickButton(onClickCancelUnStakeBtn);
           temp.label = t('Cancel unstake');
+          temp.schema = 'secondary';
           break;
         case YieldAction.START_EARNING:
           temp.icon = PlusCircle;
@@ -192,7 +195,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [availableActionsByMetadata, onClickButton, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo]);
+  }, [availableActionsByMetadata, onClickButton, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo]);
 
   const tagType = useMemo(() => {
     const tagTypeMap = createEarningTagTypes(t, token);

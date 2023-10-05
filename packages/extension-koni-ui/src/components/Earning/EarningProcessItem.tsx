@@ -3,8 +3,9 @@
 
 import { EarningStepStatus } from '@subwallet/extension-koni-ui/reducer';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, BackgroundIcon, Typography } from '@subwallet/react-ui';
-import { CheckCircle, PlusCircle, WarningCircle, XCircle } from 'phosphor-react';
+import { convertHexColorToRGBA } from '@subwallet/extension-koni-ui/utils';
+import { BackgroundIcon, Typography } from '@subwallet/react-ui';
+import { CheckCircle, PlusCircle, Spinner, XCircle } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
@@ -24,12 +25,13 @@ const Component = ({ className, index, isSelected, stepName, stepStatus }: Props
     switch (stepStatus) {
       case EarningStepStatus.SUBMITTING:
         return (
-          <div style={{ width: '32px', height: '32px', justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator
-              prefixCls={'ant'}
-              size={'24px'}
-            />
-          </div>
+          <BackgroundIcon
+            backgroundColor={convertHexColorToRGBA(token['gold-6'], 0.1)}
+            iconColor={token['gold-6']}
+            phosphorIcon={Spinner}
+            size={'lg'}
+            weight={'fill'}
+          />
         );
       case EarningStepStatus.ERROR:
         return (
@@ -44,8 +46,8 @@ const Component = ({ className, index, isSelected, stepName, stepStatus }: Props
       case EarningStepStatus.SUCCESS:
         return (
           <BackgroundIcon
-            backgroundColor={'rgba(45, 167, 63, 0.1)'}
-            iconColor={token['green-6']}
+            backgroundColor={convertHexColorToRGBA(token.colorSuccess, 0.1)}
+            iconColor={token.colorSuccess}
             phosphorIcon={CheckCircle}
             size={'lg'}
             weight={'fill'}
@@ -54,9 +56,9 @@ const Component = ({ className, index, isSelected, stepName, stepStatus }: Props
       case EarningStepStatus.PROCESSING:
         return (
           <BackgroundIcon
-            backgroundColor={token.colorPrimaryBg}
-            iconColor={token.colorPrimary}
-            phosphorIcon={WarningCircle}
+            backgroundColor={convertHexColorToRGBA(token['gray-6'], 0.1)}
+            iconColor={token['gray-6']}
+            phosphorIcon={PlusCircle}
             size={'lg'}
             weight={'fill'}
           />
@@ -65,8 +67,8 @@ const Component = ({ className, index, isSelected, stepName, stepStatus }: Props
       default:
         return (
           <BackgroundIcon
-            backgroundColor={'rgba(217, 217, 217, 0.1)'}
-            iconColor={token.colorTextLight3}
+            backgroundColor={convertHexColorToRGBA(token['gray-6'], 0.1)}
+            iconColor={token['gray-3']}
             phosphorIcon={PlusCircle}
             size={'lg'}
             weight={'fill'}
@@ -119,15 +121,15 @@ const EarningProcessItem = styled(Component)<Props>(({ theme: { token } }: Props
 
     '.staking-process-text': {
       fontWeight: '600',
-      color: token.colorTextLight4
+      color: token['gray-3']
     },
 
     '.staking-process-selected-text': {
-      color: token.colorPrimary
+      color: token['gray-6']
     },
 
     '.staking-process-success-text': {
-      color: token['green-6']
+      color: token.colorSuccess
     },
 
     '.staking-process-fail-text': {
@@ -135,7 +137,7 @@ const EarningProcessItem = styled(Component)<Props>(({ theme: { token } }: Props
     },
 
     '.staking-process-loading-text': {
-      color: token.colorTextLight4
+      color: token['gold-6']
     },
 
     '.staking-process-flex-wrapper': {

@@ -44,9 +44,11 @@ interface ToolbarBtnProps extends ThemeProps {
   label?: string;
   type?: ButtonType;
   onClick: () => void;
+  noSuffix?: boolean;
 }
 
-const _ToolbarBtn: React.FC<ToolbarBtnProps> = ({ className, icon, label, onClick, type }: ToolbarBtnProps) => {
+const _ToolbarBtn: React.FC<ToolbarBtnProps> = (props: ToolbarBtnProps) => {
+  const { className, icon, label, noSuffix = false, onClick, type } = props;
   const { token } = useTheme() as Theme;
 
   return (
@@ -60,13 +62,17 @@ const _ToolbarBtn: React.FC<ToolbarBtnProps> = ({ className, icon, label, onClic
     >
       <div className={className}>
         <Typography.Text>{label}</Typography.Text>
-        <Icon
-          className={'earning-filter-icon'}
-          customSize={'12px'}
-          iconColor={token.colorTextLight4}
-          phosphorIcon={CaretDown}
-          weight={'bold'}
-        />
+        {
+          !noSuffix && (
+            <Icon
+              className={'earning-filter-icon'}
+              customSize={'12px'}
+              iconColor={token.colorTextLight4}
+              phosphorIcon={CaretDown}
+              weight={'bold'}
+            />
+          )
+        }
       </div>
     </Button>
   );
@@ -181,14 +187,16 @@ const Component: React.FC<Props> = (props: Props) => {
           )
         }
         <ToolbarBtn
+          className='help-button'
           icon={
             <Icon
-              iconColor={token.colorTextLight4}
+              iconColor={token['gray-4']}
               phosphorIcon={Question}
               weight={'duotone'}
             />
           }
           label={t('Help')}
+          noSuffix={true}
           onClick={onClickHelpBtn}
           type={'ghost'}
         />
@@ -242,6 +250,12 @@ const EarningToolbar = styled(Component)<Props>(({ theme: { token } }: Props) =>
       display: 'flex',
       alignItems: 'center',
       gap: token.paddingXS
+    },
+
+    '.help-button': {
+      '.ant-typography': {
+        color: token.colorTextLight4
+      }
     }
   });
 });

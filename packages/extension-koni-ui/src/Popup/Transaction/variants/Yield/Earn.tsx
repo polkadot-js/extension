@@ -8,7 +8,7 @@ import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-b
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
-import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, PoolSelector, StakingProcessModal, YieldMultiValidatorSelector } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, StakingProcessModal, YieldMultiValidatorSelector, YieldPoolSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetChainPrefixBySlug, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
@@ -105,29 +105,34 @@ const Component = () => {
     });
   }, [t, notify]);
 
-  const onSuccess = useCallback((rs: SWTransactionResponse) => {
-    const { errors, id, warnings } = rs;
+  const onSuccess = useCallback((lastStep: boolean) => {
+    return (rs: SWTransactionResponse) => {
+      const { errors, id, warnings } = rs;
 
-    if (errors.length || warnings.length) {
-      if (![t('Rejected by user'), 'Rejected by user'].includes(errors[0]?.message)) {
-        notify({
-          message: errors[0]?.message || warnings[0]?.message,
-          type: errors.length ? 'error' : 'warning'
-        });
-        onError(errors[0]);
-      } else {
+      if (errors.length || warnings.length) {
+        if (![t('Rejected by user'), 'Rejected by user'].includes(errors[0]?.message)) {
+          notify({
+            message: errors[0]?.message || warnings[0]?.message,
+            type: errors.length ? 'error' : 'warning'
+          });
+          onError(errors[0]);
+        } else {
+          dispatchProcessState({
+            type: EarningActionType.STEP_ERROR_ROLLBACK,
+            payload: errors[0]
+          });
+        }
+      } else if (id) {
         dispatchProcessState({
-          type: EarningActionType.STEP_ERROR_ROLLBACK,
-          payload: errors[0]
+          type: EarningActionType.STEP_COMPLETE,
+          payload: rs
         });
+
+        if (lastStep) {
+          onDone(id);
+        }
       }
-    } else if (id) {
-      dispatchProcessState({
-        type: EarningActionType.STEP_COMPLETE,
-        payload: rs
-      });
-      onDone(id);
-    }
+    };
   }, [t, notify, onError, onDone]);
 
   const formDefault: YieldParams = useMemo(() => ({
@@ -346,6 +351,7 @@ const Component = () => {
     const isFirstStep = processState.currentStep === 0;
 
     const submitStep = isFirstStep ? processState.currentStep + 1 : processState.currentStep;
+    const isLastStep = submitStep === processState.steps.length - 1;
 
     if (currentPoolInfo.type === YieldPoolType.NOMINATION_POOL && pool) {
       const selectedPool = getSelectedPool(pool);
@@ -408,7 +414,7 @@ const Component = () => {
           })
           .then((rs) => {
             if (rs) {
-              onSuccess(rs);
+              onSuccess(isLastStep)(rs);
             }
           })
           .catch(onError)
@@ -419,7 +425,7 @@ const Component = () => {
     } else {
       setTimeout(() => {
         submitPromise
-          .then(onSuccess)
+          .then(onSuccess(isLastStep))
           .catch(onError)
           .finally(() => {
             setSubmitLoading(false);
@@ -590,12 +596,13 @@ const Component = () => {
                 hidden={currentPoolInfo.type !== YieldPoolType.NOMINATION_POOL}
                 name={'pool'}
               >
-                <PoolSelector
+                <YieldPoolSelector
                   chain={currentPoolInfo.chain}
                   disabled={processState.currentStep !== 0}
                   from={currentFrom}
                   label={t('Select pool')}
                   loading={poolLoading}
+                  method={currentPoolInfo.slug}
                   setForceFetchValidator={setForceFetchValidator}
                 />
               </Form.Item>

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, CURRENT_PAGE, NFT_TRANSACTION, STAKE_TRANSACTION, TRANSFER_TRANSACTION, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, CURRENT_PAGE, FAST_WITHDRAW_YIELD_TRANSACTION, NFT_TRANSACTION, STAKE_TRANSACTION, TRANSFER_TRANSACTION, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 
 import { removeStorage } from '../common';
 
@@ -29,6 +29,11 @@ export const detectTransactionPersistKey = (type?: ExtrinsicType): string => {
       return CLAIM_YIELD_TRANSACTION;
     case ExtrinsicType.JOIN_YIELD_POOL:
       return YIELD_TRANSACTION;
+    case ExtrinsicType.REDEEM_LDOT:
+    case ExtrinsicType.REDEEM_QDOT:
+    case ExtrinsicType.REDEEM_SDOT:
+    case ExtrinsicType.REDEEM_VDOT:
+      return FAST_WITHDRAW_YIELD_TRANSACTION;
     default:
       return '';
   }

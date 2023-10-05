@@ -141,7 +141,7 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken, token } 
 const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
-  const { background, headerType, isPortfolio, isSettingPage, setSidebarCollapsed, showBackButtonOnHeader, showSidebar, sidebarCollapsed, title } = useContext(WebUIContext);
+  const { background, headerType, isPortfolio, isSettingPage, onBack, setSidebarCollapsed, showBackButtonOnHeader, showSidebar, sidebarCollapsed, title } = useContext(WebUIContext);
   const { goBack, goHome } = useDefaultNavigate();
 
   const headerTitle = useMemo(() => {
@@ -174,14 +174,15 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
         {
           isHeaderTypeCommon && <div className={'web-layout-header'}>
             <Headers.Controller
-              { ...(headerType === HeaderType.COMMON_BACK ? { onBack: goBack, showBackButton: true } : {}) }
-              { ...(headerType === HeaderType.COMMON_BACK_TO_HOME ? { onBack: goHome, showBackButton: true } : {}) }
+              { ...(headerType === HeaderType.COMMON_BACK ? { onBack: onBack || goBack, showBackButton: true } : {}) }
+              { ...(headerType === HeaderType.COMMON_BACK_TO_HOME ? { onBack: onBack || goHome, showBackButton: true } : {}) }
               title={headerTitle}
             />
           </div>
         }
         {headerType === HeaderType.SIMPLE && <div className={'web-layout-header-simple'}>
           <Headers.Simple
+            onBack={onBack}
             showBackButton={showBackButtonOnHeader}
             title={headerTitle}
           />

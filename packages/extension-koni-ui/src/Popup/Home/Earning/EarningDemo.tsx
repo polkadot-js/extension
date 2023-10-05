@@ -21,7 +21,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { isNoAccount } = useSelector((state) => state.accountState);
 
   const onBack = useCallback(() => {
-    navigate('/');
+    navigate('/crowdloan-unlock-campaign/check-contributions');
   }, [navigate]);
 
   useEffect(() => {

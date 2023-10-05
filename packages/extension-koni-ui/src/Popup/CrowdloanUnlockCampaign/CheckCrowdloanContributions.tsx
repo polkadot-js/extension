@@ -64,6 +64,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     []
   );
 
+  const goEarningDemo = useCallback(() => {
+    navigate('/earning-demo');
+  }, [navigate]);
+
   return (
     <div className={className}>
       <div className={'__body-area'}>
@@ -183,6 +187,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 weight='fill'
               />
             }
+            onClick={goEarningDemo}
             schema={'secondary'}
           >
             <div className={'__footer-button-content'}>

@@ -41,13 +41,18 @@ const loginUrl = '/keyring/login';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
 const securityUrl = '/settings/security';
-const earningDemoUrl = '/earning-demo';
 const createDoneUrl = '/create-done';
+
+// Campaign
+const earningDemoUrl = '/earning-demo';
+const checkCrowdloanUrl = '/crowdloan-unlock-campaign/check-contributions';
+const crowdloanResultUrl = '/crowdloan-unlock-campaign/contributions-result';
 
 const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
+const allowPreventWelcomeUrls = [...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl, earningDemoUrl, checkCrowdloanUrl, crowdloanResultUrl];
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
   display: 'flex',
@@ -171,14 +176,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       redirectObj.redirect = loginUrl;
     } else if (!hasMasterPassword) {
       if (noAccount) {
-        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl, earningDemoUrl].includes(pathName)) {
+        if (!allowPreventWelcomeUrls.includes(pathName)) {
           redirectObj.redirect = welcomeUrl;
         }
       } else if (pathName !== createDoneUrl) {
         redirectObj.redirect = createPasswordUrl;
       }
     } else if (noAccount) {
-      if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl, earningDemoUrl].includes(pathName)) {
+      if (!allowPreventWelcomeUrls.includes(pathName)) {
         redirectObj.redirect = welcomeUrl;
       }
     } else if (hasConfirmations) {

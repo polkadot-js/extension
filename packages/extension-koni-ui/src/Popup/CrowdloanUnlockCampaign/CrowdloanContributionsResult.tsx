@@ -7,9 +7,9 @@ import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/
 import { CrowdloanContributionsResultParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon } from '@subwallet/react-ui';
 import { Vault } from 'phosphor-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -17,8 +17,15 @@ type Props = ThemeProps;
 const Component: React.FC<Props> = ({ className }: Props) => {
   const locationState = useLocation().state as CrowdloanContributionsResultParam;
   const [propAddress] = useState<string | undefined>(locationState?.address);
+
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
   const [, setParaChainInfoMap] = useState<ParaChainInfoMap>({});
+
+  const goEarningDemo = useCallback(() => {
+    navigate('/earning-demo');
+  }, [navigate]);
 
   useEffect(() => {
     getParaChainInfoMap().then((rs) => {
@@ -50,6 +57,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 weight='fill'
               />
             }
+            onClick={goEarningDemo}
           >
             <div className={'__footer-button-content'}>
               <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>

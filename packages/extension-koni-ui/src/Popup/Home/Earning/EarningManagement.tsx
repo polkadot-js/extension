@@ -3,8 +3,9 @@
 
 import { NominatorMetadata, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { EarningCalculatorModal, EarningManagementDetailModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout } from '@subwallet/extension-koni-ui/components';
-import YieldStakingDetailModal from '@subwallet/extension-koni-ui/components/Modal/Earning/YieldPositionDetailModal';
+import { EarningCalculatorModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout } from '@subwallet/extension-koni-ui/components';
+import YieldPositionDetailModal from '@subwallet/extension-koni-ui/components/Modal/Earning/YieldPositionDetailModal';
+import YieldStakingDetailModal from '@subwallet/extension-koni-ui/components/Modal/Earning/YieldStakingDetailModal';
 import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -293,13 +294,13 @@ const Component: React.FC<Props> = (props: Props) => {
         selectedYieldPosition && selectedYieldPoolInfo && (
           [YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(selectedYieldPoolInfo.type)
             ? (
-              <EarningManagementDetailModal
+              <YieldStakingDetailModal
                 nominatorMetadata={selectedYieldPosition.metadata as NominatorMetadata}
                 yieldPoolInfo={selectedYieldPoolInfo}
               />
             )
             : (
-              <YieldStakingDetailModal
+              <YieldPositionDetailModal
                 positionInfo={selectedYieldPosition}
                 yieldPoolInfo={selectedYieldPoolInfo}
               />

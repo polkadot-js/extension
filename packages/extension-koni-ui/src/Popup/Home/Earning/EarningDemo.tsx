@@ -3,7 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
-import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -20,18 +20,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
 
   const { setOnBack } = useContext(WebUIContext);
-  const { isNoAccount } = useSelector((state) => state.accountState);
 
   const onBack = useCallback(() => {
-    console.log(123123123);
     navigate('/crowdloan-unlock-campaign/check-contributions');
   }, [navigate]);
-
-  useEffect(() => {
-    if (!isNoAccount) {
-      navigate('/home/earning');
-    }
-  }, [navigate, isNoAccount]);
 
   useEffect(() => {
     setOnBack(onBack);

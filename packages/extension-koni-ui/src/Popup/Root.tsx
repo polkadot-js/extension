@@ -45,6 +45,7 @@ const createDoneUrl = '/create-done';
 
 // Campaign
 const earningDemoUrl = '/earning-demo';
+const earningHomeUrl = '/home/earning';
 const checkCrowdloanUrl = '/crowdloan-unlock-campaign/check-contributions';
 const crowdloanResultUrl = '/crowdloan-unlock-campaign/contributions-result';
 
@@ -185,6 +186,8 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       if (!allowPreventWelcomeUrls.includes(pathName)) {
         redirectObj.redirect = welcomeUrl;
       }
+    } else if (pathName === earningDemoUrl && !isNoAccount) {
+      redirectObj.redirect = earningHomeUrl;
     } else if (hasConfirmations) {
       redirectObj.modal = `open:${CONFIRMATION_MODAL}`;
     } else if (pathName === DEFAULT_ROUTER_PATH) {

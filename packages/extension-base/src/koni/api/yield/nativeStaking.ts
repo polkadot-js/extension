@@ -7,6 +7,7 @@ import { getPoolingBondingExtrinsic, getRelayBondingExtrinsic, PalletStakingStak
 import { calculateChainStakedReturn, calculateInflation, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
@@ -120,7 +121,7 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
   });
 }
 
-export async function generatePathForNativeStaking (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
+export async function generatePathForNativeStaking (params: OptimalYieldPathParams, balanceService: BalanceService): Promise<OptimalYieldPath> {
   const bnAmount = new BN(params.amount);
   const result: OptimalYieldPath = {
     totalFee: [],

@@ -456,6 +456,7 @@ const Component = () => {
 
       addLazy(loadingStepPromiseKey, () => {
         getOptimalYieldPath({
+          address: currentFrom,
           amount: currentAmount,
           poolInfo: currentPoolInfo
         })
@@ -472,7 +473,7 @@ const Component = () => {
           .finally(() => setStepLoading(false));
       }, 1000, 5000, false);
     }
-  }, [currentPoolInfo, currentAmount, currentStep]);
+  }, [currentPoolInfo, currentAmount, currentStep, currentFrom]);
 
   return (
     <div className={'earning-wrapper'}>

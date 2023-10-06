@@ -40,8 +40,22 @@ const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: 
   const account = isAllAccount ? null : currentAccount;
 
   const yieldPositionInfoBalance = useMemo(() => {
-    return positionInfo.balance[0];
-  }, [positionInfo.balance]);
+    if (!yieldPoolInfo.derivativeAssets) {
+      return positionInfo.balance[0];
+    }
+
+    const derivativeTokenBalance = positionInfo.balance[0].totalBalance;
+    const inputTokenSlug = yieldPoolInfo.inputAssets[0];
+    // @ts-ignore
+    const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 1;
+    const inputTokenBalance = Math.floor(parseInt(derivativeTokenBalance) * exchangeRate);
+
+    return {
+      activeBalance: inputTokenBalance.toString(),
+      slug: inputTokenSlug,
+      totalBalance: inputTokenBalance.toString()
+    };
+  }, [positionInfo.balance, yieldPoolInfo.derivativeAssets, yieldPoolInfo.inputAssets, yieldPoolInfo?.stats?.assetEarning]);
 
   const derivativeTokenState = useMemo(() => {
     if (!yieldPoolInfo.derivativeAssets) {
@@ -52,16 +66,12 @@ const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: 
 
     const derivativeTokenInfo = assetRegistry[derivativeTokenSlug];
 
-    // @ts-ignore
-    const exchangeRate = yieldPoolInfo.stats?.assetEarning[0].exchangeRate || 1;
-    const convertedAmount = Math.floor(parseInt(yieldPositionInfoBalance.totalBalance) * exchangeRate);
-
     return {
       symbol: _getAssetSymbol(derivativeTokenInfo),
       decimals: _getAssetDecimals(derivativeTokenInfo),
-      amount: convertedAmount.toString()
+      amount: positionInfo.balance[0].totalBalance
     };
-  }, [assetRegistry, yieldPoolInfo.derivativeAssets, yieldPoolInfo.stats?.assetEarning, yieldPositionInfoBalance.totalBalance]);
+  }, [assetRegistry, positionInfo.balance, yieldPoolInfo.derivativeAssets]);
   const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
 
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
@@ -212,7 +222,7 @@ const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: 
   );
 };
 
-const YieldStakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const YieldPositionDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.expected-return div:first-child': {
       flex: 2
@@ -287,4 +297,4 @@ const YieldStakingDetailModal = styled(Component)<Props>(({ theme: { token } }: 
   };
 });
 
-export default YieldStakingDetailModal;
+export default YieldPositionDetailModal;

@@ -41,7 +41,7 @@
     "@subwallet/extension-dapp": "^1.1.12-1",
     "@subwallet/extension-inject": "^1.1.12-1",
     "@subwallet/keyring": "^0.1.1",
-    "@subwallet/react-ui": "5.1.2-b72",
+    "@subwallet/react-ui": "5.1.2-b73",
     "@subwallet/ui-keyring": "^0.1.1",
     "@trendyol-js/react-carousel": "^3.0.2",
     "@walletconnect/types": "^2.8.4",

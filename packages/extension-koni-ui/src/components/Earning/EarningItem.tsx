@@ -45,8 +45,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const totalApy = useMemo(() => {
     const apy = stats?.totalApy ?? calculateReward(stats?.totalApr || 0, 100, YieldCompoundingPeriod.YEARLY).apy;
 
-    console.log('apy', apy);
-
     return apy || 0;
   }, [stats?.totalApr, stats?.totalApy]);
 

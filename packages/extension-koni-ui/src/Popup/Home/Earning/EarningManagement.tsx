@@ -242,13 +242,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
       setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
 
-      if (selectedYieldPoolInfo && [YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(selectedYieldPoolInfo.type)) {
+      if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolInfo.type)) {
         activeModal(YIELD_STAKING_DETAIL_MODAL);
       } else {
         activeModal(YIELD_POSITION_DETAIL_MODAL);
       }
     };
-  }, [activeModal, poolInfoMap, selectedYieldPoolInfo]);
+  }, [activeModal, poolInfoMap]);
 
   const renderEarningItem = useCallback((item: YieldPositionInfo) => {
     const poolInfo = poolInfoMap[item.slug];

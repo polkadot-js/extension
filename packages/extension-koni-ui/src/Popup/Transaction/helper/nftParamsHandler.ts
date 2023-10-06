@@ -87,7 +87,7 @@ export default function nftParamsHandler (nftItem: NftItem, chain: string) {
       return acalaParser(nftItem);
     } else if (_NFT_CHAIN_GROUP.rmrk.includes(chain)) {
       return rmrkParser(nftItem);
-    } else if (_NFT_CHAIN_GROUP.statemine.includes(chain)) {
+    } else if (_NFT_CHAIN_GROUP.statemine.includes(chain) || _NFT_CHAIN_GROUP.statemint.includes(chain)) {
       return statemineParser(nftItem);
     } else if (_NFT_CHAIN_GROUP.unique_network.includes(chain)) {
       return uniqueParser(nftItem);

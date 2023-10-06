@@ -23,6 +23,11 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken, token } 
     flex: 'auto',
     position: 'relative',
 
+    '.web-layout-header, .web-layout-header-simple': {
+      position: 'relative',
+      zIndex: 10
+    },
+
     '.web-layout-background': {
       position: 'fixed',
       top: 0,

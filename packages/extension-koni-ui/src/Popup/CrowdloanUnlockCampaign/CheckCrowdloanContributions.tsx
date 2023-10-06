@@ -8,9 +8,9 @@ import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Form, Icon } from '@subwallet/react-ui';
+import { Button, Form, Icon, Image } from '@subwallet/react-ui';
 import { ValidateStatus } from '@subwallet/react-ui/es/form/FormItem';
-import { ArrowCounterClockwise, PlusCircle, Question, Rocket, Vault, Wallet } from 'phosphor-react';
+import { ArrowCounterClockwise, PlusCircle, Question, Vault, Wallet } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -38,6 +38,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [{ message: responseMessage, status: responseStatus }, setSubmitResponse] =
     useState<SubmitResponse>({});
   const [isWrongAddress, setIsWrongAddress] = useState<boolean>(false);
+  const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
 
   const formDefault = useMemo((): FormParams => {
     return {
@@ -86,11 +87,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     <div className={className}>
       <div className={'__body-area'}>
         <div className='__countdown-area'>
-          <Icon
-            className='__countdown-icon'
-            phosphorIcon={Rocket}
-            weight='fill'
-          />
+          <div className='__countdown-icon'>
+            <Image
+              height={'100%'}
+              src={logoMap.network.rocketIcon as string}
+              width={'100%'}
+            />
+          </div>
           <div className={'__countdown-title'}>
             {t('Next Polkadot crowdloan unlocking in')}
           </div>
@@ -242,6 +245,16 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
   return {
     paddingLeft: token.padding,
     paddingRight: token.padding,
+    minHeight: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    position: 'fixed',
+    inset: 0,
+    maxWidth: 816,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    overflow: 'auto',
 
     '.__countdown-area': {
       display: 'flex',
@@ -250,7 +263,8 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
     },
 
     '.__countdown-icon': {
-      fontSize: 48,
+      width: 104,
+      height: 104,
       color: token.colorTextLight1,
       marginBottom: 36
     },
@@ -268,14 +282,16 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
     },
 
     '.__body-area': {
+      paddingTop: 112,
       maxWidth: 584,
-      marginLeft: 'auto',
-      marginRight: 'auto'
+      flex: 1,
+      width: '100%'
     },
 
     '.__form-area': {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      marginBottom: 80
     },
 
     '.__form-container': {
@@ -298,9 +314,7 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
 
     '.__footer-area': {
       borderTop: `2px solid ${token.colorBgDivider}`,
-      maxWidth: 784,
-      marginLeft: 'auto',
-      marginRight: 'auto'
+      paddingBottom: 58
     },
 
     '.__note-box': {

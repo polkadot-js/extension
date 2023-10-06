@@ -85,7 +85,7 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
         assetEarning: [
           {
             slug: poolInfo.rewardAssets[0],
-            apy: parseFloat(vDOTStats.apyBase) / 100,
+            apy: parseFloat(vDOTStats.apyBase),
             exchangeRate: parseFloat(exchangeRate.data.slp_polkadot_ratio[0].ratio)
           }
         ],
@@ -93,7 +93,7 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '0',
         minWithdrawal: '0',
-        totalApy: parseFloat(vDOTStats.apyBase) / 100,
+        totalApy: parseFloat(vDOTStats.apyBase),
         tvl: (vDOTStats.tvm * assetDecimals).toString()
       }
     });

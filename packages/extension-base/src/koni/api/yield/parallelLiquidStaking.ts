@@ -28,7 +28,7 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '10000000000',
         minWithdrawal: '0',
-        totalApr: 18.4,
+        totalApr: 18.38,
         tvl: '13095111106588368'
       }
     });

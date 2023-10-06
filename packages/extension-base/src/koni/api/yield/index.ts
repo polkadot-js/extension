@@ -126,11 +126,11 @@ export function calculateReward (apr: number, amount = 0, compoundingPeriod = Yi
     const reward = periodApy * amount;
 
     return {
-      apy: periodApy,
+      apy: periodApy * 100,
       rewardInToken: reward
     };
   } else {
-    const reward = apr * amount;
+    const reward = (apr / 100) * amount;
 
     return {
       apy: apr,

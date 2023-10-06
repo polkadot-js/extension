@@ -146,7 +146,10 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken, token } 
 const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
-  const { background, headerType, isPortfolio, isSettingPage, onBack, setSidebarCollapsed, showBackButtonOnHeader, showSidebar, sidebarCollapsed, title } = useContext(WebUIContext);
+  const { background, headerType, isPortfolio,
+    isSettingPage, onBack, setSidebarCollapsed,
+    showBackButtonOnHeader, showSidebar,
+    sidebarCollapsed, title, webBaseClassName } = useContext(WebUIContext);
   const { goBack, goHome } = useDefaultNavigate();
 
   const headerTitle = useMemo(() => {
@@ -164,7 +167,7 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
   const isHeaderTypeCommon = [HeaderType.COMMON, HeaderType.COMMON_BACK, HeaderType.COMMON_BACK_TO_HOME].includes(headerType);
 
   return (
-    <StyledLayout className={CN('web-layout-container', `header-type-${headerType}`)}>
+    <StyledLayout className={CN('web-layout-container', `header-type-${headerType}`, webBaseClassName)}>
       <div
         className={CN('web-layout-background', `__background-${background}`)}
       />
@@ -177,21 +180,23 @@ const BaseWeb = ({ children }: LayoutBaseWebProps) => {
 
       <div className={CN('web-layout-body', { 'setting-pages': isSettingPage })}>
         {
-          isHeaderTypeCommon && <div className={'web-layout-header'}>
+          isHeaderTypeCommon && (
             <Headers.Controller
               { ...(headerType === HeaderType.COMMON_BACK ? { onBack: onBack || goBack, showBackButton: true } : {}) }
               { ...(headerType === HeaderType.COMMON_BACK_TO_HOME ? { onBack: onBack || goHome, showBackButton: true } : {}) }
+              className={'web-layout-header'}
               title={headerTitle}
             />
-          </div>
+          )
         }
-        {headerType === HeaderType.SIMPLE && <div className={'web-layout-header-simple'}>
+        {headerType === HeaderType.SIMPLE && (
           <Headers.Simple
+            className={'web-layout-header-simple'}
             onBack={onBack}
             showBackButton={showBackButtonOnHeader}
             title={headerTitle}
           />
-        </div>}
+        )}
         <div className={CN('web-layout-content', { '__with-padding': showSidebar })}>
           {children}
         </div>

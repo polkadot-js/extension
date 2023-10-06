@@ -5,9 +5,10 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { CrowdloanParaState, ParaChainInfoMap } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetPriceId, _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { CrowdloanContributionItem } from '@subwallet/extension-base/services/subscan-service/types';
-import { AddressInput, TokenBalance } from '@subwallet/extension-koni-ui/components';
+import { AddressInput, Layout, TokenBalance } from '@subwallet/extension-koni-ui/components';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
+import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { getCrowdloanContributions, getParaChainInfoMap } from '@subwallet/extension-koni-ui/messaging';
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
@@ -19,7 +20,7 @@ import { Button, Form, Icon, Logo, Table, Tag } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import { ArrowCounterClockwise, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -122,7 +123,7 @@ const getTableItems = (
     const contributedValue = getBalanceValue(c.contributed || '0', decimals);
     const convertedContributedValue = getConvertedBalanceValue(contributedValue, price);
 
-    const unlockTime = ((c.unlocking_block - c.block_num) * 6.0236 + c.block_timestamp) * 1000;
+    const unlockTime = ((c.unlocking_block - c.block_num) * 6 + c.block_timestamp) * 1000;
 
     result.push({
       id: `${paraChainInfo.slug}-${relayChainSlug}`,
@@ -143,7 +144,7 @@ const getTableItems = (
   return result;
 };
 
-const Component: React.FC<Props> = ({ className }: Props) => {
+const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const locationState = useLocation().state as CrowdloanContributionsResultParam;
   const [propAddress] = useState<string | undefined>(locationState?.address);
   const { t } = useTranslation();
@@ -155,6 +156,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
   const { isNoAccount } = useSelector((state: RootState) => state.accountState);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
+  const { setWebBaseClassName } = useContext(WebUIContext);
 
   const [contributionsMap, setContributionsMap] = useState<CrowdloanContributionsMap>({
     polkadot: [],
@@ -173,6 +175,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const goEarningDemo = useCallback(() => {
     navigate('/earning-demo');
+  }, [navigate]);
+
+  const onBack = useCallback(() => {
+    navigate('/crowdloan-unlock-campaign/check-contributions');
   }, [navigate]);
 
   const getParaStateLabel = useCallback((paraState?: CrowdloanParaState) => {
@@ -229,7 +235,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const columns = useMemo(() => {
     const getUnlockTexts = (paraState?: CrowdloanParaState): [string, string] => {
       if (!paraState || paraState === CrowdloanParaState.COMPLETED) {
-        return [t('Locking'), t('Until')];
+        return [t('Locked'), t('Until')];
       }
 
       if (paraState === CrowdloanParaState.ONGOING) {
@@ -283,12 +289,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }
       },
       {
-        title: t('Contribute'),
-        dataIndex: 'contribute',
-        key: 'contribute',
+        title: t('Contribution'),
+        dataIndex: 'contribution',
+        key: 'contribution',
         render: (_: any, row: TableItem) => {
           return (
             <TokenBalance
+              autoHideBalance={false}
               convertedValue={row.contribution.convertedValue}
               symbol={row.contribution.symbol}
               value={row.contribution.value}
@@ -319,6 +326,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onSelectFilterTab = useCallback((value: string) => {
     setSelectedFilterTab(value);
   }, []);
+
+  useEffect(() => {
+    setWebBaseClassName(`${className}-web-base-container`);
+
+    return () => {
+      setWebBaseClassName('');
+    };
+  }, [className, setWebBaseClassName]);
 
   useEffect(() => {
     getParaChainInfoMap().then((rs) => {
@@ -373,7 +388,38 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [isNoAccount, navigate, setReturnStorage]);
 
   return (
-    <div className={className}>
+    <Layout.Base
+      className={className}
+      onBack={onBack}
+      showSubHeader={true}
+      subHeaderBackground={'transparent'}
+      subHeaderCenter={true}
+      subHeaderPaddingVertical={true}
+      title={t<string>('Your crowdloan contributions')}
+    >
+      <div className={'__tag-area'}>
+        <div className={'__tag-item'}>
+          <Logo
+            className={'__tag-item-logo'}
+            network={'polkadot'}
+            size={16}
+          />
+          <div className={'__tag-item-label'}>
+            DOT
+          </div>
+        </div>
+        <div className={'__tag-item -secondary'}>
+          <Logo
+            className={'__tag-item-logo'}
+            network={'kusama'}
+            size={16}
+          />
+          <div className={'__tag-item-label'}>
+            KSM
+          </div>
+        </div>
+      </div>
+
       <div className='__tool-area'>
         <FilterTabs
           className={'__filter-tabs-container'}
@@ -420,6 +466,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <div className={'__table-area'}>
         {!!filteredtableItems.length && (
           <Table
+            className={'__table'}
             columns={columns}
             dataSource={filteredtableItems}
             pagination={false}
@@ -427,7 +474,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           />
         )}
         {!filteredtableItems.length && (
-          <div className={'__empty-list-area'}>
+          <div className={'__empty-list-wrapper'}>
             <EmptyList
               className={'__empty-list'}
               emptyMessage={t('Check again or create a new account.')}
@@ -480,35 +527,91 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           title={t('Crowdloan unlock, then what?')}
         />
 
-        <div className='__footer-buttons'>
-          <Button
-            className={'__footer-button'}
-            contentAlign={'left'}
-            icon={
-              <Icon
-                className='__footer-button-icon'
-                phosphorIcon={Vault}
-                size='md'
-                weight='fill'
-              />
-            }
-            onClick={goEarningDemo}
-          >
-            <div className={'__footer-button-content'}>
-              <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>
+        <Button
+          className={'__footer-button'}
+          contentAlign={'left'}
+          icon={
+            <Icon
+              className='__footer-button-icon'
+              phosphorIcon={Vault}
+              size='md'
+              weight='fill'
+            />
+          }
+          onClick={goEarningDemo}
+        >
+          <div className={'__footer-button-content'}>
+            <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>
 
-              <div className={'__footer-button-subtitle'}>{t('Earning with SubWallet Dashboard')}</div>
-            </div>
-          </Button>
-        </div>
+            <div className={'__footer-button-subtitle'}>{t('Earning with SubWallet Dashboard')}</div>
+          </div>
+        </Button>
       </div>
-    </div>
+    </Layout.Base>
   );
 };
 
 const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    paddingTop: 100,
+    maxWidth: 1216,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    paddingLeft: token.padding,
+    paddingRight: token.padding,
+
+    '&-web-base-container': {
+      '.web-layout-header-simple': {
+        paddingBottom: token.sizeLG
+      }
+    },
+
+    '.__tag-area': {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: token.sizeXS,
+      marginBottom: 28
+    },
+
+    '.__tag-item': {
+      display: 'flex',
+      gap: token.sizeXXS,
+      position: 'relative',
+      alignItems: 'center',
+      paddingLeft: token.paddingSM,
+      paddingRight: token.paddingSM,
+      height: 30,
+      backgroundColor: token.colorBgSecondary,
+      borderRadius: 50,
+
+      '&:before': {
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        border: '2px solid',
+        borderColor: token.colorBorderBg,
+        borderRadius: 50,
+        opacity: 0
+      },
+
+      '&.-secondary': {
+        backgroundColor: 'transparent',
+
+        '&:before': {
+          opacity: 1
+        }
+      }
+    },
+
+    '.__tag-item-label': {
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
+      color: token.colorTextLight4
+    },
+
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
 
     '.project-container': {
       display: 'flex',
@@ -572,9 +675,15 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       marginBottom: 0
     },
 
-    '.__empty-list-area': {
-      paddingTop: 96,
-      paddingBottom: 190
+    '.__table-area': {
+      flex: 1,
+      paddingTop: token.padding,
+      paddingBottom: token.paddingLG
+    },
+
+    '.__empty-list-wrapper': {
+      paddingTop: 70,
+      paddingBottom: 100
     },
 
     '.__buttons-block': {
@@ -590,18 +699,19 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
     },
 
     '.__footer-area': {
-      borderTop: `2px solid ${token.colorBgDivider}`
+      borderTop: `2px solid ${token.colorBgDivider}`,
+      display: 'flex',
+      gap: token.size,
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingTop: token.sizeLG,
+      paddingBottom: 42
     },
 
     '.__note-box': {
-      paddingTop: token.sizeLG,
-      paddingBottom: token.sizeLG
-    },
-
-    '.__footer-buttons': {
-      display: 'flex',
-      gap: token.size,
-      flexWrap: 'wrap'
+      maxWidth: 684,
+      flex: '1 0 300px'
     },
 
     '.__footer-button': {
@@ -609,7 +719,8 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       flex: 1,
       paddingRight: token.paddingSM,
       paddingLeft: token.paddingSM,
-      gap: token.size
+      gap: token.size,
+      maxWidth: 384
     },
 
     '.__footer-button-icon': {

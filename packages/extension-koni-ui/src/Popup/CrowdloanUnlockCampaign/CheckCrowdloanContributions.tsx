@@ -3,6 +3,7 @@
 
 import { AddressInput } from '@subwallet/extension-koni-ui/components';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
+import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import Countdown from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/Countdown';
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -11,7 +12,7 @@ import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Form, Icon, Image } from '@subwallet/react-ui';
 import { ValidateStatus } from '@subwallet/react-ui/es/form/FormItem';
 import { ArrowCounterClockwise, PlusCircle, Question, Vault, Wallet } from 'phosphor-react';
-import React, { Context, useCallback, useContext, useMemo, useState } from 'react';
+import React, { Context, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +32,7 @@ export interface FormParams {
   address: string;
 }
 
-const Component: React.FC<Props> = ({ className }: Props) => {
+const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
@@ -39,6 +40,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     useState<SubmitResponse>({});
   const [isWrongAddress, setIsWrongAddress] = useState<boolean>(false);
   const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
+  const { setWebBaseClassName } = useContext(WebUIContext);
 
   const formDefault = useMemo((): FormParams => {
     return {
@@ -82,6 +84,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       navigate('/welcome');
     }
   }, [isNoAccount, navigate, setReturnStorage]);
+
+  useEffect(() => {
+    setWebBaseClassName(`${className}-web-base-container`);
+
+    return () => {
+      setWebBaseClassName('');
+    };
+  }, [className, setWebBaseClassName]);
 
   return (
     <div className={className}>
@@ -255,6 +265,14 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
     marginLeft: 'auto',
     marginRight: 'auto',
     overflow: 'auto',
+
+    '&-web-base-container': {
+      '.web-layout-header-simple': {
+        '.__back-button, .__title-wrapper': {
+          display: 'none'
+        }
+      }
+    },
 
     '.__countdown-area': {
       display: 'flex',

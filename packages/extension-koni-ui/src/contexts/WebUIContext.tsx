@@ -54,6 +54,10 @@ function checkPortfolioPage (pathname: string) {
   return pathname.startsWith('/home/tokens') || pathname.startsWith('/home/nfts') || pathname.startsWith('/home/statistics');
 }
 
+function checkEarningDonePage (pathname: string) {
+  return pathname.startsWith('/earning-done');
+}
+
 const simplePages = ['/', '/welcome', '/keyring/login', '/keyring/create-password', '/keyring/migrate-password', '/create-done', '/earning-demo'];
 
 export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) => {
@@ -79,7 +83,7 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
   useLayoutEffect(() => {
     const pathName = pathname;
 
-    if (simplePages.indexOf(pathName) !== -1 || noAccount) {
+    if (simplePages.indexOf(pathName) !== -1 || noAccount || checkEarningDonePage(pathname)) {
       setShowSidebar(false);
       setBackground(BackgroundColorMap.INFO);
       setHeaderType(HeaderType.SIMPLE);

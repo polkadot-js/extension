@@ -3,17 +3,22 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { generatePathForAcalaLiquidStaking, getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
-import { generatePathForBifrostLiquidStaking, getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingPosition, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
+import { getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
+import { getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingPosition, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
-import { generatePathForInterlayLending, getInterlayLendingExtrinsic, getInterlayLendingPosition, getInterlayLendingRedeem, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
+import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { getInterlayLendingExtrinsic, getInterlayLendingPosition, getInterlayLendingRedeem, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
 import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
-import { generatePathForParallelLiquidStaking, getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallelLiquidStaking';
+import { getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallelLiquidStaking';
+import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 // only apply for DOT right now, will need to scale up
 
@@ -121,11 +126,11 @@ export function calculateReward (apr: number, amount = 0, compoundingPeriod = Yi
     const reward = periodApy * amount;
 
     return {
-      apy: periodApy,
+      apy: periodApy * 100,
       rewardInToken: reward
     };
   } else {
-    const reward = apr * amount;
+    const reward = (apr / 100) * amount;
 
     return {
       apy: apr,
@@ -134,23 +139,144 @@ export function calculateReward (apr: number, amount = 0, compoundingPeriod = Yi
   }
 }
 
-export async function generateNaiveOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
+export async function generateNaiveOptimalPath (params: OptimalYieldPathParams, balanceService: BalanceService): Promise<OptimalYieldPath> {
   // 1. assume inputs are already validated
   // 2. generate paths based on amount only, not taking fee into account
   // 3. fees are calculated in the worst possible situation
   // 4. fees are calculated for the whole process, either user can pay all or nothing
 
   if (params.poolInfo.slug === 'DOT___bifrost_liquid_staking') {
-    return generatePathForBifrostLiquidStaking(params);
+    return generatePathForLiquidStaking(params, balanceService);
   } else if (params.poolInfo.slug === 'DOT___acala_liquid_staking') {
-    return generatePathForAcalaLiquidStaking(params);
+    return generatePathForLiquidStaking(params, balanceService);
   } else if (params.poolInfo.slug === 'DOT___interlay_lending') {
-    return generatePathForInterlayLending(params);
+    return generatePathForLiquidStaking(params, balanceService);
   } else if (params.poolInfo.slug === 'DOT___parallel_liquid_staking') {
-    return generatePathForParallelLiquidStaking(params);
+    return generatePathForLiquidStaking(params, balanceService);
   }
 
-  return generatePathForNativeStaking(params);
+  return generatePathForNativeStaking(params, balanceService);
+}
+
+export async function generatePathForLiquidStaking (params: OptimalYieldPathParams, balanceService: BalanceService): Promise<OptimalYieldPath> {
+  const bnAmount = new BN(params.amount);
+  const result: OptimalYieldPath = {
+    totalFee: [],
+    steps: [DEFAULT_YIELD_FIRST_STEP]
+  };
+
+  const poolOriginSubstrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
+
+  const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
+  const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
+
+  // const inputTokenBalance = await balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug);
+  // const altInputTokenBalance = await balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, inputTokenSlug);
+
+  const altInputTokenSlug = params.poolInfo.altInputAssets ? params.poolInfo?.altInputAssets[0] : '';
+  const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
+
+  const [inputTokenBalance, altInputTokenBalance] = await Promise.all([
+    balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug),
+    balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug)
+  ]);
+
+  const bnInputTokenBalance = new BN(inputTokenBalance.value);
+  const defaultFeeTokenSlug = params.poolInfo.feeAssets[0];
+
+  if (!bnInputTokenBalance.gte(bnAmount)) {
+    if (params.poolInfo.altInputAssets) {
+      const bnAltInputTokenBalance = new BN(altInputTokenBalance.value || '0');
+
+      if (bnAltInputTokenBalance.gt(BN_ZERO)) {
+        result.steps.push({
+          id: result.steps.length,
+          metadata: {
+            sendingValue: bnAmount.toString(),
+            originTokenInfo: altInputTokenInfo,
+            destinationTokenInfo: inputTokenInfo
+          },
+          name: 'Transfer DOT from Polkadot',
+          type: YieldStepType.XCM
+        });
+
+        const xcmOriginSubstrateApi = await params.substrateApiMap[altInputTokenInfo.originChain].isReady;
+
+        const xcmTransfer = await createXcmExtrinsic({
+          originTokenInfo: altInputTokenInfo,
+          destinationTokenInfo: inputTokenInfo,
+          sendingValue: bnAmount.toString(),
+          recipient: fakeAddress,
+          chainInfoMap: params.chainInfoMap,
+          substrateApi: xcmOriginSubstrateApi
+        });
+
+        const _xcmFeeInfo = await xcmTransfer.paymentInfo(fakeAddress);
+        const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+        // TODO: calculate fee for destination chain
+
+        result.totalFee.push({
+          slug: altInputTokenSlug,
+          amount: (xcmFeeInfo.partialFee * 2).toString() // TODO
+        });
+      }
+    }
+  }
+
+  let mintFee = '0';
+
+  if (params.poolInfo.slug === 'DOT___bifrost_liquid_staking') {
+    result.steps.push({
+      id: result.steps.length,
+      name: 'Mint vDOT',
+      type: YieldStepType.MINT_VDOT
+    });
+
+    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount, null).paymentInfo(fakeAddress);
+    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+    mintFee = mintFeeInfo.partialFee.toString();
+  } else if (params.poolInfo.slug === 'DOT___acala_liquid_staking') {
+    result.steps.push({
+      id: result.steps.length,
+      name: 'Mint LDOT',
+      type: YieldStepType.MINT_LDOT
+    });
+
+    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.homa.mint(params.amount).paymentInfo(fakeAddress);
+    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+    mintFee = mintFeeInfo.partialFee.toString();
+  } else if (params.poolInfo.slug === 'DOT___interlay_lending') {
+    result.steps.push({
+      id: result.steps.length,
+      name: 'Mint qDOT',
+      type: YieldStepType.MINT_QDOT
+    });
+
+    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.loans.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount).paymentInfo(fakeAddress);
+    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+    mintFee = mintFeeInfo.partialFee.toString();
+  } else if (params.poolInfo.slug === 'DOT___parallel_liquid_staking') {
+    result.steps.push({
+      id: result.steps.length,
+      name: 'Mint sDOT',
+      type: YieldStepType.MINT_SDOT
+    });
+
+    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.liquidStaking.stake(params.amount).paymentInfo(fakeAddress);
+    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+    mintFee = mintFeeInfo.partialFee.toString();
+  }
+
+  result.totalFee.push({
+    slug: defaultFeeTokenSlug,
+    amount: mintFee
+  });
+
+  return result;
 }
 
 // TODO: calculate token portion

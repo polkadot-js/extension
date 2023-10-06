@@ -8,7 +8,7 @@ import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, Signin
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
+import { DAppCategory, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
@@ -175,6 +175,7 @@ export interface YieldPoolStore extends BaseReduxStore {
 }
 
 export interface DAppStore extends BaseReduxStore {
+  categories: DAppCategory[];
   featureDApps: DAppInfo[];
   dApps: DAppInfo[];
 }

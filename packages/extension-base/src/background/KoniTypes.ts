@@ -2142,11 +2142,13 @@ export interface YieldPositionStats {
 }
 
 export interface OptimalYieldPathRequest {
+  address: string,
   amount: string,
   poolInfo: YieldPoolInfo
 }
 
 export interface OptimalYieldPathParams {
+  address: string,
   amount: string,
   poolInfo: YieldPoolInfo,
 

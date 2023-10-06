@@ -5,7 +5,7 @@ import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -42,7 +42,7 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
 
   getPoolStat();
 
-  const interval = setInterval(getPoolStat, 3000000);
+  const interval = setInterval(getPoolStat, YIELD_POOL_STAT_REFRESH_INTERVAL);
 
   return () => {
     clearInterval(interval);
@@ -89,87 +89,6 @@ export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddr
   return () => {
     clearInterval(interval);
   };
-}
-
-export async function generatePathForInterlayLending (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
-  const bnAmount = new BN(params.amount);
-  const result: OptimalYieldPath = {
-    totalFee: [{ slug: '' }],
-    steps: [DEFAULT_YIELD_FIRST_STEP]
-  };
-
-  const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
-  const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
-
-  const inputTokenBalance = params.balanceMap[inputTokenSlug]?.free || '0';
-  const bnInputTokenBalance = new BN(inputTokenBalance);
-
-  const feeTokenSlug = params.poolInfo.feeAssets[0];
-
-  const poolOriginSubstrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
-
-  if (!bnInputTokenBalance.gte(bnAmount)) {
-    if (params.poolInfo.altInputAssets) {
-      const remainingAmount = bnAmount.sub(bnInputTokenBalance);
-
-      const altInputTokenSlug = params.poolInfo.altInputAssets[0];
-      const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
-
-      const altInputTokenBalance = params.balanceMap[altInputTokenSlug]?.free || '0';
-      const bnAltInputTokenBalance = new BN(altInputTokenBalance);
-
-      if (bnAltInputTokenBalance.gt(BN_ZERO)) {
-        const xcmAmount = bnAltInputTokenBalance.sub(remainingAmount);
-
-        result.steps.push({
-          id: result.steps.length,
-          metadata: {
-            sendingValue: xcmAmount.toString(),
-            originTokenInfo: altInputTokenInfo,
-            destinationTokenInfo: inputTokenInfo
-          },
-          name: 'Transfer DOT from Polkadot',
-          type: YieldStepType.XCM
-        });
-
-        const xcmOriginSubstrateApi = await params.substrateApiMap[altInputTokenInfo.originChain].isReady;
-
-        const xcmTransfer = await createXcmExtrinsic({
-          originTokenInfo: altInputTokenInfo,
-          destinationTokenInfo: inputTokenInfo,
-          sendingValue: bnAmount.toString(),
-          recipient: fakeAddress,
-          chainInfoMap: params.chainInfoMap,
-          substrateApi: xcmOriginSubstrateApi
-        });
-
-        const _xcmFeeInfo = await xcmTransfer.paymentInfo(fakeAddress);
-        const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-        // TODO: calculate fee for destination chain
-
-        result.totalFee.push({
-          slug: altInputTokenSlug,
-          amount: xcmFeeInfo.partialFee.toString()
-        });
-      }
-    }
-  }
-
-  result.steps.push({
-    id: result.steps.length,
-    name: 'Mint qDOT',
-    type: YieldStepType.MINT_QDOT
-  });
-
-  const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.loans.mint({ Token: 'DOT' }, params.amount).paymentInfo(fakeAddress);
-  const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-
-  result.totalFee.push({
-    slug: feeTokenSlug,
-    amount: mintFeeInfo.partialFee.toString()
-  });
-
-  return result;
 }
 
 export async function getInterlayLendingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): Promise<HandleYieldStepData> {

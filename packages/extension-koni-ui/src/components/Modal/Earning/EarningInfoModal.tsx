@@ -87,7 +87,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [currentAsset]);
 
   const totalApy = useMemo(() => {
-    return (currentItem.stats?.totalApy || calculateReward(currentItem.stats?.totalApr || 0, undefined, YieldCompoundingPeriod.YEARLY).apy || 0) * 100;
+    return currentItem.stats?.totalApy || calculateReward(currentItem.stats?.totalApr || 0, undefined, YieldCompoundingPeriod.YEARLY).apy || 0;
   }, [currentItem.stats?.totalApr, currentItem.stats?.totalApy]);
 
   const totalStakedValue = useMemo(() => {
@@ -100,7 +100,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const apyItems = useMemo((): APYItem[] => {
     return currentItem.stats?.assetEarning?.map((value) => {
       const asset = assetRegistry[value.slug];
-      const apy = (value.apy || calculateReward(value.apr || 0, undefined, YieldCompoundingPeriod.YEARLY).apy || 0) * 100;
+      const apy = value.apy || calculateReward(value.apr || 0, undefined, YieldCompoundingPeriod.YEARLY).apy || 0;
       const apyStr = formatNumber(apy, 0, balanceFormatter);
 
       return {

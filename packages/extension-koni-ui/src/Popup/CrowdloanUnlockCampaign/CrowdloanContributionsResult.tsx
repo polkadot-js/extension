@@ -7,7 +7,7 @@ import { _getAssetDecimals, _getAssetPriceId, _getChainNativeTokenSlug } from '@
 import { CrowdloanContributionItem } from '@subwallet/extension-base/services/subscan-service/types';
 import { AddressInput, Layout, TokenBalance } from '@subwallet/extension-koni-ui/components';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
-import { CREATE_RETURN, DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
+import { CREATE_RETURN, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { getCrowdloanContributions, getParaChainInfoMap } from '@subwallet/extension-koni-ui/messaging';
@@ -16,7 +16,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
 import { CrowdloanContributionsResultParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon, Logo, Table, Tag } from '@subwallet/react-ui';
+import { Button, Form, Icon, Logo, ModalContext, Table, Tag } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import { ArrowCounterClockwise, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
@@ -156,7 +156,8 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
   const { isNoAccount } = useSelector((state: RootState) => state.accountState);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
-  const { setWebBaseClassName } = useContext(WebUIContext);
+  const { setOnBack, setWebBaseClassName } = useContext(WebUIContext);
+  const { activeModal } = useContext(ModalContext);
 
   const [contributionsMap, setContributionsMap] = useState<CrowdloanContributionsMap>({
     polkadot: [],
@@ -384,13 +385,22 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     if (isNoAccount) {
       setReturnStorage('/home/earning');
       navigate('/welcome');
+    } else {
+      activeModal(NEW_SEED_MODAL);
     }
-  }, [isNoAccount, navigate, setReturnStorage]);
+  }, [activeModal, isNoAccount, navigate, setReturnStorage]);
+
+  useEffect(() => {
+    setOnBack(onBack);
+
+    return () => {
+      setOnBack(undefined);
+    };
+  }, [onBack, setOnBack]);
 
   return (
     <Layout.Base
       className={className}
-      onBack={onBack}
       showSubHeader={true}
       subHeaderBackground={'transparent'}
       subHeaderCenter={true}

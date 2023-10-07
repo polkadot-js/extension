@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AddressInput } from '@subwallet/extension-koni-ui/components';
-import { CREATE_RETURN, DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
+import { CREATE_RETURN, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import Countdown from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/Countdown';
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Form, Icon, Image } from '@subwallet/react-ui';
+import { Button, Form, Icon, Image, ModalContext } from '@subwallet/react-ui';
 import { ValidateStatus } from '@subwallet/react-ui/es/form/FormItem';
 import { ArrowCounterClockwise, PlusCircle, Question, Vault, Wallet } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -41,6 +41,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const [isWrongAddress, setIsWrongAddress] = useState<boolean>(false);
   const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
   const { setWebBaseClassName } = useContext(WebUIContext);
+  const { activeModal } = useContext(ModalContext);
 
   const formDefault = useMemo((): FormParams => {
     return {
@@ -82,8 +83,10 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     if (isNoAccount) {
       setReturnStorage('/home/earning');
       navigate('/welcome');
+    } else {
+      activeModal(NEW_SEED_MODAL);
     }
-  }, [isNoAccount, navigate, setReturnStorage]);
+  }, [activeModal, isNoAccount, navigate, setReturnStorage]);
 
   useEffect(() => {
     setWebBaseClassName(`${className}-web-base-container`);

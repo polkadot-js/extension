@@ -14,7 +14,16 @@ const SwLogosMap: Record<string, string> = {
   moonpay: DefaultLogosMap.moonpay,
   banxa: DefaultLogosMap.banxa,
   coinbase: DefaultLogosMap.coinbase,
-  rocketIcon: DefaultLogosMap.rocketIcon
+  rocketIcon: DefaultLogosMap.rocketIcon,
+  invarch: DefaultLogosMap.invarch,
+  sora_polkadot: DefaultLogosMap.sora_polkadot,
+  logion: DefaultLogosMap.logion,
+  energy_web_x: DefaultLogosMap.energy_web_x,
+  moonsama: DefaultLogosMap.moonsama,
+  omnibtc: DefaultLogosMap.omnibtc,
+  coinversation: DefaultLogosMap.coinversation,
+  peaq: DefaultLogosMap.peaq,
+  t3rn: DefaultLogosMap.t3rn
 };
 
 export default SwLogosMap;

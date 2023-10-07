@@ -14,7 +14,16 @@ export const DefaultLogosMap: Record<string, string> = {
   walletconnect: '/images/projects/walletconnect.png',
   banxa: '/images/projects/banxa.png',
   coinbase: '/images/projects/coinbase.png',
-  rocketIcon: '/images/projects/rocket-icon.png'
+  rocketIcon: '/images/projects/rocket-icon.png',
+  invarch: '/images/projects/invarch.png',
+  sora_polkadot: '/images/projects/sora_polkadot.png',
+  logion: '/images/projects/logion.png',
+  energy_web_x: '/images/projects/energy_web_x.png',
+  moonsama: '/images/projects/moonsama.svg',
+  omnibtc: '/images/projects/omnibtc.jpg',
+  coinversation: '/images/projects/coinversation.jpg',
+  peaq: '/images/projects/peaq.jpg',
+  t3rn: '/images/projects/t3rn.png'
 };
 
 export const IconMap = {

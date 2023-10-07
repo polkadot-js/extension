@@ -344,6 +344,61 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
 
   useEffect(() => {
     getParaChainInfoMap().then((rs) => {
+      rs.polkadot['3340'] = {
+        slug: 'invarch',
+        name: 'InvArch',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 3340
+      };
+      rs.polkadot['2025'] = {
+        slug: 'sora_polkadot',
+        name: 'SORA Polkadot',
+        paraState: CrowdloanParaState.ONGOING,
+        paraId: 2025
+      };
+      rs.polkadot['3341'] = {
+        slug: 'logion',
+        name: 'Logion',
+        paraState: CrowdloanParaState.ONGOING,
+        paraId: 3341
+      };
+      rs.polkadot['3345'] = {
+        slug: 'energy_web_x',
+        name: 'Energy Web X',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 3345
+      };
+      rs.polkadot['3334'] = {
+        slug: 'moonsama',
+        name: 'Moonsama',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 3334
+      };
+      rs.polkadot['2053'] = {
+        slug: 'omnibtc',
+        name: 'OmniBTC',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 2053
+      };
+      rs.polkadot['2027'] = {
+        slug: 'coinversation',
+        name: 'Coinversation',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 2027
+      };
+      rs.polkadot['3338'] = {
+        slug: 'peaq',
+        name: 'Peaq',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 3338
+      };
+      rs.polkadot['3333'] = {
+        slug: 't3rn',
+        name: 'T3rn',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 3333
+      };
+
       setParaChainInfoMap(rs);
     }).catch((e) => {
       console.log('getParaChainInfoMap Error', e);

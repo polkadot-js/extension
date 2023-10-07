@@ -42,7 +42,7 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
         }
       });
 
-    Object.entries(params.optionalNamespaces)
+    params.optionalNamespaces && Object.entries(params.optionalNamespaces)
       .forEach(([key, namespace]) => {
         if (isSupportWalletConnectNamespace(key)) {
           if (namespace.chains) {
@@ -76,9 +76,11 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
       }
     }
 
-    for (const [key, namespace] of Object.entries(params.optionalNamespaces)) {
-      if (isSupportWalletConnectNamespace(key)) {
-        chains.push(...(namespace.chains || []));
+    if (params.optionalNamespaces) {
+      for (const [key, namespace] of Object.entries(params.optionalNamespaces)) {
+        if (isSupportWalletConnectNamespace(key)) {
+          chains.push(...(namespace.chains || []));
+        }
       }
     }
 

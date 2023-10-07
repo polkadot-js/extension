@@ -1,6 +1,6 @@
     1860	Nam Phạm                      	[Issue 1821] update nft logic for azero domain
-    1620	AnhMTV                        	Release version 1.1.15
-    1314	S2kael                        	Revert "[Issue-1942] [Ledger] Use AttachReadOnly for import Ledger"
+    1621	AnhMTV                        	
+    1316	S2kael                        	Revert "[Issue-1942] [Ledger] Use AttachReadOnly for import Ledger"
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	

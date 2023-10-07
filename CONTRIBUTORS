@@ -1,6 +1,6 @@
     1860	Nam Phạm                      	[Issue 1821] update nft logic for azero domain
-    1621	AnhMTV                        	
-    1316	S2kael                        	Revert "[Issue-1942] [Ledger] Use AttachReadOnly for import Ledger"
+    1625	AnhMTV                        	
+    1320	S2kael                        	[Issue-1988] [Inject] Switch to special account when have only one account
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	

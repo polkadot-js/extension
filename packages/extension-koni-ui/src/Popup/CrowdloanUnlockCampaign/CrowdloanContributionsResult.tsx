@@ -96,6 +96,8 @@ enum FilterValue {
   ACTIVE = 'active'
 }
 
+const acceptFundStatus: number[] = [1, 2];
+
 const getTableItems = (
   relayChainSlug: 'polkadot' | 'kusama',
   contributionsMap: CrowdloanContributionsMap,
@@ -114,6 +116,10 @@ const getTableItems = (
   const price = priceMap[priceId] || 0;
 
   contributionsMap[relayChainSlug].forEach((c) => {
+    if (!acceptFundStatus.includes(c.fund_status)) {
+      return;
+    }
+
     if (!paraChainInfoMap[relayChainSlug]?.[`${c.para_id}`]) {
       return;
     }
@@ -367,11 +373,11 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
 
   const validateAddress = useCallback((rule: Rule, address: string): Promise<void> => {
     if (!address) {
-      return Promise.reject(t('Address is required'));
+      return Promise.reject(t('Address is required.'));
     }
 
     if (!isAddress(address)) {
-      return Promise.reject(t('Invalid address'));
+      return Promise.reject(t('Invalid address. Check again or create a new account to get started.'));
     }
 
     fetchTableData(address);
@@ -523,7 +529,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
                 onClick={onClickCreateNewWallet}
                 schema='primary'
               >
-                {t('Create a wallet')}
+                {t('Create a new account')}
               </Button>
             </div>
           </div>

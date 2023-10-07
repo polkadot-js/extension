@@ -42,3 +42,5 @@ export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';
 export const DAPPS_FAVORITE = 'dapps.favorite';
 
 export const CREATE_RETURN = 'account.create-return';
+
+export const CROWDLOAN_UNLOCK_TIME = 'event.crowdloan-unlock-time';

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AddressInput } from '@subwallet/extension-koni-ui/components';
-import { CREATE_RETURN, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { CREATE_RETURN, CROWDLOAN_UNLOCK_TIME, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_CROWDLOAN_UNLOCK_TIME } from '@subwallet/extension-koni-ui/constants/event';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import Countdown from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/Countdown';
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
@@ -15,7 +16,7 @@ import { ArrowCounterClockwise, PlusCircle, Question, Vault, Wallet } from 'phos
 import React, { Context, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled, { ThemeContext } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -42,6 +43,13 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
   const { setWebBaseClassName } = useContext(WebUIContext);
   const { activeModal } = useContext(ModalContext);
+  const [crowdloanUnlockTime] = useLocalStorage<number>(CROWDLOAN_UNLOCK_TIME, DEFAULT_CROWDLOAN_UNLOCK_TIME);
+
+  const outletContext: {
+    crowdloanUnlockTime: number,
+  } = useOutletContext();
+
+  const targetCrowdloanUnlockTime = outletContext?.crowdloanUnlockTime || crowdloanUnlockTime;
 
   const formDefault = useMemo((): FormParams => {
     return {
@@ -59,7 +67,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     } else {
       setSubmitResponse({
         status: 'error',
-        message: t('Invalid address')
+        message: t('Invalid address. Check again or create a new account to get started.')
       });
       setIsWrongAddress(true);
     }
@@ -110,7 +118,10 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
           <div className={'__countdown-title'}>
             {t('Next Polkadot crowdloan unlocking in')}
           </div>
-          <Countdown className={'__countdown'} />
+          <Countdown
+            className={'__countdown'}
+            targetTime={targetCrowdloanUnlockTime}
+          />
         </div>
 
         <div className='__form-area'>
@@ -190,7 +201,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
                   onClick={onClickCreateNewWallet}
                   schema='primary'
                 >
-                  {t('Create a wallet')}
+                  {t('Create a new account')}
                 </Button>
               </div>
             )

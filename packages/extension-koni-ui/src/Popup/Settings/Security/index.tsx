@@ -6,6 +6,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { EDIT_AUTO_LOCK_TIME_MODAL, EDIT_UNLOCK_TYPE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveAutoLockTime, saveCameraSetting, saveEnableChainPatrol, saveUnlockType, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -62,6 +63,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const isPopup = useIsPopup();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { setOnBack } = useContext(WebUIContext);
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
   const { camera, enableChainPatrol, timeAutoLock, unlockType } = useSelector((state: RootState) => state.settings);
@@ -265,6 +267,14 @@ const Component: React.FC<Props> = (props: Props) => {
         .catch(console.error);
     }
   }, [camera]);
+
+  useEffect(() => {
+    setOnBack(onBack);
+
+    return () => {
+      setOnBack(undefined);
+    };
+  }, [onBack, setOnBack]);
 
   return (
     <PageWrapper className={CN(className)}>

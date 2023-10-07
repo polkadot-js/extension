@@ -96,12 +96,12 @@ const Component: React.FC<Props> = (props: Props) => {
           )
         }
         {
-          status === ProcessStatus.SUCCESS && (
+          status === ProcessStatus.FAIL && (
             <EarningDoneFail />
           )
         }
         {
-          status === ProcessStatus.FAIL && (
+          status === ProcessStatus.SUCCESS && (
             <EarningDoneSuccess />
           )
         }
@@ -126,7 +126,11 @@ const EarningDoneContent = styled(Component)<Props>(({ theme: { extendToken, tok
     },
 
     '.social-group': {
-      alignSelf: 'center'
+      alignSelf: 'center',
+
+      '@media (max-height: 894px)': {
+        display: 'none'
+      }
     },
 
     '.and-more': {

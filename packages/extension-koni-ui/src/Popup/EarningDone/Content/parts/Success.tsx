@@ -42,6 +42,10 @@ const Component: React.FC<Props> = (props: Props) => {
     // TODO: add callback
   }, []);
 
+  const goToNft = useCallback(() => {
+    navigate('/home/nfts/collections');
+  }, [navigate]);
+
   return (
     <div className={CN(className)}>
       <Trans
@@ -70,7 +74,14 @@ const Component: React.FC<Props> = (props: Props) => {
       />
       <div className='description'>
         <Trans
-          components={{ highlight: <span className='highlight' /> }}
+          components={{
+            highlight: (
+              <span
+                className='highlight'
+                onClick={goToNft}
+              />
+            )
+          }}
           i18nKey={'T&C: From Oct 24 to Nov 7, each address that initiates transactions on each protocol on the SubWallet Earning Dashboard is eligible for 01 free NFT. Check your NFT <highlight>here</highlight>!'}
         />
       </div>
@@ -149,7 +160,8 @@ const EarningDoneSuccess = styled(Component)<Props>(({ theme: { token } }: Props
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
       color: token.colorLink,
-      textDecoration: 'underline'
+      textDecoration: 'underline',
+      cursor: 'pointer'
     }
   };
 });

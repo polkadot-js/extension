@@ -229,7 +229,8 @@ const EarningOverviewContent = styled(Component)<Props>(({ theme: { token } }: P
   return ({
     '.ant-sw-list-wrapper': {
       marginLeft: -token.margin,
-      marginRight: -token.margin
+      marginRight: -token.margin,
+      flexBasis: 'auto'
     },
 
     '.earning-filter-icon': {

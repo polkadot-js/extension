@@ -28,9 +28,9 @@ enum FilterValue {
   ALL = 'all',
   POLKADOT_PARACHAIN = 'Polkadot parachain',
   KUSAMA_PARACHAIN = 'Kusama parachain',
-  WINNER = 'completed',
+  WON = 'won',
   FAIL = 'failed',
-  ACTIVE = 'active'
+  IN_AUCTION = 'in auction'
 }
 
 function getTagColor (paraState?: CrowdloanParaState) {
@@ -98,7 +98,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const filterOptions = useMemo(() => [
     { label: t('Polkadot parachain'), value: FilterValue.POLKADOT_PARACHAIN },
     { label: t('Kusama parachain'), value: FilterValue.KUSAMA_PARACHAIN },
-    { label: t('Win'), value: FilterValue.WINNER },
+    { label: t('Won'), value: FilterValue.WON },
     { label: t('Fail'), value: FilterValue.FAIL }
   ], [t]);
 
@@ -117,7 +117,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           if (item.relayParentDisplayName === 'Kusama parachain') {
             return true;
           }
-        } else if (filter === FilterValue.WINNER) {
+        } else if (filter === FilterValue.WON) {
           if (item.paraState === CrowdloanParaState.COMPLETED) {
             return true;
           }
@@ -155,11 +155,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         return true;
       }
 
-      if (selectedFilterTab === FilterValue.WINNER) {
+      if (selectedFilterTab === FilterValue.WON) {
         return item.paraState === CrowdloanParaState.COMPLETED;
       }
 
-      if (selectedFilterTab === FilterValue.ACTIVE) {
+      if (selectedFilterTab === FilterValue.IN_AUCTION) {
         return item.paraState === CrowdloanParaState.ONGOING;
       }
 
@@ -180,7 +180,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     if (paraState.valueOf() === CrowdloanParaState.COMPLETED.valueOf()) {
-      return t('Win');
+      return t('Won');
     }
 
     if (paraState === CrowdloanParaState.FAILED.valueOf()) {
@@ -188,7 +188,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     if (paraState === CrowdloanParaState.ONGOING.valueOf()) {
-      return t('Active');
+      return t('In Auction');
     }
 
     return '';
@@ -380,12 +380,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         value: FilterValue.ALL
       },
       {
-        label: t('Active'),
-        value: FilterValue.ACTIVE
+        label: t('In Auction'),
+        value: FilterValue.IN_AUCTION
       },
       {
-        label: t('Winner'),
-        value: FilterValue.WINNER
+        label: t('Won'),
+        value: FilterValue.WON
       }
     ];
   }, [t]);
@@ -510,6 +510,11 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '.web-container': {
         height: '100%',
         marginTop: 24
+      },
+
+      '.search-container': {
+        width: 'auto',
+        flex: 1
       }
     },
 

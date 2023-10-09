@@ -10,7 +10,7 @@ import styled, { useTheme } from 'styled-components';
 interface Props extends ThemeProps {
   phosphorIcon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,
   emptyTitle?: string,
-  emptyMessage?: string,
+  emptyMessage?: string | React.ReactNode,
   buttonProps?: ButtonProps;
 }
 

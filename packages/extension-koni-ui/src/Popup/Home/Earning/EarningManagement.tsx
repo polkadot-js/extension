@@ -9,9 +9,9 @@ import { useFilterModal, useGroupYieldPosition, useTranslation } from '@subwalle
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, Divider, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Vault } from 'phosphor-react';
+import { PlusCircle, Vault } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -313,6 +313,10 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(TRANSACTION_YIELD_FAST_WITHDRAW_MODAL);
   }, [inactiveModal]);
 
+  const addMore = useCallback(() => {
+    navigate('/home/earning/overview');
+  }, [navigate]);
+
   return (
     <Layout.Base
       className={className}
@@ -337,12 +341,38 @@ const Component: React.FC<Props> = (props: Props) => {
         className={CN('earning-management__container')}
         enableSearchInput={false}
         filterBy={filterFunction}
-        list={resultList}
+        list={new Array(1).fill(resultList).flat()}
         renderItem={renderEarningItem}
         renderOnScroll={true}
         renderWhenEmpty={renderWhenEmpty}
         searchMinCharactersCount={2}
       />
+      <Divider className='divider' />
+      <div className='footer-group'>
+        <div className='footer-left'>
+          <Icon
+            iconColor='var(--icon-color)'
+            phosphorIcon={PlusCircle}
+            size='md'
+            weight='fill'
+          />
+          <span className='footer-content'>{t('Do you want to add more funds or add funds for other pools?')}</span>
+        </div>
+        <Button
+          icon={(
+            <Icon
+              phosphorIcon={Vault}
+              size='sm'
+              weight='fill'
+            />
+          )}
+          onClick={addMore}
+          shape='circle'
+          size='xs'
+        >
+          {t('Add more fund')}
+        </Button>
+      </div>
 
       {selectedYieldPoolInfo && <EarningCalculatorModal defaultItem={selectedYieldPoolInfo} />}
       {selectedYieldPoolInfo && <EarningInfoModal defaultItem={selectedYieldPoolInfo} />}
@@ -435,6 +465,33 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
     '.earning-filter-icon': {
       width: '12px',
       height: '12px'
+    },
+
+    '.divider': {
+      margin: `${token.margin}px 0`
+    },
+
+    '.footer-group': {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: token.marginXS,
+      marginBottom: token.marginXL,
+
+      '.footer-left': {
+        '--icon-color': token['gold-6'],
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: token.sizeXS,
+
+        '.footer-content': {
+          fontSize: token.fontSizeHeading5,
+          lineHeight: token.lineHeightHeading5,
+          color: token.colorTextSecondary
+        }
+      }
     }
   });
 });

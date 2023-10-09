@@ -259,7 +259,7 @@ const Component = () => {
           <div>
             {
               Object.values(_assetEarnings).map((value) => {
-                const amount = (value.apy || 0) * 100;
+                const amount = (value.apy || 0);
 
                 return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)}% ${value.symbol}`;
               }).join(' - ')

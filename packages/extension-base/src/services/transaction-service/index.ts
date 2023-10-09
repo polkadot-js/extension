@@ -3,8 +3,9 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, SubmitYieldStepData, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, SubmitYieldStepData, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -26,6 +27,7 @@ import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import keyring from '@subwallet/ui-keyring';
+import BigN from 'bignumber.js';
 import { addHexPrefix } from 'ethereumjs-util';
 import { ethers, TransactionLike } from 'ethers';
 import EventEmitter from 'eventemitter3';
@@ -41,6 +43,8 @@ import { EventRecord } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 import { isHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
+
+import { _TRANSFER_CHAIN_GROUP } from '../chain-service/constants';
 
 export default class TransactionService {
   private readonly balanceService: BalanceService;
@@ -185,34 +189,34 @@ export default class TransactionService {
     const transferNativeNum = parseInt(transferNative);
 
     // TODO
-    // if (!new BigN(balance.value).gt(0)) {
-    //   validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-    // }
-    //
-    // if (transferNativeNum + feeNum > balanceNum) {
-    //   if (!isTransferAll) {
-    //     validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-    //   } else {
-    //     if ([
-    //       ..._TRANSFER_CHAIN_GROUP.acala,
-    //       ..._TRANSFER_CHAIN_GROUP.genshiro,
-    //       ..._TRANSFER_CHAIN_GROUP.bitcountry,
-    //       ..._TRANSFER_CHAIN_GROUP.statemine
-    //     ].includes(chain)) { // Chain not have transfer all function
-    //       validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-    //     }
-    //   }
-    // }
+    if (!new BigN(balance.value).gt(0)) {
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+    }
 
-    // if (!isTransferAll) {
-    //   if (balanceNum - (transferNativeNum + feeNum) < edNum) {
-    //     if (edAsWarning) {
-    //       validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
-    //     } else {
-    //       validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
-    //     }
-    //   }
-    // }
+    if (transferNativeNum + feeNum > balanceNum) {
+      if (!isTransferAll) {
+        validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+      } else {
+        if ([
+          ..._TRANSFER_CHAIN_GROUP.acala,
+          ..._TRANSFER_CHAIN_GROUP.genshiro,
+          ..._TRANSFER_CHAIN_GROUP.bitcountry,
+          ..._TRANSFER_CHAIN_GROUP.statemine
+        ].includes(chain)) { // Chain not have transfer all function
+          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+        }
+      }
+    }
+
+    if (!isTransferAll) {
+      if (balanceNum - (transferNativeNum + feeNum) < edNum) {
+        if (edAsWarning) {
+          validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
+        } else {
+          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
+        }
+      }
+    }
 
     // Validate transaction with additionalValidator method
     additionalValidator && await additionalValidator(validationResponse);

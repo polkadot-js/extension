@@ -7,6 +7,7 @@ import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handler
 import { AccountAuthType, AccountJson, AddressJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAccountUnsubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
+import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
@@ -24,7 +25,6 @@ import { HexString } from '@polkadot/util/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
-import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 
 export enum RuntimeEnvironment {
   Web = 'Web',
@@ -603,6 +603,9 @@ export type TransactionAdditionalInfo = {
   [ExtrinsicType.TRANSFER_XCM]: XCMTransactionAdditionalInfo,
   [ExtrinsicType.SEND_NFT]: NFTTransactionAdditionalInfo,
   [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.MINT_QDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
   [ExtrinsicType.REDEEM_VDOT]: Pick<SubmitYieldStepData, 'inputTokenSlug' | 'exchangeRate'>
 }
 
@@ -2202,6 +2205,8 @@ export interface OptimalYieldPath {
 export enum YieldValidationStatus {
   NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
   NOT_ENOUGH_MIN_AMOUNT = 'NOT_ENOUGH_MIN_AMOUNT',
+  NOT_ENOUGH_BALANCE = 'NOT_ENOUGH_BALANCE',
+  NOT_ENOUGH_MIN_JOIN_POOL = 'NOT_ENOUGH_MIN_JOIN_POOL',
   OK = 'OK'
 }
 

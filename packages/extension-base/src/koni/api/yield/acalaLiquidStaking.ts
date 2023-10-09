@@ -3,8 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
@@ -100,83 +99,6 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
   return () => {
     clearInterval(interval);
   };
-}
-
-export function validateProcessForAcalaLiquidStaking (params: OptimalYieldPathParams, path: OptimalYieldPath): TransactionError[] {
-  const errors: TransactionError[] = [];
-  const processValidation: YieldProcessValidation = {
-    ok: true,
-    status: YieldValidationStatus.OK
-  };
-
-  const bnAmount = new BN(params.amount);
-  const inputTokenSlug = params.poolInfo.inputAssets[0]; // TODO
-  const bnInputTokenBalance = new BN(params.balanceMap[inputTokenSlug]?.free || '0');
-
-  if (path.steps[0].type === YieldStepType.XCM && params.poolInfo.altInputAssets) { // if xcm
-    const missingAmount = bnAmount.sub(bnInputTokenBalance); // TODO: what if input token is not LOCAL ??
-    const xcmFee = new BN(path.totalFee[0].amount || '0');
-    const xcmAmount = missingAmount.add(xcmFee);
-
-    const altInputTokenSlug = params.poolInfo.altInputAssets[0];
-    const bnAltInputTokenBalance = new BN(params.balanceMap[altInputTokenSlug]?.free || '0');
-    const altInputTokenMinAmount = new BN(params.assetInfoMap[altInputTokenSlug].minAmount || '0');
-
-    if (!bnAltInputTokenBalance.sub(xcmAmount).gte(altInputTokenMinAmount)) {
-      processValidation.failedStep = path.steps[0];
-      processValidation.ok = false;
-      processValidation.status = YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT;
-
-      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT, processValidation.message, processValidation));
-
-      return errors;
-    }
-  }
-
-  const submitStep = path.steps[0].type === YieldStepType.XCM ? path.steps[1] : path.steps[0];
-  const feeTokenSlug = path.totalFee[submitStep.id].slug;
-  const defaultFeeTokenSlug = params.poolInfo.feeAssets[0];
-
-  if (feeTokenSlug === defaultFeeTokenSlug) {
-    const bnFeeAmount = new BN(path.totalFee[submitStep.id]?.amount || '0');
-    const bnFeeTokenBalance = new BN(params.balanceMap[feeTokenSlug]?.free || '0');
-    const bnFeeTokenMinAmount = new BN(params.assetInfoMap[feeTokenSlug]?.minAmount || '0');
-
-    if (!bnFeeTokenBalance.sub(bnFeeAmount).gte(bnFeeTokenMinAmount)) {
-      processValidation.failedStep = path.steps[submitStep.id];
-      processValidation.ok = false;
-      processValidation.status = YieldValidationStatus.NOT_ENOUGH_FEE;
-
-      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_FEE, processValidation.message, processValidation));
-
-      return errors;
-    }
-
-    if (!bnAmount.gte(new BN(params.poolInfo.stats?.minJoinPool || '0'))) {
-      processValidation.failedStep = path.steps[submitStep.id];
-      processValidation.ok = false;
-      processValidation.status = YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT;
-
-      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT, processValidation.message, processValidation));
-
-      return errors;
-    }
-  } else {
-    const bnFeeAmount = new BN(path.totalFee[submitStep.id]?.amount || '0');
-
-    // paying fee with input token
-    if (!bnAmount.sub(bnFeeAmount).gte(new BN(params.poolInfo.stats?.minJoinPool || '0'))) {
-      processValidation.failedStep = path.steps[submitStep.id];
-      processValidation.ok = false;
-      processValidation.status = YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT;
-
-      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_MIN_AMOUNT, processValidation.message, processValidation));
-
-      return errors;
-    }
-  }
-
-  return errors;
 }
 
 export async function getAcalaLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): Promise<HandleYieldStepData> {

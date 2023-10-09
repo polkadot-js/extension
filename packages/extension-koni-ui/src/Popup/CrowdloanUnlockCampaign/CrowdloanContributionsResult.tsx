@@ -7,7 +7,7 @@ import { _getAssetDecimals, _getAssetPriceId, _getChainNativeTokenSlug } from '@
 import { CrowdloanContributionItem } from '@subwallet/extension-base/services/subscan-service/types';
 import { AddressInput, Layout, TokenBalance } from '@subwallet/extension-koni-ui/components';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
-import { CREATE_RETURN, DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
+import { CREATE_RETURN, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { getCrowdloanContributions, getParaChainInfoMap } from '@subwallet/extension-koni-ui/messaging';
@@ -16,7 +16,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
 import { CrowdloanContributionsResultParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon, Logo, Table, Tag } from '@subwallet/react-ui';
+import { Button, Form, Icon, Logo, ModalContext, Table, Tag } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import { ArrowCounterClockwise, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
@@ -96,6 +96,8 @@ enum FilterValue {
   ACTIVE = 'active'
 }
 
+const acceptFundStatus: number[] = [1, 2];
+
 const getTableItems = (
   relayChainSlug: 'polkadot' | 'kusama',
   contributionsMap: CrowdloanContributionsMap,
@@ -114,6 +116,10 @@ const getTableItems = (
   const price = priceMap[priceId] || 0;
 
   contributionsMap[relayChainSlug].forEach((c) => {
+    if (!acceptFundStatus.includes(c.fund_status)) {
+      return;
+    }
+
     if (!paraChainInfoMap[relayChainSlug]?.[`${c.para_id}`]) {
       return;
     }
@@ -156,7 +162,8 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
   const { isNoAccount } = useSelector((state: RootState) => state.accountState);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
-  const { setWebBaseClassName } = useContext(WebUIContext);
+  const { setOnBack, setWebBaseClassName } = useContext(WebUIContext);
+  const { activeModal } = useContext(ModalContext);
 
   const [contributionsMap, setContributionsMap] = useState<CrowdloanContributionsMap>({
     polkadot: [],
@@ -337,6 +344,61 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
 
   useEffect(() => {
     getParaChainInfoMap().then((rs) => {
+      rs.polkadot['3340'] = {
+        slug: 'invarch',
+        name: 'InvArch',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 3340
+      };
+      rs.polkadot['2025'] = {
+        slug: 'sora_polkadot',
+        name: 'SORA Polkadot',
+        paraState: CrowdloanParaState.ONGOING,
+        paraId: 2025
+      };
+      rs.polkadot['3341'] = {
+        slug: 'logion',
+        name: 'Logion',
+        paraState: CrowdloanParaState.ONGOING,
+        paraId: 3341
+      };
+      rs.polkadot['3345'] = {
+        slug: 'energy_web_x',
+        name: 'Energy Web X',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 3345
+      };
+      rs.polkadot['3334'] = {
+        slug: 'moonsama',
+        name: 'Moonsama',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 3334
+      };
+      rs.polkadot['2053'] = {
+        slug: 'omnibtc',
+        name: 'OmniBTC',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 2053
+      };
+      rs.polkadot['2027'] = {
+        slug: 'coinversation',
+        name: 'Coinversation',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 2027
+      };
+      rs.polkadot['3338'] = {
+        slug: 'peaq',
+        name: 'Peaq',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 3338
+      };
+      rs.polkadot['3333'] = {
+        slug: 't3rn',
+        name: 'T3rn',
+        paraState: CrowdloanParaState.COMPLETED,
+        paraId: 3333
+      };
+
       setParaChainInfoMap(rs);
     }).catch((e) => {
       console.log('getParaChainInfoMap Error', e);
@@ -366,11 +428,11 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
 
   const validateAddress = useCallback((rule: Rule, address: string): Promise<void> => {
     if (!address) {
-      return Promise.reject(t('Address is required'));
+      return Promise.reject(t('Address is required.'));
     }
 
     if (!isAddress(address)) {
-      return Promise.reject(t('Invalid address'));
+      return Promise.reject(t('Invalid address. Check again or create a new account to get started.'));
     }
 
     fetchTableData(address);
@@ -384,13 +446,22 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     if (isNoAccount) {
       setReturnStorage('/home/earning');
       navigate('/welcome');
+    } else {
+      activeModal(NEW_SEED_MODAL);
     }
-  }, [isNoAccount, navigate, setReturnStorage]);
+  }, [activeModal, isNoAccount, navigate, setReturnStorage]);
+
+  useEffect(() => {
+    setOnBack(onBack);
+
+    return () => {
+      setOnBack(undefined);
+    };
+  }, [onBack, setOnBack]);
 
   return (
     <Layout.Base
       className={className}
-      onBack={onBack}
       showSubHeader={true}
       subHeaderBackground={'transparent'}
       subHeaderCenter={true}
@@ -513,7 +584,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
                 onClick={onClickCreateNewWallet}
                 schema='primary'
               >
-                {t('Create a wallet')}
+                {t('Create a new account')}
               </Button>
             </div>
           </div>

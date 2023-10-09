@@ -114,7 +114,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const onClickStakeBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
       if (isNoAccount) {
-        setReturnStorage('/home/earning');
+        setReturnStorage('/home/earning/');
         navigate('/welcome');
       } else {
         setSelectedItem(item);

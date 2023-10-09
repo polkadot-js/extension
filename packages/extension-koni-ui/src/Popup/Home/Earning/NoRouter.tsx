@@ -19,9 +19,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     if (yieldPositions.length) {
-      navigate('/home/earning/detail');
+      navigate('/home/earning/detail', { replace: true });
     } else {
-      navigate('/home/earning/overview');
+      navigate('/home/earning/overview', { replace: true });
     }
   }, [yieldPositions.length, navigate]);
 

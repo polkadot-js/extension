@@ -91,7 +91,7 @@ const Component = ({ children, className, headerIcons, isSetTitleContext = true,
       },
       label: t('Earning'),
       key: 'earning',
-      url: '/home/earning'
+      url: '/home/earning/'
     },
     {
       icon: {

@@ -71,7 +71,7 @@ const Component: React.FC = () => {
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
 
   const goHome = useCallback(() => {
-    navigate('/home/earning');
+    navigate('/home/earning/');
   }, [navigate]);
 
   const onFieldsChange: FormCallbacks<YieldStakingWithdrawParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {

@@ -3,7 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
-import { useGetYieldPositions, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useAutoNavigateEarning, useGetYieldPositions, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +23,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const yieldPositions = useGetYieldPositions();
 
+  useAutoNavigateEarning();
+
   const onBack = useCallback(() => {
     navigate('/home/earning/detail');
   }, [navigate]);
@@ -30,6 +32,8 @@ const Component: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     if (yieldPositions.length) {
       setHeaderType(HeaderType.COMMON_BACK);
+    } else {
+      setHeaderType(HeaderType.COMMON);
     }
   }, [setHeaderType, yieldPositions.length]);
 

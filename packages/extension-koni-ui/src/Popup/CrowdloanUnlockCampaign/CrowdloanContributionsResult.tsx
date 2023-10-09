@@ -444,7 +444,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
 
   const onClickCreateNewWallet = useCallback(() => {
     if (isNoAccount) {
-      setReturnStorage('/home/earning');
+      setReturnStorage('/home/earning/');
       navigate('/welcome');
     } else {
       activeModal(NEW_SEED_MODAL);

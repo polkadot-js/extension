@@ -52,6 +52,7 @@ export const YIELD_POSITION_DETAIL_MODAL = 'yield-position-detail-modal';
 
 export const STAKING_CALCULATOR_MODAL = 'staking-calculator-modal';
 export const EARNING_INFO_MODAL = 'earning-info-modal';
+export const EARNING_MORE_ACTION_MODAL = 'earning-more-action-modal';
 
 /* Earning */
 

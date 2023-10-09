@@ -45,7 +45,7 @@ const createDoneUrl = '/create-done';
 
 // Campaign
 const earningDemoUrl = '/earning-demo';
-const earningHomeUrl = '/home/earning';
+const earningHomeUrl = '/home/earning/';
 const checkCrowdloanUrl = '/crowdloan-unlock-campaign/check-contributions';
 const crowdloanResultUrl = '/crowdloan-unlock-campaign/contributions-result';
 

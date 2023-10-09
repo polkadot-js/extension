@@ -5,13 +5,13 @@ import { NominatorMetadata, YieldPoolInfo, YieldPoolType, YieldPositionInfo } fr
 import { BaseModal, EarningCalculatorModal, EarningInfoModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout, YieldPositionDetailModal, YieldStakingDetailModal } from '@subwallet/extension-koni-ui/components';
 import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFilterModal, useGroupYieldPosition, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useAutoNavigateEarning, useFilterModal, useGroupYieldPosition, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, Divider, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Vault } from 'phosphor-react';
+import { PlusCircle, Vault } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -49,6 +49,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [{ selectedYieldPoolInfo, selectedYieldPosition }, setSelectedItem] = useState<{ selectedYieldPosition: YieldPositionInfo | undefined, selectedYieldPoolInfo: YieldPoolInfo | undefined }>({ selectedYieldPosition: undefined, selectedYieldPoolInfo: undefined });
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  useAutoNavigateEarning();
 
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setUnYieldStorage] = useLocalStorage(UN_YIELD_TRANSACTION, DEFAULT_UN_YIELD_PARAMS);
@@ -313,6 +315,10 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(TRANSACTION_YIELD_FAST_WITHDRAW_MODAL);
   }, [inactiveModal]);
 
+  const addMore = useCallback(() => {
+    navigate('/home/earning/overview');
+  }, [navigate]);
+
   return (
     <Layout.Base
       className={className}
@@ -337,12 +343,38 @@ const Component: React.FC<Props> = (props: Props) => {
         className={CN('earning-management__container')}
         enableSearchInput={false}
         filterBy={filterFunction}
-        list={resultList}
+        list={new Array(1).fill(resultList).flat()}
         renderItem={renderEarningItem}
         renderOnScroll={true}
         renderWhenEmpty={renderWhenEmpty}
         searchMinCharactersCount={2}
       />
+      <Divider className='divider' />
+      <div className='footer-group'>
+        <div className='footer-left'>
+          <Icon
+            iconColor='var(--icon-color)'
+            phosphorIcon={PlusCircle}
+            size='md'
+            weight='fill'
+          />
+          <span className='footer-content'>{t('Do you want to add more funds or add funds for other pools?')}</span>
+        </div>
+        <Button
+          icon={(
+            <Icon
+              phosphorIcon={Vault}
+              size='sm'
+              weight='fill'
+            />
+          )}
+          onClick={addMore}
+          shape='circle'
+          size='xs'
+        >
+          {t('Add more fund')}
+        </Button>
+      </div>
 
       {selectedYieldPoolInfo && <EarningCalculatorModal defaultItem={selectedYieldPoolInfo} />}
       {selectedYieldPoolInfo && <EarningInfoModal defaultItem={selectedYieldPoolInfo} />}
@@ -435,6 +467,33 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
     '.earning-filter-icon': {
       width: '12px',
       height: '12px'
+    },
+
+    '.divider': {
+      margin: `${token.margin}px 0`
+    },
+
+    '.footer-group': {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: token.marginXS,
+      marginBottom: token.marginXL,
+
+      '.footer-left': {
+        '--icon-color': token['gold-6'],
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: token.sizeXS,
+
+        '.footer-content': {
+          fontSize: token.fontSizeHeading5,
+          lineHeight: token.lineHeightHeading5,
+          color: token.colorTextSecondary
+        }
+      }
     }
   });
 });

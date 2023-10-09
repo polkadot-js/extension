@@ -54,7 +54,7 @@ function Component ({ className,
       // },
       {
         label: t('Earning'),
-        value: '/home/earning',
+        value: '/home/earning/',
         icon: Vault
       },
       {
@@ -129,7 +129,7 @@ function Component ({ className,
       const transaction = pathname.split('/')[2];
 
       if (transaction === 'earn') {
-        return ['/home/earning'];
+        return ['/home/earning/'];
       }
 
       return ['/home/staking'];

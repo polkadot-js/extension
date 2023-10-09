@@ -53,7 +53,7 @@ const Component: React.FC = () => {
   const [isChangeData, setIsChangeData] = useState(false);
 
   const goHome = useCallback(() => {
-    navigate('/home/earning');
+    navigate('/home/earning/');
   }, [navigate]);
 
   const persistUnstake = useMemo(() => {

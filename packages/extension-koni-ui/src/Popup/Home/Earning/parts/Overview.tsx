@@ -37,7 +37,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount, isNoAccount } = useSelector((state: RootState) => state.accountState);
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const { chainInfoMap, chainStateMap } = useSelector((state: RootState) => state.chainStore);
 
   const { activeModal } = useContext(ModalContext);
 
@@ -114,7 +114,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const onClickStakeBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
       if (isNoAccount) {
-        setReturnStorage('/home/earning');
+        setReturnStorage('/home/earning/');
         navigate('/welcome');
       } else {
         setSelectedItem(item);
@@ -148,6 +148,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const resultList = useMemo((): YieldPoolInfo[] => {
     return [...Object.values(poolInfo)]
       .filter((value) => {
+        if (!chainStateMap[value.chain].active) {
+          return false;
+        }
+
         if (!currentAccount) {
           return true;
         }
@@ -182,7 +186,7 @@ const Component: React.FC<Props> = (props: Props) => {
             return 0;
         }
       });
-  }, [chainInfoMap, currentAccount, poolInfo, sortSelection]);
+  }, [chainInfoMap, chainStateMap, currentAccount, poolInfo, sortSelection]);
 
   const renderWhenEmpty = useCallback(() => {
     return (

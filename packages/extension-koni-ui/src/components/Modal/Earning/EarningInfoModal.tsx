@@ -135,7 +135,7 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(modalId);
 
     if (isNoAccount) {
-      setReturnStorage('/home/earning');
+      setReturnStorage('/home/earning/');
       navigate('/welcome');
     } else {
       const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';

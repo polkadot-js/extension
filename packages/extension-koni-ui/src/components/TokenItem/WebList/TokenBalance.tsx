@@ -17,7 +17,7 @@ type Props = ThemeProps & {
 };
 
 function Component (
-  { autoHideBalance,
+  { autoHideBalance = true,
     className = '',
     convertedValue,
     symbol, value }: Props) {

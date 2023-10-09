@@ -8,8 +8,8 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
-import { useFetchChainInfo, useGetAccountsByStaking, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { BN_ZERO, DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { useFetchChainInfo, useGetAccountsByYield, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -37,11 +37,17 @@ export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) =
 
 const modalId = YIELD_STAKING_DETAIL_MODAL;
 
-const Component: React.FC<Props> = ({ className, nominatorMetadata, yieldPoolInfo }: Props) => {
+const Component: React.FC<Props> = (props: Props) => {
+  const { className, nominatorMetadata, yieldPoolInfo } = props;
+  const { slug } = yieldPoolInfo;
+
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+
   const chainStakingMetadata = useMemo(() => yieldPoolInfo.metadata, [yieldPoolInfo]);
+
   const { expectedReturn, minJoinNominationPool, minStake, unstakingPeriod } = chainStakingMetadata || {};
   const { activeStake, address, chain, nominations, status, type, unstakings } = nominatorMetadata;
+
   const showingOption = isShowNominationByValidator(chain);
   const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
   const modalTitle = type === StakingType.NOMINATED.valueOf() ? detectTranslate('Nomination details') : detectTranslate('Pooled details');
@@ -61,7 +67,17 @@ const Component: React.FC<Props> = ({ className, nominatorMetadata, yieldPoolInf
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setUnStakeStorage] = useLocalStorage(UN_YIELD_TRANSACTION, DEFAULT_UN_YIELD_PARAMS);
 
-  const stakingAccounts = useGetAccountsByStaking(chain, type);
+  const yieldAccounts = useGetAccountsByYield(slug);
+
+  const unstakedValue = useMemo(() => {
+    let tmp = BN_ZERO;
+
+    unstakings.forEach((value) => {
+      tmp = tmp.plus(value.claimable);
+    });
+
+    return tmp.toString();
+  }, [unstakings]);
 
   const tagTypes = useMemo(() => createEarningTagTypes(t, token), [t, token]);
 
@@ -233,7 +249,7 @@ const Component: React.FC<Props> = ({ className, nominatorMetadata, yieldPoolInf
     >
       <MetaInfo>
         <MetaInfo.Account
-          accounts={isAccountAll(address) ? stakingAccounts : undefined}
+          accounts={isAccountAll(address) ? yieldAccounts : undefined}
           address={address}
           label={t('Account')}
           name={account?.name}
@@ -295,7 +311,7 @@ const Component: React.FC<Props> = ({ className, nominatorMetadata, yieldPoolInf
           label={t('Unstaked')}
           suffix={symbol}
           // value={staking.unlockingBalance || '0'}
-          value={'0'}
+          value={unstakedValue}
         />
 
         <MetaInfo.Chain
@@ -416,7 +432,7 @@ const Component: React.FC<Props> = ({ className, nominatorMetadata, yieldPoolInf
                 label={t('Unstaked')}
                 suffix={symbol}
                 // value={staking.unlockingBalance || '0'}
-                value={'0'}
+                value={unstakedValue}
               />
             </MetaInfo>
             <MetaInfo

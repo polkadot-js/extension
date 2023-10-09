@@ -123,7 +123,7 @@ const Component = (props: Props) => {
 
   const onSubmit: FormCallbacks<EarningCalculatorFormProps>['onFinish'] = useCallback((values: EarningCalculatorFormProps) => {
     if (isNoAccount) {
-      setReturnStorage('/home/earning');
+      setReturnStorage('/home/earning/');
       navigate('/welcome');
     } else {
       const { amount } = values;

@@ -112,7 +112,7 @@ function Component ({ children, className, modalContent }: Props) {
       case 'un-yield':
       case 'withdraw-yield':
       case 'claim-yield':
-        return '/home/earning';
+        return '/home/earning/';
       case 'send-fund':
       default:
         return '/home/tokens';

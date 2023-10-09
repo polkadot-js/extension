@@ -34,7 +34,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 
   const backToEarning = useCallback(() => {
-    navigate('/home/earning');
+    navigate('/home/earning/');
   }, [navigate]);
 
   return (

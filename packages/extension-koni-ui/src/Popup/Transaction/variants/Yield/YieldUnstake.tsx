@@ -9,7 +9,7 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { AccountSelector, AmountInput, HiddenInput, NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNativeTokenBasicInfo, useGetYieldInfo, useGetYieldMetadata, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNativeTokenBasicInfo, useGetYieldPositionInfo, useGetYieldMetadata, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitNominationPoolUnstaking, yieldSubmitUnstaking } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams, UnYieldParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
@@ -66,8 +66,8 @@ const Component: React.FC = () => {
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain || '');
   const yieldPoolInfo = useGetYieldMetadata(method);
   const chainStakingMetadata = yieldPoolInfo?.metadata as ChainStakingMetadata;
-  const allNominatorInfo = useGetYieldInfo(method);
-  const nominatorInfo = useGetYieldInfo(method, from);
+  const allNominatorInfo = useGetYieldPositionInfo(method);
+  const nominatorInfo = useGetYieldPositionInfo(method, from);
   const nominatorMetadata = nominatorInfo[0].metadata as NominatorMetadata;
   const type = nominatorMetadata.type;
 

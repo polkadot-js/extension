@@ -14,7 +14,7 @@ export default class MigrateLedgerAccount extends BaseMigrationJob {
         const store = new AccountsStore();
 
         const update = (key: string, value: KeyringJson) => {
-          if (key.startsWith('account:') && value.meta && isString(value.meta?.originGenesisHash)) {
+          if (key.startsWith('account:') && value?.meta && isString(value.meta?.originGenesisHash)) {
             const newValue = { ...value };
 
             newValue.meta.availableGenesisHashes = [value.meta.originGenesisHash];

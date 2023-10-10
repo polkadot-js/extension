@@ -170,7 +170,7 @@ const Component: React.FC = () => {
           />
 
           <Form.Item
-            name={'value'}
+            name={'amount'}
             rules={[
               { required: true, message: t('Amount is required') },
               validateYieldWithdrawPosition(minWithdraw, activeBalance, tokenDecimals || 0, t)

@@ -6,7 +6,7 @@ import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/se
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
-import { usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetAccountsByYield, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTagTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
@@ -25,7 +25,10 @@ interface Props extends ThemeProps {
 
 const modalId = YIELD_POSITION_DETAIL_MODAL;
 
-const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: Props) => {
+const Component: React.FC<Props> = (props: Props) => {
+  const { className, positionInfo, yieldPoolInfo } = props;
+  const { slug } = yieldPoolInfo;
+
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const modalTitle = detectTranslate('Position details');
@@ -35,6 +38,8 @@ const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: 
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const onClickFooterButton = usePreCheckAction(currentAccount?.address, false);
+
+  const yieldAccounts = useGetAccountsByYield(slug);
 
   const account = isAllAccount ? null : currentAccount;
 
@@ -159,7 +164,7 @@ const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: 
     >
       <MetaInfo>
         <MetaInfo.Account
-          accounts={isAccountAll(positionInfo.address) ? [] : undefined}
+          accounts={isAccountAll(positionInfo.address) ? yieldAccounts : undefined}
           address={positionInfo.address}
           label={t('Account')}
           name={account?.name}

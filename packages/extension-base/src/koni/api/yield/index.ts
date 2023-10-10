@@ -23,6 +23,7 @@ import { BN, BN_ZERO } from '@polkadot/util';
 
 // only apply for DOT right now, will need to scale up
 
+// TODO: add exchange rate
 export function subscribeYieldPoolStats (substrateApiMap: Record<string, _SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPoolInfo) => void) {
   const unsubList: VoidFunction[] = [];
 

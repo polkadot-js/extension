@@ -157,7 +157,7 @@ const getGroupStatus = (earnMapping: Record<string, StakingStatus> = {}): Stakin
   return StakingStatus.PARTIALLY_EARNING;
 };
 
-const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): NominatorMetadata[] => {
+export const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): NominatorMetadata[] => {
   const itemGroups: string[] = [];
 
   for (const nominatorMetadata of nominatorMetadataList) {

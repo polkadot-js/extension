@@ -6,7 +6,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, CancelUnstakeSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetYieldInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitStakingCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { CancelUnYieldParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -42,8 +42,8 @@ const Component: React.FC = () => {
 
   const from = useWatchTransaction('from', form, defaultData);
 
-  const allNominatorInfo = useGetYieldInfo(method);
-  const nominatorInfo = useGetYieldInfo(method, from);
+  const allNominatorInfo = useGetYieldPositionInfo(method);
+  const nominatorInfo = useGetYieldPositionInfo(method, from);
   const nominatorMetadata = nominatorInfo[0].metadata as NominatorMetadata;
   const type = nominatorMetadata.type;
 
@@ -53,7 +53,7 @@ const Component: React.FC = () => {
   const [isChangeData, setIsChangeData] = useState(false);
 
   const goHome = useCallback(() => {
-    navigate('/home/earning');
+    navigate('/home/earning/');
   }, [navigate]);
 
   const persistUnstake = useMemo(() => {

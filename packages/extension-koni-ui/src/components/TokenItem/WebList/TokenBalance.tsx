@@ -13,14 +13,16 @@ type Props = ThemeProps & {
   value: BigN,
   convertedValue: BigN,
   symbol?: string,
+  autoHideBalance?: boolean,
 };
 
 function Component (
-  { className = '',
+  { autoHideBalance = true,
+    className = '',
     convertedValue,
-    symbol,
-    value }: Props) {
+    symbol, value }: Props) {
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
+  const hideBalance = autoHideBalance ? !isShowBalance : undefined;
 
   return (
     <div className={classNames(className)}>
@@ -28,7 +30,7 @@ function Component (
         className={'__value'}
         decimal={0}
         decimalOpacity={0.45}
-        hide={!isShowBalance}
+        hide={hideBalance}
         suffix={symbol}
         value={value}
       />
@@ -36,7 +38,7 @@ function Component (
         className={'__converted-value'}
         decimal={0}
         decimalOpacity={0.45}
-        hide={!isShowBalance}
+        hide={hideBalance}
         intOpacity={0.45}
         prefix='$'
         unitOpacity={0.45}

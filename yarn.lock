@@ -6042,7 +6042,7 @@ __metadata:
     "@subwallet/extension-inject": ^1.1.12-1
     "@subwallet/extension-mocks": ^1.1.12-1
     "@subwallet/keyring": ^0.1.1
-    "@subwallet/react-ui": 5.1.2-b72
+    "@subwallet/react-ui": 5.1.2-b73
     "@subwallet/ui-keyring": ^0.1.1
     "@trendyol-js/react-carousel": ^3.0.2
     "@types/bn.js": ^5.1.1
@@ -6157,9 +6157,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b72":
-  version: 5.1.2-b72
-  resolution: "@subwallet/react-ui@npm:5.1.2-b72"
+"@subwallet/react-ui@npm:5.1.2-b73":
+  version: 5.1.2-b73
+  resolution: "@subwallet/react-ui@npm:5.1.2-b73"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6231,7 +6231,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: cd4f0d66071ed9298dcbbad6800112215f910901d455a5a53dc693703b0357008e5c5486c26eed8eb3cecc5eb408faf398254a2dcd792ef38aa5f13ca1af71f8
+  checksum: f2738774f479fc245aeae3cb8286c32b4c7b811063a46572613fa2537c4bb55bbb35e7cddd322db206d4eee52357f80ff64990825dac9600ecbf3541997a237c
   languageName: node
   linkType: hard
 

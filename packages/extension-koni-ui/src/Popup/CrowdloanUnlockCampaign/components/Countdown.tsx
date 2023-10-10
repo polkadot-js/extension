@@ -7,11 +7,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  targetTime: number;
+};
 
-const targetTime = 1705380018000;
-
-const Component: React.FC<Props> = ({ className }: Props) => {
+const Component: React.FC<Props> = ({ className, targetTime }: Props) => {
   const { t } = useTranslation();
   const [days, hours, minutes, seconds] = useCountdown(targetTime);
 

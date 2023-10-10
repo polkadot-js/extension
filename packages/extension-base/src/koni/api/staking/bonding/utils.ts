@@ -357,7 +357,7 @@ export enum YieldAction {
 export function getYieldAvailableActionsByType (yieldPoolInfo: YieldPoolInfo): YieldAction[] {
   if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(yieldPoolInfo.type)) {
     if (yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL) {
-      return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CLAIM_REWARD];
+      return [YieldAction.STAKE, YieldAction.CLAIM_REWARD, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
     }
 
     const chain = yieldPoolInfo.chain;
@@ -365,7 +365,7 @@ export function getYieldAvailableActionsByType (yieldPoolInfo: YieldPoolInfo): Y
     if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
       return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CANCEL_UNSTAKE];
     } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
-      return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CLAIM_REWARD];
+      return [YieldAction.STAKE, YieldAction.CLAIM_REWARD, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
     } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
       return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
     }

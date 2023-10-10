@@ -5,7 +5,7 @@ import { NominatorMetadata, StakingType } from '@subwallet/extension-base/backgr
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { POOL_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { NominationPoolDataType, useFilterModal, useGetValidatorList, useGetYieldInfo } from '@subwallet/extension-koni-ui/hooks';
+import { NominationPoolDataType, useFilterModal, useGetValidatorList, useGetYieldPositionInfo } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { Badge, Button, Icon, InputRef, ModalContext, useExcludeModal } from '@subwallet/react-ui';
@@ -63,7 +63,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const isActive = checkActive(id);
 
-  const nominatorMetadata = useGetYieldInfo(method, from);
+  const nominatorMetadata = useGetYieldPositionInfo(method, from);
   const items = useGetValidatorList(chain, StakingType.POOLED) as NominationPoolDataType[];
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 

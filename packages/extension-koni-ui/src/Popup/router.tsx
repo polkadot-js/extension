@@ -134,6 +134,9 @@ const EarningDemo = new LazyLoader('EarningDemo', () => import('@subwallet/exten
 const EarningManagement = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
 const EarningNoRouter = new LazyLoader('EarningNoRouter', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/NoRouter'));
 
+const EarningDoneOutlet = new LazyLoader('EarningDoneOutlet', () => import('@subwallet/extension-koni-ui/Popup/EarningDone/Outlet'));
+const EarningDoneContent = new LazyLoader('EarningDoneContent', () => import('@subwallet/extension-koni-ui/Popup/EarningDone/Content'));
+
 const CrowdloanUnlockCampaign = new LazyLoader('CrowdloanUnlockCampaign', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign'));
 const CheckCrowdloanContributions = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CheckCrowdloanContributions'));
 const CrowdloanContributionsResult = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CrowdloanContributionsResult'));
@@ -217,6 +220,12 @@ export const router = createBrowserRouter([
       },
       {
         ...TransactionDone.generateRouterObject('transaction-done/:chainType/:chain/:transactionId')
+      },
+      {
+        ...EarningDoneOutlet.generateRouterObject('earning-done'),
+        children: [
+          EarningDoneContent.generateRouterObject(':chainType/:chain/:transactionId')
+        ]
       },
       {
         path: '/keyring',

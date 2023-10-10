@@ -5,9 +5,8 @@ import { ExtrinsicType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTagTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
@@ -112,8 +111,8 @@ const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: 
   }, [currentAccount, inactiveModal, navigate, setUnStakeStorage, yieldPoolInfo]);
 
   const onClickMoreAction = useCallback(() => {
-    activeModal(MORE_ACTION_MODAL);
     inactiveModal(modalId);
+    activeModal(EARNING_MORE_ACTION_MODAL);
   }, [activeModal, inactiveModal]);
 
   const footer = () => {

@@ -42,6 +42,8 @@ type WebUIContext = {
   setShowBackButtonOnHeader: (show?: boolean) => void;
   onBack?: VoidFunction;
   setOnBack: (func?: VoidFunction) => void;
+  setWebBaseClassName: React.Dispatch<React.SetStateAction<string>>;
+  webBaseClassName: string;
 }
 
 export const WebUIContext = React.createContext({} as WebUIContext);
@@ -54,7 +56,21 @@ function checkPortfolioPage (pathname: string) {
   return pathname.startsWith('/home/tokens') || pathname.startsWith('/home/nfts') || pathname.startsWith('/home/statistics');
 }
 
-const simplePages = ['/', '/welcome', '/keyring/login', '/keyring/create-password', '/keyring/migrate-password', '/create-done', '/earning-demo'];
+function checkEarningDonePage (pathname: string) {
+  return pathname.startsWith('/earning-done');
+}
+
+const simplePages = [
+  '/',
+  '/welcome',
+  '/keyring/login',
+  '/keyring/create-password',
+  '/keyring/migrate-password',
+  '/create-done',
+  '/earning-demo',
+  '/crowdloan-unlock-campaign/check-contributions',
+  '/crowdloan-unlock-campaign/contributions-result'
+];
 
 export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) => {
   const [background, setBackground] = useState<BackgroundColorMap>(BackgroundColorMap.INFO);
@@ -64,6 +80,7 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
   const [showBackButtonOnHeader, setShowBackButtonOnHeader] = useState<boolean | undefined>(undefined);
   const [title, setTitle] = useState<string | React.ReactNode>('');
   const [onBack, _setOnBack] = useState<VoidFunction | undefined>(undefined);
+  const [webBaseClassName, setWebBaseClassName] = useState<string>('');
   const pathname = useLocation().pathname;
   const { accounts } = useSelector((state: RootState) => state.accountState);
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
@@ -79,7 +96,7 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
   useLayoutEffect(() => {
     const pathName = pathname;
 
-    if (simplePages.indexOf(pathName) !== -1 || noAccount) {
+    if (simplePages.indexOf(pathName) !== -1 || noAccount || checkEarningDonePage(pathname)) {
       setShowSidebar(false);
       setBackground(BackgroundColorMap.INFO);
       setHeaderType(HeaderType.SIMPLE);
@@ -120,7 +137,9 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
         showBackButtonOnHeader,
         setShowBackButtonOnHeader,
         onBack,
-        setOnBack
+        setOnBack,
+        webBaseClassName,
+        setWebBaseClassName
       }}
     >
       {children}

@@ -159,14 +159,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <div className={className}>
-      {!isWebUI && <SwHeader
-        left='logo'
-        onClickLeft={goHome}
-        rightButtons={headerIcons}
-        showLeftButton={true}
-                   >
-        {t('DApps')}
-      </SwHeader>}
+      {
+        !isWebUI && (
+          <SwHeader
+            left='logo'
+            onClickLeft={goHome}
+            rightButtons={headerIcons}
+            showLeftButton={true}
+          >
+            {t('DApps')}
+          </SwHeader>
+        )
+      }
 
       <div
         className={'__scroll-container'}

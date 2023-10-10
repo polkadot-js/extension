@@ -2,17 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AddressInput } from '@subwallet/extension-koni-ui/components';
+import { CREATE_RETURN, CROWDLOAN_UNLOCK_TIME, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_CROWDLOAN_UNLOCK_TIME } from '@subwallet/extension-koni-ui/constants/event';
+import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import Countdown from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/Countdown';
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Form, Icon } from '@subwallet/react-ui';
+import { Button, Form, Icon, Image, ModalContext } from '@subwallet/react-ui';
 import { ValidateStatus } from '@subwallet/react-ui/es/form/FormItem';
-import { ArrowCounterClockwise, PlusCircle, Question, Rocket, Vault, Wallet } from 'phosphor-react';
-import React, { Context, useCallback, useContext, useMemo, useState } from 'react';
+import { ArrowCounterClockwise, PlusCircle, Question, Vault, Wallet } from 'phosphor-react';
+import React, { Context, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled, { ThemeContext } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { isAddress } from '@polkadot/util-crypto';
 
@@ -27,13 +33,23 @@ export interface FormParams {
   address: string;
 }
 
-const Component: React.FC<Props> = ({ className }: Props) => {
+const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
   const [{ message: responseMessage, status: responseStatus }, setSubmitResponse] =
     useState<SubmitResponse>({});
   const [isWrongAddress, setIsWrongAddress] = useState<boolean>(false);
+  const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
+  const { setWebBaseClassName } = useContext(WebUIContext);
+  const { activeModal } = useContext(ModalContext);
+  const [crowdloanUnlockTime] = useLocalStorage<number>(CROWDLOAN_UNLOCK_TIME, DEFAULT_CROWDLOAN_UNLOCK_TIME);
+
+  const outletContext: {
+    crowdloanUnlockTime: number,
+  } = useOutletContext();
+
+  const targetCrowdloanUnlockTime = outletContext?.crowdloanUnlockTime || crowdloanUnlockTime;
 
   const formDefault = useMemo((): FormParams => {
     return {
@@ -51,7 +67,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     } else {
       setSubmitResponse({
         status: 'error',
-        message: t('Invalid address')
+        message: t('Invalid address. Check again or create a new account to get started.')
       });
       setIsWrongAddress(true);
     }
@@ -68,19 +84,44 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     navigate('/earning-demo');
   }, [navigate]);
 
+  const { isNoAccount } = useSelector((state: RootState) => state.accountState);
+  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
+
+  const onClickCreateNewWallet = useCallback(() => {
+    if (isNoAccount) {
+      setReturnStorage('/home/earning/');
+      navigate('/welcome');
+    } else {
+      activeModal(NEW_SEED_MODAL);
+    }
+  }, [activeModal, isNoAccount, navigate, setReturnStorage]);
+
+  useEffect(() => {
+    setWebBaseClassName(`${className}-web-base-container`);
+
+    return () => {
+      setWebBaseClassName('');
+    };
+  }, [className, setWebBaseClassName]);
+
   return (
     <div className={className}>
       <div className={'__body-area'}>
         <div className='__countdown-area'>
-          <Icon
-            className='__countdown-icon'
-            phosphorIcon={Rocket}
-            weight='fill'
-          />
+          <div className='__countdown-icon'>
+            <Image
+              height={'100%'}
+              src={logoMap.network.rocketIcon as string}
+              width={'100%'}
+            />
+          </div>
           <div className={'__countdown-title'}>
             {t('Next Polkadot crowdloan unlocking in')}
           </div>
-          <Countdown className={'__countdown'} />
+          <Countdown
+            className={'__countdown'}
+            targetTime={targetCrowdloanUnlockTime}
+          />
         </div>
 
         <div className='__form-area'>
@@ -157,9 +198,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                       weight='fill'
                     />
                   }
+                  onClick={onClickCreateNewWallet}
                   schema='primary'
                 >
-                  {t('Create a wallet')}
+                  {t('Create a new account')}
                 </Button>
               </div>
             )
@@ -227,6 +269,24 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
   return {
     paddingLeft: token.padding,
     paddingRight: token.padding,
+    minHeight: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    position: 'fixed',
+    inset: 0,
+    maxWidth: 816,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    overflow: 'auto',
+
+    '&-web-base-container': {
+      '.web-layout-header-simple': {
+        '.__back-button, .__title-wrapper': {
+          display: 'none'
+        }
+      }
+    },
 
     '.__countdown-area': {
       display: 'flex',
@@ -235,7 +295,8 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
     },
 
     '.__countdown-icon': {
-      fontSize: 48,
+      width: 104,
+      height: 104,
       color: token.colorTextLight1,
       marginBottom: 36
     },
@@ -253,14 +314,16 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
     },
 
     '.__body-area': {
+      paddingTop: 112,
       maxWidth: 584,
-      marginLeft: 'auto',
-      marginRight: 'auto'
+      flex: 1,
+      width: '100%'
     },
 
     '.__form-area': {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      marginBottom: 80
     },
 
     '.__form-container': {
@@ -283,9 +346,7 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
 
     '.__footer-area': {
       borderTop: `2px solid ${token.colorBgDivider}`,
-      maxWidth: 784,
-      marginLeft: 'auto',
-      marginRight: 'auto'
+      paddingBottom: 58
     },
 
     '.__note-box': {

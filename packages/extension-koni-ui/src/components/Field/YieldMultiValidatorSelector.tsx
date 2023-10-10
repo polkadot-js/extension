@@ -6,7 +6,7 @@ import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bo
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useFilterModal, useGetValidatorList, useGetYieldInfo, useGetYieldMetadata, useSelectValidators, ValidatorDataType } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetValidatorList, useGetYieldMetadata, useGetYieldPositionInfo, useSelectValidators, ValidatorDataType } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getValidatorKey } from '@subwallet/extension-koni-ui/utils';
 import { Badge, Button, Icon, InputRef, ModalContext, SwList, useExcludeModal } from '@subwallet/react-ui';
@@ -80,7 +80,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const isActive = checkActive(id);
 
   const items = useGetValidatorList(chain, StakingType.NOMINATED) as ValidatorDataType[];
-  const yieldInfo = useGetYieldInfo(slug, from);
+  const yieldInfo = useGetYieldPositionInfo(slug, from);
 
   const chainStakingMetadata = useGetYieldMetadata(slug);
 

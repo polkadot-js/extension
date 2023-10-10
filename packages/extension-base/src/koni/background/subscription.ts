@@ -169,6 +169,8 @@ export class KoniSubscription {
   }
 
   initYieldPoolStatsSubscription (substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
+    this.state.resetYieldPoolInfo(Object.keys(this.state.getActiveChainInfoMap()));
+
     const updateYieldPoolStats = (data: YieldPoolInfo) => {
       this.state.updateYieldPoolInfo(data);
     };

@@ -95,15 +95,16 @@ export function parseLiquidStakingEvents (historyItem: Partial<TransactionHistor
   }
 }
 
-export function parseLiquidStakingFastUnstakeEvents (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], inputTokenInfo: _ChainAsset, chainInfo: _ChainInfo, feePaidWithInputAsset: boolean, extrinsicType: ExtrinsicType) {
+export function parseLiquidStakingFastUnstakeEvents (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], chainInfo: _ChainInfo, extrinsicType: ExtrinsicType) {
   for (let index = 0; index < eventLogs.length; index++) {
     const record = eventLogs[index];
 
     const { decimals: nativeDecimals, symbol: nativeSymbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
-    const eventMethod = extrinsicType === ExtrinsicType.MINT_VDOT ? 'deposit' : 'withdraw';
+    const section = extrinsicType === ExtrinsicType.REDEEM_QDOT ? 'balances' : 'tokens';
+    const eventMethod = extrinsicType === ExtrinsicType.REDEEM_QDOT ? 'withdrawn' : 'withdraw';
 
-    if (record.event.section === 'balances' &&
+    if (record.event.section === section &&
       record.event.method.toLowerCase() === eventMethod) {
       if (record.event.data[2]?.toString()) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

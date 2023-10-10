@@ -17,7 +17,7 @@ import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { TRANSACTION_TIMEOUT } from '@subwallet/extension-base/services/transaction-service/constants';
-import { parseLiquidStakingEvents, parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
+import { parseLiquidStakingEvents, parseLiquidStakingFastUnstakeEvents, parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
 import { getBaseTransactionInfo, getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEmitter, TransactionEventMap, TransactionEventResponse, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
 import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
@@ -559,7 +559,7 @@ export default class TransactionService {
           const derivativeTokenInfo = this.chainService.getAssetBySlug(derivativeTokenSlug);
 
           historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(derivativeTokenInfo), decimals: _getAssetDecimals(derivativeTokenInfo) };
-          // eventLogs && parseLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
+          eventLogs && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
         }
 
         break;

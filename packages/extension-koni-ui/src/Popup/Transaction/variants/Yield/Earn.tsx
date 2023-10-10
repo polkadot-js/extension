@@ -155,7 +155,7 @@ const Component = () => {
           if (assetEarningStats.apy !== undefined) {
             yearlyEarnings[assetSlug] = {
               apy: assetEarningStats.apy,
-              rewardInToken: assetEarningStats.apy * currentAmountNumb,
+              rewardInToken: (assetEarningStats.apy) / 100 * currentAmountNumb,
               symbol: rewardAsset.symbol
             };
           } else {

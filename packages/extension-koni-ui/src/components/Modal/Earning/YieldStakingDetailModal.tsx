@@ -8,9 +8,9 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { BN_ZERO, DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { BN_ZERO, DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, StakingStatusUi, TRANSACTION_YIELD_UNSTAKE_MODAL, UN_YIELD_TRANSACTION, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainInfo, useGetAccountsByYield, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -56,7 +56,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [seeMore, setSeeMore] = useState<boolean>(false);
+
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
+
   const onClickFooterButton = usePreCheckAction(currentAccount?.address, false);
 
   const chainInfo = useFetchChainInfo(yieldPoolInfo.chain);
@@ -109,13 +112,18 @@ const Component: React.FC<Props> = (props: Props) => {
         method: yieldPoolInfo.slug,
         asset: yieldPoolInfo.inputAssets[0]
       });
-      navigate('/transaction/un-yield');
+
+      if (isWebUI) {
+        activeModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
+      } else {
+        navigate('/transaction/un-yield');
+      }
     }, 300);
-  }, [currentAccount, inactiveModal, navigate, setUnStakeStorage, yieldPoolInfo]);
+  }, [isWebUI, activeModal, currentAccount, inactiveModal, navigate, setUnStakeStorage, yieldPoolInfo]);
 
   const onClickMoreAction = useCallback(() => {
-    activeModal(MORE_ACTION_MODAL);
     inactiveModal(modalId);
+    activeModal(EARNING_MORE_ACTION_MODAL);
   }, [activeModal, inactiveModal]);
 
   const footer = () => {

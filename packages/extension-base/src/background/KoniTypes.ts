@@ -603,6 +603,9 @@ export type TransactionAdditionalInfo = {
   [ExtrinsicType.TRANSFER_XCM]: XCMTransactionAdditionalInfo,
   [ExtrinsicType.SEND_NFT]: NFTTransactionAdditionalInfo,
   [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.MINT_QDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
   [ExtrinsicType.REDEEM_VDOT]: Pick<SubmitYieldStepData, 'inputTokenSlug' | 'exchangeRate'>
 }
 
@@ -2202,6 +2205,8 @@ export interface OptimalYieldPath {
 export enum YieldValidationStatus {
   NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
   NOT_ENOUGH_MIN_AMOUNT = 'NOT_ENOUGH_MIN_AMOUNT',
+  NOT_ENOUGH_BALANCE = 'NOT_ENOUGH_BALANCE',
+  NOT_ENOUGH_MIN_JOIN_POOL = 'NOT_ENOUGH_MIN_JOIN_POOL',
   OK = 'OK'
 }
 

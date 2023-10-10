@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
+import EarningMoreActionModal from '../../../components/Modal/Earning/EarningMoreActionModal';
 import Transaction from '../../Transaction/Transaction';
 import YieldCancelUnstake from '../../Transaction/variants/Yield/YieldCancelUnstake';
 import YieldUnstake from '../../Transaction/variants/Yield/YieldUnstake';
@@ -394,6 +395,14 @@ const Component: React.FC<Props> = (props: Props) => {
                 yieldPoolInfo={selectedYieldPoolInfo}
               />
             )
+        )
+      }
+      {
+        selectedYieldPosition && selectedYieldPoolInfo && (
+          <EarningMoreActionModal
+            yieldPoolInfo={selectedYieldPoolInfo}
+            yieldPositionInfo={selectedYieldPosition}
+          />
         )
       }
       <BaseModal

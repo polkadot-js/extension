@@ -3891,10 +3891,11 @@ export default class KoniExtension {
       substrateApiMap: this.#koniState.getSubstrateApiMap()
     };
 
-    const yieldValidation: TransactionError[] = validateYieldProcess(
+    const yieldValidation: TransactionError[] = await validateYieldProcess(
       address,
       params,
       path,
+      this.#koniState.balanceService,
       data
     ); // TODO: validate, set to fail upon submission
 
@@ -4023,6 +4024,7 @@ export default class KoniExtension {
       inputData.address,
       params,
       inputData.path,
+      this.#koniState.balanceService,
       inputData.data
     );
   }

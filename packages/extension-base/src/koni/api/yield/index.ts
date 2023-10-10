@@ -3,7 +3,8 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { validatePoolBondingCondition, validateRelayBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingPosition, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
@@ -161,7 +162,7 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams, 
 export async function generatePathForLiquidStaking (params: OptimalYieldPathParams, balanceService: BalanceService): Promise<OptimalYieldPath> {
   const bnAmount = new BN(params.amount);
   const result: OptimalYieldPath = {
-    totalFee: [],
+    totalFee: [{ slug: '' }],
     steps: [DEFAULT_YIELD_FIRST_STEP]
   };
 
@@ -169,9 +170,6 @@ export async function generatePathForLiquidStaking (params: OptimalYieldPathPara
 
   const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
   const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
-
-  // const inputTokenBalance = await balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug);
-  // const altInputTokenBalance = await balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, inputTokenSlug);
 
   const altInputTokenSlug = params.poolInfo.altInputAssets ? params.poolInfo?.altInputAssets[0] : '';
   const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
@@ -279,35 +277,118 @@ export async function generatePathForLiquidStaking (params: OptimalYieldPathPara
   return result;
 }
 
-// TODO: calculate token portion
-// TODO: compare to ED
-// TODO: compare to minAmount
-// TODO: simulate the whole process, compare to fee (step by step)
-export function validateYieldProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data?: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool): TransactionError[] {
-  return [];
+export async function validateEarningProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, balanceService: BalanceService): Promise<TransactionError[]> {
+  const errors: TransactionError[] = [];
+  const processValidation: YieldProcessValidation = {
+    ok: true,
+    status: YieldValidationStatus.OK
+  };
 
-  // const poolInfo = params.poolInfo;
-  // const chainInfo = params.chainInfoMap[poolInfo.chain];
-  //
-  // if (['DOT___bifrost_liquid_staking', 'DOT___acala_liquid_staking'].includes(params.poolInfo.slug)) {
-  //   return validateProcessForAcalaLiquidStaking(params, path);
-  // } else if (params.poolInfo.type === YieldPoolType.NOMINATION_POOL) {
-  //   if (!data) {
-  //     return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
-  //   }
-  //
-  //   const inputData = data as SubmitJoinNominationPool;
-  //
-  //   return validatePoolBondingCondition(chainInfo, inputData.amount, inputData.selectedPool, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
-  // }
-  //
-  // if (!data) {
-  //   return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
-  // }
-  //
-  // const inputData = data as SubmitJoinNativeStaking;
-  //
-  // return validateRelayBondingCondition(chainInfo, inputData.amount, inputData.selectedValidators, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
+  const bnAmount = new BN(params.amount);
+  const inputTokenSlug = params.poolInfo.inputAssets[0];
+  const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
+
+  const altInputTokenSlug = params.poolInfo.altInputAssets ? params.poolInfo?.altInputAssets[0] : '';
+  const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
+
+  const [inputTokenBalance, altInputTokenBalance] = await Promise.all([
+    balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug),
+    balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug)
+  ]);
+
+  const bnInputTokenBalance = new BN(inputTokenBalance.value || '0');
+
+  let isXcmOk = false;
+
+  if (path.steps[1].type === YieldStepType.XCM && params.poolInfo.altInputAssets) { // if xcm
+    const missingAmount = bnAmount.sub(bnInputTokenBalance); // TODO: what if input token is not LOCAL ??
+    const xcmFee = new BN(path.totalFee[1].amount || '0');
+    const xcmAmount = missingAmount.add(xcmFee);
+
+    const bnAltInputTokenBalance = new BN(altInputTokenBalance.value || '0');
+    const altInputTokenMinAmount = new BN(params.assetInfoMap[altInputTokenSlug].minAmount || '0');
+
+    if (!bnAltInputTokenBalance.sub(xcmAmount).gte(altInputTokenMinAmount)) {
+      processValidation.failedStep = path.steps[1];
+      processValidation.ok = false;
+      processValidation.status = YieldValidationStatus.NOT_ENOUGH_BALANCE;
+
+      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_BALANCE, processValidation.message, processValidation));
+
+      return errors;
+    }
+
+    isXcmOk = true;
+  }
+
+  const submitStep = path.steps[1].type === YieldStepType.XCM ? path.steps[2] : path.steps[1];
+  const feeTokenSlug = path.totalFee[submitStep.id].slug;
+  const feeTokenInfo = params.assetInfoMap[feeTokenSlug];
+  const defaultFeeTokenSlug = params.poolInfo.feeAssets[0];
+
+  if (params.poolInfo.feeAssets.length === 1 && feeTokenSlug === defaultFeeTokenSlug) {
+    const bnFeeAmount = new BN(path.totalFee[submitStep.id]?.amount || '0');
+    const feeTokenBalance = await balanceService.getTokenFreeBalance(params.address, feeTokenInfo.originChain, feeTokenSlug);
+    const bnFeeTokenBalance = new BN(feeTokenBalance.value || '0');
+    const bnFeeTokenMinAmount = new BN(params.assetInfoMap[feeTokenSlug]?.minAmount || '0');
+
+    if (!bnFeeTokenBalance.sub(bnFeeAmount).gte(bnFeeTokenMinAmount)) {
+      processValidation.failedStep = path.steps[submitStep.id];
+      processValidation.ok = false;
+      processValidation.status = YieldValidationStatus.NOT_ENOUGH_FEE;
+
+      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_FEE, processValidation.message, processValidation));
+
+      return errors;
+    }
+  }
+
+  if (!bnAmount.gte(new BN(params.poolInfo.stats?.minJoinPool || '0'))) {
+    processValidation.failedStep = path.steps[submitStep.id];
+    processValidation.ok = false;
+    processValidation.status = YieldValidationStatus.NOT_ENOUGH_MIN_JOIN_POOL;
+
+    errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_MIN_JOIN_POOL, processValidation.message, processValidation));
+
+    return errors;
+  }
+
+  if (!isXcmOk && bnAmount.gt(bnInputTokenBalance)) {
+    processValidation.failedStep = path.steps[submitStep.id];
+    processValidation.ok = false;
+    processValidation.status = YieldValidationStatus.NOT_ENOUGH_BALANCE;
+
+    errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_BALANCE, processValidation.message, processValidation));
+
+    return errors;
+  }
+
+  return errors;
+}
+
+export async function validateYieldProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, balanceService: BalanceService, data?: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool): Promise<TransactionError[]> {
+  const poolInfo = params.poolInfo;
+  const chainInfo = params.chainInfoMap[poolInfo.chain];
+
+  if (params.poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+    if (!data) {
+      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+    }
+
+    const inputData = data as SubmitJoinNominationPool;
+
+    return validatePoolBondingCondition(chainInfo, inputData.amount, inputData.selectedPool, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
+  } else if (params.poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+    if (!data) {
+      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+    }
+
+    const inputData = data as SubmitJoinNativeStaking;
+
+    return validateRelayBondingCondition(chainInfo, inputData.amount, inputData.selectedValidators, address, poolInfo.metadata as ChainStakingMetadata, inputData.nominatorMetadata);
+  }
+
+  return await validateEarningProcess(address, params, path, balanceService);
 }
 
 export function validateYieldRedeem (address: string, poolInfo: YieldPoolInfo, amount: string): TransactionError[] {

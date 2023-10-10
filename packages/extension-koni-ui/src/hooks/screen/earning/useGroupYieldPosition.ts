@@ -7,7 +7,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import BigN from 'bignumber.js';
-import { useMemo } from 'react';
+import { useDeferredValue, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { groupNominatorMetadatas } from '../staking/useGetStakingList';
@@ -50,6 +50,7 @@ const combineYieldPositionStats = (array: YieldPositionStats[]): YieldPositionSt
 const useGroupYieldPosition = (): YieldPositionInfo[] => {
   const { poolInfo, yieldPosition } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount } = useSelector((state: RootState) => state.accountState);
+  const { chainStateMap } = useSelector((state: RootState) => state.chainStore);
 
   return useMemo(() => {
     const raw: Record<string, YieldPositionInfo[]> = {};
@@ -67,13 +68,15 @@ const useGroupYieldPosition = (): YieldPositionInfo[] => {
     };
 
     for (const info of yieldPosition) {
-      const isValid = checkAddress(info);
+      if (chainStateMap[info.chain].active && poolInfo[info.slug]) {
+        const isValid = checkAddress(info);
 
-      if (isValid) {
-        if (raw[info.slug]) {
-          raw[info.slug].push(info);
-        } else {
-          raw[info.slug] = [info];
+        if (isValid) {
+          if (raw[info.slug]) {
+            raw[info.slug].push(info);
+          } else {
+            raw[info.slug] = [info];
+          }
         }
       }
     }
@@ -143,7 +146,7 @@ const useGroupYieldPosition = (): YieldPositionInfo[] => {
     }
 
     return result;
-  }, [currentAccount?.address, poolInfo, yieldPosition]);
+  }, [chainStateMap, currentAccount?.address, poolInfo, yieldPosition]);
 };
 
 export default useGroupYieldPosition;

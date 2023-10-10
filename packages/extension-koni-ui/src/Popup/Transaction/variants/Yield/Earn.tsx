@@ -4,7 +4,7 @@
 import { SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
-import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
@@ -239,16 +239,19 @@ const Component = () => {
       >
         {
           currentPoolInfo?.stats?.assetEarning?.map((item) => {
-            if (item.exchangeRate === undefined) {
+            if (item.exchangeRate === undefined || !currentPoolInfo.derivativeAssets) {
               return null;
             }
+
+            const derivativeAssetSlug = currentPoolInfo.derivativeAssets[0];
+            const derivativeAssetInfo = chainAsset[derivativeAssetSlug];
 
             return (
               <MetaInfo.Number
                 decimals={0}
                 key={item.slug}
                 label={t('You\'ll receive')}
-                suffix={chainAsset[item.slug].symbol}
+                suffix={_getAssetSymbol(derivativeAssetInfo)}
                 value={value * item.exchangeRate}
               />
             );

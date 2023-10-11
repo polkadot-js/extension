@@ -13,7 +13,7 @@ import { isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, ModalContext, SettingItem } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowArcLeft, ArrowCircleDown, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -47,7 +47,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { currentAccount } = useSelector((state) => state.accountState);
   const { poolInfo: poolInfoMap } = useSelector((state) => state.yieldPool);
 
-  const [selected, setSelected] = useState<YieldAction | undefined>();
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setUnYieldStorage] = useLocalStorage(UN_YIELD_TRANSACTION, DEFAULT_UN_YIELD_PARAMS);
   const [, setCancelUnYieldStorage] = useLocalStorage(CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS);
@@ -165,23 +164,31 @@ const Component: React.FC<Props> = (props: Props) => {
     return actionListByChain.map((action): ActionListType => {
       if (action === YieldAction.UNSTAKE) {
         return {
-          action: YieldAction.UNSTAKE,
+          action: action,
           backgroundIconColor: 'magenta-6',
           icon: MinusCircle,
           label: t('Unstake'),
           onClick: onClickUnStakeBtn
         };
-      } else if (action === YieldAction.WITHDRAW || action === YieldAction.WITHDRAW_EARNING) {
+      } else if (action === YieldAction.WITHDRAW) {
         return {
-          action: YieldAction.WITHDRAW,
+          action: action,
           backgroundIconColor: 'geekblue-6',
           icon: ArrowCircleDown,
           label: t('Withdraw unstaked funds'),
           onClick: onClickWithdrawBtn
         };
+      } else if (action === YieldAction.WITHDRAW_EARNING) {
+        return {
+          action: action,
+          backgroundIconColor: 'geekblue-6',
+          icon: ArrowCircleDown,
+          label: t('Withdraw'),
+          onClick: onClickWithdrawBtn
+        };
       } else if (action === YieldAction.CANCEL_UNSTAKE) {
         return {
-          action: YieldAction.CANCEL_UNSTAKE,
+          action: action,
           backgroundIconColor: 'purple-8',
           icon: ArrowArcLeft,
           label: t('Cancel unstaking'),
@@ -189,16 +196,24 @@ const Component: React.FC<Props> = (props: Props) => {
         };
       } else if (action === YieldAction.CLAIM_REWARD) {
         return {
-          action: YieldAction.CLAIM_REWARD,
+          action: action,
           backgroundIconColor: 'green-7',
           icon: Wallet,
           label: t('Claim rewards'),
           onClick: noop
         };
+      } else if (action === YieldAction.START_EARNING) {
+        return {
+          action: action,
+          backgroundIconColor: 'green-6',
+          icon: PlusCircle,
+          label: t('Earn more'),
+          onClick: onClickStakeBtn
+        };
       }
 
       return {
-        action: YieldAction.STAKE,
+        action: action,
         backgroundIconColor: 'green-6',
         icon: PlusCircle,
         label: t('Stake more'),
@@ -223,19 +238,18 @@ const Component: React.FC<Props> = (props: Props) => {
         return ExtrinsicType.STAKING_CLAIM_REWARD;
       case YieldAction.CANCEL_UNSTAKE:
         return ExtrinsicType.STAKING_CANCEL_UNSTAKE;
+      case YieldAction.START_EARNING:
+        return ExtrinsicType.MINT_LDOT;
+      case YieldAction.WITHDRAW_EARNING:
+        return ExtrinsicType.REDEEM_LDOT;
       default:
         return ExtrinsicType.UNKNOWN;
     }
   }, [yieldPoolInfo.type]);
 
   const onClickItem = useCallback((action: YieldAction, onClick: () => void) => {
-    const _onClick = () => {
-      setSelected(action);
-      onClick();
-    };
-
     return () => {
-      onPreCheck(_onClick, convertStakingActionToExtrinsicType(action))();
+      onPreCheck(onClick, convertStakingActionToExtrinsicType(action))();
     };
   }, [convertStakingActionToExtrinsicType, onPreCheck]);
 
@@ -274,7 +288,7 @@ const Component: React.FC<Props> = (props: Props) => {
       closable={true}
       id={modalId}
       maskClosable={true}
-      onCancel={!selected ? onCancel : undefined}
+      onCancel={onCancel}
       title={t('Actions')}
     >
       {modalContent}

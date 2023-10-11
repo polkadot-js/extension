@@ -82,6 +82,8 @@ const Component: React.FC<Props> = (props: Props) => {
     return tmp.toString();
   }, [unstakings]);
 
+  const totalStaked = useMemo(() => new BigN(activeStake).plus(unstakedValue).toString(), [activeStake, unstakedValue]);
+
   const tagTypes = useMemo(() => createEarningTagTypes(t, token), [t, token]);
 
   const onClickStakeMoreBtn = useCallback(() => {
@@ -303,8 +305,7 @@ const Component: React.FC<Props> = (props: Props) => {
           decimals={decimals}
           label={t('Total staked')}
           suffix={symbol}
-          // value={String(parseFloat(activeStake) + parseFloat(staking.unlockingBalance || '0'))}
-          value={String(parseFloat(activeStake) + parseFloat('0'))}
+          value={totalStaked}
         />
 
         <MetaInfo.Number

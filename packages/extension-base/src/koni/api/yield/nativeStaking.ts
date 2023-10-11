@@ -51,8 +51,6 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
     const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
     const unlockingPeriod = parseInt(unlockingEras) * (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default); // in hours
 
-    console.log('expectedReturn', expectedReturn);
-
     // eslint-disable-next-line node/no-callback-literal
     // callback({
     //   ...poolInfo,

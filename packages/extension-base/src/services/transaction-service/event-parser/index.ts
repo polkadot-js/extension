@@ -65,7 +65,7 @@ export function parseTransferEventLogs (historyItem: Partial<TransactionHistoryI
   }
 }
 
-export function parseBifrostLiquidStakingEvents (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], inputTokenInfo: _ChainAsset, chainInfo: _ChainInfo, feePaidWithInputAsset: boolean, extrinsicType: ExtrinsicType) {
+export function parseLiquidStakingEvents (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], inputTokenInfo: _ChainAsset, chainInfo: _ChainInfo, feePaidWithInputAsset: boolean, extrinsicType: ExtrinsicType) {
   if (feePaidWithInputAsset) {
     historyItem.fee = {
       value: '0', // TODO
@@ -78,9 +78,10 @@ export function parseBifrostLiquidStakingEvents (historyItem: Partial<Transactio
 
       const { decimals: nativeDecimals, symbol: nativeSymbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
-      const eventMethod = extrinsicType === ExtrinsicType.MINT_VDOT ? 'deposit' : 'withdraw';
+      const section = extrinsicType === ExtrinsicType.REDEEM_QDOT ? 'tokens' : 'balances';
+      const eventMethod = extrinsicType === ExtrinsicType.REDEEM_QDOT ? 'withdrawn' : 'withdraw';
 
-      if (record.event.section === 'balances' &&
+      if (record.event.section === section &&
         record.event.method.toLowerCase() === eventMethod) {
         if (record.event.data[2]?.toString()) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -90,6 +91,29 @@ export function parseBifrostLiquidStakingEvents (historyItem: Partial<Transactio
             decimals: nativeDecimals
           };
         }
+      }
+    }
+  }
+}
+
+export function parseLiquidStakingFastUnstakeEvents (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], chainInfo: _ChainInfo, extrinsicType: ExtrinsicType) {
+  for (let index = 0; index < eventLogs.length; index++) {
+    const record = eventLogs[index];
+
+    const { decimals: nativeDecimals, symbol: nativeSymbol } = _getChainNativeTokenBasicInfo(chainInfo);
+
+    const section = extrinsicType === ExtrinsicType.REDEEM_QDOT ? 'tokens' : 'balances';
+    const eventMethod = extrinsicType === ExtrinsicType.REDEEM_QDOT ? 'withdrawn' : 'withdraw';
+
+    if (record.event.section === section &&
+      record.event.method.toLowerCase() === eventMethod) {
+      if (record.event.data[2]?.toString()) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        historyItem.fee = {
+          value: record.event.data[2]?.toString() || '0',
+          symbol: nativeSymbol,
+          decimals: nativeDecimals
+        };
       }
     }
   }

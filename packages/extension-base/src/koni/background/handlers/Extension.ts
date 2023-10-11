@@ -3508,7 +3508,7 @@ export default class KoniExtension {
     const params = request.request.params;
 
     const requiredNamespaces: ProposalTypes.RequiredNamespaces = params.requiredNamespaces;
-    const optionalNamespaces: ProposalTypes.OptionalNamespaces = params.optionalNamespaces;
+    const optionalNamespaces: ProposalTypes.OptionalNamespaces = params.optionalNamespaces || {};
 
     const availableNamespaces: ProposalTypes.RequiredNamespaces = {};
 
@@ -3936,7 +3936,7 @@ export default class KoniExtension {
   private async handleYieldRedeem (inputData: RequestYieldFastWithdrawal): Promise<SWTransactionResponse> {
     const { address, amount, yieldPoolInfo } = inputData;
 
-    if (!amount || !yieldPoolInfo.metadata) {
+    if (!amount) {
       return this.#koniState.transactionService
         .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }

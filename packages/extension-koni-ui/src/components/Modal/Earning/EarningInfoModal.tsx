@@ -112,7 +112,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [assetRegistry, currentItem.stats?.assetEarning]);
 
   const requireTokenItems = useMemo((): RequireTokenItem[] => {
-    return currentItem.feeAssets.map((slug) => {
+    return currentItem.inputAssets.map((slug) => {
       const asset = assetRegistry[slug];
 
       return {
@@ -121,7 +121,7 @@ const Component: React.FC<Props> = (props: Props) => {
         symbol: asset.symbol
       };
     });
-  }, [assetRegistry, currentItem.feeAssets]);
+  }, [assetRegistry, currentItem.inputAssets]);
 
   const onClose = useCallback(() => {
     inactiveModal(modalId);

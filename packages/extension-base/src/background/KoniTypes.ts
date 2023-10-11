@@ -605,8 +605,7 @@ export type TransactionAdditionalInfo = {
   [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
   [ExtrinsicType.MINT_QDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
   [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
-  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
-  [ExtrinsicType.REDEEM_VDOT]: Pick<SubmitYieldStepData, 'inputTokenSlug' | 'exchangeRate'>
+  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>
 }
 
 // export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM

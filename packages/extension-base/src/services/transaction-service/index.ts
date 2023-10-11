@@ -17,7 +17,7 @@ import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { TRANSACTION_TIMEOUT } from '@subwallet/extension-base/services/transaction-service/constants';
-import { parseBifrostLiquidStakingEvents, parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
+import { parseLiquidStakingEvents, parseLiquidStakingFastUnstakeEvents, parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
 import { getBaseTransactionInfo, getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEmitter, TransactionEventMap, TransactionEventResponse, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
 import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
@@ -541,23 +541,26 @@ export default class TransactionService {
           rewardTokenSlug: params.rewardTokenSlug,
           exchangeRate: params.exchangeRate
         } as TransactionAdditionalInfo[ExtrinsicType.MINT_VDOT];
-        eventLogs && parseBifrostLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
+        eventLogs && parseLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
 
         break;
       }
 
+      case ExtrinsicType.REDEEM_QDOT:
+      case ExtrinsicType.REDEEM_LDOT:
+      case ExtrinsicType.REDEEM_SDOT:
+
+      // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.REDEEM_VDOT: {
         const data = parseTransactionData<ExtrinsicType.REDEEM_VDOT>(transaction.data);
-        const params = data.data as SubmitYieldStepData;
-        const inputTokenInfo = this.chainService.getAssetBySlug(params.inputTokenSlug);
-        const isFeePaidWithInputAsset = params.feeTokenSlug === params.inputTokenSlug;
 
-        historyItem.amount = { value: params.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
-        historyItem.additionalInfo = {
-          inputTokenSlug: params.inputTokenSlug,
-          exchangeRate: params.exchangeRate
-        } as TransactionAdditionalInfo[ExtrinsicType.REDEEM_VDOT];
-        eventLogs && parseBifrostLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
+        if (data.yieldPoolInfo.derivativeAssets) {
+          const derivativeTokenSlug = data.yieldPoolInfo.derivativeAssets[0];
+          const derivativeTokenInfo = this.chainService.getAssetBySlug(derivativeTokenSlug);
+
+          historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(derivativeTokenInfo), decimals: _getAssetDecimals(derivativeTokenInfo) };
+          eventLogs && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
+        }
 
         break;
       }

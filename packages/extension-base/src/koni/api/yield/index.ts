@@ -23,40 +23,39 @@ import { BN, BN_ZERO } from '@polkadot/util';
 
 // only apply for DOT right now, will need to scale up
 
+// TODO: add exchange rate
 export function subscribeYieldPoolStats (substrateApiMap: Record<string, _SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPoolInfo) => void) {
   const unsubList: VoidFunction[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   Object.values(YIELD_POOLS_INFO).forEach(async (poolInfo) => {
-    if (!substrateApiMap[poolInfo.chain]) {
-      return;
-    }
+    if (substrateApiMap[poolInfo.chain]) {
+      const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
+      const chainInfo = chainInfoMap[poolInfo.chain];
 
-    const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
-    const chainInfo = chainInfoMap[poolInfo.chain];
+      if (YieldPoolType.NOMINATION_POOL === poolInfo.type) {
+        const unsub = await subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
 
-    if (YieldPoolType.NOMINATION_POOL === poolInfo.type) {
-      const unsub = subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
+        // @ts-ignore
+        unsubList.push(unsub);
+      } else if (poolInfo.slug === 'DOT___bifrost_liquid_staking') {
+        const unsub = subscribeBifrostLiquidStakingStats(poolInfo, assetInfoMap, callback);
 
-      // @ts-ignore
-      unsubList.push(unsub);
-    } else if (poolInfo.slug === 'DOT___bifrost_liquid_staking') {
-      const unsub = subscribeBifrostLiquidStakingStats(poolInfo, assetInfoMap, callback);
+        // @ts-ignore
+        unsubList.push(unsub);
+      } else if (poolInfo.slug === 'DOT___acala_liquid_staking') {
+        const unsub = await subscribeAcalaLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
 
-      // @ts-ignore
-      unsubList.push(unsub);
-    } else if (poolInfo.slug === 'DOT___acala_liquid_staking') {
-      const unsub = await subscribeAcalaLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
+        unsubList.push(unsub);
+      } else if (poolInfo.slug === 'DOT___interlay_lending') {
+        const unsub = subscribeInterlayLendingStats(poolInfo, callback);
 
-      unsubList.push(unsub);
-    } else if (poolInfo.slug === 'DOT___interlay_lending') {
-      const unsub = subscribeInterlayLendingStats(poolInfo, callback);
+        unsubList.push(unsub);
+      } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
+        const unsub = subscribeParallelLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
 
-      unsubList.push(unsub);
-    } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
-      const unsub = subscribeParallelLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
-
-      unsubList.push(unsub);
+        unsubList.push(unsub);
+      }
     }
   });
 
@@ -215,7 +214,7 @@ export async function generatePathForLiquidStaking (params: OptimalYieldPathPara
 
         result.totalFee.push({
           slug: altInputTokenSlug,
-          amount: (xcmFeeInfo.partialFee * 2).toString() // TODO
+          amount: (xcmFeeInfo.partialFee * 1.2).toString() // TODO
         });
       }
     }
@@ -435,6 +434,7 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
   }
 
   const _data = requestData.data as SubmitJoinNominationPool;
+
   const extrinsic = await getNominationPoolJoinExtrinsic(address, params, _data);
 
   const joinPoolData: RequestStakePoolingBonding = {

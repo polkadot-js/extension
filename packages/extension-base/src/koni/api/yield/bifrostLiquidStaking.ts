@@ -91,7 +91,7 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '0',
+        minJoinPool: '10000000000',
         minWithdrawal: '0',
         totalApy: parseFloat(vDOTStats.apyBase),
         tvl: (vDOTStats.tvm * assetDecimals).toString()
@@ -173,12 +173,18 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
     const destinationTokenInfo = params.assetInfoMap[destinationTokenSlug];
     const substrateApi = params.substrateApiMap[originChainInfo.slug];
 
+    const xcmFee = path.totalFee[currentStep].amount || '0';
+    const bnXcmFee = new BN(xcmFee);
+    const bnAmount = new BN(inputData.amount);
+
+    const bnTotalAmount = bnAmount.add(bnXcmFee);
+
     const extrinsic = await createXcmExtrinsic({
       chainInfoMap: params.chainInfoMap,
       destinationTokenInfo,
       originTokenInfo,
       recipient: address,
-      sendingValue: inputData.amount,
+      sendingValue: bnTotalAmount.toString(),
       substrateApi
     });
 
@@ -187,7 +193,7 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
       destinationNetworkKey: destinationTokenInfo.originChain,
       from: address,
       to: address,
-      value: inputData.amount,
+      value: bnTotalAmount.toString(),
       tokenSlug: originTokenSlug,
       showExtraWarning: true
     };
@@ -197,7 +203,7 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
       extrinsicType: ExtrinsicType.TRANSFER_XCM,
       extrinsic,
       txData: xcmData,
-      transferNativeAmount: inputData.amount
+      transferNativeAmount: bnTotalAmount.toString()
     };
   }
 

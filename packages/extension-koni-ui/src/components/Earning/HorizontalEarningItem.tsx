@@ -161,6 +161,7 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.label = t('Claim rewards');
           break;
         case YieldAction.WITHDRAW:
+        case YieldAction.WITHDRAW_EARNING:
           temp.icon = StopCircle;
           temp.onClick = onClickButton(onClickWithdrawBtn);
           temp.label = t('Withdraw');
@@ -182,12 +183,6 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.icon = PlusCircle;
           temp.onClick = onClickButton(onClickStakeBtn);
           temp.label = t('Earn now');
-          break;
-        case YieldAction.WITHDRAW_EARNING:
-          temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickWithdrawBtn); // TODO
-          temp.label = t('Withdraw');
-          temp.schema = 'secondary';
           break;
       }
 

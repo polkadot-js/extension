@@ -329,10 +329,6 @@ export default class KoniState {
       this.mantaPayConfigSubject.next(data);
     });
 
-    this.dbService.subscribeYieldPoolInfo([], (data) => {
-      this.yieldPoolInfoSubject.next(data);
-    });
-
     let unsub: Subscription | undefined;
 
     this.keyringService.accountSubject.subscribe((accounts) => { // TODO: improve this
@@ -2081,6 +2077,12 @@ export default class KoniState {
 
   public updateYieldPoolInfo (data: YieldPoolInfo) {
     this.dbService.updateYieldPoolStore(data).catch((e) => this.logger.warn(e));
+  }
+
+  public resetYieldPoolInfo (chains: string[]) {
+    this.dbService.subscribeYieldPoolInfo(chains, (data) => { // TODO: no unsub
+      this.yieldPoolInfoSubject.next(data);
+    });
   }
 
   public updateYieldPosition (data: YieldPositionInfo) {

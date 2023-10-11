@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EarningCalculatorModal, EarningItem, EarningToolbar, EmptyList } from '@subwallet/extension-koni-ui/components';
 import EarningInfoModal from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInfoModal';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
@@ -158,13 +158,16 @@ const Component: React.FC<Props> = (props: Props) => {
 
         const availableGen: string[] = currentAccount.availableGenesisHashes || [];
         const isEvmAddress = isEthereumAddress(currentAccount.address);
+        const chain = chainInfoMap[value.chain];
+
+        if (isEvmAddress !== _isChainEvmCompatible(chain)) {
+          return false;
+        }
 
         if (currentAccount?.isHardware) {
           if (isEvmAddress) {
             return false;
           } else {
-            const chain = chainInfoMap[value.chain];
-
             if (chain && !availableGen.includes(_getSubstrateGenesisHash(chain))) {
               return false;
             }

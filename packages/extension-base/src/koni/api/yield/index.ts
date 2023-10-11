@@ -214,7 +214,7 @@ export async function generatePathForLiquidStaking (params: OptimalYieldPathPara
 
         result.totalFee.push({
           slug: altInputTokenSlug,
-          amount: (xcmFeeInfo.partialFee * 2).toString() // TODO
+          amount: (xcmFeeInfo.partialFee * 1.2).toString() // TODO
         });
       }
     }
@@ -272,6 +272,8 @@ export async function generatePathForLiquidStaking (params: OptimalYieldPathPara
     slug: defaultFeeTokenSlug,
     amount: mintFee
   });
+
+  console.log('result', result);
 
   return result;
 }

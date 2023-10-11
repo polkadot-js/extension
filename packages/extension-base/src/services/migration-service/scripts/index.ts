@@ -4,6 +4,7 @@
 import DeleteChain from '@subwallet/extension-base/services/migration-service/scripts/DeleteChain';
 
 import BaseMigrationJob from '../Base';
+import AddDotCrowdloanCampaign from './AddDotCrowdloanCampaign';
 import AutoEnableChainsTokens from './AutoEnableChainsTokens';
 import MigrateAuthUrls from './MigrateAuthUrls';
 import MigrateAutoLock from './MigrateAutoLock';
@@ -32,6 +33,7 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.0.12-02': MigrateEthProvider,
   '1.1.6-01': MigrateWalletReference,
   '1.1.7': DeleteChain,
-  '1.1.13-01': MigrateTokenDecimals
+  '1.1.13-01': MigrateTokenDecimals,
+  '1.1.17-02': AddDotCrowdloanCampaign
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

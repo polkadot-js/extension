@@ -1894,6 +1894,11 @@ export enum NotificationType {
   WARNING = 'warning',
   ERROR = 'error',
 }
+
+export interface NotificationButton {
+  title: string;
+}
+
 export interface Notification {
   id: number;
   type: NotificationType;
@@ -1902,7 +1907,10 @@ export interface Notification {
   notifyViaBrowser?: boolean;
   action?: {
     url?: string; // Add more action in the future
-  }
+    buttonClick?: (btnIndex: number) => void;
+    click?: () => void;
+  };
+  buttons?: NotificationButton[];
 }
 
 export type NotificationParams = Omit<Notification, 'id'>;
@@ -2032,6 +2040,34 @@ export interface ResolveAddressToDomainRequest {
   chain: string,
   address: string
 }
+
+/* Campaign */
+
+export enum VersionCampaign {
+  V1 = 'v1'
+}
+
+export interface BaseCampaign {
+  slug: string;
+  isExpired: boolean;
+  isDone: boolean;
+  version: VersionCampaign;
+  data: unknown;
+}
+
+export interface CampaignVersion1 extends BaseCampaign {
+  version: VersionCampaign.V1;
+  data: {
+    title: string;
+    message: string;
+    okText: string;
+    url: string;
+  }
+}
+
+export type CampaignData = CampaignVersion1;
+
+/* Campaign */
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {

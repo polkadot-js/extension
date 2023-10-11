@@ -5,15 +5,18 @@ import State from '@subwallet/extension-base/koni/background/handlers/State';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
+import { EventService } from '@subwallet/extension-base/services/event-service';
 
 import MigrationScripts, { EVERYTIME } from './scripts';
 
 export default class MigrationService {
   readonly state: State;
   private logger: Logger;
+  #eventService: EventService;
 
-  constructor (state: State) {
+  constructor (state: State, eventService: EventService) {
     this.state = state;
+    this.#eventService = eventService;
     this.logger = createLogger('Migration');
   }
 
@@ -45,5 +48,7 @@ export default class MigrationService {
         this.logger.error('Migration error: ', MigrationScripts[keys[i]].name, error);
       }
     }
+
+    this.#eventService.emit('migration.done', true);
   }
 }

@@ -3508,7 +3508,7 @@ export default class KoniExtension {
     const params = request.request.params;
 
     const requiredNamespaces: ProposalTypes.RequiredNamespaces = params.requiredNamespaces;
-    const optionalNamespaces: ProposalTypes.OptionalNamespaces = params.optionalNamespaces;
+    const optionalNamespaces: ProposalTypes.OptionalNamespaces = params.optionalNamespaces || {};
 
     const availableNamespaces: ProposalTypes.RequiredNamespaces = {};
 
@@ -3872,6 +3872,8 @@ export default class KoniExtension {
 
   private async handleYieldStep (inputData: RequestYieldStepSubmit): Promise<SWTransactionResponse> {
     const { address, data, path, yieldPoolInfo } = inputData;
+
+    console.log('data', data, inputData);
 
     if (!data) {
       return this.#koniState.transactionService

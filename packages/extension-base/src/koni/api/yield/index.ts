@@ -214,7 +214,7 @@ export async function generatePathForLiquidStaking (params: OptimalYieldPathPara
 
         result.totalFee.push({
           slug: altInputTokenSlug,
-          amount: (xcmFeeInfo.partialFee * 2).toString() // TODO
+          amount: (xcmFeeInfo.partialFee * 1.2).toString() // TODO
         });
       }
     }
@@ -272,6 +272,8 @@ export async function generatePathForLiquidStaking (params: OptimalYieldPathPara
     slug: defaultFeeTokenSlug,
     amount: mintFee
   });
+
+  console.log('result', result);
 
   return result;
 }
@@ -434,6 +436,7 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
   }
 
   const _data = requestData.data as SubmitJoinNominationPool;
+
   const extrinsic = await getNominationPoolJoinExtrinsic(address, params, _data);
 
   const joinPoolData: RequestStakePoolingBonding = {

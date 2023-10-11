@@ -6,7 +6,7 @@ import { EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extensio
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useGetCrowdloanList, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { CrowdloanItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { CrowdloanItem, Icon, ModalContext, SwList, Tag } from '@subwallet/react-ui';
+import { CrowdloanItem, Icon, Image, ModalContext, SwList, Tag } from '@subwallet/react-ui';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
@@ -188,20 +188,35 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderPaddingVertical={true}
         title={t<string>('Crowdloans')}
       >
-        <SwList.Section
-          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          enableSearchInput
-          filterBy={filterFunction}
-          list={items}
-          onClickActionBtn={onClickActionBtn}
-          renderItem={renderItem}
-          renderWhenEmpty={emptyCrowdloanList}
-          searchFunction={searchFunction}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search project')}
-          showActionBtn
-        />
+        <div className='content-container'>
+          <div className='image-container'>
+            <a
+              href={'https://web.subwallet.app/earning-demo'}
+              rel='noreferrer'
+              target='_blank'
+            >
+              <Image
+                className='banner-image'
+                src='/images/subwallet/crowdloan-banner.png'
+                width='100%'
+              />
+            </a>
+          </div>
 
+          <SwList.Section
+            actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+            enableSearchInput
+            filterBy={filterFunction}
+            list={items}
+            onClickActionBtn={onClickActionBtn}
+            renderItem={renderItem}
+            renderWhenEmpty={emptyCrowdloanList}
+            searchFunction={searchFunction}
+            searchMinCharactersCount={2}
+            searchPlaceholder={t<string>('Search project')}
+            showActionBtn
+          />
+        </div>
         <FilterModal
           applyFilterButtonTitle={t('Apply filter')}
           id={FILTER_MODAL_ID}
@@ -222,6 +237,21 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
 
+    '.content-container': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
+    '.empty-list': {
+      marginTop: 36
+    },
+
+    '.image-container': {
+      padding: token.padding,
+      paddingTop: token.paddingXXS,
+      width: '100%'
+    },
+
     '.crowdloan-item': {
       marginBottom: token.marginXS
     },
@@ -237,7 +267,16 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.ant-sw-list-section': {
-      height: '100%'
+      height: '100%',
+      flex: 1,
+
+      '.ant-sw-list-wrapper': {
+        flexBasis: 'auto'
+      }
+    },
+
+    '.banner-image': {
+      cursor: 'pointer'
     }
   });
 });

@@ -12,7 +12,8 @@ import { _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/exten
 import { sumBN } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { BN, BN_ZERO } from '@polkadot/util';
+import { BN } from '@polkadot/util';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 
 const YEAR = 365 * 24 * 60 * 60 * 1000;
 
@@ -65,41 +66,28 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
   const derivativeTokenSlug = poolInfo.derivativeAssets[0];
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
 
-  async function getLtokenBalance () {
-    const balances = (await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]))) as unknown as TokenBalanceRaw[];
+  return substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), (_balances) => {
+    const balances = _balances as unknown as TokenBalanceRaw[];
+
     const totalBalance = sumBN(balances.map((b) => (b.free || new BN(0))));
 
-    if (totalBalance.gt(BN_ZERO)) {
-      positionCallback({
-        slug: poolInfo.slug,
-        chain: chainInfo.slug,
-        address: useAddresses[0], // TODO
-        balance: [
-          {
-            slug: derivativeTokenSlug, // token slug
-            totalBalance: totalBalance.toString(), // TODO: convert with exchange rate
-            activeBalance: totalBalance.toString()
-          }
-        ],
+    positionCallback({
+      slug: poolInfo.slug,
+      chain: chainInfo.slug,
+      address: useAddresses.length > 1 ? ALL_ACCOUNT_KEY : useAddresses[0], // TODO
+      balance: [
+        {
+          slug: derivativeTokenSlug, // token slug
+          totalBalance: totalBalance.toString(),
+          activeBalance: totalBalance.toString()
+        }
+      ],
 
-        metadata: {
-          rewards: []
-        } as YieldPositionStats
-      } as YieldPositionInfo);
-    }
-  }
-
-  function getPositionInterval () {
-    getLtokenBalance().catch(console.error);
-  }
-
-  getPositionInterval();
-
-  const interval = setInterval(getPositionInterval, 30000);
-
-  return () => {
-    clearInterval(interval);
-  };
+      metadata: {
+        rewards: []
+      } as YieldPositionStats
+    } as YieldPositionInfo);
+  });
 }
 
 export async function getAcalaLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): Promise<HandleYieldStepData> {

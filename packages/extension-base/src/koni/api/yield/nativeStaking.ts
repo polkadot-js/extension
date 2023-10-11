@@ -2,12 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, OptimalYieldPath, OptimalYieldPathParams, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  ChainStakingMetadata, NominatorMetadata,
+  OptimalYieldPath,
+  OptimalYieldPathParams,
+  StakingStatus,
+  StakingType,
+  SubmitJoinNativeStaking,
+  SubmitJoinNominationPool,
+  YieldPoolInfo,
+  YieldPoolType,
+  YieldPositionInfo,
+  YieldStepType
+} from '@subwallet/extension-base/background/KoniTypes';
 import { getPoolingBondingExtrinsic, getRelayBondingExtrinsic, PalletStakingStakingLedger, subscribeRelayChainNominatorMetadata, subscribeRelayChainPoolMemberMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { calculateChainStakedReturn, calculateInflation, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/helper/utils';
-import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
@@ -51,38 +62,6 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
     const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
     const unlockingPeriod = parseInt(unlockingEras) * (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default); // in hours
 
-    // eslint-disable-next-line node/no-callback-literal
-    // callback({
-    //   ...poolInfo,
-    //   stats: {
-    //     assetEarning: [
-    //       {
-    //         slug: _getChainNativeTokenSlug(chainInfo),
-    //         apr: expectedReturn
-    //       }
-    //     ],
-    //     maxCandidatePerFarmer: parseInt(maxNominations),
-    //     maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks),
-    //     minJoinPool: minStake.toString(),
-    //     minWithdrawal: '0',
-    //     totalApr: expectedReturn,
-    //     tvl: bnTotalEraStake.toString()
-    //   },
-    //   metadata: {
-    //     chain: chainInfo.slug,
-    //     type: StakingType.NOMINATED,
-    //     expectedReturn: !_STAKING_CHAIN_GROUP.ternoa.includes(chainInfo.slug) ? expectedReturn : undefined, // in %, annually
-    //     inflation,
-    //     era: parseInt(currentEra),
-    //     minStake: minStake.toString(),
-    //     maxValidatorPerNominator: parseInt(maxNominations),
-    //     maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
-    //     allowCancelUnstaking: true,
-    //     unstakingPeriod: unlockingPeriod,
-    //     minJoinNominationPool: minPoolJoin
-    //   } as ChainStakingMetadata
-    // });
-
     if (substrateApi.api.query.nominationPools) {
       const nominationPoolSlug = `${poolInfo.slug.slice(0, 3)}___nomination_pool`;
 
@@ -121,7 +100,7 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
   });
 }
 
-export async function generatePathForNativeStaking (params: OptimalYieldPathParams, balanceService: BalanceService): Promise<OptimalYieldPath> {
+export async function generatePathForNativeStaking (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
   const bnAmount = new BN(params.amount);
   const result: OptimalYieldPath = {
     totalFee: [],
@@ -261,6 +240,28 @@ export function getNominationPoolPosition (substrateApi: _SubstrateApi, useAddre
             address: owner,
             chain: poolInfo.chain,
             metadata: nominatorMetadata,
+            slug: poolInfo.slug
+          });
+        } else {
+          positionCallback({
+            balance: [
+              {
+                slug: nativeTokenSlug,
+                totalBalance: '0',
+                activeBalance: '0'
+              }
+            ],
+            address: owner,
+            chain: poolInfo.chain,
+            metadata: {
+              chain: poolInfo.chain,
+              type: StakingType.POOLED,
+              address: owner,
+              status: StakingStatus.NOT_STAKING,
+              activeStake: '0',
+              nominations: [], // can only join 1 pool at a time
+              unstakings: []
+            } as NominatorMetadata,
             slug: poolInfo.slug
           });
         }

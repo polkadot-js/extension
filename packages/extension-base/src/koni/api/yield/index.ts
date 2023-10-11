@@ -87,19 +87,19 @@ export function subscribeYieldPosition (substrateApiMap: Record<string, Substrat
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___bifrost_liquid_staking') {
-      const unsub = getBifrostLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = await getBifrostLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___acala_liquid_staking') {
-      const unsub = getAcalaLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = await getAcalaLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___interlay_lending') {
-      const unsub = getInterlayLendingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = await getInterlayLendingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
-      const unsub = getParallelLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = await getParallelLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     }
@@ -155,7 +155,7 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams, 
     return generatePathForLiquidStaking(params, balanceService);
   }
 
-  return generatePathForNativeStaking(params, balanceService);
+  return generatePathForNativeStaking(params);
 }
 
 export async function generatePathForLiquidStaking (params: OptimalYieldPathParams, balanceService: BalanceService): Promise<OptimalYieldPath> {

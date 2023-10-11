@@ -153,7 +153,7 @@ export async function getParallelLiquidStakingExtrinsic (address: string, params
     txChain: params.poolInfo.chain,
     extrinsicType: ExtrinsicType.MINT_SDOT,
     extrinsic,
-    txData: inputData,
+    txData: requestData,
     transferNativeAmount: '0'
   };
 }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
+import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { useGetChainPrefixBySlug, useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { SwAlert } from '@subwallet/react-ui';

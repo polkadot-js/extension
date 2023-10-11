@@ -304,9 +304,7 @@ export const updateWCNotSupportRequests = (data: WalletConnectNotSupportRequest[
 export const subscribeWCNotSupportRequests = lazySubscribeMessage('pri(walletConnect.requests.notSupport.subscribe)', null, updateWCNotSupportRequests, updateWCNotSupportRequests);
 
 export const updateYieldPoolInfo = (data: YieldPoolInfo[]) => {
-  addLazy('updateYieldPoolInfo', () => {
-    store.dispatch({ type: 'yieldPoolInfo/updateYieldPoolInfo', payload: data });
-  });
+  store.dispatch({ type: 'yieldPoolInfo/updateYieldPoolInfo', payload: data });
 };
 
 export const subscribeYieldPoolInfo = lazySubscribeMessage('pri(yield.subscribePoolInfo)', null, updateYieldPoolInfo, updateYieldPoolInfo);

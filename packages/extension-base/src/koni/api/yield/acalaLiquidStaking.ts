@@ -37,7 +37,8 @@ export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi,
         assetEarning: [
           {
             slug: poolInfo.rewardAssets[0],
-            apr: 18.38
+            apr: 18.38,
+            exchangeRate: 1
           }
         ],
         maxCandidatePerFarmer: 1,

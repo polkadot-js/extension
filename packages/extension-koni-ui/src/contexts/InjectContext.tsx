@@ -84,6 +84,7 @@ class InjectHandler {
   isInitEnable: boolean;
   enableSubject: BehaviorSubject<boolean>;
   loadingSubject: BehaviorSubject<boolean>;
+  successSubject: BehaviorSubject<number>;
   errorSubject = new BehaviorSubject<InjectErrorMap>({});
   loadingPromiseHandler = createPromiseHandler<boolean>();
 
@@ -106,6 +107,7 @@ class InjectHandler {
 
   constructor () {
     this.enableSubject = new BehaviorSubject<boolean>(localStorage.getItem(ENABLE_INJECT) === 'true');
+    this.successSubject = new BehaviorSubject<number>(0);
     this.isInitEnable = this.enableSubject.value;
     this.loadingSubject = new BehaviorSubject<boolean>(true);
     this.hasInjected = !!win.injectedWeb3 || !!win.SubWallet;
@@ -129,53 +131,63 @@ class InjectHandler {
   }
 
   async enable () {
-    this.loadingSubject.next(true);
-    this.errorSubject.next({
-      substrate: undefined,
-      evm: undefined
+    return new Promise<void>((resolve, reject) => {
+      let success = 0;
+
+      this.successSubject.next(0);
+      this.loadingSubject.next(true);
+
+      this.errorSubject.next({
+        substrate: undefined,
+        evm: undefined
+      });
+
+      const finishAction = () => {
+        success++;
+        this.enableSubject.next(true);
+        this.successSubject.next(success);
+        localStorage.setItem(ENABLE_INJECT, 'true');
+        resolve();
+      };
+
+      try {
+        this.enableSubstrate()
+          .then(() => {
+            this.substratePromiseHandler.resolve(this.substrateWallet);
+
+            finishAction();
+          })
+          .catch((e: Error) => {
+            this.errorSubject.next({ ...this.errorSubject.value, substrate: e });
+            this.substratePromiseHandler.reject(e);
+
+            if (this.errorSubject.value.evm) {
+              reject(e);
+            }
+          });
+
+        this.enableEvm()
+          .then(() => {
+            this.evmPromiseHandler.resolve(this.evmWallet);
+
+            finishAction();
+          })
+          .catch((e: Error) => {
+            this.errorSubject.next({ ...this.errorSubject.value, evm: e });
+            this.evmPromiseHandler.reject(e);
+
+            if (this.errorSubject.value.substrate) {
+              reject(e);
+            }
+          });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setTimeout(() => {
+          this.loadingSubject.next(false);
+        }, 900);
+      }
     });
-
-    const finishAction = () => {
-      this.enableSubject.next(true);
-      localStorage.setItem(ENABLE_INJECT, 'true');
-    };
-
-    try {
-      this.enableSubstrate()
-        .then(() => {
-          this.substratePromiseHandler.resolve(this.substrateWallet);
-
-          if (this.evmEnableCompleted || this.errorSubject.value.evm) {
-            finishAction();
-          }
-        })
-        .catch((e: Error) => {
-          this.errorSubject.next({ ...this.errorSubject.value, substrate: e });
-          this.substratePromiseHandler.reject(e);
-        });
-
-      this.enableEvm()
-        .then(() => {
-          this.evmPromiseHandler.resolve(this.evmWallet);
-
-          if (this.substrateEnableCompleted || this.errorSubject.value.substrate) {
-            finishAction();
-          }
-        })
-        .catch((e: Error) => {
-          this.errorSubject.next({ ...this.errorSubject.value, evm: e });
-          this.evmPromiseHandler.reject(e);
-        });
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setTimeout(() => {
-        this.loadingSubject.next(false);
-      }, 900);
-    }
-
-    // async placeholer for future
-    await Promise.resolve();
   }
 
   disable () {
@@ -187,6 +199,9 @@ class InjectHandler {
     this.evmEnableCompleted = false;
     this.updateInjectedAccount(this.substrateKey, []);
     this.updateInjectedAccount(this.evmKey, []);
+    this.substrateWallet = undefined;
+    this.evmWallet = undefined;
+    this.successSubject.next(0);
     this.enableSubject.next(false);
     localStorage.setItem(ENABLE_INJECT, 'false');
   }
@@ -264,7 +279,7 @@ class InjectHandler {
   }
 
   unsubscribeEvmAccount () {
-    this.substrateAccountUnsubcall?.();
+    this.evmAccountUnsubcall?.();
   }
 
   updateInjectedAccount (key: string, accounts: InjectedAccountWithMeta[]) {
@@ -334,10 +349,34 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const [substrateWallet, setSubstrateWallet] = useState(injectHandler.substrateWallet);
   const [loadingInject, setLoadingInject] = useState(injectHandler.loadingSubject.value);
 
+  const enableInject = useCallback((callback?: VoidFunction) => {
+    injectHandler.enable()
+      .then(() => {
+        callback?.();
+      }).catch(console.error);
+  }, []);
+
+  const disableInject = useCallback(() => {
+    injectHandler.disable();
+  }, []);
+
+  const initCallback = useCallback(() => {
+    injectHandler.onLoaded();
+  }, []);
+
+  const setWallet = useCallback(() => {
+    setEvmWallet(injectHandler.evmWallet);
+    setSubstrateWallet(injectHandler.substrateWallet);
+  }, []);
+
   useEffect(() => {
     injectHandler.enableSubject.subscribe(setEnabled);
     injectHandler.loadingSubject.subscribe(setLoadingInject);
   }, []);
+
+  useEffect(() => {
+    injectHandler.successSubject.subscribe(setWallet);
+  }, [setWallet]);
 
   useEffect(() => {
     const subscription = injectHandler.errorSubject.subscribe((error) => {
@@ -353,23 +392,6 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
       subscription.unsubscribe();
     };
   }, [notification, t]);
-
-  const enableInject = useCallback((callback?: VoidFunction) => {
-    injectHandler.enable()
-      .then(() => {
-        setEvmWallet(injectHandler.evmWallet);
-        setSubstrateWallet(injectHandler.substrateWallet);
-        callback?.();
-      }).catch(console.error);
-  }, []);
-
-  const disableInject = useCallback(() => {
-    injectHandler.disable();
-  }, []);
-
-  const initCallback = useCallback(() => {
-    injectHandler.onLoaded();
-  }, []);
 
   return (
     <InjectContext.Provider

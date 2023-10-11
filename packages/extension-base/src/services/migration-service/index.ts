@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import State from '@subwallet/extension-base/koni/background/handlers/State';
+import { EventService } from '@subwallet/extension-base/services/event-service';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
-import { EventService } from '@subwallet/extension-base/services/event-service';
 
 import MigrationScripts, { EVERYTIME } from './scripts';
 

@@ -118,6 +118,23 @@ export class KeyringService {
         }
       };
     }));
+
+    const currentAddress = this.currentAccountSubject.value.address;
+    const afterAccounts: Record<string, boolean> = {};
+
+    Object.keys(this.accounts).forEach((adr) => {
+      afterAccounts[adr] = true;
+    });
+
+    accounts.forEach((value) => {
+      afterAccounts[value.address] = true;
+    });
+
+    if (Object.keys(afterAccounts).length === 1) {
+      this.currentAccountSubject.next({ address: Object.keys(afterAccounts)[0], currentGenesisHash: null });
+    } else if (Object.keys(afterAccounts).indexOf(currentAddress) === -1) {
+      this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
+    }
   }
 
   public removeInjectAccounts (addresses: string[]) {
@@ -126,7 +143,7 @@ export class KeyringService {
 
     if (afterAccounts.length === 1) {
       this.currentAccountSubject.next({ address: afterAccounts[0], currentGenesisHash: null });
-    } else if (addresses.indexOf(currentAddress) > -1) {
+    } else if (addresses.indexOf(currentAddress) === -1) {
       this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
     }
 

@@ -803,7 +803,12 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingTop: token.sizeLG,
-      paddingBottom: 42
+      paddingBottom: 42,
+      position: 'sticky',
+      bottom: 0,
+      background: token.colorBgDefault,
+      opacity: 1,
+      zIndex: 10
     },
 
     '.__note-box': {

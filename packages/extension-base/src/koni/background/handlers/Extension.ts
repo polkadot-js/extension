@@ -3873,6 +3873,8 @@ export default class KoniExtension {
   private async handleYieldStep (inputData: RequestYieldStepSubmit): Promise<SWTransactionResponse> {
     const { address, data, path, yieldPoolInfo } = inputData;
 
+    console.log('data', data, inputData);
+
     if (!data) {
       return this.#koniState.transactionService
         .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);

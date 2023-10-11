@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -12,6 +12,7 @@ import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetChainPrefixBySlug, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import useGetYieldPositionByAddressAndSlug from '@subwallet/extension-koni-ui/hooks/screen/earning/useGetYieldPositionByAddressAndSlug';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -87,6 +88,8 @@ const Component = () => {
 
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
+
+  const currentYieldPosition = useGetYieldPositionByAddressAndSlug(currentFrom, currentPoolInfo.slug);
 
   const onDone = useCallback((extrinsicHash: string) => {
     const chainType = isEthereumAddress(currentFrom) ? 'ethereum' : 'substrate';
@@ -361,14 +364,16 @@ const Component = () => {
 
       data = {
         amount: currentAmount,
-        selectedPool
+        selectedPool,
+        nominatorMetadata: currentYieldPosition?.metadata as NominatorMetadata | undefined
       } as SubmitJoinNominationPool;
     } else if (currentPoolInfo.type === YieldPoolType.NATIVE_STAKING && pool) {
       const selectedValidators = getSelectedValidators(parseNominations(nominate));
 
       data = {
         amount: currentAmount,
-        selectedValidators
+        selectedValidators,
+        nominatorMetadata: currentYieldPosition?.metadata as NominatorMetadata | undefined
       } as SubmitJoinNativeStaking;
     } else {
       data = getJoinYieldParams(currentPoolInfo, currentAmount, processState.feeStructure[submitStep]);
@@ -435,7 +440,7 @@ const Component = () => {
           });
       }, 300);
     }
-  }, [currentPoolInfo, form, getSelectedPool, getSelectedValidators, onError, onSuccess, processState]);
+  }, [currentPoolInfo, currentYieldPosition?.metadata, form, getSelectedPool, getSelectedValidators, onError, onSuccess, processState.currentStep, processState.feeStructure, processState.steps]);
 
   useEffect(() => {
     let unmount = false;

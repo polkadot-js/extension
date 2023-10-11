@@ -436,6 +436,7 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
   }
 
   const _data = requestData.data as SubmitJoinNominationPool;
+
   const extrinsic = await getNominationPoolJoinExtrinsic(address, params, _data);
 
   const joinPoolData: RequestStakePoolingBonding = {

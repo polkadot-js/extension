@@ -4,18 +4,15 @@
 import { ExtrinsicType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import useGetYieldPositionByAddressAndSlug from '@subwallet/extension-koni-ui/hooks/screen/earning/useGetYieldPositionByAddressAndSlug';
+import { useGetYieldMetadata, useGetYieldPositionByAddressAndSlug, useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitRedeem } from '@subwallet/extension-koni-ui/messaging';
-import { FreeBalance, TransactionFooter } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
-import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, ThemeProps, YieldFastWithdrawParams } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { validateYieldWithdrawPosition } from '@subwallet/extension-koni-ui/utils/form/validators/yield';
+import { convertFieldToObject, simpleCheckForm, validateYieldWithdrawPosition } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -24,7 +21,7 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useGetYieldMetadata from '../../../../hooks/screen/earning/useGetYieldMetadata';
+import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
 
 type Props = ThemeProps;
 
@@ -33,9 +30,11 @@ const _accountFilterFunc = (
   selectedPoolSlug: string
 ): (account: AccountJson) => boolean => {
   return (account: AccountJson): boolean => {
-    const yieldPositionInfo = allYieldPosition.find((item) => item.address.toLowerCase() === account.address.toLowerCase());
+    const yieldPositionInfo = allYieldPosition.find((item) => {
+      return isSameAddress(item.address, account.address) && item.slug === selectedPoolSlug;
+    });
 
-    return new BigN(yieldPositionInfo?.balance[0].totalBalance || BN_ZERO).gt(BN_ZERO) && yieldPositionInfo?.slug === selectedPoolSlug;
+    return new BigN(yieldPositionInfo?.balance[0].totalBalance || BN_ZERO).gt(BN_ZERO);
   };
 };
 
@@ -170,7 +169,7 @@ const Component: React.FC = () => {
           />
 
           <Form.Item
-            name={'value'}
+            name={'amount'}
             rules={[
               { required: true, message: t('Amount is required') },
               validateYieldWithdrawPosition(minWithdraw, activeBalance, tokenDecimals || 0, t)

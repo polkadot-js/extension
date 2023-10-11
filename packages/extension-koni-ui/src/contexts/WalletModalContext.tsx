@@ -4,7 +4,7 @@
 import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
 import { ConfirmationModal } from '@subwallet/extension-koni-ui/components/Modal/ConfirmationModal';
 import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModal';
-import { BUY_TOKEN_MODAL, CONFIRMATION_MODAL, CREATE_ACCOUNT_MODAL, SEED_PHRASE_MODAL, TRANSACTION_TRANSFER_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { BUY_TOKEN_MODAL, CONFIRMATION_MODAL, CREATE_ACCOUNT_MODAL, SEED_PHRASE_MODAL, TRANSACTION_TRANSFER_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext, useExcludeModal } from '@subwallet/react-ui';
@@ -62,6 +62,9 @@ export const WalletModalContext = ({ children }: Props) => {
   useExcludeModal(CONFIRMATION_MODAL);
   useExcludeModal(TRANSACTION_TRANSFER_MODAL);
   useExcludeModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
+  useExcludeModal(TRANSACTION_YIELD_WITHDRAW_MODAL);
+  useExcludeModal(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL);
+  useExcludeModal(TRANSACTION_YIELD_FAST_WITHDRAW_MODAL);
   useExcludeModal(BUY_TOKEN_MODAL);
 
   useEffect(() => {

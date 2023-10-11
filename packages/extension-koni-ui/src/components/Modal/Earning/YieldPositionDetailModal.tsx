@@ -3,10 +3,10 @@
 
 import { ExtrinsicType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
-import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, StakingStatusUi, UN_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
-import { usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, StakingStatusUi, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { useGetAccountsByYield, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTagTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
+import { getYieldAvailableActionsByPosition, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 
 interface Props extends ThemeProps {
   positionInfo: YieldPositionInfo;
@@ -25,16 +26,25 @@ interface Props extends ThemeProps {
 
 const modalId = YIELD_POSITION_DETAIL_MODAL;
 
-const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: Props) => {
-  const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
-  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const modalTitle = detectTranslate('Position details');
+const Component: React.FC<Props> = (props: Props) => {
+  const { className, positionInfo, yieldPoolInfo } = props;
+  const { slug } = yieldPoolInfo;
+
+  const { isWebUI } = useContext(ScreenContext);
 
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+  const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
+
   const onClickFooterButton = usePreCheckAction(currentAccount?.address, false);
+
+  const yieldAccounts = useGetAccountsByYield(slug);
+
+  const availableActions = useMemo(() => getYieldAvailableActionsByPosition(positionInfo, yieldPoolInfo), [positionInfo, yieldPoolInfo]);
 
   const account = isAllAccount ? null : currentAccount;
 
@@ -74,7 +84,7 @@ const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: 
   const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
 
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
-  const [, setUnStakeStorage] = useLocalStorage(UN_YIELD_TRANSACTION, DEFAULT_UN_YIELD_PARAMS);
+  const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
 
   const tagTypes = useMemo(() => createEarningTagTypes(t, token), [t, token]);
 
@@ -94,21 +104,24 @@ const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: 
     }, 300);
   }, [currentAccount, inactiveModal, navigate, setYieldStorage, yieldPoolInfo]);
 
-  const onClickUnstakeBtn = useCallback(() => {
+  const onClickWithdrawBtn = useCallback(() => {
     inactiveModal(modalId);
-    setTimeout(() => {
-      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+    const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
-      setUnStakeStorage({
-        ...DEFAULT_UN_YIELD_PARAMS,
-        from: address,
-        chain: yieldPoolInfo.chain,
-        method: yieldPoolInfo.slug,
-        asset: yieldPoolInfo.inputAssets[0]
-      });
-      navigate('/transaction/un-yield');
-    }, 300);
-  }, [currentAccount, inactiveModal, navigate, setUnStakeStorage, yieldPoolInfo]);
+    setFastWithdrawStorage({
+      ...DEFAULT_FAST_WITHDRAW_YIELD_PARAMS,
+      from: address,
+      chain: yieldPoolInfo.chain,
+      method: yieldPoolInfo.slug,
+      asset: yieldPoolInfo.inputAssets[0]
+    });
+
+    if (isWebUI) {
+      activeModal(TRANSACTION_YIELD_FAST_WITHDRAW_MODAL);
+    } else {
+      navigate('/transaction/yield-withdraw-position');
+    }
+  }, [activeModal, currentAccount, inactiveModal, isWebUI, navigate, setFastWithdrawStorage, yieldPoolInfo]);
 
   const onClickMoreAction = useCallback(() => {
     inactiveModal(modalId);
@@ -125,15 +138,16 @@ const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: 
         />
         <Button
           className='__action-btn'
-          disabled
+          disabled={!availableActions.includes(YieldAction.WITHDRAW_EARNING)}
           onClick={onClickFooterButton(
-            onClickUnstakeBtn,
+            onClickWithdrawBtn,
             yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND
           )}
           schema='secondary'
         >{t('Withdraw')}</Button>
         <Button
           className='__action-btn'
+          disabled={!availableActions.includes(YieldAction.START_EARNING)}
           onClick={onClickFooterButton(
             onClickStakeMoreBtn,
             yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_BOND : ExtrinsicType.STAKING_JOIN_POOL
@@ -155,11 +169,11 @@ const Component: React.FC<Props> = ({ className, positionInfo, yieldPoolInfo }: 
       id={modalId}
       maskClosable={true}
       onCancel={onCloseModal}
-      title={t(modalTitle)}
+      title={t('Position details')}
     >
       <MetaInfo>
         <MetaInfo.Account
-          accounts={isAccountAll(positionInfo.address) ? [] : undefined}
+          accounts={isAccountAll(positionInfo.address) ? yieldAccounts : undefined}
           address={positionInfo.address}
           label={t('Account')}
           name={account?.name}

@@ -19,7 +19,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper
       className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['yieldPool', 'price'])}
+      resolve={dataContext.awaitStores(['yieldPool', 'price', 'staking'])}
     >
       <Outlet />
     </PageWrapper>

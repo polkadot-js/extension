@@ -2,19 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  ChainStakingMetadata, NominatorMetadata,
-  OptimalYieldPath,
-  OptimalYieldPathParams,
-  StakingStatus,
-  StakingType,
-  SubmitJoinNativeStaking,
-  SubmitJoinNominationPool,
-  YieldPoolInfo,
-  YieldPoolType,
-  YieldPositionInfo,
-  YieldStepType
-} from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, StakingStatus, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getPoolingBondingExtrinsic, getRelayBondingExtrinsic, PalletStakingStakingLedger, subscribeRelayChainNominatorMetadata, subscribeRelayChainPoolMemberMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { calculateChainStakedReturn, calculateInflation, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';

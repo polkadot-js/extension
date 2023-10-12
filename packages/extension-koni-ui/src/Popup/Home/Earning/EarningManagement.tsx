@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, StakingType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseModal, EarningCalculatorModal, EarningInfoModal, EarningMoreActionModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout, YieldPositionDetailModal, YieldStakingDetailModal } from '@subwallet/extension-koni-ui/components';
 import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -41,6 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { poolInfo: poolInfoMap } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount } = useSelector((state: RootState) => state.accountState);
   const { chainStateMap } = useSelector((state: RootState) => state.chainStore);
+  const stakingRewardMap = useSelector((state: RootState) => state.staking.stakingRewardMap);
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
@@ -50,6 +51,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const [{ selectedYieldPoolInfo, selectedYieldPosition }, setSelectedItem] = useState<{ selectedYieldPosition: YieldPositionInfo | undefined, selectedYieldPoolInfo: YieldPoolInfo | undefined }>({ selectedYieldPosition: undefined, selectedYieldPoolInfo: undefined });
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const selectedStakingRewardItem = useMemo(() => {
+    return stakingRewardMap.find((item) => item.address === selectedYieldPosition?.address && item.chain === selectedYieldPoolInfo?.chain && item.type === StakingType.POOLED);
+  }, [selectedYieldPoolInfo?.chain, selectedYieldPosition?.address, stakingRewardMap]);
 
   useAutoNavigateEarning();
 
@@ -259,9 +264,12 @@ const Component: React.FC<Props> = (props: Props) => {
       return null;
     }
 
+    const nominationPoolReward = stakingRewardMap.find((rewardItem) => rewardItem.address === item?.address && rewardItem.chain === poolInfo?.chain && rewardItem.type === StakingType.POOLED);
+
     return (
       <HorizontalEarningItem
         key={key}
+        nominationPoolReward={nominationPoolReward}
         onClickCalculatorBtn={onClickCalculatorBtn(item)}
         onClickCancelUnStakeBtn={onClickCancelUnStakeBtn(item)}
         onClickInfoBtn={onClickInfoBtn(item)}
@@ -273,7 +281,7 @@ const Component: React.FC<Props> = (props: Props) => {
         yieldPositionInfo={item}
       />
     );
-  }, [poolInfoMap, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn]);
+  }, [poolInfoMap, stakingRewardMap, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn]);
 
   const resultList = useMemo((): YieldPositionInfo[] => {
     return [...groupYieldPosition]
@@ -394,6 +402,7 @@ const Component: React.FC<Props> = (props: Props) => {
             ? (
               <YieldStakingDetailModal
                 nominatorMetadata={selectedYieldPosition.metadata as NominatorMetadata}
+                rewardItem={selectedStakingRewardItem}
                 yieldPoolInfo={selectedYieldPoolInfo}
               />
             )

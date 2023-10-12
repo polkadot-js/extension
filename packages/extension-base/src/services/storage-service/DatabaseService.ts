@@ -368,4 +368,8 @@ export default class DatabaseService {
       next: (data) => callback && callback(data)
     }));
   }
+
+  async getYieldNominationPoolPosition (addresses: string[], chains: string[]) {
+    return this.stores.yieldPosition.getByAddressAndChains(addresses, chains);
+  }
 }

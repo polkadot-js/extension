@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, OptimalYieldPathRequest, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -77,6 +77,7 @@ const Component = () => {
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitString, setSubmitString] = useState<string | undefined>();
 
   const currentStep = processState.currentStep;
 
@@ -460,28 +461,36 @@ const Component = () => {
 
   useEffect(() => {
     if (currentStep === 0) {
-      setStepLoading(true);
+      const submitData: OptimalYieldPathRequest = {
+        address: currentFrom,
+        amount: currentAmount,
+        poolInfo: currentPoolInfo
+      };
 
-      addLazy(loadingStepPromiseKey, () => {
-        getOptimalYieldPath({
-          address: currentFrom,
-          amount: currentAmount,
-          poolInfo: currentPoolInfo
-        })
-          .then((res) => {
-            dispatchProcessState({
-              payload: {
-                steps: res.steps,
-                feeStructure: res.totalFee
-              },
-              type: EarningActionType.STEP_CREATE
-            });
-          })
-          .catch(console.error)
-          .finally(() => setStepLoading(false));
-      }, 1000, 5000, false);
+      const newData = JSON.stringify(submitData);
+
+      if (newData !== submitString) {
+        setSubmitString(newData);
+
+        setStepLoading(true);
+
+        addLazy(loadingStepPromiseKey, () => {
+          getOptimalYieldPath(submitData)
+            .then((res) => {
+              dispatchProcessState({
+                payload: {
+                  steps: res.steps,
+                  feeStructure: res.totalFee
+                },
+                type: EarningActionType.STEP_CREATE
+              });
+            })
+            .catch(console.error)
+            .finally(() => setStepLoading(false));
+        }, 1000, 5000, false);
+      }
     }
-  }, [currentPoolInfo, currentAmount, currentStep, currentFrom]);
+  }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom]);
 
   return (
     <div className={'earning-wrapper'}>

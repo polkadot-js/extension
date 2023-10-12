@@ -2,22 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getYieldAvailableActionsByPosition, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, StakingStatusUi, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, FAST_WITHDRAW_YIELD_TRANSACTION, StakingStatusUi, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetAccountsByYield, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTagTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, ModalContext } from '@subwallet/react-ui';
-import { DotsThree } from 'phosphor-react';
+import { Button, ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
-import { getYieldAvailableActionsByPosition, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 
 interface Props extends ThemeProps {
   positionInfo: YieldPositionInfo;
@@ -123,19 +122,19 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [activeModal, currentAccount, inactiveModal, isWebUI, navigate, setFastWithdrawStorage, yieldPoolInfo]);
 
-  const onClickMoreAction = useCallback(() => {
-    inactiveModal(modalId);
-    activeModal(EARNING_MORE_ACTION_MODAL);
-  }, [activeModal, inactiveModal]);
+  // const onClickMoreAction = useCallback(() => {
+  //   inactiveModal(modalId);
+  //   activeModal(EARNING_MORE_ACTION_MODAL);
+  // }, [activeModal, inactiveModal]);
 
   const footer = () => {
     return (
       <div className='staking-detail-modal-footer'>
-        <Button
-          icon={<Icon phosphorIcon={DotsThree} />}
-          onClick={onClickMoreAction}
-          schema='secondary'
-        />
+        {/* <Button */}
+        {/*   icon={<Icon phosphorIcon={DotsThree} />} */}
+        {/*   onClick={onClickMoreAction} */}
+        {/*   schema='secondary' */}
+        {/* /> */}
         <Button
           className='__action-btn'
           disabled={!availableActions.includes(YieldAction.WITHDRAW_EARNING)}

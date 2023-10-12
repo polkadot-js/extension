@@ -64,7 +64,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_YIELD_TRANSACTION, DEFAULT_WITHDRAW_YIELD_PARAMS);
   const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
 
-  const filterFunction = useMemo<(item: YieldPoolInfo) => boolean>(() => {
+  const filterFunction = useMemo<(item: YieldPositionInfo) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
         return true;
@@ -75,28 +75,30 @@ const Component: React.FC<Props> = (props: Props) => {
           return true;
         }
 
+        const poolInfo = poolInfoMap[item.slug];
+
         if (filter === YieldPoolType.NOMINATION_POOL) {
-          if (item.type === YieldPoolType.NOMINATION_POOL) {
+          if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
             return true;
           }
         } else if (filter === YieldPoolType.NATIVE_STAKING) {
-          if (item.type === YieldPoolType.NATIVE_STAKING) {
+          if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
             return true;
           }
         } else if (filter === YieldPoolType.LIQUID_STAKING) {
-          if (item.type === YieldPoolType.LIQUID_STAKING) {
+          if (poolInfo.type === YieldPoolType.LIQUID_STAKING) {
             return true;
           }
         } else if (filter === YieldPoolType.LENDING) {
-          if (item.type === YieldPoolType.LENDING) {
+          if (poolInfo.type === YieldPoolType.LENDING) {
             return true;
           }
         } else if (filter === YieldPoolType.PARACHAIN_STAKING) {
-          if (item.type === YieldPoolType.PARACHAIN_STAKING) {
+          if (poolInfo.type === YieldPoolType.PARACHAIN_STAKING) {
             return true;
           }
         } else if (filter === YieldPoolType.SINGLE_FARMING) {
-          if (item.type === YieldPoolType.SINGLE_FARMING) {
+          if (poolInfo.type === YieldPoolType.SINGLE_FARMING) {
             return true;
           }
         }
@@ -104,7 +106,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
       return false;
     };
-  }, [selectedFilters]);
+  }, [poolInfoMap, selectedFilters]);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);

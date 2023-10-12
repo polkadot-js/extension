@@ -114,8 +114,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, []);
 
   const availableActionsByMetadata = useMemo(() => {
-    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo);
-  }, [yieldPoolInfo, yieldPositionInfo]);
+    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo, nominationPoolReward?.unclaimedReward);
+  }, [nominationPoolReward?.unclaimedReward, yieldPoolInfo, yieldPositionInfo]);
 
   const buttons = useMemo((): ButtonOptionProps[] => {
     const result: ButtonOptionProps[] = [];

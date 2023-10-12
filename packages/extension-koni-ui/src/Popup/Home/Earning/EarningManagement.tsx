@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, StakingType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, NominatorMetadata, StakingRewardItem, StakingType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BaseModal, EarningCalculatorModal, EarningInfoModal, EarningMoreActionModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout, YieldPositionDetailModal, YieldStakingDetailModal } from '@subwallet/extension-koni-ui/components';
 import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -53,8 +54,31 @@ const Component: React.FC<Props> = (props: Props) => {
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const selectedStakingRewardItem = useMemo(() => {
-    return stakingRewardMap.find((item) => item.address === selectedYieldPosition?.address && item.chain === selectedYieldPoolInfo?.chain && item.type === StakingType.POOLED);
-  }, [selectedYieldPoolInfo?.chain, selectedYieldPosition?.address, stakingRewardMap]);
+    let nominationPoolReward: StakingRewardItem | undefined;
+
+    if (isAccountAll(currentAccount?.address || '')) {
+      nominationPoolReward = {
+        state: APIItemState.READY,
+        name: '',
+        chain: '',
+        address: ALL_ACCOUNT_KEY,
+        type: StakingType.POOLED
+      } as StakingRewardItem;
+
+      stakingRewardMap.forEach((stakingReward: StakingRewardItem) => {
+        if (nominationPoolReward && stakingReward.chain === selectedYieldPoolInfo?.chain && stakingReward.type === StakingType.POOLED) {
+          nominationPoolReward.name = stakingReward.name;
+          nominationPoolReward.chain = stakingReward.chain;
+
+          nominationPoolReward.unclaimedReward = stakingReward.unclaimedReward;
+        }
+      });
+    } else {
+      nominationPoolReward = stakingRewardMap.find((rewardItem) => rewardItem.address === selectedYieldPosition?.address && rewardItem.chain === selectedYieldPoolInfo?.chain && rewardItem.type === StakingType.POOLED);
+    }
+
+    return nominationPoolReward;
+  }, [currentAccount?.address, selectedYieldPoolInfo?.chain, selectedYieldPosition?.address, stakingRewardMap]);
 
   useAutoNavigateEarning();
 
@@ -266,7 +290,28 @@ const Component: React.FC<Props> = (props: Props) => {
       return null;
     }
 
-    const nominationPoolReward = stakingRewardMap.find((rewardItem) => rewardItem.address === item?.address && rewardItem.chain === poolInfo?.chain && rewardItem.type === StakingType.POOLED);
+    let nominationPoolReward: StakingRewardItem | undefined;
+
+    if (isAccountAll(currentAccount?.address || '')) {
+      nominationPoolReward = {
+        state: APIItemState.READY,
+        name: '',
+        chain: '',
+        address: ALL_ACCOUNT_KEY,
+        type: StakingType.POOLED
+      } as StakingRewardItem;
+
+      stakingRewardMap.forEach((stakingReward: StakingRewardItem) => {
+        if (nominationPoolReward && stakingReward.chain === poolInfo?.chain && stakingReward.type === StakingType.POOLED) {
+          nominationPoolReward.name = stakingReward.name;
+          nominationPoolReward.chain = stakingReward.chain;
+
+          nominationPoolReward.unclaimedReward = stakingReward.unclaimedReward;
+        }
+      });
+    } else {
+      nominationPoolReward = stakingRewardMap.find((rewardItem) => rewardItem.address === item?.address && rewardItem.chain === poolInfo?.chain && rewardItem.type === StakingType.POOLED);
+    }
 
     return (
       <HorizontalEarningItem
@@ -283,7 +328,7 @@ const Component: React.FC<Props> = (props: Props) => {
         yieldPositionInfo={item}
       />
     );
-  }, [poolInfoMap, stakingRewardMap, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn]);
+  }, [poolInfoMap, currentAccount?.address, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, stakingRewardMap]);
 
   const resultList = useMemo((): YieldPositionInfo[] => {
     return [...groupYieldPosition]
@@ -419,6 +464,7 @@ const Component: React.FC<Props> = (props: Props) => {
       {
         selectedYieldPosition && selectedYieldPoolInfo && (
           <EarningMoreActionModal
+            stakingRewardItem={selectedStakingRewardItem}
             yieldPoolInfo={selectedYieldPoolInfo}
             yieldPositionInfo={selectedYieldPosition}
           />

@@ -239,7 +239,12 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.content-container': {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      height: '100%'
+    },
+
+    '.ant-sw-screen-layout-body': {
+      overflow: 'hidden'
     },
 
     '.empty-list': {

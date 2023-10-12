@@ -20,6 +20,7 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import MigrationService from '@subwallet/extension-base/services/migration-service';
+import MintCampaignService from '@subwallet/extension-base/services/mint-campaign-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import { PriceService } from '@subwallet/extension-base/services/price-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
@@ -139,6 +140,7 @@ export default class KoniState {
   readonly migrationService: MigrationService;
   readonly subscanService: SubscanService;
   readonly walletConnectService: WalletConnectService;
+  readonly mintCampaignService: MintCampaignService;
 
   // Handle the general status of the extension
   private generalStatus: ServiceStatus = ServiceStatus.INITIALIZING;
@@ -160,9 +162,12 @@ export default class KoniState {
     this.priceService = new PriceService(this.dbService, this.eventService, this.chainService);
     this.balanceService = new BalanceService(this.chainService);
     this.historyService = new HistoryService(this.dbService, this.chainService, this.eventService, this.keyringService);
-    this.transactionService = new TransactionService(this.chainService, this.eventService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
     this.walletConnectService = new WalletConnectService(this, this.requestService);
     this.migrationService = new MigrationService(this);
+    this.mintCampaignService = new MintCampaignService(this);
+
+    this.transactionService = new TransactionService(this.chainService, this.eventService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService, this.mintCampaignService);
+
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');

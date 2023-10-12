@@ -24,8 +24,8 @@ jobs:
         cache: 'yarn'
       env:
         TRANSAK_API_KEY: ${{ secrets.TRANSAK_API_KEY }}
-        BANXA_SANDBOX_API_KEY: ${{ secrets.BANXA_SANDBOX_API_KEY }}
-        BANXA_SANBOX_API_SECRET: ${{ secrets.BANXA_SANBOX_API_SECRET }}
+        COINBASE_PAY_ID: ${{ secrets.COINBASE_PAY_ID }}
+        NFT_MINTING_HOST: ${{ secrets.NFT_MINTING_HOST }}
     - run: yarn install --immutable | grep -v 'YN0013'
     - run: yarn webapp:build
     - name: Publish to Cloudflare Pages

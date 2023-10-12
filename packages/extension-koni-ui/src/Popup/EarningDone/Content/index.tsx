@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { UnlockDotMintedData } from '@subwallet/extension-base/types';
 import { CloseIcon, Layout, SocialGroup } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { unlockDotCheckSubscribe } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -30,6 +32,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
   const { historyList } = useSelector((state) => state.transactionHistory);
 
+  const [nftData, setNftData] = useState<UnlockDotMintedData>();
+
   const item = useMemo(() => {
     return historyList.find((value) => value.transactionId === transactionId);
   }, [historyList, transactionId]);
@@ -40,7 +44,12 @@ const Component: React.FC<Props> = (props: Props) => {
     } else {
       switch (item.status) {
         case ExtrinsicStatus.SUCCESS:
-          return ProcessStatus.SUCCESS;
+          if (nftData) {
+            return ProcessStatus.SUCCESS;
+          } else {
+            return ProcessStatus.PROCESSING;
+          }
+
         case ExtrinsicStatus.FAIL:
         case ExtrinsicStatus.CANCELLED:
           return ProcessStatus.FAIL;
@@ -48,7 +57,7 @@ const Component: React.FC<Props> = (props: Props) => {
           return ProcessStatus.PROCESSING;
       }
     }
-  }, [item]);
+  }, [item, nftData]);
 
   const viewInHistory = useCallback(
     () => {
@@ -64,6 +73,24 @@ const Component: React.FC<Props> = (props: Props) => {
   const backToEarning = useCallback(() => {
     navigate('/home/earning/');
   }, [navigate]);
+
+  useEffect(() => {
+    let unmount = false;
+
+    const callback = (data: UnlockDotMintedData | undefined) => {
+      if (!unmount) {
+        setNftData(data);
+      }
+    };
+
+    unlockDotCheckSubscribe({ transactionId: transactionId || '' }, callback)
+      .then(callback)
+      .catch(console.error);
+
+    return () => {
+      unmount = true;
+    };
+  }, [transactionId]);
 
   return (
     <Layout.WithSubHeaderOnly
@@ -102,7 +129,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }
         {
           status === ProcessStatus.SUCCESS && (
-            <EarningDoneSuccess />
+            <EarningDoneSuccess url={nftData?.nftImage || ''} />
           )
         }
       </div>

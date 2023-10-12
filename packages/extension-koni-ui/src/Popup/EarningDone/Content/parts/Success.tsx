@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { baseParseIPFSUrl } from '@subwallet/extension-base/utils';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -12,10 +13,12 @@ import { Trans } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-type Props = ThemeProps;
+interface Props extends ThemeProps {
+  url: string;
+}
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className } = props;
+  const { className, url } = props;
   const { chain, transactionId } = useParams<{chain: string, transactionId: string}>();
 
   const navigate = useNavigate();
@@ -69,7 +72,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <Image
         height={300}
         shape='default'
-        src='/images/subwallet/nft.png'
+        src={baseParseIPFSUrl(url)}
         width={300}
       />
       <div className='description'>

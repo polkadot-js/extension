@@ -118,6 +118,8 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           TARGET_ENV: JSON.stringify('webapp'),
           ID_PREFIX: JSON.stringify('sw-app-'),
           TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
+          COINBASE_PAY_ID: JSON.stringify(process.env.COINBASE_PAY_ID),
+          NFT_MINTING_HOST: JSON.stringify(process.env.NFT_MINTING_HOST),
           TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
           BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true)
         }

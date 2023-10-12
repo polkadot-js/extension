@@ -14,6 +14,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useFetchChainState, useGetChainPrefixBySlug, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useGetYieldPositionByAddressAndSlug from '@subwallet/extension-koni-ui/hooks/screen/earning/useGetYieldPositionByAddressAndSlug';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
+import { unlockDotCheckIsMinted } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
@@ -77,6 +78,8 @@ const Component = () => {
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [checkMintLoading, setCheckMintLoading] = useState(false);
+  const [isMinted, setIsMinted] = useState(true);
   const [submitString, setSubmitString] = useState<string | undefined>();
 
   const currentStep = processState.currentStep;
@@ -95,8 +98,14 @@ const Component = () => {
   const onDone = useCallback((extrinsicHash: string) => {
     const chainType = isEthereumAddress(currentFrom) ? 'ethereum' : 'substrate';
 
-    navigate(`/earning-done/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
-  }, [currentFrom, currentPoolInfo.chain, navigate]);
+    let donePath = 'transaction-done';
+
+    if (!isMinted) {
+      donePath = 'earning-done';
+    }
+
+    navigate(`/${donePath}/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
+  }, [currentFrom, currentPoolInfo.chain, isMinted, navigate]);
 
   const onError = useCallback((error: Error) => {
     notify({
@@ -492,6 +501,25 @@ const Component = () => {
     }
   }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom]);
 
+  useEffect(() => {
+    setCheckMintLoading(true);
+
+    unlockDotCheckIsMinted({
+      slug: currentPoolInfo.slug,
+      address: currentFrom
+    })
+      .then((value) => {
+        setIsMinted(!value);
+      })
+      .finally(() => {
+        setCheckMintLoading(false);
+      });
+
+    return () => {
+      setIsMinted(true);
+    };
+  }, [currentFrom, currentPoolInfo.slug]);
+
   return (
     <div className={'earning-wrapper'}>
       <div className={'__transaction-block'}>
@@ -642,7 +670,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading || checkMintLoading}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}

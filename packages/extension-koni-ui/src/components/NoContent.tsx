@@ -19,7 +19,8 @@ export enum PAGE_TYPE {
   HISTORY = 'history',
   STAKING = 'staking',
   STATISTIC = 'statistic',
-  DAPPS = 'dapps'
+  DAPPS = 'dapps',
+  MISSION = 'mission'
 }
 
 type Props = ThemeProps & {
@@ -90,6 +91,11 @@ const Component: React.FC<Props> = ({ className, pageType }: Props) => {
         icon: GlobeHemisphereWest,
         title: t('No dApps found'),
         content: t('Your dApps will show up here')
+      },
+      [PAGE_TYPE.MISSION]: {
+        icon: GlobeHemisphereWest,
+        title: t('No mission found'),
+        content: t('Your missions will show up here')
       }
     };
   }, [t]);

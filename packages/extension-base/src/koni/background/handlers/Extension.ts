@@ -23,6 +23,7 @@ import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObjec
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { generateNaiveOptimalPath, handleYieldRedeem, handleYieldStep, validateYieldProcess, validateYieldRedeem } from '@subwallet/extension-base/koni/api/yield';
+import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
@@ -3920,6 +3921,9 @@ export default class KoniExtension {
 
     console.log('extrinsic', extrinsic.toHex());
 
+    const isMintingStep = YIELD_EXTRINSIC_TYPES.includes(extrinsicType);
+    const isPoolSupportAlternativeFee = yieldPoolInfo.feeAssets.length > 1;
+
     return await this.#koniState.transactionService.handleTransaction({
       address,
       chain: txChain,
@@ -3929,7 +3933,8 @@ export default class KoniExtension {
       extrinsicType, // change this depends on step
       chainType: ChainType.SUBSTRATE,
       resolveOnDone: !isLastStep,
-      transferNativeAmount
+      transferNativeAmount,
+      skipFeeValidation: isMintingStep && isPoolSupportAlternativeFee
     });
   }
 

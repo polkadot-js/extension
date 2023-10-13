@@ -130,7 +130,7 @@ const Component: React.FC<Props> = (props: Props) => {
       key: 'calculator',
       hidden: false,
       schema: 'secondary',
-      tooltip: t('Calculator')
+      tooltip: t('Earning calculator')
     });
 
     // Info

@@ -304,7 +304,7 @@ const Component: React.FC = () => {
           <div className={CN('text-light-4', { mt: mustChooseValidator })}>
             {
               t(
-                'Once unbonded, your funds would be available for withdrawal after {{time}}.',
+                'Once unstaked, your funds will be available for withdrawal after {{time}}.',
                 {
                   replace:
                       {
@@ -331,7 +331,7 @@ const Component: React.FC = () => {
           loading={loading}
           onClick={onPreCheck(form.submit, type === StakingType.POOLED ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND)}
         >
-          {t('Unbond')}
+          {t('Unstake')}
         </Button>
       </TransactionFooter>
     </div>

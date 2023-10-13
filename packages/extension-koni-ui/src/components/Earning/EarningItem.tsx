@@ -109,7 +109,7 @@ const Component: React.FC<Props> = (props: Props) => {
               onClick={childClick(onClickCalculatorBtn)}
               shape='circle'
               size='xs'
-              tooltip={t('Staking calculator')}
+              tooltip={t('Earning calculator')}
               type='ghost'
             />
             <Button

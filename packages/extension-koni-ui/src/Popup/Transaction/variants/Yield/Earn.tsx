@@ -280,7 +280,7 @@ const Component = () => {
                 const amount = value.rewardInToken || 0;
 
                 return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)} ${value.symbol}`;
-              }).join(' - ').concat('/Year')
+              }).join(' - ').concat('/year')
             }
           </div>
         </MetaInfo.Default>

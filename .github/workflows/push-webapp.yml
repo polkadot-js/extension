@@ -28,8 +28,7 @@ jobs:
     - name: Build
       env:
         TRANSAK_API_KEY: ${{ secrets.TRANSAK_API_KEY }}
-        BANXA_SANDBOX_API_KEY: ${{ secrets.BANXA_SANDBOX_API_KEY }}
-        BANXA_SANBOX_API_SECRET: ${{ secrets.BANXA_SANBOX_API_SECRET }}
+        COINBASE_PAY_ID: ${{ secrets.COINBASE_PAY_ID }}
       run: |
         yarn install --immutable | grep -v 'YN0013'
         yarn webapp:build

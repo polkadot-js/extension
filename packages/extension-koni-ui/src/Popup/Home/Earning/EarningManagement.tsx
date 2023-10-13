@@ -558,7 +558,7 @@ const Component: React.FC<Props> = (props: Props) => {
         destroyOnClose={true}
         id={TRANSACTION_YIELD_CLAIM_MODAL}
         onCancel={handleCloseClaim}
-        title={t('Withdraw')}
+        title={t('Claim rewards')}
       >
         <Transaction
           modalContent={isWebUI}

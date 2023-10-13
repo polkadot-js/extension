@@ -21,7 +21,7 @@ const Component: React.FC<Props> = ({ asset, className, tokenSlug }: Props) => {
       <Logo
         shape={'circle'}
         size={16}
-        token={symbol.toLowerCase()}
+        token={tokenSlug.toLowerCase()}
       />
       <Number
         className={'earning-info-item-text'}

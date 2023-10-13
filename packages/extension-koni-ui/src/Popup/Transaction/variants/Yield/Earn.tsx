@@ -589,7 +589,7 @@ const Component = () => {
                           <Logo
                             className={'amount-prefix'}
                             size={20}
-                            token={asset.split('-')[2].toLowerCase()}
+                            token={asset.toLowerCase()}
                           />
                         )}
                         showMaxButton={false}

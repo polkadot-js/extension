@@ -7,7 +7,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import BigN from 'bignumber.js';
-import { useDeferredValue, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { groupNominatorMetadatas } from '../staking/useGetStakingList';
@@ -82,9 +82,9 @@ const useGroupYieldPosition = (): YieldPositionInfo[] => {
     }
 
     for (const [slug, infoList] of Object.entries(raw)) {
-      const first = infoList[0];
+      const positionInfo = infoList[0];
 
-      if (!first) {
+      if (!positionInfo) {
         continue;
       }
 
@@ -94,7 +94,7 @@ const useGroupYieldPosition = (): YieldPositionInfo[] => {
         const base: Omit<YieldPositionInfo, 'balance' | 'metadata'> = {
           address: ALL_ACCOUNT_KEY,
           slug: slug,
-          chain: first.chain
+          chain: positionInfo.chain
         };
 
         const rawBalance: Record<string, YieldAssetBalance[]> = {};
@@ -120,10 +120,15 @@ const useGroupYieldPosition = (): YieldPositionInfo[] => {
         for (const values of Object.values(rawBalance)) {
           const _first = values[0];
 
+          const pool = poolInfo[slug];
+          const inputSlug = pool.inputAssets[0];
+
+          const exchangeRate = pool.stats?.assetEarning?.find((i) => i.slug === inputSlug)?.exchangeRate || 1;
+
           const tmp: YieldAssetBalance = {
             slug: _first.slug,
             activeBalance: '0',
-            exchangeRate: _first.exchangeRate,
+            exchangeRate: exchangeRate,
             totalBalance: '0'
           };
 
@@ -141,7 +146,7 @@ const useGroupYieldPosition = (): YieldPositionInfo[] => {
           metadata: isStaking ? groupNominatorMetadatas(rawMetadata as NominatorMetadata[])[0] : combineYieldPositionStats(rawMetadata as YieldPositionStats[])
         });
       } else {
-        result.push(first);
+        result.push(positionInfo);
       }
     }
 

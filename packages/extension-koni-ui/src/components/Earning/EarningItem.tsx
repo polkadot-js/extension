@@ -10,7 +10,7 @@ import { createEarningTagTypes } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Logo, Number, Tag, Web3Block } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle, PlusMinus, Question } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -49,6 +49,13 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [stats?.totalApr, stats?.totalApy]);
 
   const tagTypes = useMemo(() => createEarningTagTypes(t, token)[type], [t, token, type]);
+
+  const childClick = useCallback((onClick: VoidFunction) => {
+    return (e?: SyntheticEvent) => {
+      e && e.stopPropagation();
+      onClick();
+    };
+  }, []);
 
   return (
     <Web3Block
@@ -109,7 +116,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   size='sm'
                 />
               )}
-              onClick={onClickCalculatorBtn}
+              onClick={childClick(onClickCalculatorBtn)}
               shape='circle'
               size='xs'
               tooltip={t('Staking calculator')}
@@ -124,7 +131,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   weight='fill'
                 />
               )}
-              onClick={onClickInfoBtn}
+              onClick={childClick(onClickInfoBtn)}
               shape='circle'
               size='xs'
               tooltip={t('FAQs')}
@@ -139,7 +146,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   weight='fill'
                 />
               )}
-              onClick={onClickStakeBtn}
+              onClick={childClick(onClickStakeBtn)}
               shape='circle'
               size='xs'
             >
@@ -148,6 +155,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
         </div>
       )}
+      onClick={onClickInfoBtn}
     />
   );
 };

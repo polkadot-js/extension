@@ -60,14 +60,14 @@ export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, subst
           assetEarning: [
             {
               slug: _getChainNativeTokenSlug(chainInfo),
-              apr: expectedReturn
+              apy: expectedReturn
             }
           ],
           maxCandidatePerFarmer: parseInt(maxNominations),
           maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks),
           minJoinPool: minPoolJoin || '0',
           minWithdrawal: '0',
-          totalApr: expectedReturn,
+          totalApy: expectedReturn,
           tvl: bnTotalEraStake.toString()
         },
         metadata: {

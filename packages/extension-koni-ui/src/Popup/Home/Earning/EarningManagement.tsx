@@ -4,13 +4,14 @@
 import { APIItemState, NominatorMetadata, StakingRewardItem, StakingType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BaseModal, EarningCalculatorModal, EarningInfoModal, EarningMoreActionModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout, YieldPositionDetailModal, YieldStakingDetailModal } from '@subwallet/extension-koni-ui/components';
-import { CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_CLAIM_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { BN_TEN, BN_ZERO, CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_CLAIM_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useAutoNavigateEarning, useFilterModal, useGroupYieldPosition, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PlusCircle, Vault } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -34,6 +35,12 @@ enum SortKey {
   TOTAL_VALUE = 'total-value',
 }
 
+interface SortOption {
+  label: string;
+  value: SortKey;
+  desc: boolean;
+}
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
@@ -43,12 +50,22 @@ const Component: React.FC<Props> = (props: Props) => {
   const { poolInfo: poolInfoMap } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount } = useSelector((state: RootState) => state.accountState);
   const { chainStateMap } = useSelector((state: RootState) => state.chainStore);
+  const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
   const stakingRewardMap = useSelector((state: RootState) => state.staking.stakingRewardMap);
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
 
+  useAutoNavigateEarning();
+
   const groupYieldPosition = useGroupYieldPosition();
+
+  const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
+  const [, setUnYieldStorage] = useLocalStorage(UN_YIELD_TRANSACTION, DEFAULT_UN_YIELD_PARAMS);
+  const [, setCancelUnYieldStorage] = useLocalStorage(CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS);
+  const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_YIELD_TRANSACTION, DEFAULT_WITHDRAW_YIELD_PARAMS);
+  const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
+  const [, setClaimStorage] = useLocalStorage(CLAIM_YIELD_TRANSACTION, DEFAULT_CLAIM_YIELD_PARAMS);
 
   const [{ selectedYieldPoolInfo, selectedYieldPosition }, setSelectedItem] = useState<{ selectedYieldPosition: YieldPositionInfo | undefined, selectedYieldPoolInfo: YieldPoolInfo | undefined }>({ selectedYieldPosition: undefined, selectedYieldPoolInfo: undefined });
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
@@ -81,14 +98,15 @@ const Component: React.FC<Props> = (props: Props) => {
     return nominationPoolReward;
   }, [currentAccount?.address, selectedYieldPoolInfo?.chain, selectedYieldPosition?.address, stakingRewardMap]);
 
-  useAutoNavigateEarning();
-
-  const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
-  const [, setUnYieldStorage] = useLocalStorage(UN_YIELD_TRANSACTION, DEFAULT_UN_YIELD_PARAMS);
-  const [, setCancelUnYieldStorage] = useLocalStorage(CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS);
-  const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_YIELD_TRANSACTION, DEFAULT_WITHDRAW_YIELD_PARAMS);
-  const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
-  const [, setClaimStorage] = useLocalStorage(CLAIM_YIELD_TRANSACTION, DEFAULT_CLAIM_YIELD_PARAMS);
+  const sortOptions = useMemo((): SortOption[] => {
+    return [
+      {
+        desc: true,
+        label: t('Sort by total value'),
+        value: SortKey.TOTAL_VALUE
+      }
+    ];
+  }, [t]);
 
   const filterFunction = useMemo<(item: YieldPositionInfo) => boolean>(() => {
     return (item) => {
@@ -364,21 +382,36 @@ const Component: React.FC<Props> = (props: Props) => {
       })
       .sort((a: YieldPositionInfo, b: YieldPositionInfo) => {
         const aPoolInfo = poolInfoMap[a.slug];
+        const aInputSlug = aPoolInfo.inputAssets[0];
+        const aInputAsset = assetRegistry[aInputSlug];
+        const aInputDecimals = aInputAsset.decimals || 0;
+
         const bPoolInfo = poolInfoMap[b.slug];
+        const bInputSlug = bPoolInfo.inputAssets[0];
+        const bInputAsset = assetRegistry[bInputSlug];
+        const bInputDecimals = bInputAsset.decimals || 0;
+
+        const aValue = a.balance.reduce((previousValue, currentValue) => {
+          const value = new BigN(currentValue.totalBalance).multipliedBy(currentValue.exchangeRate || 1);
+
+          return previousValue.plus(value);
+        }, BN_ZERO).div(BN_TEN.pow(aInputDecimals));
+
+        const bValue = b.balance.reduce((previousValue, currentValue) => {
+          const value = new BigN(currentValue.totalBalance).multipliedBy(currentValue.exchangeRate || 1);
+
+          return previousValue.plus(value);
+        }, BN_ZERO).div(BN_TEN.pow(bInputDecimals));
 
         switch (sortSelection) {
           case SortKey.TOTAL_VALUE:
-            if (aPoolInfo.stats && bPoolInfo.stats && aPoolInfo.stats.tvl && bPoolInfo.stats.tvl) {
-              return parseFloat(aPoolInfo.stats.tvl) - parseFloat(bPoolInfo.stats.tvl);
-            } else {
-              return 0;
-            }
+            return bValue.minus(aValue).toNumber();
 
           default:
             return 0;
         }
       });
-  }, [chainStateMap, groupYieldPosition, poolInfoMap, sortSelection]);
+  }, [assetRegistry, chainStateMap, groupYieldPosition, poolInfoMap, sortSelection]);
 
   const renderWhenEmpty = useCallback(() => {
     return (
@@ -432,7 +465,9 @@ const Component: React.FC<Props> = (props: Props) => {
         onCloseFilterModal={onCloseFilterModal}
         onResetSort={onResetSort}
         selectedFilters={selectedFilters}
+        selectedSort={sortSelection}
         showAdd={true}
+        sortOptions={sortOptions}
       />
       <SwList.Section
         className={CN('earning-management__container')}
@@ -558,7 +593,7 @@ const Component: React.FC<Props> = (props: Props) => {
         destroyOnClose={true}
         id={TRANSACTION_YIELD_CLAIM_MODAL}
         onCancel={handleCloseClaim}
-        title={t('Withdraw')}
+        title={t('Claim rewards')}
       >
         <Transaction
           modalContent={isWebUI}

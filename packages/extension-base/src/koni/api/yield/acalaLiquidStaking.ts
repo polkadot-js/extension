@@ -15,21 +15,55 @@ import { sumBN } from '@subwallet/extension-base/utils';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN } from '@polkadot/util';
 
-const YEAR = 365 * 24 * 60 * 60 * 1000;
+// const YEAR = 365 * 24 * 60 * 60 * 1000;
 
-export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
-  const substrateApi = await chainApi.isReady;
+export function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
+  async function getPoolStat () {
+    const substrateApi = await chainApi.isReady;
 
-  const [_bumpEraFrequency, _commissionRate, _estimatedRewardRatePerEra] = await Promise.all([
-    substrateApi.api.query.homa.bumpEraFrequency(),
-    substrateApi.api.query.homa.commissionRate(),
-    substrateApi.api.query.homa.estimatedRewardRatePerEra()
-  ]);
+    const [_toBondPool, _totalStakingBonded] = await Promise.all([
+      substrateApi.api.query.homa.toBondPool(),
+      substrateApi.api.query.homa.totalStakingBonded()
+    ]);
 
-  const eraFrequency = _bumpEraFrequency.toPrimitive() as number;
-  const commissionRate = _commissionRate.toPrimitive() as number;
-  const estimatedRewardRate = _estimatedRewardRatePerEra.toPrimitive() as number;
+    const toBondPool = new BN(_toBondPool.toString());
+    const totalStakingBonded = new BN(_totalStakingBonded.toString());
 
+    // eslint-disable-next-line node/no-callback-literal
+    callback({
+      ...poolInfo,
+      stats: {
+        assetEarning: [
+          {
+            slug: poolInfo.rewardAssets[0],
+            apr: 20.86,
+            exchangeRate: 1 / 7.46544
+          }
+        ],
+        maxCandidatePerFarmer: 1,
+        maxWithdrawalRequestPerFarmer: 1,
+        minJoinPool: '50000000000',
+        minWithdrawal: '0',
+        totalApr: 20.86,
+        tvl: totalStakingBonded.add(toBondPool).toString()
+      }
+    });
+  }
+
+  function getStatInterval () {
+    getPoolStat().catch(console.error);
+  }
+
+  getStatInterval();
+
+  const interval = setInterval(getStatInterval, YIELD_POOL_STAT_REFRESH_INTERVAL);
+
+  return () => {
+    clearInterval(interval);
+  };
+}
+
+export function subscribeAcalaLcDOTLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
   function getPoolStat () {
     // eslint-disable-next-line node/no-callback-literal
     callback({
@@ -38,23 +72,27 @@ export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi,
         assetEarning: [
           {
             slug: poolInfo.rewardAssets[0],
-            apr: 18.38,
-            exchangeRate: 1
+            apr: 232.45,
+            exchangeRate: 1 / 7.46544
           }
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '10000000000',
+        minJoinPool: '50000000000',
         minWithdrawal: '0',
-        totalApr: 18.38,
-        tvl: '13095111106588368'
+        totalApr: 232.45,
+        tvl: '6579642367262479'
       }
     });
   }
 
-  getPoolStat();
+  function getStatInterval () {
+    getPoolStat();
+  }
 
-  const interval = setInterval(getPoolStat, YIELD_POOL_STAT_REFRESH_INTERVAL);
+  getStatInterval();
+
+  const interval = setInterval(getStatInterval, YIELD_POOL_STAT_REFRESH_INTERVAL);
 
   return () => {
     clearInterval(interval);

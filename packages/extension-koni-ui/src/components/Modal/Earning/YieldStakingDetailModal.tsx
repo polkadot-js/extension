@@ -84,7 +84,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const totalStaked = useMemo(() => new BigN(activeStake).plus(unstakedValue).toString(), [activeStake, unstakedValue]);
 
-  const tagTypes = useMemo(() => createEarningTagTypes(t, token), [t, token]);
+  const tagTypes = useMemo(() => createEarningTagTypes(t), [t]);
 
   const onClickStakeMoreBtn = useCallback(() => {
     inactiveModal(modalId);

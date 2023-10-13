@@ -341,7 +341,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {t('Reward distribution')}
           </div>
           <div className='description'>
-            {t('Payable every {{number}} hours', { replace: { number: 8 } })}
+            {t('Payable every {{number}} hours', { replace: { number: 24 } })}
           </div>
         </div>
       </div>

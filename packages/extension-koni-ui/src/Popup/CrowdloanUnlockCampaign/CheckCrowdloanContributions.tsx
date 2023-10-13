@@ -10,6 +10,7 @@ import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Image, ModalContext } from '@subwallet/react-ui';
 import { ValidateStatus } from '@subwallet/react-ui/es/form/FormItem';
 import { ArrowCounterClockwise, PlusCircle, Question, Vault, Wallet } from 'phosphor-react';
@@ -81,8 +82,8 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   );
 
   const goEarningDemo = useCallback(() => {
-    navigate('/earning-demo');
-  }, [navigate]);
+    openInNewTab(`${window.location.origin}/earning-demo`)();
+  }, []);
 
   const { isNoAccount } = useSelector((state: RootState) => state.accountState);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
@@ -236,7 +237,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             <div className={'__footer-button-content'}>
               <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>
 
-              <div className={'__footer-button-subtitle'}>{t('Earning with SubWallet Dashboard')}</div>
+              <div className={'__footer-button-subtitle'}>{t('Learn more about our solution')}</div>
             </div>
           </Button>
 
@@ -252,12 +253,13 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
                 weight='fill'
               />
             }
+            onClick={openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs')}
             schema={'secondary'}
           >
             <div className={'__footer-button-content'}>
               <div className={'__footer-button-title'}>{t('Frequently asked questions')}</div>
 
-              <div className={'__footer-button-subtitle'}>{t('Create a new account with web wallet')}</div>
+              <div className={'__footer-button-subtitle'}>{t('Learn more about our solution')}</div>
             </div>
           </Button>
         </div>

@@ -16,7 +16,8 @@ import { getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, ge
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getTokenOnChainInfo, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -68,6 +69,7 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
 
 export function subscribeYieldPosition (substrateApiMap: Record<string, SubstrateApi>, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPositionInfo) => void) {
   const unsubList: VoidFunction[] = [];
+  const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   Object.values(YIELD_POOLS_INFO).forEach(async (poolInfo) => {
@@ -78,28 +80,30 @@ export function subscribeYieldPosition (substrateApiMap: Record<string, Substrat
     const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
     const chainInfo = chainInfoMap[poolInfo.chain];
 
+    const useAddresses = _isChainEvmCompatible(chainInfo) ? evmAddresses : substrateAddresses;
+
     if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
-      const unsub = await getNativeStakingPosition(substrateApi, addresses, chainInfo, poolInfo, callback);
+      const unsub = await getNativeStakingPosition(substrateApi, useAddresses, chainInfo, poolInfo, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
-      const unsub = await getNominationPoolPosition(substrateApi, addresses, chainInfo, poolInfo, callback);
+      const unsub = await getNominationPoolPosition(substrateApi, useAddresses, chainInfo, poolInfo, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___bifrost_liquid_staking') {
-      const unsub = getBifrostLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = await getBifrostLiquidStakingPosition(substrateApi, useAddresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___acala_liquid_staking') {
-      const unsub = getAcalaLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = await getAcalaLiquidStakingPosition(substrateApi, useAddresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___interlay_lending') {
-      const unsub = getInterlayLendingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = await getInterlayLendingPosition(substrateApi, useAddresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
-      const unsub = getParallelLiquidStakingPosition(substrateApi, addresses, chainInfo, poolInfo, assetInfoMap, callback);
+      const unsub = await getParallelLiquidStakingPosition(substrateApi, useAddresses, chainInfo, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     }
@@ -155,7 +159,7 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams, 
     return generatePathForLiquidStaking(params, balanceService);
   }
 
-  return generatePathForNativeStaking(params, balanceService);
+  return generatePathForNativeStaking(params);
 }
 
 export async function generatePathForLiquidStaking (params: OptimalYieldPathParams, balanceService: BalanceService): Promise<OptimalYieldPath> {

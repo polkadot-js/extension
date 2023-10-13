@@ -114,10 +114,11 @@ const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/e
 const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/ClaimReward'));
 const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/Withdraw'));
 const Earn = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/Earn'));
-const UnYield = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldUnstake'));
-const WithdrawYield = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldWithdraw'));
-const CancelUnYield = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldCancelUnstake'));
-const YieldWithdrawPosition = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldWithdrawPosition'));
+const UnYield = new LazyLoader('YieldUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldUnstake'));
+const WithdrawYield = new LazyLoader('YieldWithdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldWithdraw'));
+const CancelUnYield = new LazyLoader('YieldCancelUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldCancelUnstake'));
+const YieldWithdrawPosition = new LazyLoader('YieldWithdrawPosition', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldWithdrawPosition'));
+const YieldClaimReward = new LazyLoader('YieldClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldClaimReward'));
 
 // Wallet Connect
 const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
@@ -214,6 +215,7 @@ export const router = createBrowserRouter([
           WithdrawYield.generateRouterObject('withdraw-yield'),
           CancelUnYield.generateRouterObject('cancel-un-yield'),
           YieldWithdrawPosition.generateRouterObject('yield-withdraw-position'),
+          YieldClaimReward.generateRouterObject('yield-claim'),
           {
             path: 'compound',
             element: <Example />

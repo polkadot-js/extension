@@ -3,7 +3,7 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_TRANSACTION_PARAMS, STAKING_NETWORK_DETAIL_MODAL, TRANSACTION_TITLE_MAP, TRANSACTION_TRANSFER_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, TRANSFER_NFT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_TRANSACTION_PARAMS, STAKING_NETWORK_DETAIL_MODAL, TRANSACTION_TITLE_MAP, TRANSACTION_TRANSFER_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, TRANSFER_NFT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
@@ -51,6 +51,8 @@ function Component ({ children, className, modalContent }: Props) {
       return ExtrinsicType.STAKING_WITHDRAW;
     } else if (checkActive(TRANSACTION_YIELD_FAST_WITHDRAW_MODAL)) {
       return ExtrinsicType.REDEEM_LDOT;
+    } else if (checkActive(TRANSACTION_YIELD_CLAIM_MODAL)) {
+      return ExtrinsicType.STAKING_CLAIM_REWARD;
     }
 
     switch (action) {

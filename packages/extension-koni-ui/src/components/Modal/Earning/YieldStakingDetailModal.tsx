@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominationInfo, NominatorMetadata, StakingRewardItem, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { getValidatorLabel, isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
@@ -28,7 +28,7 @@ import { useLocalStorage } from 'usehooks-ts';
 interface Props extends ThemeProps {
   nominatorMetadata: NominatorMetadata;
   yieldPoolInfo: YieldPoolInfo;
-  // rewardItem?: StakingRewardItem;
+  rewardItem?: StakingRewardItem;
 }
 
 export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) => {
@@ -38,7 +38,7 @@ export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) =
 const modalId = YIELD_STAKING_DETAIL_MODAL;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, nominatorMetadata, yieldPoolInfo } = props;
+  const { className, nominatorMetadata, rewardItem, yieldPoolInfo } = props;
   const { slug } = yieldPoolInfo;
 
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
@@ -292,14 +292,14 @@ const Component: React.FC<Props> = (props: Props) => {
         {/*  /> */}
         {/* )} */}
 
-        {/* {!!rewardItem?.unclaimedReward && ( */}
-        {/*  <MetaInfo.Number */}
-        {/*    decimals={decimals} */}
-        {/*    label={t('Unclaimed rewards')} */}
-        {/*    suffix={staking.nativeToken} */}
-        {/*    value={rewardItem?.unclaimedReward || '0'} */}
-        {/*  /> */}
-        {/* )} */}
+        {!!rewardItem?.unclaimedReward && (
+          <MetaInfo.Number
+            decimals={decimals}
+            label={t('Unclaimed rewards')}
+            suffix={symbol}
+            value={rewardItem?.unclaimedReward || '0'}
+          />
+        )}
 
         <MetaInfo.Number
           decimals={decimals}

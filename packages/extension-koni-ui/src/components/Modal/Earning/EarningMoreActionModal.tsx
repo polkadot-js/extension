@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakingRewardItem, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_CLAIM_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, ModalContext, SettingItem } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowArcLeft, ArrowCircleDown, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
@@ -22,6 +22,7 @@ import { useLocalStorage } from 'usehooks-ts';
 type Props = ThemeProps & {
   yieldPoolInfo: YieldPoolInfo;
   yieldPositionInfo: YieldPositionInfo;
+  stakingRewardItem?: StakingRewardItem;
 }
 
 const modalId = EARNING_MORE_ACTION_MODAL;
@@ -35,7 +36,7 @@ type ActionListType = {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, yieldPoolInfo, yieldPositionInfo } = props;
+  const { className, stakingRewardItem, yieldPoolInfo, yieldPositionInfo } = props;
 
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
@@ -52,6 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [, setCancelUnYieldStorage] = useLocalStorage(CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS);
   const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_YIELD_TRANSACTION, DEFAULT_WITHDRAW_YIELD_PARAMS);
   const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
+  const [, setClaimStorage] = useLocalStorage(CLAIM_YIELD_TRANSACTION, DEFAULT_CLAIM_YIELD_PARAMS);
 
   const onCancel = useCallback(
     () => {
@@ -154,9 +156,29 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [activeModal, currentAccount, isWebUI, navigate, poolInfoMap, setFastWithdrawStorage, setWithdrawStorage, yieldPoolInfo.slug]);
 
+  const onClickClaimBtn = useCallback(() => {
+    const poolInfo = poolInfoMap[yieldPoolInfo.slug];
+
+    const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+    setClaimStorage({
+      ...DEFAULT_CLAIM_YIELD_PARAMS,
+      method: poolInfo.slug,
+      from: address,
+      chain: poolInfo.chain,
+      asset: poolInfo.inputAssets[0]
+    });
+
+    if (isWebUI) {
+      activeModal(TRANSACTION_YIELD_CLAIM_MODAL);
+    } else {
+      navigate('/transaction/yield-claim');
+    }
+  }, [activeModal, currentAccount, isWebUI, navigate, poolInfoMap, setClaimStorage, yieldPoolInfo.slug]);
+
   const availableActions = useMemo(() => {
-    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo);
-  }, [yieldPoolInfo, yieldPositionInfo]);
+    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo, stakingRewardItem?.unclaimedReward);
+  }, [stakingRewardItem?.unclaimedReward, yieldPoolInfo, yieldPositionInfo]);
 
   const actionList: ActionListType[] = useMemo((): ActionListType[] => {
     const actionListByChain = getYieldAvailableActionsByType(yieldPoolInfo);
@@ -200,7 +222,7 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'green-7',
           icon: Wallet,
           label: t('Claim rewards'),
-          onClick: noop
+          onClick: onClickClaimBtn
         };
       } else if (action === YieldAction.START_EARNING) {
         return {
@@ -220,7 +242,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onClick: onClickStakeBtn
       };
     });
-  }, [onClickCancelUnStakeBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo]);
+  }, [onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo]);
 
   const onPreCheck = usePreCheckAction(currentAccount?.address, false);
 

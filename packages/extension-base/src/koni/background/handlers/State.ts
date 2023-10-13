@@ -449,6 +449,10 @@ export default class KoniState {
     return this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
   }
 
+  public async getPooledPositionByAddress (addresses: string[]): Promise<YieldPositionInfo[]> {
+    return this.dbService.getYieldNominationPoolPosition(addresses, this.activeChainSlugs);
+  }
+
   public subscribeYieldPoolInfo () {
     return this.yieldPoolInfoSubject;
   }

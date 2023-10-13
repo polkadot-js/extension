@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, NominatorMetadata, StakingRewardItem, StakingType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BaseModal, EarningCalculatorModal, EarningInfoModal, EarningMoreActionModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout, YieldPositionDetailModal, YieldStakingDetailModal } from '@subwallet/extension-koni-ui/components';
-import { CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_CLAIM_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useAutoNavigateEarning, useFilterModal, useGroupYieldPosition, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -20,6 +21,7 @@ import { useLocalStorage } from 'usehooks-ts';
 
 import Transaction from '../../Transaction/Transaction';
 import YieldCancelUnstake from '../../Transaction/variants/Yield/YieldCancelUnstake';
+import YieldClaimReward from '../../Transaction/variants/Yield/YieldClaimReward';
 import YieldUnstake from '../../Transaction/variants/Yield/YieldUnstake';
 import YieldWithdraw from '../../Transaction/variants/Yield/YieldWithdraw';
 import YieldWithdrawPosition from '../../Transaction/variants/Yield/YieldWithdrawPosition';
@@ -41,6 +43,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { poolInfo: poolInfoMap } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount } = useSelector((state: RootState) => state.accountState);
   const { chainStateMap } = useSelector((state: RootState) => state.chainStore);
+  const stakingRewardMap = useSelector((state: RootState) => state.staking.stakingRewardMap);
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
@@ -51,6 +54,33 @@ const Component: React.FC<Props> = (props: Props) => {
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
+  const selectedStakingRewardItem = useMemo(() => {
+    let nominationPoolReward: StakingRewardItem | undefined;
+
+    if (isAccountAll(currentAccount?.address || '')) {
+      nominationPoolReward = {
+        state: APIItemState.READY,
+        name: '',
+        chain: '',
+        address: ALL_ACCOUNT_KEY,
+        type: StakingType.POOLED
+      } as StakingRewardItem;
+
+      stakingRewardMap.forEach((stakingReward: StakingRewardItem) => {
+        if (nominationPoolReward && stakingReward.chain === selectedYieldPoolInfo?.chain && stakingReward.type === StakingType.POOLED) {
+          nominationPoolReward.name = stakingReward.name;
+          nominationPoolReward.chain = stakingReward.chain;
+
+          nominationPoolReward.unclaimedReward = stakingReward.unclaimedReward;
+        }
+      });
+    } else {
+      nominationPoolReward = stakingRewardMap.find((rewardItem) => rewardItem.address === selectedYieldPosition?.address && rewardItem.chain === selectedYieldPoolInfo?.chain && rewardItem.type === StakingType.POOLED);
+    }
+
+    return nominationPoolReward;
+  }, [currentAccount?.address, selectedYieldPoolInfo?.chain, selectedYieldPosition?.address, stakingRewardMap]);
+
   useAutoNavigateEarning();
 
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
@@ -58,8 +88,9 @@ const Component: React.FC<Props> = (props: Props) => {
   const [, setCancelUnYieldStorage] = useLocalStorage(CANCEL_UN_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS);
   const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_YIELD_TRANSACTION, DEFAULT_WITHDRAW_YIELD_PARAMS);
   const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
+  const [, setClaimStorage] = useLocalStorage(CLAIM_YIELD_TRANSACTION, DEFAULT_CLAIM_YIELD_PARAMS);
 
-  const filterFunction = useMemo<(item: YieldPoolInfo) => boolean>(() => {
+  const filterFunction = useMemo<(item: YieldPositionInfo) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
         return true;
@@ -70,28 +101,30 @@ const Component: React.FC<Props> = (props: Props) => {
           return true;
         }
 
+        const poolInfo = poolInfoMap[item.slug];
+
         if (filter === YieldPoolType.NOMINATION_POOL) {
-          if (item.type === YieldPoolType.NOMINATION_POOL) {
+          if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
             return true;
           }
         } else if (filter === YieldPoolType.NATIVE_STAKING) {
-          if (item.type === YieldPoolType.NATIVE_STAKING) {
+          if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
             return true;
           }
         } else if (filter === YieldPoolType.LIQUID_STAKING) {
-          if (item.type === YieldPoolType.LIQUID_STAKING) {
+          if (poolInfo.type === YieldPoolType.LIQUID_STAKING) {
             return true;
           }
         } else if (filter === YieldPoolType.LENDING) {
-          if (item.type === YieldPoolType.LENDING) {
+          if (poolInfo.type === YieldPoolType.LENDING) {
             return true;
           }
         } else if (filter === YieldPoolType.PARACHAIN_STAKING) {
-          if (item.type === YieldPoolType.PARACHAIN_STAKING) {
+          if (poolInfo.type === YieldPoolType.PARACHAIN_STAKING) {
             return true;
           }
         } else if (filter === YieldPoolType.SINGLE_FARMING) {
-          if (item.type === YieldPoolType.SINGLE_FARMING) {
+          if (poolInfo.type === YieldPoolType.SINGLE_FARMING) {
             return true;
           }
         }
@@ -99,7 +132,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
       return false;
     };
-  }, [selectedFilters]);
+  }, [poolInfoMap, selectedFilters]);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);
@@ -146,6 +179,30 @@ const Component: React.FC<Props> = (props: Props) => {
       navigate('/transaction/earn');
     };
   }, [currentAccount, navigate, poolInfoMap, setYieldStorage]);
+
+  const onClickClaimBtn = useCallback((item: YieldPositionInfo) => {
+    return () => {
+      const poolInfo = poolInfoMap[item.slug];
+
+      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+
+      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+      setClaimStorage({
+        ...DEFAULT_CLAIM_YIELD_PARAMS,
+        method: poolInfo.slug,
+        from: address,
+        chain: poolInfo.chain,
+        asset: poolInfo.inputAssets[0]
+      });
+
+      if (isWebUI) {
+        activeModal(TRANSACTION_YIELD_CLAIM_MODAL);
+      } else {
+        navigate('/transaction/yield-claim');
+      }
+    };
+  }, [activeModal, currentAccount, isWebUI, navigate, poolInfoMap, setClaimStorage]);
 
   const onClickUnStakeBtn = useCallback((item: YieldPositionInfo) => {
     return () => {
@@ -259,11 +316,36 @@ const Component: React.FC<Props> = (props: Props) => {
       return null;
     }
 
+    let nominationPoolReward: StakingRewardItem | undefined;
+
+    if (isAccountAll(currentAccount?.address || '')) {
+      nominationPoolReward = {
+        state: APIItemState.READY,
+        name: '',
+        chain: '',
+        address: ALL_ACCOUNT_KEY,
+        type: StakingType.POOLED
+      } as StakingRewardItem;
+
+      stakingRewardMap.forEach((stakingReward: StakingRewardItem) => {
+        if (nominationPoolReward && stakingReward.chain === poolInfo?.chain && stakingReward.type === StakingType.POOLED) {
+          nominationPoolReward.name = stakingReward.name;
+          nominationPoolReward.chain = stakingReward.chain;
+
+          nominationPoolReward.unclaimedReward = stakingReward.unclaimedReward;
+        }
+      });
+    } else {
+      nominationPoolReward = stakingRewardMap.find((rewardItem) => rewardItem.address === item?.address && rewardItem.chain === poolInfo?.chain && rewardItem.type === StakingType.POOLED);
+    }
+
     return (
       <HorizontalEarningItem
         key={key}
+        nominationPoolReward={nominationPoolReward}
         onClickCalculatorBtn={onClickCalculatorBtn(item)}
         onClickCancelUnStakeBtn={onClickCancelUnStakeBtn(item)}
+        onClickClaimBtn={onClickClaimBtn(item)}
         onClickInfoBtn={onClickInfoBtn(item)}
         onClickItem={onClickItem(item)}
         onClickStakeBtn={onClickStakeBtn(item)}
@@ -273,7 +355,7 @@ const Component: React.FC<Props> = (props: Props) => {
         yieldPositionInfo={item}
       />
     );
-  }, [poolInfoMap, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn]);
+  }, [poolInfoMap, currentAccount?.address, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, stakingRewardMap, onClickClaimBtn]);
 
   const resultList = useMemo((): YieldPositionInfo[] => {
     return [...groupYieldPosition]
@@ -322,6 +404,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const handleCloseFastWithdraw = useCallback(() => {
     inactiveModal(TRANSACTION_YIELD_FAST_WITHDRAW_MODAL);
+  }, [inactiveModal]);
+
+  const handleCloseClaim = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_CLAIM_MODAL);
   }, [inactiveModal]);
 
   const addMore = useCallback(() => {
@@ -394,6 +480,7 @@ const Component: React.FC<Props> = (props: Props) => {
             ? (
               <YieldStakingDetailModal
                 nominatorMetadata={selectedYieldPosition.metadata as NominatorMetadata}
+                rewardItem={selectedStakingRewardItem}
                 yieldPoolInfo={selectedYieldPoolInfo}
               />
             )
@@ -408,6 +495,7 @@ const Component: React.FC<Props> = (props: Props) => {
       {
         selectedYieldPosition && selectedYieldPoolInfo && (
           <EarningMoreActionModal
+            stakingRewardItem={selectedStakingRewardItem}
             yieldPoolInfo={selectedYieldPoolInfo}
             yieldPositionInfo={selectedYieldPosition}
           />
@@ -463,6 +551,19 @@ const Component: React.FC<Props> = (props: Props) => {
           modalContent={isWebUI}
         >
           <YieldWithdrawPosition />
+        </Transaction>
+      </BaseModal>
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_CLAIM_MODAL}
+        onCancel={handleCloseClaim}
+        title={t('Withdraw')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+        >
+          <YieldClaimReward />
         </Transaction>
       </BaseModal>
     </Layout.Base>

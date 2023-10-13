@@ -25,7 +25,7 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
           {
             slug: poolInfo.rewardAssets[0],
             apr: 1.29,
-            exchangeRate: 1
+            exchangeRate: 1 / 49.77
           },
           {
             slug: poolInfo.rewardAssets[1],

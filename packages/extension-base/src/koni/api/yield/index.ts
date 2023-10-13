@@ -6,11 +6,12 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { validatePoolBondingCondition, validateRelayBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
+import { getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLcDOTLiquidStakingStats, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acalaLiquidStaking';
 import { getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingPosition, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { getInterlayLendingExtrinsic, getInterlayLendingPosition, getInterlayLendingRedeem, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlayLending';
+import { subscribeMoonwellLendingStats } from '@subwallet/extension-base/koni/api/yield/moonwellLending';
 import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/nativeStaking';
 import { getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallelLiquidStaking';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
@@ -45,7 +46,7 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
         // @ts-ignore
         unsubList.push(unsub);
       } else if (poolInfo.slug === 'DOT___acala_liquid_staking') {
-        const unsub = await subscribeAcalaLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
+        const unsub = subscribeAcalaLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
 
         unsubList.push(unsub);
       } else if (poolInfo.slug === 'DOT___interlay_lending') {
@@ -53,7 +54,15 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
 
         unsubList.push(unsub);
       } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
-        const unsub = subscribeParallelLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
+        const unsub = subscribeParallelLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback, substrateApiMap);
+
+        unsubList.push(unsub);
+      } else if (poolInfo.slug === 'LcDOT___acala_euphrates_liquid_staking') {
+        const unsub = subscribeAcalaLcDOTLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
+
+        unsubList.push(unsub);
+      } else if (poolInfo.slug === 'xcDOT___moonwell_lending') {
+        const unsub = subscribeMoonwellLendingStats(substrateApi, chainInfoMap, poolInfo, callback);
 
         unsubList.push(unsub);
       }

@@ -47,15 +47,10 @@ function Component ({ className,
         value: '/home/crowdloans',
         icon: Rocket
       },
-      {
-        label: t('Staking'),
-        value: '/home/staking',
-        icon: Database
-      },
       // {
-      //   label: t('Earning'),
-      //   value: '/home/earning/',
-      //   icon: Vault
+      //   label: t('Staking'),
+      //   value: '/home/staking',
+      //   icon: Database
       // },
       {
         label: t('Earning'),

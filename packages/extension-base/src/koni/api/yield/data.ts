@@ -219,6 +219,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     slug: 'xcDOT___moonwell_lending',
     chain: 'moonbeam',
     name: 'Moonwell Lending',
+    logo: 'moonwell',
     description: 'Earn rewards by lending xcDOT',
     type: YieldPoolType.LENDING,
     inputAssets: [

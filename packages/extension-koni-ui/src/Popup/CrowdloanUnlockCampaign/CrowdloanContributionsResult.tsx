@@ -1,21 +1,20 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { CrowdloanParaState, ParaChainInfoMap } from '@subwallet/extension-base/background/KoniTypes';
-import { _getAssetDecimals, _getAssetPriceId, _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { CrowdloanContributionItem } from '@subwallet/extension-base/services/subscan-service/types';
 import { AddressInput, Layout, TokenBalance } from '@subwallet/extension-koni-ui/components';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
-import { getCrowdloanContributions, getParaChainInfoMap } from '@subwallet/extension-koni-ui/messaging';
+import { getCrowdloanContributions } from '@subwallet/extension-koni-ui/messaging';
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
-import { CrowdloanContributionsResultParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate } from '@subwallet/extension-koni-ui/utils';
+import { CrowdloanContributionsResultParam, CrowdloanFundInfo, CrowdloanFundStatus, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Logo, ModalContext, Table, Tag } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
@@ -24,7 +23,7 @@ import { ArrowCounterClockwise, PlusCircle, RocketLaunch, Vault, Wallet } from '
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -46,7 +45,8 @@ type TableItem = {
     convertedValue: BigN;
   };
   paraState?: CrowdloanParaState,
-  unlockTime: string
+  unlockTime: string;
+  sortOrder: number
 };
 
 type CrowdloanContributionsMap = {
@@ -97,54 +97,64 @@ enum FilterValue {
   IN_AUCTION = 'in auction'
 }
 
-const acceptFundStatus: number[] = [1, 2];
+const paraStateMap: Record<CrowdloanFundStatus, CrowdloanParaState> = {
+  [CrowdloanFundStatus.IN_AUCTION]: CrowdloanParaState.ONGOING,
+  [CrowdloanFundStatus.WON]: CrowdloanParaState.COMPLETED,
+  [CrowdloanFundStatus.FAILED]: CrowdloanParaState.FAILED
+};
 
 const getTableItems = (
   relayChainSlug: 'polkadot' | 'kusama',
   contributionsMap: CrowdloanContributionsMap,
-  paraChainInfoMap: ParaChainInfoMap,
+  crowdloanFundInfoMap: Record<string, CrowdloanFundInfo>,
   chainInfoMap: Record<string, _ChainInfo>,
-  assetRegistryMap: Record<string, _ChainAsset>,
   priceMap: PriceStore['priceMap']
 ) => {
   const result: TableItem[] = [];
 
-  const relayChainInfo = chainInfoMap[relayChainSlug];
-  const relayChainNativeTokenSlug = _getChainNativeTokenSlug(relayChainInfo);
-  const relayChainAsset = assetRegistryMap[relayChainNativeTokenSlug];
-  const decimals = _getAssetDecimals(relayChainAsset);
-  const priceId = _getAssetPriceId(assetRegistryMap[relayChainNativeTokenSlug]);
+  const relayChainName = relayChainSlug === 'polkadot' ? 'Polkadot' : 'Kusama';
+  const decimals = relayChainSlug === 'polkadot' ? 10 : 12;
+  const priceId = relayChainSlug === 'polkadot' ? 'polkadot' : 'kusama';
+  const symbol = relayChainSlug === 'polkadot' ? 'DOT' : 'KSM';
   const price = priceMap[priceId] || 0;
+  const dateNow = Date.now();
 
   contributionsMap[relayChainSlug].forEach((c) => {
-    if (!acceptFundStatus.includes(c.fund_status)) {
+    if (!crowdloanFundInfoMap[c.fund_id]) {
       return;
     }
 
-    if (!paraChainInfoMap[relayChainSlug]?.[`${c.para_id}`]) {
+    const fundInfo = crowdloanFundInfoMap[c.fund_id];
+
+    if (!fundInfo.status || fundInfo.status === CrowdloanFundStatus.FAILED) {
       return;
     }
 
-    const paraChainInfo = paraChainInfoMap[relayChainSlug][`${c.para_id}`];
+    if (!fundInfo.endTime || new Date(fundInfo.endTime).getTime() < dateNow) {
+      return;
+    }
 
     const contributedValue = getBalanceValue(c.contributed || '0', decimals);
     const convertedContributedValue = getConvertedBalanceValue(contributedValue, price);
 
-    const unlockTime = ((c.unlocking_block - c.block_num) * 6 + c.block_timestamp) * 1000;
+    const unlockTimeNumber = new Date(fundInfo.endTime).getTime();
+    const unlockTime = customFormatDate(unlockTimeNumber, '#YYYY#-#MM#-#DD#');
+    const chainInfo: _ChainInfo | undefined = fundInfo.chain ? chainInfoMap[fundInfo.chain] : undefined;
 
     result.push({
-      id: `${paraChainInfo.slug}-${relayChainSlug}`,
-      chainSlug: paraChainInfo.slug,
-      chainName: paraChainInfo.name,
+      id: `${c.fund_id}-${relayChainSlug}`,
+      chainSlug: chainInfo?.slug || `unknown-${c.fund_id}`,
+      chainName: chainInfo?.name || `Unknown (${c.fund_id})`,
       relayChainSlug: relayChainSlug,
-      relayChainName: relayChainInfo.name,
+      relayChainName,
       contribution: {
-        symbol: relayChainAsset.symbol,
+        symbol,
         value: contributedValue,
         convertedValue: convertedContributedValue
       },
-      paraState: paraChainInfo.paraState,
-      unlockTime: customFormatDate(unlockTime, '#YYYY#-#MM#-#DD#')
+      paraState: paraStateMap[fundInfo.status],
+      unlockTime: customFormatDate(unlockTime, '#YYYY#-#MM#-#DD#'),
+      sortOrder: unlockTimeNumber
     });
   });
 
@@ -162,10 +172,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const [propAddress] = useState<string | undefined>(locationState?.address);
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [paraChainInfoMap, setParaChainInfoMap] = useState<ParaChainInfoMap>({});
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
-  const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
   const { isNoAccount } = useSelector((state: RootState) => state.accountState);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
@@ -178,6 +185,12 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     kusama: []
   });
 
+  const { chainInfoMap = {},
+    crowdloanFundInfoMap = {} }: {
+    crowdloanFundInfoMap: Record<string, CrowdloanFundInfo>,
+    chainInfoMap: Record<string, _ChainInfo>,
+  } = useOutletContext();
+
   const [form] = Form.useForm<FormParams>();
   const addressValue = Form.useWatch('address', form);
   const [loading, setLoading] = useState<boolean>(false);
@@ -189,8 +202,9 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   }, [propAddress]);
 
   const goEarningDemo = useCallback(() => {
-    navigate('/earning-demo');
-  }, [navigate]);
+    openInNewTab(`${window.location.origin}/earning-demo`)();
+    // todo: ...
+  }, []);
 
   const onBack = useCallback(() => {
     navigate('/crowdloan-unlock-campaign/check-contributions');
@@ -222,10 +236,10 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     }
 
     return [
-      ...getTableItems('polkadot', contributionsMap, paraChainInfoMap, chainInfoMap, assetRegistryMap, priceMap),
-      ...getTableItems('kusama', contributionsMap, paraChainInfoMap, chainInfoMap, assetRegistryMap, priceMap)
-    ];
-  }, [assetRegistryMap, chainInfoMap, contributionsMap, paraChainInfoMap, priceMap]);
+      ...getTableItems('polkadot', contributionsMap, crowdloanFundInfoMap, chainInfoMap, priceMap),
+      ...getTableItems('kusama', contributionsMap, crowdloanFundInfoMap, chainInfoMap, priceMap)
+    ].sort((a, b) => a.sortOrder - b.sortOrder);
+  }, [chainInfoMap, contributionsMap, crowdloanFundInfoMap, priceMap]);
 
   const filteredTableItems = useMemo(() => {
     const filterTabFunction = (item: TableItem) => {
@@ -369,69 +383,6 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
       setWebBaseClassName('');
     };
   }, [className, setWebBaseClassName]);
-
-  useEffect(() => {
-    getParaChainInfoMap().then((rs) => {
-      rs.polkadot['3340'] = {
-        slug: 'invarch',
-        name: 'InvArch',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 3340
-      };
-      rs.polkadot['2025'] = {
-        slug: 'sora_polkadot',
-        name: 'SORA Polkadot',
-        paraState: CrowdloanParaState.ONGOING,
-        paraId: 2025
-      };
-      rs.polkadot['3341'] = {
-        slug: 'logion',
-        name: 'Logion',
-        paraState: CrowdloanParaState.ONGOING,
-        paraId: 3341
-      };
-      rs.polkadot['3345'] = {
-        slug: 'energy_web_x',
-        name: 'Energy Web X',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 3345
-      };
-      rs.polkadot['3334'] = {
-        slug: 'moonsama',
-        name: 'Moonsama',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 3334
-      };
-      rs.polkadot['2053'] = {
-        slug: 'omnibtc',
-        name: 'OmniBTC',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 2053
-      };
-      rs.polkadot['2027'] = {
-        slug: 'coinversation',
-        name: 'Coinversation',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 2027
-      };
-      rs.polkadot['3338'] = {
-        slug: 'peaq',
-        name: 'Peaq',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 3338
-      };
-      rs.polkadot['3333'] = {
-        slug: 't3rn',
-        name: 'T3rn',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 3333
-      };
-
-      setParaChainInfoMap(rs);
-    }).catch((e) => {
-      console.log('getParaChainInfoMap Error', e);
-    });
-  }, []);
 
   const fetchTableData = useCallback((address: string) => {
     setLoading(true);
@@ -605,7 +556,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
                   </span>
                   <a
                     className={'__link'}
-                    href='https://docs.subwallet.app/'
+                    href='https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs'
                     rel='noreferrer'
                     target={'_blank'}
                   >
@@ -678,7 +629,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
           <div className={'__footer-button-content'}>
             <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>
 
-            <div className={'__footer-button-subtitle'}>{t('Earning with SubWallet Dashboard')}</div>
+            <div className={'__footer-button-subtitle'}>{t('Earn with SubWallet Dashboard')}</div>
           </div>
         </Button>
       </div>

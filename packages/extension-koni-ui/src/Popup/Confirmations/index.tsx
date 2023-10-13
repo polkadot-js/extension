@@ -165,7 +165,7 @@ const Component = function ({ className }: Props) {
           return t('Transfer confirmation');
         case ExtrinsicType.STAKING_JOIN_POOL:
         case ExtrinsicType.STAKING_BOND:
-          return t('Add to bond confirm');
+          return t('Staking confirmation');
         case ExtrinsicType.STAKING_LEAVE_POOL:
         case ExtrinsicType.STAKING_UNBOND:
           return t('Unbond confirm');
@@ -176,7 +176,7 @@ const Component = function ({ className }: Props) {
         case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
           return t('Cancel unstake confirm');
         default:
-          return t('Transaction confirm');
+          return t('Transaction confirmation');
       }
     } else {
       return t(titleMap[confirmation.type] || '');

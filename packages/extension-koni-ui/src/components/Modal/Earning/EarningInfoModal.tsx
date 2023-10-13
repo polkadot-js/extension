@@ -4,7 +4,7 @@
 import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils';
+import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -126,6 +126,14 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, [assetRegistry, currentItem.inputAssets, chainInfoMap]);
 
+  const rewardTextI18nKey = useMemo(() => {
+    if (['westend', 'polkadot'].includes(currentItem.chain)) {
+      return detectTranslate('Claimable and compoundable on your own schedule. <highlight>Learn more</highlight>');
+    } else {
+      return detectTranslate('Claimable on your own schedule. <highlight>Learn more</highlight>');
+    }
+  }, [currentItem.chain]);
+
   const onClose = useCallback(() => {
     inactiveModal(modalId);
   }, [inactiveModal]);
@@ -213,13 +221,13 @@ const Component: React.FC<Props> = (props: Props) => {
             )}
             onClick={form.submit}
           >
-            {t('Stake now')}
+            {t('Earn now')}
           </Button>
         </>
       )}
       id={modalId}
       onCancel={onClose}
-      title={t('Staking information')}
+      title={t('Earning information')}
     >
       <div>
         <EarningTokenList />
@@ -231,7 +239,7 @@ const Component: React.FC<Props> = (props: Props) => {
         >
           <Form.Item
             colon={false}
-            label={'Select method'}
+            label={'Select protocol'}
             name={'method'}
           >
             <EarningMethodSelector
@@ -251,7 +259,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {currentItem.description}
           </div>
           <div className='title'>
-            {t('Maximum possible APR')}
+            {t('Maximum possible APY')}
           </div>
           <div className='reward-text'>
             <Number
@@ -288,7 +296,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 )
               }}
-              i18nKey={'Maximum APR when Staking {{symbol}} for a period of 12 months. <highlight>Learn more</highlight>'}
+              i18nKey={'Maximum APY when you stake {{symbol}} for 12 months. <highlight>Learn more</highlight>'}
               values={{
                 symbol: currentAsset.symbol
               }}
@@ -317,7 +325,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <Divider className='divider' />
         <div className='info-container'>
           <div className='title'>
-            {t('Requirement assets')}
+            {t('Required assets')}
           </div>
           <div className='token-item-container'>
             {
@@ -341,7 +349,17 @@ const Component: React.FC<Props> = (props: Props) => {
             {t('Reward distribution')}
           </div>
           <div className='description'>
-            {t('Payable every {{number}} hours', { replace: { number: 8 } })}
+            <Trans
+              components={{
+                highlight: (
+                  <span
+                    className='link'
+                    onClick={onClickInfo}
+                  />
+                )
+              }}
+              i18nKey={rewardTextI18nKey}
+            />
           </div>
         </div>
       </div>

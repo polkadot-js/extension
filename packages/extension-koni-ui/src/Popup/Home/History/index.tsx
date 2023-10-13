@@ -235,7 +235,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake'),
     [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake'),
     [ExtrinsicType.STAKING_BOND]: t('Bond'),
-    [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
+    [ExtrinsicType.STAKING_UNBOND]: t('Unstake'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),
     [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake'),

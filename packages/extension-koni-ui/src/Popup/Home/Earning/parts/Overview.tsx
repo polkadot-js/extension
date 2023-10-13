@@ -236,8 +236,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const renderWhenEmpty = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Need message')}
-        emptyTitle={t('Need message')}
+        emptyMessage={t('Try turning on networks or switch to another account')}
+        emptyTitle={t('No earning pools found')}
         phosphorIcon={Vault}
       />
     );

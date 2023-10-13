@@ -16,7 +16,7 @@ export const TxTypeNameMap: Record<ExtrinsicType, string> = {
   [ExtrinsicType.STAKING_LEAVE_POOL]: detectTranslate('Leave pool'),
   [ExtrinsicType.JOIN_YIELD_POOL]: detectTranslate('Join pool'),
   [ExtrinsicType.STAKING_BOND]: detectTranslate('Bond'),
-  [ExtrinsicType.STAKING_UNBOND]: detectTranslate('Unbond'),
+  [ExtrinsicType.STAKING_UNBOND]: detectTranslate('Unstake'),
   [ExtrinsicType.STAKING_CLAIM_REWARD]: detectTranslate('Claim reward'),
   [ExtrinsicType.STAKING_WITHDRAW]: detectTranslate('Withdraw'),
   [ExtrinsicType.STAKING_POOL_WITHDRAW]: detectTranslate('Withdraw'),

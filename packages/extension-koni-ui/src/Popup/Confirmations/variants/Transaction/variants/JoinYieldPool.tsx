@@ -3,8 +3,7 @@
 
 import { RequestYieldStepSubmit, SubmitYieldStepData } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
-import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
+import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import CN from 'classnames';
 import React, { useMemo } from 'react';

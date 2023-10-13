@@ -26,6 +26,7 @@ export default class DatabaseService {
   // TODO: might remove this
   private nftSubscription: Subscription | undefined;
   private stakingSubscription: Subscription | undefined;
+  private yieldInfoSubscription: Subscription | undefined;
 
   constructor (private eventService: EventService) {
     this.logger = createLogger('DB-Service');
@@ -345,9 +346,13 @@ export default class DatabaseService {
   }
 
   subscribeYieldPoolInfo (chains: string[], callback: (data: YieldPoolInfo[]) => void) {
-    this.stores.yieldPoolInfo.subscribeYieldPoolInfo(chains).subscribe(({
+    this.yieldInfoSubscription && this.yieldInfoSubscription.unsubscribe();
+
+    this.yieldInfoSubscription = this.stores.yieldPoolInfo.subscribeYieldPoolInfo(chains).subscribe(({
       next: (data) => callback && callback(data)
     }));
+
+    return this.yieldInfoSubscription;
   }
 
   async updateYieldPosition (data: YieldPositionInfo) {
@@ -362,5 +367,9 @@ export default class DatabaseService {
     return this.stores.yieldPosition.subscribeYieldPositions(addresses).subscribe(({
       next: (data) => callback && callback(data)
     }));
+  }
+
+  async getYieldNominationPoolPosition (addresses: string[], chains: string[]) {
+    return this.stores.yieldPosition.getByAddressAndChains(addresses, chains);
   }
 }

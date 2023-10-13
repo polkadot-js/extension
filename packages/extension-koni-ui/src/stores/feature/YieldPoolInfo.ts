@@ -23,14 +23,14 @@ const yieldPoolInfoSlice = createSlice({
       });
 
       return {
+        ...state,
         poolInfo,
-        yieldPosition: state.yieldPosition,
         reduxStatus: ReduxStatus.READY
       };
     },
     updateYieldPositionInfo (state, action: PayloadAction<YieldPositionInfo[]>) {
       return {
-        poolInfo: state.poolInfo,
+        ...state,
         yieldPosition: action.payload,
         reduxStatus: ReduxStatus.READY
       };

@@ -344,7 +344,7 @@ export class KoniSubscription {
       return;
     }
 
-    const pooledStakingItems = await this.state.getPooledStakingRecordsByAddress(addresses);
+    const pooledStakingItems = await this.state.getPooledPositionByAddress(addresses);
 
     const pooledAddresses: string[] = [];
 

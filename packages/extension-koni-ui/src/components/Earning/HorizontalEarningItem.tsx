@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, StakingStatus, YieldAssetBalance, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, StakingRewardItem, StakingStatus, YieldAssetBalance, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
@@ -26,6 +26,7 @@ interface Props extends ThemeProps {
   onClickWithdrawBtn: () => void;
   yieldPoolInfo: YieldPoolInfo;
   yieldPositionInfo: YieldPositionInfo;
+  nominationPoolReward?: StakingRewardItem;
 }
 
 interface ButtonOptionProps {
@@ -41,6 +42,7 @@ interface ButtonOptionProps {
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className,
+    nominationPoolReward,
     onClickCalculatorBtn,
     onClickCancelUnStakeBtn,
     onClickInfoBtn,
@@ -112,8 +114,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, []);
 
   const availableActionsByMetadata = useMemo(() => {
-    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo);
-  }, [yieldPoolInfo, yieldPositionInfo]);
+    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo, nominationPoolReward?.unclaimedReward);
+  }, [nominationPoolReward?.unclaimedReward, yieldPoolInfo, yieldPositionInfo]);
 
   const buttons = useMemo((): ButtonOptionProps[] => {
     const result: ButtonOptionProps[] = [];
@@ -161,6 +163,7 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.label = t('Claim rewards');
           break;
         case YieldAction.WITHDRAW:
+        case YieldAction.WITHDRAW_EARNING:
           temp.icon = StopCircle;
           temp.onClick = onClickButton(onClickWithdrawBtn);
           temp.label = t('Withdraw');
@@ -182,12 +185,6 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.icon = PlusCircle;
           temp.onClick = onClickButton(onClickStakeBtn);
           temp.label = t('Earn now');
-          break;
-        case YieldAction.WITHDRAW_EARNING:
-          temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickWithdrawBtn); // TODO
-          temp.label = t('Withdraw');
-          temp.schema = 'secondary';
           break;
       }
 
@@ -312,7 +309,7 @@ const Component: React.FC<Props> = (props: Props) => {
           }
 
           {
-            yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL && <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
+            yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL && nominationPoolReward && <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
               <Typography.Text style={{ color: token.colorTextLight4 }}>{t('Unclaimed rewards:')}</Typography.Text>
               <Number
                 decimal={_getAssetDecimals(inputTokenInfo)}
@@ -320,7 +317,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 intColor={token.colorSuccess}
                 suffix={_getAssetSymbol(inputTokenInfo)}
                 unitColor={token.colorSuccess}
-                value={'0'} // TODO: improve this
+                value={nominationPoolReward?.unclaimedReward || '0'}
               />
             </div>
           }

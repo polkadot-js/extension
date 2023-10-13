@@ -2269,6 +2269,7 @@ export interface ValidateYieldProcessParams {
 export interface RequestYieldFastWithdrawal extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
+  yieldPositionInfo: YieldPositionInfo;
   amount: string;
 }
 

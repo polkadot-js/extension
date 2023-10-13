@@ -107,7 +107,8 @@ const Component: React.FC = () => {
       yieldSubmitRedeem({
         address: from,
         amount: values.amount,
-        yieldPoolInfo
+        yieldPoolInfo,
+        yieldPositionInfo: yieldPosition
       })
         .then(onSuccess)
         .catch(onError)
@@ -166,6 +167,7 @@ const Component: React.FC = () => {
             className={'free-balance'}
             label={t('Available balance:')}
             onBalanceReady={setIsBalanceReady}
+            tokenSlug={yieldPoolInfo?.derivativeAssets?.[0]}
           />
 
           <Form.Item

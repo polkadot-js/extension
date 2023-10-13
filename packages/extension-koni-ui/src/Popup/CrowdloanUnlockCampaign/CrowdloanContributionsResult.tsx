@@ -677,6 +677,7 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       paddingRight: token.paddingSM,
       height: 30,
       borderRadius: 50,
+      cursor: 'pointer',
 
       '&:before': {
         content: '""',

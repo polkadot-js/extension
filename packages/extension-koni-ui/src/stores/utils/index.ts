@@ -343,12 +343,12 @@ export const getDAppsData = (() => {
     start: () => {
       Promise.all([
         (async () => {
-          const res = await fetch('https://content-cache.subwallet.app/api/strapi/dapps');
+          const res = await fetch('https://static-data.subwallet.app/dapps/list.json');
 
           return await res.json() as [];
         })(),
         (async () => {
-          const res = await fetch('https://content-cache.subwallet.app/api/strapi/categories');
+          const res = await fetch('https://static-data.subwallet.app/categories/list.json');
 
           return await res.json() as [];
         })()

@@ -163,7 +163,7 @@ export async function getNominationPoolReward (addresses: string[], chainInfoMap
         await Promise.all(validAddresses.map(async (address) => {
           const _unclaimedReward = await substrateApi.api.call?.nominationPoolsApi?.pendingRewards(address);
 
-          if (_unclaimedReward && _unclaimedReward.toString() !== '0') {
+          if (_unclaimedReward) {
             callBack({
               address: address,
               chain: networkKey,

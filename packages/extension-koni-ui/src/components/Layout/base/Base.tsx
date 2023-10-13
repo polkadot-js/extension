@@ -11,7 +11,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
-import { Aperture, Clock, Rocket, Vault, Wallet } from 'phosphor-react';
+import { Aperture, Clock, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -83,16 +83,16 @@ const Component = ({ children, className, headerIcons, isSetTitleContext = true,
     //   key: 'staking',
     //   url: '/home/staking'
     // },
-    {
-      icon: {
-        type: 'phosphor',
-        phosphorIcon: Vault,
-        weight: 'fill'
-      },
-      label: t('Earning'),
-      key: 'earning',
-      url: '/home/earning/'
-    },
+    // {
+    //   icon: {
+    //     type: 'phosphor',
+    //     phosphorIcon: Vault,
+    //     weight: 'fill'
+    //   },
+    //   label: t('Earning'),
+    //   key: 'earning',
+    //   url: '/home/earning/'
+    // },
     {
       icon: {
         type: 'phosphor',

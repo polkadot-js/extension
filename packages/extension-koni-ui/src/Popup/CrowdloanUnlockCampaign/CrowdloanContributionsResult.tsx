@@ -7,6 +7,7 @@ import { CrowdloanContributionItem } from '@subwallet/extension-base/services/su
 import { AddressInput, Layout, TokenBalance } from '@subwallet/extension-koni-ui/components';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { getCrowdloanContributions } from '@subwallet/extension-koni-ui/messaging';
@@ -179,6 +180,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const { setOnBack, setWebBaseClassName } = useContext(WebUIContext);
   const { activeModal } = useContext(ModalContext);
   const [currentSelectRelayChainFilter, setCurrentSelectRelayChainFilter] = useState<RelayChainFilter>(RelayChainFilter.ALL);
+  const { isWebUI } = useContext(ScreenContext);
 
   const [contributionsMap, setContributionsMap] = useState<CrowdloanContributionsMap>({
     polkadot: [],
@@ -294,7 +296,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
       return [t('Refunded'), t('On')];
     };
 
-    return [
+    const cols = [
       {
         title: t('Project name'),
         dataIndex: 'name',
@@ -353,7 +355,14 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
         }
       }
     ];
-  }, [getParaStateLabel, t]);
+
+    if (!isWebUI) {
+      // Remove col 3
+      cols.splice(1, 2);
+    }
+
+    return cols;
+  }, [getParaStateLabel, isWebUI, t]);
 
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {
     return [
@@ -606,33 +615,34 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
         )}
       </div>
 
-      <div className={'__footer-area'}>
-        <NoteBox
-          className={'__note-box'}
-          content={t('There\'re multiple ways you can play with your unlocked DOT, such as native staking, liquid staking, or lending. Check out SubWallet Dashboard for curated options with competitive APY to earn yield on your DOT.')}
-          title={t('Crowdloan unlock, then what?')}
-        />
+      {isWebUI && (
+        <div className={'__footer-area'}>
+          <NoteBox
+            className={'__note-box'}
+            content={t('There\'re multiple ways you can play with your unlocked DOT, such as native staking, liquid staking, or lending. Check out SubWallet Dashboard for curated options with competitive APY to earn yield on your DOT.')}
+            title={t('Crowdloan unlock, then what?')}
+          />
 
-        <Button
-          className={'__footer-button'}
-          contentAlign={'left'}
-          icon={
-            <Icon
-              className='__footer-button-icon'
-              phosphorIcon={Vault}
-              size='md'
-              weight='fill'
-            />
-          }
-          onClick={goEarningDemo}
-        >
-          <div className={'__footer-button-content'}>
-            <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>
-
-            <div className={'__footer-button-subtitle'}>{t('Earn with SubWallet Dashboard')}</div>
-          </div>
-        </Button>
-      </div>
+          <Button
+            className={'__footer-button'}
+            contentAlign={'left'}
+            icon={
+              <Icon
+                className='__footer-button-icon'
+                phosphorIcon={Vault}
+                size='md'
+                weight='fill'
+              />
+            }
+            onClick={goEarningDemo}
+          >
+            <div className={'__footer-button-content'}>
+              <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>
+              <div className={'__footer-button-subtitle'}>{t('Earn with SubWallet Dashboard')}</div>
+            </div>
+          </Button>
+        </div>
+      )}
     </Layout.Base>
   );
 };
@@ -752,8 +762,11 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
     },
 
     '.__form-area': {
-      maxWidth: 358,
-      flex: 1
+      flex: 1,
+
+      '.web-ui-enable &': {
+        maxWidth: 358
+      }
     },
 
     '.__form-item': {
@@ -788,7 +801,8 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       gap: token.size,
       maxWidth: 584,
       marginLeft: 'auto',
-      marginRight: 'auto'
+      marginRight: 'auto',
+      flexWrap: 'wrap'
     },
 
     '.__check-again-button, .__create-a-wallet-button': {

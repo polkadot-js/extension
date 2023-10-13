@@ -60,7 +60,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [txParams.feeTokenSlug, tokenInfoMap]);
 
   const estimatedReceivables = useMemo(() => {
-    return Math.floor(parseInt(txParams.amount) * txParams.exchangeRate);
+    return Math.floor(parseInt(txParams.amount) / txParams.exchangeRate);
   }, [txParams.amount, txParams.exchangeRate]);
 
   return (

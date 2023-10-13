@@ -39,7 +39,7 @@ const typeName = (type: SWTransaction['extrinsicType']) => {
     case ExtrinsicType.STAKING_BOND:
       return 'Bond';
     case ExtrinsicType.STAKING_UNBOND:
-      return 'Unbond';
+      return 'Unstake';
     case ExtrinsicType.STAKING_CLAIM_REWARD:
       return 'Claim reward';
     case ExtrinsicType.STAKING_WITHDRAW:

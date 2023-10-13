@@ -256,7 +256,7 @@ const Component = () => {
                 key={item.slug}
                 label={t('You\'ll receive')}
                 suffix={_getAssetSymbol(derivativeAssetInfo)}
-                value={value * item.exchangeRate}
+                value={value / item.exchangeRate}
               />
             );
           })
@@ -280,7 +280,7 @@ const Component = () => {
                 const amount = value.rewardInToken || 0;
 
                 return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)} ${value.symbol}`;
-              }).join(' - ').concat('/Year')
+              }).join(' - ').concat('/year')
             }
           </div>
         </MetaInfo.Default>

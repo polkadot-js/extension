@@ -8,13 +8,13 @@ import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { createEarningTagTypes } from '@subwallet/extension-koni-ui/utils';
-import { Button, ButtonProps, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, Logo, Number, Typography, Web3Block } from '@subwallet/react-ui';
 import { MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 import MetaInfo from '../MetaInfo/MetaInfo';
+import EarningTypeTag from './EarningTypeTag';
 
 interface Props extends ThemeProps {
   onClickCalculatorBtn: () => void;
@@ -196,12 +196,6 @@ const Component: React.FC<Props> = (props: Props) => {
     return result;
   }, [availableActionsByMetadata, onClickButton, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, onClickClaimBtn, t, yieldPoolInfo]);
 
-  const tagType = useMemo(() => {
-    const tagTypeMap = createEarningTagTypes(t, token);
-
-    return tagTypeMap[type];
-  }, [t, token, type]);
-
   const derivativeTokenState = useMemo(() => {
     if (!yieldPoolInfo.derivativeAssets) {
       return;
@@ -232,16 +226,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <>
             <div className={'earning-item-name-wrapper'}>
               <div className={'earning-item-name'}>{name}</div>
-              <Tag
-                bgType={'default'}
-                color={tagType.color}
-                icon={(
-                  <Icon
-                    phosphorIcon={tagType.icon}
-                    weight='fill'
-                  />
-                )}
-              >{tagType.label}</Tag>
+              <EarningTypeTag type={type} />
             </div>
 
             <div className={'earning-item-description'}>{description}</div>

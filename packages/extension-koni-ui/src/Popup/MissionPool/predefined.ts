@@ -6,7 +6,10 @@ import { MissionCategory } from '@subwallet/extension-koni-ui/types/missionPool'
 export enum MissionCategoryType {
   ALL='all',
   CLAIMABLE='claimable',
-  ANNOUNCED='announced'
+  ANNOUNCED='announced',
+  INCOMING='incoming',
+  ONGOING='ongoing',
+  ENDED='ended',
 }
 
 export const missionCategoryMap: Record<string, MissionCategory> = {
@@ -17,6 +20,18 @@ export const missionCategoryMap: Record<string, MissionCategory> = {
   [MissionCategoryType.ANNOUNCED]: {
     slug: MissionCategoryType.ANNOUNCED,
     name: 'Announced'
+  },
+  [MissionCategoryType.INCOMING]: {
+    slug: MissionCategoryType.INCOMING,
+    name: 'Incoming'
+  },
+  [MissionCategoryType.ONGOING]: {
+    slug: MissionCategoryType.ONGOING,
+    name: 'Ongoing'
+  },
+  [MissionCategoryType.ENDED]: {
+    slug: MissionCategoryType.ENDED,
+    name: 'Ended'
   }
 };
 

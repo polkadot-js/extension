@@ -226,6 +226,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
     position: 'relative',
+    cursor: 'pointer',
 
     '.ant-number .ant-typography': {
       fontSize: 'inherit !important',

@@ -113,11 +113,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const filterOptions = useMemo((): FilterOption[] => [
     { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
-    { label: t('Native staking'), value: YieldPoolType.NATIVE_STAKING },
+    // { label: t('Native staking'), value: YieldPoolType.NATIVE_STAKING },
     { label: t('Liquid staking'), value: YieldPoolType.LIQUID_STAKING },
-    { label: t('Lending'), value: YieldPoolType.LENDING },
-    { label: t('Parachain staking'), value: YieldPoolType.PARACHAIN_STAKING },
-    { label: t('Single farming'), value: YieldPoolType.SINGLE_FARMING }
+    { label: t('Lending'), value: YieldPoolType.LENDING }
+    // { label: t('Parachain staking'), value: YieldPoolType.PARACHAIN_STAKING },
+    // { label: t('Single farming'), value: YieldPoolType.SINGLE_FARMING }
   ], [t]);
 
   const filterLabel = useMemo(() => {

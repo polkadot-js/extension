@@ -111,6 +111,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
           <div className='__countdown-icon'>
             <Image
               height={'100%'}
+              shape={'circle'}
               src={logoMap.network.rocketIcon as string}
               width={'100%'}
             />

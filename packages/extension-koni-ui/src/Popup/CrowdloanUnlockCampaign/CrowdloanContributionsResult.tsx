@@ -91,9 +91,9 @@ enum FilterValue {
   ALL = 'all',
   POLKADOT_PARACHAIN = 'Polkadot parachain',
   KUSAMA_PARACHAIN = 'Kusama parachain',
-  WINNER = 'completed',
+  WON = 'won',
   FAIL = 'failed',
-  ACTIVE = 'active'
+  IN_AUCTION = 'in auction'
 }
 
 const acceptFundStatus: number[] = [1, 2];
@@ -194,7 +194,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     }
 
     if (paraState.valueOf() === CrowdloanParaState.COMPLETED.valueOf()) {
-      return t('Winner');
+      return t('Won');
     }
 
     if (paraState === CrowdloanParaState.FAILED.valueOf()) {
@@ -202,7 +202,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     }
 
     if (paraState === CrowdloanParaState.ONGOING.valueOf()) {
-      return t('Active');
+      return t('In Auction');
     }
 
     return '';
@@ -225,11 +225,11 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
         return true;
       }
 
-      if (selectedFilterTab === FilterValue.WINNER) {
+      if (selectedFilterTab === FilterValue.WON) {
         return item.paraState === CrowdloanParaState.COMPLETED;
       }
 
-      if (selectedFilterTab === FilterValue.ACTIVE) {
+      if (selectedFilterTab === FilterValue.IN_AUCTION) {
         return item.paraState === CrowdloanParaState.ONGOING;
       }
 
@@ -320,12 +320,12 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
         value: FilterValue.ALL
       },
       {
-        label: t('Active'),
-        value: FilterValue.ACTIVE
+        label: t('In Auction'),
+        value: FilterValue.IN_AUCTION
       },
       {
-        label: t('Winner'),
-        value: FilterValue.WINNER
+        label: t('Won'),
+        value: FilterValue.WON
       }
     ];
   }, [t]);
@@ -548,7 +548,21 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
           <div className={'__empty-list-wrapper'}>
             <EmptyList
               className={'__empty-list'}
-              emptyMessage={t('Check again or create a new account.')}
+              emptyMessage={
+                <>
+                  <span className={'__has-suffix-space'}>
+                    {t('Check again, create a new account or visit our')}
+                  </span>
+                  <a
+                    className={'__link'}
+                    href='https://docs.subwallet.app/'
+                    rel='noreferrer'
+                    target={'_blank'}
+                  >
+                    {t('FAQs')}
+                  </a>
+                </>
+              }
               emptyTitle={t('We can\'t find any crowdloan contributions from this address.')}
               phosphorIcon={RocketLaunch}
             />
@@ -757,6 +771,18 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       paddingBottom: 100
     },
 
+    '.__empty-list': {
+      '.__has-suffix-space': {
+        '&:after': {
+          content: '" "'
+        }
+      },
+
+      '.__link': {
+        textDecoration: 'underline'
+      }
+    },
+
     '.__buttons-block': {
       display: 'flex',
       gap: token.size,
@@ -777,7 +803,12 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingTop: token.sizeLG,
-      paddingBottom: 42
+      paddingBottom: 42,
+      position: 'sticky',
+      bottom: 0,
+      background: token.colorBgDefault,
+      opacity: 1,
+      zIndex: 10
     },
 
     '.__note-box': {

@@ -17,6 +17,12 @@ import { Option, u32, Vec } from '@polkadot/types';
 import { ParaId } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
+const getOnlineChainList = (async () => {
+  const request = await axios.get<_ChainInfo[]>('https://static-data.subwallet.app/chains/list.json');
+
+  return request.data;
+})();
+
 function getRPCCrowdloan (parentAPI: _SubstrateApi, paraId: number, hexAddresses: string[], paraState: CrowdloanParaState, callback: (rs: CrowdloanItem) => void) {
   const unsubPromise = parentAPI.api.derive.crowdloan.ownContributions(paraId, hexAddresses, (result: DeriveOwnContributions) => {
     let contribute = new BN(0);
@@ -106,6 +112,7 @@ export async function getCrowdloanFundsStatus (api: ApiPromise) {
 // Get All crowdloan
 export async function subscribeCrowdloan (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, callback: (networkKey: string, rs: CrowdloanItem) => void, chainInfoMap: Record<string, _ChainInfo>) {
   const unsubMap: Record<string, any> = {};
+  const chainList = await getOnlineChainList;
 
   if (Object.keys(substrateApiMap).includes(COMMON_CHAIN_SLUGS.KUSAMA) && Object.keys(substrateApiMap).includes(COMMON_CHAIN_SLUGS.POLKADOT)) {
     const polkadotAPI = await substrateApiMap[COMMON_CHAIN_SLUGS.POLKADOT].isReady;
@@ -121,7 +128,9 @@ export async function subscribeCrowdloan (addresses: string[], substrateApiMap: 
       return registry.createType('AccountId', address).toHex();
     });
 
-    Object.entries(chainInfoMap).forEach(([networkKey, chainInfo]) => {
+    chainList.forEach((chainInfo) => {
+      const networkKey = chainInfo.slug;
+
       if (_isSubstrateParaChain(chainInfo)) {
         const parentChain = _getSubstrateRelayParent(chainInfo);
 
@@ -129,11 +138,13 @@ export async function subscribeCrowdloan (addresses: string[], substrateApiMap: 
           callback(networkKey, rs);
         };
 
-        const paraId = _getSubstrateParaId(chainInfo);
+        const paraId = (chainInfo.substrateInfo?.crowdloanParaId || chainInfo.substrateInfo?.paraId || 0) as number;
 
-        if (paraId <= -1 || addresses.length === 0 || parentChain.length === 0) {
+        if (!paraId || addresses.length === 0 || parentChain.length === 0) {
           return;
         }
+
+        console.log(networkKey, paraId);
 
         if (networkKey === COMMON_CHAIN_SLUGS.ACALA) {
           const acalaAddresses = substrateAddresses.map((address) => reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo), _isChainEvmCompatible(chainInfo)));

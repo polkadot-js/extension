@@ -15,7 +15,7 @@ import { sumBN } from '@subwallet/extension-base/utils';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN } from '@polkadot/util';
 
-const YEAR = 365 * 24 * 60 * 60 * 1000;
+// const YEAR = 365 * 24 * 60 * 60 * 1000;
 
 export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
   const substrateApi = await chainApi.isReady;
@@ -37,7 +37,7 @@ export async function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi,
           {
             slug: poolInfo.rewardAssets[0],
             apr: 20.86,
-            exchangeRate: 1
+            exchangeRate: 7.46544
           }
         ],
         maxCandidatePerFarmer: 1,

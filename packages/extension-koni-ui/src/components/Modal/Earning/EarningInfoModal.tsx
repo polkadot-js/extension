@@ -251,7 +251,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {currentItem.description}
           </div>
           <div className='title'>
-            {t('Maximum possible APR')}
+            {t('Maximum possible APY')}
           </div>
           <div className='reward-text'>
             <Number
@@ -288,7 +288,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 )
               }}
-              i18nKey={'Maximum APR when Staking {{symbol}} for a period of 12 months. <highlight>Learn more</highlight>'}
+              i18nKey={'Maximum APY when Staking {{symbol}} for a period of 12 months. <highlight>Learn more</highlight>'}
               values={{
                 symbol: currentAsset.symbol
               }}

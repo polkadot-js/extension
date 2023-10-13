@@ -27,7 +27,7 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
       substrateApi.api.query.timestamp.now()
     ]);
 
-    const exchangeRate = _exchangeRate.toPrimitive() as number;
+    const exchangeRate = _exchangeRate.toPrimitive() as number; // TODO
     const currentBlockHeader = _currentBlockHeader.toPrimitive() as unknown as BlockHeader;
     const currentTimestamp = _currentTimestamp.toPrimitive() as number;
 
@@ -42,7 +42,7 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
 
     const beginTimestamp = _beginTimestamp.toPrimitive() as number;
     const beginExchangeRate = _beginExchangeRate.toPrimitive() as number;
-    const decimals = 10 ** 10;
+    // const decimals = 10 ** 10;
 
     const apy = (exchangeRate / beginExchangeRate) ** (365 * 24 * 60 * 60000 / (currentTimestamp - beginTimestamp)) - 1;
 
@@ -54,7 +54,7 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
           {
             slug: poolInfo.rewardAssets[0],
             apy: apy * 100,
-            exchangeRate: exchangeRate / decimals
+            exchangeRate: 1.266
           }
         ],
         maxCandidatePerFarmer: 1,

@@ -2105,6 +2105,7 @@ export interface YieldWithdrawalMethod {
 export interface YieldPoolInfo {
   slug: string,
   chain: string,
+  logo?: string,
   derivativeAssets?: string[],
   inputAssets: string[], // slug
   rewardAssets: string[], // slug

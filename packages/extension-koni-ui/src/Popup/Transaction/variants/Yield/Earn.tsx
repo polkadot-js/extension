@@ -95,7 +95,7 @@ const Component = () => {
   const onDone = useCallback((extrinsicHash: string) => {
     const chainType = isEthereumAddress(currentFrom) ? 'ethereum' : 'substrate';
 
-    navigate(`/earning-done/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
+    navigate(`/transaction-done/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
   }, [currentFrom, currentPoolInfo.chain, navigate]);
 
   const onError = useCallback((error: Error) => {

@@ -9,8 +9,8 @@ import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Button, Divider, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
+import { isAccountAll, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { Button, Divider, Form, Icon, ModalContext, Number, Tooltip } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { Info, PlusCircle } from 'phosphor-react';
@@ -46,6 +46,7 @@ interface RequireTokenItem {
   symbol: string;
   token: string;
   children: string;
+  tooltip: string;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -61,6 +62,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount, isNoAccount } = useSelector((state: RootState) => state.accountState);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
   const { priceMap } = useSelector((state: RootState) => state.price);
 
@@ -118,18 +120,37 @@ const Component: React.FC<Props> = (props: Props) => {
       return {
         children: asset.symbol,
         token: asset.slug,
-        symbol: asset.symbol
+        symbol: asset.symbol,
+        tooltip: `${asset.symbol} (${chainInfoMap[asset.originChain].name})`
       };
     });
-  }, [assetRegistry, currentItem.inputAssets]);
+  }, [assetRegistry, currentItem.inputAssets, chainInfoMap]);
 
   const onClose = useCallback(() => {
     inactiveModal(modalId);
   }, [inactiveModal]);
 
   const onClickInfo = useCallback(() => {
-    // TODO: add action
-  }, []);
+    let hashTag = '';
+
+    switch (currentItem.chain) {
+      case 'polkadot':
+        hashTag = 'polkadot-nomination-pool';
+        break;
+      case 'westend':
+        hashTag = '';
+        break;
+      case 'bifrost_dot':
+        hashTag = 'bifrost';
+        break;
+      default:
+        hashTag = currentItem.chain;
+    }
+
+    const url = `https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs#${hashTag}`;
+
+    openInNewTab(url)();
+  }, [currentItem.chain]);
 
   const onSubmit: FormCallbacks<EarningInfoFormProps>['onFinish'] = useCallback(() => {
     inactiveModal(modalId);
@@ -302,10 +323,16 @@ const Component: React.FC<Props> = (props: Props) => {
             {
               requireTokenItems.map((value) => {
                 return (
-                  <EarningTokenItem
+                  <Tooltip
                     key={value.token}
-                    {...value}
-                  />
+                    title={value.tooltip}
+                  >
+                    <div>
+                      <EarningTokenItem
+                        {...value}
+                      />
+                    </div>
+                  </Tooltip>
                 );
               })
             }
@@ -398,7 +425,8 @@ const EarningInfoModal = styled(Component)<Props>(({ theme: { token } }: Props) 
     },
 
     '.link': {
-      color: token.colorLink
+      color: token.colorLink,
+      cursor: 'pointer'
     }
   };
 });

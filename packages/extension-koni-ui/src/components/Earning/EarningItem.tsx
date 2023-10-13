@@ -6,12 +6,13 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { createEarningTagTypes } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, Logo, Number, Tag, Web3Block } from '@subwallet/react-ui';
+import { Button, Icon, Logo, Number, Web3Block } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle, PlusMinus, Question } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+
+import EarningTypeTag from './EarningTypeTag';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo,
@@ -48,8 +49,6 @@ const Component: React.FC<Props> = (props: Props) => {
     return apy || 0;
   }, [stats?.totalApr, stats?.totalApy]);
 
-  const tagTypes = useMemo(() => createEarningTagTypes(t, token)[type], [t, token, type]);
-
   const childClick = useCallback((onClick: VoidFunction) => {
     return (e?: SyntheticEvent) => {
       e && e.stopPropagation();
@@ -72,16 +71,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <div className={'earning-item-description'}>{description}</div>
           </div>
 
-          <Tag
-            bgType={'default'}
-            color={tagTypes.color}
-            icon={(
-              <Icon
-                phosphorIcon={tagTypes.icon}
-                weight='fill'
-              />
-            )}
-          >{tagTypes.label}</Tag>
+          <EarningTypeTag type={type} />
 
           <div className={'earning-item-reward'}>
             <Number

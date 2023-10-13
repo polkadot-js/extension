@@ -11,14 +11,14 @@ import { DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, FAST_WITHDRAW
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetAccountsByYield, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTagTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, ModalContext } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
@@ -39,7 +39,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { isWebUI } = useContext(ScreenContext);
 
-  const { token } = useTheme() as Theme;
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -122,7 +121,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
 
-  const tagTypes = useMemo(() => createEarningTagTypes(t, token), [t, token]);
+  const tagTypes = useMemo(() => createEarningTagTypes(t), [t]);
 
   const onClickStakeMoreBtn = useCallback(() => {
     inactiveModal(modalId);

@@ -37,7 +37,7 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
         minJoinPool: '10000000000',
         minWithdrawal: '0',
         totalApr: 13.61,
-        tvl: '13095111106588368'
+        tvl: '291890000000000'
       }
     });
   }

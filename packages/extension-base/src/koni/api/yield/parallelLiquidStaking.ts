@@ -62,7 +62,7 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
         minJoinPool: '10000000000',
         minWithdrawal: '0',
         totalApy: apy * 100,
-        tvl: '13095111106588368'
+        tvl: '12812000000000000'
       }
     });
   }

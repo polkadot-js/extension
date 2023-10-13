@@ -8,7 +8,7 @@ import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { createEarningTagTypes, noop } from '@subwallet/extension-koni-ui/utils';
+import { createEarningTagTypes } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
 import { MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
@@ -19,6 +19,7 @@ import MetaInfo from '../MetaInfo/MetaInfo';
 interface Props extends ThemeProps {
   onClickCalculatorBtn: () => void;
   onClickCancelUnStakeBtn: () => void;
+  onClickClaimBtn: () => void;
   onClickItem?: () => void;
   onClickInfoBtn: () => void;
   onClickStakeBtn: () => void;
@@ -45,6 +46,7 @@ const Component: React.FC<Props> = (props: Props) => {
     nominationPoolReward,
     onClickCalculatorBtn,
     onClickCancelUnStakeBtn,
+    onClickClaimBtn,
     onClickInfoBtn,
     onClickItem,
     onClickStakeBtn,
@@ -159,7 +161,7 @@ const Component: React.FC<Props> = (props: Props) => {
           break;
         case YieldAction.CLAIM_REWARD:
           temp.icon = Wallet;
-          temp.onClick = onClickButton(noop);
+          temp.onClick = onClickButton(onClickClaimBtn);
           temp.label = t('Claim rewards');
           break;
         case YieldAction.WITHDRAW:
@@ -192,7 +194,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [availableActionsByMetadata, onClickButton, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo]);
+  }, [availableActionsByMetadata, onClickButton, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, onClickClaimBtn, t, yieldPoolInfo]);
 
   const tagType = useMemo(() => {
     const tagTypeMap = createEarningTagTypes(t, token);

@@ -12,6 +12,7 @@ import { addLazy, canDerive, isEmptyObject } from '@subwallet/extension-base/uti
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { DAppCategory, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
+import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
 import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
 import { SessionTypes } from '@walletconnect/types';
@@ -361,6 +362,46 @@ export const getDAppsData = (() => {
 
   rs.promise.then((data) => {
     updateDAppStore(data[0] as DAppInfo[], data[1] as DAppCategory[]);
+  }).catch(console.error);
+
+  return rs;
+})();
+
+export const updateMissionPoolStore = (missions: MissionInfo[]) => {
+  store.dispatch({ type: 'missionPool/update',
+    payload: {
+      missions
+    } });
+};
+
+export const getMissionPoolData = (() => {
+  const handler: {
+    resolve?: (value: unknown[]) => void,
+    reject?: (reason?: any) => void
+  } = {};
+
+  const promise = new Promise<any[]>((resolve, reject) => {
+    handler.resolve = resolve;
+    handler.reject = reject;
+  });
+
+  const rs = {
+    promise,
+    start: () => {
+      (async () => {
+        const res = await fetch('https://static-data.subwallet.app/airdrop-campaigns/list.json');
+
+        return await res.json() as [];
+      })()
+        .then((data) => {
+          handler.resolve?.(data);
+        })
+        .catch(handler.reject);
+    }
+  };
+
+  rs.promise.then((data) => {
+    updateMissionPoolStore(data as MissionInfo[]);
   }).catch(console.error);
 
   return rs;

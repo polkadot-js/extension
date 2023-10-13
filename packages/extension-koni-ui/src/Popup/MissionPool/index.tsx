@@ -7,11 +7,11 @@ import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/No
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
-import { useFilterModal } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { MissionDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/Popup/MissionPool/MissionDetailModal';
 import MissionItem from '@subwallet/extension-koni-ui/Popup/MissionPool/MissionItem';
-import { mockMissionPoolItems } from '@subwallet/extension-koni-ui/Popup/MissionPool/mock-data';
 import { missionCategories, MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/MissionPool/predefined';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
 import { ButtonProps, Icon, ModalContext, SwHeader } from '@subwallet/react-ui';
@@ -39,7 +39,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { isWebUI } = useContext(ScreenContext);
   const { goHome } = useDefaultNavigate();
   const [currentSelectItem, setCurrentSelectItem] = useState<MissionInfo | null>(null);
-  const [missionItems] = useState<MissionInfo[]>(mockMissionPoolItems);
+  const { missions } = useSelector((state: RootState) => state.missionPool);
 
   useEffect(() => {
     if (location.pathname === '/mission-pools') {
@@ -83,8 +83,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const searchFunction = useCallback((item: MissionInfo, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
+    if (!item.name && !searchTextLowerCase) {
+      return true;
+    }
+
     return (
-      !item.name || item.name.toLowerCase().includes(searchTextLowerCase)
+      item.name?.toLowerCase().includes(searchTextLowerCase)
     );
   }, []);
 
@@ -101,8 +105,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       return filterTabFunction(_item) && filterFunction(_item) && searchFunction(_item, searchInput);
     };
 
-    return missionItems.filter(_filterFunction);
-  }, [missionItems, filterFunction, searchFunction, searchInput, selectedFilterTab]);
+    return missions.filter(_filterFunction);
+  }, [missions, filterFunction, searchFunction, searchInput, selectedFilterTab]);
 
   const onSelectFilterTab = useCallback((value: string) => {
     setSelectedFilterTab(value);
@@ -182,7 +186,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       >
         <div className={'__mission-list-area'}>
           {!filteredItems.length && (
-            <NoContent pageType={PAGE_TYPE.DAPPS} />
+            <NoContent pageType={PAGE_TYPE.MISSION} />
           )}
 
           {

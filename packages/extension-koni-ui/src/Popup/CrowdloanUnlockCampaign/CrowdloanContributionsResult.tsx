@@ -19,6 +19,7 @@ import { customFormatDate } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Logo, ModalContext, Table, Tag } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
+import CN from 'classnames';
 import { ArrowCounterClockwise, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -150,6 +151,12 @@ const getTableItems = (
   return result;
 };
 
+enum RelayChainFilter {
+  ALL='all',
+  POLKADOT='polkadot',
+  KUSAMA='kusama'
+}
+
 const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const locationState = useLocation().state as CrowdloanContributionsResultParam;
   const [propAddress] = useState<string | undefined>(locationState?.address);
@@ -164,6 +171,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
   const { setOnBack, setWebBaseClassName } = useContext(WebUIContext);
   const { activeModal } = useContext(ModalContext);
+  const [currentSelectRelayChainFilter, setCurrentSelectRelayChainFilter] = useState<RelayChainFilter>(RelayChainFilter.ALL);
 
   const [contributionsMap, setContributionsMap] = useState<CrowdloanContributionsMap>({
     polkadot: [],
@@ -219,7 +227,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     ];
   }, [assetRegistryMap, chainInfoMap, contributionsMap, paraChainInfoMap, priceMap]);
 
-  const filteredtableItems = useMemo(() => {
+  const filteredTableItems = useMemo(() => {
     const filterTabFunction = (item: TableItem) => {
       if (selectedFilterTab === FilterValue.ALL) {
         return true;
@@ -236,8 +244,28 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
       return false;
     };
 
-    return tableItems.filter(filterTabFunction);
-  }, [selectedFilterTab, tableItems]);
+    const filterRelaytChainFunction = (item: TableItem) => {
+      if (currentSelectRelayChainFilter === RelayChainFilter.ALL) {
+        return true;
+      }
+
+      if (currentSelectRelayChainFilter === RelayChainFilter.POLKADOT) {
+        return item.relayChainSlug === RelayChainFilter.POLKADOT;
+      }
+
+      if (currentSelectRelayChainFilter === RelayChainFilter.KUSAMA) {
+        return item.relayChainSlug === RelayChainFilter.KUSAMA;
+      }
+
+      return false;
+    };
+
+    const filterFunction = (item: TableItem) => {
+      return filterTabFunction(item) && filterRelaytChainFunction(item);
+    };
+
+    return tableItems.filter(filterFunction);
+  }, [currentSelectRelayChainFilter, selectedFilterTab, tableItems]);
 
   const columns = useMemo(() => {
     const getUnlockTexts = (paraState?: CrowdloanParaState): [string, string] => {
@@ -459,6 +487,18 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     };
   }, [onBack, setOnBack]);
 
+  const onSelectRelayChainFilter = useCallback((relayChainFilter: RelayChainFilter) => {
+    return () => {
+      setCurrentSelectRelayChainFilter((prev) => {
+        if (prev === relayChainFilter) {
+          return RelayChainFilter.ALL;
+        }
+
+        return relayChainFilter;
+      });
+    };
+  }, []);
+
   return (
     <Layout.Base
       className={className}
@@ -469,7 +509,12 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
       title={t<string>('Your crowdloan contributions')}
     >
       <div className={'__tag-area'}>
-        <div className={'__tag-item'}>
+        <div
+          className={CN('__tag-item', {
+            '-active': currentSelectRelayChainFilter === RelayChainFilter.POLKADOT
+          })}
+          onClick={onSelectRelayChainFilter(RelayChainFilter.POLKADOT)}
+        >
           <Logo
             className={'__tag-item-logo'}
             network={'polkadot'}
@@ -479,7 +524,12 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             DOT
           </div>
         </div>
-        <div className={'__tag-item -secondary'}>
+        <div
+          className={CN('__tag-item', {
+            '-active': currentSelectRelayChainFilter === RelayChainFilter.KUSAMA
+          })}
+          onClick={onSelectRelayChainFilter(RelayChainFilter.KUSAMA)}
+        >
           <Logo
             className={'__tag-item-logo'}
             network={'kusama'}
@@ -535,16 +585,16 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
       </div>
 
       <div className={'__table-area'}>
-        {!!filteredtableItems.length && (
+        {!!filteredTableItems.length && (
           <Table
             className={'__table'}
             columns={columns}
-            dataSource={filteredtableItems}
+            dataSource={filteredTableItems}
             pagination={false}
             rowKey={'id'}
           />
         )}
-        {!filteredtableItems.length && (
+        {!filteredTableItems.length && (
           <div className={'__empty-list-wrapper'}>
             <EmptyList
               className={'__empty-list'}
@@ -665,7 +715,6 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       paddingLeft: token.paddingSM,
       paddingRight: token.paddingSM,
       height: 30,
-      backgroundColor: token.colorBgSecondary,
       borderRadius: 50,
 
       '&:before': {
@@ -675,14 +724,14 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
         border: '2px solid',
         borderColor: token.colorBorderBg,
         borderRadius: 50,
-        opacity: 0
+        opacity: 1
       },
 
-      '&.-secondary': {
-        backgroundColor: 'transparent',
+      '&.-active': {
+        backgroundColor: token.colorBgSecondary,
 
         '&:before': {
-          opacity: 1
+          opacity: 0
         }
       }
     },

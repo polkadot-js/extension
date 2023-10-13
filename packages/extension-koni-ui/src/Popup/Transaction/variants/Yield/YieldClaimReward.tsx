@@ -44,7 +44,7 @@ const Component: React.FC = () => {
   const { stakingRewardMap } = useSelector((state) => state.staking);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
-  const allNominatorInfo = useGetYieldPositionInfo(chain, method);
+  const allNominatorInfo = useGetYieldPositionInfo(method);
   const type = StakingType.POOLED;
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
 

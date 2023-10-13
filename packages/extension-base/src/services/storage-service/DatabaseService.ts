@@ -337,6 +337,10 @@ export default class DatabaseService {
     await this.stores.yieldPoolInfo.upsert(data);
   }
 
+  async deleteYieldPoolInfo (slugs: string[]) {
+    await this.stores.yieldPoolInfo.bulkDelete(slugs);
+  }
+
   async getYieldPools () {
     return this.stores.yieldPoolInfo.getAll();
   }

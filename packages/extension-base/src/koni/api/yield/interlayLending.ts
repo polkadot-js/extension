@@ -139,15 +139,20 @@ export async function getInterlayLendingExtrinsic (address: string, params: Opti
   };
 }
 
-export async function getInterlayLendingRedeem (params: OptimalYieldPathParams, amount: string, redeemAll?: boolean): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+export async function getInterlayLendingRedeem (params: OptimalYieldPathParams, amount: string, yieldPositionInfo: YieldPositionInfo): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
   // @ts-ignore
-  const derivativeTokenSlug = params.poolInfo.derivativeAssets[0];
-  const derivativeTokenInfo = params.assetInfoMap[derivativeTokenSlug];
+  const inputTokenSlug = params.poolInfo.inputAssets[0];
+  const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
 
-  const extrinsic = redeemAll
-    ? substrateApi.api.tx.loans.redeem(_getTokenOnChainInfo(derivativeTokenInfo), amount)
-    : substrateApi.api.tx.loans.redeemAll(_getTokenOnChainInfo(derivativeTokenInfo));
+  const bnAmount = new BN(amount);
+  const bnActiveBalance = new BN(yieldPositionInfo.balance[0].totalBalance);
+
+  const redeemAll = bnAmount.eq(bnActiveBalance);
+
+  const extrinsic = !redeemAll
+    ? substrateApi.api.tx.loans.redeem(_getTokenOnChainInfo(inputTokenInfo), amount)
+    : substrateApi.api.tx.loans.redeemAll(_getTokenOnChainInfo(inputTokenInfo));
 
   return [ExtrinsicType.REDEEM_QDOT, extrinsic];
 }

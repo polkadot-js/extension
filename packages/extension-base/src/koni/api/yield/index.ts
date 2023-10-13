@@ -458,13 +458,13 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
   };
 }
 
-export async function handleYieldRedeem (params: OptimalYieldPathParams, address: string, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+export async function handleYieldRedeem (params: OptimalYieldPathParams, address: string, amount: string, yieldPositionInfo: YieldPositionInfo): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   if (params.poolInfo.slug === 'DOT___acala_liquid_staking') {
     return getAcalaLiquidStakingRedeem(params, amount);
   } else if (params.poolInfo.slug === 'DOT___parallel_liquid_staking') {
     return getParallelLiquidStakingRedeem(params, amount, address);
   } else if (params.poolInfo.slug === 'DOT___interlay_lending') {
-    return getInterlayLendingRedeem(params, amount);
+    return getInterlayLendingRedeem(params, amount, yieldPositionInfo);
   }
 
   return getBifrostLiquidStakingRedeem(params, amount);

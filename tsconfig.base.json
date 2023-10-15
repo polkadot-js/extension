@@ -3,8 +3,8 @@
 	"compilerOptions": {
 		"composite": true,
     /* FIXME Dropzone is problematic with nodenext resolution */
-    "module": "Node16",
-    "moduleResolution": "Node16",
+    "module": "ESNext",
+    "moduleResolution": "node",
 		"paths": {
       "@polkadot/extension": ["extension/src/index.ts"],
       "@polkadot/extension/*": ["extension/src/*.ts"],

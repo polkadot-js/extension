@@ -18,17 +18,17 @@
   "version": "0.46.6-6-x",
   "main": "index.js",
   "dependencies": {
-    "@polkadot/api": "^10.9.1",
-    "@polkadot/rpc-provider": "^10.9.1",
-    "@polkadot/types": "^10.9.1",
-    "@polkadot/util": "^12.4.2",
-    "@polkadot/util-crypto": "^12.4.2",
-    "@polkadot/x-global": "^12.4.2",
+    "@polkadot/api": "^10.10.1",
+    "@polkadot/rpc-provider": "^10.10.1",
+    "@polkadot/types": "^10.10.1",
+    "@polkadot/util": "^12.5.1",
+    "@polkadot/util-crypto": "^12.5.1",
+    "@polkadot/x-global": "^12.5.1",
     "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.243",
-    "@types/firefox-webext-browser": "^111.0.1"
+    "@types/chrome": "^0.0.246",
+    "@types/firefox-webext-browser": "^111.0.2"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

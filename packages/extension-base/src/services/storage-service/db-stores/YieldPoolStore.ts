@@ -22,6 +22,10 @@ export default class YieldPoolStore extends BaseStore<YieldPoolInfo> {
     return this.table.where('chain').equals(chain).and((item) => item.type === poolType).first();
   }
 
+  async bulkDelete (slugs: string[]) {
+    return this.table.bulkDelete(slugs);
+  }
+
   subscribeYieldPoolInfo (chains: string[]) {
     return liveQuery(
       () => this.getByChains(chains)

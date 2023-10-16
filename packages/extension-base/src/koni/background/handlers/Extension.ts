@@ -3940,7 +3940,7 @@ export default class KoniExtension {
   }
 
   private async handleYieldRedeem (inputData: RequestYieldFastWithdrawal): Promise<SWTransactionResponse> {
-    const { address, amount, yieldPoolInfo } = inputData;
+    const { address, amount, yieldPoolInfo, yieldPositionInfo } = inputData;
 
     if (!amount) {
       return this.#koniState.transactionService
@@ -3967,7 +3967,7 @@ export default class KoniExtension {
         chainInfoMap: this.#koniState.getChainInfoMap(),
         poolInfo: yieldPoolInfo,
         substrateApiMap: this.#koniState.getSubstrateApiMap()
-      }, address, amount);
+      }, address, amount, yieldPositionInfo);
 
     console.log('extrinsic', extrinsic.toHex());
 

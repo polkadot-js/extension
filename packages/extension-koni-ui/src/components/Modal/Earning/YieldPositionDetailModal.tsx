@@ -1,21 +1,24 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, FAST_WITHDRAW_YIELD_TRANSACTION, StakingStatusUi, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetAccountsByYield, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTagTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, ModalContext } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
@@ -25,13 +28,17 @@ interface Props extends ThemeProps {
 
 const modalId = YIELD_POSITION_DETAIL_MODAL;
 
+interface YieldAssetExpectedEarning {
+  apy?: number;
+  symbol: string;
+}
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className, positionInfo, yieldPoolInfo } = props;
   const { slug } = yieldPoolInfo;
 
   const { isWebUI } = useContext(ScreenContext);
 
-  const { token } = useTheme() as Theme;
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -65,27 +72,56 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [positionInfo.balance, yieldPoolInfo.derivativeAssets, yieldPoolInfo.inputAssets, yieldPoolInfo?.stats?.assetEarning]);
 
+  const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
+  const derivativeTokenInfo = useMemo(() => {
+    const derivativeTokenSlug = yieldPoolInfo.derivativeAssets?.[0];
+
+    return derivativeTokenSlug ? assetRegistry[derivativeTokenSlug] : undefined;
+  }, [assetRegistry, yieldPoolInfo.derivativeAssets]);
+
   const derivativeTokenState = useMemo(() => {
-    if (!yieldPoolInfo.derivativeAssets) {
+    if (!derivativeTokenInfo) {
       return;
     }
-
-    const derivativeTokenSlug = yieldPoolInfo.derivativeAssets[0];
-
-    const derivativeTokenInfo = assetRegistry[derivativeTokenSlug];
 
     return {
       symbol: _getAssetSymbol(derivativeTokenInfo),
       decimals: _getAssetDecimals(derivativeTokenInfo),
       amount: positionInfo.balance[0].totalBalance
     };
-  }, [assetRegistry, positionInfo.balance, yieldPoolInfo.derivativeAssets]);
-  const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
+  }, [derivativeTokenInfo, positionInfo.balance]);
+
+  const _assetEarnings: Record<string, YieldAssetExpectedEarning> = useMemo(() => {
+    const yearlyEarnings: Record<string, YieldAssetExpectedEarning> = {};
+
+    if (yieldPoolInfo.stats?.assetEarning) {
+      yieldPoolInfo.stats?.assetEarning.forEach((assetEarningStats) => {
+        const assetSlug = assetEarningStats.slug;
+        const rewardAsset = assetRegistry[assetSlug];
+
+        if (assetEarningStats.apy !== undefined) {
+          yearlyEarnings[assetSlug] = {
+            apy: assetEarningStats.apy,
+            symbol: rewardAsset.symbol
+          };
+        } else {
+          const assetApr = assetEarningStats?.apr || 0;
+
+          yearlyEarnings[assetSlug] = {
+            apy: calculateReward(assetApr, 0, YieldCompoundingPeriod.YEARLY).apy,
+            symbol: rewardAsset.symbol
+          };
+        }
+      });
+    }
+
+    return yearlyEarnings;
+  }, [assetRegistry, yieldPoolInfo.stats?.assetEarning]);
 
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
 
-  const tagTypes = useMemo(() => createEarningTagTypes(t, token), [t, token]);
+  const tagTypes = useMemo(() => createEarningTagTypes(t), [t]);
 
   const onClickStakeMoreBtn = useCallback(() => {
     inactiveModal(modalId);
@@ -201,12 +237,14 @@ const Component: React.FC<Props> = (props: Props) => {
         />
 
         {
-          derivativeTokenState && <MetaInfo.Number
-            decimals={derivativeTokenState.decimals}
-            label={t('Derivative token balance')}
-            suffix={derivativeTokenState.symbol}
-            value={derivativeTokenState.amount}
-          />
+          derivativeTokenState && (
+            <MetaInfo.Number
+              decimals={derivativeTokenState.decimals}
+              label={t('Derivative token balance')}
+              suffix={derivativeTokenState.symbol}
+              value={derivativeTokenState.amount}
+            />
+          )
         }
 
         <MetaInfo.Chain
@@ -221,6 +259,20 @@ const Component: React.FC<Props> = (props: Props) => {
           spaceSize={'xs'}
           valueColorScheme={'light'}
         >
+          <MetaInfo.Default
+            label={t('Yearly rewards')}
+            valueColorSchema={'gray'}
+          >
+            <div>
+              {
+                Object.values(_assetEarnings).map((value) => {
+                  const amount = (value.apy || 0);
+
+                  return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)}% ${value.symbol}`;
+                }).join(' - ')
+              }
+            </div>
+          </MetaInfo.Default>
           <MetaInfo.Number
             decimals={_getAssetDecimals(inputTokenInfo)}
             label={t('Minimum active')}
@@ -228,6 +280,23 @@ const Component: React.FC<Props> = (props: Props) => {
             value={yieldPoolInfo.stats?.minJoinPool || '0'}
             valueColorSchema={'gray'}
           />
+          {
+            derivativeTokenInfo && (
+              <MetaInfo.Number
+                decimals={_getAssetDecimals(derivativeTokenInfo)}
+                label={t('Minimum redeem')}
+                suffix={_getAssetSymbol(derivativeTokenInfo)}
+                value={yieldPoolInfo.stats?.minWithdrawal || '0'}
+                valueColorSchema={'gray'}
+              />
+            )
+          }
+          <MetaInfo.Default
+            label={t('Reward period')}
+            valueColorSchema={'gray'}
+          >
+            {t('{{number}} hours', { replace: { number: 24 } })}
+          </MetaInfo.Default>
         </MetaInfo>
       </>
     </BaseModal>

@@ -4,13 +4,13 @@
 import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils';
+import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Button, Divider, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
+import { isAccountAll, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { Button, Divider, Form, Icon, ModalContext, Number, Tooltip } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { Info, PlusCircle } from 'phosphor-react';
@@ -46,6 +46,7 @@ interface RequireTokenItem {
   symbol: string;
   token: string;
   children: string;
+  tooltip: string;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -61,6 +62,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount, isNoAccount } = useSelector((state: RootState) => state.accountState);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
   const { priceMap } = useSelector((state: RootState) => state.price);
 
@@ -118,18 +120,45 @@ const Component: React.FC<Props> = (props: Props) => {
       return {
         children: asset.symbol,
         token: asset.slug,
-        symbol: asset.symbol
+        symbol: asset.symbol,
+        tooltip: `${asset.symbol} (${chainInfoMap[asset.originChain].name})`
       };
     });
-  }, [assetRegistry, currentItem.inputAssets]);
+  }, [assetRegistry, currentItem.inputAssets, chainInfoMap]);
+
+  const rewardTextI18nKey = useMemo(() => {
+    if (['westend', 'polkadot'].includes(currentItem.chain)) {
+      return detectTranslate('Claimable and compoundable on your own schedule. <highlight>Learn more</highlight>');
+    } else {
+      return detectTranslate('Claimable on your own schedule. <highlight>Learn more</highlight>');
+    }
+  }, [currentItem.chain]);
 
   const onClose = useCallback(() => {
     inactiveModal(modalId);
   }, [inactiveModal]);
 
   const onClickInfo = useCallback(() => {
-    // TODO: add action
-  }, []);
+    let hashTag = '';
+
+    switch (currentItem.chain) {
+      case 'polkadot':
+        hashTag = 'polkadot-nomination-pool';
+        break;
+      case 'westend':
+        hashTag = '';
+        break;
+      case 'bifrost_dot':
+        hashTag = 'bifrost';
+        break;
+      default:
+        hashTag = currentItem.chain;
+    }
+
+    const url = `https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs#${hashTag}`;
+
+    openInNewTab(url)();
+  }, [currentItem.chain]);
 
   const onSubmit: FormCallbacks<EarningInfoFormProps>['onFinish'] = useCallback(() => {
     inactiveModal(modalId);
@@ -192,13 +221,13 @@ const Component: React.FC<Props> = (props: Props) => {
             )}
             onClick={form.submit}
           >
-            {t('Stake now')}
+            {t('Earn now')}
           </Button>
         </>
       )}
       id={modalId}
       onCancel={onClose}
-      title={t('Staking information')}
+      title={t('Earning information')}
     >
       <div>
         <EarningTokenList />
@@ -210,7 +239,7 @@ const Component: React.FC<Props> = (props: Props) => {
         >
           <Form.Item
             colon={false}
-            label={'Select method'}
+            label={'Select protocol'}
             name={'method'}
           >
             <EarningMethodSelector
@@ -230,7 +259,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {currentItem.description}
           </div>
           <div className='title'>
-            {t('Maximum possible APR')}
+            {t('Maximum possible APY')}
           </div>
           <div className='reward-text'>
             <Number
@@ -267,7 +296,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 )
               }}
-              i18nKey={'Maximum APR when Staking {{symbol}} for a period of 12 months. <highlight>Learn more</highlight>'}
+              i18nKey={'Maximum APY when you earn {{symbol}} for 12 months. <highlight>Learn more</highlight>'}
               values={{
                 symbol: currentAsset.symbol
               }}
@@ -296,16 +325,22 @@ const Component: React.FC<Props> = (props: Props) => {
         <Divider className='divider' />
         <div className='info-container'>
           <div className='title'>
-            {t('Requirement assets')}
+            {t('Required assets')}
           </div>
           <div className='token-item-container'>
             {
               requireTokenItems.map((value) => {
                 return (
-                  <EarningTokenItem
+                  <Tooltip
                     key={value.token}
-                    {...value}
-                  />
+                    title={value.tooltip}
+                  >
+                    <div>
+                      <EarningTokenItem
+                        {...value}
+                      />
+                    </div>
+                  </Tooltip>
                 );
               })
             }
@@ -314,7 +349,17 @@ const Component: React.FC<Props> = (props: Props) => {
             {t('Reward distribution')}
           </div>
           <div className='description'>
-            {t('Payable every {{number}} hours', { replace: { number: 8 } })}
+            <Trans
+              components={{
+                highlight: (
+                  <span
+                    className='link'
+                    onClick={onClickInfo}
+                  />
+                )
+              }}
+              i18nKey={rewardTextI18nKey}
+            />
           </div>
         </div>
       </div>
@@ -398,7 +443,8 @@ const EarningInfoModal = styled(Component)<Props>(({ theme: { token } }: Props) 
     },
 
     '.link': {
-      color: token.colorLink
+      color: token.colorLink,
+      cursor: 'pointer'
     }
   };
 });

@@ -10,4 +10,5 @@ export { default as EarningProcessItem } from './EarningProcessItem';
 export { default as EarningTokenItem } from './EarningTokenItem';
 export { default as EarningTokenList } from './EarningTokenList';
 export { default as EarningToolbar } from './EarningToolbar';
+export { default as EarningTypeTag } from './EarningTypeTag';
 export { default as HorizontalEarningItem } from './HorizontalEarningItem';

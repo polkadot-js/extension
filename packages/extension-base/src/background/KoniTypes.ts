@@ -2106,6 +2106,7 @@ export interface YieldWithdrawalMethod {
 export interface YieldPoolInfo {
   slug: string,
   chain: string,
+  logo?: string,
   derivativeAssets?: string[],
   inputAssets: string[], // slug
   rewardAssets: string[], // slug
@@ -2270,6 +2271,7 @@ export interface ValidateYieldProcessParams {
 export interface RequestYieldFastWithdrawal extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
+  yieldPositionInfo: YieldPositionInfo;
   amount: string;
 }
 

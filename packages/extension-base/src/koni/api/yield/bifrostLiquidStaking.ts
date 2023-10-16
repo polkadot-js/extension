@@ -92,8 +92,8 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '10000000000',
-        minWithdrawal: '0',
+        minJoinPool: '5000000000',
+        minWithdrawal: '4000000000',
         totalApy: parseFloat(vDOTStats.apyBase),
         tvl: (vDOTStats.tvm * assetDecimals).toString()
       }

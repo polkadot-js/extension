@@ -50,7 +50,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const showingOption = isShowNominationByValidator(chain);
   const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
-  const modalTitle = type === StakingType.NOMINATED.valueOf() ? detectTranslate('Nomination details') : detectTranslate('Pooled details');
+  const modalTitle = type === StakingType.NOMINATED.valueOf() ? detectTranslate('Nomination details') : detectTranslate('Earning details');
 
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
@@ -84,7 +84,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const totalStaked = useMemo(() => new BigN(activeStake).plus(unstakedValue).toString(), [activeStake, unstakedValue]);
 
-  const tagTypes = useMemo(() => createEarningTagTypes(t, token), [t, token]);
+  const tagTypes = useMemo(() => createEarningTagTypes(t), [t]);
 
   const onClickStakeMoreBtn = useCallback(() => {
     inactiveModal(modalId);

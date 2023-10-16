@@ -114,17 +114,17 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       items={items}
       label={label}
       onSelect={onSelect}
-      placeholder={placeholder || t('Select method')}
+      placeholder={placeholder || t('Select protocol')}
       prefix={value !== '' && chainLogo}
       renderItem={renderItem}
       renderSelected={renderMethodSelected}
       renderWhenEmpty={renderEmpty}
       searchFunction={searchFunction}
       searchMinCharactersCount={2}
-      searchPlaceholder={t<string>('Enter method name')}
+      searchPlaceholder={t<string>('Enter protocol name')}
       selected={value || ''}
       statusHelp={statusHelp}
-      title={label || placeholder || t('Select method')}
+      title={label || placeholder || t('Select protocol')}
       tooltip={tooltip}
     />
   );

@@ -9,36 +9,40 @@ import { BackgroundIcon, Button, Icon, ModalContext, Typography } from '@subwall
 import { ButtonType } from '@subwallet/react-ui/es/button';
 import CN from 'classnames';
 import { CaretDown, FadersHorizontal, IconProps, Plus, Question, SortAscending } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import EarningTokenList from './EarningTokenList';
 
+interface FilterOption {
+  label: string;
+  value: string;
+}
+
+interface SortOption {
+  label: string;
+  value: string;
+  desc: boolean;
+}
+
 interface Props extends ThemeProps {
+  // Common
+  showAdd?: boolean;
+
+  // Filter
   filterSelectionMap: Record<string, boolean>;
   onApplyFilter: () => void;
   onChangeFilterOption: (value: string, isCheck: boolean) => void;
   onCloseFilterModal: () => void;
   selectedFilters: string[];
+
+  // Sort
   onChangeSortOpt: (value: string) => void;
   onResetSort: () => void;
-  showAdd?: boolean;
+  sortOptions: SortOption[];
+  selectedSort: string;
 }
-
-const FILTER_MODAL_ID = 'earning-filter-modal';
-const SORTING_MODAL_ID = 'earning-sorting-modal';
-
-enum SortKey {
-  TOTAL_VALUE = 'total-value',
-}
-
-interface SortOption {
-  label: string;
-  value: SortKey;
-  desc: boolean;
-}
-
 interface ToolbarBtnProps extends ThemeProps {
   icon: React.ReactNode;
   label?: string;
@@ -78,6 +82,10 @@ const _ToolbarBtn: React.FC<ToolbarBtnProps> = (props: ToolbarBtnProps) => {
   );
 };
 
+const FILTER_MODAL_ID = 'earning-filter-modal';
+
+const SORTING_MODAL_ID = 'earning-sorting-modal';
+
 const ToolbarBtn = styled(_ToolbarBtn)<ToolbarBtnProps>(({ theme: { token } }: ToolbarBtnProps) => {
   return ({
     display: 'flex',
@@ -94,7 +102,7 @@ const ToolbarBtn = styled(_ToolbarBtn)<ToolbarBtnProps>(({ theme: { token } }: T
 });
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className = '', filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters, showAdd } = props;
+  const { className = '', filterSelectionMap, onApplyFilter, onChangeFilterOption, onChangeSortOpt, onCloseFilterModal, onResetSort, selectedFilters, selectedSort, showAdd, sortOptions } = props;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -103,25 +111,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { activeModal } = useContext(ModalContext);
 
-  const filterOptions = useMemo(() => [
+  const filterOptions = useMemo((): FilterOption[] => [
     { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
-    { label: t('Native staking'), value: YieldPoolType.NATIVE_STAKING },
+    // { label: t('Native staking'), value: YieldPoolType.NATIVE_STAKING },
     { label: t('Liquid staking'), value: YieldPoolType.LIQUID_STAKING },
-    { label: t('Lending'), value: YieldPoolType.LENDING },
-    { label: t('Parachain staking'), value: YieldPoolType.PARACHAIN_STAKING },
-    { label: t('Single farming'), value: YieldPoolType.SINGLE_FARMING }
+    { label: t('Lending'), value: YieldPoolType.LENDING }
+    // { label: t('Parachain staking'), value: YieldPoolType.PARACHAIN_STAKING },
+    // { label: t('Single farming'), value: YieldPoolType.SINGLE_FARMING }
   ], [t]);
-  const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
-
-  const sortingOptions: SortOption[] = useMemo(() => {
-    return [
-      {
-        desc: true,
-        label: t('Sort by total value'),
-        value: SortKey.TOTAL_VALUE
-      }
-    ];
-  }, [t]);
 
   const filterLabel = useMemo(() => {
     if (!selectedFilters.length) {
@@ -136,8 +133,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [selectedFilters, filterOptions, t]);
 
   const sortingLabel = useMemo(() => {
-    return sortingOptions.find((item) => item.value === sortSelection)?.label || '';
-  }, [sortingOptions, sortSelection]);
+    return sortOptions.find((item) => item.value === selectedSort)?.label || '';
+  }, [sortOptions, selectedSort]);
 
   const openFilterModal = useCallback(() => activeModal(FILTER_MODAL_ID), [activeModal]);
   const openSortingModal = useCallback(() => activeModal(SORTING_MODAL_ID), [activeModal]);
@@ -148,14 +145,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const onClickMore = useCallback(() => {
     navigate('/home/earning/overview');
   }, [navigate]);
-
-  const onChangeSortOpt = useCallback((value: string) => {
-    setSortSelection(value as SortKey);
-  }, []);
-
-  const onResetSort = useCallback(() => {
-    setSortSelection(SortKey.TOTAL_VALUE);
-  }, []);
 
   const renderIconBtn = useCallback((icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>) => (
     <BackgroundIcon
@@ -227,8 +216,8 @@ const Component: React.FC<Props> = (props: Props) => {
         id={SORTING_MODAL_ID}
         onChangeOption={onChangeSortOpt}
         onReset={onResetSort}
-        optionSelection={sortSelection}
-        options={sortingOptions}
+        optionSelection={selectedSort}
+        options={sortOptions}
       />
     </div>
   );

@@ -170,12 +170,12 @@ const Component = (props: Props) => {
       id={modalId}
       maskClosable
       onCancel={onCloseModal}
-      title={t('Staking calculator')}
+      title={t('Earning calculator')}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
         <EarningTokenList />
 
-        <Typography.Text className={'earning-calculator-message'}>{t('Enter the number of tokens to estimate the rewards')}</Typography.Text>
+        <Typography.Text className={'earning-calculator-message'}>{t('Enter the amount of tokens to estimate rewards')}</Typography.Text>
 
         <Form
           className={'form-container form-space-sm earning-calculator-form-container'}
@@ -186,7 +186,7 @@ const Component = (props: Props) => {
         >
           <Form.Item
             colon={false}
-            label={'Select method'}
+            label={'Select protocol'}
             name={FormFieldName.METHOD}
           >
             <EarningMethodSelector
@@ -197,7 +197,7 @@ const Component = (props: Props) => {
 
           <Form.Item
             colon={false}
-            label={'Staking amount'}
+            label={t('Enter amount')}
             name={FormFieldName.VALUE}
             rules={[
               () => ({
@@ -256,7 +256,7 @@ const Component = (props: Props) => {
         )}
         onClick={form.submit}
       >
-        {t('Stake now')}
+        {t('Earn now')}
       </Button>
     </BaseModal>
   );

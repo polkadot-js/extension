@@ -46,7 +46,7 @@ const Component: React.FC<Props> = ({ className, transaction }: Props) => {
           (
             <MetaInfo.Chain
               chain={chainInfo.slug}
-              label={t('Sender network')}
+              label={t('Origin network')}
             />
           )
         }
@@ -108,8 +108,8 @@ const Component: React.FC<Props> = ({ className, transaction }: Props) => {
         (
           <SwAlert
             className={CN(className, 'alert-area')}
-            description={t('Need to add message')}
-            title={t('Need to add message')}
+            description={t("You are transferring {{symbol}} from {{network}} since you don't have enough DOT on the destination network.", { replace: { symbol: tokenInfo.symbol, network: chainInfo.name } })}
+            title={t('Pay attention!')}
             type='warning'
           />
         )

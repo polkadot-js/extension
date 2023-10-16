@@ -1,16 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EarningCalculatorModal, EarningItem, EarningToolbar, EmptyList } from '@subwallet/extension-koni-ui/components';
 import EarningInfoModal from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInfoModal';
-import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext, SwList } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { Vault } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -27,6 +29,14 @@ const FILTER_MODAL_ID = 'earning-filter-modal';
 
 enum SortKey {
   TOTAL_VALUE = 'total-value',
+  APY = 'apy',
+  INCENTIVE = 'incentive'
+}
+
+interface SortOption {
+  label: string;
+  value: SortKey;
+  desc: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -38,8 +48,29 @@ const Component: React.FC<Props> = (props: Props) => {
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount, isNoAccount } = useSelector((state: RootState) => state.accountState);
   const { chainInfoMap, chainStateMap } = useSelector((state: RootState) => state.chainStore);
+  const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
 
   const { activeModal } = useContext(ModalContext);
+
+  const sortOptions = useMemo((): SortOption[] => {
+    return [
+      {
+        desc: true,
+        label: t('Sort by total value'),
+        value: SortKey.TOTAL_VALUE
+      },
+      {
+        desc: true,
+        label: t('APY'),
+        value: SortKey.APY
+      },
+      {
+        desc: true,
+        label: t('Incentive'),
+        value: SortKey.INCENTIVE
+      }
+    ];
+  }, [t]);
 
   const [selectedItem, setSelectedItem] = useState<YieldPoolInfo | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
@@ -177,25 +208,36 @@ const Component: React.FC<Props> = (props: Props) => {
         return true;
       })
       .sort((a: YieldPoolInfo, b: YieldPoolInfo) => {
+        const aInputSlug = a.inputAssets[0];
+        const aInputAsset = assetRegistry[aInputSlug];
+        const aInputDecimals = aInputAsset.decimals || 0;
+        const aTotalValue = new BigN(a.stats?.tvl || '0').div(BN_TEN.pow(aInputDecimals));
+        const aTotalApy = a.stats?.totalApy ?? calculateReward(a.stats?.totalApr || 0, 0, YieldCompoundingPeriod.YEARLY).apy ?? 0;
+
+        const bInputSlug = b.inputAssets[0];
+        const bInputAsset = assetRegistry[bInputSlug];
+        const bInputDecimals = bInputAsset.decimals || 0;
+        const bTotalValue = new BigN(b.stats?.tvl || '0').div(BN_TEN.pow(bInputDecimals));
+        const bTotalApy = b.stats?.totalApy ?? calculateReward(b.stats?.totalApr || 0, 0, YieldCompoundingPeriod.YEARLY).apy ?? 0;
+
         switch (sortSelection) {
           case SortKey.TOTAL_VALUE:
-            if (a.stats && b.stats && a.stats.tvl && b.stats.tvl) {
-              return parseFloat(a.stats.tvl) - parseFloat(b.stats.tvl);
-            } else {
-              return 0;
-            }
+            return new BigN(bTotalValue).minus(aTotalValue).toNumber();
+
+          case SortKey.APY:
+            return bTotalApy - aTotalApy;
 
           default:
             return 0;
         }
       });
-  }, [chainInfoMap, chainStateMap, currentAccount, poolInfo, sortSelection]);
+  }, [assetRegistry, chainInfoMap, chainStateMap, currentAccount, poolInfo, sortSelection]);
 
   const renderWhenEmpty = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Need message')}
-        emptyTitle={t('Need message')}
+        emptyMessage={t('Try turning on networks or switch to another account')}
+        emptyTitle={t('No earning pools found')}
         phosphorIcon={Vault}
       />
     );
@@ -211,6 +253,8 @@ const Component: React.FC<Props> = (props: Props) => {
         onCloseFilterModal={onCloseFilterModal}
         onResetSort={onResetSort}
         selectedFilters={selectedFilters}
+        selectedSort={sortSelection}
+        sortOptions={sortOptions}
       />
       <SwList.Section
         className={CN('nft_collection_list__container')}

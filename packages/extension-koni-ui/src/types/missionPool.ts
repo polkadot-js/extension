@@ -23,4 +23,5 @@ export type MissionInfo = {
   logo: string,
   backdrop_image: string,
   campaign_url: string | null,
+  chains: string[] | null
 }

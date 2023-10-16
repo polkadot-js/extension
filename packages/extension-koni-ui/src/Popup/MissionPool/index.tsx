@@ -153,7 +153,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             rightButtons={headerIcons}
             showLeftButton={true}
           >
-            {t('DApps')}
+            {t('Mission Pools')}
           </SwHeader>
         )
       }
@@ -184,28 +184,25 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <div
         className={'__scroll-container'}
       >
-        <div className={'__mission-list-area'}>
-          {!filteredItems.length && (
-            <NoContent pageType={PAGE_TYPE.MISSION} />
-          )}
+        {!filteredItems.length && (
+          <NoContent pageType={PAGE_TYPE.MISSION} />
+        )}
 
-          {
-            !!filteredItems.length && (
-              <div className='__mission-list-container'>
-                {
-                  filteredItems.map((item) => (
-                    <MissionItem
-                      data={item}
-                      key={item.id}
-                      onClick={onClickItem}
-                    />
-                  ))
-                }
-              </div>
-            )
-          }
-
-        </div>
+        {
+          !!filteredItems.length && (
+            <div className='__mission-list-container'>
+              {
+                filteredItems.map((item) => (
+                  <MissionItem
+                    data={item}
+                    key={item.id}
+                    onClick={onClickItem}
+                  />
+                ))
+              }
+            </div>
+          )
+        }
       </div>
 
       <MissionDetailModal
@@ -229,11 +226,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
 
     '.ant-sw-header-container': {
       paddingTop: token.padding,
       paddingBottom: token.padding,
-      backgroundColor: token.colorBgDefault
+      backgroundColor: token.colorBgDefault,
+      marginRight: -token.margin,
+      marginLeft: -token.margin
     },
 
     '.ant-sw-header-center-part': {
@@ -244,7 +245,7 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__scroll-container': {
-      height: '100%',
+      flex: 1,
       marginLeft: -44,
       marginRight: -44,
       paddingLeft: 44,
@@ -264,18 +265,14 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       gap: token.size,
       alignItems: 'center',
-      position: 'sticky',
-      top: 0,
       backgroundColor: token.colorBgDefault,
-      zIndex: 30,
-      paddingBottom: token.paddingXS,
       flexWrap: 'wrap',
       justifyContent: 'flex-end',
+      marginBottom: 20,
 
       '.filter-tabs-container': {
         flex: 1,
-        overflowX: 'auto',
-        flexBasis: 650
+        overflowX: 'auto'
       },
 
       '.search-container': {
@@ -294,16 +291,28 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
       }
     },
 
-    '.__mission-list-area': {
-      marginTop: 32,
-      marginBottom: 40
-    },
-
     '.__mission-list-container': {
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
       alignItems: 'stretch',
-      gap: token.size
+      gap: token.size,
+      marginBottom: 40
+    },
+
+    '@media (max-width: 991px)': {
+      paddingLeft: token.size,
+      paddingRight: token.size
+    },
+
+    '@media (max-width: 767px)': {
+      '.__tool-area': {
+        gap: token.sizeXS,
+
+        '.search-container': {
+          minWidth: '100%',
+          maxWidth: 'none'
+        }
+      }
     }
   };
 });

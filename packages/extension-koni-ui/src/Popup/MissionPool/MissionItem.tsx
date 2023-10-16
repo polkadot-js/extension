@@ -5,7 +5,7 @@ import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
 import { customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Button, ButtonProps, Icon, Image, Number, Tag } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, Image, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { SwIconProps } from '@subwallet/react-ui/es/icon';
 import CN from 'classnames';
@@ -45,8 +45,8 @@ function Component (props: Props): React.ReactElement<Props> {
       return t('TBD');
     }
 
-    const start = data.start_time ? customFormatDate(new Date(data.start_time), '#DD# #DDD# #YYYY#') : t('TBD');
-    const end = data.end_time ? customFormatDate(new Date(data.end_time), '#DD# #DDD# #YYYY#') : t('TBD');
+    const start = data.start_time ? customFormatDate(new Date(data.start_time), '#DD# #MMM# #YYYY#') : t('TBD');
+    const end = data.end_time ? customFormatDate(new Date(data.end_time), '#DD# #MMM# #YYYY#') : t('TBD');
 
     return `${start} - ${end}`;
   }, [data.end_time, data.start_time, t]);
@@ -145,6 +145,7 @@ function Component (props: Props): React.ReactElement<Props> {
         >
           <Image
             height={'100%'}
+            shape={'squircle'}
             src={data.logo || logoMap.default as string}
             width={'100%'}
           />
@@ -155,12 +156,7 @@ function Component (props: Props): React.ReactElement<Props> {
         <div className={'__item-rewards __item-value-row'}>
           <div className='__item-label'>{t('Rewards')}:</div>
           <div className='__item-value'>
-            <Number
-              decimal={0}
-              decimalOpacity={0.45}
-              prefix={'$'}
-              value={data.reward || '0'}
-            />
+            {data.reward}
           </div>
         </div>
         <div className={'__item-description'}>
@@ -289,7 +285,9 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       'white-space': 'nowrap',
       fontWeight: token.headingFontWeight,
       marginBottom: token.marginXS,
-      minHeight: 28
+      minHeight: 28,
+      width: '100%',
+      textAlign: 'center'
     },
 
     '.__item-rewards': {
@@ -320,7 +318,8 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.__item-tag': {
       display: 'flex',
-      gap: token.sizeXXS
+      gap: token.sizeXXS,
+      marginRight: 0
     },
 
     '.__item-buttons': {

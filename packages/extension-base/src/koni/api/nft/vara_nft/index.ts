@@ -32,8 +32,6 @@ export class VaraNftApi extends BaseNftApi {
   }
 
   private static parseNftRequest (publicKey: string) {
-    console.log(publicKey);
-
     return {
       // eslint-disable-next-line
       query: `

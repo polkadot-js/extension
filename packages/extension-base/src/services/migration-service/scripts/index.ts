@@ -5,6 +5,7 @@ import DeleteChain from '@subwallet/extension-base/services/migration-service/sc
 
 import BaseMigrationJob from '../Base';
 import AutoEnableChainsTokens from './AutoEnableChainsTokens';
+import EnableVaraChain from './EnableVaraChain';
 import MigrateAuthUrls from './MigrateAuthUrls';
 import MigrateAutoLock from './MigrateAutoLock';
 import MigrateChainPatrol from './MigrateChainPatrol';
@@ -34,6 +35,7 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.1.6-01': MigrateWalletReference,
   '1.1.7': DeleteChain,
   '1.1.13-01': MigrateTokenDecimals,
-  '1.1.17-01': MigratePioneerProvider
+  '1.1.17-01': MigratePioneerProvider,
+  '1.1.17-03': EnableVaraChain
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

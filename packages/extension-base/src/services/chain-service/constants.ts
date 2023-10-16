@@ -221,7 +221,8 @@ export const _XCM_TYPE = {
 };
 
 export const _DEFAULT_ACTIVE_CHAINS = [
-  ..._DEFAULT_CHAINS
+  ..._DEFAULT_CHAINS,
+  'vara_network'
 ];
 
 export const EVM_PASS_CONNECT_STATUS = {

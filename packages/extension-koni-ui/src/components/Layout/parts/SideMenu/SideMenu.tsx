@@ -62,11 +62,11 @@ function Component ({ className,
         value: '/dapps',
         icon: Globe
       },
-      // {
-      //   label: t('Mission Pools'),
-      //   value: '/mission-pools',
-      //   icon: Parachute
-      // },
+      {
+        label: t('Mission Pools'),
+        value: '/mission-pools',
+        icon: Parachute
+      },
       {
         label: t('History'),
         value: '/home/history',

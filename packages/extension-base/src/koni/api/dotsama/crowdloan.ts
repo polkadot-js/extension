@@ -138,13 +138,11 @@ export async function subscribeCrowdloan (addresses: string[], substrateApiMap: 
           callback(networkKey, rs);
         };
 
-        const paraId = (chainInfo.substrateInfo?.crowdloanParaId || chainInfo.substrateInfo?.paraId || 0) as number;
+        const paraId = (chainInfo.substrateInfo?.crowdloanParaId || chainInfo.substrateInfo?.paraId || 0);
 
         if (!paraId || addresses.length === 0 || parentChain.length === 0) {
           return;
         }
-
-        console.log(networkKey, paraId);
 
         if (networkKey === COMMON_CHAIN_SLUGS.ACALA) {
           const acalaAddresses = substrateAddresses.map((address) => reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo), _isChainEvmCompatible(chainInfo)));

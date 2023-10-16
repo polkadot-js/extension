@@ -18,7 +18,7 @@ interface BlockHeader {
   number: number
 }
 
-export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void, substrateApiMap: Record<string, _SubstrateApi>) {
+export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
   async function getPoolStat () {
     const substrateApi = await chainApi.isReady;
 

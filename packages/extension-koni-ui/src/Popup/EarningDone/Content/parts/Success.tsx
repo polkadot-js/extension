@@ -51,6 +51,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div className={CN(className)}>
+      <img
+        alt='success-gif'
+        className={CN('success-image')}
+        src='/images/subwallet/mint-nft-done.gif'
+      />
       <Trans
         components={{
           main: <div className='title' />,
@@ -122,6 +127,14 @@ const EarningDoneSuccess = styled(Component)<Props>(({ theme: { token } }: Props
     display: 'flex',
     flexDirection: 'column',
     gap: token.sizeLG,
+
+    '.success-image': {
+      width: 470,
+      position: 'absolute',
+      zIndex: -1,
+      top: token.sizeLG,
+      marginLeft: -40
+    },
 
     '.button-container': {
       display: 'flex',

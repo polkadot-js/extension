@@ -48,7 +48,8 @@ export const _NFT_CHAIN_GROUP = {
   statemine: ['statemine'],
   statemint: ['statemint'],
   unique_network: ['unique_network'],
-  bitcountry: ['bitcountry', 'pioneer']
+  bitcountry: ['bitcountry', 'pioneer'],
+  vara: ['vara_network']
 };
 
 // Staking--------------------------------------------------------------------------------------------------------------

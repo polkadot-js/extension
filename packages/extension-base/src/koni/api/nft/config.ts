@@ -33,6 +33,10 @@ export const UNIQUE_SCAN_ENDPOINT = 'https://explorer-api.unique.network/v1/grap
 
 export const QUARTZ_SCAN_ENDPOINT = 'https://hasura-quartz.unique.network/v1/graphql';
 
+export const VARA_SCAN_ENDPOINT = 'https://nft-explorer.vara-network.io/graphql';
+
+// GATEWAY
+
 export const UNIQUE_IPFS_GATEWAY = 'https://ipfs.unique.network/ipfs/';
 
 export const NFT_STORAGE_GATEWAY = 'https://nftstorage.link/ipfs/';

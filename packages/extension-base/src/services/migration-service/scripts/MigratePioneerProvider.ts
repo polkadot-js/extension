@@ -3,8 +3,8 @@
 
 import MigrateProvider from './MigrateProvider';
 
-export default class MigrateEthProvider extends MigrateProvider {
-  newProvider = 'ethereum';
-  oldProvider = 'Cloudflare';
-  slug = 'Llamarpc';
+export default class MigratePioneerProvider extends MigrateProvider {
+  slug = 'pioneer';
+  oldProvider = 'OnFinality';
+  newProvider = 'Pioneer';
 }

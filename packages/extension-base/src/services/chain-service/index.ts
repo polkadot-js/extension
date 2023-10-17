@@ -1018,6 +1018,8 @@ export class ChainService {
 
     if (params.chainSpec.genesisHash !== '') {
       substrateInfo = {
+        crowdloanFunds: params.chainSpec.crowdloanFunds || null,
+        crowdloanParaId: params.chainSpec.crowdloanParaId || null,
         addressPrefix: params.chainSpec.addressPrefix,
         blockExplorer: params.chainEditInfo.blockExplorer || null,
         chainType: params.chainSpec.paraId !== null ? _SubstrateChainType.PARACHAIN : _SubstrateChainType.RELAYCHAIN,

@@ -48,7 +48,8 @@ export const _NFT_CHAIN_GROUP = {
   statemine: ['statemine'],
   statemint: ['statemint'],
   unique_network: ['unique_network'],
-  bitcountry: ['bitcountry', 'pioneer']
+  bitcountry: ['bitcountry', 'pioneer'],
+  vara: ['vara_network']
 };
 
 // Staking--------------------------------------------------------------------------------------------------------------
@@ -220,7 +221,8 @@ export const _XCM_TYPE = {
 };
 
 export const _DEFAULT_ACTIVE_CHAINS = [
-  ..._DEFAULT_CHAINS
+  ..._DEFAULT_CHAINS,
+  'vara_network'
 ];
 
 export const EVM_PASS_CONNECT_STATUS = {

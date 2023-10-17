@@ -86,7 +86,7 @@ export function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi, chain
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '50000000000',
-        minWithdrawal: '0',
+        minWithdrawal: '50000000000',
         totalApy: apy * 100,
         tvl: totalStakingBonded.add(toBondPool).toString()
       }

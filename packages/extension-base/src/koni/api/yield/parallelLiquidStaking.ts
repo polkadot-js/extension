@@ -71,7 +71,7 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, po
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '10000000000',
-        minWithdrawal: '0',
+        minWithdrawal: '5000000000',
         totalApy: apy * 100,
         tvl: tvl.toString()
       }

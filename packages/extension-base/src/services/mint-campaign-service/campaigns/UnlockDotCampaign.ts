@@ -34,8 +34,8 @@ export default class UnlockDotCampaign {
       result = await this.submitNft(address, requestId);
 
       await this.#state.reloadNft();
-    } else {
-      result = await this.getMinted(address, slug);
+    // } else {
+    //   result = await this.getMinted(address, slug);
     }
 
     this.#transactionNftState[transactionId] = result;

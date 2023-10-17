@@ -509,7 +509,7 @@ const Component = () => {
       address: currentFrom
     })
       .then((value) => {
-        setIsMinted(false);
+        setIsMinted(value);
       })
       .finally(() => {
         setCheckMintLoading(false);

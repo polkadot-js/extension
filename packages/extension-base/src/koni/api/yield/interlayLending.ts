@@ -35,17 +35,13 @@ export function subscribeInterlayLendingStats (chainApi: _SubstrateApi, chainInf
             slug: poolInfo.rewardAssets[0],
             apr: 1.29,
             exchangeRate: exchangeRate / decimals
-          },
-          {
-            slug: poolInfo.rewardAssets[1],
-            apr: 12.32
           }
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '10000000000',
         minWithdrawal: '0',
-        totalApr: 13.61,
+        totalApr: 1.29,
         tvl: '291890000000000'
       }
     });

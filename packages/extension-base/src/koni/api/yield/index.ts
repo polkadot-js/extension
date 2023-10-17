@@ -50,11 +50,11 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
 
         unsubList.push(unsub);
       } else if (poolInfo.slug === 'DOT___interlay_lending') {
-        const unsub = subscribeInterlayLendingStats(poolInfo, callback);
+        const unsub = subscribeInterlayLendingStats(substrateApi, chainInfoMap, poolInfo, assetInfoMap, callback);
 
         unsubList.push(unsub);
       } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
-        const unsub = subscribeParallelLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback, substrateApiMap);
+        const unsub = subscribeParallelLiquidStakingStats(substrateApi, poolInfo, callback);
 
         unsubList.push(unsub);
       } else if (poolInfo.slug === 'LcDOT___acala_euphrates_liquid_staking') {

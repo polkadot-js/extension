@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 1.1.16
+Build date: Oct 07, 2023.
+
+Features & Update:
+- Add support for the sub0 2023 Biodiversity NFT Collection (#1982)
+
+Bugs fixed:
+- Fixed bug when connect to dApp via WallectConnect (#1981)
+
+
 ## 1.1.15
 Build date: Sep 30, 2023.
 

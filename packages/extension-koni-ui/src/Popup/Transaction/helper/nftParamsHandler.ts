@@ -77,6 +77,17 @@ function psp34Parser (nftItem: NftItem) {
   };
 }
 
+function varaParser (nftItem: NftItem) {
+  const contractAddress = nftItem.collectionId;
+  const tokenId = nftItem.id;
+
+  return {
+    contractAddress,
+    tokenId,
+    networkKey: nftItem.chain
+  };
+}
+
 export default function nftParamsHandler (nftItem: NftItem, chain: string) {
   if (nftItem.type === _AssetType.ERC721) {
     return web3Parser(nftItem);
@@ -91,6 +102,8 @@ export default function nftParamsHandler (nftItem: NftItem, chain: string) {
       return statemineParser(nftItem);
     } else if (_NFT_CHAIN_GROUP.unique_network.includes(chain)) {
       return uniqueParser(nftItem);
+    } else if (_NFT_CHAIN_GROUP.vara.includes(chain)) {
+      return varaParser(nftItem);
     }
   }
 

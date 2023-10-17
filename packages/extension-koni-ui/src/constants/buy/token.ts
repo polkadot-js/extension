@@ -99,29 +99,9 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       'banxa'
     ]
   },
-  'dockPosMainnet-NATIVE-DOCK': {
-    serviceInfo: {
-      ...DEFAULT_SERVICE_INFO,
-      transak: {
-        network: 'mainnet',
-        symbol: 'DOCK'
-      }
-    },
-    network: 'dockPosMainnet',
-    slug: 'dockPosMainnet-NATIVE-DOCK',
-    symbol: 'DOCK',
-    support: 'SUBSTRATE',
-    services: [
-      'transak'
-    ]
-  },
   'polkadot-NATIVE-DOT': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
-      transak: {
-        network: 'mainnet',
-        symbol: 'DOT'
-      },
       banxa: {
         network: 'DOT',
         symbol: 'DOT'
@@ -136,7 +116,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     symbol: 'DOT',
     support: 'SUBSTRATE',
     services: [
-      'transak',
       'banxa',
       'coinbase'
     ]
@@ -254,10 +233,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
   'moonbeam-NATIVE-GLMR': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
-      transak: {
-        network: 'mainnet',
-        symbol: 'GLMR'
-      },
       banxa: {
         network: 'GLMR',
         symbol: 'GLMR'
@@ -268,17 +243,12 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     symbol: 'GLMR',
     support: 'ETHEREUM',
     services: [
-      'transak',
       'banxa'
     ]
   },
   'kusama-NATIVE-KSM': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
-      transak: {
-        network: 'mainnet',
-        symbol: 'KSM'
-      },
       banxa: {
         network: 'KSM',
         symbol: 'KSM'
@@ -293,7 +263,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     symbol: 'KSM',
     support: 'SUBSTRATE',
     services: [
-      'transak',
       'banxa',
       'coinbase'
     ]
@@ -527,6 +496,10 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
         network: 'ethereum',
         symbol: 'DAI'
       },
+      banxa: {
+        network: 'ETH',
+        symbol: 'DAI'
+      },
       coinbase: {
         network: 'ethereum',
         symbol: 'DAI'
@@ -538,6 +511,7 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     support: 'ETHEREUM',
     services: [
       'transak',
+      'banxa',
       'coinbase'
     ]
   },
@@ -634,10 +608,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
   'ethereum-ERC20-SAND-0x3845badAde8e6dFF049820680d1F14bD3903a5d0': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
-      transak: {
-        network: 'ethereum',
-        symbol: 'SAND'
-      },
       banxa: {
         network: 'ETH',
         symbol: 'SAND'
@@ -648,7 +618,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     symbol: 'SAND',
     support: 'ETHEREUM',
     services: [
-      'transak',
       'banxa'
     ]
   },
@@ -719,22 +688,6 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     services: [
       'transak',
       'banxa'
-    ]
-  },
-  'optimism-ERC20-USDC-0x7F5c764cBc14f9669B88837ca1490cCa17c31607': {
-    serviceInfo: {
-      ...DEFAULT_SERVICE_INFO,
-      transak: {
-        network: 'optimism',
-        symbol: 'USDC'
-      }
-    },
-    network: 'optimism',
-    slug: 'optimism-ERC20-USDC-0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
-    symbol: 'USDC',
-    support: 'ETHEREUM',
-    services: [
-      'transak'
     ]
   },
   'polygon-ERC20-USDC-0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174': {

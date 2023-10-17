@@ -101,14 +101,18 @@ export default class TransactionService {
       errors: validationInput.errors || [],
       warnings: validationInput.warnings || []
     };
-    const { additionalValidator, address, chain, edAsWarning, isTransferAll, transaction } = validation;
+    const { additionalValidator, address, chain, edAsWarning, extrinsicType, isTransferAll, transaction } = validation;
 
     // Check duplicate transaction
     validation.errors.push(...this.checkDuplicate(validationInput));
 
     // Return unsupported error if not found transaction
     if (!transaction) {
-      validation.errors.push(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+      if (extrinsicType === ExtrinsicType.SEND_NFT) {
+        validation.errors.push(new TransactionError(BasicTxErrorType.UNSUPPORTED, t('This feature is not yet available for this NFT')));
+      } else {
+        validation.errors.push(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+      }
     }
 
     const validationResponse: SWTransactionResponse = {

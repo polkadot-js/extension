@@ -32,6 +32,7 @@ export interface EventRegistry {
   'mantaPay.enable': [string];
 
   'migration.done': [boolean];
+  'campaign.ready': [boolean];
 }
 
 export type EventType = keyof EventRegistry;

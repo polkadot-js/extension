@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
+import { CampaignBanner, CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFilterModal, useGetCrowdloanList, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetBannerByScreen, useGetCrowdloanList, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { CrowdloanItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { CrowdloanItem, Icon, Image, ModalContext, SwList, Tag } from '@subwallet/react-ui';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
@@ -61,6 +62,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { isShowBalance } = useSelector((state) => state.settings);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const banners = useGetBannerByScreen('crowdloan');
 
   const filterOptions = useMemo(() => [
     { label: t('Polkadot parachain'), value: FilterValue.POLKADOT_PARACHAIN },
@@ -176,6 +179,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [t]
   );
 
+  const onClickBanner = useCallback((item: CampaignBanner) => {
+    return () => {
+      if (item.data.action === 'open_url') {
+        const url = item.data.metadata?.url as string | undefined;
+
+        if (url) {
+          openInNewTab(url)();
+        }
+      }
+    };
+  }, []);
+
   return (
     <PageWrapper
       className={`crowdloans ${className}`}
@@ -189,18 +204,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t<string>('Crowdloans')}
       >
         <div className='content-container'>
-          <div className='image-container'>
-            <a
-              href={'https://web.subwallet.app/earning-demo'}
-              rel='noreferrer'
-              target='_blank'
-            >
-              <Image
-                className='banner-image'
-                src='/images/subwallet/crowdloan-banner.png'
-                width='100%'
-              />
-            </a>
+          <div className='banner-container'>
+            {banners.map((item) => {
+              return (
+                <div
+                  className='image-container'
+                  key={item.slug}
+                >
+                  <Image
+                    className='banner-image'
+                    onClick={onClickBanner(item)}
+                    src='/images/subwallet/crowdloan-banner.png'
+                    width='100%'
+                  />
+                </div>
+              );
+            })}
           </div>
 
           <SwList.Section
@@ -251,9 +270,14 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
       marginTop: 36
     },
 
+    '.banner-container': {
+      margin: token.margin,
+      marginTop: token.marginXXS,
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
     '.image-container': {
-      padding: token.padding,
-      paddingTop: token.paddingXXS,
       width: '100%'
     },
 

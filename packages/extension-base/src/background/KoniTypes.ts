@@ -2043,29 +2043,63 @@ export interface ResolveAddressToDomainRequest {
 
 /* Campaign */
 
-export enum VersionCampaign {
-  V1 = 'v1'
+export type CampaignAction = 'open_view' | 'open_url' | null;
+
+export interface CampaignButton {
+  id: number;
+  color: string;
+  icon: string | null;
+  name: string;
+  type: CampaignAction;
+  metadata: Record<string, any> | null;
 }
 
-export interface BaseCampaign {
+export enum CampaignDataType {
+  NOTIFICATION = 'notification',
+  BANNER ='banner'
+}
+
+export interface BaseCampaignData {
   slug: string;
-  isExpired: boolean;
+  campaignId: number;
   isDone: boolean;
-  version: VersionCampaign;
-  data: unknown;
+  type: CampaignDataType;
+  data: Record<string, any>;
+  buttons: CampaignButton[];
+  startTime: number;
+  endTime: number;
+  condition: Record<string, any> | null;
 }
 
-export interface CampaignVersion1 extends BaseCampaign {
-  version: VersionCampaign.V1;
+export interface CampaignBanner extends BaseCampaignData {
+  type: CampaignDataType.BANNER;
   data: {
-    title: string;
-    message: string;
-    okText: string;
-    url: string;
+    media: string;
+    alt: string;
+    action: CampaignAction;
+    metadata: Record<string, any> | null;
+    environments: string[];
+    position: string[];
   }
 }
 
-export type CampaignData = CampaignVersion1;
+export interface CampaignNotification extends BaseCampaignData {
+  type: CampaignDataType.NOTIFICATION;
+  data: {
+    title: string;
+    message: string;
+    repeat: number;
+    repeatAfter: number;
+    action: CampaignAction;
+    metadata: Record<string, any> | null;
+  }
+}
+
+export type CampaignData = CampaignBanner | CampaignNotification;
+
+export interface RequestCampaignBannerComplete {
+  slug: string;
+}
 
 /* Campaign */
 
@@ -2333,6 +2367,11 @@ export interface KoniRequestSignatures {
 
   /// Metadata
   'pri(metadata.find)': [RequestFindRawMetadata, ResponseFindRawMetadata];
+
+  /* Campaign */
+  'pri(campaign.banner.subscribe)': [null, CampaignBanner[], CampaignBanner[]];
+  'pri(campaign.banner.complete)': [RequestCampaignBannerComplete, boolean];
+  /* Campaign */
 }
 
 export interface ApplicationMetadataType {

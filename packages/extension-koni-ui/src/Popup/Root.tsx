@@ -80,7 +80,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   const notify = useNotification();
   const [rootLoading, setRootLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
-  const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay']));
+  const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay', 'campaign']));
   const currentPage = useGetCurrentPage();
   const firstRender = useRef(true);
 

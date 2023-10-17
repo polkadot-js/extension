@@ -5,6 +5,13 @@ import { ICampaign } from '@subwallet/extension-base/services/storage-service/da
 import BaseStore from '@subwallet/extension-base/services/storage-service/db-stores/BaseStore';
 import { liveQuery } from 'dexie';
 
+const filterProcessing = (campaign: ICampaign): boolean => {
+  const now = new Date().getTime();
+  const isExpired = now <= campaign.startTime || now >= campaign.endTime;
+
+  return !(campaign.isDone || isExpired);
+};
+
 export default class CampaignStore extends BaseStore<ICampaign> {
   async getAll () {
     return this.table.toArray();
@@ -15,12 +22,12 @@ export default class CampaignStore extends BaseStore<ICampaign> {
   }
 
   async getProcessingCampaign () {
-    return (await this.table.toArray()).filter((data) => !data.isDone && !data.isExpired);
+    return (await this.table.toArray()).filter(filterProcessing);
   }
 
   subscribeProcessingCampaign () {
     return liveQuery(
-      () => this.table.filter((data) => !data.isDone && !data.isExpired)
+      () => this.table.filter(filterProcessing).toArray()
     );
   }
 

@@ -1,18 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { CampaignBanner } from '@subwallet/extension-base/background/KoniTypes';
+import { CampaignBannerModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
+import { HOME_CAMPAIGN_BANNER_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
-import { useGetMantaPayConfig } from '@subwallet/extension-koni-ui/hooks/account/useGetMantaPayConfig';
-import useHandleMantaPaySync from '@subwallet/extension-koni-ui/hooks/account/useHandleMantaPaySync';
-import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
-import { useGetChainSlugsByAccountType } from '@subwallet/extension-koni-ui/hooks/screen/home/useGetChainSlugsByAccountType';
-import useTokenGroup from '@subwallet/extension-koni-ui/hooks/screen/home/useTokenGroup';
+import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router';
 import styled from 'styled-components';
@@ -32,6 +30,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const handleMantaPaySync = useHandleMantaPaySync();
 
+  const banners = useGetBannerByScreen('tokens');
+
+  const firstBanner = useMemo((): CampaignBanner | undefined => banners[0], [banners]);
+
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);
   }, [activeModal]);
@@ -45,6 +47,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       handleMantaPaySync(mantaPayConfig.address);
     }
   }, [handleMantaPaySync, isZkModeSyncing, mantaPayConfig]);
+
+  useEffect(() => {
+    if (firstBanner) {
+      activeModal(HOME_CAMPAIGN_BANNER_MODAL);
+    }
+  }, [activeModal, firstBanner]);
 
   return (
     <>
@@ -70,6 +78,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         sortedTokenSlugs={tokenGroupStructure.sortedTokenSlugs}
         tokenBalanceMap={accountBalance.tokenBalanceMap}
       />
+      {firstBanner && <CampaignBannerModal banner={firstBanner} />}
     </>
   );
 }

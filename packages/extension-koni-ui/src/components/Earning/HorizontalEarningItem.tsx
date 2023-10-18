@@ -224,7 +224,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return (
       <div
         className={CN(className, '-compact-mode')}
-        onClick={onClickInfoBtn}
+        onClick={onClickItem}
       >
         <div className={'__item-upper-part'}>
           <Logo
@@ -464,6 +464,7 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
     padding: `${token.paddingXL}px ${token.paddingMD}px ${token.padding}px`,
+    cursor: 'pointer',
 
     '.earning-item-name-wrapper': {
       display: 'flex',

@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 1.1.17
+Build date: Oct 17, 2023.
+
+Features & Update:
+The default Vara network is enabled (#2019)
+- Update coinable ID for product environment (#2017)
+- Replace the user feedback form when uninstalling extension (#2010)
+- Update chain list (#1998)
+  - Update RPC for Pioneer network
+  - Add support for Vara NFTs
+- Updated list of tokens supported by Transak (#2026)
+
 ## 1.1.16
 Build date: Oct 07, 2023.
 

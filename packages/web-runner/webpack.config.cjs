@@ -106,7 +106,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           NODE_ENV: JSON.stringify(mode),
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
-          TARGET_ENV: JSON.stringify('webrunner')
+          TARGET_ENV: JSON.stringify('mobile')
         }
       }),
       new CopyPlugin({

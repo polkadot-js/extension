@@ -74,11 +74,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const preCheckAction = usePreCheckAction(currentAccount?.address, false);
 
-  const [selectedItem, setSelectedItem] = useState<YieldPoolInfo | undefined>(undefined);
+  const [selectedSlug, setSelectedSlug] = useState('');
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
+
+  const selectedItem = useMemo((): YieldPoolInfo | undefined => poolInfo[selectedSlug], [poolInfo, selectedSlug]);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);
@@ -132,14 +134,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClickCalculatorBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
-      setSelectedItem(item);
+      setSelectedSlug(item.slug);
       activeModal(STAKING_CALCULATOR_MODAL);
     };
   }, [activeModal]);
 
   const onClickInfoBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
-      setSelectedItem(item);
+      setSelectedSlug(item.slug);
       activeModal(EARNING_INFO_MODAL);
     };
   }, [activeModal]);
@@ -151,7 +153,7 @@ const Component: React.FC<Props> = (props: Props) => {
         navigate('/welcome');
       } else {
         const callback = () => {
-          setSelectedItem(item);
+          setSelectedSlug(item.slug);
           const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
           setYieldStorage({

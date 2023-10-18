@@ -647,6 +647,13 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
           color: token.colorTextSecondary
         }
       }
+    },
+
+    '.empty-list': {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)'
     }
   });
 });

@@ -42,6 +42,8 @@ const Component: React.FC = () => {
 
   const from = useWatchTransaction('from', form, defaultData);
 
+  const preCheckAction = usePreCheckAction(from);
+
   const allNominatorInfo = useGetYieldPositionInfo(method);
   const nominatorInfo = useGetYieldPositionInfo(method, from);
   const nominatorMetadata = nominatorInfo[0].metadata as NominatorMetadata;
@@ -105,8 +107,6 @@ const Component: React.FC = () => {
 
     return (nomination ? (nomination.metadata as NominatorMetadata)?.unstakings.length > 0 : false) && accountFilterFunc(chainInfoMap, type, chain)(account);
   }, [chainInfoMap, allNominatorInfo, chain, type]);
-
-  const onPreCheck = usePreCheckAction(from);
 
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);
@@ -175,7 +175,7 @@ const Component: React.FC = () => {
             />
           )}
           loading={loading}
-          onClick={onPreCheck(form.submit, ExtrinsicType.STAKING_CANCEL_UNSTAKE)}
+          onClick={preCheckAction(form.submit, ExtrinsicType.STAKING_CANCEL_UNSTAKE)}
         >
           {t('Approve')}
         </Button>

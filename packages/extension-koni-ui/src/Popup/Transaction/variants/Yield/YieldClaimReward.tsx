@@ -101,7 +101,7 @@ const Component: React.FC = () => {
     }, 300);
   }, [chain, from, onError, onSuccess, reward?.unclaimedReward, type]);
 
-  const checkAction = usePreCheckAction(from);
+  const preCheckAction = usePreCheckAction(from);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const chainInfo = chainInfoMap[chain];
@@ -231,7 +231,7 @@ const Component: React.FC = () => {
             />
           )}
           loading={loading}
-          onClick={checkAction(form.submit, ExtrinsicType.STAKING_CLAIM_REWARD)}
+          onClick={preCheckAction(form.submit, ExtrinsicType.STAKING_CLAIM_REWARD)}
         >
           {t('Continue')}
         </Button>

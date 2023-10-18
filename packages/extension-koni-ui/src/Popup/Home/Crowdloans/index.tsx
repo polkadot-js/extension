@@ -214,7 +214,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Image
                     className='banner-image'
                     onClick={onClickBanner(item)}
-                    src='/images/subwallet/crowdloan-banner.png'
+                    src={item.data.media}
                     width='100%'
                   />
                 </div>

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldCompoundingPeriod, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
@@ -12,7 +12,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useGetAccountsByYield, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { createEarningTagTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { createEarningTagTypes, getEarnExtrinsicType, getWithdrawExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, ModalContext } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -176,7 +176,7 @@ const Component: React.FC<Props> = (props: Props) => {
           disabled={!availableActions.includes(YieldAction.WITHDRAW_EARNING)}
           onClick={onClickFooterButton(
             onClickWithdrawBtn,
-            yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND
+            getWithdrawExtrinsicType(slug)
           )}
           schema='secondary'
         >{t('Withdraw')}</Button>
@@ -185,7 +185,7 @@ const Component: React.FC<Props> = (props: Props) => {
           disabled={!availableActions.includes(YieldAction.START_EARNING)}
           onClick={onClickFooterButton(
             onClickStakeMoreBtn,
-            yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_BOND : ExtrinsicType.STAKING_JOIN_POOL
+            getEarnExtrinsicType(slug)
           )}
         >{t('Earn more')}</Button>
       </div>

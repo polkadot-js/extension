@@ -9,7 +9,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { getEarnExtrinsicType, getWithdrawExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, ModalContext, SettingItem } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowArcLeft, ArrowCircleDown, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
@@ -54,6 +54,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_YIELD_TRANSACTION, DEFAULT_WITHDRAW_YIELD_PARAMS);
   const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
   const [, setClaimStorage] = useLocalStorage(CLAIM_YIELD_TRANSACTION, DEFAULT_CLAIM_YIELD_PARAMS);
+
+  const preCheckAction = usePreCheckAction(currentAccount?.address, false);
 
   const onCancel = useCallback(
     () => {
@@ -190,7 +192,7 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'magenta-6',
           icon: MinusCircle,
           label: t('Unstake'),
-          onClick: onClickUnStakeBtn
+          onClick: preCheckAction(onClickUnStakeBtn, ExtrinsicType.STAKING_LEAVE_POOL)
         };
       } else if (action === YieldAction.WITHDRAW) {
         return {
@@ -198,7 +200,7 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'geekblue-6',
           icon: ArrowCircleDown,
           label: t('Withdraw unstaked funds'),
-          onClick: onClickWithdrawBtn
+          onClick: preCheckAction(onClickWithdrawBtn, getWithdrawExtrinsicType(yieldPoolInfo.slug))
         };
       } else if (action === YieldAction.WITHDRAW_EARNING) {
         return {
@@ -206,7 +208,7 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'geekblue-6',
           icon: ArrowCircleDown,
           label: t('Withdraw'),
-          onClick: onClickWithdrawBtn
+          onClick: preCheckAction(onClickWithdrawBtn, getWithdrawExtrinsicType(yieldPoolInfo.slug))
         };
       } else if (action === YieldAction.CANCEL_UNSTAKE) {
         return {
@@ -214,7 +216,7 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'purple-8',
           icon: ArrowArcLeft,
           label: t('Cancel unstaking'),
-          onClick: onClickCancelUnStakeBtn
+          onClick: preCheckAction(onClickCancelUnStakeBtn, ExtrinsicType.STAKING_CANCEL_UNSTAKE)
         };
       } else if (action === YieldAction.CLAIM_REWARD) {
         return {
@@ -222,7 +224,7 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'green-7',
           icon: Wallet,
           label: t('Claim rewards'),
-          onClick: onClickClaimBtn
+          onClick: preCheckAction(onClickClaimBtn, ExtrinsicType.STAKING_CLAIM_REWARD)
         };
       } else if (action === YieldAction.START_EARNING) {
         return {
@@ -230,7 +232,7 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'green-6',
           icon: PlusCircle,
           label: t('Earn more'),
-          onClick: onClickStakeBtn
+          onClick: preCheckAction(onClickStakeBtn, getEarnExtrinsicType(yieldPoolInfo.slug))
         };
       }
 
@@ -239,10 +241,10 @@ const Component: React.FC<Props> = (props: Props) => {
         backgroundIconColor: 'green-6',
         icon: PlusCircle,
         label: t('Stake more'),
-        onClick: onClickStakeBtn
+        onClick: preCheckAction(onClickStakeBtn, getEarnExtrinsicType(yieldPoolInfo.slug))
       };
     });
-  }, [onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo]);
+  }, [onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, preCheckAction, t, yieldPoolInfo]);
 
   const onPreCheck = usePreCheckAction(currentAccount?.address, false);
 

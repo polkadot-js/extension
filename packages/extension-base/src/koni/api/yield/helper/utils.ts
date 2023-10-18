@@ -55,7 +55,7 @@ export function convertDerivativeToOriginToken (amount: string, poolInfo: YieldP
 
   const exchangeRate = poolInfo.stats?.assetEarning?.[0].exchangeRate || 1;
   const formattedAmount = parseInt(amount) / (10 ** derivativeDecimals); // TODO: decimals
-  const minAmount = formattedAmount * exchangeRate * 0.9;
+  const minAmount = formattedAmount * exchangeRate * 0.95;
 
   return Math.floor(minAmount * (10 ** originDecimals));
 }

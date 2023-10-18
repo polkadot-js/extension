@@ -8,9 +8,7 @@ import { useEffect, useState } from 'react';
 const useCountdown = (targetDate: number | string) => {
   const countDownDate = new Date(targetDate).getTime();
 
-  const [countDown, setCountDown] = useState(
-    countDownDate - new Date().getTime()
-  );
+  const [countDown, setCountDown] = useState(countDownDate - new Date().getTime());
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -20,7 +18,7 @@ const useCountdown = (targetDate: number | string) => {
         setCountDown(0);
         clearInterval(interval);
       } else {
-        setCountDown(countDownDate - new Date().getTime());
+        setCountDown(countDownDate - currentTime);
       }
     }, 1000);
 

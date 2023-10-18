@@ -21,6 +21,11 @@ type UnlockTimeInfo = {
   time: number;
 }
 
+type PeriodTimeInfo = {
+  polkadot: Record<string, number>;
+  kusama: Record<string, number>;
+}
+
 function crowdloanFundsToMap (crowdloanFunds: CrowdloanFundInfo[]): Record<string, CrowdloanFundInfo> {
   const result: Record<string, CrowdloanFundInfo> = {};
 
@@ -78,14 +83,18 @@ const Component: React.FC<Props> = (props: Props) => {
         return await res.json() as _ChainInfo[];
       })(),
       (async () => {
-        const res = await fetch('https://static-data.subwallet.app/events/crowdloan-unlock.json');
+        const res = await fetch('https://static-data.subwallet.app/events/period-time.json');
 
-        return await res.json() as UnlockTimeInfo;
+        return await res.json() as PeriodTimeInfo;
       })()
-    ]).then(([crowdloanFunds, chainInfoItems, unlockTimeInfo]) => {
+    ]).then(([crowdloanFunds, chainInfoItems, periodTimeInfo]) => {
       setCrowdloanFundInfoMap(crowdloanFundsToMap(crowdloanFunds));
       setChainInfoMap(chainInfoItemsToMap(chainInfoItems));
-      setCrowdloanUnlockTime(unlockTimeInfo.time);
+
+      const curerntTimestamp = (new Date()).getTime();
+      const nearestTime = Object.values(periodTimeInfo.polkadot).find((t) => t > curerntTimestamp);
+
+      setCrowdloanUnlockTime(nearestTime || 0);
 
       updateLogoMaps({
         chainLogoMap: getLogoMap(chainInfoItems),

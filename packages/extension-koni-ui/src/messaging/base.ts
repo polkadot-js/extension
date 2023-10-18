@@ -5,6 +5,8 @@ import { MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequ
 import { Message } from '@subwallet/extension-base/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 
+import { VirtualMessageCenter } from './VirtualMessageCenter';
+
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resolve: (data: any) => void;
@@ -16,7 +18,7 @@ interface Handler {
 type Handlers = Record<string, Handler>;
 
 // const port = chrome.runtime.connect({ name: PORT_EXTENSION });
-const port = window;
+const port = VirtualMessageCenter.getInstance().ui;
 const handlers: Handlers = {};
 
 // setup a listener for messages, any incoming resolves the promise
@@ -45,8 +47,8 @@ const handlers: Handlers = {};
 //   }
 // });
 
-port.addEventListener('message', (event: Message) => {
-  const data = event.data;
+port.addEventListener('message', (event) => {
+  const data = event.data as Message['data'];
   const handler = handlers[data.id];
 
   if (!handler) {
@@ -83,7 +85,7 @@ port.addEventListener('message', (event: Message) => {
       }
     }
   }
-}, false);
+});
 
 export function sendMessage<TMessageType extends MessageTypesWithNullRequest> (message: TMessageType): Promise<ResponseTypes[TMessageType]>;
 export function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;

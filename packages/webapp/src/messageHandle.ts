@@ -4,6 +4,7 @@
 import { RequestSignatures, TransportRequestMessage, TransportResponseMessage } from '@subwallet/extension-base/background/types';
 import { ID_PREFIX, PORT_CONTENT, PORT_EXTENSION, PORT_MOBILE } from '@subwallet/extension-base/defaults';
 import handlers from '@subwallet/extension-base/koni/background/handlers';
+import { VirtualMessageCenter } from '@subwallet/extension-koni-ui/messaging/VirtualMessageCenter';
 
 export interface CustomResponse<T> {
   id: string,
@@ -13,12 +14,14 @@ export interface CustomResponse<T> {
 
 export type PageStatus = CustomResponse<{ status: 'init' | 'load' | 'crypto_ready' }>
 
+const bgMessage = VirtualMessageCenter.getInstance().bg;
+
 export function responseMessage (response: TransportResponseMessage<keyof RequestSignatures> | PageStatus) {
-  window.postMessage(response);
+  bgMessage.postMessage(response);
 }
 
 export function setupHandlers () {
-  window.addEventListener('message', (ev) => {
+  bgMessage.addEventListener('message', (ev) => {
     const data = ev.data as TransportRequestMessage<keyof RequestSignatures>;
     const port = {
       name: PORT_EXTENSION,

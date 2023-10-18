@@ -7,6 +7,7 @@ import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-serv
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll, openInNewTab } from '@subwallet/extension-koni-ui/utils';
@@ -94,7 +95,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const totalStakedValue = useMemo(() => {
     const token = new BigN(currentItem.stats?.tvl || 0);
-    const price = priceMap[currentAsset.priceId || ''];
+    const price = priceMap[currentAsset.priceId || ''] || 0;
 
     return token.multipliedBy(price);
   }, [currentAsset.priceId, currentItem.stats?.tvl, priceMap]);
@@ -272,7 +273,6 @@ const Component: React.FC<Props> = (props: Props) => {
               value={totalApy}
               weight={600}
             />
-            &nbsp;{t('rewards')}
           </div>
           <div className='token-item-container'>
             {
@@ -296,7 +296,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 )
               }}
-              i18nKey={'Maximum APY when you earn {{symbol}} for 12 months. <highlight>Learn more</highlight>'}
+              i18nKey={'Maximum APY when you stake {{symbol}} for 12 months. <highlight>Learn more</highlight>'}
               values={{
                 symbol: currentAsset.symbol
               }}
@@ -319,6 +319,12 @@ const Component: React.FC<Props> = (props: Props) => {
               value={currentItem.stats?.minJoinPool || 0}
               valueColorSchema={'success'}
             />
+            <MetaInfo.Default
+              label={t('Unlock period')}
+              valueColorSchema={'success'}
+            >
+              {currentItem.metadata?.unstakingPeriod ? getUnstakingPeriod(t, currentItem.metadata.unstakingPeriod) : t('Instant')}
+            </MetaInfo.Default>
           </MetaInfo>
         </div>
 

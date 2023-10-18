@@ -56,7 +56,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return [
       {
         desc: true,
-        label: t('Sort by total value'),
+        label: t('Total value staked'),
         value: SortKey.TOTAL_VALUE
       },
       {

@@ -3,26 +3,17 @@
 
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import React, { useContext, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
-  const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isWebUI) {
-      navigate('/');
-    }
-  }, [isWebUI, navigate]);
 
   return (
     <PageWrapper

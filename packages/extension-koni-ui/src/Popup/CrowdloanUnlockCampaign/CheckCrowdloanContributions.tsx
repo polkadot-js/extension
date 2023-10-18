@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AddressInput } from '@subwallet/extension-koni-ui/components';
-import { CREATE_RETURN, CROWDLOAN_UNLOCK_TIME, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { CREATE_RETURN, CROWDLOAN_UNLOCK_TIME, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, WIKI_URL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_CROWDLOAN_UNLOCK_TIME } from '@subwallet/extension-koni-ui/constants/event';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import Countdown from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/Countdown';
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
@@ -11,7 +12,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon, Image, ModalContext } from '@subwallet/react-ui';
+import { Button, ButtonProps, Form, Icon, Image, ModalContext, SwHeader } from '@subwallet/react-ui';
 import { ValidateStatus } from '@subwallet/react-ui/es/form/FormItem';
 import { ArrowCounterClockwise, PlusCircle, Question, Vault, Wallet } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -45,6 +46,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const { setWebBaseClassName } = useContext(WebUIContext);
   const { activeModal } = useContext(ModalContext);
   const [crowdloanUnlockTime] = useLocalStorage<number>(CROWDLOAN_UNLOCK_TIME, DEFAULT_CROWDLOAN_UNLOCK_TIME);
+  const { isWebUI } = useContext(ScreenContext);
 
   const outletContext: {
     crowdloanUnlockTime: number,
@@ -105,8 +107,35 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     };
   }, [className, setWebBaseClassName]);
 
+  const headerIcons = useMemo<ButtonProps[]>(() => {
+    return [
+      {
+        icon: (
+          <Icon
+            customSize={'24px'}
+            phosphorIcon={Question}
+            type='phosphor'
+          />
+        ),
+        onClick: openInNewTab(WIKI_URL)
+      }
+    ];
+  }, []);
+
   return (
     <div className={className}>
+      {
+        !isWebUI && (
+          <SwHeader
+            background={'transparent'}
+            className={'__header-area'}
+            left='logo'
+            rightButtons={headerIcons}
+            showLeftButton={true}
+          />
+        )
+      }
+
       <div className={'__body-area'}>
         <div className='__countdown-area'>
           <div className='__countdown-icon'>
@@ -291,6 +320,16 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
       }
     },
 
+    '.__header-area': {
+      alignSelf: 'stretch',
+      marginLeft: -token.margin,
+      marginRight: -token.margin,
+      position: 'sticky',
+      top: 0,
+      zIndex: 10,
+      backgroundColor: token.colorBgDefault
+    },
+
     '.__countdown-area': {
       display: 'flex',
       flexDirection: 'column',
@@ -301,15 +340,16 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
       width: 104,
       height: 104,
       color: token.colorTextLight1,
-      marginBottom: 36
+      marginBottom: 52
     },
 
     '.__countdown-title': {
-      fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG,
-      color: token.colorTextLight4,
+      fontSize: token.fontSizeHeading4,
+      lineHeight: token.lineHeightHeading4,
+      color: token.colorTextLight3,
       fontWeight: token.headingFontWeight,
-      marginBottom: 24
+      marginBottom: token.margin,
+      textAlign: 'center'
     },
 
     '.__countdown': {
@@ -335,7 +375,13 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
 
     '.__check-contributions-button': {
       maxWidth: 384,
-      alignSelf: 'center'
+      alignSelf: 'center',
+
+      '.ant-btn-content-wrapper': {
+        'white-space': 'nowrap',
+        textOverflow: 'ellipsis',
+        overflow: 'hidden'
+      }
     },
 
     '.__form-buttons': {
@@ -392,6 +438,46 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       color: token.colorTextLight3
+    },
+
+    '@media (max-width: 991px)': {
+      '.__countdown-icon': {
+        width: 88,
+        height: 88
+      },
+
+      '.__countdown-title': {
+        fontSize: token.fontSize,
+        lineHeight: token.lineHeight
+      },
+
+      '.__form-area': {
+        marginBottom: 140
+      },
+
+      '.__body-area': {
+        paddingTop: 56
+      },
+
+      '.__countdown': {
+        '.__time-item-number': {
+          fontSize: token.fontSizeHeading3,
+          lineHeight: token.lineHeightHeading3
+        },
+        '.__time-item-unit': {
+          fontSize: token.fontSizeSM,
+          lineHeight: token.lineHeightSM
+        },
+        '.__time-separator': {
+          fontSize: token.fontSizeHeading3,
+          lineHeight: token.lineHeightHeading3
+        }
+      },
+
+      '.__note-box': {
+        paddingTop: token.size,
+        paddingBottom: token.size
+      }
     }
   };
 });

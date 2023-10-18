@@ -21,11 +21,15 @@ const Component: React.FC<ChainInfoItem> = (props: ChainInfoItem) => {
 
   return (
     <div className={CN(className, '__row -type-chain')}>
-      <div className={'__col __label-col'}>
-        <div className={'__label'}>
-          {label}
-        </div>
-      </div>
+      {
+        !!label && (
+          <div className={'__col __label-col'}>
+            <div className={'__label'}>
+              {label}
+            </div>
+          </div>
+        )
+      }
       <div className={'__col __value-col -to-right'}>
         <div className={`__chain-item __value -is-wrapper -schema-${valueColorSchema}`}>
           <Logo

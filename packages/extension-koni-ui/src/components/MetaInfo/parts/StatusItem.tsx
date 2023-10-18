@@ -18,11 +18,16 @@ const Component: React.FC<StatusInfoItem> = (props: StatusInfoItem) => {
 
   return (
     <div className={CN(className, '__row', '-type-status')}>
-      <div className={'__col __label-col'}>
-        <div className={'__label'}>
-          {label}
-        </div>
-      </div>
+      {
+        !!label && (
+          <div className={'__col __label-col'}>
+            <div className={'__label'}>
+              {label}
+            </div>
+          </div>
+        )
+      }
+
       <div className={'__col __value-col -to-right'}>
         <div className={`__status-item __value -is-wrapper -schema-${valueColorSchema}`}>
           <Icon

@@ -25,7 +25,7 @@ interface Props extends ThemeProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, compactMode , item, onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn } = props;
+  const { className, compactMode, item, onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { chain, description, inputAssets, name, stats, type } = item;
@@ -164,7 +164,18 @@ const Component: React.FC<Props> = (props: Props) => {
             <div className={'earning-item-description'}>{description}</div>
           </div>
 
-          <EarningTypeTag type={type} />
+          <div className='earning-item-tags-container'>
+            <EarningTypeTag
+              className={'earning-item-tag'}
+              type={type}
+            />
+
+            {
+              EXCLUSIVE_REWARD_SLUGS.includes(item.slug) && (
+                <EarningTypeTag className={'earning-item-tag'} />
+              )
+            }
+          </div>
 
           <div className={'earning-item-reward'}>
             <Number
@@ -315,6 +326,15 @@ const EarningItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.earning-item-stake-btn': {
       width: token.sizeMD,
       height: token.sizeMD
+    },
+
+    '.earning-item-tags-container': {
+      display: 'flex',
+      gap: token.sizeXS
+    },
+
+    '.earning-item-tag': {
+      marginRight: 0
     },
 
     // compact mode style

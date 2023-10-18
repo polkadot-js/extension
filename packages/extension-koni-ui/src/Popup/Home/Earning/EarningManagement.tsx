@@ -3,9 +3,10 @@
 
 import { APIItemState, NominatorMetadata, StakingRewardItem, StakingType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { BaseModal, EarningCalculatorModal, EarningInfoModal, EarningMoreActionModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout, YieldPositionDetailModal, YieldStakingDetailModal } from '@subwallet/extension-koni-ui/components';
+import { BaseModal, EarningCalculatorModal, EarningInfoModal, EarningMoreActionModal, EarningToolbar, EmptyList, HorizontalEarningItem, YieldPositionDetailModal, YieldStakingDetailModal } from '@subwallet/extension-koni-ui/components';
 import { BN_TEN, BN_ZERO, CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_CLAIM_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { useAutoNavigateEarning, useFilterModal, useGroupYieldPosition, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -14,9 +15,9 @@ import { Button, Divider, Icon, ModalContext, SwList } from '@subwallet/react-ui
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PlusCircle, Vault } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -70,6 +71,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [{ selectedYieldPoolInfo, selectedYieldPosition }, setSelectedItem] = useState<{ selectedYieldPosition: YieldPositionInfo | undefined, selectedYieldPoolInfo: YieldPoolInfo | undefined }>({ selectedYieldPosition: undefined, selectedYieldPoolInfo: undefined });
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const location = useLocation();
+  const { setTitle } = useContext(WebUIContext);
 
   const selectedStakingRewardItem = useMemo(() => {
     let nominationPoolReward: StakingRewardItem | undefined;
@@ -359,6 +362,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return (
       <HorizontalEarningItem
+        compactMode={!isWebUI}
         key={key}
         nominationPoolReward={nominationPoolReward}
         onClickCalculatorBtn={onClickCalculatorBtn(item)}
@@ -373,7 +377,7 @@ const Component: React.FC<Props> = (props: Props) => {
         yieldPositionInfo={item}
       />
     );
-  }, [poolInfoMap, currentAccount?.address, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, stakingRewardMap, onClickClaimBtn]);
+  }, [poolInfoMap, currentAccount?.address, isWebUI, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickClaimBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, stakingRewardMap]);
 
   const resultList = useMemo((): YieldPositionInfo[] => {
     return [...groupYieldPosition]
@@ -447,16 +451,14 @@ const Component: React.FC<Props> = (props: Props) => {
     navigate('/home/earning/overview');
   }, [navigate]);
 
+  useEffect(() => {
+    if (location.pathname.startsWith('/home/earning')) {
+      setTitle(t('Earning'));
+    }
+  }, [location.pathname, setTitle, t]);
+
   return (
-    <Layout.Base
-      className={className}
-      showSubHeader={true}
-      subHeaderBackground={'transparent'}
-      subHeaderCenter={false}
-      // subHeaderIcons={subHeaderButton}
-      subHeaderPaddingVertical={true}
-      title={t('Earning')}
-    >
+    <div className={className}>
       <EarningToolbar
         filterSelectionMap={filterSelectionMap}
         onApplyFilter={onApplyFilter}
@@ -601,13 +603,15 @@ const Component: React.FC<Props> = (props: Props) => {
           <YieldClaimReward />
         </Transaction>
       </BaseModal>
-    </Layout.Base>
+    </div>
   );
 };
 
 const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    height: '100%',
     display: 'flex',
+    flexDirection: 'column',
 
     '.earning-management__container .ant-sw-list': {
       paddingLeft: 0,
@@ -631,8 +635,8 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginTop: token.marginXS,
-      marginBottom: token.marginXL,
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingXL,
 
       '.footer-left': {
         '--icon-color': token['gold-6'],
@@ -647,6 +651,11 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
           color: token.colorTextSecondary
         }
       }
+    },
+
+    '@media (max-width: 991px)': {
+      paddingLeft: token.padding,
+      paddingRight: token.padding
     }
   });
 });

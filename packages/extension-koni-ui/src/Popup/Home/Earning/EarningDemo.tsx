@@ -24,8 +24,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { setOnBack } = useContext(WebUIContext);
-  const { setTitle } = useContext(WebUIContext);
+  const { setOnBack, setTitle } = useContext(WebUIContext);
   const location = useLocation();
 
   const onBack = useCallback(() => {

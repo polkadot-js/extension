@@ -16,11 +16,15 @@ export const Component: React.FC<DataInfoItem> = (props: DataInfoItem) => {
 
   return (
     <div className={CN(className, '__row', '-d-column', ' -type-data')}>
-      <div className={'__col __label-col'}>
-        <div className={'__label'}>
-          {label}
-        </div>
-      </div>
+      {
+        !!label && (
+          <div className={'__col __label-col'}>
+            <div className={'__label'}>
+              {label}
+            </div>
+          </div>
+        )
+      }
       <div className={'__col __value-col'}>
         <div className={`__value mono-text -schema-${valueColorSchema}`}>
           {children}

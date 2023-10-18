@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { ExtrinsicType, YieldPoolInfo, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 
 export interface RuntimeDispatchInfo {
   weight: {
@@ -46,3 +48,14 @@ export const DEFAULT_YIELD_FIRST_STEP: YieldStepDetail = {
 export const YIELD_EXTRINSIC_TYPES = [ExtrinsicType.MINT_VDOT, ExtrinsicType.MINT_LDOT, ExtrinsicType.MINT_SDOT, ExtrinsicType.MINT_QDOT];
 
 export const YIELD_POOL_STAT_REFRESH_INTERVAL = 300000;
+
+export function convertDerivativeToOriginToken (amount: string, poolInfo: YieldPoolInfo, derivativeTokenInfo: _ChainAsset, originTokenInfo: _ChainAsset) {
+  const derivativeDecimals = _getAssetDecimals(derivativeTokenInfo);
+  const originDecimals = _getAssetDecimals(originTokenInfo);
+
+  const exchangeRate = poolInfo.stats?.assetEarning?.[0].exchangeRate || 1;
+  const formattedAmount = parseInt(amount) / (10 ** derivativeDecimals); // TODO: decimals
+  const minAmount = formattedAmount * exchangeRate * 0.9;
+
+  return Math.floor(minAmount * (10 ** originDecimals));
+}

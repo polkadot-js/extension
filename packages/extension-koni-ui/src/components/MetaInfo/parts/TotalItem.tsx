@@ -23,12 +23,12 @@ const Component: React.FC<TotalInfoItem> = (props: TotalInfoItem) => {
 
   return (
     <div className={CN(className, '__row -type-total}')}>
-      <div className={'__col'}>
+      <div className={'__col __label-col'}>
         <div className={'__label'}>
           {t('Total')}
         </div>
       </div>
-      <div className={'__col -to-right'}>
+      <div className={'__col __value-col -to-right'}>
         <Number
           className={'__balance-item __value -schema-even-odd'}
           decimal={decimals}

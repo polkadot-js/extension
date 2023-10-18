@@ -5,11 +5,10 @@ import { MissionCategory } from '@subwallet/extension-koni-ui/types/missionPool'
 
 export enum MissionCategoryType {
   ALL='all',
+  UPCOMING='upcoming',
+  LIVE='live',
   CLAIMABLE='claimable',
-  ANNOUNCED='announced',
-  INCOMING='incoming',
-  ONGOING='ongoing',
-  ENDED='ended',
+  ARCHIVED='archived',
 }
 
 export const missionCategoryMap: Record<string, MissionCategory> = {
@@ -17,25 +16,23 @@ export const missionCategoryMap: Record<string, MissionCategory> = {
     slug: MissionCategoryType.CLAIMABLE,
     name: 'Claimable'
   },
-  [MissionCategoryType.ANNOUNCED]: {
-    slug: MissionCategoryType.ANNOUNCED,
-    name: 'Announced'
+  [MissionCategoryType.UPCOMING]: {
+    slug: MissionCategoryType.UPCOMING,
+    name: 'Upcoming'
   },
-  [MissionCategoryType.INCOMING]: {
-    slug: MissionCategoryType.INCOMING,
-    name: 'Incoming'
+  [MissionCategoryType.LIVE]: {
+    slug: MissionCategoryType.LIVE,
+    name: 'Live'
   },
-  [MissionCategoryType.ONGOING]: {
-    slug: MissionCategoryType.ONGOING,
-    name: 'Ongoing'
-  },
-  [MissionCategoryType.ENDED]: {
-    slug: MissionCategoryType.ENDED,
-    name: 'Ended'
+  [MissionCategoryType.ARCHIVED]: {
+    slug: MissionCategoryType.ARCHIVED,
+    name: 'Archived'
   }
 };
 
 export const missionCategories: MissionCategory[] = [
+  missionCategoryMap[MissionCategoryType.UPCOMING],
+  missionCategoryMap[MissionCategoryType.LIVE],
   missionCategoryMap[MissionCategoryType.CLAIMABLE],
-  missionCategoryMap[MissionCategoryType.ANNOUNCED]
+  missionCategoryMap[MissionCategoryType.ARCHIVED]
 ];

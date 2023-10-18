@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { CrowdloanContributionItem } from '@subwallet/extension-base/services/subscan-service/types';
-import { AddressInput, Layout, TokenBalance } from '@subwallet/extension-koni-ui/components';
+import { AddressInput, TokenBalance } from '@subwallet/extension-koni-ui/components';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -16,11 +16,11 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
 import { CrowdloanContributionsResultParam, CrowdloanFundInfo, CrowdloanFundStatus, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon, Logo, ModalContext, Table, Tag } from '@subwallet/react-ui';
+import { Button, ButtonProps, Form, Icon, Logo, ModalContext, SwSubHeader, Table, Tag } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowCounterClockwise, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
+import { ArrowCounterClockwise, FadersHorizontal, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -181,6 +181,14 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const { activeModal } = useContext(ModalContext);
   const [currentSelectRelayChainFilter, setCurrentSelectRelayChainFilter] = useState<RelayChainFilter>(RelayChainFilter.ALL);
   const { isWebUI } = useContext(ScreenContext);
+  const { setTitle } = useContext(WebUIContext);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === '/crowdloan-unlock-campaign/contributions-result') {
+      setTitle(t('Your crowdloan contributions'));
+    }
+  }, [location.pathname, setTitle, t]);
 
   const [contributionsMap, setContributionsMap] = useState<CrowdloanContributionsMap>({
     polkadot: [],
@@ -459,55 +467,88 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     };
   }, []);
 
-  return (
-    <Layout.Base
-      className={className}
-      showSubHeader={true}
-      subHeaderBackground={'transparent'}
-      subHeaderCenter={true}
-      subHeaderPaddingVertical={true}
-      title={t<string>('Your crowdloan contributions')}
-    >
-      <div className={'__tag-area'}>
-        <div
-          className={CN('__tag-item', {
-            '-active': currentSelectRelayChainFilter === RelayChainFilter.POLKADOT
-          })}
-          onClick={onSelectRelayChainFilter(RelayChainFilter.POLKADOT)}
-        >
-          <Logo
-            className={'__tag-item-logo'}
-            network={'polkadot'}
-            size={16}
-          />
-          <div className={'__tag-item-label'}>
-            DOT
-          </div>
-        </div>
-        <div
-          className={CN('__tag-item', {
-            '-active': currentSelectRelayChainFilter === RelayChainFilter.KUSAMA
-          })}
-          onClick={onSelectRelayChainFilter(RelayChainFilter.KUSAMA)}
-        >
-          <Logo
-            className={'__tag-item-logo'}
-            network={'kusama'}
-            size={16}
-          />
-          <div className={'__tag-item-label'}>
-            KSM
-          </div>
+  const tagAreaNode = (
+    <div className={'__tag-area'}>
+      <div
+        className={CN('__tag-item', {
+          '-active': currentSelectRelayChainFilter === RelayChainFilter.POLKADOT
+        })}
+        onClick={onSelectRelayChainFilter(RelayChainFilter.POLKADOT)}
+      >
+        <Logo
+          className={'__tag-item-logo'}
+          network={'polkadot'}
+          size={16}
+        />
+        <div className={'__tag-item-label'}>
+          DOT
         </div>
       </div>
-
-      <div className='__tool-area'>
-        <FilterTabs
-          className={'__filter-tabs-container'}
-          items={filterTabItems}
-          onSelect={onSelectFilterTab}
-          selectedItem={selectedFilterTab}
+      <div
+        className={CN('__tag-item', {
+          '-active': currentSelectRelayChainFilter === RelayChainFilter.KUSAMA
+        })}
+        onClick={onSelectRelayChainFilter(RelayChainFilter.KUSAMA)}
+      >
+        <Logo
+          className={'__tag-item-logo'}
+          network={'kusama'}
+          size={16}
         />
+        <div className={'__tag-item-label'}>
+          KSM
+        </div>
+      </div>
+    </div>
+  );
+
+  // @ts-ignore
+  const headerIcons = useMemo<ButtonProps[]>(() => {
+    return [
+      {
+        icon: (
+          <Icon
+            customSize={'24px'}
+            phosphorIcon={FadersHorizontal}
+            type='phosphor'
+          />
+        ),
+        onClick: () => {
+          //
+        }
+      }
+    ];
+  }, []);
+
+  return (
+    <div
+      className={className}
+    >
+      {isWebUI && tagAreaNode}
+      <div className='__tool-area'>
+        {
+          !isWebUI && (
+            <SwSubHeader
+              background={'transparent'}
+              className={'__header-area'}
+              onBack={onBack}
+              // rightButtons={headerIcons}
+              showBackButton
+              title={t('Your contributions')}
+            />
+          )
+        }
+
+        {
+          isWebUI && (
+            <FilterTabs
+              className={'__filter-tabs-container'}
+              items={filterTabItems}
+              onSelect={onSelectFilterTab}
+              selectedItem={selectedFilterTab}
+            />
+          )
+        }
 
         <div className={'__form-area'}>
           <Form
@@ -542,6 +583,8 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             </Form.Item>
           </Form>
         </div>
+
+        {!isWebUI && tagAreaNode}
       </div>
 
       <div className={'__table-area'}>
@@ -615,35 +658,33 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
         )}
       </div>
 
-      {isWebUI && (
-        <div className={'__footer-area'}>
-          <NoteBox
-            className={'__note-box'}
-            content={t('There\'re multiple ways you can play with your unlocked DOT, such as native staking, liquid staking, or lending. Check out SubWallet Dashboard for curated options with competitive APY to earn yield on your DOT.')}
-            title={t('Crowdloan unlock, then what?')}
-          />
+      <div className={'__footer-area'}>
+        <NoteBox
+          className={'__note-box'}
+          content={t('There\'re multiple ways you can play with your unlocked DOT, such as native staking, liquid staking, or lending. Check out SubWallet Dashboard for curated options with competitive APY to earn yield on your DOT.')}
+          title={t('Crowdloan unlock, then what?')}
+        />
 
-          <Button
-            className={'__footer-button'}
-            contentAlign={'left'}
-            icon={
-              <Icon
-                className='__footer-button-icon'
-                phosphorIcon={Vault}
-                size='md'
-                weight='fill'
-              />
-            }
-            onClick={goEarningDemo}
-          >
-            <div className={'__footer-button-content'}>
-              <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>
-              <div className={'__footer-button-subtitle'}>{t('Earn with SubWallet Dashboard')}</div>
-            </div>
-          </Button>
-        </div>
-      )}
-    </Layout.Base>
+        <Button
+          className={'__footer-button'}
+          contentAlign={'left'}
+          icon={
+            <Icon
+              className='__footer-button-icon'
+              phosphorIcon={Vault}
+              size='md'
+              weight='fill'
+            />
+          }
+          onClick={goEarningDemo}
+        >
+          <div className={'__footer-button-content'}>
+            <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>
+            <div className={'__footer-button-subtitle'}>{t('Earn with SubWallet Dashboard')}</div>
+          </div>
+        </Button>
+      </div>
+    </div>
   );
 };
 
@@ -654,11 +695,21 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
     marginRight: 'auto',
     paddingLeft: token.padding,
     paddingRight: token.padding,
+    minHeight: '100%',
+    display: 'flex',
+    flexDirection: 'column',
 
     '&-web-base-container': {
       '.web-layout-header-simple': {
         paddingBottom: token.sizeLG
       }
+    },
+
+    '.__header-area': {
+      alignSelf: 'stretch',
+      marginLeft: -token.margin,
+      marginRight: -token.margin,
+      backgroundColor: token.colorBgDefault
     },
 
     '.__tag-area': {
@@ -677,6 +728,7 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       paddingRight: token.paddingSM,
       height: 30,
       borderRadius: 50,
+      cursor: 'pointer',
 
       '&:before': {
         content: '""',
@@ -860,6 +912,50 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       color: token.colorTextLight3
+    },
+
+    '@media (max-width: 991px)': {
+      '.__footer-area': {
+        position: 'static',
+        paddingTop: token.padding
+      },
+
+      '.__table-area': {
+        paddingTop: 0,
+        paddingBottom: token.sizeXS
+      },
+
+      '.__tool-area': {
+        position: 'sticky',
+        display: 'block',
+        top: 0,
+        background: token.colorBgDefault,
+        zIndex: 10
+      },
+
+      '.__form-area': {
+        marginTop: token.margin,
+        marginBottom: token.margin
+      },
+
+      '.__tag-area': {
+        minWidth: '100%',
+        paddingBottom: token.padding,
+        marginBottom: 0,
+        justifyContent: 'flex-start'
+      }
+    },
+
+    '@media (max-width: 767px)': {
+      '.__footer-button': {
+        minWidth: '100%'
+      },
+
+      '.__buttons-block': {
+        '.ant-btn': {
+          minWidth: '100%'
+        }
+      }
     }
   };
 });

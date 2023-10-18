@@ -7,7 +7,7 @@ import { missionCategoryMap } from '@subwallet/extension-koni-ui/Popup/MissionPo
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
-import { customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { capitalize, customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Image, ModalContext } from '@subwallet/react-ui';
 import { GlobeHemisphereWest, PlusCircle, TwitterLogo } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
@@ -31,8 +31,8 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
       return t('TBD');
     }
 
-    const start = data.start_time ? customFormatDate(new Date(data.start_time), '#DD# #DDD# #YYYY#') : t('TBD');
-    const end = data.end_time ? customFormatDate(new Date(data.end_time), '#DD# #DDD# #YYYY#') : t('TBD');
+    const start = data.start_time ? customFormatDate(new Date(data.start_time), '#DD# #MMM# #YYYY#') : t('TBD');
+    const end = data.end_time ? customFormatDate(new Date(data.end_time), '#DD# #MMM# #YYYY#') : t('TBD');
 
     return `${start} - ${end}`;
   }, [data?.end_time, data?.start_time, t]);
@@ -64,7 +64,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
     }
 
     if (data?.status) {
-      return t('');
+      return t(capitalize(data?.status));
     }
 
     return '';
@@ -75,7 +75,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
       className={`${className}`}
       id={modalId}
       onCancel={onCancel}
-      title={t('Mission Details')}
+      title={t('Mission details')}
     >
       {
         data && (
@@ -90,89 +90,116 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
             >
               <Image
                 height={'100%'}
+                shape={'squircle'}
                 src={data.logo || logoMap.default as string}
                 width={'100%'}
               />
             </div>
 
             <MetaInfo
+              className={'__meta-block'}
               spaceSize={'ms'}
               valueColorScheme={'light'}
             >
+              <MetaInfo.Default
+                label={t('Name')}
+              >
+                {data.name}
+              </MetaInfo.Default>
+
+              {
+                !!data.chains && !!data.chains.length && (
+                  <MetaInfo.Chain
+                    chain={data.chains[0]}
+                    label={t('Network')}
+                  />
+                )
+              }
               <MetaInfo.Default
                 label={t('Status')}
                 valueColorSchema={'success'}
               >
                 {status}
               </MetaInfo.Default>
-              <MetaInfo.Number
-                label={t('Total Supply')}
-                prefix={'$'}
-                value={'1000000'}
+              <MetaInfo.Default
+                className={'-vertical'}
+                label={t('Description')}
                 valueColorSchema={'gray'}
-              />
-              <MetaInfo.Number
+              >
+                {data.description}
+              </MetaInfo.Default>
+              <MetaInfo.Default
+                label={t('Total token supply')}
+                valueColorSchema={'gray'}
+              >
+                {data.total_supply}
+              </MetaInfo.Default>
+              <MetaInfo.Default
                 label={t('Total rewards')}
-                value={'1000'}
                 valueColorSchema={'gray'}
-              />
+              >
+                {data.reward}
+              </MetaInfo.Default>
               <MetaInfo.Default
                 label={t('Timeline')}
                 valueColorSchema={'success'}
               >
                 {timeline}
               </MetaInfo.Default>
-              <MetaInfo.Number
+              <MetaInfo.Default
                 label={t('Total winners')}
-                value={'50'}
                 valueColorSchema={'gray'}
-              />
+              >
+                {data.total_winner}
+              </MetaInfo.Default>
             </MetaInfo>
 
-            <div className={'__modal-separator'}></div>
+            <div className='__modal-footer'>
+              <div className={'__modal-separator'}></div>
 
-            <div className={'__modal-buttons'}>
-              <Button
-                className={'__modal-icon-button'}
-                icon={(
-                  <Icon
-                    phosphorIcon={GlobeHemisphereWest}
-                    size={'sm'}
-                    weight={'fill'}
-                  />
-                )}
-                onClick={onClickGlobalIcon}
-                size={'xs'}
-                type='ghost'
-              />
-              <Button
-                className={'__modal-icon-button'}
-                icon={(
-                  <Icon
-                    phosphorIcon={TwitterLogo}
-                    size={'sm'}
-                    weight={'fill'}
-                  />
-                )}
-                onClick={onClickTwitterIcon}
-                size={'xs'}
-                type='ghost'
-              />
-              <Button
-                className={'__modal-join-now-button'}
-                icon={(
-                  <Icon
-                    phosphorIcon={PlusCircle}
-                    size={'sm'}
-                    weight={'fill'}
-                  />
-                )}
-                onClick={onClickJoinNow}
-                shape={'circle'}
-                size={'xs'}
-              >
-                {t('Join now')}
-              </Button>
+              <div className={'__modal-buttons'}>
+                <Button
+                  className={'__modal-icon-button'}
+                  icon={(
+                    <Icon
+                      phosphorIcon={GlobeHemisphereWest}
+                      size={'sm'}
+                      weight={'fill'}
+                    />
+                  )}
+                  onClick={onClickGlobalIcon}
+                  size={'xs'}
+                  type='ghost'
+                />
+                <Button
+                  className={'__modal-icon-button'}
+                  icon={(
+                    <Icon
+                      phosphorIcon={TwitterLogo}
+                      size={'sm'}
+                      weight={'fill'}
+                    />
+                  )}
+                  onClick={onClickTwitterIcon}
+                  size={'xs'}
+                  type='ghost'
+                />
+                <Button
+                  className={'__modal-join-now-button'}
+                  icon={(
+                    <Icon
+                      phosphorIcon={PlusCircle}
+                      size={'sm'}
+                      weight={'fill'}
+                    />
+                  )}
+                  onClick={onClickJoinNow}
+                  shape={'circle'}
+                  size={'xs'}
+                >
+                  {t('Join now')}
+                </Button>
+              </div>
             </div>
           </>
         )
@@ -191,9 +218,8 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
     },
 
     '.__modal-separator': {
-      marginTop: token.paddingLG,
-      marginBottom: token.paddingLG,
       height: 2,
+      marginBottom: token.marginLG,
       marginLeft: -token.margin,
       marginRight: -token.margin,
       backgroundColor: 'rgba(33, 33, 33, 0.80)'
@@ -210,7 +236,6 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
 
     '.__modal-buttons': {
       gap: token.size,
-
       display: 'flex'
     },
 
@@ -225,6 +250,44 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
         height: 20,
         width: 20
       }
+    },
+
+    '.__meta-block': {
+      '.__row': {
+        gap: token.size
+      },
+
+      '.__label-col': {
+        maxWidth: 'fit-content',
+        justifyContent: 'flex-start'
+      },
+
+      '.__value-col': {
+        textAlign: 'right'
+      },
+
+      '.__row.-vertical': {
+        flexDirection: 'column',
+        gap: token.sizeXS,
+
+        '.__value-col': {
+          textAlign: 'left'
+        }
+      }
+    },
+
+    '.__modal-footer': {
+      marginTop: token.paddingLG,
+      paddingBottom: token.padding,
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
+      marginRight: -token.margin,
+      marginLeft: -token.margin,
+      marginBottom: -token.margin,
+      backgroundColor: token.colorBgDefault,
+      position: 'sticky',
+      bottom: -token.size,
+      zIndex: 10
     }
   });
 });

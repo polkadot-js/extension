@@ -696,11 +696,6 @@ const Component = () => {
               )
             }
           </div>
-          <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
-
-          <Typography.Text style={{ color: token.colorTextLight4 }}>
-            {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
-          </Typography.Text>
         </div>
       )}
 

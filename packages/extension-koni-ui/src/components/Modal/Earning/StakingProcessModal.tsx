@@ -5,7 +5,7 @@ import { YieldStepDetail } from '@subwallet/extension-base/background/KoniTypes'
 import { BaseModal, EarningProcessItem } from '@subwallet/extension-koni-ui/components';
 import { STAKING_PROCESS_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Divider, ModalContext, Typography } from '@subwallet/react-ui';
+import { ModalContext, Typography } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
@@ -53,11 +53,6 @@ const Component = ({ className, currentStep, yieldSteps }: Props) => {
           })
         }
       </div>
-      <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
-
-      <Typography.Text style={{ color: token.colorTextLight4 }}>
-        {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
-      </Typography.Text>
     </BaseModal>
   );
 };

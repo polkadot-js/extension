@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CampaignData, CampaignDataType } from '@subwallet/extension-base/background/KoniTypes';
+import { MARKETING_CAMPAIGN_URL } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { ListCampaignResponse } from '@subwallet/extension-base/services/campaign-service/types';
 import { TARGET_ENV } from '@subwallet/extension-base/utils';
@@ -29,8 +30,7 @@ export default class CampaignService {
   private async fetchCampaign () {
     const response = await axios.request({
       method: 'GET',
-      baseURL: 'https://content.subwallet.app/api',
-      url: 'list/marketing-campaign'
+      url: MARKETING_CAMPAIGN_URL
     });
 
     const respData = response.data as ListCampaignResponse;

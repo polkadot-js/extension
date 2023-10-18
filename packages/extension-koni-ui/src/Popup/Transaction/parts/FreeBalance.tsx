@@ -12,12 +12,13 @@ import styled, { useTheme } from 'styled-components';
 type Props = ThemeProps & {
   address?: string,
   tokenSlug?: string;
+  customTokenBalance?: string; // TODO: used only for earning
   label?: string;
   chain?: string;
   onBalanceReady?: (rs: boolean) => void;
 }
 
-const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug }: Props) => {
+const Component = ({ address, chain, className, customTokenBalance, label, onBalanceReady, tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug);
@@ -59,7 +60,7 @@ const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug
               size={14}
               suffix={tokenBalance?.symbol}
               unitColor={token.colorTextTertiary}
-              value={tokenBalance.value}
+              value={customTokenBalance || tokenBalance.value}
             />
           </>
         )

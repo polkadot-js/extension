@@ -22,9 +22,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
 
-  const derivativeAsset = useMemo(() => {
-    return assetRegistry[yieldPoolInfo.derivativeAssets?.[0] || ''];
-  }, [assetRegistry, yieldPoolInfo.derivativeAssets]);
+  const assetInfo = useMemo(() => {
+    const tokenSlug = yieldPoolInfo.slug === 'DOT___interlay_lending' ? yieldPoolInfo.inputAssets?.[0] : yieldPoolInfo.derivativeAssets?.[0];
+
+    return assetRegistry[tokenSlug || ''];
+  }, [assetRegistry, yieldPoolInfo.derivativeAssets, yieldPoolInfo.inputAssets, yieldPoolInfo.slug]);
 
   return (
     <div className={CN(className)}>
@@ -37,9 +39,9 @@ const Component: React.FC<Props> = (props: Props) => {
         hasBackgroundWrapper
       >
         <MetaInfo.Number
-          decimals={derivativeAsset.decimals || 0}
+          decimals={assetInfo.decimals || 0}
           label={t('Amount')}
-          suffix={derivativeAsset.symbol}
+          suffix={assetInfo.symbol}
           value={amount}
         />
 

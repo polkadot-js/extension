@@ -6,7 +6,7 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -231,6 +231,14 @@ export async function getAcalaLiquidStakingExtrinsic (address: string, params: O
 export async function getAcalaLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
 
+  const derivativeTokenSlug = params.poolInfo.derivativeAssets?.[0] || '';
+  const originTokenSlug = params.poolInfo.inputAssets[0] || '';
+
+  const derivativeTokenInfo = params.assetInfoMap[derivativeTokenSlug];
+  const originTokenInfo = params.assetInfoMap[originTokenSlug];
+
+  const formattedMinAmount = convertDerivativeToOriginToken(amount, params.poolInfo, derivativeTokenInfo, originTokenInfo);
+
   const extrinsic = substrateApi.api.tx.aggregatedDex.swapWithExactSupply(
     // Swap path
     [
@@ -245,7 +253,7 @@ export async function getAcalaLiquidStakingRedeem (params: OptimalYieldPathParam
     // Supply amount
     amount,
     // Min target amount
-    0 // should always set a min target to prevent unexpected result
+    formattedMinAmount // should always set a min target to prevent unexpected result
   );
 
   return [ExtrinsicType.REDEEM_LDOT, extrinsic];

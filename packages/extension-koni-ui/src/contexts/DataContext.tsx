@@ -121,7 +121,14 @@ const _DataContext: DataContextType = {
 
         // Start the handler if it's not started or it's not a subscription and we want to renew
         if (!handler.isStarted || (!handler.isSubscription && renew)) {
+          console.log('XY', siName);
           handler.start();
+
+          handler.promise.then(() => {
+            console.log('XYZ', siName, 'done');
+          }).catch((e) => {
+            console.error('XYZ', siName, 'error', e);
+          });
           handler.isStarted = true;
         }
 

@@ -210,10 +210,12 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
 export async function getBifrostLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
   // @ts-ignore
-  const rewardTokenSlug = params.poolInfo.derivativeAssets[0];
-  const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
+  // const rewardTokenSlug = params.poolInfo.derivativeAssets[0];
+  // const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
 
-  const extrinsic = substrateApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount);
+  // const extrinsic = substrateApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount);
+
+  const extrinsic = substrateApi.api.tx.stablePool.swap(0, 1, 0, amount, 0);
 
   return [ExtrinsicType.REDEEM_VDOT, extrinsic];
 }

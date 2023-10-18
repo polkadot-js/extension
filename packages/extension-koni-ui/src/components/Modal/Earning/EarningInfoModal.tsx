@@ -296,7 +296,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 )
               }}
-              i18nKey={'Maximum APY when you stake {{symbol}} for 12 months. <highlight>Learn more</highlight>'}
+              i18nKey={'Maximum APY when you earn {{symbol}} for 12 months. <highlight>Learn more</highlight>'}
               values={{
                 symbol: currentAsset.symbol
               }}

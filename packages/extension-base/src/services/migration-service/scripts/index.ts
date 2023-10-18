@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import DeleteChain from '@subwallet/extension-base/services/migration-service/scripts/DeleteChain';
+import DeleteEarningData from '@subwallet/extension-base/services/migration-service/scripts/DeleteEarningData';
+import EnableEarningChains from '@subwallet/extension-base/services/migration-service/scripts/EnableEarningChains';
 
 import BaseMigrationJob from '../Base';
 import AutoEnableChainsTokens from './AutoEnableChainsTokens';
@@ -32,6 +34,8 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.0.12-02': MigrateEthProvider,
   '1.1.6-01': MigrateWalletReference,
   '1.1.7': DeleteChain,
-  '1.1.13-01': MigrateTokenDecimals
+  '1.1.13-01': MigrateTokenDecimals,
+  '1.1.13-02': EnableEarningChains,
+  '1.1.13-03': DeleteEarningData
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

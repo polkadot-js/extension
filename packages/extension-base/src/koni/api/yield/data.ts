@@ -167,8 +167,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
       'interlay-LOCAL-qDOT'
     ],
     rewardAssets: [
-      'interlay-LOCAL-DOT',
-      'interlay-NATIVE-INTR'
+      'interlay-LOCAL-DOT'
     ],
     feeAssets: [
       'interlay-NATIVE-INTR',
@@ -184,64 +183,65 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
         waitingTime: 0 // 0 means immediately
       }
     ]
-  },
-  LcDOT___acala_euphrates_liquid_staking: {
-    slug: 'LcDOT___acala_euphrates_liquid_staking',
-    chain: 'acala',
-    name: 'LcDOT Liquid Staking',
-    description: 'Earn rewards by staking LcDOT',
-    type: YieldPoolType.LIQUID_STAKING,
-    inputAssets: [
-      'acala-LOCAL-LcDOT'
-    ],
-    derivativeAssets: [
-      'acala-LOCAL-LDOT'
-    ],
-    rewardAssets: [
-      'acala-LOCAL-DOT',
-      'acala-NATIVE-ACA'
-    ],
-    feeAssets: [
-      'acala-NATIVE-ACA'
-    ],
-    altInputAssets: [
-      'polkadot-NATIVE-DOT'
-    ],
-    withdrawalMethods: [
-      {
-        name: 'Default withdrawal',
-        description: 'Withdraw your DOT',
-        waitingTime: 0 // 0 means immediately
-      }
-    ]
-  },
-  xcDOT___moonwell_lending: {
-    slug: 'xcDOT___moonwell_lending',
-    chain: 'moonbeam',
-    name: 'Moonwell Lending',
-    description: 'Earn rewards by lending xcDOT',
-    type: YieldPoolType.LENDING,
-    inputAssets: [
-      'moonbeam-LOCAL-xcDOT'
-    ],
-    derivativeAssets: [
-      'moonbeam-LOCAL-mDOT' // TODO: add to chain-list
-    ],
-    rewardAssets: [
-      'moonbeam-LOCAL-xcDOT',
-      'moonbeam-ERC20-WELL-0x511ab53f793683763e5a8829738301368a2411e3',
-      'moonbeam-NATIVE-GLMR'
-    ],
-    feeAssets: [
-      'moonbeam-NATIVE-GLMR'
-    ],
-    altInputAssets: [],
-    withdrawalMethods: [
-      {
-        name: 'Default withdrawal',
-        description: 'Withdraw your DOT',
-        waitingTime: 0 // 0 means immediately
-      }
-    ]
   }
+  // LcDOT___acala_euphrates_liquid_staking: {
+  //   slug: 'LcDOT___acala_euphrates_liquid_staking',
+  //   chain: 'acala',
+  //   name: 'LcDOT Liquid Staking',
+  //   description: 'Earn rewards by staking LcDOT',
+  //   type: YieldPoolType.LIQUID_STAKING,
+  //   inputAssets: [
+  //     'acala-LOCAL-LcDOT'
+  //   ],
+  //   derivativeAssets: [
+  //     'acala-LOCAL-LDOT'
+  //   ],
+  //   rewardAssets: [
+  //     'acala-LOCAL-DOT',
+  //     'acala-NATIVE-ACA'
+  //   ],
+  //   feeAssets: [
+  //     'acala-NATIVE-ACA'
+  //   ],
+  //   altInputAssets: [
+  //     'polkadot-NATIVE-DOT'
+  //   ],
+  //   withdrawalMethods: [
+  //     {
+  //       name: 'Default withdrawal',
+  //       description: 'Withdraw your DOT',
+  //       waitingTime: 0 // 0 means immediately
+  //     }
+  //   ]
+  // },
+  // xcDOT___moonwell_lending: {
+  //   slug: 'xcDOT___moonwell_lending',
+  //   chain: 'moonbeam',
+  //   name: 'Moonwell Lending',
+  //   logo: 'moonwell',
+  //   description: 'Earn rewards by lending xcDOT',
+  //   type: YieldPoolType.LENDING,
+  //   inputAssets: [
+  //     'moonbeam-LOCAL-xcDOT'
+  //   ],
+  //   derivativeAssets: [
+  //     'moonbeam-LOCAL-mDOT' // TODO: add to chain-list
+  //   ],
+  //   rewardAssets: [
+  //     'moonbeam-LOCAL-xcDOT',
+  //     'moonbeam-ERC20-WELL-0x511ab53f793683763e5a8829738301368a2411e3',
+  //     'moonbeam-NATIVE-GLMR'
+  //   ],
+  //   feeAssets: [
+  //     'moonbeam-NATIVE-GLMR'
+  //   ],
+  //   altInputAssets: [],
+  //   withdrawalMethods: [
+  //     {
+  //       name: 'Default withdrawal',
+  //       description: 'Withdraw your DOT',
+  //       waitingTime: 0 // 0 means immediately
+  //     }
+  //   ]
+  // }
 };

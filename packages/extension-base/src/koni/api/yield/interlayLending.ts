@@ -15,8 +15,17 @@ import { sumBN } from '@subwallet/extension-base/utils';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN } from '@polkadot/util';
 
-export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
-  function getPoolStat () {
+export function subscribeInterlayLendingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPoolInfo) => void) {
+  async function getPoolStat () {
+    const substrateApi = await chainApi.isReady;
+    const inputTokenSlug = poolInfo.inputAssets[0];
+    const inputTokenInfo = assetInfoMap[inputTokenSlug];
+
+    const _exchangeRate = await substrateApi.api.query.loans.exchangeRate(_getTokenOnChainInfo(inputTokenInfo));
+
+    const exchangeRate = _exchangeRate.toPrimitive() as number;
+    const decimals = 10 ** 18;
+
     // eslint-disable-next-line node/no-callback-literal
     callback({
       ...poolInfo,
@@ -25,26 +34,26 @@ export function subscribeInterlayLendingStats (poolInfo: YieldPoolInfo, callback
           {
             slug: poolInfo.rewardAssets[0],
             apr: 1.29,
-            exchangeRate: 1 / 49.77
-          },
-          {
-            slug: poolInfo.rewardAssets[1],
-            apr: 12.32
+            exchangeRate: exchangeRate / decimals
           }
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '10000000000',
         minWithdrawal: '0',
-        totalApr: 13.61,
-        tvl: '13095111106588368'
+        totalApr: 1.29,
+        tvl: '291890000000000'
       }
     });
   }
 
-  getPoolStat();
+  function getStatInterval () {
+    getPoolStat().catch(console.error);
+  }
 
-  const interval = setInterval(getPoolStat, YIELD_POOL_STAT_REFRESH_INTERVAL);
+  getStatInterval();
+
+  const interval = setInterval(getStatInterval, YIELD_POOL_STAT_REFRESH_INTERVAL);
 
   return () => {
     clearInterval(interval);

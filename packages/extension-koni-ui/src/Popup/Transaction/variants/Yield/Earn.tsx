@@ -256,7 +256,7 @@ const Component = () => {
                 key={item.slug}
                 label={t('You\'ll receive')}
                 suffix={_getAssetSymbol(derivativeAssetInfo)}
-                value={value * item.exchangeRate}
+                value={value / item.exchangeRate}
               />
             );
           })

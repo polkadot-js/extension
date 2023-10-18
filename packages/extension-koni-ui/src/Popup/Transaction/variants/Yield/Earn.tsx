@@ -233,6 +233,7 @@ const Component = () => {
 
   const renderMetaInfo = useCallback(() => {
     const asset = currentPoolInfo?.inputAssets[0] || '';
+    const assetSymbol = chainAsset[asset].symbol || '';
     const assetDecimals = chainAsset[asset].decimals || 0;
     const value = currentAmount ? parseFloat(currentAmount) / (10 ** assetDecimals) : 0;
 
@@ -268,7 +269,7 @@ const Component = () => {
               Object.values(_assetEarnings).map((value) => {
                 const amount = (value.apy || 0);
 
-                return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)}% ${value.symbol}`;
+                return `${formatNumber(amount, 0, balanceFormatter)}% ${value.symbol}`;
               }).join(' - ')
             }
           </div>
@@ -279,11 +280,22 @@ const Component = () => {
               Object.values(_assetEarnings).map((value) => {
                 const amount = value.rewardInToken || 0;
 
-                return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)} ${value.symbol}`;
+                return `${formatNumber(amount, 0, balanceFormatter)} ${value.symbol}`;
               }).join(' - ').concat('/year')
             }
           </div>
         </MetaInfo.Default>
+
+        {
+          currentPoolInfo.stats?.minJoinPool && (
+            <MetaInfo.Number
+              decimals={assetDecimals}
+              label={t('Min stake')}
+              suffix={assetSymbol}
+              value={currentPoolInfo.stats.minJoinPool}
+            />
+          )
+        }
 
         <MetaInfo.Number
           decimals={0}

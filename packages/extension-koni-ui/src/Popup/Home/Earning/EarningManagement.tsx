@@ -102,7 +102,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return [
       {
         desc: true,
-        label: t('Sort by total value'),
+        label: t('Total value staked'),
         value: SortKey.TOTAL_VALUE
       }
     ];
@@ -488,7 +488,7 @@ const Component: React.FC<Props> = (props: Props) => {
             size='md'
             weight='fill'
           />
-          <span className='footer-content'>{t('Do you want to add more funds or add funds for other pools?')}</span>
+          <span className='footer-content'>{t('Do you want to add more funds or add funds to other pools')}</span>
         </div>
         <Button
           icon={(
@@ -541,7 +541,7 @@ const Component: React.FC<Props> = (props: Props) => {
         destroyOnClose={true}
         id={TRANSACTION_YIELD_UNSTAKE_MODAL}
         onCancel={handleCloseUnstake}
-        title={t('Unbond')}
+        title={t('Unstake')}
       >
         <Transaction
           modalContent={isWebUI}

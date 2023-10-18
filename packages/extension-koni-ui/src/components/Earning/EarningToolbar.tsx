@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import EarningTokenList from './EarningTokenList';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 
 interface FilterOption {
   label: string;
@@ -139,7 +140,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const openFilterModal = useCallback(() => activeModal(FILTER_MODAL_ID), [activeModal]);
   const openSortingModal = useCallback(() => activeModal(SORTING_MODAL_ID), [activeModal]);
   const onClickHelpBtn = useCallback(() => {
-    // TODO: Add action
+    openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs')();
   }, []);
 
   const onClickMore = useCallback(() => {

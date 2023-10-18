@@ -231,6 +231,13 @@ export async function getAcalaLiquidStakingExtrinsic (address: string, params: O
 export async function getAcalaLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
 
+  const exchangeRate = params.poolInfo.stats?.assetEarning?.[0].exchangeRate || 1;
+  const formattedAmount = parseInt(amount) / (10 ** 10);
+  const minAmount = formattedAmount * exchangeRate * 0.9;
+  const formattedMinAmount = Math.floor(minAmount * (10 ** 10));
+
+  console.log('formattedMinAmount', exchangeRate, formattedAmount * exchangeRate);
+
   const extrinsic = substrateApi.api.tx.aggregatedDex.swapWithExactSupply(
     // Swap path
     [
@@ -245,7 +252,7 @@ export async function getAcalaLiquidStakingRedeem (params: OptimalYieldPathParam
     // Supply amount
     amount,
     // Min target amount
-    0 // should always set a min target to prevent unexpected result
+    formattedMinAmount // should always set a min target to prevent unexpected result
   );
 
   return [ExtrinsicType.REDEEM_LDOT, extrinsic];

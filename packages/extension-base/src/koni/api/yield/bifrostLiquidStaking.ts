@@ -215,7 +215,14 @@ export async function getBifrostLiquidStakingRedeem (params: OptimalYieldPathPar
 
   // const extrinsic = substrateApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount);
 
-  const extrinsic = substrateApi.api.tx.stablePool.swap(0, 1, 0, amount, 0);
+  const exchangeRate = params.poolInfo.stats?.assetEarning?.[0].exchangeRate || 1;
+  const formattedAmount = parseInt(amount) / (10 ** 10);
+  const minAmount = formattedAmount * exchangeRate * 0.9;
+  const formattedMinAmount = Math.floor(minAmount * (10 ** 10));
+
+  console.log('formattedMinAmount', exchangeRate, formattedAmount * exchangeRate);
+
+  const extrinsic = substrateApi.api.tx.stablePool.swap(0, 1, 0, amount, formattedMinAmount);
 
   return [ExtrinsicType.REDEEM_VDOT, extrinsic];
 }

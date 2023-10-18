@@ -192,10 +192,15 @@ export async function getParallelLiquidStakingExtrinsic (address: string, params
 
 export async function getParallelLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string, address: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
-  // const rewardTokenSlug = params.poolInfo.derivativeAssets[0];
-  // const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
 
-  const extrinsic = substrateApi.api.tx.liquidStaking.fastMatchUnstake([address]);
+  const exchangeRate = params.poolInfo.stats?.assetEarning?.[0].exchangeRate || 1;
+  const formattedAmount = parseInt(amount) / (10 ** 10);
+  const minAmount = formattedAmount * exchangeRate * 0.9;
+  const formattedMinAmount = Math.floor(minAmount * (10 ** 10));
+
+  console.log('formattedMinAmount', exchangeRate, formattedAmount * exchangeRate);
+
+  const extrinsic = substrateApi.api.tx.ammRoute.swapExactTokensForTokens(['1001', '101'], amount, formattedMinAmount);
 
   return [ExtrinsicType.REDEEM_SDOT, extrinsic];
 }

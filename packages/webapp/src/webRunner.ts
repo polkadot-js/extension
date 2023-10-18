@@ -19,7 +19,7 @@ setupHandlers();
 // initial setup
 cryptoWaitReady()
   .then((): void => {
-    console.log('[Mobile] crypto initialized');
+    console.log('[WebApp] crypto initialized');
 
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519', password_store: new KeyringStore() });
@@ -34,8 +34,8 @@ cryptoWaitReady()
     // wake webapp up
     koniState.wakeup().catch((err) => console.warn(err));
 
-    console.log('[Mobile] initialization completed');
+    console.log('[WebApp] initialization completed');
   })
   .catch((error): void => {
-    console.error('[Mobile] initialization failed', error);
+    console.error('[WebApp] initialization failed', error);
   });

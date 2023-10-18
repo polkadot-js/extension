@@ -14,16 +14,7 @@ export interface CustomResponse<T> {
 export type PageStatus = CustomResponse<{ status: 'init' | 'load' | 'crypto_ready' }>
 
 export function responseMessage (response: TransportResponseMessage<keyof RequestSignatures> | PageStatus) {
-  // @ts-ignore
-  if (window.ReactNativeWebView) {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    window.ReactNativeWebView.postMessage(JSON.stringify(response));
-  } else {
-    // console.log('handleSendMessageFinish Post message in browser ', response);
-    window.postMessage(response);
-    // handleSendMessageFinish(response);
-  }
+  window.postMessage(response);
 }
 
 export function setupHandlers () {

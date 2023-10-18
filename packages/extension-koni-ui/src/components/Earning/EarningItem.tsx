@@ -4,10 +4,12 @@
 import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
+import { EXCLUSIVE_REWARD_SLUGS } from '@subwallet/extension-koni-ui/constants/earning';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Logo, Number, Web3Block } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
+import CN from 'classnames';
 import { PlusCircle, PlusMinus, Question } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -16,13 +18,14 @@ import EarningTypeTag from './EarningTypeTag';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo,
+  compactMode?: boolean,
   onClickCalculatorBtn: () => void;
   onClickInfoBtn: () => void;
   onClickStakeBtn: () => void;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, item, onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn } = props;
+  const { className, compactMode , item, onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { chain, description, inputAssets, name, stats, type } = item;
@@ -56,6 +59,96 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
+  if (compactMode) {
+    return (
+      <div
+        className={CN(className, '-compact-mode')}
+        onClick={onClickInfoBtn}
+      >
+        <div className={'__item-upper-part'}>
+          <Logo
+            className={'__item-logo'}
+            network={chain}
+            size={38}
+          />
+
+          <div className='__item-lines-container'>
+            <div className='__item-line-1'>
+              <div className='__item-name'>{name}</div>
+              <div className='__item-rewards'>
+                <div className='__item-rewards-label'>
+                  {t('Rewards')}:
+                </div>
+                <div className='__item-rewards-value'>
+                  <Number
+                    decimal={0}
+                    suffix={'%'}
+                    value={totalApy}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className='__item-line-2'>
+              <div className='__item-total-staked-label'>
+                {t('Total value staked')}:
+              </div>
+              <div className='__item-total-staked-value'>
+                <Number
+                  decimal={0}
+                  prefix={'$'}
+                  value={tvl}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={'__item-lower-part'}>
+          <div className='__item-tags-container'>
+            <EarningTypeTag
+              className={'__item-tag'}
+              type={type}
+            />
+            {
+              EXCLUSIVE_REWARD_SLUGS.includes(item.slug) && (
+                <EarningTypeTag className={'__item-tag'} />
+              )
+            }
+          </div>
+          <div className='__item-buttons-container'>
+            <Button
+              className={'__item-stake-more-button'}
+              icon={(
+                <Icon
+                  iconColor={token.colorPrimary}
+                  phosphorIcon={PlusCircle}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+              onClick={childClick(onClickStakeBtn)}
+              size='xs'
+              type='ghost'
+            />
+
+            <Button
+              className={'__item-calculator-button'}
+              icon={(
+                <Icon
+                  phosphorIcon={PlusMinus}
+                  size='sm'
+                />
+              )}
+              onClick={childClick(onClickCalculatorBtn)}
+              shape='circle'
+              size='xs'
+              type='ghost'
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Web3Block
       className={className}
@@ -85,7 +178,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: token.paddingXXS }}>
-            <div className='earning-item-total-value-staked'>{t('Total value staked:')}</div>
+            <div className='earning-item-total-value-staked'>{t('Total value staked')}:</div>
             <Number
               decimal={0}
               decimalColor={token.colorSuccess}
@@ -152,6 +245,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const EarningItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    cursor: 'pointer',
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
     padding: `${token.paddingXL}px ${token.paddingLG}px ${token.padding}px`,
@@ -221,6 +315,104 @@ const EarningItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.earning-item-stake-btn': {
       width: token.sizeMD,
       height: token.sizeMD
+    },
+
+    // compact mode style
+    '&.-compact-mode': {
+      paddingTop: token.sizeSM,
+      paddingLeft: token.sizeSM,
+      paddingRight: token.sizeSM,
+      paddingBottom: 0
+    },
+
+    '.__item-logo': {
+      marginRight: token.marginSM
+    },
+
+    '.__item-lines-container': {
+      flex: 1,
+      overflow: 'hidden'
+    },
+
+    '.__item-line-1, .__item-line-2': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      gap: token.sizeSM
+    },
+
+    '.__item-line-1': {
+      marginBottom: token.marginXXS
+    },
+
+    '.__item-rewards-label, .__item-total-staked-label': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      color: token.colorTextLight4
+    },
+
+    '.__item-name': {
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      color: token.colorTextLight1,
+      fontWeight: token.headingFontWeight,
+      overflow: 'hidden',
+      'white-space': 'nowrap',
+      textOverflow: 'ellipsis'
+    },
+
+    '.__item-rewards': {
+      display: 'flex',
+      alignItems: 'baseline',
+      'white-space': 'nowrap',
+      gap: token.sizeXXS
+    },
+
+    '.__item-rewards-value': {
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      color: token.colorTextLight1,
+      fontWeight: token.headingFontWeight
+    },
+
+    '.__item-total-staked-value': {
+      color: token.colorSuccess,
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM
+    },
+
+    '.__item-rewards-value, .__item-total-staked-value': {
+      '.ant-number, .ant-typography': {
+        color: 'inherit !important',
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      }
+    },
+
+    '.__item-tags-container': {
+      flex: 1,
+      display: 'flex',
+      overflow: 'hidden',
+      gap: token.sizeXS
+    },
+
+    '.__item-tag': {
+      marginRight: 0,
+      'white-space': 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      minWidth: 70
+    },
+
+    '.__item-upper-part': {
+      display: 'flex',
+      paddingBottom: token.sizeXS
+    },
+
+    '.__item-lower-part': {
+      borderTop: '2px solid rgba(33, 33, 33, 0.80)',
+      display: 'flex',
+      alignItems: 'center'
     }
   });
 });

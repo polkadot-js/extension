@@ -7,6 +7,7 @@ import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/exte
 import { EarningCalculatorModal, EarningItem, EarningToolbar, EmptyList } from '@subwallet/extension-koni-ui/components';
 import EarningInfoModal from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInfoModal';
 import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -44,6 +45,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isWebUI } = useContext(ScreenContext);
 
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount, isNoAccount } = useSelector((state: RootState) => state.accountState);
@@ -167,6 +169,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const renderEarningItem = useCallback((item: YieldPoolInfo) => {
     return (
       <EarningItem
+        compactMode={!isWebUI}
         item={item}
         key={item.slug}
         onClickCalculatorBtn={onClickCalculatorBtn(item)}
@@ -174,7 +177,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onClickStakeBtn={onClickStakeBtn(item)}
       />
     );
-  }, [onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn]);
+  }, [isWebUI, onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn]);
 
   const resultList = useMemo((): YieldPoolInfo[] => {
     return [...Object.values(poolInfo)]
@@ -256,14 +259,13 @@ const Component: React.FC<Props> = (props: Props) => {
         selectedSort={sortSelection}
         sortOptions={sortOptions}
       />
-      <SwList.Section
+      <SwList
         className={CN('nft_collection_list__container')}
         displayGrid={true}
-        enableSearchInput={false}
         filterBy={filterFunction}
-        gridGap={'14px'}
+        gridGap={isWebUI ? '16px' : '8px'}
         list={resultList}
-        minColumnWidth={'384px'}
+        minColumnWidth={'360px'}
         renderItem={renderEarningItem}
         renderOnScroll={true}
         renderWhenEmpty={renderWhenEmpty}

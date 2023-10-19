@@ -25,7 +25,7 @@ export type CrowdloanFundInfo = _CrowdloanFund & {
 }
 
 const getOnlineFundList = (async () => {
-  const request = await axios.get<CrowdloanFundInfo[]>('https://static-data.subwallet.app/crowdloan-funds/list.json');
+  const request = await axios.get<CrowdloanFundInfo[]>('https://content.subwallet.app/api/list/crowdloan-fund');
 
   return request.data;
 })();
@@ -36,6 +36,7 @@ function getRPCCrowdloan (parentAPI: _SubstrateApi, fundInfo: _CrowdloanFund, he
     let contribute = new BN(0);
 
     Object.values(result).forEach((item) => {
+      console.log(fundId, item.toBn().toString());
       contribute = contribute.add(item.toBn());
     });
 
@@ -161,11 +162,14 @@ export async function subscribeCrowdloan (addresses: string[], substrateApiMap: 
       const chainSlug = fundInfo.chain;
       const endTime = new Date(fundInfo.endTime).getTime();
       const parentChain = fundInfo.relayChain;
+      const substrateInfo = chainInfoMap[chainSlug]?.substrateInfo;
 
-      if (chainSlug && parentChain && STATUS_MAP[fundInfo.status] && fundInfo.paraId && endTime > now && chainInfoMap[chainSlug]) {
+      if (chainSlug && parentChain && STATUS_MAP[fundInfo.status] && fundInfo.paraId && endTime > now && substrateInfo) {
         const crowdloanCb = (rs: CrowdloanItem) => {
           callback(chainSlug, rs);
         };
+
+        fundInfo.paraId = substrateInfo.crowdloanParaId || substrateInfo.paraId || fundInfo.paraId;
 
         if (chainSlug === COMMON_CHAIN_SLUGS.ACALA) {
           const acalaAddresses = substrateAddresses.map((address) => reformatAddress(address, 10, false));

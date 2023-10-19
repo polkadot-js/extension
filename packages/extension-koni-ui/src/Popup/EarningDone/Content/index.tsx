@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicStatus } from '@subwallet/extension-base/background/KoniTypes';
-import { UnlockDotMintedData } from '@subwallet/extension-base/types';
+import { UnlockDotTransactionNft } from '@subwallet/extension-base/types';
 import { CloseIcon, Layout, SocialGroup } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -32,7 +32,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
   const { historyList } = useSelector((state) => state.transactionHistory);
 
-  const [nftData, setNftData] = useState<UnlockDotMintedData>();
+  const [nftData, setNftData] = useState<UnlockDotTransactionNft>();
 
   const item = useMemo(() => {
     return historyList.find((value) => value.transactionId === transactionId);
@@ -44,7 +44,7 @@ const Component: React.FC<Props> = (props: Props) => {
     } else {
       switch (item.status) {
         case ExtrinsicStatus.SUCCESS:
-          if (nftData) {
+          if (nftData !== undefined) {
             return ProcessStatus.SUCCESS;
           } else {
             return ProcessStatus.PROCESSING;
@@ -77,7 +77,7 @@ const Component: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     let unmount = false;
 
-    const callback = (data: UnlockDotMintedData | undefined) => {
+    const callback = (data: UnlockDotTransactionNft) => {
       if (!unmount) {
         setNftData(data);
       }
@@ -119,7 +119,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         {
           status === ProcessStatus.PROCESSING && (
-            <EarningDoneProcessing />
+            <EarningDoneProcessing isMinting={item?.status && item.status === ExtrinsicStatus.SUCCESS} />
           )
         }
         {

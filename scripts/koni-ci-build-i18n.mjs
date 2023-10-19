@@ -11,16 +11,27 @@ function runBuild() {
   execSync('yarn i18next-scanner --config i18next-scanner.config.js');
 }
 
-const sourcePath = './packages/extension-koni/public/locales'
-const destinationPath = './packages/web-runner/public/locales'
+const path= './packages/{{name}}/public/locales';
 
+const source = 'extension-koni'
+const destinations = ['web-runner', 'webapp']
+
+
+const createPath = (source) => {
+  return path.replace('{{name}}', source);
+}
 
 function cloneTrans() {
-  try {
-    fs.cpSync(sourcePath, destinationPath, { recursive: true })
-    console.log('Clone done');
-  } catch (e) {
-    console.error('Fail to clone trans', e);
+  const sourcePath = createPath(source)
+  for (const destination of destinations) {
+    const destinationPath = createPath(destination)
+
+    try {
+      fs.cpSync(sourcePath, destinationPath, { recursive: true })
+      console.log(`Clone ${destination} done`);
+    } catch (e) {
+      console.error(`Fail to clone trans on ${destination}`, e);
+    }
   }
 }
 

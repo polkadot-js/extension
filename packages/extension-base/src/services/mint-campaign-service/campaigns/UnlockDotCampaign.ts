@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { UnlockDotCheckMintData, UnlockDotCheckMintRequest, UnlockDotCheckMintResponse, UnlockDotFetchMintedRequest, UnlockDotFetchMintedResponse, UnlockDotMintedData, UnlockDotMintSubmitRequest, UnlockDotMintSubmitResponse, UnlockDotSubmitMintData } from '@subwallet/extension-base/types';
+import { UnlockDotCheckMintData, UnlockDotCheckMintRequest, UnlockDotCheckMintResponse, UnlockDotFetchMintedRequest, UnlockDotFetchMintedResponse, UnlockDotMintedData, UnlockDotMintSubmitRequest, UnlockDotMintSubmitResponse, UnlockDotSubmitMintData, UnlockDotTransactionNft } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import axios from 'axios';
 import { BehaviorSubject } from 'rxjs';
@@ -14,8 +14,8 @@ export default class UnlockDotCampaign {
   readonly #campaignId = 4;
   readonly #state: KoniState;
 
-  readonly #transactionNftSubject: BehaviorSubject<Record<string, UnlockDotMintedData | undefined>> = new BehaviorSubject<Record<string, UnlockDotMintedData | undefined>>({});
-  readonly #transactionNftState: Record<string, UnlockDotMintedData | undefined> = {};
+  readonly #transactionNftSubject: BehaviorSubject<Record<string, UnlockDotTransactionNft>> = new BehaviorSubject<Record<string, UnlockDotTransactionNft>>({});
+  readonly #transactionNftState: Record<string, UnlockDotTransactionNft> = {};
 
   constructor (state: KoniState) {
     this.#state = state;
@@ -38,7 +38,7 @@ export default class UnlockDotCampaign {
     //   result = await this.getMinted(address, slug);
     }
 
-    this.#transactionNftState[transactionId] = result;
+    this.#transactionNftState[transactionId] = result ?? { nftImage: '' };
 
     this.#transactionNftSubject.next(this.#transactionNftState);
   }
@@ -126,7 +126,7 @@ export default class UnlockDotCampaign {
     return !!(await this.getMinted(address, slug));
   }
 
-  public subscribeMintedNft (transactionId: string, cb: (data: UnlockDotMintedData | undefined) => void) {
+  public subscribeMintedNft (transactionId: string, cb: (data: UnlockDotTransactionNft) => void) {
     return this.#transactionNftSubject.subscribe({
       next: (map) => {
         cb(map[transactionId]);

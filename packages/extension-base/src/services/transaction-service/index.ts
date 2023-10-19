@@ -647,8 +647,6 @@ export default class TransactionService {
 
     const transaction = this.getTransaction(id);
 
-    console.log('onHasTransactionHash', transaction.extrinsicType);
-
     if ([
       ExtrinsicType.STAKING_JOIN_POOL,
       ExtrinsicType.JOIN_YIELD_POOL,

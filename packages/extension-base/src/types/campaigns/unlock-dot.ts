@@ -47,6 +47,8 @@ export interface UnlockDotMintedData {
   additionalData: string;
 }
 
+export type UnlockDotTransactionNft = UnlockDotMintedData | undefined | Pick<UnlockDotMintedData, 'nftImage'>;
+
 export interface UnlockDotFetchMintedRequest {
   address: string;
 }

@@ -9,10 +9,12 @@ import { SpinnerGap } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
 
-type Props = ThemeProps;
+interface Props extends ThemeProps {
+  isMinting?: boolean;
+}
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className } = props;
+  const { className, isMinting } = props;
 
   const { t } = useTranslation();
 
@@ -29,10 +31,18 @@ const Component: React.FC<Props> = (props: Props) => {
       </div>
       <div className='content-container'>
         <div className='title'>
-          {t('Processing...')}
+          {
+            isMinting
+              ? t('Minting NFT...')
+              : t('Processing...')
+          }
         </div>
         <div className='description'>
-          {t('Please stay on this page while the transaction is being processed')}
+          {
+            isMinting
+              ? t("You're eligible for a free NFT! Please stay on this page while the minting is being processed")
+              : t('Please stay on this page while the transaction is being processed')
+          }
         </div>
       </div>
     </div>

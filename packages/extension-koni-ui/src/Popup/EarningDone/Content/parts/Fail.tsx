@@ -23,7 +23,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   return (
-    <div className={CN(className)}>
+    <div className={CN(className, { mt: !isWebUI })}>
       <div className='page-icon'>
         <PageIcon
           color='var(--page-icon-color)'
@@ -69,6 +69,10 @@ const EarningDoneFail = styled(Component)<Props>(({ theme: { token } }: Props) =
     display: 'flex',
     flexDirection: 'column',
     gap: token.sizeLG,
+
+    '&.mt': {
+      marginTop: token.marginLG
+    },
 
     '.page-icon': {
       display: 'flex',

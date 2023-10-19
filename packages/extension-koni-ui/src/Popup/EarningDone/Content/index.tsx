@@ -229,6 +229,10 @@ const EarningDoneContent = styled(Component)<Props>(({ theme: { extendToken, tok
       }
     },
 
+    '.ant-sw-screen-layout-body': {
+      position: 'relative'
+    },
+
     '.social-group': {
       alignSelf: 'center',
 

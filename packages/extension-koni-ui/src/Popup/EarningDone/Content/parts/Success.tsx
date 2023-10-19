@@ -3,6 +3,7 @@
 
 import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { baseParseIPFSUrl, detectTranslate } from '@subwallet/extension-base/utils';
+import { ImageSlash } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -40,7 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, []);
 
   return (
-    <div className={CN(className)}>
+    <div className={CN(className, { mt: !isWebUI })}>
       {
         url && isWebUI && (
           <img
@@ -105,16 +106,9 @@ const Component: React.FC<Props> = (props: Props) => {
                 <ActivityIndicator size={52} />
               )
               : (
-                <Icon
-                  customIcon={(
-                    <Image
-                      height={52}
-                      shape='square'
-                      src={'/images/image-not-supported.svg'}
-                      width={52}
-                    />
-                  )}
-                  type='customIcon'
+                <ImageSlash
+                  height={52}
+                  width={52}
                 />
               )
           }
@@ -188,6 +182,10 @@ const EarningDoneSuccess = styled(Component)<Props>(({ theme: { token } }: Props
     display: 'flex',
     flexDirection: 'column',
     gap: token.sizeLG,
+
+    '&.mt': {
+      marginTop: token.marginLG
+    },
 
     '.success-image': {
       width: 470,

@@ -25,7 +25,7 @@ export type CrowdloanFundInfo = _CrowdloanFund & {
 }
 
 const getOnlineFundList = (async () => {
-  const request = await axios.get<CrowdloanFundInfo[]>('https://content.subwallet.app/api/list/crowdloan-fund');
+  const request = await axios.get<CrowdloanFundInfo[]>('https://static-data.subwallet.app/crowdloan-funds/list.json');
 
   return request.data;
 })();

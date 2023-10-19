@@ -167,8 +167,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
       'interlay-LOCAL-qDOT'
     ],
     rewardAssets: [
-      'interlay-LOCAL-DOT',
-      'interlay-NATIVE-INTR'
+      'interlay-LOCAL-DOT'
     ],
     feeAssets: [
       'interlay-NATIVE-INTR',

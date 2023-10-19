@@ -67,20 +67,42 @@ const Component: React.FC = () => {
     return yieldPoolInfo?.stats?.minWithdrawal || '0';
   }, [yieldPoolInfo?.stats?.minWithdrawal]);
 
+  const isInterlayPool = useMemo(() => {
+    return yieldPoolInfo && yieldPoolInfo.slug === 'DOT___interlay_lending';
+  }, [yieldPoolInfo]);
+
   const activeBalance = useMemo(() => {
+    if (isInterlayPool) {
+      const exchangeRate = yieldPoolInfo?.stats?.assetEarning?.[0].exchangeRate || 1;
+      const inputTokenSlug = yieldPoolInfo?.inputAssets[0] || '';
+      const inputTokenDecimals = _getAssetDecimals(assetRegistry[inputTokenSlug]);
+
+      const formattedBalance = parseInt(yieldPosition?.balance[0]?.activeBalance || '0') / (10 ** inputTokenDecimals);
+      const inputAmount = formattedBalance * exchangeRate;
+      const formattedAmount = Math.floor(inputAmount * (10 ** inputTokenDecimals));
+
+      return formattedAmount.toString();
+    }
+
     return yieldPosition?.balance[0]?.activeBalance || '0';
-  }, [yieldPosition?.balance]);
+  }, [assetRegistry, isInterlayPool, yieldPoolInfo?.inputAssets, yieldPoolInfo?.stats?.assetEarning, yieldPosition?.balance]);
 
   const tokenDecimals = useMemo(() => {
     if (!yieldPoolInfo) {
       return;
     }
 
+    if (isInterlayPool) {
+      const inputTokenSlug = yieldPoolInfo.inputAssets[0];
+
+      return _getAssetDecimals(assetRegistry[inputTokenSlug]);
+    }
+
     const tokenSlug = yieldPoolInfo.derivativeAssets ? yieldPoolInfo?.derivativeAssets[0] : yieldPoolInfo?.inputAssets[0];
     const tokenInfo = assetRegistry[tokenSlug];
 
     return _getAssetDecimals(tokenInfo);
-  }, [assetRegistry, yieldPoolInfo]);
+  }, [assetRegistry, isInterlayPool, yieldPoolInfo]);
 
   const onFieldsChange: FormCallbacks<YieldFastWithdrawParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
@@ -165,9 +187,10 @@ const Component: React.FC = () => {
             address={from}
             chain={chain}
             className={'free-balance'}
+            customTokenBalance={isInterlayPool ? activeBalance : undefined}
             label={t('Available balance:')}
             onBalanceReady={setIsBalanceReady}
-            tokenSlug={yieldPoolInfo?.derivativeAssets?.[0]}
+            tokenSlug={isInterlayPool ? yieldPoolInfo?.inputAssets?.[0] : yieldPoolInfo?.derivativeAssets?.[0]}
           />
 
           <Form.Item

@@ -127,6 +127,7 @@ export class KoniCron {
 
       // MantaPay
       reloadMantaPay && this.removeCron('syncMantaPay');
+      commonReload && this.removeCron('refreshPoolingStakingReward');
 
       // NFT
       (commonReload || needUpdateNft) && this.resetNft(address);
@@ -136,6 +137,7 @@ export class KoniCron {
       if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
         (commonReload || needUpdateNft) && this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
         reloadMantaPay && this.addCron('syncMantaPay', this.syncMantaPay, CRON_SYNC_MANTA_PAY);
+        commonReload && this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
       } else {
         this.setStakingRewardReady();
       }

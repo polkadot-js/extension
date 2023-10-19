@@ -550,6 +550,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <SwSubHeader
             background={'transparent'}
             className={'__header-area'}
+            paddingVertical
             rightButtons={headerIcons}
             showBackButton={false}
             title={t('Earning')}
@@ -811,7 +812,6 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
       },
 
       '.__toolbar-area': {
-        paddingTop: token.paddingXS,
         position: 'sticky',
         zIndex: 10,
         top: 0,

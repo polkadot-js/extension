@@ -508,7 +508,7 @@ const Component = () => {
 
               {processState.steps && (
                 <>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div className={'__step-wrapper'}>
                     {stepLoading
                       ? (
                         <ActivityIndicator
@@ -776,7 +776,6 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       '.meta-info': {
         marginBottom: token.marginSM
       }
-
     },
 
     '.__transaction-process': {
@@ -809,6 +808,12 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '@media (max-width: 991px)': {
       '.earning-wrapper': {
         height: '100%'
+      },
+
+      '.__step-wrapper': {
+        display: 'flex',
+        alignItems: 'center',
+        minHeight: 32
       },
 
       '.transaction-content': {

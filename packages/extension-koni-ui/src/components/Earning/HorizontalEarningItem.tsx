@@ -371,7 +371,16 @@ const Component: React.FC<Props> = (props: Props) => {
           <>
             <div className={'earning-item-name-wrapper'}>
               <div className={'earning-item-name'}>{name}</div>
-              <EarningTypeTag type={type} />
+              <EarningTypeTag
+                className={'earning-item-tag'}
+                type={type}
+              />
+
+              {
+                EXCLUSIVE_REWARD_SLUGS.includes(yieldPoolInfo.slug) && (
+                  <EarningTypeTag className={'earning-item-tag'} />
+                )
+              }
             </div>
 
             <div className={'earning-item-description'}>{description}</div>
@@ -470,14 +479,25 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
       display: 'flex',
       alignItems: 'center',
       gap: token.paddingSM,
-      paddingBottom: token.paddingXS
+      paddingBottom: token.paddingXS,
+      overflow: 'hidden'
     },
 
     '.earning-item-name': {
       fontSize: token.fontSizeHeading4,
       lineHeight: token.lineHeightHeading4,
       fontWeight: 600,
-      color: token.colorTextLight1
+      color: token.colorTextLight1,
+      'white-space': 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
+    },
+
+    '.earning-item-tag': {
+      marginRight: 0,
+      'white-space': 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
 
     '.earning-item-description': {
@@ -572,6 +592,7 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
     },
 
     '.__item-line-1': {
+      'white-space': 'nowrap',
       marginBottom: token.marginXXS
     },
 

@@ -78,6 +78,7 @@ const Component: React.FC<Props> = (props: Props) => {
               '-no-back': !yieldPositions.length
             })}
             onBack={onBack}
+            paddingVertical
             rightButtons={headerIcons}
             showBackButton={!!yieldPositions.length}
             title={t('Earning')}

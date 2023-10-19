@@ -348,7 +348,6 @@ const EarningOverviewContent = styled(Component)<Props>(({ theme: { token } }: P
 
     '@media (max-width: 991px)': {
       '.__toolbar-area': {
-        paddingTop: token.paddingXS,
         position: 'sticky',
         zIndex: 10,
         top: 0,

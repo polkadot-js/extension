@@ -224,12 +224,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, {} as Record<string, string>);
   }, [accounts]);
 
-  const typeNameMap: Record<string, string> = useMemo(() => ({
+  const typeNameMap: Record<string, string> = useMemo((): Record<ExtrinsicType | 'default' | 'send' | 'received' | 'submitting' | 'processing', string> => ({
     default: t('Transaction'),
     submitting: t('Submitting...'),
     processing: t('Processing...'),
     send: t('Send'),
     received: t('Receive'),
+    [ExtrinsicType.TRANSFER_BALANCE]: t('Send token'),
+    [ExtrinsicType.TRANSFER_TOKEN]: t('Send token'),
+    [ExtrinsicType.TRANSFER_XCM]: t('Send token'),
     [ExtrinsicType.SEND_NFT]: t('NFT'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan'),
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake'),
@@ -238,18 +241,30 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.STAKING_UNBOND]: t('Unstake'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),
+    [ExtrinsicType.STAKING_POOL_WITHDRAW]: t('Withdraw'),
     [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake'),
+    [ExtrinsicType.STAKING_COMPOUNDING]: t('Compound'),
+    [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: t('Cancel compound'),
     [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction'),
+    [ExtrinsicType.JOIN_YIELD_POOL]: t('Stake'),
     [ExtrinsicType.MINT_QDOT]: t('Mint qDOT'),
     [ExtrinsicType.MINT_SDOT]: t('Mint sDOT'),
     [ExtrinsicType.MINT_LDOT]: t('Mint LDOT'),
-    [ExtrinsicType.MINT_VDOT]: t('Mint vDOT')
+    [ExtrinsicType.MINT_VDOT]: t('Mint vDOT'),
+    [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT'),
+    [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT'),
+    [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT'),
+    [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT'),
+    [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
 
-  const typeTitleMap: Record<string, string> = useMemo(() => ({
+  const typeTitleMap: Record<string, string> = useMemo((): Record<ExtrinsicType | 'default' | 'send' | 'received', string> => ({
     default: t('Transaction'),
     send: t('Send token'),
     received: t('Receive token'),
+    [ExtrinsicType.TRANSFER_BALANCE]: t('Send token'),
+    [ExtrinsicType.TRANSFER_TOKEN]: t('Send token'),
+    [ExtrinsicType.TRANSFER_XCM]: t('Send token'),
     [ExtrinsicType.SEND_NFT]: t('NFT transaction'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan transaction'),
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake transaction'),
@@ -258,12 +273,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond transaction'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward transaction'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw transaction'),
+    [ExtrinsicType.STAKING_POOL_WITHDRAW]: t('Withdraw transaction'),
     [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake transaction'),
+    [ExtrinsicType.STAKING_COMPOUNDING]: t('Compound transaction'),
+    [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: t('Cancel compound transaction'),
     [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction'),
+    [ExtrinsicType.JOIN_YIELD_POOL]: t('Stake transaction'),
     [ExtrinsicType.MINT_QDOT]: t('Mint qDOT transaction'),
     [ExtrinsicType.MINT_SDOT]: t('Mint sDOT transaction'),
     [ExtrinsicType.MINT_LDOT]: t('Mint LDOT transaction'),
-    [ExtrinsicType.MINT_VDOT]: t('Mint vDOT transaction')
+    [ExtrinsicType.MINT_VDOT]: t('Mint vDOT transaction'),
+    [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT transaction'),
+    [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT transaction'),
+    [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT transaction'),
+    [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT transaction'),
+    [ExtrinsicType.UNKNOWN]: t('Unknown transaction')
   }), [t]);
 
   // Fill display data to history list

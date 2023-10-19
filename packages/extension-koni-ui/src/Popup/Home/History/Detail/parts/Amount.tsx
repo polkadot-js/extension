@@ -3,8 +3,11 @@
 
 import { ExtrinsicType, TransactionAdditionalInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { isTypeStaking } from '@subwallet/extension-koni-ui/utils';
+import { isTypeMint, isTypeStaking } from '@subwallet/extension-koni-ui/utils';
+import BigN from 'bignumber.js';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -17,11 +20,45 @@ const Component: React.FC<Props> = (props: Props) => {
   const { data } = props;
   const { amount, type: transactionType } = data;
 
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const additionalInfo = data.additionalInfo;
+
   const { t } = useTranslation();
 
   const isStaking = isTypeStaking(data.type);
   const isCrowdloan = data.type === ExtrinsicType.CROWDLOAN;
   const isNft = data.type === ExtrinsicType.SEND_NFT;
+  const isMint = isTypeMint(data.type);
+
+  const derivativeTokenSlug = useMemo((): string | undefined => {
+    if (isMint) {
+      if (additionalInfo) {
+        return (additionalInfo as TransactionAdditionalInfo[ExtrinsicType.MINT_QDOT])?.derivativeTokenSlug;
+      } else {
+        return undefined;
+      }
+    } else {
+      return undefined;
+    }
+  }, [additionalInfo, isMint]);
+
+  const amountDerivative = useMemo(() => {
+    if (amount && derivativeTokenSlug && additionalInfo) {
+      const rate = (additionalInfo as TransactionAdditionalInfo[ExtrinsicType.MINT_QDOT])?.exchangeRate;
+
+      if (rate) {
+        return new BigN(amount.value).div(BN_TEN.pow(amount.decimals)).div(rate);
+      }
+    }
+
+    return undefined;
+  }, [additionalInfo, amount, derivativeTokenSlug]);
+
+  const derivativeSymbol = useMemo(() => {
+    return derivativeTokenSlug ? assetRegistry[derivativeTokenSlug].symbol : '';
+  }, [assetRegistry, derivativeTokenSlug]);
 
   const amountLabel = useMemo((): string => {
     switch (transactionType) {
@@ -54,6 +91,17 @@ const Component: React.FC<Props> = (props: Props) => {
               value={amount?.value || '0'}
             />
           )
+      }
+      {
+        (isMint && amountDerivative) &&
+        (
+          <MetaInfo.Number
+            decimals={0}
+            label={t('Estimated receivables')}
+            suffix={derivativeSymbol}
+            value={amountDerivative}
+          />
+        )
       }
       {data.additionalInfo && isNft && (
         <MetaInfo.Default

@@ -296,7 +296,7 @@ const Component: React.FC<Props> = (props: Props) => {
           }
 
           {
-            yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL && nominationPoolReward && <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
+            yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL && <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
               <Typography.Text style={{ color: token.colorTextLight4 }}>{t('Unclaimed rewards:')}</Typography.Text>
               <Number
                 decimal={_getAssetDecimals(inputTokenInfo)}

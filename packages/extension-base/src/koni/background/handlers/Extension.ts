@@ -22,7 +22,7 @@ import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, getRelayPools
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { generateNaiveOptimalPath, handleYieldRedeem, handleYieldStep, validateYieldProcess, validateYieldRedeem } from '@subwallet/extension-base/koni/api/yield';
+import { generateNaiveOptimalPath, handleYieldRedeem, handleYieldStep, validateYieldProcess } from '@subwallet/extension-base/koni/api/yield';
 import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
@@ -3945,17 +3945,6 @@ export default class KoniExtension {
     if (!amount) {
       return this.#koniState.transactionService
         .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
-    }
-
-    const yieldValidation: TransactionError[] = validateYieldRedeem(
-      address,
-      yieldPoolInfo,
-      amount
-    ); // TODO: validate, set to fail upon submission
-
-    if (yieldValidation.length > 0) {
-      return this.#koniState.transactionService
-        .generateBeforeHandleResponseErrors(yieldValidation);
     }
 
     const [extrinsicType, extrinsic] = await handleYieldRedeem(

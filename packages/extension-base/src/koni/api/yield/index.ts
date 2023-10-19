@@ -403,10 +403,6 @@ export async function validateYieldProcess (address: string, params: OptimalYiel
   return await validateEarningProcess(address, params, path, balanceService);
 }
 
-export function validateYieldRedeem (address: string, poolInfo: YieldPoolInfo, amount: string): TransactionError[] {
-  return [];
-}
-
 export interface HandleYieldStepData {
   txChain: string,
   extrinsicType: ExtrinsicType,

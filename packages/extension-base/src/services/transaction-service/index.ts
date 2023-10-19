@@ -552,7 +552,20 @@ export default class TransactionService {
         break;
       }
 
-      case ExtrinsicType.REDEEM_QDOT:
+      case ExtrinsicType.REDEEM_QDOT: {
+        const data = parseTransactionData<ExtrinsicType.REDEEM_QDOT>(transaction.data);
+
+        if (data.yieldPoolInfo.derivativeAssets) {
+          const inputTokenSlug = data.yieldPoolInfo.inputAssets[0];
+          const inputTokenInfo = this.chainService.getAssetBySlug(inputTokenSlug);
+
+          historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
+          eventLogs && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
+        }
+
+        break;
+      }
+
       case ExtrinsicType.REDEEM_LDOT:
       case ExtrinsicType.REDEEM_SDOT:
 

@@ -7,7 +7,7 @@ import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossCh
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
 
@@ -192,10 +192,16 @@ export async function getParallelLiquidStakingExtrinsic (address: string, params
 
 export async function getParallelLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string, address: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
-  // const rewardTokenSlug = params.poolInfo.derivativeAssets[0];
-  // const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
 
-  const extrinsic = substrateApi.api.tx.liquidStaking.fastMatchUnstake([address]);
+  const derivativeTokenSlug = params.poolInfo.derivativeAssets?.[0] || '';
+  const originTokenSlug = params.poolInfo.inputAssets[0] || '';
+
+  const derivativeTokenInfo = params.assetInfoMap[derivativeTokenSlug];
+  const originTokenInfo = params.assetInfoMap[originTokenSlug];
+
+  const formattedMinAmount = convertDerivativeToOriginToken(amount, params.poolInfo, derivativeTokenInfo, originTokenInfo);
+
+  const extrinsic = substrateApi.api.tx.ammRoute.swapExactTokensForTokens(['1001', '101'], amount, formattedMinAmount);
 
   return [ExtrinsicType.REDEEM_SDOT, extrinsic];
 }

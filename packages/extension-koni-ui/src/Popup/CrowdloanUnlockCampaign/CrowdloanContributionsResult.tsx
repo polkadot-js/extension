@@ -311,7 +311,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
         dataIndex: 'name',
         key: 'name',
         render: (_: any, row: TableItem) => {
-          const [, text2] = getUnlockTexts(row.paraState);
+          const [text1, text2] = getUnlockTexts(row.paraState);
 
           return <div className='project-container'>
             <Logo
@@ -323,13 +323,13 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
               subNetwork={row.relayChainSlug}
             />
             <div className='project-information'>
-              <div style={{ display: 'flex' }} className={'project-information-part-1'}>
+              <div className={'project-information-part-1'}>
                 <div className={'project-name'}>{row.chainName}</div>
                 {!isWebUI && (<Tag color={getTagColor(row.paraState)}>{getParaStateLabel(row.paraState)}</Tag>)}
               </div>
 
               {isWebUI && (<div className={'project-parachain'}>{`${row.relayChainName} ${t('parachain')}`}</div>)}
-              {!isWebUI && (<div className={'fund-unlock-detail-line-2-for-mobile'}>{`${text2} ${row.unlockTime}`}</div>)}
+              {!isWebUI && (<div className={'fund-unlock-detail-line-2-for-mobile'}>{`${text1} ${text2.toLowerCase()} ${row.unlockTime}`}</div>)}
 
             </div>
           </div>;
@@ -540,10 +540,11 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             <SwSubHeader
               background={'transparent'}
               className={'__header-area'}
+              paddingVertical
+              title={t('Your contributions')}
               onBack={onBack}
               // rightButtons={headerIcons}
               showBackButton
-              title={t('Your contributions')}
             />
           )
         }
@@ -789,7 +790,7 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       },
 
       '.project-information-part-1': {
-        display: 'flex',
+        display: 'flex'
       },
 
       '.project-name': {
@@ -825,7 +826,11 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
     '.fund-unlock-detail-line-2-for-mobile': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
-      color: token.colorTextLight4
+      color: token.colorTextLight4,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      maxWidth: 156
     },
 
     '.address-input-icon': {
@@ -966,7 +971,7 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       },
 
       '.__form-area': {
-        marginTop: token.margin,
+        marginTop: token.marginXS,
         marginBottom: token.margin
       },
 

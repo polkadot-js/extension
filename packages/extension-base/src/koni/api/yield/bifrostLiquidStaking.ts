@@ -6,7 +6,7 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -210,10 +210,20 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
 export async function getBifrostLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
   // @ts-ignore
-  const rewardTokenSlug = params.poolInfo.derivativeAssets[0];
-  const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
+  // const rewardTokenSlug = params.poolInfo.derivativeAssets[0];
+  // const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
 
-  const extrinsic = substrateApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount);
+  // const extrinsic = substrateApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), amount);
+
+  const derivativeTokenSlug = params.poolInfo.derivativeAssets?.[0] || '';
+  const originTokenSlug = params.poolInfo.inputAssets[0] || '';
+
+  const derivativeTokenInfo = params.assetInfoMap[derivativeTokenSlug];
+  const originTokenInfo = params.assetInfoMap[originTokenSlug];
+
+  const formattedMinAmount = convertDerivativeToOriginToken(amount, params.poolInfo, derivativeTokenInfo, originTokenInfo);
+
+  const extrinsic = substrateApi.api.tx.stablePool.swap(0, 1, 0, amount, formattedMinAmount);
 
   return [ExtrinsicType.REDEEM_VDOT, extrinsic];
 }

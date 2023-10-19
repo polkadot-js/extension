@@ -5,29 +5,40 @@ import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { BN } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 interface BlockHeader {
   number: number
 }
 
-export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void, substrateApiMap: Record<string, _SubstrateApi>) {
+export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
   async function getPoolStat () {
     const substrateApi = await chainApi.isReady;
 
-    const [_exchangeRate, _currentBlockHeader, _currentTimestamp] = await Promise.all([
+    const [_exchangeRate, _currentBlockHeader, _currentTimestamp, _stakingLedgers] = await Promise.all([
       substrateApi.api.query.liquidStaking.exchangeRate(),
       substrateApi.api.rpc.chain.getHeader(),
-      substrateApi.api.query.timestamp.now()
+      substrateApi.api.query.timestamp.now(),
+      substrateApi.api.query.liquidStaking.stakingLedgers.entries()
     ]);
 
-    const exchangeRate = _exchangeRate.toPrimitive() as number; // TODO
+    let tvl = BN_ZERO;
+
+    for (const _stakingLedger of _stakingLedgers) {
+      const _ledger = _stakingLedger[1];
+      const ledger = _ledger.toPrimitive() as unknown as PalletStakingStakingLedger;
+
+      tvl = tvl.add(new BN(ledger.total.toString()));
+    }
+
+    const exchangeRate = _exchangeRate.toPrimitive() as number;
     const currentBlockHeader = _currentBlockHeader.toPrimitive() as unknown as BlockHeader;
     const currentTimestamp = _currentTimestamp.toPrimitive() as number;
 
@@ -42,7 +53,7 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
 
     const beginTimestamp = _beginTimestamp.toPrimitive() as number;
     const beginExchangeRate = _beginExchangeRate.toPrimitive() as number;
-    // const decimals = 10 ** 10;
+    const decimals = 10 ** 18;
 
     const apy = (exchangeRate / beginExchangeRate) ** (365 * 24 * 60 * 60000 / (currentTimestamp - beginTimestamp)) - 1;
 
@@ -54,15 +65,15 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, ch
           {
             slug: poolInfo.rewardAssets[0],
             apy: apy * 100,
-            exchangeRate: 1.266
+            exchangeRate: exchangeRate / decimals
           }
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '10000000000',
-        minWithdrawal: '0',
+        minWithdrawal: '5000000000',
         totalApy: apy * 100,
-        tvl: '12812000000000000'
+        tvl: tvl.toString()
       }
     });
   }
@@ -181,10 +192,16 @@ export async function getParallelLiquidStakingExtrinsic (address: string, params
 
 export async function getParallelLiquidStakingRedeem (params: OptimalYieldPathParams, amount: string, address: string): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
   const substrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
-  // const rewardTokenSlug = params.poolInfo.derivativeAssets[0];
-  // const rewardTokenInfo = params.assetInfoMap[rewardTokenSlug];
 
-  const extrinsic = substrateApi.api.tx.liquidStaking.fastMatchUnstake([address]);
+  const derivativeTokenSlug = params.poolInfo.derivativeAssets?.[0] || '';
+  const originTokenSlug = params.poolInfo.inputAssets[0] || '';
+
+  const derivativeTokenInfo = params.assetInfoMap[derivativeTokenSlug];
+  const originTokenInfo = params.assetInfoMap[originTokenSlug];
+
+  const formattedMinAmount = convertDerivativeToOriginToken(amount, params.poolInfo, derivativeTokenInfo, originTokenInfo);
+
+  const extrinsic = substrateApi.api.tx.ammRoute.swapExactTokensForTokens(['1001', '101'], amount, formattedMinAmount);
 
   return [ExtrinsicType.REDEEM_SDOT, extrinsic];
 }

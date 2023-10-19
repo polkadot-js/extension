@@ -151,7 +151,7 @@ const Component: React.FC<Props> = (props: Props) => {
       key: 'info',
       hidden: false,
       schema: 'secondary',
-      tooltip: t('FAQs')
+      tooltip: t('Earning information')
     });
 
     actionListByChain.forEach((item) => {

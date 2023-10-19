@@ -530,7 +530,7 @@ const Component: React.FC<Props> = (props: Props) => {
         action: YieldAction.CUSTOM_ACTION,
         backgroundIconColor: 'geekblue-6',
         icon: Question,
-        label: t('FAQs'),
+        label: t('Earning information'),
         onClick: () => {
           selectedYieldPosition && onClickInfoBtn(selectedYieldPosition)();
         }

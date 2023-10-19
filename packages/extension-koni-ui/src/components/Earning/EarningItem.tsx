@@ -361,6 +361,7 @@ const EarningItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__item-line-1': {
+      'white-space': 'nowrap',
       marginBottom: token.marginXXS
     },
 

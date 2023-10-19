@@ -16,7 +16,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
 import { CrowdloanContributionsResultParam, CrowdloanFundInfo, CrowdloanFundStatus, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Button, ButtonProps, Form, Icon, Logo, ModalContext, SwSubHeader, Table, Tag } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, ButtonProps, Form, Icon, Logo, ModalContext, SwSubHeader, Table, Tag } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -101,7 +101,8 @@ enum FilterValue {
 const paraStateMap: Record<CrowdloanFundStatus, CrowdloanParaState> = {
   [CrowdloanFundStatus.IN_AUCTION]: CrowdloanParaState.ONGOING,
   [CrowdloanFundStatus.WON]: CrowdloanParaState.COMPLETED,
-  [CrowdloanFundStatus.FAILED]: CrowdloanParaState.FAILED
+  [CrowdloanFundStatus.FAILED]: CrowdloanParaState.FAILED,
+  [CrowdloanFundStatus.WITHDRAW]: CrowdloanParaState.FAILED
 };
 
 const getTableItems = (
@@ -127,7 +128,7 @@ const getTableItems = (
 
     const fundInfo = crowdloanFundInfoMap[c.fund_id];
 
-    if (!fundInfo.status || fundInfo.status === CrowdloanFundStatus.FAILED) {
+    if (!fundInfo.status || [CrowdloanFundStatus.FAILED, CrowdloanFundStatus.WITHDRAW].includes(fundInfo.status)) {
       return;
     }
 
@@ -310,6 +311,8 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
         dataIndex: 'name',
         key: 'name',
         render: (_: any, row: TableItem) => {
+          const [text1, text2] = getUnlockTexts(row.paraState);
+
           return <div className='project-container'>
             <Logo
               isShowSubLogo={true}
@@ -320,8 +323,14 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
               subNetwork={row.relayChainSlug}
             />
             <div className='project-information'>
-              <div className={'project-name'}>{row.chainName}</div>
-              <div className={'project-parachain'}>{`${row.relayChainName} ${t('parachain')}`}</div>
+              <div className={'project-information-part-1'}>
+                <div className={'project-name'}>{row.chainName}</div>
+                {!isWebUI && (<Tag color={getTagColor(row.paraState)}>{getParaStateLabel(row.paraState)}</Tag>)}
+              </div>
+
+              {isWebUI && (<div className={'project-parachain'}>{`${row.relayChainName} ${t('parachain')}`}</div>)}
+              {!isWebUI && (<div className={'fund-unlock-detail-line-2-for-mobile'}>{`${text1} ${text2.toLowerCase()} ${row.unlockTime}`}</div>)}
+
             </div>
           </div>;
         }
@@ -531,10 +540,11 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             <SwSubHeader
               background={'transparent'}
               className={'__header-area'}
+              paddingVertical
+              title={t('Your contributions')}
               onBack={onBack}
               // rightButtons={headerIcons}
               showBackButton
-              title={t('Your contributions')}
             />
           )
         }
@@ -565,7 +575,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
                 }
               ]}
               statusHelpAsTooltip
-              validateTrigger='onBlur'
+              validateTrigger='onChange'
             >
               <AddressInput
                 placeholder={t('Enter your Polkadot wallet address')}
@@ -588,7 +598,15 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
       </div>
 
       <div className={'__table-area'}>
-        {!!filteredTableItems.length && (
+        {loading && (
+          <div className={'__loading-area'}>
+            <ActivityIndicator
+              loading={true}
+              size={32}
+            />
+          </div>
+        )}
+        {!!filteredTableItems.length && !loading && (
           <Table
             className={'__table'}
             columns={columns}
@@ -597,7 +615,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             rowKey={'id'}
           />
         )}
-        {!filteredTableItems.length && (
+        {!filteredTableItems.length && !loading && (
           <div className={'__empty-list-wrapper'}>
             <EmptyList
               className={'__empty-list'}
@@ -771,6 +789,10 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
         paddingRight: token.paddingXS
       },
 
+      '.project-information-part-1': {
+        display: 'flex'
+      },
+
       '.project-name': {
         fontSize: token.fontSizeLG,
         lineHeight: token.lineHeightLG,
@@ -801,6 +823,16 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       color: token.colorSuccess
     },
 
+    '.fund-unlock-detail-line-2-for-mobile': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      color: token.colorTextLight4,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      maxWidth: 156
+    },
+
     '.address-input-icon': {
       zIndex: 10
     },
@@ -826,10 +858,14 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
     },
 
     '.__table-area': {
+      display: 'flex',
+      flexDirection: 'column',
       flex: 1,
       paddingTop: token.padding,
       paddingBottom: token.paddingLG
     },
+
+    '.__loading-area': { display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center' },
 
     '.__empty-list-wrapper': {
       paddingTop: 70,
@@ -844,7 +880,8 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       },
 
       '.__link': {
-        textDecoration: 'underline'
+        textDecoration: 'underline',
+        color: token.colorPrimary
       }
     },
 
@@ -934,7 +971,7 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       },
 
       '.__form-area': {
-        marginTop: token.margin,
+        marginTop: token.marginXS,
         marginBottom: token.margin
       },
 

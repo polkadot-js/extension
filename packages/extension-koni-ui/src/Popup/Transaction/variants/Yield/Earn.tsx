@@ -239,6 +239,7 @@ const Component = () => {
     return (
       <MetaInfo
         labelColorScheme={'gray'}
+        spaceSize={'sm'}
         valueColorScheme={'gray'}
       >
         {
@@ -497,10 +498,6 @@ const Component = () => {
       <div className={'__transaction-block'}>
         <TransactionContent>
           <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
-            {/* <EarningBtn icon={<Logo className={'earning-calculator-tag'} size={16} network={'polkadot'} />} size={'xs'}> */}
-            {/*  {'DOT'} */}
-            {/* </EarningBtn> */}
-
             <Form
               className={'form-container form-space-sm earning-calculator-form-container'}
               form={form}
@@ -508,40 +505,48 @@ const Component = () => {
               onFieldsChange={onFieldsChange}
             >
               <HiddenInput fields={hiddenFields} />
-              {/* <Form.Item */}
-              {/*  name={FormFieldName.METHOD} */}
-              {/*  label={t('Select method')} */}
-              {/*  colon={false} */}
-              {/* > */}
-              {/*  <EarningMethodSelector items={Object.values(poolInfo)} /> */}
-              {/* </Form.Item> */}
-
-              {/* <Divider className={'staking-modal-divider'} /> */}
 
               {processState.steps && (
-                <div style={{ display: 'flex', alignItems: 'center', paddingBottom: token.paddingSM }}>
-                  {stepLoading
-                    ? (
-                      <ActivityIndicator
-                        prefixCls={'ant'}
-                        size={'24px'}
-                      />
-                    )
-                    : (
-                      <Typography.Text
-                        size={'lg'}
-                        style={{ fontWeight: '600' }}
-                      >
-                        {t('Step {{step}}: {{label}}', {
-                          replace: { step: processState.currentStep + 1, label: processState.steps[processState.currentStep]?.name }
-                        })}
-                      </Typography.Text>
-                    )}
-                </div>
+                <>
+                  <div className={'__step-wrapper'}>
+                    {stepLoading
+                      ? (
+                        <ActivityIndicator
+                          prefixCls={'ant'}
+                          size={'24px'}
+                        />
+                      )
+                      : (
+                        <>
+                          {isWebUI && (
+                            <Typography.Text
+                              size={'lg'}
+                              style={{ fontWeight: '600' }}
+                            >
+                              {t('Step {{step}}: {{label}}', {
+                                replace: { step: processState.currentStep + 1, label: processState.steps[processState.currentStep]?.name }
+                              })}
+                            </Typography.Text>
+                          )}
+                          {
+                            !isWebUI && (
+                              <EarningProcessItem
+                                index={processState.currentStep}
+                                isSelected
+                                stepName={processState.steps[processState.currentStep]?.name}
+                                stepStatus={processState.stepResults[processState.currentStep]?.status}
+                              />
+                            )
+                          }
+                        </>
+                      )}
+                  </div>
+
+                  <Divider className={'staking-modal-divider'} />
+                </>
               )}
 
               <Form.Item
-                // className={CN({ hidden: !isAllAccount })}
                 name={'from'}
               >
                 <AccountSelector
@@ -771,7 +776,6 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       '.meta-info': {
         marginBottom: token.marginSM
       }
-
     },
 
     '.__transaction-process': {
@@ -799,6 +803,26 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.ant-loading-icon': {
       display: 'flex',
       justifyContent: 'center'
+    },
+
+    '@media (max-width: 991px)': {
+      '.earning-wrapper': {
+        height: '100%'
+      },
+
+      '.__step-wrapper': {
+        display: 'flex',
+        alignItems: 'center',
+        minHeight: 32
+      },
+
+      '.transaction-content': {
+        paddingBottom: token.padding
+      },
+
+      '.__transaction-block': {
+        overflow: 'hidden'
+      }
     }
   };
 });

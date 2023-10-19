@@ -205,7 +205,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
                 <Button
                   block
                   className='__check-again-button'
-                  disabled={!addressValue}
+                  disabled={!addressValue || responseStatus === 'error'}
                   icon={
                     <Icon
                       customSize={'28px'}
@@ -386,6 +386,7 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
 
     '.__form-buttons': {
       display: 'flex',
+      flexWrap: 'wrap',
       gap: token.size
     },
 
@@ -477,6 +478,14 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
       '.__note-box': {
         paddingTop: token.size,
         paddingBottom: token.size
+      }
+    },
+
+    '@media (max-width: 767px)': {
+      '.__form-buttons': {
+        '.ant-btn': {
+          minWidth: '100%'
+        }
       }
     }
   };

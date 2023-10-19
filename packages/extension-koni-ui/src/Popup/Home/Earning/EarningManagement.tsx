@@ -3,9 +3,11 @@
 
 import { APIItemState, NominatorMetadata, StakingRewardItem, StakingType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { BaseModal, EarningCalculatorModal, EarningInfoModal, EarningMoreActionModal, EarningToolbar, EmptyList, HorizontalEarningItem, YieldPositionDetailModal, YieldStakingDetailModal } from '@subwallet/extension-koni-ui/components';
+import { ActionListType } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningMoreActionModal';
 import Search from '@subwallet/extension-koni-ui/components/Search';
-import { BN_TEN, BN_ZERO, CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_CLAIM_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { BN_TEN, BN_ZERO, CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_CLAIM_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, EARNING_MORE_ACTION_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { useAutoNavigateEarning, useFilterModal, useGroupYieldPosition, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -15,7 +17,7 @@ import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Divider, Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { FadersHorizontal, Plus, PlusCircle, Vault } from 'phosphor-react';
+import { FadersHorizontal, Plus, PlusCircle, PlusMinus, Question, Vault } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -87,6 +89,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const location = useLocation();
   const { setTitle } = useContext(WebUIContext);
   const [searchInput, setSearchInput] = useState<string>('');
+  const [isShowAdditionActionInActionsModal, setShowAdditionActionInActionsModal] = useState<boolean>(false);
 
   const selectedStakingRewardItem = useMemo(() => {
     let nominationPoolReward: StakingRewardItem | undefined;
@@ -343,6 +346,16 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [activeModal, poolInfoMap]);
 
+  const onClickItemMoreActions = useCallback((item: YieldPositionInfo) => {
+    return () => {
+      const poolInfo = poolInfoMap[item.slug];
+
+      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      setShowAdditionActionInActionsModal(true);
+      activeModal(EARNING_MORE_ACTION_MODAL);
+    };
+  }, [activeModal, poolInfoMap]);
+
   const renderEarningItem = useCallback((item: YieldPositionInfo) => {
     const poolInfo = poolInfoMap[item.slug];
     const key = [item.slug, item.address].join('-');
@@ -385,6 +398,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onClickClaimBtn={onClickClaimBtn(item)}
         onClickInfoBtn={onClickInfoBtn(item)}
         onClickItem={onClickItem(item)}
+        onClickMoreBtn={onClickItemMoreActions(item)}
         onClickStakeBtn={onClickStakeBtn(item)}
         onClickUnStakeBtn={onClickUnStakeBtn(item)}
         onClickWithdrawBtn={onClickWithdrawBtn(item)}
@@ -392,7 +406,7 @@ const Component: React.FC<Props> = (props: Props) => {
         yieldPositionInfo={item}
       />
     );
-  }, [poolInfoMap, currentAccount?.address, isWebUI, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickClaimBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, stakingRewardMap]);
+  }, [poolInfoMap, currentAccount?.address, isWebUI, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickClaimBtn, onClickInfoBtn, onClickItem, onClickItemMoreActions, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, stakingRewardMap]);
 
   const resultList = useMemo((): YieldPositionInfo[] => {
     return [...groupYieldPosition]
@@ -492,13 +506,42 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const handleSearch = useCallback((value: string) => setSearchInput(value), [setSearchInput]);
 
-  const onClickActionBtn = useCallback(
+  const onClickSearchFilterBtn = useCallback(
     (e?: SyntheticEvent) => {
       e && e.stopPropagation();
       activeModal(FILTER_MODAL_ID);
     },
     [activeModal]
   );
+
+  const moreActions = useCallback((currentActions: ActionListType[]): ActionListType[] => {
+    return [
+      {
+        action: YieldAction.CUSTOM_ACTION,
+        backgroundIconColor: 'geekblue-6',
+        icon: PlusMinus,
+        label: t('Earning calculator'),
+        onClick: () => {
+          console.log('----selectedYieldPosition', selectedYieldPosition);
+          selectedYieldPosition && onClickCalculatorBtn(selectedYieldPosition)();
+        }
+      },
+      {
+        action: YieldAction.CUSTOM_ACTION,
+        backgroundIconColor: 'geekblue-6',
+        icon: Question,
+        label: t('Earning information'),
+        onClick: () => {
+          selectedYieldPosition && onClickInfoBtn(selectedYieldPosition)();
+        }
+      },
+      ...currentActions
+    ];
+  }, [onClickCalculatorBtn, onClickInfoBtn, selectedYieldPosition, t]);
+
+  const onCloseActionsModal = useCallback(() => {
+    setShowAdditionActionInActionsModal(false);
+  }, []);
 
   return (
     <div className={className}>
@@ -507,6 +550,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <SwSubHeader
             background={'transparent'}
             className={'__header-area'}
+            paddingVertical
             rightButtons={headerIcons}
             showBackButton={false}
             title={t('Earning')}
@@ -514,7 +558,6 @@ const Component: React.FC<Props> = (props: Props) => {
       }
 
       <div className={'__body-area'}>
-
         <div className='__toolbar-area'>
           {
             !isWebUI && (
@@ -525,7 +568,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     size='sm'
                   />
                 )}
-                onClickActionBtn={onClickActionBtn}
+                onClickActionBtn={onClickSearchFilterBtn}
                 onSearch={handleSearch}
                 placeholder={t('Search project')}
                 searchValue={searchInput}
@@ -613,6 +656,8 @@ const Component: React.FC<Props> = (props: Props) => {
       {
         selectedYieldPosition && selectedYieldPoolInfo && (
           <EarningMoreActionModal
+            additionActions={isShowAdditionActionInActionsModal ? moreActions : undefined}
+            onAfterCancel={onCloseActionsModal}
             stakingRewardItem={selectedStakingRewardItem}
             yieldPoolInfo={selectedYieldPoolInfo}
             yieldPositionInfo={selectedYieldPosition}
@@ -767,7 +812,6 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
       },
 
       '.__toolbar-area': {
-        paddingTop: token.paddingXS,
         position: 'sticky',
         zIndex: 10,
         top: 0,

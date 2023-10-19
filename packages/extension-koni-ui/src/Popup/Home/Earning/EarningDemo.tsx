@@ -69,6 +69,7 @@ const Component: React.FC<Props> = (props: Props) => {
             background={'transparent'}
             className={'__header-area'}
             onBack={onBack}
+            paddingVertical
             rightButtons={headerIcons}
             showBackButton
             title={t('Earning pools')}

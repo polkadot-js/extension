@@ -31,6 +31,7 @@ export enum CrowdloanFundStatus {
   IN_AUCTION= 'in_auction',
   WON= 'won',
   FAILED= 'failed',
+  WITHDRAW= 'withdraw',
 }
 
 export type CrowdloanFundInfo = {

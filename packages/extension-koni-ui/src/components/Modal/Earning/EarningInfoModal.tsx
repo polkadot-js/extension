@@ -272,7 +272,6 @@ const Component: React.FC<Props> = (props: Props) => {
               value={totalApy}
               weight={600}
             />
-            &nbsp;{t('rewards')}
           </div>
           <div className='token-item-container'>
             {

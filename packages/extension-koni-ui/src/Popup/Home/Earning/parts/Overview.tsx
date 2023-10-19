@@ -9,10 +9,10 @@ import EarningInfoModal from '@subwallet/extension-koni-ui/components/Modal/Earn
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, usePreCheckAction, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { getEarnExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -72,7 +72,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return [
       {
         desc: true,
-        label: t('Sort by total value'),
+        label: t('Total value staked'),
         value: SortKey.TOTAL_VALUE
       },
       {
@@ -88,11 +88,15 @@ const Component: React.FC<Props> = (props: Props) => {
     ];
   }, [t]);
 
-  const [selectedItem, setSelectedItem] = useState<YieldPoolInfo | undefined>(undefined);
+  const preCheckAction = usePreCheckAction(currentAccount?.address, false);
+
+  const [selectedSlug, setSelectedSlug] = useState('');
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
+
+  const selectedItem = useMemo((): YieldPoolInfo | undefined => poolInfo[selectedSlug], [poolInfo, selectedSlug]);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);
@@ -146,14 +150,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClickCalculatorBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
-      setSelectedItem(item);
+      setSelectedSlug(item.slug);
       activeModal(STAKING_CALCULATOR_MODAL);
     };
   }, [activeModal]);
 
   const onClickInfoBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
-      setSelectedItem(item);
+      setSelectedSlug(item.slug);
       activeModal(EARNING_INFO_MODAL);
     };
   }, [activeModal]);
@@ -164,21 +168,25 @@ const Component: React.FC<Props> = (props: Props) => {
         setReturnStorage('/home/earning/');
         navigate('/welcome');
       } else {
-        setSelectedItem(item);
-        const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+        const callback = () => {
+          setSelectedSlug(item.slug);
+          const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
-        setYieldStorage({
-          ...DEFAULT_YIELD_PARAMS,
-          method: item.slug,
-          from: address,
-          chain: item.chain,
-          asset: item.inputAssets[0]
-        });
+          setYieldStorage({
+            ...DEFAULT_YIELD_PARAMS,
+            method: item.slug,
+            from: address,
+            chain: item.chain,
+            asset: item.inputAssets[0]
+          });
 
-        navigate('/transaction/earn');
+          navigate('/transaction/earn');
+        };
+
+        preCheckAction(callback, getEarnExtrinsicType(item.slug))();
       }
     };
-  }, [currentAccount, isNoAccount, navigate, setReturnStorage, setYieldStorage]);
+  }, [currentAccount, isNoAccount, navigate, preCheckAction, setReturnStorage, setYieldStorage]);
 
   const renderEarningItem = useCallback((item: YieldPoolInfo) => {
     return (
@@ -344,6 +352,13 @@ const EarningOverviewContent = styled(Component)<Props>(({ theme: { token } }: P
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingBottom: token.padding
+    },
+
+    '.empty-list': {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)'
     },
 
     '@media (max-width: 991px)': {

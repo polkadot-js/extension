@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, StakingRewardItem, StakingStatus, YieldAssetBalance, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, StakingRewardItem, StakingStatus, YieldAssetBalance, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
 import { EXCLUSIVE_REWARD_SLUGS } from '@subwallet/extension-koni-ui/constants/earning';
-import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getEarnExtrinsicType, getWithdrawExtrinsicType } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Logo, Number, Typography, Web3Block } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { DotsThree, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
@@ -63,7 +64,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { chain, description, name, type } = yieldPoolInfo;
+  const { chain, description, name, slug, type } = yieldPoolInfo;
+  const { address } = yieldPositionInfo;
+
+  const preCheckAction = usePreCheckAction(address, false);
 
   const nominatorMetadata = useMemo((): NominatorMetadata | undefined => {
     if (![YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(yieldPoolInfo.type)) {
@@ -114,12 +118,17 @@ const Component: React.FC<Props> = (props: Props) => {
     return StakingStatusUi.inactive;
   }, [nominatorMetadata]);
 
-  const onClickButton = useCallback((callback: VoidFunction): React.MouseEventHandler => {
+  const onClickButton = useCallback((callback: VoidFunction, extrinsicType?: ExtrinsicType): React.MouseEventHandler => {
     return (event) => {
       event.stopPropagation();
-      callback();
+
+      if (extrinsicType) {
+        preCheckAction(callback, extrinsicType)();
+      } else {
+        callback();
+      }
     };
-  }, []);
+  }, [preCheckAction]);
 
   const availableActionsByMetadata = useMemo(() => {
     return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo, nominationPoolReward?.unclaimedReward);
@@ -165,35 +174,35 @@ const Component: React.FC<Props> = (props: Props) => {
         case YieldAction.STAKE:
           temp.icon = PlusCircle;
           temp.label = t('Stake now');
-          temp.onClick = onClickButton(onClickStakeBtn);
+          temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(slug));
           break;
         case YieldAction.CLAIM_REWARD:
           temp.icon = Wallet;
-          temp.onClick = onClickButton(onClickClaimBtn);
+          temp.onClick = onClickButton(onClickClaimBtn, ExtrinsicType.STAKING_CLAIM_REWARD);
           temp.label = t('Claim rewards');
           break;
         case YieldAction.WITHDRAW:
         case YieldAction.WITHDRAW_EARNING:
           temp.icon = StopCircle;
-          temp.onClick = onClickButton(onClickWithdrawBtn);
+          temp.onClick = onClickButton(onClickWithdrawBtn, getWithdrawExtrinsicType(slug));
           temp.label = t('Withdraw');
           temp.schema = 'secondary';
           break;
         case YieldAction.UNSTAKE:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickUnStakeBtn);
+          temp.onClick = onClickButton(onClickUnStakeBtn, ExtrinsicType.STAKING_LEAVE_POOL);
           temp.label = t('Unstake');
           temp.schema = 'secondary';
           break;
         case YieldAction.CANCEL_UNSTAKE:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickCancelUnStakeBtn);
+          temp.onClick = onClickButton(onClickCancelUnStakeBtn, ExtrinsicType.STAKING_CANCEL_UNSTAKE);
           temp.label = t('Cancel unstake');
           temp.schema = 'secondary';
           break;
         case YieldAction.START_EARNING:
           temp.icon = PlusCircle;
-          temp.onClick = onClickButton(onClickStakeBtn);
+          temp.onClick = onClickButton(onClickStakeBtn, ExtrinsicType.JOIN_YIELD_POOL);
           temp.label = t('Earn now');
           break;
       }
@@ -202,7 +211,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, onClickStakeBtn, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
+  }, [onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, onClickStakeBtn, slug, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
 
   const derivativeTokenState = useMemo(() => {
     if (!yieldPoolInfo.derivativeAssets) {

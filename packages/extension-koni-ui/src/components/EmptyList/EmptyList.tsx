@@ -6,6 +6,7 @@ import { Button, ButtonProps, PageIcon } from '@subwallet/react-ui';
 import { IconProps } from 'phosphor-react';
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
+import CN from 'classnames';
 
 interface Props extends ThemeProps {
   phosphorIcon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,
@@ -19,7 +20,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { token } = useTheme() as Theme;
 
   return (
-    <div className={className}>
+    <div className={CN(className, 'empty-list')}>
       <div className={'empty_icon_wrapper'}>
         <PageIcon
           color={token['gray-4']}

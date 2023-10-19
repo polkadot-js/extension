@@ -228,7 +228,7 @@ const Component: React.FC<Props> = (props: Props) => {
               onClick={childClick(onClickInfoBtn)}
               shape='circle'
               size='xs'
-              tooltip={t('FAQs')}
+              tooltip={t('Earning information')}
               type='ghost'
             />
             <Button

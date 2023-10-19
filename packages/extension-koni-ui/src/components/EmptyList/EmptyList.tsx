@@ -3,6 +3,7 @@
 
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ButtonProps, PageIcon } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { IconProps } from 'phosphor-react';
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -19,7 +20,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { token } = useTheme() as Theme;
 
   return (
-    <div className={className}>
+    <div className={CN(className, 'empty-list')}>
       <div className={'empty_icon_wrapper'}>
         <PageIcon
           color={token['gray-4']}

@@ -1902,6 +1902,11 @@ export enum NotificationType {
   WARNING = 'warning',
   ERROR = 'error',
 }
+
+export interface NotificationButton {
+  title: string;
+}
+
 export interface Notification {
   id: number;
   type: NotificationType;
@@ -1910,7 +1915,10 @@ export interface Notification {
   notifyViaBrowser?: boolean;
   action?: {
     url?: string; // Add more action in the future
-  }
+    buttonClick?: (btnIndex: number) => void;
+    click?: () => void;
+  };
+  buttons?: NotificationButton[];
 }
 
 export type NotificationParams = Omit<Notification, 'id'>;
@@ -2040,6 +2048,68 @@ export interface ResolveAddressToDomainRequest {
   chain: string,
   address: string
 }
+
+/* Campaign */
+
+export type CampaignAction = 'open_view' | 'open_url' | null;
+
+export interface CampaignButton {
+  id: number;
+  color: string;
+  icon: string | null;
+  name: string;
+  type: CampaignAction;
+  metadata: Record<string, any> | null;
+}
+
+export enum CampaignDataType {
+  NOTIFICATION = 'notification',
+  BANNER ='banner'
+}
+
+export interface BaseCampaignData {
+  slug: string;
+  campaignId: number;
+  isDone: boolean;
+  type: CampaignDataType;
+  data: Record<string, any>;
+  buttons: CampaignButton[];
+  startTime: number;
+  endTime: number;
+  condition: Record<string, any> | null;
+}
+
+export interface CampaignBanner extends BaseCampaignData {
+  type: CampaignDataType.BANNER;
+  data: {
+    media: string;
+    alt: string;
+    action: CampaignAction;
+    metadata: Record<string, any> | null;
+    environments: string[];
+    position: string[];
+  }
+}
+
+export interface CampaignNotification extends BaseCampaignData {
+  type: CampaignDataType.NOTIFICATION;
+  data: {
+    title: string;
+    message: string;
+    repeat: number;
+    repeatAfter: number;
+    action: CampaignAction;
+    metadata: Record<string, any> | null;
+  }
+}
+
+export type CampaignData = CampaignBanner | CampaignNotification;
+
+export interface RequestCampaignBannerComplete {
+  slug: string;
+}
+
+/* Campaign */
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
@@ -2305,6 +2375,11 @@ export interface KoniRequestSignatures {
 
   /// Metadata
   'pri(metadata.find)': [RequestFindRawMetadata, ResponseFindRawMetadata];
+
+  /* Campaign */
+  'pri(campaign.banner.subscribe)': [null, CampaignBanner[], CampaignBanner[]];
+  'pri(campaign.banner.complete)': [RequestCampaignBannerComplete, boolean];
+  /* Campaign */
 }
 
 export interface ApplicationMetadataType {

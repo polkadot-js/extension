@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _FundStatus, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AddressJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAccountUnsubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
@@ -292,7 +292,15 @@ export interface BalanceJson {
 export interface CrowdloanItem {
   state: APIItemState,
   paraState?: CrowdloanParaState,
-  contribute: string
+  contribute: string,
+  fundId: string;
+  paraId: number;
+  status: _FundStatus;
+  startTime: Date;
+  endTime: Date;
+  auctionIndex: number;
+  firstPeriod: number;
+  lastPeriod: number;
 }
 
 export interface CrowdloanJson {

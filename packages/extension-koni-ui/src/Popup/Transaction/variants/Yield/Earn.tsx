@@ -293,7 +293,7 @@ const Component = () => {
           currentPoolInfo.stats?.minJoinPool && (
             <MetaInfo.Number
               decimals={assetDecimals}
-              label={t('Min stake')}
+              label={t('Minimum active stake')}
               suffix={assetSymbol}
               value={currentPoolInfo.stats.minJoinPool}
             />

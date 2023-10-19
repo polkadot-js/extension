@@ -328,7 +328,7 @@ const Component: React.FC<Props> = (props: Props) => {
               valueColorSchema={'success'}
             />
             <MetaInfo.Default
-              label={t('Unlock period')}
+              label={t('Unstaking period')}
               valueColorSchema={'success'}
             >
               {currentItem.metadata?.unstakingPeriod ? getUnstakingPeriod(t, currentItem.metadata.unstakingPeriod) : t('Instant')}

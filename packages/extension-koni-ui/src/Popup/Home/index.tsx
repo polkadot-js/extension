@@ -30,7 +30,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const handleMantaPaySync = useHandleMantaPaySync();
 
-  const banners = useGetBannerByScreen('tokens');
+  const banners = useGetBannerByScreen('home');
 
   const firstBanner = useMemo((): CampaignBanner | undefined => banners[0], [banners]);
 

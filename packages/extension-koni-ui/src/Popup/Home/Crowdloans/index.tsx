@@ -274,7 +274,8 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
       margin: token.margin,
       marginTop: token.marginXXS,
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      gap: token.sizeXS
     },
 
     '.image-container': {

@@ -2,18 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PhosphorIcon } from '@subwallet/extension-koni-ui/types';
-import { ArrowCircleRight, XCircle } from 'phosphor-react';
+import * as Phosphor from 'phosphor-react';
 
 export const getBannerButtonIcon = (icon: string | null): PhosphorIcon | undefined => {
   if (!icon) {
     return undefined;
   }
 
-  switch (icon) {
-    case 'XCircle':
-      return XCircle;
-    case 'ArrowCircleRight':
-      return ArrowCircleRight;
+  if (['Icon', 'IconProps', 'IconWeight', 'IconContext'].includes(icon) && icon in Phosphor) {
+    // @ts-ignore
+    return Phosphor[icon] as PhosphorIcon;
   }
 
   return undefined;

@@ -7,35 +7,20 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { XCircle } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-type Props = ThemeProps;
+interface Props extends ThemeProps {
+  viewInHistory: VoidFunction;
+  backToEarning: VoidFunction;
+}
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className } = props;
-  const { chain, transactionId } = useParams<{chain: string, transactionId: string}>();
-  const navigate = useNavigate();
+  const { backToEarning, className, viewInHistory } = props;
 
   const { isWebUI } = useContext(ScreenContext);
 
   const { t } = useTranslation();
-
-  const viewInHistory = useCallback(
-    () => {
-      if (chain && transactionId) {
-        navigate(`/home/history/${chain}/${transactionId}`);
-      } else {
-        navigate('/home/history');
-      }
-    },
-    [chain, transactionId, navigate]
-  );
-
-  const backToEarning = useCallback(() => {
-    navigate('/home/earning/');
-  }, [navigate]);
 
   return (
     <div className={CN(className)}>

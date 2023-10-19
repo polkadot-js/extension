@@ -1043,5 +1043,7 @@
   "Watch any wallet": "",
   "Enter address": "",
   "Add watch-only wallet": "",
-  "{{name}} must be equal or greater than {{minString}}": ""
+  "{{name}} must be equal or greater than {{minString}}": "",
+  "<main>Yay! You staked</main><sub><span>in</span><logo /><span>{{poolName}}</span></sub>": "",
+  "<main>Yay! You supplied</main><sub><span>in</span><logo /><span>{{poolName}}</span></sub>": ""
 }

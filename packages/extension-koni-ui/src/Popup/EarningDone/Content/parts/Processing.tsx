@@ -80,12 +80,15 @@ const EarningDoneProcessing = styled(Component)<Props>(({ theme: { token } }: Pr
     },
 
     '.description': {
-      paddingLeft: token.paddingXS,
-      paddingRight: token.paddingXS,
       color: token.colorTextDescription,
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,
-      fontWeight: token.bodyFontWeight
+      fontWeight: token.bodyFontWeight,
+      padding: `0 ${token.size}px`,
+
+      '.web-ui-enable &': {
+        padding: `0 ${token.sizeXS}px`
+      }
     }
   };
 });

@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { baseParseIPFSUrl } from '@subwallet/extension-base/utils';
+import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { baseParseIPFSUrl, detectTranslate } from '@subwallet/extension-base/utils';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -10,18 +11,20 @@ import CN from 'classnames';
 import { TwitterLogo } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
+  chain?: string;
+  contactUs: VoidFunction;
+  goToNft: VoidFunction;
+  shareOnTwitter: VoidFunction;
   url: string;
+  viewInHistory: VoidFunction;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, url } = props;
-  const { chain, transactionId } = useParams<{chain: string, transactionId: string}>();
+  const { chain, className, contactUs, goToNft, shareOnTwitter, url, viewInHistory } = props;
 
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const { isWebUI } = useContext(ScreenContext);
@@ -32,29 +35,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [imageDone, setImageDone] = useState(false);
 
-  const viewInHistory = useCallback(
-    () => {
-      if (chain && transactionId) {
-        navigate(`/home/history/${chain}/${transactionId}`);
-      } else {
-        navigate('/home/history');
-      }
-    },
-    [chain, transactionId, navigate]
-  );
-
-  const shareOnTwitter = useCallback(() => {
-    // TODO: add callback
-  }, []);
-
-  const contactUs = useCallback(() => {
-    // TODO: add callback
-  }, []);
-
-  const goToNft = useCallback(() => {
-    navigate('/home/nfts/collections');
-  }, [navigate]);
-
   const onImageLoad = useCallback(() => {
     setImageDone(true);
   }, []);
@@ -62,7 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <div className={CN(className)}>
       {
-        url && (
+        url && isWebUI && (
           <img
             alt='success-gif'
             className={CN('success-image')}
@@ -86,7 +66,11 @@ const Component: React.FC<Props> = (props: Props) => {
                 ),
                 span: <span />
               }}
-              i18nKey={'<main>Yay! You staked</main><sub><span>in</span><logo /><span>{{poolName}}</span></sub>'}
+              i18nKey={
+                pool?.type !== YieldPoolType.LENDING
+                  ? detectTranslate('<main>Yay! You staked</main><sub><span>in</span><logo /><span>{{poolName}}</span></sub>')
+                  : detectTranslate('<main>Yay! You supplied</main><sub><span>in</span><logo /><span>{{poolName}}</span></sub>')
+              }
               values={{
                 poolName: pool?.name || ''
               }}
@@ -260,6 +244,11 @@ const EarningDoneSuccess = styled(Component)<Props>(({ theme: { token } }: Props
       lineHeight: token.lineHeightHeading2,
       fontWeight: token.fontWeightStrong,
       color: token.colorSecondary,
+      padding: `0 ${token.size}px`,
+
+      '.web-ui-enable &': {
+        padding: `0 ${token.sizeXS}px`
+      },
 
       '&.warn': {
         color: token.colorWarning,
@@ -277,16 +266,24 @@ const EarningDoneSuccess = styled(Component)<Props>(({ theme: { token } }: Props
       flexDirection: 'row',
       gap: token.sizeXXS,
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      padding: `0 ${token.size}px`,
+
+      '.web-ui-enable &': {
+        padding: `0 ${token.sizeXS}px`
+      }
     },
 
     '.description': {
-      paddingLeft: token.paddingXS,
-      paddingRight: token.paddingXS,
       color: token.colorTextDescription,
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,
-      fontWeight: token.bodyFontWeight
+      fontWeight: token.bodyFontWeight,
+      padding: `0 ${token.size}px`,
+
+      '.web-ui-enable &': {
+        padding: `0 ${token.sizeXS}px`
+      }
     },
 
     '.highlight': {

@@ -3,12 +3,14 @@
 
 import { ExtrinsicStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { UnlockDotTransactionNft } from '@subwallet/extension-base/types';
-import { CloseIcon, Layout, SocialGroup } from '@subwallet/extension-koni-ui/components';
+import { Layout, SocialGroup } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { unlockDotCheckSubscribe } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ButtonProps, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
+import { TwitterLogo } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -74,6 +76,85 @@ const Component: React.FC<Props> = (props: Props) => {
     navigate('/home/earning/');
   }, [navigate]);
 
+  const shareOnTwitter = useCallback(() => {
+    // TODO: add callback
+  }, []);
+
+  const contactUs = useCallback(() => {
+    // TODO: add callback
+  }, []);
+
+  const goToNft = useCallback(() => {
+    navigate('/home/nfts/collections');
+  }, [navigate]);
+
+  const rightFooterButton = useMemo((): ButtonProps | undefined => {
+    if (isWebUI) {
+      return undefined;
+    }
+
+    switch (status) {
+      case ProcessStatus.PROCESSING:
+        return undefined;
+      case ProcessStatus.FAIL:
+        return {
+          block: true,
+          onClick: backToEarning,
+          schema: 'secondary',
+          children: t('Back to Earning')
+        };
+      case ProcessStatus.SUCCESS:
+        return {
+          block: true,
+          onClick: viewInHistory,
+          schema: 'secondary',
+          children: t('View transaction')
+        };
+    }
+  }, [backToEarning, isWebUI, status, t, viewInHistory]);
+
+  const leftFooterButton = useMemo((): ButtonProps | undefined => {
+    if (isWebUI) {
+      return undefined;
+    }
+
+    switch (status) {
+      case ProcessStatus.PROCESSING:
+        return undefined;
+      case ProcessStatus.FAIL:
+        return {
+          block: true,
+          onClick: viewInHistory,
+          schema: 'primary',
+          children: t('View transaction')
+        };
+
+      case ProcessStatus.SUCCESS: {
+        if (nftData?.nftImage) {
+          return {
+            block: true,
+            icon: (
+              <Icon
+                phosphorIcon={TwitterLogo}
+                weight='fill'
+              />
+            ),
+            schema: 'primary',
+            onClick: shareOnTwitter,
+            children: t('Share to Twitter')
+          };
+        } else {
+          return {
+            block: true,
+            onClick: contactUs,
+            schema: 'primary',
+            children: t('Contact us')
+          };
+        }
+      }
+    }
+  }, [contactUs, isWebUI, nftData?.nftImage, shareOnTwitter, status, t, viewInHistory]);
+
   useEffect(() => {
     let unmount = false;
 
@@ -95,22 +176,8 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <Layout.WithSubHeaderOnly
       className={className}
-      {...(!isWebUI
-        ? {
-          leftFooterButton: {
-            block: true,
-            onClick: viewInHistory,
-            children: t('View transaction')
-          },
-          rightFooterButton: {
-            block: true,
-            onClick: backToEarning,
-            children: t('Back to Earning')
-          },
-          subHeaderLeft: <CloseIcon />
-        }
-        : {}
-      )}
+      leftFooterButton={leftFooterButton}
+      rightFooterButton={rightFooterButton}
       title={t('Earning result')}
     >
       <div className={CN('content-container', {
@@ -124,12 +191,22 @@ const Component: React.FC<Props> = (props: Props) => {
         }
         {
           status === ProcessStatus.FAIL && (
-            <EarningDoneFail />
+            <EarningDoneFail
+              backToEarning={backToEarning}
+              viewInHistory={viewInHistory}
+            />
           )
         }
         {
           status === ProcessStatus.SUCCESS && (
-            <EarningDoneSuccess url={nftData?.nftImage || ''} />
+            <EarningDoneSuccess
+              chain={chain}
+              contactUs={contactUs}
+              goToNft={goToNft}
+              shareOnTwitter={shareOnTwitter}
+              url={nftData?.nftImage || ''}
+              viewInHistory={viewInHistory}
+            />
           )
         }
       </div>

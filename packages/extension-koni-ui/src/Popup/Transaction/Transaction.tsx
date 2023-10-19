@@ -65,12 +65,13 @@ function Component ({ children, className, modalContent }: Props) {
       case 'cancel-un-yield':
         return ExtrinsicType.STAKING_CANCEL_UNSTAKE;
       case 'claim-reward':
-      case 'claim-yield':
+      case 'yield-claim':
         return ExtrinsicType.STAKING_CLAIM_REWARD;
       case 'withdraw':
       case 'withdraw-yield':
-      case 'yield-withdraw-position':
         return ExtrinsicType.STAKING_WITHDRAW;
+      case 'yield-withdraw-position':
+        return ExtrinsicType.REDEEM_VDOT;
       case 'compound':
         return ExtrinsicType.STAKING_COMPOUNDING;
       case 'send-nft':
@@ -113,7 +114,9 @@ function Component ({ children, className, modalContent }: Props) {
       case 'earn':
       case 'un-yield':
       case 'withdraw-yield':
-      case 'claim-yield':
+      case 'cancel-un-yield':
+      case 'yield-withdraw-position':
+      case 'yield-claim':
         return '/home/earning/';
       case 'send-fund':
       default:

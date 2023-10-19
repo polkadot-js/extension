@@ -9,7 +9,7 @@ export const getBannerButtonIcon = (icon: string | null): PhosphorIcon | undefin
     return undefined;
   }
 
-  if (['Icon', 'IconProps', 'IconWeight', 'IconContext'].includes(icon) && icon in Phosphor) {
+  if (!['Icon', 'IconProps', 'IconWeight', 'IconContext'].includes(icon) && icon in Phosphor) {
     // @ts-ignore
     return Phosphor[icon] as PhosphorIcon;
   }

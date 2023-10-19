@@ -20,8 +20,12 @@ const STATUS_MAP: Record<_FundStatus, CrowdloanParaState> = {
   [_FundStatus.WON]: CrowdloanParaState.COMPLETED
 };
 
+export type CrowdloanFundInfo = _CrowdloanFund & {
+  chain: string;
+}
+
 const getOnlineFundList = (async () => {
-  const request = await axios.get<_CrowdloanFund[]>('https://static-data.subwallet.app/crowdloan-funds/list.json');
+  const request = await axios.get<CrowdloanFundInfo[]>('https://static-data.subwallet.app/crowdloan-funds/list.json');
 
   return request.data;
 })();
@@ -73,14 +77,13 @@ export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], fu
       let contribute = new BN(0);
 
       resList.forEach((res) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
         contribute = contribute.add(new BN(res.data.data?.acala?.[0]?.totalDOTLocked || '0'));
       });
 
       const rs: CrowdloanItem = {
         state: APIItemState.READY,
         paraState,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
         contribute: contribute.toString(),
         fundId,
         paraId,
@@ -130,7 +133,16 @@ export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], fu
 // Get All crowdloan
 export async function subscribeCrowdloan (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, callback: (networkKey: string, rs: CrowdloanItem) => void, chainInfoMap: Record<string, _ChainInfo>) {
   const unsubMap: Record<string, any> = {};
-  const fundList = await getOnlineFundList;
+  const latestMap: Record<string, CrowdloanFundInfo> = {};
+  const rawFundList = await getOnlineFundList;
+
+  rawFundList.forEach((fundInfo) => {
+    const chainSlug = fundInfo.chain;
+
+    if (!latestMap[chainSlug] || fundInfo.auctionIndex > latestMap[chainSlug].auctionIndex) {
+      latestMap[chainSlug] = fundInfo;
+    }
+  });
 
   if (Object.keys(substrateApiMap).includes(COMMON_CHAIN_SLUGS.KUSAMA) && Object.keys(substrateApiMap).includes(COMMON_CHAIN_SLUGS.POLKADOT)) {
     const now = Date.now();
@@ -145,10 +157,8 @@ export async function subscribeCrowdloan (addresses: string[], substrateApiMap: 
       return;
     }
 
-    fundList.forEach((fundInfo) => {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const chainSlug = fundInfo.chain as string;
+    Object.values(latestMap).forEach((fundInfo) => {
+      const chainSlug = fundInfo.chain;
       const endTime = new Date(fundInfo.endTime).getTime();
       const parentChain = fundInfo.relayChain;
 

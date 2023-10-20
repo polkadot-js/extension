@@ -4,9 +4,9 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { CrowdloanContributionItem } from '@subwallet/extension-base/services/subscan-service/types';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, TokenBalance } from '@subwallet/extension-koni-ui/components';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
-import { CREATE_RETURN, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
@@ -16,17 +16,17 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
 import { CrowdloanContributionsResultParam, CrowdloanFundInfo, CrowdloanFundStatus, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, Button, ButtonProps, Form, Icon, Logo, ModalContext, SwSubHeader, Table, Tag } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, ButtonProps, Form, Icon, Logo, SwSubHeader, Table, Tag } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
+import fetch from 'cross-fetch';
 import { ArrowCounterClockwise, FadersHorizontal, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
-import { useLocalStorage } from 'usehooks-ts';
 
 import { isAddress } from '@polkadot/util-crypto';
 
@@ -98,6 +98,8 @@ enum FilterValue {
   IN_AUCTION = 'in auction'
 }
 
+const ACALA_FUND_ID = '2000-0';
+
 const paraStateMap: Record<CrowdloanFundStatus, CrowdloanParaState> = {
   [CrowdloanFundStatus.IN_AUCTION]: CrowdloanParaState.ONGOING,
   [CrowdloanFundStatus.WON]: CrowdloanParaState.COMPLETED,
@@ -163,6 +165,45 @@ const getTableItems = (
   return result;
 };
 
+const getAcalaTableItem = (
+  value: string | undefined,
+  fundInfo: CrowdloanFundInfo | undefined,
+  chainInfo: _ChainInfo | undefined,
+  priceMap: PriceStore['priceMap']
+): TableItem | undefined => {
+  if (!value || !fundInfo || !chainInfo) {
+    return;
+  }
+
+  if (!fundInfo.endTime || new Date(fundInfo.endTime).getTime() < Date.now()) {
+    return;
+  }
+
+  const price = priceMap.polkadot || 0;
+
+  const contributedValue = getBalanceValue(value || '0', 10);
+  const convertedContributedValue = getConvertedBalanceValue(contributedValue, price);
+
+  const unlockTimeNumber = new Date(fundInfo.endTime).getTime();
+  const unlockTime = customFormatDate(unlockTimeNumber, '#YYYY#-#MM#-#DD#');
+
+  return {
+    id: `${ACALA_FUND_ID}-polkadot`,
+    chainSlug: chainInfo.slug,
+    chainName: chainInfo.name,
+    relayChainSlug: 'polkadot',
+    relayChainName: 'Polkadot',
+    contribution: {
+      symbol: 'DOT',
+      value: contributedValue,
+      convertedValue: convertedContributedValue
+    },
+    paraState: paraStateMap[fundInfo.status as CrowdloanFundStatus],
+    unlockTime: customFormatDate(unlockTime, '#YYYY#-#MM#-#DD#'),
+    sortOrder: unlockTimeNumber
+  };
+};
+
 enum RelayChainFilter {
   ALL='all',
   POLKADOT='polkadot',
@@ -177,10 +218,9 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
   const { isNoAccount } = useSelector((state: RootState) => state.accountState);
-  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
   const { setOnBack, setWebBaseClassName } = useContext(WebUIContext);
-  const { activeModal } = useContext(ModalContext);
   const [currentSelectRelayChainFilter, setCurrentSelectRelayChainFilter] = useState<RelayChainFilter>(RelayChainFilter.ALL);
+  const [acalaValue, setAcalaValue] = useState<string | undefined>(undefined);
   const { isWebUI } = useContext(ScreenContext);
   const { setTitle } = useContext(WebUIContext);
   const location = useLocation();
@@ -242,15 +282,25 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   }, [t]);
 
   const tableItems = useMemo<TableItem[]>(() => {
-    if (!contributionsMap.polkadot.length && !contributionsMap.kusama.length) {
+    if (!contributionsMap.polkadot.length && !contributionsMap.kusama.length && !acalaValue) {
       return [];
     }
 
-    return [
+    const results: TableItem[] = [];
+
+    if (acalaValue) {
+      const acalaValueInfo = getAcalaTableItem(acalaValue, crowdloanFundInfoMap[ACALA_FUND_ID], chainInfoMap.acala, priceMap);
+
+      !!acalaValueInfo && results.push(acalaValueInfo);
+    }
+
+    results.push(
       ...getTableItems('polkadot', contributionsMap, crowdloanFundInfoMap, chainInfoMap, priceMap),
       ...getTableItems('kusama', contributionsMap, crowdloanFundInfoMap, chainInfoMap, priceMap)
-    ].sort((a, b) => a.sortOrder - b.sortOrder);
-  }, [chainInfoMap, contributionsMap, crowdloanFundInfoMap, priceMap]);
+    );
+
+    return results.sort((a, b) => a.sortOrder - b.sortOrder);
+  }, [acalaValue, chainInfoMap, contributionsMap, crowdloanFundInfoMap, priceMap]);
 
   const filteredTableItems = useMemo(() => {
     const filterTabFunction = (item: TableItem) => {
@@ -412,10 +462,23 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
 
   const fetchTableData = useCallback((address: string) => {
     setLoading(true);
-    fetchContributionsMap(address).then((rs) => {
-      setContributionsMap(rs);
+
+    const polkadotAddress = reformatAddress(address, 10, false);
+
+    Promise.all([
+      fetchContributionsMap(address),
+      (async () => {
+        const res = await fetch(`https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=${polkadotAddress}`);
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return await res.json();
+      })()
+    ]).then(([contributionsMap, acalaValueInfo]) => {
+      setContributionsMap(contributionsMap);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+      setAcalaValue(acalaValueInfo?.data?.acala?.[0]?.totalDOTLocked);
     }).catch((e) => {
-      console.log('fetchContributionsMap Error', e);
+      console.log('fetch Contributions Error', e);
     }).finally(() => {
       setLoading(false);
     });
@@ -449,12 +512,11 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
 
   const onClickCreateNewWallet = useCallback(() => {
     if (isNoAccount) {
-      setReturnStorage('/home/earning/');
-      navigate('/welcome');
+      openInNewTab(`${window.location.origin}/welcome`)();
     } else {
-      activeModal(NEW_SEED_MODAL);
+      openInNewTab(`${window.location.origin}/home/tokens`)();
     }
-  }, [activeModal, isNoAccount, navigate, setReturnStorage]);
+  }, [isNoAccount]);
 
   useEffect(() => {
     setOnBack(onBack);
@@ -540,11 +602,11 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             <SwSubHeader
               background={'transparent'}
               className={'__header-area'}
-              paddingVertical
-              title={t('Your contributions')}
               onBack={onBack}
+              paddingVertical
               // rightButtons={headerIcons}
               showBackButton
+              title={t('Your contributions')}
             />
           )
         }

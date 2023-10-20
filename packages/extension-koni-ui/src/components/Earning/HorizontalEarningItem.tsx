@@ -306,9 +306,30 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           <div className='__item-buttons-container'>
             {
-              (actionListByChain.includes(YieldAction.STAKE) || actionListByChain.includes(YieldAction.START_EARNING)) && (
+              actionListByChain.includes(YieldAction.STAKE) && (
                 <Button
                   className={'__item-button __item-stake-button'}
+                  disabled={!availableActionsByMetadata.includes(YieldAction.STAKE)}
+                  icon={(
+                    <Icon
+                      iconColor={token.colorPrimary}
+                      phosphorIcon={PlusCircle}
+                      size='sm'
+                      weight='fill'
+                    />
+                  )}
+                  onClick={onClickButton(onClickStakeBtn)}
+                  size='xs'
+                  type='ghost'
+                />
+              )
+            }
+
+            {
+              actionListByChain.includes(YieldAction.START_EARNING) && (
+                <Button
+                  className={'__item-button __item-stake-button'}
+                  disabled={!availableActionsByMetadata.includes(YieldAction.START_EARNING)}
                   icon={(
                     <Icon
                       iconColor={token.colorPrimary}
@@ -328,6 +349,7 @@ const Component: React.FC<Props> = (props: Props) => {
               (actionListByChain.includes(YieldAction.CLAIM_REWARD)) && (
                 <Button
                   className={'__item-button __item-stake-button'}
+                  disabled={!availableActionsByMetadata.includes(YieldAction.CLAIM_REWARD)}
                   icon={(
                     <Icon
                       iconColor={token.colorSuccess}
@@ -603,6 +625,12 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
     '.__item-line-1': {
       'white-space': 'nowrap',
       marginBottom: token.marginXXS
+    },
+
+    '.__item-button': {
+      '&:disabled': {
+        opacity: 0.4
+      }
     },
 
     '.__item-name': {

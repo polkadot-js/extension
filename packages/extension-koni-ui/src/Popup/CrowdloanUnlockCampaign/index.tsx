@@ -17,10 +17,6 @@ import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps;
 
-type UnlockTimeInfo = {
-  time: number;
-}
-
 type PeriodTimeInfo = {
   polkadot: Record<string, number>;
   kusama: Record<string, number>;

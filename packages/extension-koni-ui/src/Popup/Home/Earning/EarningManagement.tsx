@@ -347,13 +347,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClickItemMoreActions = useCallback((item: YieldPositionInfo) => {
     return () => {
-      const poolInfo = poolInfoMap[item.slug];
-
-      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      setSelectedSlug(item.slug);
       setShowAdditionActionInActionsModal(true);
       activeModal(EARNING_MORE_ACTION_MODAL);
     };
-  }, [activeModal, poolInfoMap]);
+  }, [activeModal]);
 
   const renderEarningItem = useCallback((item: YieldPositionInfo) => {
     const poolInfo = poolInfoMap[item.slug];

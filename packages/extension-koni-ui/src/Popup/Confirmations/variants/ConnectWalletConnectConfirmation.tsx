@@ -183,6 +183,7 @@ function Component ({ className, request }: Props) {
                         appliedAccounts={appliedAccounts}
                         availableAccounts={availableAccounts}
                         id={`${namespace}-accounts`}
+                        namespace={namespace}
                         onApply={onApplyModal(namespace)}
                         onCancel={onCancelModal(namespace)}
                         onSelectAccount={_onSelectAccount(namespace)}

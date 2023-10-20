@@ -13,7 +13,7 @@ import { Button, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import { GeneralEmptyList } from '../../EmptyList';
@@ -21,6 +21,7 @@ import WCAccountInput from './WCAccountInput';
 
 interface Props extends ThemeProps {
   id: string;
+  namespace: string;
   selectedAccounts: string[];
   appliedAccounts: string[];
   availableAccounts: AccountJson[];
@@ -33,7 +34,7 @@ interface Props extends ThemeProps {
 const renderEmpty = () => <GeneralEmptyList />;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { appliedAccounts, availableAccounts, className, id, onApply, onCancel, onSelectAccount, selectedAccounts, useModal } = props;
+  const { appliedAccounts, availableAccounts, className, id, namespace, onApply, onCancel, onSelectAccount, selectedAccounts, useModal } = props;
 
   const { t } = useTranslation();
 
@@ -42,6 +43,28 @@ const Component: React.FC<Props> = (props: Props) => {
   const sectionRef = useRef<SwListSectionRef>(null);
 
   const isActive = checkActive(id);
+
+  const noAccountTitle = useMemo(() => {
+    switch (namespace) {
+      case 'polkadot':
+        return t('No available Substrate account');
+      case 'eip155':
+        return t('No available EVM account');
+      default:
+        return t('No available account');
+    }
+  }, [namespace, t]);
+
+  const noAccountDescription = useMemo(() => {
+    switch (namespace) {
+      case 'polkadot':
+        return t("You don't have any Substrate account to connect. Please create one or skip this step by hitting Cancel.");
+      case 'eip155':
+        return t("You don't have any EVM account to connect. Please create one or skip this step by hitting Cancel.");
+      default:
+        return t("You don't have any account to connect. Please create one or skip this step by hitting Cancel.");
+    }
+  }, [namespace, t]);
 
   const onOpenModal = useCallback(() => {
     activeModal(id);
@@ -86,8 +109,8 @@ const Component: React.FC<Props> = (props: Props) => {
         !availableAccounts.length
           ? (
             <AlertBox
-              description={t('You don’t have any accounts. Please create a new account')}
-              title={t('No accounts found')}
+              description={noAccountDescription}
+              title={noAccountTitle}
               type='warning'
             />
           )

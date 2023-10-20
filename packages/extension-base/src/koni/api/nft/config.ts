@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RuntimeInfo } from '@subwallet/extension-base/utils';
+import Bowser from 'bowser';
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account-rmrk1/';
 
@@ -52,6 +53,17 @@ export const DWEB_LINK = 'https://dweb.link/ipfs/';
 export const IPFS_GATEWAY_4EVERLAND = 'https://4everland.io/ipfs/';
 
 export const IPFS_FLEEK = 'https://ipfs.fleek.co/ipfs/';
+
+export const W3S_IPFS = 'https://w3s.link/ipfs/'; // 400
+export const IPFS2_RMRK = 'https://ipfs2.rmrk.link/ipfs/'; // ????
+export const IPFS_ETH_ARAGON = 'https://ipfs.eth.aragon.network/ipfs/'; // 400
+export const SUBWALLET_IPFS = 'https://ipfs.subwallet.app/ipfs/'; // ???
+
+const detectFirefox = (): boolean => {
+  return (localStorage.getItem('browserInfo') || Bowser.getParser(window.navigator.userAgent).getBrowserName()).toLowerCase() === 'firefox';
+};
+
+const isFirefox = detectFirefox();
 
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
@@ -139,6 +151,13 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
     weight: 50
   }
 ];
+
+if (isFirefox) {
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: SUBWALLET_IPFS,
+    weight: 5000
+  });
+}
 
 if (!RuntimeInfo.protocol || (RuntimeInfo.protocol && !RuntimeInfo.protocol.startsWith('http'))) {
   RANDOM_IPFS_GATEWAY_SETTING.push({

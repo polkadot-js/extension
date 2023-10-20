@@ -2904,7 +2904,7 @@ export default class KoniExtension {
     oldPassword }: RequestChangeMasterPassword): ResponseChangeMasterPassword {
     try {
       // Remove isMasterPassword meta if createNew
-      if (createNew) {
+      if (createNew && !keyring.keyring.hasMasterPassword) {
         const pairs = keyring.getPairs();
 
         for (const pair of pairs) {

@@ -74,6 +74,28 @@ function Component ({ className, request }: Props) {
     return !visibleAccounts.filter(({ address }) => !!selectedMap[address]).length;
   }, [selectedMap, visibleAccounts]);
 
+  const noAvailableTitle = useMemo(() => {
+    switch (accountAuthType) {
+      case 'substrate':
+        return t('No available Substrate account');
+      case 'evm':
+        return t('No available EVM account');
+      default:
+        return t('No available account');
+    }
+  }, [accountAuthType, t]);
+
+  const noAvailableDescription = useMemo(() => {
+    switch (accountAuthType) {
+      case 'substrate':
+        return t("You don't have any Substrate account to connect. Please create one or skip this step by hitting Cancel.");
+      case 'evm':
+        return t("You don't have any EVM account to connect. Please create one or skip this step by hitting Cancel.");
+      default:
+        return t("You don't have any account to connect. Please create one or skip this step by hitting Cancel.");
+    }
+  }, [accountAuthType, t]);
+
   // Handle buttons actions
   const onBlock = useCallback(() => {
     setLoading(true);
@@ -176,7 +198,7 @@ function Component ({ className, request }: Props) {
         >
           {
             visibleAccounts.length === 0
-              ? t('No available account')
+              ? noAvailableTitle
               : t('Choose the account(s) you’d like to connect')
           }
         </div>
@@ -215,7 +237,7 @@ function Component ({ className, request }: Props) {
         <div className='description'>
           {
             visibleAccounts.length === 0
-              ? t("You don't have any accounts to connect. Please create or import an account.")
+              ? noAvailableDescription
               : t('Make sure you trust this site before connecting')
           }
         </div>

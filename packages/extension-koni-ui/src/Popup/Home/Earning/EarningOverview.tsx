@@ -45,7 +45,7 @@ const Component: React.FC<Props> = (props: Props) => {
       subHeaderBackground={'transparent'}
       subHeaderCenter={false}
       subHeaderPaddingVertical={true}
-      title={t('Earning')}
+      title={t('Earning pools')}
     >
       <EarningOverviewContent />
     </Layout.Base>

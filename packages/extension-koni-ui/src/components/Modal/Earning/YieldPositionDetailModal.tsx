@@ -204,7 +204,7 @@ const Component: React.FC<Props> = (props: Props) => {
       id={modalId}
       maskClosable={true}
       onCancel={onCloseModal}
-      title={t('Position details')}
+      title={t('Earning details')}
     >
       <MetaInfo>
         <MetaInfo.Account

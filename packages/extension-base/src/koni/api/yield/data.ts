@@ -54,7 +54,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     slug: 'DOT___acala_liquid_staking',
     chain: 'acala',
     name: 'Acala Liquid Staking',
-    description: 'Stake DOT to receive LDOT',
+    description: 'Stake DOT to earn yield on LDOT',
     type: YieldPoolType.LIQUID_STAKING,
     inputAssets: [
       'acala-LOCAL-DOT'
@@ -89,7 +89,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     slug: 'DOT___bifrost_liquid_staking',
     chain: 'bifrost_dot',
     name: 'Bifrost Liquid Staking',
-    description: 'Stake DOT by minting vDOT',
+    description: 'Stake DOT to earn yield on vDOT',
     type: YieldPoolType.LIQUID_STAKING,
     inputAssets: [
       'bifrost_dot-LOCAL-DOT'
@@ -124,7 +124,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
     slug: 'DOT___parallel_liquid_staking',
     chain: 'parallel',
     name: 'Parallel Liquid Staking',
-    description: 'Stake DOT by minting sDOT',
+    description: 'Stake DOT to earn yield on sDOT',
     type: YieldPoolType.LIQUID_STAKING,
     inputAssets: [
       'parallel-LOCAL-DOT'

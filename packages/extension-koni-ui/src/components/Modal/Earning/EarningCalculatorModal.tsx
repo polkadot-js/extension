@@ -5,9 +5,10 @@ import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo } from
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { usePreCheckAction } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { getEarnExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon, ModalContext, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
@@ -75,6 +76,8 @@ const Component = (props: Props) => {
   const currentAmount = Form.useWatch(FormFieldName.VALUE, form);
   const currentMethod = Form.useWatch(FormFieldName.METHOD, form);
 
+  const preCheckAction = usePreCheckAction(currentAccount?.address, false);
+
   const currentItem = useMemo(() => currentMethod ? poolInfo[currentMethod] : defaultItem, [currentMethod, poolInfo, defaultItem]);
 
   const currentDecimal = useMemo(() => {
@@ -122,28 +125,33 @@ const Component = (props: Props) => {
   }, []);
 
   const onSubmit: FormCallbacks<EarningCalculatorFormProps>['onFinish'] = useCallback((values: EarningCalculatorFormProps) => {
+    const { amount, method } = values;
+
     if (isNoAccount) {
+      inactiveModal(modalId);
       setReturnStorage('/home/earning/');
       navigate('/welcome');
     } else {
-      const { amount } = values;
+      const callback = () => {
+        inactiveModal(modalId);
 
-      inactiveModal(modalId);
+        const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
-      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+        setYieldStorage({
+          ...DEFAULT_YIELD_PARAMS,
+          method: currentItem.slug,
+          from: address,
+          chain: currentItem.chain,
+          asset: currentItem.inputAssets[0],
+          'amount-0': amount
+        });
 
-      setYieldStorage({
-        ...DEFAULT_YIELD_PARAMS,
-        method: currentItem.slug,
-        from: address,
-        chain: currentItem.chain,
-        asset: currentItem.inputAssets[0],
-        'amount-0': amount
-      });
+        navigate('/transaction/earn');
+      };
 
-      navigate('/transaction/earn');
+      preCheckAction(callback, getEarnExtrinsicType(method))();
     }
-  }, [isNoAccount, setReturnStorage, navigate, inactiveModal, currentAccount, setYieldStorage, currentItem.slug, currentItem.chain, currentItem.inputAssets]);
+  }, [isNoAccount, inactiveModal, setReturnStorage, navigate, preCheckAction, currentAccount, setYieldStorage, currentItem.slug, currentItem.chain, currentItem.inputAssets]);
 
   useEffect(() => {
     addExclude(modalId);

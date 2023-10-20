@@ -12,7 +12,7 @@ import { useGetYieldMetadata, useGetYieldPositionByAddressAndSlug, useHandleSubm
 import { yieldSubmitRedeem } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, ThemeProps, YieldFastWithdrawParams } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, simpleCheckForm, validateYieldWithdrawPosition } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, getWithdrawExtrinsicType, simpleCheckForm, validateYieldWithdrawPosition } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -142,24 +142,7 @@ const Component: React.FC = () => {
 
   const onPreCheck = usePreCheckAction(from);
 
-  const extrinsicType = useMemo((): ExtrinsicType => {
-    if (!yieldPoolInfo) {
-      return ExtrinsicType.UNKNOWN;
-    }
-
-    switch (yieldPoolInfo.slug) {
-      case 'DOT___acala_liquid_staking':
-        return ExtrinsicType.REDEEM_LDOT;
-      case 'DOT___bifrost_liquid_staking':
-        return ExtrinsicType.REDEEM_VDOT;
-      case 'DOT___parallel_liquid_staking':
-        return ExtrinsicType.REDEEM_SDOT;
-      case 'DOT___interlay_lending':
-        return ExtrinsicType.REDEEM_QDOT;
-      default:
-        return ExtrinsicType.UNKNOWN;
-    }
-  }, [yieldPoolInfo]);
+  const extrinsicType = useMemo((): ExtrinsicType => getWithdrawExtrinsicType(yieldPoolInfo?.slug), [yieldPoolInfo]);
 
   return (
     <div>

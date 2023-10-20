@@ -6,11 +6,11 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
-import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { usePreCheckAction, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { getEarnExtrinsicType, isAccountAll, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon, ModalContext, Number, Tooltip } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -78,6 +78,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [defaultItem.slug]);
 
   const currentMethod = Form.useWatch('method', form);
+
+  const preCheckAction = usePreCheckAction(currentAccount?.address, false);
 
   const currentItem = useMemo(() => currentMethod ? poolInfo[currentMethod] : defaultItem, [currentMethod, poolInfo, defaultItem]);
 
@@ -161,26 +163,32 @@ const Component: React.FC<Props> = (props: Props) => {
     openInNewTab(url)();
   }, [currentItem.chain]);
 
-  const onSubmit: FormCallbacks<EarningInfoFormProps>['onFinish'] = useCallback(() => {
-    inactiveModal(modalId);
+  const onSubmit: FormCallbacks<EarningInfoFormProps>['onFinish'] = useCallback((values: EarningInfoFormProps) => {
+    const { method } = values;
 
     if (isNoAccount) {
       setReturnStorage('/home/earning/');
       navigate('/welcome');
+      inactiveModal(modalId);
     } else {
-      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+      const callback = () => {
+        inactiveModal(modalId);
+        const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
-      setYieldStorage({
-        ...DEFAULT_YIELD_PARAMS,
-        method: currentItem.slug,
-        from: address,
-        chain: currentItem.chain,
-        asset: currentItem.inputAssets[0]
-      });
+        setYieldStorage({
+          ...DEFAULT_YIELD_PARAMS,
+          method: currentItem.slug,
+          from: address,
+          chain: currentItem.chain,
+          asset: currentItem.inputAssets[0]
+        });
 
-      navigate('/transaction/earn');
+        navigate('/transaction/earn');
+      };
+
+      preCheckAction(callback, getEarnExtrinsicType(method))();
     }
-  }, [inactiveModal, isNoAccount, setReturnStorage, navigate, currentAccount, setYieldStorage, currentItem.slug, currentItem.chain, currentItem.inputAssets]);
+  }, [isNoAccount, setReturnStorage, navigate, inactiveModal, preCheckAction, currentAccount, setYieldStorage, currentItem.slug, currentItem.chain, currentItem.inputAssets]);
 
   useEffect(() => {
     addExclude(modalId);
@@ -320,7 +328,7 @@ const Component: React.FC<Props> = (props: Props) => {
               valueColorSchema={'success'}
             />
             <MetaInfo.Default
-              label={t('Unlock period')}
+              label={t('Unstaking period')}
               valueColorSchema={'success'}
             >
               {currentItem.metadata?.unstakingPeriod ? getUnstakingPeriod(t, currentItem.metadata.unstakingPeriod) : t('Instant')}

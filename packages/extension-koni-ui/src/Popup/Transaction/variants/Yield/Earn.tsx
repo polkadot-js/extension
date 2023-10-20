@@ -46,6 +46,8 @@ interface _YieldAssetExpectedEarning extends YieldAssetExpectedEarning {
   symbol: string;
 }
 
+const dotPolkadotSlug = 'polkadot-NATIVE-DOT';
+
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
@@ -85,6 +87,10 @@ const Component = () => {
   const currentAmount = useWatchTransaction(`${formFieldPrefix}0`, form, defaultData);
   const currentFrom = useWatchTransaction('from', form, defaultData);
   const currentPoolInfo = useMemo(() => poolInfoMap[methodSlug], [methodSlug, poolInfoMap]);
+
+  const needDotBalance = useMemo(() => !['westend', 'polkadot'].includes(currentPoolInfo.chain), [currentPoolInfo.chain]);
+
+  const [isDotBalanceReady, setIsDotBalanceReady] = useState<boolean>(!needDotBalance);
 
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
@@ -581,6 +587,19 @@ const Component = () => {
                 />
               </Form.Item>
 
+              {
+                !['westend', 'polkadot'].includes(currentPoolInfo.chain) && (
+                  <FreeBalanceToStake
+                    address={currentFrom}
+                    chain={'polkadot'}
+                    className={'account-free-balance'}
+                    label={t('Available DOT on Polkadot:')}
+                    onBalanceReady={setIsDotBalanceReady}
+                    tokenSlug={dotPolkadotSlug}
+                  />
+                )
+              }
+
               {currentPoolInfo.inputAssets.map((asset, index) => {
                 const name = formFieldPrefix + String(index);
                 const _asset = chainAsset[asset];
@@ -672,7 +691,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || !isDotBalanceReady || stepLoading}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}

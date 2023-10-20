@@ -86,7 +86,7 @@ const filterAccountMigrated = (acc: AccountJson) => {
 };
 
 const filterAccountCanMigrate = (acc: AccountJson) => {
-  return acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isMasterPassword && !acc.isInjected;
+  return acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected;
 };
 
 const Component: React.FC<Props> = (props: Props) => {

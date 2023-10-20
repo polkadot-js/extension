@@ -3,10 +3,10 @@
 
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ButtonProps, PageIcon } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { IconProps } from 'phosphor-react';
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
-import CN from 'classnames';
 
 interface Props extends ThemeProps {
   phosphorIcon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,

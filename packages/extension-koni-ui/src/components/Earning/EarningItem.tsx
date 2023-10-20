@@ -355,20 +355,22 @@ const EarningItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__item-line-1, .__item-line-2': {
+      'white-space': 'nowrap',
       display: 'flex',
       justifyContent: 'space-between',
       gap: token.sizeSM
     },
 
     '.__item-line-1': {
-      'white-space': 'nowrap',
       marginBottom: token.marginXXS
     },
 
     '.__item-rewards-label, .__item-total-staked-label': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
-      color: token.colorTextLight4
+      color: token.colorTextLight4,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
 
     '.__item-name': {
@@ -377,7 +379,6 @@ const EarningItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       color: token.colorTextLight1,
       fontWeight: token.headingFontWeight,
       overflow: 'hidden',
-      'white-space': 'nowrap',
       textOverflow: 'ellipsis'
     },
 

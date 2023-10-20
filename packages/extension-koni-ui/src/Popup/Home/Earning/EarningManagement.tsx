@@ -443,15 +443,32 @@ const Component: React.FC<Props> = (props: Props) => {
       });
   }, [assetRegistry, chainStateMap, groupYieldPosition, poolInfoMap, sortSelection]);
 
+  const addMore = useCallback(() => {
+    navigate('/home/earning/overview');
+  }, [navigate]);
+
   const renderWhenEmpty = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Need message')}
-        emptyTitle={t('Need message')}
+        buttonProps={{
+          icon: (
+            <Icon
+              phosphorIcon={Vault}
+              size='sm'
+              weight='fill'
+            />
+          ),
+          onClick: addMore,
+          shape: 'circle',
+          size: 'xs',
+          children: t('Earn now')
+        }}
+        emptyMessage={t('Switch account, turn on networks or start earning to view pools')}
+        emptyTitle={t('No pools found')}
         phosphorIcon={Vault}
       />
     );
-  }, [t]);
+  }, [addMore, t]);
 
   const handleCloseUnstake = useCallback(() => {
     inactiveModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
@@ -472,10 +489,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const handleCloseClaim = useCallback(() => {
     inactiveModal(TRANSACTION_YIELD_CLAIM_MODAL);
   }, [inactiveModal]);
-
-  const addMore = useCallback(() => {
-    navigate('/home/earning/overview');
-  }, [navigate]);
 
   useEffect(() => {
     if (location.pathname.startsWith('/home/earning')) {
@@ -748,6 +761,13 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
       }
     },
 
+    '.empty-list': {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)'
+    },
+
     '.__body-area': {
       overflow: 'auto',
       flex: 1,
@@ -808,6 +828,11 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
         paddingRight: token.size
       },
 
+      '.empty-list': {
+        position: 'static',
+        transform: 'none'
+      },
+
       '.__toolbar-area': {
         position: 'sticky',
         zIndex: 10,
@@ -846,13 +871,6 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
           lineHeight: token.lineHeight
         }
       }
-    },
-
-    '.empty-list': {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)'
     }
   });
 });

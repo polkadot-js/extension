@@ -369,6 +369,11 @@ const EarningOverviewContent = styled(Component)<Props>(({ theme: { token } }: P
         backgroundColor: token.colorBgDefault
       },
 
+      '.empty-list': {
+        position: 'static',
+        transform: 'none'
+      },
+
       '.search-container': {
         paddingBottom: token.size,
 
@@ -388,6 +393,13 @@ const EarningOverviewContent = styled(Component)<Props>(({ theme: { token } }: P
 
       '.__list-container': {
         paddingBottom: token.paddingXS
+      }
+    },
+
+    '@media (max-width: 767px)': {
+      '.__list-container': {
+        display: 'flex',
+        flexDirection: 'column'
       }
     }
   });

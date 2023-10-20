@@ -1,12 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
+import { CampaignBanner, CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFilterModal, useGetCrowdloanList, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetBannerByScreen, useGetCrowdloanList, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { CrowdloanItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { CrowdloanItem, Icon, ModalContext, SwList, Tag } from '@subwallet/react-ui';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { CrowdloanItem, Icon, Image, ModalContext, SwList, Tag } from '@subwallet/react-ui';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
@@ -61,6 +62,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { isShowBalance } = useSelector((state) => state.settings);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const banners = useGetBannerByScreen('crowdloan');
 
   const filterOptions = useMemo(() => [
     { label: t('Polkadot parachain'), value: FilterValue.POLKADOT_PARACHAIN },
@@ -176,6 +179,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [t]
   );
 
+  const onClickBanner = useCallback((item: CampaignBanner) => {
+    return () => {
+      if (item.data.action === 'open_url') {
+        const url = item.data.metadata?.url as string | undefined;
+
+        if (url) {
+          openInNewTab(url)();
+        }
+      }
+    };
+  }, []);
+
   return (
     <PageWrapper
       className={`crowdloans ${className}`}
@@ -188,20 +203,39 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderPaddingVertical={true}
         title={t<string>('Crowdloans')}
       >
-        <SwList.Section
-          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          enableSearchInput
-          filterBy={filterFunction}
-          list={items}
-          onClickActionBtn={onClickActionBtn}
-          renderItem={renderItem}
-          renderWhenEmpty={emptyCrowdloanList}
-          searchFunction={searchFunction}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search project')}
-          showActionBtn
-        />
+        <div className='content-container'>
+          <div className='banner-container'>
+            {banners.map((item) => {
+              return (
+                <div
+                  className='image-container'
+                  key={item.slug}
+                >
+                  <Image
+                    className='banner-image'
+                    onClick={onClickBanner(item)}
+                    src={item.data.media}
+                    width='100%'
+                  />
+                </div>
+              );
+            })}
+          </div>
 
+          <SwList.Section
+            actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+            enableSearchInput
+            filterBy={filterFunction}
+            list={items}
+            onClickActionBtn={onClickActionBtn}
+            renderItem={renderItem}
+            renderWhenEmpty={emptyCrowdloanList}
+            searchFunction={searchFunction}
+            searchMinCharactersCount={2}
+            searchPlaceholder={t<string>('Search project')}
+            showActionBtn
+          />
+        </div>
         <FilterModal
           applyFilterButtonTitle={t('Apply filter')}
           id={FILTER_MODAL_ID}
@@ -222,6 +256,32 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
 
+    '.content-container': {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%'
+    },
+
+    '.ant-sw-screen-layout-body': {
+      overflow: 'hidden'
+    },
+
+    '.empty-list': {
+      marginTop: 36
+    },
+
+    '.banner-container': {
+      margin: token.margin,
+      marginTop: token.marginXXS,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.sizeXS
+    },
+
+    '.image-container': {
+      width: '100%'
+    },
+
     '.crowdloan-item': {
       marginBottom: token.marginXS
     },
@@ -237,7 +297,16 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.ant-sw-list-section': {
-      height: '100%'
+      height: '100%',
+      flex: 1,
+
+      '.ant-sw-list-wrapper': {
+        flexBasis: 'auto'
+      }
+    },
+
+    '.banner-image': {
+      cursor: 'pointer'
     }
   });
 });

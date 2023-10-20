@@ -214,6 +214,7 @@ export { openInNewTab } from '@subwallet/extension-koni-ui/utils/common/browser'
 
 export * from './account';
 export * from './buy';
+export * from './campaign';
 export * from './chain';
 export * from './confirmation';
 export * from './connector';

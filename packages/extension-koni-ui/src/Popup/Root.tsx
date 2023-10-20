@@ -159,6 +159,8 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
       redirectTarget = migratePasswordUrl;
     } else if (hasMasterPassword && needUnlock) {
       redirectTarget = loginUrl;
+    } else if (hasMasterPassword && pathName === createPasswordUrl) {
+      redirectTarget = DEFAULT_ROUTER_PATH;
     } else if (!hasMasterPassword) {
       if (noAccount) {
         if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl].includes(pathName)) {

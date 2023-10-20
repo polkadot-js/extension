@@ -14,7 +14,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useFetchChainState, useGetChainPrefixBySlug, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useGetYieldPositionByAddressAndSlug from '@subwallet/extension-koni-ui/hooks/screen/earning/useGetYieldPositionByAddressAndSlug';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
-import { unlockDotCheckIsMinted } from '@subwallet/extension-koni-ui/messaging/campaigns';
+import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
@@ -79,7 +79,7 @@ const Component = () => {
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [checkMintLoading, setCheckMintLoading] = useState(false);
-  const [isMinted, setIsMinted] = useState(true);
+  const [canMint, setCanMint] = useState(false);
   const [submitString, setSubmitString] = useState<string | undefined>();
 
   const currentStep = processState.currentStep;
@@ -100,12 +100,12 @@ const Component = () => {
 
     let donePath = 'transaction-done';
 
-    if (!isMinted) {
+    if (canMint) {
       donePath = 'earning-done';
     }
 
     navigate(`/${donePath}/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
-  }, [currentFrom, currentPoolInfo.chain, isMinted, navigate]);
+  }, [currentFrom, currentPoolInfo.chain, canMint, navigate]);
 
   const onError = useCallback((error: Error) => {
     notify({
@@ -504,21 +504,22 @@ const Component = () => {
   useEffect(() => {
     setCheckMintLoading(true);
 
-    unlockDotCheckIsMinted({
+    unlockDotCheckCanMint({
       slug: currentPoolInfo.slug,
-      address: currentFrom
+      address: currentFrom,
+      network: currentPoolInfo.chain
     })
       .then((value) => {
-        setIsMinted(false);
+        setCanMint(value);
       })
       .finally(() => {
         setCheckMintLoading(false);
       });
 
     return () => {
-      setIsMinted(true);
+      setCanMint(false);
     };
-  }, [currentFrom, currentPoolInfo.slug]);
+  }, [currentFrom, currentPoolInfo.chain, currentPoolInfo.slug]);
 
   return (
     <div className={'earning-wrapper'}>

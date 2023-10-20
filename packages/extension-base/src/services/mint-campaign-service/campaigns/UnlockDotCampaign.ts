@@ -96,6 +96,7 @@ export default class UnlockDotCampaign {
     return response.data as UnlockDotMintSubmitResponse;
   }
 
+  // @ts-ignore
   private async getMinted (address: string, slug: string) {
     const params: UnlockDotFetchMintedRequest = { address };
 
@@ -122,8 +123,37 @@ export default class UnlockDotCampaign {
     return undefined;
   }
 
-  public async isMinted (address: string, slug: string) {
-    return !!(await this.getMinted(address, slug));
+  public async canMint (address: string, slug: string, network: string) {
+    const data: UnlockDotCheckMintRequest = {
+      address,
+      campaignId: this.#campaignId,
+      category: slug,
+      additionalData: {
+        slug,
+        network
+      }
+    };
+
+    const response = await axios.request({
+      baseURL: this.#host,
+      url: '/api/mint/check',
+      method: 'POST',
+      data
+    });
+
+    const respData = response.data as UnlockDotCheckMintResponse;
+
+    if (
+      respData.inMintingTime &&
+      respData.validCampaign &&
+      respData.validCategory &&
+      respData.validUser &&
+      respData.notDuplicated
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   public subscribeMintedNft (transactionId: string, cb: (data: UnlockDotTransactionNft) => void) {

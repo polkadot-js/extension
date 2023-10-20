@@ -4,7 +4,7 @@
 export interface UnlockDotAdditionalData {
   slug: string;
   network: string;
-  extrinsicHash: string;
+  extrinsicHash?: string;
 }
 
 /* Axios */
@@ -70,7 +70,7 @@ export interface UnlockDotCheckMintData {
   address: string;
   slug: string;
   network: string;
-  extrinsicHash: string;
+  extrinsicHash?: string;
 }
 
 export interface UnlockDotSubmitMintData {
@@ -81,9 +81,10 @@ export interface UnlockDotSubmitMintData {
   extrinsicHash: string;
 }
 
-export interface RequestUnlockDotCheckIsMinted {
+export interface RequestUnlockDotCheckCanMint {
   address: string;
   slug: string;
+  network: string;
 }
 
 export interface RequestUnlockDotSubscribeMintedData {

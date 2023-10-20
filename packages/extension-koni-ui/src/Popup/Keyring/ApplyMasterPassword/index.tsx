@@ -83,8 +83,12 @@ const intersectionArray = (array1: AccountJson[], array2: AccountJson[]): Accoun
   return array1.filter((account) => array2.find((acc) => acc.address === account.address));
 };
 
-const filterAccountNeedMigrate = (acc: AccountJson) => {
+const filterAccountMigrated = (acc: AccountJson) => {
   return acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && acc.isMasterPassword && !acc.isInjected;
+};
+
+const filterAccountCanMigrate = (acc: AccountJson) => {
+  return acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isMasterPassword && !acc.isInjected;
 };
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -109,11 +113,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const checkUnlock = useUnlockChecker();
 
-  const migratedRef = useRef<AccountJson[]>(accounts.filter(filterAccountNeedMigrate));
+  const migratedRef = useRef<AccountJson[]>(accounts.filter(filterAccountMigrated));
 
   const migrated = useMemo(() => {
     const oldVal = migratedRef.current;
-    const newVal = accounts.filter(filterAccountNeedMigrate);
+    const newVal = accounts.filter(filterAccountMigrated);
     const result = intersectionArray(oldVal, newVal);
 
     migratedRef.current = result;
@@ -123,7 +127,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const canMigrate = useMemo(
     () => accounts
-      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal)
+      .filter(filterAccountCanMigrate)
       .filter((acc) => !migrated.find((item) => item.address === acc.address))
     , [accounts, migrated]
   );

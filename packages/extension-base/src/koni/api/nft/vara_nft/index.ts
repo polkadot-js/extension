@@ -86,25 +86,27 @@ export class VaraNftApi extends BaseNftApi {
       await Promise.all(this.addresses.map(async (address) => {
         const nfts = await this.getNftByAccount(address);
 
-        for (const nft of nfts) {
-          const parsedNft: NftItem = {
-            id: nft.tokenId,
-            chain: this.chain,
-            owner: address,
-            name: nft.name,
-            image: this.parseUrl(nft.mediaUrl),
-            description: nft.description,
-            collectionId: nft.collection.id
-          };
+        if (nfts) {
+          for (const nft of nfts) {
+            const parsedNft: NftItem = {
+              id: nft.tokenId,
+              chain: this.chain,
+              owner: address,
+              name: nft.name,
+              image: this.parseUrl(nft.mediaUrl),
+              description: nft.description,
+              collectionId: nft.collection.id
+            };
 
-          const parsedCollection: NftCollection = {
-            collectionId: nft.collection.id,
-            chain: this.chain,
-            collectionName: nft.collection.name
-          };
+            const parsedCollection: NftCollection = {
+              collectionId: nft.collection.id,
+              chain: this.chain,
+              collectionName: nft.collection.name
+            };
 
-          params.updateItem(this.chain, parsedNft, address);
-          params.updateCollection(this.chain, parsedCollection);
+            params.updateItem(this.chain, parsedNft, address);
+            params.updateCollection(this.chain, parsedCollection);
+          }
         }
       }));
     } catch (e) {

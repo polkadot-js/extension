@@ -5912,6 +5912,7 @@ __metadata:
     axios: ^1.2.1
     bignumber.js: ^9.1.1
     bn.js: ^5.2.1
+    bowser: ^2.11.0
     browser-passworder: ^2.0.3
     buffer: ^6.0.3
     cross-fetch: ^3.1.5

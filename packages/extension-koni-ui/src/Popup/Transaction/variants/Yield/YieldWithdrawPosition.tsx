@@ -5,10 +5,9 @@ import { ExtrinsicType, YieldPositionInfo } from '@subwallet/extension-base/back
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AmountInput, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AmountInput, HiddenInput } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetYieldMetadata, useGetYieldPositionByAddressAndSlug, useHandleSubmitTransaction, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetYieldMetadata, useGetYieldPositionByAddressAndSlug, useHandleSubmitTransaction, usePreCheckAction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitRedeem } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, ThemeProps, YieldFastWithdrawParams } from '@subwallet/extension-koni-ui/types';
@@ -17,11 +16,11 @@ import { Button, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { MinusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
+import { FreeBalance, TransactionContent, TransactionFooter, YieldOutlet } from '../../parts';
 
 type Props = ThemeProps;
 
@@ -41,8 +40,6 @@ const _accountFilterFunc = (
 const hideFields: Array<keyof YieldFastWithdrawParams> = ['chain', 'asset', 'method'];
 
 const Component: React.FC = () => {
-  useSetCurrentPage('/transaction/yield-withdraw-position');
-
   const { t } = useTranslation();
   const { defaultData, onDone, persistData } = useTransactionContext<YieldFastWithdrawParams>();
 
@@ -218,17 +215,14 @@ const Component: React.FC = () => {
 const Wrapper: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
-  useSetCurrentPage('/transaction/withdraw-yield');
-
-  const dataContext = useContext(DataContext);
-
   return (
-    <PageWrapper
-      className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['yieldPool'])}
+    <YieldOutlet
+      className={CN(className)}
+      path={'/transaction/yield-withdraw-position'}
+      stores={['yieldPool']}
     >
       <Component />
-    </PageWrapper>
+    </YieldOutlet>
   );
 };
 

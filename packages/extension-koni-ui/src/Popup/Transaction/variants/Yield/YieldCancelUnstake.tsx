@@ -4,22 +4,21 @@
 import { ExtrinsicType, NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, CancelUnstakeSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { AccountSelector, CancelUnstakeSelector, HiddenInput } from '@subwallet/extension-koni-ui/components';
+import { useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitStakingCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { CancelUnYieldParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { accountFilterFunc } from '../../helper';
-import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
+import { FreeBalance, TransactionContent, TransactionFooter, YieldOutlet } from '../../parts';
 
 type Props = ThemeProps;
 
@@ -30,7 +29,6 @@ const Component: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const dataContext = useContext(DataContext);
   const { defaultData, onDone, persistData } = useTransactionContext<CancelUnYieldParams>();
   const { chain, method } = defaultData;
 
@@ -114,39 +112,37 @@ const Component: React.FC = () => {
   return (
     <>
       <TransactionContent>
-        <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
-          <Form
-            className={'form-container form-space-sm'}
-            form={form}
-            initialValues={formDefault}
-            onFieldsChange={onFieldsChange}
-            onFinish={onSubmit}
+        <Form
+          className={'form-container form-space-sm'}
+          form={form}
+          initialValues={formDefault}
+          onFieldsChange={onFieldsChange}
+          onFinish={onSubmit}
+        >
+          <HiddenInput fields={hideFields} />
+          <Form.Item
+            hidden={!isAllAccount}
+            name={'from'}
           >
-            <HiddenInput fields={hideFields} />
-            <Form.Item
-              hidden={!isAllAccount}
-              name={'from'}
-            >
-              <AccountSelector filter={filterAccount} />
-            </Form.Item>
-            <FreeBalance
-              address={from}
+            <AccountSelector filter={filterAccount} />
+          </Form.Item>
+          <FreeBalance
+            address={from}
+            chain={chain}
+            className={'free-balance'}
+            label={t('Available balance:')}
+            onBalanceReady={setIsBalanceReady}
+          />
+          <Form.Item name={'unstake'}>
+            <CancelUnstakeSelector
               chain={chain}
-              className={'free-balance'}
-              label={t('Available balance:')}
-              onBalanceReady={setIsBalanceReady}
+              defaultValue={persistUnstake}
+              disabled={!from}
+              label={t('Select an unstake request')}
+              nominators={from ? nominatorMetadata?.unstakings || [] : []}
             />
-            <Form.Item name={'unstake'}>
-              <CancelUnstakeSelector
-                chain={chain}
-                defaultValue={persistUnstake}
-                disabled={!from}
-                label={t('Select an unstake request')}
-                nominators={from ? nominatorMetadata?.unstakings || [] : []}
-              />
-            </Form.Item>
-          </Form>
-        </PageWrapper>
+          </Form.Item>
+        </Form>
       </TransactionContent>
       <TransactionFooter
         errors={[]}
@@ -187,17 +183,14 @@ const Component: React.FC = () => {
 const Wrapper: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
-  useSetCurrentPage('/transaction/cancel-un-yield');
-
-  const dataContext = useContext(DataContext);
-
   return (
-    <PageWrapper
-      className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['yieldPool'])}
+    <YieldOutlet
+      className={CN(className)}
+      path={'/transaction/cancel-un-yield'}
+      stores={['yieldPool']}
     >
       <Component />
-    </PageWrapper>
+    </YieldOutlet>
   );
 };
 

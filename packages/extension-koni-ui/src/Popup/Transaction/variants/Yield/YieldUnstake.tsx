@@ -6,9 +6,8 @@ import { ChainStakingMetadata, ExtrinsicType, NominationInfo, NominatorMetadata,
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { getValidatorLabel, isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { AccountSelector, AmountInput, HiddenInput, NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AmountInput, HiddenInput, NominationSelector } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetNativeTokenBasicInfo, useGetYieldMetadata, useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitNominationPoolUnstaking, yieldSubmitUnstaking } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams, UnYieldParams } from '@subwallet/extension-koni-ui/types';
@@ -17,12 +16,12 @@ import { Button, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { MinusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { accountFilterFunc } from '../../helper';
-import { BondedBalance, FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
+import { BondedBalance, FreeBalance, TransactionContent, TransactionFooter, YieldOutlet } from '../../parts';
 
 type Props = ThemeProps;
 
@@ -343,15 +342,14 @@ const Wrapper: React.FC<Props> = (props: Props) => {
 
   useSetCurrentPage('/transaction/un-yield');
 
-  const dataContext = useContext(DataContext);
-
   return (
-    <PageWrapper
-      className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['yieldPool'])}
+    <YieldOutlet
+      className={CN(className)}
+      path={'/transaction/un-yield'}
+      stores={['yieldPool']}
     >
       <Component />
-    </PageWrapper>
+    </YieldOutlet>
   );
 };
 

@@ -7,22 +7,21 @@ import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking
 import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNativeTokenBasicInfo, useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { AccountSelector, HiddenInput, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { useGetNativeTokenBasicInfo, useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitStakingWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, YieldStakingWithdrawParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { accountFilterFunc } from '../../helper';
-import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
+import { FreeBalance, TransactionContent, TransactionFooter, YieldOutlet } from '../../parts';
 
 type Props = ThemeProps;
 
@@ -30,12 +29,9 @@ const hideFields: Array<keyof YieldStakingWithdrawParams> = ['chain', 'asset', '
 const validateFields: Array<keyof YieldStakingWithdrawParams> = ['from'];
 
 const Component: React.FC = () => {
-  useSetCurrentPage('/transaction/withdraw-yield');
-
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const dataContext = useContext(DataContext);
   const { defaultData, onDone, persistData } = useTransactionContext<YieldStakingWithdrawParams>();
   const { chain, method } = defaultData;
 
@@ -129,51 +125,49 @@ const Component: React.FC = () => {
   return (
     <>
       <TransactionContent>
-        <PageWrapper resolve={dataContext.awaitStores(['yieldPool'])}>
-          <Form
-            className={'form-container form-space-sm'}
-            form={form}
-            initialValues={formDefault}
-            onFieldsChange={onFieldsChange}
-            onFinish={onSubmit}
+        <Form
+          className={'form-container form-space-sm'}
+          form={form}
+          initialValues={formDefault}
+          onFieldsChange={onFieldsChange}
+          onFinish={onSubmit}
+        >
+          <HiddenInput fields={hideFields} />
+          <Form.Item
+            hidden={!isAllAccount}
+            name={'from'}
           >
-            <HiddenInput fields={hideFields} />
-            <Form.Item
-              hidden={!isAllAccount}
-              name={'from'}
+            <AccountSelector filter={filterAccount} />
+          </Form.Item>
+          <FreeBalance
+            address={from}
+            chain={chain}
+            className={'free-balance'}
+            label={t('Available balance:')}
+            onBalanceReady={setIsBalanceReady}
+          />
+          <Form.Item>
+            <MetaInfo
+              className='withdraw-meta-info'
+              hasBackgroundWrapper={true}
             >
-              <AccountSelector filter={filterAccount} />
-            </Form.Item>
-            <FreeBalance
-              address={from}
-              chain={chain}
-              className={'free-balance'}
-              label={t('Available balance:')}
-              onBalanceReady={setIsBalanceReady}
-            />
-            <Form.Item>
-              <MetaInfo
-                className='withdraw-meta-info'
-                hasBackgroundWrapper={true}
-              >
-                <MetaInfo.Chain
-                  chain={chain}
-                  label={t('Network')}
-                />
-                {
-                  unstakingInfo && (
-                    <MetaInfo.Number
-                      decimals={decimals}
-                      label={t('Amount')}
-                      suffix={symbol}
-                      value={unstakingInfo.claimable}
-                    />
-                  )
-                }
-              </MetaInfo>
-            </Form.Item>
-          </Form>
-        </PageWrapper>
+              <MetaInfo.Chain
+                chain={chain}
+                label={t('Network')}
+              />
+              {
+                unstakingInfo && (
+                  <MetaInfo.Number
+                    decimals={decimals}
+                    label={t('Amount')}
+                    suffix={symbol}
+                    value={unstakingInfo.claimable}
+                  />
+                )
+              }
+            </MetaInfo>
+          </Form.Item>
+        </Form>
       </TransactionContent>
       <TransactionFooter
         errors={[]}
@@ -214,17 +208,14 @@ const Component: React.FC = () => {
 const Wrapper: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
-  useSetCurrentPage('/transaction/withdraw-yield');
-
-  const dataContext = useContext(DataContext);
-
   return (
-    <PageWrapper
-      className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['yieldPool'])}
+    <YieldOutlet
+      className={CN(className)}
+      path={'/transaction/withdraw-yield'}
+      stores={['yieldPool']}
     >
       <Component />
-    </PageWrapper>
+    </YieldOutlet>
   );
 };
 

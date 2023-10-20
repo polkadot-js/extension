@@ -544,6 +544,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <Transaction
           modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_UNSTAKE_MODAL}
         >
           <YieldUnstake />
         </Transaction>
@@ -557,6 +558,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <Transaction
           modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL}
         >
           <YieldCancelUnstake />
         </Transaction>
@@ -570,6 +572,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <Transaction
           modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_WITHDRAW_MODAL}
         >
           <YieldWithdraw />
         </Transaction>
@@ -583,6 +586,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <Transaction
           modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_FAST_WITHDRAW_MODAL}
         >
           <YieldWithdrawPosition />
         </Transaction>
@@ -596,6 +600,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <Transaction
           modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_CLAIM_MODAL}
         >
           <YieldClaimReward />
         </Transaction>

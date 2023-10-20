@@ -8,8 +8,7 @@ import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subw
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
-import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, StakingProcessModal, YieldMultiValidatorSelector, YieldPoolSelector } from '@subwallet/extension-koni-ui/components';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, StakingProcessModal, YieldMultiValidatorSelector, YieldPoolSelector } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetChainPrefixBySlug, useNotification, usePreCheckAction, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useGetYieldPositionByAddressAndSlug from '@subwallet/extension-koni-ui/hooks/screen/earning/useGetYieldPositionByAddressAndSlug';
@@ -31,7 +30,7 @@ import styled, { useTheme } from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../../helper';
-import { FreeBalanceToStake, TransactionContent } from '../../parts';
+import { FreeBalanceToStake, TransactionContent, YieldOutlet } from '../../parts';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -725,15 +724,14 @@ const Component = () => {
 const Wrapper: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
-  const dataContext = useContext(DataContext);
-
   return (
-    <PageWrapper
-      className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['yieldPool', 'price', 'chainStore', 'assetRegistry'])}
+    <YieldOutlet
+      className={CN(className)}
+      path={'/transaction/earn'}
+      stores={['yieldPool', 'price', 'chainStore', 'assetRegistry']}
     >
       <Component />
-    </PageWrapper>
+    </YieldOutlet>
   );
 };
 

@@ -5,6 +5,7 @@ import { AlertBox, Layout, PageWrapper } from '@subwallet/extension-koni-ui/comp
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import { useNotification } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
@@ -54,12 +55,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const [noAccount] = useState(isNoAccount(accounts));
 
+  const notification = useNotification();
+
   const passwordRules = useMemo(() => renderBasePasswordRules(t('Password'), t), [t]);
   const confirmPasswordRules = useMemo(() => renderBaseConfirmPasswordRules(FormFieldName.PASSWORD, t), [t]);
 
   const [form] = Form.useForm<CreatePasswordFormState>();
   const [isDisabled, setIsDisable] = useState(true);
-  const [submitError, setSubmitError] = useState('');
 
   const [loading, setLoading] = useState(false);
 
@@ -81,22 +83,27 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         newPassword: password
       }).then((res) => {
         if (!res.status) {
-          setSubmitError(res.errors[0]);
+          notification({
+            message: res.errors[0],
+            type: 'error'
+          });
         } else {
           onComplete();
         }
       }).catch((e: Error) => {
-        setSubmitError(e.message);
+        notification({
+          message: e.message,
+          type: 'error'
+        });
       }).finally(() => {
         setLoading(false);
       });
     }
-  }, [onComplete]);
+  }, [onComplete, notification]);
 
   const onUpdate: Callbacks<CreatePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
     const { empty, error } = simpleCheckForm(allFields);
 
-    setSubmitError('');
     setIsDisable(error || empty);
   }, []);
 
@@ -189,14 +196,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 type='warning'
               />
             </Form.Item>
-            {
-              submitError && (
-                <Form.Item
-                  help={submitError}
-                  validateStatus='error'
-                />
-              )
-            }
           </Form>
           <SwModal
             closeIcon={(

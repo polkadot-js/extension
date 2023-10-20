@@ -69,7 +69,7 @@ const Component: React.FC<Props> = (props: Props) => {
         {
           !isInterlayPool && <MetaInfo.Number
             decimals={receivedAssetInfo.decimals || 0}
-            label={t('Minimum receivables')}
+            label={t('Estimated receivables')}
             suffix={receivedAssetInfo.symbol}
             value={estimatedReceivables}
           />

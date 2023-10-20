@@ -192,6 +192,7 @@ export const router = createBrowserRouter([
               EarningNoRouter.generateRouterObject('')
             ]
           },
+          MissionPool.generateRouterObject('mission-pools'),
           History.generateRouterObject('history'),
           History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
           {
@@ -316,12 +317,6 @@ export const router = createBrowserRouter([
         children: [
           CheckCrowdloanContributions.generateRouterObject('check-contributions'),
           CrowdloanContributionsResult.generateRouterObject('contributions-result')
-        ]
-      },
-      {
-        ...MissionPool.generateRouterObject('/mission-pools'),
-        children: [
-          MissionPool.generateRouterObject('/mission-pools')
         ]
       }
     ]

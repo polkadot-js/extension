@@ -14,14 +14,12 @@ import { missionCategories, MissionCategoryType } from '@subwallet/extension-kon
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
-import { ButtonProps, Icon, ModalContext, SwHeader } from '@subwallet/react-ui';
-import { FadersHorizontal, X } from 'phosphor-react';
+import { Icon, ModalContext, SwSubHeader } from '@subwallet/react-ui';
+import { FadersHorizontal } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-
-import useDefaultNavigate from '../../hooks/router/useDefaultNavigate';
 
 type Props = ThemeProps;
 
@@ -37,7 +35,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [searchInput, setSearchInput] = useState<string>('');
   const { activeModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { goHome } = useDefaultNavigate();
   const [currentSelectItem, setCurrentSelectItem] = useState<MissionInfo | null>(null);
   const { missions } = useSelector((state: RootState) => state.missionPool);
 
@@ -122,22 +119,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     [activeModal]
   );
 
-  const headerIcons = useMemo<ButtonProps[]>(() => {
-    return [
-      {
-        icon: (
-          <Icon
-            customSize={'24px'}
-            phosphorIcon={X}
-            type='phosphor'
-            weight={'bold'}
-          />
-        ),
-        onClick: goHome
-      }
-    ];
-  }, [goHome]);
-
   const onClickItem = useCallback((item: MissionInfo) => {
     setCurrentSelectItem(item);
     activeModal(PoolDetailModalId);
@@ -147,15 +128,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     <div className={className}>
       {
         !isWebUI && (
-          <SwHeader
-            left='logo'
-            onClickLeft={goHome}
-            rightButtons={headerIcons}
-            showLeftButton={true}
-          >
-            {t('Mission Pools')}
-          </SwHeader>
-        )
+          <SwSubHeader
+            background={'transparent'}
+            className={'__header-area'}
+            paddingVertical
+            showBackButton={false}
+            title={t('Mission Pools')}
+          />)
       }
 
       <div className={'__tool-area'}>
@@ -194,6 +173,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               {
                 filteredItems.map((item) => (
                   <MissionItem
+                    compactMode={!isWebUI}
                     data={item}
                     key={item.id}
                     onClick={onClickItem}
@@ -228,21 +208,6 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-
-    '.ant-sw-header-container': {
-      paddingTop: token.padding,
-      paddingBottom: token.padding,
-      backgroundColor: token.colorBgDefault,
-      marginRight: -token.margin,
-      marginLeft: -token.margin
-    },
-
-    '.ant-sw-header-center-part': {
-      color: token.colorTextLight1,
-      fontSize: token.fontSizeHeading4,
-      lineHeight: token.lineHeightHeading4,
-      fontWeight: token.headingFontWeight
-    },
 
     '.__scroll-container': {
       flex: 1,
@@ -299,9 +264,44 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
       marginBottom: 40
     },
 
+    '.__header-area': {
+      '.ant-sw-header-center-part': {
+        marginLeft: 0
+      },
+
+      '.ant-sw-sub-header-center-part-pl': {
+        textAlign: 'left',
+        paddingLeft: 0
+      }
+    },
+
     '@media (max-width: 991px)': {
       paddingLeft: token.size,
-      paddingRight: token.size
+      paddingRight: token.size,
+
+      '.__mission-list-container': {
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: token.margin,
+        gap: token.sizeXS
+      },
+
+      '.__scroll-container': {
+        marginLeft: -16,
+        marginRight: -16,
+        paddingLeft: 16,
+        paddingRight: 16
+      },
+
+      '.__tool-area': {
+        '.search-container': {
+          order: 1
+        },
+
+        '.filter-tabs-container': {
+          order: 2
+        }
+      }
     },
 
     '@media (max-width: 767px)': {

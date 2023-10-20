@@ -64,7 +64,7 @@ function Component ({ className,
       },
       {
         label: t('Mission Pools'),
-        value: '/mission-pools',
+        value: '/home/mission-pools',
         icon: Parachute
       },
       {

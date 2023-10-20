@@ -151,8 +151,6 @@
   "APY": "APY",
   "Show QR code": "QRコードを表示",
   "{{number}} accounts connected": "{{number}} アカウント接続済み",
-  "You don’t have any accounts. Please create a new account": "アカウントがありません。新しいアカウントを作成してください。",
-  "No accounts found": "アカウントが見つかりません",
   "Apply {{number}} accounts": "{{number}} アカウントを申請",
   "Make sure you trust this site before connecting": "接続する前にこのサイトを信頼していることを確認してください",
   "Unknown network": "不明なネットワーク",
@@ -330,7 +328,6 @@
   "Contract address": "コントラクトアドレス",
   "No available account": "利用可能なアカウントはありません",
   "Choose the account(s) you’d like to connect": "接続したいアカウントを選択してください",
-  "You don't have any accounts to connect. Please create or import an account.": "接続するためのアカウントがありません。アカウントを作成するかインポートしてください。",
   "Connect": "接続",
   "Create one": "一つ作る",
   "EVM networks": "EVM ネットワーク",
@@ -846,5 +843,10 @@
   "No staking found": "",
   "Try searching or importing one": "",
   "Your dApps will show up here": "",
-  "This feature is not yet available for this NFT": ""
+  "This feature is not yet available for this NFT": "",
+  "No available Substrate account": "",
+  "No available EVM account": "",
+  "You don't have any Substrate account to connect. Please create one or skip this step by hitting Cancel.": "",
+  "You don't have any EVM account to connect. Please create one or skip this step by hitting Cancel.": "",
+  "You don't have any account to connect. Please create one or skip this step by hitting Cancel.": ""
 }

@@ -151,8 +151,6 @@
   "APY": "APY",
   "Show QR code": "Hiển thị mã QR",
   "{{number}} accounts connected": "Đã kết nối {{number}} tài khoản",
-  "You don’t have any accounts. Please create a new account": "Hiện bạn không có tài khoản nào. Hãy tạo mới một tài khoản",
-  "No accounts found": "Không tìm thấy tài khoản",
   "Apply {{number}} accounts": "Kết nối {{number}} tài khoản",
   "Make sure you trust this site before connecting": "Hãy đảm bảo rằng bạn tin tưởng trang web này trước khi kết nối",
   "Unknown network": "Mạng không xác định",
@@ -330,7 +328,6 @@
   "Contract address": "Contract address",
   "No available account": "Không có tài khoản khả dụng",
   "Choose the account(s) you’d like to connect": "Chọn (các) tài khoản bạn muốn kết nối",
-  "You don't have any accounts to connect. Please create or import an account.": "Bạn không có tài khoản nào để kết nối. Vui lòng tạo hoặc nhập tài khoản.",
   "Connect": "Kết nối",
   "Create one": "Tạo tài khoản",
   "EVM networks": "Mạng EVM",
@@ -846,5 +843,10 @@
   "No staking found": "Không tìm thấy stake",
   "Try searching or importing one": "Vui lòng thử tìm kiếm hoặc nhập thủ công",
   "Your dApps will show up here": "DApp của bạn sẽ hiển thị tại đây",
-  "This feature is not yet available for this NFT": ""
+  "This feature is not yet available for this NFT": "",
+  "No available Substrate account": "",
+  "No available EVM account": "",
+  "You don't have any Substrate account to connect. Please create one or skip this step by hitting Cancel.": "",
+  "You don't have any EVM account to connect. Please create one or skip this step by hitting Cancel.": "",
+  "You don't have any account to connect. Please create one or skip this step by hitting Cancel.": ""
 }

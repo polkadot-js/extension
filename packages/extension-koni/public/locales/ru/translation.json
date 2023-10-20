@@ -151,8 +151,6 @@
   "APY": "APY",
   "Show QR code": "Показать QR-код",
   "{{number}} accounts connected": "",
-  "You don’t have any accounts. Please create a new account": "",
-  "No accounts found": "",
   "Apply {{number}} accounts": "",
   "Make sure you trust this site before connecting": "Перед подключением убедитесь, что вы доверяете этому сайту",
   "Unknown network": "",
@@ -330,7 +328,6 @@
   "Contract address": "Адрес контракта",
   "No available account": "Нет доступного аккаунта",
   "Choose the account(s) you’d like to connect": "Выберите аккаунт(ы), которые вы хотите подключить",
-  "You don't have any accounts to connect. Please create or import an account.": "У вас пока нет аккаунтов для подключения. Пожалуйста, создайте или импортируйте аккаунт",
   "Connect": "Подключить",
   "Create one": "Создать",
   "EVM networks": "",
@@ -846,5 +843,10 @@
   "No staking found": "",
   "Try searching or importing one": "",
   "Your dApps will show up here": "",
-  "This feature is not yet available for this NFT": ""
+  "This feature is not yet available for this NFT": "",
+  "No available Substrate account": "",
+  "No available EVM account": "",
+  "You don't have any Substrate account to connect. Please create one or skip this step by hitting Cancel.": "",
+  "You don't have any EVM account to connect. Please create one or skip this step by hitting Cancel.": "",
+  "You don't have any account to connect. Please create one or skip this step by hitting Cancel.": ""
 }

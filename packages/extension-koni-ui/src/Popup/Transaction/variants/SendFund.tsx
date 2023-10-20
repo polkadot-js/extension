@@ -18,7 +18,7 @@ import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, formatBalance, noop, transactionDefaultFilterAccount } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -161,8 +161,6 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
   return result;
 }
 
-const defaultFilterAccount = (account: AccountJson): boolean => !(isAccountAll(account.address) || account.isReadOnly);
-
 const filterAccountFunc = (
   chainInfoMap: Record<string, _ChainInfo>,
   assetRegistry: Record<string, _ChainAsset>,
@@ -173,7 +171,7 @@ const filterAccountFunc = (
   const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
 
   if (!tokenGroupSlug) {
-    return defaultFilterAccount;
+    return transactionDefaultFilterAccount;
   }
 
   const chainAssets = Object.values(assetRegistry).filter((chainAsset) => {
@@ -200,7 +198,7 @@ const filterAccountFunc = (
     const validGen: string[] = account.availableGenesisHashes || [];
     const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
 
-    if (!defaultFilterAccount(account)) {
+    if (!transactionDefaultFilterAccount(account)) {
       return false;
     }
 

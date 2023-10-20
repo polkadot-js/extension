@@ -36,7 +36,6 @@ function getRPCCrowdloan (parentAPI: _SubstrateApi, fundInfo: _CrowdloanFund, he
     let contribute = new BN(0);
 
     Object.values(result).forEach((item) => {
-      console.log(fundId, item.toBn().toString());
       contribute = contribute.add(item.toBn());
     });
 

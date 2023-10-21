@@ -134,6 +134,7 @@ export interface RejectResolver {
 export enum StakingType {
   NOMINATED = 'nominated',
   POOLED = 'pooled',
+  LIQUID_STAKING = 'liquid_staking'
 }
 
 export interface StakingRewardItem {
@@ -2148,8 +2149,7 @@ export type YieldPoolMetadata = ChainStakingMetadata;
 export type YieldPositionMetadata = NominatorMetadata | YieldPositionStats;
 
 export interface YieldPositionStats {
-  rewards: YieldTokenBaseInfo[],
-  initialExchangeRate?: number
+  rewards: YieldTokenBaseInfo[]
 }
 
 export interface OptimalYieldPathRequest {

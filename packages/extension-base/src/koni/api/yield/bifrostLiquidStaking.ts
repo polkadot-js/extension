@@ -114,7 +114,7 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
   };
 }
 
-export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void, initialExchangeRate?: number) {
+export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void) {
   // @ts-ignore
   const derivativeTokenSlug = poolInfo.derivativeAssets[0];
   const inputTokenSlug = poolInfo.inputAssets[0];
@@ -142,8 +142,7 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
           {
             slug: inputTokenSlug
           }
-        ],
-        initialExchangeRate
+        ]
       } as YieldPositionStats
     } as YieldPositionInfo);
   });

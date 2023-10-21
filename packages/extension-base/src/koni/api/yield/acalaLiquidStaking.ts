@@ -3,7 +3,20 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  ExtrinsicType, NominationInfo,
+  NominatorMetadata,
+  OptimalYieldPath,
+  OptimalYieldPathParams,
+  RequestCrossChainTransfer,
+  RequestYieldStepSubmit, StakingStatus, StakingType,
+  SubmitYieldStepData,
+  TokenBalanceRaw, UnstakingInfo,
+  YieldPoolInfo,
+  YieldPositionInfo,
+  YieldPositionStats,
+  YieldStepType
+} from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
@@ -166,8 +179,16 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
       ],
 
       metadata: {
-        rewards: []
-      } as YieldPositionStats
+        chain: chainInfo.slug,
+        type: StakingType.LIQUID_STAKING,
+
+        status: StakingStatus.EARNING_REWARD,
+        address: string,
+        activeStake: string,
+        nominations: NominationInfo[],
+        unstakings: UnstakingInfo[],
+        isBondedBefore?: boolean
+      } as NominatorMetadata,
     } as YieldPositionInfo);
   });
 }

@@ -538,7 +538,6 @@ const Component: React.FC<Props> = (props: Props) => {
         icon: PlusMinus,
         label: t('Earning calculator'),
         onClick: () => {
-          console.log('----selectedYieldPosition', selectedYieldPosition);
           selectedYieldPosition && onClickCalculatorBtn(selectedYieldPosition)();
         }
       },

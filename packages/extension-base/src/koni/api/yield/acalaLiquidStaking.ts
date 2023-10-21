@@ -17,18 +17,16 @@ import {
   YieldPositionStats,
   YieldStepType
 } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { sumBN } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { BN } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 // const YEAR = 365 * 24 * 60 * 60 * 1000;
 
@@ -164,22 +162,25 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
   return substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), (_balances) => {
     const balances = _balances as unknown as TokenBalanceRaw[];
 
-    const totalBalance = sumBN(balances.map((b) => (b.free || new BN(0))));
+    for (let i = 0; i < balances.length; i++) {
+      const balanceItem = balances[i];
+      const address = useAddresses[i];
+      const totalBalance = balanceItem.free || BN_ZERO;
 
-    positionCallback({
-      slug: poolInfo.slug,
-      chain: chainInfo.slug,
-      address: useAddresses.length > 1 ? ALL_ACCOUNT_KEY : useAddresses[0], // TODO
-      balance: [
-        {
-          slug: derivativeTokenSlug, // token slug
-          totalBalance: totalBalance.toString(),
-          activeBalance: totalBalance.toString()
-        }
-      ],
-
-      metadata: {
+      positionCallback({
+        slug: poolInfo.slug,
         chain: chainInfo.slug,
+        address,
+        balance: [
+          {
+            slug: derivativeTokenSlug, // token slug
+            totalBalance: totalBalance.toString(),
+            activeBalance: totalBalance.toString()
+          }
+        ],
+
+        metadata: {
+          chain: chainInfo.slug,
         type: StakingType.LIQUID_STAKING,
 
         status: StakingStatus.EARNING_REWARD,
@@ -188,8 +189,9 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
         nominations: NominationInfo[],
         unstakings: UnstakingInfo[],
         isBondedBefore?: boolean
-      } as NominatorMetadata,
-    } as YieldPositionInfo);
+        } as NominatorMetadata,
+      } as YieldPositionInfo);
+    }
   });
 }
 

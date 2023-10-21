@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo, _FundStatus } from '@subwallet/chain-list/types';
 import { CrowdloanContributionItem } from '@subwallet/extension-base/services/subscan-service/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { AddressInput, TokenBalance } from '@subwallet/extension-koni-ui/components';
+import { AddressInput } from '@subwallet/extension-koni-ui/components';
+import CrowdloanTable from '@subwallet/extension-koni-ui/components/CrowdloanTable';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
@@ -14,11 +14,10 @@ import { getCrowdloanContributions } from '@subwallet/extension-koni-ui/messagin
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
-import { CrowdloanContributionsResultParam, CrowdloanFundInfo, CrowdloanFundStatus, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, Button, ButtonProps, Form, Icon, Logo, SwSubHeader, Table, Tag } from '@subwallet/react-ui';
+import { _CrowdloanItemType, CrowdloanContributionsResultParam, CrowdloanFundInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { ActivityIndicator, Button, ButtonProps, Form, Icon, Logo, SwSubHeader } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
-import BigN from 'bignumber.js';
 import CN from 'classnames';
 import fetch from 'cross-fetch';
 import { ArrowCounterClockwise, FadersHorizontal, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
@@ -33,22 +32,6 @@ import { isAddress } from '@polkadot/util-crypto';
 import EmptyList from '../../components/EmptyList/EmptyList';
 
 type Props = ThemeProps;
-
-type TableItem = {
-  id: string;
-  chainSlug: string;
-  chainName: string;
-  relayChainSlug: string;
-  relayChainName: string;
-  contribution: {
-    symbol: string;
-    value: BigN;
-    convertedValue: BigN;
-  };
-  paraState?: CrowdloanParaState,
-  unlockTime: string;
-  sortOrder: number
-};
 
 type CrowdloanContributionsMap = {
   polkadot: CrowdloanContributionItem[],
@@ -69,26 +52,6 @@ const fetchContributionsMap = async (address: string): Promise<CrowdloanContribu
   };
 };
 
-function getTagColor (paraState?: CrowdloanParaState) {
-  if (!paraState) {
-    return 'default';
-  }
-
-  if (paraState.valueOf() === CrowdloanParaState.COMPLETED.valueOf()) {
-    return 'success';
-  }
-
-  if (paraState === CrowdloanParaState.FAILED.valueOf()) {
-    return 'error';
-  }
-
-  if (paraState === CrowdloanParaState.ONGOING.valueOf()) {
-    return 'warning';
-  }
-
-  return 'default';
-}
-
 enum FilterValue {
   ALL = 'all',
   POLKADOT_PARACHAIN = 'Polkadot parachain',
@@ -100,21 +63,14 @@ enum FilterValue {
 
 const ACALA_FUND_ID = '2000-0';
 
-const paraStateMap: Record<CrowdloanFundStatus, CrowdloanParaState> = {
-  [CrowdloanFundStatus.IN_AUCTION]: CrowdloanParaState.ONGOING,
-  [CrowdloanFundStatus.WON]: CrowdloanParaState.COMPLETED,
-  [CrowdloanFundStatus.FAILED]: CrowdloanParaState.FAILED,
-  [CrowdloanFundStatus.WITHDRAW]: CrowdloanParaState.FAILED
-};
-
 const getTableItems = (
   relayChainSlug: 'polkadot' | 'kusama',
   contributionsMap: CrowdloanContributionsMap,
   crowdloanFundInfoMap: Record<string, CrowdloanFundInfo>,
   chainInfoMap: Record<string, _ChainInfo>,
   priceMap: PriceStore['priceMap']
-) => {
-  const result: TableItem[] = [];
+): _CrowdloanItemType[] => {
+  const result: _CrowdloanItemType[] = [];
 
   const relayChainName = relayChainSlug === 'polkadot' ? 'Polkadot' : 'Kusama';
   const decimals = relayChainSlug === 'polkadot' ? 10 : 12;
@@ -130,7 +86,7 @@ const getTableItems = (
 
     const fundInfo = crowdloanFundInfoMap[c.fund_id];
 
-    if (!fundInfo.status || [CrowdloanFundStatus.FAILED, CrowdloanFundStatus.WITHDRAW].includes(fundInfo.status)) {
+    if (!fundInfo.status || [_FundStatus.FAILED, _FundStatus.WITHDRAW].includes(fundInfo.status)) {
       return;
     }
 
@@ -140,13 +96,10 @@ const getTableItems = (
 
     const contributedValue = getBalanceValue(c.contributed || '0', decimals);
     const convertedContributedValue = getConvertedBalanceValue(contributedValue, price);
-
-    const unlockTimeNumber = new Date(fundInfo.endTime).getTime();
-    const unlockTime = customFormatDate(unlockTimeNumber, '#YYYY#-#MM#-#DD#');
     const chainInfo: _ChainInfo | undefined = fundInfo.chain ? chainInfoMap[fundInfo.chain] : undefined;
 
     result.push({
-      id: `${c.fund_id}-${relayChainSlug}`,
+      fundId: c.fund_id,
       chainSlug: chainInfo?.slug || `unknown-${c.fund_id}`,
       chainName: chainInfo?.name || `Unknown (${c.fund_id})`,
       relayChainSlug: relayChainSlug,
@@ -156,9 +109,8 @@ const getTableItems = (
         value: contributedValue,
         convertedValue: convertedContributedValue
       },
-      paraState: paraStateMap[fundInfo.status],
-      unlockTime: customFormatDate(unlockTime, '#YYYY#-#MM#-#DD#'),
-      sortOrder: unlockTimeNumber
+      fundStatus: fundInfo.status,
+      unlockTime: new Date(fundInfo.endTime).getTime()
     });
   });
 
@@ -170,12 +122,12 @@ const getAcalaTableItem = (
   fundInfo: CrowdloanFundInfo | undefined,
   chainInfo: _ChainInfo | undefined,
   priceMap: PriceStore['priceMap']
-): TableItem | undefined => {
-  if (!value || !fundInfo || !chainInfo) {
+): _CrowdloanItemType | undefined => {
+  if (!value || !(fundInfo && fundInfo.endTime && fundInfo.status) || !chainInfo) {
     return;
   }
 
-  if (!fundInfo.endTime || new Date(fundInfo.endTime).getTime() < Date.now()) {
+  if (new Date(fundInfo.endTime).getTime() < Date.now()) {
     return;
   }
 
@@ -184,11 +136,8 @@ const getAcalaTableItem = (
   const contributedValue = getBalanceValue(value || '0', 10);
   const convertedContributedValue = getConvertedBalanceValue(contributedValue, price);
 
-  const unlockTimeNumber = new Date(fundInfo.endTime).getTime();
-  const unlockTime = customFormatDate(unlockTimeNumber, '#YYYY#-#MM#-#DD#');
-
   return {
-    id: `${ACALA_FUND_ID}-polkadot`,
+    fundId: ACALA_FUND_ID,
     chainSlug: chainInfo.slug,
     chainName: chainInfo.name,
     relayChainSlug: 'polkadot',
@@ -198,9 +147,8 @@ const getAcalaTableItem = (
       value: contributedValue,
       convertedValue: convertedContributedValue
     },
-    paraState: paraStateMap[fundInfo.status as CrowdloanFundStatus],
-    unlockTime: customFormatDate(unlockTime, '#YYYY#-#MM#-#DD#'),
-    sortOrder: unlockTimeNumber
+    fundStatus: fundInfo.status,
+    unlockTime: new Date(fundInfo.endTime).getTime()
   };
 };
 
@@ -261,32 +209,12 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     navigate('/crowdloan-unlock-campaign/check-contributions');
   }, [navigate]);
 
-  const getParaStateLabel = useCallback((paraState?: CrowdloanParaState) => {
-    if (!paraState) {
-      return '';
-    }
-
-    if (paraState.valueOf() === CrowdloanParaState.COMPLETED.valueOf()) {
-      return t('Won');
-    }
-
-    if (paraState === CrowdloanParaState.FAILED.valueOf()) {
-      return t('Fail');
-    }
-
-    if (paraState === CrowdloanParaState.ONGOING.valueOf()) {
-      return t('In Auction');
-    }
-
-    return '';
-  }, [t]);
-
-  const tableItems = useMemo<TableItem[]>(() => {
+  const tableItems = useMemo<_CrowdloanItemType[]>(() => {
     if (!contributionsMap.polkadot.length && !contributionsMap.kusama.length && !acalaValue) {
       return [];
     }
 
-    const results: TableItem[] = [];
+    const results: _CrowdloanItemType[] = [];
 
     if (acalaValue) {
       const acalaValueInfo = getAcalaTableItem(acalaValue, crowdloanFundInfoMap[ACALA_FUND_ID], chainInfoMap.acala, priceMap);
@@ -299,27 +227,27 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
       ...getTableItems('kusama', contributionsMap, crowdloanFundInfoMap, chainInfoMap, priceMap)
     );
 
-    return results.sort((a, b) => a.sortOrder - b.sortOrder);
+    return results.sort((a, b) => a.unlockTime - b.unlockTime);
   }, [acalaValue, chainInfoMap, contributionsMap, crowdloanFundInfoMap, priceMap]);
 
   const filteredTableItems = useMemo(() => {
-    const filterTabFunction = (item: TableItem) => {
+    const filterTabFunction = (item: _CrowdloanItemType) => {
       if (selectedFilterTab === FilterValue.ALL) {
         return true;
       }
 
       if (selectedFilterTab === FilterValue.WON) {
-        return item.paraState === CrowdloanParaState.COMPLETED;
+        return item.fundStatus === _FundStatus.WON;
       }
 
       if (selectedFilterTab === FilterValue.IN_AUCTION) {
-        return item.paraState === CrowdloanParaState.ONGOING;
+        return item.fundStatus === _FundStatus.IN_AUCTION;
       }
 
       return false;
     };
 
-    const filterRelaytChainFunction = (item: TableItem) => {
+    const filterRelaytChainFunction = (item: _CrowdloanItemType) => {
       if (currentSelectRelayChainFilter === RelayChainFilter.ALL) {
         return true;
       }
@@ -335,101 +263,12 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
       return false;
     };
 
-    const filterFunction = (item: TableItem) => {
+    const filterFunction = (item: _CrowdloanItemType) => {
       return filterTabFunction(item) && filterRelaytChainFunction(item);
     };
 
     return tableItems.filter(filterFunction);
   }, [currentSelectRelayChainFilter, selectedFilterTab, tableItems]);
-
-  const columns = useMemo(() => {
-    const getUnlockTexts = (paraState?: CrowdloanParaState): [string, string] => {
-      if (!paraState || paraState === CrowdloanParaState.COMPLETED) {
-        return [t('Locked'), t('Until')];
-      }
-
-      if (paraState === CrowdloanParaState.ONGOING) {
-        return [t('Crowdloan'), t('Ends on')];
-      }
-
-      return [t('Refunded'), t('On')];
-    };
-
-    const cols = [
-      {
-        title: t('Project name'),
-        dataIndex: 'name',
-        key: 'name',
-        render: (_: any, row: TableItem) => {
-          const [text1, text2] = getUnlockTexts(row.paraState);
-
-          return <div className='project-container'>
-            <Logo
-              isShowSubLogo={true}
-              network={row.chainSlug}
-              shape={'squircle'}
-              size={40}
-              subLogoShape={'circle'}
-              subNetwork={row.relayChainSlug}
-            />
-            <div className='project-information'>
-              <div className={'project-information-part-1'}>
-                <div className={'project-name'}>{row.chainName}</div>
-                {!isWebUI && (<Tag color={getTagColor(row.paraState)}>{getParaStateLabel(row.paraState)}</Tag>)}
-              </div>
-
-              {isWebUI && (<div className={'project-parachain'}>{`${row.relayChainName} ${t('parachain')}`}</div>)}
-              {!isWebUI && (<div className={'fund-unlock-detail-line-2-for-mobile'}>{`${text1} ${text2.toLowerCase()} ${row.unlockTime}`}</div>)}
-
-            </div>
-          </div>;
-        }
-      },
-      {
-        title: t('Status'),
-        dataIndex: 'status',
-        key: 'status',
-        render: (_: any, item: TableItem) => {
-          return <Tag color={getTagColor(item.paraState)}>{getParaStateLabel(item.paraState)}</Tag>;
-        }
-      },
-      {
-        title: t('Details'),
-        dataIndex: 'details',
-        key: 'details',
-        render: (_: any, row: TableItem) => {
-          const [text1, text2] = getUnlockTexts(row.paraState);
-
-          return <div className={'fund-unlock-detail'}>
-            <div className={'fund-unlock-detail-line-1'}>{text1}</div>
-            <div className={'fund-unlock-detail-line-2'}>{`${text2} ${row.unlockTime}`}</div>
-          </div>;
-        }
-      },
-      {
-        title: t('Contribution'),
-        dataIndex: 'contribution',
-        key: 'contribution',
-        render: (_: any, row: TableItem) => {
-          return (
-            <TokenBalance
-              autoHideBalance={false}
-              convertedValue={row.contribution.convertedValue}
-              symbol={row.contribution.symbol}
-              value={row.contribution.value}
-            />
-          );
-        }
-      }
-    ];
-
-    if (!isWebUI) {
-      // Remove col 3
-      cols.splice(1, 2);
-    }
-
-    return cols;
-  }, [getParaStateLabel, isWebUI, t]);
 
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {
     return [
@@ -669,13 +508,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
           </div>
         )}
         {!!filteredTableItems.length && !loading && (
-          <Table
-            className={'__table'}
-            columns={columns}
-            dataSource={filteredTableItems}
-            pagination={false}
-            rowKey={'id'}
-          />
+          <CrowdloanTable items={filteredTableItems} />
         )}
         {!filteredTableItems.length && !loading && (
           <div className={'__empty-list-wrapper'}>

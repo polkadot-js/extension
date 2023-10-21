@@ -5,15 +5,15 @@ import { ExtrinsicType, NominatorMetadata, StakingRewardItem, StakingStatus, Yie
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
-import { EXCLUSIVE_REWARD_SLUGS } from '@subwallet/extension-koni-ui/constants/earning';
+import { EXCLUSIVE_REWARD_SLUGS, ExclusiveRewardContentMap } from '@subwallet/extension-koni-ui/constants/earning';
 import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getEarnExtrinsicType, getWithdrawExtrinsicType } from '@subwallet/extension-koni-ui/utils';
-import { Button, ButtonProps, Icon, Logo, Number, Typography, Web3Block } from '@subwallet/react-ui';
+import { getEarnExtrinsicType, getWithdrawExtrinsicType, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { Button, ButtonProps, Icon, Logo, Number, Tooltip, Typography, Web3Block } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { DotsThree, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 import MetaInfo from '../MetaInfo/MetaInfo';
@@ -229,6 +229,35 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [assetRegistry, yieldPoolInfo.derivativeAssets, yieldPositionInfo.balance]);
 
+  const childClick = useCallback((onClick: VoidFunction) => {
+    return (e?: SyntheticEvent) => {
+      e && e.stopPropagation();
+      onClick();
+    };
+  }, []);
+
+  const exclusiveRewardTagNode = useMemo(() => {
+    if (!EXCLUSIVE_REWARD_SLUGS.includes(yieldPoolInfo.slug)) {
+      return null;
+    }
+
+    const label = t(ExclusiveRewardContentMap[yieldPoolInfo.slug] || 'No content');
+
+    return (
+      <Tooltip
+        placement={'top'}
+        title={label}
+      >
+        <div
+          className={'exclusive-reward-tag-wrapper'}
+          onClick={childClick(openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs#exclusive-rewards'))}
+        >
+          <EarningTypeTag className={compactMode ? '__item-tag' : 'earning-item-tag'} />
+        </div>
+      </Tooltip>
+    );
+  }, [yieldPoolInfo.slug, childClick, compactMode, t]);
+
   if (compactMode) {
     return (
       <div
@@ -298,11 +327,7 @@ const Component: React.FC<Props> = (props: Props) => {
               className={'__item-tag'}
               type={type}
             />
-            {
-              EXCLUSIVE_REWARD_SLUGS.includes(yieldPoolInfo.slug) && (
-                <EarningTypeTag className={'__item-tag'} />
-              )
-            }
+            {exclusiveRewardTagNode}
           </div>
           <div className='__item-buttons-container'>
             {
@@ -407,11 +432,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 type={type}
               />
 
-              {
-                EXCLUSIVE_REWARD_SLUGS.includes(yieldPoolInfo.slug) && (
-                  <EarningTypeTag className={'earning-item-tag'} />
-                )
-              }
+              {exclusiveRewardTagNode}
             </div>
 
             <div className={'earning-item-description'}>{description}</div>

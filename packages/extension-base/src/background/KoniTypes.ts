@@ -2304,15 +2304,6 @@ export interface SubmitJoinNominationPool {
   nominatorMetadata?: NominatorMetadata
 }
 
-export interface ParaChainInfo {
-  slug: string,
-  name: string,
-  paraState?: CrowdloanParaState,
-  paraId: number | null
-}
-
-export type ParaChainInfoMap = Record<string, Record<string, ParaChainInfo>>;
-
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions

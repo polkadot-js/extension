@@ -349,6 +349,9 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const [substrateWallet, setSubstrateWallet] = useState(injectHandler.substrateWallet);
   const [loadingInject, setLoadingInject] = useState(injectHandler.loadingSubject.value);
 
+  // Todo: Select EVM Wallet
+  // Todo: Select Substrate Wallet
+
   const enableInject = useCallback((callback?: VoidFunction) => {
     injectHandler.enable()
       .then(() => {

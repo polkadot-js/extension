@@ -12,7 +12,7 @@ import DAppItem from '@subwallet/extension-koni-ui/Popup/DApps/DAppItem';
 import FeatureDAppItem from '@subwallet/extension-koni-ui/Popup/DApps/FeatureDAppItem';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { DAppCategoryType, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
+import { DAppCategory, DAppCategoryType, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { ButtonProps, Icon, ModalContext, SwHeader } from '@subwallet/react-ui';
 import { Carousel } from '@trendyol-js/react-carousel';
 import { ArrowCircleLeft, ArrowCircleRight, FadersHorizontal, X } from 'phosphor-react';
@@ -53,6 +53,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       value: c.slug
     }))
   ], [categories, t]);
+
+  const categoryMap = useMemo<Record<string, DAppCategory>>(() => (Object.fromEntries(categories.map((c) => [c.slug, c]))), [categories]);
 
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {
     return [
@@ -260,6 +262,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                     className={'__dapp-item'}
                     key={i.id}
                     {...i}
+                    categoryMap={categoryMap}
                   />
                 ))
               }

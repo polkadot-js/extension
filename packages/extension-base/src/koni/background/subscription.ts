@@ -281,13 +281,13 @@ export class KoniSubscription {
     }, this.state.getChainInfoMap());
 
     if (onlyRunOnFirstTime) {
-      subscriptionPromise.then((unsub) => unsub()).catch(this.logger.warn);
+      subscriptionPromise.then((unsub) => unsub?.()).catch(this.logger.warn);
 
       return;
     }
 
     return () => {
-      subscriptionPromise.then((unsub) => unsub()).catch(this.logger.warn);
+      subscriptionPromise.then((unsub) => unsub?.()).catch(this.logger.warn);
     };
   }
 

@@ -4,7 +4,7 @@
 import type { MetadataRequest, SigningRequest, WindowOpenParams } from '@subwallet/extension-base/background/types';
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { AllLogoMap, BalanceJson, ConfirmationsQueue, CronReloadRequest, CrowdloanJson, Notification, ParaChainInfoMap, PriceJson, RequestGetTransaction, RequestParseEvmContractInput, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribePrice, ResponseParseEvmContractInput, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AllLogoMap, BalanceJson, ConfirmationsQueue, CronReloadRequest, CrowdloanJson, Notification, PriceJson, RequestGetTransaction, RequestParseEvmContractInput, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribePrice, ResponseParseEvmContractInput, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
@@ -103,10 +103,6 @@ export async function getCrowdloanContributions (relayChain: string, address: st
   return sendMessage('pri(crowdloan.getCrowdloanContributions)', { relayChain,
     address,
     page });
-}
-
-export async function getParaChainInfoMap (): Promise<ParaChainInfoMap> {
-  return sendMessage('pri(chainService.getParaChainInfoMap)', null);
 }
 
 export * from './accounts';

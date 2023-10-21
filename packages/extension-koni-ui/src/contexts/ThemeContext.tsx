@@ -222,7 +222,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       }
     },
 
-    '.ant-sw-header-center-part .ant-sw-sub-header-title': {
+    '.ant-sw-header-left-part + .ant-sw-header-center-part .ant-sw-sub-header-title': {
       display: 'block',
       textAlign: 'center'
     },

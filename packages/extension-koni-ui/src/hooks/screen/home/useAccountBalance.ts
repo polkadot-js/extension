@@ -143,6 +143,11 @@ function getAccountBalance (
       tokenBalance.chainDisplayName = _getChainName(chainInfoMap[originChain]);
       tokenBalance.isTestnet = !_isAssetValuable(chainAsset);
 
+      if (isShowZeroBalance) {
+        !tokenBalance.relatedChains.includes(originChain) && tokenBalance.relatedChains.push(originChain);
+        !tokenGroupBalance.relatedChains.includes(originChain) && tokenGroupBalance.relatedChains.push(originChain);
+      }
+
       if (isTokenBalanceReady) {
         tokenBalance.free.value = tokenBalance.free.value.plus(getBalanceValue(balanceItem.free || '0', decimals));
         tokenGroupBalance.free.value = tokenGroupBalance.free.value.plus(tokenBalance.free.value);
@@ -152,10 +157,7 @@ function getAccountBalance (
 
         tokenBalance.total.value = tokenBalance.free.value.plus(tokenBalance.locked.value);
 
-        if (isShowZeroBalance) {
-          !tokenBalance.relatedChains.includes(originChain) && tokenBalance.relatedChains.push(originChain);
-          !tokenGroupBalance.relatedChains.includes(originChain) && tokenGroupBalance.relatedChains.push(originChain);
-        } else {
+        if (!isShowZeroBalance) {
           if (tokenBalance.total.value.eq(BN_0)) {
             return;
           }

@@ -4,10 +4,11 @@
 import { YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
-import { EXCLUSIVE_REWARD_SLUGS } from '@subwallet/extension-koni-ui/constants/earning';
+import { EXCLUSIVE_REWARD_SLUGS, ExclusiveRewardContentMap } from '@subwallet/extension-koni-ui/constants/earning';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, Logo, Number, Web3Block } from '@subwallet/react-ui';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { Button, Icon, Logo, Number, Tooltip, Web3Block } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PlusCircle, PlusMinus, Question } from 'phosphor-react';
@@ -70,6 +71,28 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
+  const exclusiveRewardTagNode = useMemo(() => {
+    if (!EXCLUSIVE_REWARD_SLUGS.includes(item.slug)) {
+      return null;
+    }
+
+    const label = t(ExclusiveRewardContentMap[item.slug] || 'No content');
+
+    return (
+      <Tooltip
+        placement={'top'}
+        title={label}
+      >
+        <div
+          className={'exclusive-reward-tag-wrapper'}
+          onClick={childClick(openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs#exclusive-rewards'))}
+        >
+          <EarningTypeTag className={compactMode ? '__item-tag' : 'earning-item-tag'} />
+        </div>
+      </Tooltip>
+    );
+  }, [item.slug, childClick, compactMode, t]);
+
   if (compactMode) {
     return (
       <div
@@ -119,11 +142,7 @@ const Component: React.FC<Props> = (props: Props) => {
               className={'__item-tag'}
               type={type}
             />
-            {
-              EXCLUSIVE_REWARD_SLUGS.includes(item.slug) && (
-                <EarningTypeTag className={'__item-tag'} />
-              )
-            }
+            {exclusiveRewardTagNode}
           </div>
           <div className='__item-buttons-container'>
             <Button
@@ -181,11 +200,7 @@ const Component: React.FC<Props> = (props: Props) => {
               type={type}
             />
 
-            {
-              EXCLUSIVE_REWARD_SLUGS.includes(item.slug) && (
-                <EarningTypeTag className={'earning-item-tag'} />
-              )
-            }
+            {exclusiveRewardTagNode}
           </div>
 
           <div className={'earning-item-reward'}>

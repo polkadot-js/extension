@@ -1,19 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _FundStatus } from '@subwallet/chain-list/types';
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import BigN from 'bignumber.js';
-
-export type CrowdloanValueInfo = {
-  value: BigN,
-  convertedValue: BigN,
-  symbol: string,
-};
-
-export type CrowdloanContributeValueType = {
-  paraState?: CrowdloanParaState;
-  contribute: CrowdloanValueInfo;
-};
 
 export type CrowdloanItemType = {
   slug: string;
@@ -27,18 +17,26 @@ export type CrowdloanItemType = {
   crowdloanUrl?: string | null;
 }
 
-export enum CrowdloanFundStatus {
-  IN_AUCTION= 'in_auction',
-  WON= 'won',
-  FAILED= 'failed',
-  WITHDRAW= 'withdraw',
+export type _CrowdloanItemType = {
+  fundId: string;
+  chainSlug: string;
+  chainName: string;
+  relayChainSlug: string;
+  relayChainName: string;
+  contribution: {
+    symbol: string;
+    value: BigN;
+    convertedValue: BigN;
+  };
+  fundStatus: _FundStatus,
+  unlockTime: number
 }
 
 export type CrowdloanFundInfo = {
   id: number | null,
   paraId: number | null,
   fundId: string | null,
-  status: CrowdloanFundStatus | null,
+  status: _FundStatus | null,
   metadata: any | null, // todo: will set type later
   relayChain: string | null,
   auctionIndex: number | null,

@@ -2,22 +2,36 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
-import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainInfo, _CrowdloanFund, _FundStatus } from '@subwallet/chain-list/types';
 import { APIItemState, CrowdloanItem, CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@subwallet/extension-base/constants';
 import registry from '@subwallet/extension-base/koni/api/dotsama/typeRegistry';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainSubstrateAddressPrefix, _getSubstrateParaId, _getSubstrateRelayParent, _isChainEvmCompatible, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses, reformatAddress } from '@subwallet/extension-base/utils';
 import axios from 'axios';
 
-import { ApiPromise } from '@polkadot/api';
 import { DeriveOwnContributions } from '@polkadot/api-derive/types';
-import { Option, u32, Vec } from '@polkadot/types';
-import { ParaId } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
-function getRPCCrowdloan (parentAPI: _SubstrateApi, paraId: number, hexAddresses: string[], paraState: CrowdloanParaState, callback: (rs: CrowdloanItem) => void) {
+const STATUS_MAP: Record<_FundStatus, CrowdloanParaState> = {
+  [_FundStatus.IN_AUCTION]: CrowdloanParaState.ONGOING,
+  [_FundStatus.WITHDRAW]: CrowdloanParaState.FAILED,
+  [_FundStatus.FAILED]: CrowdloanParaState.FAILED,
+  [_FundStatus.WON]: CrowdloanParaState.COMPLETED
+};
+
+export type CrowdloanFundInfo = _CrowdloanFund & {
+  chain: string;
+}
+
+const getOnlineFundList = (async () => {
+  const request = await axios.get<CrowdloanFundInfo[]>('https://static-data.subwallet.app/crowdloan-funds/list.json');
+
+  return request.data;
+})();
+
+function getRPCCrowdloan (parentAPI: _SubstrateApi, fundInfo: _CrowdloanFund, hexAddresses: string[], callback: (rs: CrowdloanItem) => void) {
+  const { auctionIndex, endTime, firstPeriod, fundId, lastPeriod, paraId, startTime, status } = fundInfo;
   const unsubPromise = parentAPI.api.derive.crowdloan.ownContributions(paraId, hexAddresses, (result: DeriveOwnContributions) => {
     let contribute = new BN(0);
 
@@ -27,8 +41,16 @@ function getRPCCrowdloan (parentAPI: _SubstrateApi, paraId: number, hexAddresses
 
     const rs: CrowdloanItem = {
       state: APIItemState.READY,
-      paraState,
-      contribute: contribute.toString()
+      paraState: STATUS_MAP[fundInfo.status],
+      contribute: contribute.toString(),
+      fundId,
+      paraId,
+      status,
+      startTime,
+      endTime,
+      auctionIndex,
+      firstPeriod,
+      lastPeriod
     };
 
     callback(rs);
@@ -43,7 +65,9 @@ function getRPCCrowdloan (parentAPI: _SubstrateApi, paraId: number, hexAddresses
   };
 }
 
-export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], paraState: CrowdloanParaState, callback: (rs: CrowdloanItem) => void) => {
+export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], fundInfo: _CrowdloanFund, callback: (rs: CrowdloanItem) => void) => {
+  const { auctionIndex, endTime, firstPeriod, fundId, lastPeriod, paraId, startTime, status } = fundInfo;
+  const paraState = STATUS_MAP[fundInfo.status];
   const acalaContributionApi = 'https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=';
 
   const getContributeInfo = () => {
@@ -53,15 +77,22 @@ export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], pa
       let contribute = new BN(0);
 
       resList.forEach((res) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
         contribute = contribute.add(new BN(res.data.data?.acala?.[0]?.totalDOTLocked || '0'));
       });
 
       const rs: CrowdloanItem = {
         state: APIItemState.READY,
         paraState,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-        contribute: contribute.toString()
+        contribute: contribute.toString(),
+        fundId,
+        paraId,
+        status,
+        startTime,
+        endTime,
+        auctionIndex,
+        firstPeriod,
+        lastPeriod
       };
 
       callback(rs);
@@ -76,73 +107,77 @@ export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], pa
   };
 };
 
-export async function getCrowdloanFundsStatus (api: ApiPromise) {
-  const leases = await api.query.slots.leases.keys<ParaId[]>();
-  const leasesParaIds = leases.map(({ args: [paraId] }) => paraId.toString());
+// export async function getCrowdloanFundsStatus (api: ApiPromise) {
+//   const leases = await api.query.slots.leases.keys<ParaId[]>();
+//   const leasesParaIds = leases.map(({ args: [paraId] }) => paraId.toString());
 
-  const rs = await api.query.crowdloan.funds.entries<Option<any>, ParaId[]>();
-  const newRaise = await api.query.crowdloan.newRaise<Vec<u32>>();
+//   const rs = await api.query.crowdloan.funds.entries<Option<any>, ParaId[]>();
+//   const newRaise = await api.query.crowdloan.newRaise<Vec<u32>>();
 
-  const newRaiseParaIds = (newRaise.toJSON() as number[]).map((p) => p.toString());
+//   const newRaiseParaIds = (newRaise.toJSON() as number[]).map((p) => p.toString());
 
-  return rs.reduce((stateMap, [{ args: [paraId] }, fundData]) => {
-    const paraStr = paraId.toString();
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    // const item = fundData.unwrap() as PolkadotRuntimeCommonCrowdloanFundInfo;
-
-    if (leasesParaIds.indexOf(paraStr) > -1) {
-      stateMap[paraStr] = CrowdloanParaState.COMPLETED;
-    }
-
-    if (newRaiseParaIds.indexOf(paraStr) > -1) {
-      stateMap[paraStr] = CrowdloanParaState.ONGOING;
-    }
-
-    return stateMap;
-  }, {} as Record<string, CrowdloanParaState>);
-}
+//   return rs.reduce((stateMap, [{ args: [paraId] }, fundData]) => {
+//     const paraStr = paraId.toString();
+//     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+//     // const item = fundData.unwrap() as PolkadotRuntimeCommonCrowdloanFundInfo;
+//     if (leasesParaIds.indexOf(paraStr) > -1) {
+//       stateMap[paraStr] = CrowdloanParaState.COMPLETED;
+//     }
+//     if (newRaiseParaIds.indexOf(paraStr) > -1) {
+//       stateMap[paraStr] = CrowdloanParaState.ONGOING;
+//     }
+//     return stateMap;
+//   }, {} as Record<string, CrowdloanParaState>);
+// }
 
 // Get All crowdloan
 export async function subscribeCrowdloan (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, callback: (networkKey: string, rs: CrowdloanItem) => void, chainInfoMap: Record<string, _ChainInfo>) {
   const unsubMap: Record<string, any> = {};
+  const latestMap: Record<string, CrowdloanFundInfo> = {};
+  const rawFundList = await getOnlineFundList;
+
+  rawFundList.forEach((fundInfo) => {
+    const chainSlug = fundInfo.chain;
+
+    if (!latestMap[chainSlug] || fundInfo.auctionIndex > latestMap[chainSlug].auctionIndex) {
+      latestMap[chainSlug] = fundInfo;
+    }
+  });
 
   if (Object.keys(substrateApiMap).includes(COMMON_CHAIN_SLUGS.KUSAMA) && Object.keys(substrateApiMap).includes(COMMON_CHAIN_SLUGS.POLKADOT)) {
+    const now = Date.now();
     const polkadotAPI = await substrateApiMap[COMMON_CHAIN_SLUGS.POLKADOT].isReady;
-    const polkadotFundsStatusMap = await getCrowdloanFundsStatus(polkadotAPI.api);
     const kusamaAPI = await substrateApiMap[COMMON_CHAIN_SLUGS.KUSAMA].isReady;
-    const kusamaFundsStatusMap = await getCrowdloanFundsStatus(kusamaAPI.api);
-
-    // TODO: find all crowdloan valid networks: parachains, in-crowdloan, crowdloan but failed
-
     const substrateAddresses = categoryAddresses(addresses)[0];
-
     const hexAddresses = substrateAddresses.map((address) => {
       return registry.createType('AccountId', address).toHex();
     });
 
-    Object.entries(chainInfoMap).forEach(([networkKey, chainInfo]) => {
-      if (_isSubstrateParaChain(chainInfo)) {
-        const parentChain = _getSubstrateRelayParent(chainInfo);
+    if (addresses.length === 0) {
+      return;
+    }
 
+    Object.values(latestMap).forEach((fundInfo) => {
+      const chainSlug = fundInfo.chain;
+      const endTime = new Date(fundInfo.endTime).getTime();
+      const parentChain = fundInfo.relayChain;
+      const substrateInfo = chainInfoMap[chainSlug]?.substrateInfo;
+
+      if (chainSlug && parentChain && STATUS_MAP[fundInfo.status] && fundInfo.paraId && endTime > now && substrateInfo) {
         const crowdloanCb = (rs: CrowdloanItem) => {
-          callback(networkKey, rs);
+          callback(chainSlug, rs);
         };
 
-        const paraId = _getSubstrateParaId(chainInfo);
+        fundInfo.paraId = substrateInfo.crowdloanParaId || substrateInfo.paraId || fundInfo.paraId;
 
-        if (paraId <= -1 || addresses.length === 0 || parentChain.length === 0) {
-          return;
-        }
+        if (chainSlug === COMMON_CHAIN_SLUGS.ACALA) {
+          const acalaAddresses = substrateAddresses.map((address) => reformatAddress(address, 10, false));
 
-        if (networkKey === COMMON_CHAIN_SLUGS.ACALA) {
-          const acalaAddresses = substrateAddresses.map((address) => reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo), _isChainEvmCompatible(chainInfo)));
-
-          unsubMap.acala = subscribeAcalaContributeInterval(acalaAddresses, CrowdloanParaState.COMPLETED, crowdloanCb);
-        } else if (parentChain === COMMON_CHAIN_SLUGS.POLKADOT && polkadotFundsStatusMap[paraId]) {
-          unsubMap[networkKey] = getRPCCrowdloan(polkadotAPI, paraId, hexAddresses, polkadotFundsStatusMap[paraId], crowdloanCb);
-        } else if (parentChain === COMMON_CHAIN_SLUGS.KUSAMA && kusamaFundsStatusMap[paraId]) {
-          unsubMap[networkKey] = getRPCCrowdloan(kusamaAPI, paraId, hexAddresses, kusamaFundsStatusMap[paraId], crowdloanCb);
+          unsubMap.acala = subscribeAcalaContributeInterval(acalaAddresses, fundInfo, crowdloanCb);
+        } else if (parentChain === COMMON_CHAIN_SLUGS.POLKADOT) {
+          unsubMap[chainSlug] = getRPCCrowdloan(polkadotAPI, fundInfo, hexAddresses, crowdloanCb);
+        } else if (parentChain === COMMON_CHAIN_SLUGS.KUSAMA) {
+          unsubMap[chainSlug] = getRPCCrowdloan(kusamaAPI, fundInfo, hexAddresses, crowdloanCb);
         }
       }
     });

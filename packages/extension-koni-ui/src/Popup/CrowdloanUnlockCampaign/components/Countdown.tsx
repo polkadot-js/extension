@@ -57,22 +57,22 @@ const Countdown = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__time-item-number': {
-      fontSize: token.fontSizeHeading3,
-      lineHeight: token.lineHeightHeading3,
+      fontSize: token.fontSizeHeading2,
+      lineHeight: token.lineHeightHeading2,
       fontWeight: token.headingFontWeight,
       color: token.colorTextLight1
     },
 
     '.__time-item-unit': {
-      fontSize: token.sizeSM,
-      lineHeight: token.lineHeightSM,
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
       color: token.colorTextLight4,
       textTransform: 'uppercase'
     },
 
     '.__time-separator': {
-      fontSize: token.fontSizeHeading3,
-      lineHeight: token.lineHeightHeading3,
+      fontSize: token.fontSizeHeading2,
+      lineHeight: token.lineHeightHeading2,
       color: token.colorTextLight4,
       alignSelf: 'top',
       paddingLeft: token.padding,

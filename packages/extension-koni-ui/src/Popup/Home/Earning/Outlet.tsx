@@ -13,7 +13,6 @@ type Props = ThemeProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
-
   const dataContext = useContext(DataContext);
 
   return (

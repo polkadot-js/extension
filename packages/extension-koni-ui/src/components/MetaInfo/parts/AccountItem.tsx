@@ -55,12 +55,12 @@ const Component: React.FC<AccountInfoItem> = (props: AccountInfoItem) => {
 
   return (
     <div className={CN(className, '__row -type-account')}>
-      {!!label && <div className={'__col'}>
+      {!!label && <div className={'__col __label-col'}>
         <div className={'__label'}>
           {label}
         </div>
       </div>}
-      <div className={'__col -to-right'}>
+      <div className={'__col __value-col -to-right'}>
         <div className={`__account-item __value -is-wrapper -schema-${valueColorSchema}`}>
           {
             isAll

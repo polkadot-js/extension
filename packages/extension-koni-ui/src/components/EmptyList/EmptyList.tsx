@@ -11,7 +11,7 @@ import CN from 'classnames';
 interface Props extends ThemeProps {
   phosphorIcon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,
   emptyTitle?: string,
-  emptyMessage?: string,
+  emptyMessage?: string | React.ReactNode,
   buttonProps?: ButtonProps;
 }
 

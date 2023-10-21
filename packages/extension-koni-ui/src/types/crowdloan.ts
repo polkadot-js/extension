@@ -26,3 +26,25 @@ export type CrowdloanItemType = {
   paraState?: CrowdloanParaState;
   crowdloanUrl?: string | null;
 }
+
+export enum CrowdloanFundStatus {
+  IN_AUCTION= 'in_auction',
+  WON= 'won',
+  FAILED= 'failed',
+  WITHDRAW= 'withdraw',
+}
+
+export type CrowdloanFundInfo = {
+  id: number | null,
+  paraId: number | null,
+  fundId: string | null,
+  status: CrowdloanFundStatus | null,
+  metadata: any | null, // todo: will set type later
+  relayChain: string | null,
+  auctionIndex: number | null,
+  firstPeriod: number | null,
+  lastPeriod: number | null,
+  startTime: string | null,
+  endTime: string | null,
+  chain: string | null
+}

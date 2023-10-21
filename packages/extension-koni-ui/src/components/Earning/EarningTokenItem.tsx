@@ -14,14 +14,14 @@ interface Props extends ThemeProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { children, className, symbol } = props;
+  const { children, className, token } = props;
 
   return (
     <div className={CN(className)}>
       <Logo
         className={'earning-btn-icon'}
         size={16}
-        token={symbol.toLowerCase()}
+        token={token.toLowerCase()}
       />
       {children}
     </div>

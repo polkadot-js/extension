@@ -107,7 +107,8 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
       if (pathName.startsWith('/home') ||
         pathName === '/settings' ||
         pathName === '/settings/list' ||
-        pathName === '/dapps'
+        pathName === '/dapps' ||
+        pathName === '/mission-pools'
       ) {
         setHeaderType(HeaderType.COMMON);
       } else if (pathName.startsWith('/transaction-done')) {

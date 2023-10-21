@@ -24,6 +24,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
+import { BN } from '@polkadot/util';
+
 import Transaction from '../../Transaction/Transaction';
 import YieldCancelUnstake from '../../Transaction/variants/Yield/YieldCancelUnstake';
 import YieldClaimReward from '../../Transaction/variants/Yield/YieldClaimReward';
@@ -111,7 +113,9 @@ const Component: React.FC<Props> = (props: Props) => {
           nominationPoolReward.name = stakingReward.name;
           nominationPoolReward.chain = stakingReward.chain;
 
-          nominationPoolReward.unclaimedReward = stakingReward.unclaimedReward;
+          const bnUnclaimedReward = new BN(stakingReward.unclaimedReward || '0');
+
+          nominationPoolReward.unclaimedReward = bnUnclaimedReward.add(new BN(nominationPoolReward.unclaimedReward || '0')).toString();
         }
       });
     } else {
@@ -379,7 +383,9 @@ const Component: React.FC<Props> = (props: Props) => {
           nominationPoolReward.name = stakingReward.name;
           nominationPoolReward.chain = stakingReward.chain;
 
-          nominationPoolReward.unclaimedReward = stakingReward.unclaimedReward;
+          const bnUnclaimedReward = new BN(stakingReward.unclaimedReward || '0');
+
+          nominationPoolReward.unclaimedReward = bnUnclaimedReward.add(new BN(nominationPoolReward.unclaimedReward || '0')).toString();
         }
       });
     } else {

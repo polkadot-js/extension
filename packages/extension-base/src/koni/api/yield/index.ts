@@ -411,7 +411,7 @@ export interface HandleYieldStepData {
   transferNativeAmount: string
 }
 
-export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
+export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number, balanceService: BalanceService): Promise<HandleYieldStepData> {
   if (yieldPoolInfo.type === YieldPoolType.NATIVE_STAKING) {
     const _data = requestData.data as SubmitJoinNativeStaking;
     const extrinsic = await getNativeStakingBondExtrinsic(address, params, _data);
@@ -433,13 +433,13 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
       transferNativeAmount: _data.amount
     };
   } else if (yieldPoolInfo.slug === 'DOT___acala_liquid_staking') {
-    return getAcalaLiquidStakingExtrinsic(address, params, path, currentStep, requestData);
+    return getAcalaLiquidStakingExtrinsic(address, params, path, currentStep, requestData, balanceService);
   } else if (yieldPoolInfo.slug === 'DOT___bifrost_liquid_staking') {
-    return getBifrostLiquidStakingExtrinsic(address, params, path, currentStep, requestData);
+    return getBifrostLiquidStakingExtrinsic(address, params, path, currentStep, requestData, balanceService);
   } else if (yieldPoolInfo.slug === 'DOT___parallel_liquid_staking') {
-    return getParallelLiquidStakingExtrinsic(address, params, path, currentStep, requestData);
+    return getParallelLiquidStakingExtrinsic(address, params, path, currentStep, requestData, balanceService);
   } else if (yieldPoolInfo.slug === 'DOT___interlay_lending') {
-    return getInterlayLendingExtrinsic(address, params, path, currentStep, requestData);
+    return getInterlayLendingExtrinsic(address, params, path, currentStep, requestData, balanceService);
   }
 
   const _data = requestData.data as SubmitJoinNominationPool;

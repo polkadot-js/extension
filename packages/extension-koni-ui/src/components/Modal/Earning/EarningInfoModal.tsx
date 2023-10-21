@@ -3,14 +3,14 @@
 
 import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
-import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { usePreCheckAction, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getEarnExtrinsicType, isAccountAll, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { findNetworkJsonByGenesisHash, getEarnExtrinsicType, isAccountAll, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon, ModalContext, Number, Tooltip } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -21,6 +21,8 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { EarningTokenItem, EarningTokenList } from '../../Earning';
 import { EarningMethodSelector } from '../../Field';
@@ -128,6 +130,32 @@ const Component: React.FC<Props> = (props: Props) => {
       };
     });
   }, [assetRegistry, currentItem.inputAssets, chainInfoMap]);
+
+  const methodOptions = useMemo(() => {
+    return Object.values(poolInfo).filter((pool) => {
+      if (!currentAccount?.address) {
+        return true;
+      }
+
+      if (isAccountAll(currentAccount.address)) {
+        return true;
+      }
+
+      const isLedger = !!currentAccount.isHardware;
+      const validGen: string[] = currentAccount.availableGenesisHashes || [];
+      const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
+
+      if (isLedger) {
+        return validLedgerNetwork.includes(pool.chain);
+      }
+
+      const chain = chainInfoMap[pool.chain];
+      const isEvmChain = _isChainEvmCompatible(chain);
+      const isEvmAddress = isEthereumAddress(currentAccount.address);
+
+      return isEvmChain === isEvmAddress;
+    });
+  }, [chainInfoMap, currentAccount, poolInfo]);
 
   const rewardTextI18nKey = useMemo(() => {
     if (['westend', 'polkadot'].includes(currentItem.chain)) {
@@ -252,7 +280,7 @@ const Component: React.FC<Props> = (props: Props) => {
             name={'method'}
           >
             <EarningMethodSelector
-              items={Object.values(poolInfo)}
+              items={methodOptions}
               showChainInSelected
             />
           </Form.Item>

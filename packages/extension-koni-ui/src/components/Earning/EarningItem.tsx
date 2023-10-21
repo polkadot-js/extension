@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -48,6 +48,17 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return apy || 0;
   }, [stats?.totalApr, stats?.totalApy]);
+
+  const submitText = useMemo(() => {
+    switch (type) {
+      case YieldPoolType.LENDING:
+        return t('Supply now');
+      case YieldPoolType.NOMINATION_POOL:
+      case YieldPoolType.LIQUID_STAKING:
+      default:
+        return t('Stake now');
+    }
+  }, [t, type]);
 
   const childClick = useCallback((onClick: VoidFunction) => {
     return (e?: SyntheticEvent) => {
@@ -140,7 +151,7 @@ const Component: React.FC<Props> = (props: Props) => {
               shape='circle'
               size='xs'
             >
-              {t('Stake now')}
+              {submitText}
             </Button>
           </div>
         </div>

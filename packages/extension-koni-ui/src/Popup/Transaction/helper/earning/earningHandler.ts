@@ -68,6 +68,7 @@ export function getJoinYieldParams (yieldPoolInfo: YieldPoolInfo, amount: string
   const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 0;
 
   return {
+    slug: yieldPoolInfo.slug,
     exchangeRate,
     inputTokenSlug: yieldPoolInfo.inputAssets[0],
     derivativeTokenSlug: yieldPoolInfo?.derivativeAssets ? yieldPoolInfo.derivativeAssets[0] : undefined, // TODO

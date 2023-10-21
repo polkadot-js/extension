@@ -172,7 +172,7 @@ const Component = function ({ className }: Props) {
         case ExtrinsicType.STAKING_WITHDRAW:
           return t('Withdrawal confirm');
         case ExtrinsicType.STAKING_CLAIM_REWARD:
-          return t('Claim rewards confirm');
+          return t('Reward claiming confirmation');
         case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
           return t('Cancel unstake confirm');
         default:

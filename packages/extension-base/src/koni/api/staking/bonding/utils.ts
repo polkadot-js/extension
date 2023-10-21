@@ -371,8 +371,10 @@ export function getYieldAvailableActionsByType (yieldPoolInfo: YieldPoolInfo): Y
     }
   }
 
-  if ([YieldPoolType.LIQUID_STAKING, YieldPoolType.LENDING].includes(yieldPoolInfo.type)) {
+  if (yieldPoolInfo.type === YieldPoolType.LENDING) {
     return [YieldAction.START_EARNING, YieldAction.WITHDRAW_EARNING];
+  } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
+    return [YieldAction.START_EARNING, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
   }
 
   return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CANCEL_UNSTAKE];
@@ -411,6 +413,16 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
         result.push(YieldAction.WITHDRAW);
       }
     }
+  } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
+    result.push(YieldAction.START_EARNING);
+
+    const activeBalance = new BN(yieldPosition.balance[0].activeBalance || '0');
+
+    if (activeBalance.gt(BN_ZERO)) {
+      result.push(YieldAction.UNSTAKE);
+    }
+
+    // TODO: check has unstakings to withdraw
   } else {
     result.push(YieldAction.START_EARNING);
     result.push(YieldAction.WITHDRAW_EARNING); // TODO

@@ -26,7 +26,6 @@ enum FilterValue {
   POLKADOT_PARACHAIN = 'Polkadot parachain',
   KUSAMA_PARACHAIN = 'Kusama parachain',
   WON = 'won',
-  FAIL = 'failed',
   IN_AUCTION = 'in auction'
 }
 
@@ -50,8 +49,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const filterOptions = useMemo(() => [
     { label: t('Polkadot parachain'), value: FilterValue.POLKADOT_PARACHAIN },
     { label: t('Kusama parachain'), value: FilterValue.KUSAMA_PARACHAIN },
-    { label: t('Won'), value: FilterValue.WON },
-    { label: t('Fail'), value: FilterValue.FAIL }
+    { label: t('Won'), value: FilterValue.WON }
   ], [t]);
 
   const filterFunction = useMemo<(item: _CrowdloanItemType) => boolean>(() => {

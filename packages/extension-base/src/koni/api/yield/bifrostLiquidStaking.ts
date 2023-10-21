@@ -144,8 +144,9 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
               slug: inputTokenSlug
             }
           ]
-      } as YieldPositionStats
-    } as YieldPositionInfo);}
+        } as YieldPositionStats
+      } as YieldPositionInfo);
+    }
   });
 }
 

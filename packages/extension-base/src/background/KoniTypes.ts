@@ -603,10 +603,10 @@ export interface NFTTransactionAdditionalInfo {
 export type TransactionAdditionalInfo = {
   [ExtrinsicType.TRANSFER_XCM]: XCMTransactionAdditionalInfo,
   [ExtrinsicType.SEND_NFT]: NFTTransactionAdditionalInfo,
-  [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
-  [ExtrinsicType.MINT_QDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
-  [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>,
-  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'rewardTokenSlug' | 'exchangeRate'>
+  [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.MINT_QDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate'>,
+  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate'>
 }
 
 // export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM

@@ -6,16 +6,15 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNativeTokenBasicInfo, useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { AccountSelector, HiddenInput, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { useGetNativeTokenBasicInfo, useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitStakingClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { ClaimYieldParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Checkbox, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -23,7 +22,7 @@ import styled from 'styled-components';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
+import { FreeBalance, TransactionContent, TransactionFooter, YieldOutlet } from '../../parts';
 
 type Props = ThemeProps;
 
@@ -33,7 +32,6 @@ const validateFields: Array<keyof ClaimYieldParams> = ['from'];
 const Component: React.FC = () => {
   const navigate = useNavigate();
 
-  const dataContext = useContext(DataContext);
   const { defaultData, onDone, persistData } = useTransactionContext<ClaimYieldParams>();
   const { chain, method } = defaultData;
 
@@ -101,7 +99,7 @@ const Component: React.FC = () => {
     }, 300);
   }, [chain, from, onError, onSuccess, reward?.unclaimedReward, type]);
 
-  const checkAction = usePreCheckAction(from);
+  const preCheckAction = usePreCheckAction(from);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const chainInfo = chainInfoMap[chain];
@@ -149,60 +147,58 @@ const Component: React.FC = () => {
   return (
     <>
       <TransactionContent>
-        <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
-          <Form
-            className={CN('form-container form-space-sm')}
-            form={form}
-            initialValues={formDefault}
-            onFieldsChange={onFieldsChange}
-            onFinish={onSubmit}
+        <Form
+          className={CN('form-container form-space-sm')}
+          form={form}
+          initialValues={formDefault}
+          onFieldsChange={onFieldsChange}
+          onFinish={onSubmit}
+        >
+          <HiddenInput fields={hideFields} />
+          <Form.Item
+            hidden={!isAllAccount}
+            name={'from'}
           >
-            <HiddenInput fields={hideFields} />
-            <Form.Item
-              hidden={!isAllAccount}
-              name={'from'}
+            <AccountSelector filter={filterAccount} />
+          </Form.Item>
+          <FreeBalance
+            address={from}
+            chain={chain}
+            className={'free-balance'}
+            label={t('Available balance:')}
+            onBalanceReady={setIsBalanceReady}
+          />
+          <Form.Item>
+            <MetaInfo
+              className='claim-reward-meta-info'
+              hasBackgroundWrapper={true}
             >
-              <AccountSelector filter={filterAccount} />
-            </Form.Item>
-            <FreeBalance
-              address={from}
-              chain={chain}
-              className={'free-balance'}
-              label={t('Available balance:')}
-              onBalanceReady={setIsBalanceReady}
-            />
-            <Form.Item>
-              <MetaInfo
-                className='claim-reward-meta-info'
-                hasBackgroundWrapper={true}
-              >
-                <MetaInfo.Chain
-                  chain={chain}
-                  label={t('Network')}
-                />
-                {
-                  reward?.unclaimedReward && (
-                    <MetaInfo.Number
-                      decimals={decimals}
-                      label={t('Reward claiming')}
-                      suffix={symbol}
-                      value={reward.unclaimedReward}
-                    />
-                  )
-                }
-              </MetaInfo>
-            </Form.Item>
-            <Form.Item
-              hidden={type !== StakingType.POOLED}
-              name={'bondReward'}
-              valuePropName='checked'
-            >
-              <Checkbox>
-                <span className={'__option-label'}>{t('Bond reward after claim')}</span>
-              </Checkbox>
-            </Form.Item>
-          </Form>
-        </PageWrapper>
+              <MetaInfo.Chain
+                chain={chain}
+                label={t('Network')}
+              />
+              {
+                reward?.unclaimedReward && (
+                  <MetaInfo.Number
+                    decimals={decimals}
+                    label={t('Reward claiming')}
+                    suffix={symbol}
+                    value={reward.unclaimedReward}
+                  />
+                )
+              }
+            </MetaInfo>
+          </Form.Item>
+          <Form.Item
+            hidden={type !== StakingType.POOLED}
+            name={'bondReward'}
+            valuePropName='checked'
+          >
+            <Checkbox>
+              <span className={'__option-label'}>{t('Bond reward after claim')}</span>
+            </Checkbox>
+          </Form.Item>
+        </Form>
       </TransactionContent>
       <TransactionFooter
         errors={[]}
@@ -231,7 +227,7 @@ const Component: React.FC = () => {
             />
           )}
           loading={loading}
-          onClick={checkAction(form.submit, ExtrinsicType.STAKING_CLAIM_REWARD)}
+          onClick={preCheckAction(form.submit, ExtrinsicType.STAKING_CLAIM_REWARD)}
         >
           {t('Continue')}
         </Button>
@@ -243,17 +239,14 @@ const Component: React.FC = () => {
 const Wrapper: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
-  useSetCurrentPage('/transaction/yield-claim-reward');
-
-  const dataContext = useContext(DataContext);
-
   return (
-    <PageWrapper
-      className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['yieldPool', 'staking'])}
+    <YieldOutlet
+      className={CN(className)}
+      path={'/transaction/yield-claim-reward'}
+      stores={['yieldPool', 'staking']}
     >
       <Component />
-    </PageWrapper>
+    </YieldOutlet>
   );
 };
 

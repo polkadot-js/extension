@@ -6,7 +6,7 @@ import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/comp
 import { DEFAULT_TRANSACTION_PARAMS, STAKING_NETWORK_DETAIL_MODAL, TRANSACTION_TITLE_MAP, TRANSACTION_TRANSFER_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, TRANSFER_NFT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
+import { TransactionContext, TransactionContextProps } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
 import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
 import { detectTransactionPersistKey } from '@subwallet/extension-koni-ui/utils';
@@ -20,13 +20,14 @@ import { useLocalStorage } from 'usehooks-ts';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
-  title?: string,
-  children?: React.ReactElement
-  transactionType?: string
-  modalContent?: boolean
+  title?: string;
+  children?: React.ReactElement;
+  transactionType?: string;
+  modalContent?: boolean;
+  modalId?: string;
 }
 
-function Component ({ children, className, modalContent }: Props) {
+function Component ({ children, className, modalContent, modalId }: Props) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -178,13 +179,24 @@ function Component ({ children, className, modalContent }: Props) {
       : [];
   }, [disabledRightBtn, onClickRightBtn, showRightBtn]);
 
+  const contextValues = useMemo((): TransactionContextProps => ({
+    defaultData,
+    needPersistData,
+    persistData,
+    onDone,
+    onClickRightBtn,
+    setShowRightBtn,
+    setDisabledRightBtn,
+    modalId
+  }), [defaultData, modalId, needPersistData, onClickRightBtn, onDone, persistData]);
+
   useEffect(() => {
     chain !== '' && chainChecker(chain);
   }, [chain, chainChecker]);
 
   if (modalContent) {
     return (
-      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
+      <TransactionContext.Provider value={contextValues}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper __modal-content')}>
             {children}
@@ -201,7 +213,7 @@ function Component ({ children, className, modalContent }: Props) {
         showBackButton
         title={titleMap[transactionType]}
       >
-        <TransactionContext.Provider value={{ defaultData, needPersistData, persistData, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
+        <TransactionContext.Provider value={contextValues}>
           <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
             <div className={CN(className, 'transaction-wrapper')}>
               <Outlet />
@@ -217,7 +229,7 @@ function Component ({ children, className, modalContent }: Props) {
       showFilterIcon
       showTabBar={false}
     >
-      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
+      <TransactionContext.Provider value={contextValues}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader

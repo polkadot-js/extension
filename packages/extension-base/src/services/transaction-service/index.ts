@@ -544,7 +544,7 @@ export default class TransactionService {
 
         historyItem.amount = { value: params.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
         historyItem.additionalInfo = {
-          rewardTokenSlug: params.rewardTokenSlug,
+          derivativeTokenSlug: params.derivativeTokenSlug,
           exchangeRate: params.exchangeRate
         } as TransactionAdditionalInfo[ExtrinsicType.MINT_VDOT];
         eventLogs && parseLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);

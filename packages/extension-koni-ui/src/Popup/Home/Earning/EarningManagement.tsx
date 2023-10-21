@@ -67,9 +67,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
   const [, setClaimStorage] = useLocalStorage(CLAIM_YIELD_TRANSACTION, DEFAULT_CLAIM_YIELD_PARAMS);
 
-  const [{ selectedYieldPoolInfo, selectedYieldPosition }, setSelectedItem] = useState<{ selectedYieldPosition: YieldPositionInfo | undefined, selectedYieldPoolInfo: YieldPoolInfo | undefined }>({ selectedYieldPosition: undefined, selectedYieldPoolInfo: undefined });
+  const [selectedSlug, setSelectedSlug] = useState('');
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const selectedYieldPosition = useMemo(() => groupYieldPosition.find((item) => item.slug === selectedSlug), [groupYieldPosition, selectedSlug]);
+  const selectedYieldPoolInfo = useMemo((): YieldPoolInfo | undefined => poolInfoMap[selectedSlug], [poolInfoMap, selectedSlug]);
 
   const selectedStakingRewardItem = useMemo(() => {
     let nominationPoolReward: StakingRewardItem | undefined;
@@ -102,7 +105,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return [
       {
         desc: true,
-        label: t('Sort by total value'),
+        label: t('Total value staked'),
         value: SortKey.TOTAL_VALUE
       }
     ];
@@ -162,27 +165,23 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClickCalculatorBtn = useCallback((item: YieldPositionInfo) => {
     return () => {
-      const poolInfo = poolInfoMap[item.slug];
-
-      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      setSelectedSlug(item.slug);
       activeModal(STAKING_CALCULATOR_MODAL);
     };
-  }, [activeModal, poolInfoMap]);
+  }, [activeModal]);
 
   const onClickInfoBtn = useCallback((item: YieldPositionInfo) => {
     return () => {
-      const poolInfo = poolInfoMap[item.slug];
-
-      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      setSelectedSlug(item.slug);
       activeModal(EARNING_INFO_MODAL);
     };
-  }, [activeModal, poolInfoMap]);
+  }, [activeModal]);
 
   const onClickStakeBtn = useCallback((item: YieldPositionInfo) => {
     return () => {
       const poolInfo = poolInfoMap[item.slug];
 
-      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      setSelectedSlug(item.slug);
 
       const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
@@ -202,7 +201,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return () => {
       const poolInfo = poolInfoMap[item.slug];
 
-      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      setSelectedSlug(item.slug);
 
       const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
@@ -226,7 +225,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return () => {
       const poolInfo = poolInfoMap[item.slug];
 
-      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      setSelectedSlug(item.slug);
 
       const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
@@ -250,7 +249,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return () => {
       const poolInfo = poolInfoMap[item.slug];
 
-      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      setSelectedSlug(item.slug);
 
       const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
@@ -274,7 +273,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return () => {
       const poolInfo = poolInfoMap[item.slug];
 
-      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      setSelectedSlug(item.slug);
 
       const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
@@ -316,7 +315,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return () => {
       const poolInfo = poolInfoMap[item.slug];
 
-      setSelectedItem({ selectedYieldPosition: item, selectedYieldPoolInfo: poolInfo });
+      setSelectedSlug(item.slug);
 
       if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolInfo.type)) {
         activeModal(YIELD_STAKING_DETAIL_MODAL);
@@ -488,7 +487,7 @@ const Component: React.FC<Props> = (props: Props) => {
             size='md'
             weight='fill'
           />
-          <span className='footer-content'>{t('Do you want to add more funds or add funds for other pools?')}</span>
+          <span className='footer-content'>{t('Do you want to add more funds or add funds to other pools')}</span>
         </div>
         <Button
           icon={(
@@ -541,10 +540,11 @@ const Component: React.FC<Props> = (props: Props) => {
         destroyOnClose={true}
         id={TRANSACTION_YIELD_UNSTAKE_MODAL}
         onCancel={handleCloseUnstake}
-        title={t('Unbond')}
+        title={t('Unstake')}
       >
         <Transaction
           modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_UNSTAKE_MODAL}
         >
           <YieldUnstake />
         </Transaction>
@@ -558,6 +558,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <Transaction
           modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL}
         >
           <YieldCancelUnstake />
         </Transaction>
@@ -571,6 +572,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <Transaction
           modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_WITHDRAW_MODAL}
         >
           <YieldWithdraw />
         </Transaction>
@@ -584,6 +586,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <Transaction
           modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_FAST_WITHDRAW_MODAL}
         >
           <YieldWithdrawPosition />
         </Transaction>
@@ -597,6 +600,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <Transaction
           modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_CLAIM_MODAL}
         >
           <YieldClaimReward />
         </Transaction>
@@ -647,6 +651,13 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
           color: token.colorTextSecondary
         }
       }
+    },
+
+    '.empty-list': {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)'
     }
   });
 });

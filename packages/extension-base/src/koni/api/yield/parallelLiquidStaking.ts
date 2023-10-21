@@ -8,6 +8,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
 
@@ -133,7 +134,7 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
   });
 }
 
-export async function getParallelLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit) {
+export async function getParallelLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit, balanceService: BalanceService) {
   const inputData = requestData.data as SubmitYieldStepData;
 
   if (path.steps[currentStep].type === YieldStepType.XCM) {
@@ -144,11 +145,14 @@ export async function getParallelLiquidStakingExtrinsic (address: string, params
     const destinationTokenInfo = params.assetInfoMap[destinationTokenSlug];
     const substrateApi = params.substrateApiMap[originChainInfo.slug];
 
+    const inputTokenBalance = await balanceService.getTokenFreeBalance(params.address, destinationTokenInfo.originChain, destinationTokenSlug);
+    const bnInputTokenBalance = new BN(inputTokenBalance.value);
+
     const xcmFee = path.totalFee[currentStep].amount || '0';
     const bnXcmFee = new BN(xcmFee);
     const bnAmount = new BN(inputData.amount);
 
-    const bnTotalAmount = bnAmount.add(bnXcmFee);
+    const bnTotalAmount = bnAmount.sub(bnInputTokenBalance).add(bnXcmFee);
 
     const extrinsic = await createXcmExtrinsic({
       chainInfoMap: params.chainInfoMap,

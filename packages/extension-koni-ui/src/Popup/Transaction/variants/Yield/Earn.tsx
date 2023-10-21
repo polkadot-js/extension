@@ -8,17 +8,16 @@ import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subw
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
-import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, PageWrapper, StakingProcessModal, YieldMultiValidatorSelector, YieldPoolSelector } from '@subwallet/extension-koni-ui/components';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, StakingProcessModal, YieldMultiValidatorSelector, YieldPoolSelector } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFetchChainState, useGetChainPrefixBySlug, useNotification, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetChainPrefixBySlug, useNotification, usePreCheckAction, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useGetYieldPositionByAddressAndSlug from '@subwallet/extension-koni-ui/hooks/screen/earning/useGetYieldPositionByAddressAndSlug';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, getEarnExtrinsicType, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -32,7 +31,7 @@ import styled, { useTheme } from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../../helper';
-import { FreeBalanceToStake, TransactionContent } from '../../parts';
+import { FreeBalanceToStake, TransactionContent, YieldOutlet } from '../../parts';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -92,6 +91,9 @@ const Component = () => {
 
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
+  const preCheckAction = usePreCheckAction(currentFrom);
+
+  const extrinsicType = useMemo(() => getEarnExtrinsicType(methodSlug), [methodSlug]);
 
   const currentYieldPosition = useGetYieldPositionByAddressAndSlug(currentFrom, currentPoolInfo.slug);
 
@@ -242,6 +244,7 @@ const Component = () => {
 
   const renderMetaInfo = useCallback(() => {
     const asset = currentPoolInfo?.inputAssets[0] || '';
+    const assetSymbol = chainAsset[asset].symbol || '';
     const assetDecimals = chainAsset[asset].decimals || 0;
     const value = currentAmount ? parseFloat(currentAmount) / (10 ** assetDecimals) : 0;
 
@@ -277,7 +280,7 @@ const Component = () => {
               Object.values(_assetEarnings).map((value) => {
                 const amount = (value.apy || 0);
 
-                return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)}% ${value.symbol}`;
+                return `${formatNumber(amount, 0, balanceFormatter)}% ${value.symbol}`;
               }).join(' - ')
             }
           </div>
@@ -288,11 +291,22 @@ const Component = () => {
               Object.values(_assetEarnings).map((value) => {
                 const amount = value.rewardInToken || 0;
 
-                return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)} ${value.symbol}`;
+                return `${formatNumber(amount, 0, balanceFormatter)} ${value.symbol}`;
               }).join(' - ').concat('/year')
             }
           </div>
         </MetaInfo.Default>
+
+        {
+          currentPoolInfo.stats?.minJoinPool && (
+            <MetaInfo.Number
+              decimals={assetDecimals}
+              label={t('Minimum active stake')}
+              suffix={assetSymbol}
+              value={currentPoolInfo.stats.minJoinPool}
+            />
+          )
+        }
 
         <MetaInfo.Number
           decimals={0}
@@ -679,7 +693,7 @@ const Component = () => {
               />
             }
             loading={submitLoading}
-            onClick={onClick}
+            onClick={preCheckAction(onClick, extrinsicType)}
           >
             {processState.currentStep === 0 ? t('Submit') : (!isProcessDone ? t('Continue') : t('Finish'))}
           </Button>
@@ -725,11 +739,6 @@ const Component = () => {
               )
             }
           </div>
-          <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
-
-          <Typography.Text style={{ color: token.colorTextLight4 }}>
-            {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
-          </Typography.Text>
         </div>
       )}
 
@@ -744,15 +753,14 @@ const Component = () => {
 const Wrapper: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
-  const dataContext = useContext(DataContext);
-
   return (
-    <PageWrapper
-      className={CN(className, 'page-wrapper')}
-      resolve={dataContext.awaitStores(['yieldPool', 'price', 'chainStore', 'assetRegistry'])}
+    <YieldOutlet
+      className={CN(className)}
+      path={'/transaction/earn'}
+      stores={['yieldPool', 'price', 'chainStore', 'assetRegistry']}
     >
       <Component />
-    </PageWrapper>
+    </YieldOutlet>
   );
 };
 

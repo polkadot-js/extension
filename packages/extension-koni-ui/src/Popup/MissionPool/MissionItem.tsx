@@ -17,7 +17,8 @@ import styled, { ThemeContext } from 'styled-components';
 
 type Props = ThemeProps & {
   data: MissionInfo,
-  onClick: (data: MissionInfo) => void
+  onClick: (data: MissionInfo) => void,
+  compactMode?: boolean;
 };
 
 enum TagType {
@@ -36,7 +37,7 @@ type TagInfo = {
 }
 
 function Component (props: Props): React.ReactElement<Props> {
-  const { className, data, onClick } = props;
+  const { className, compactMode, data, onClick } = props;
   const { t } = useTranslation();
   const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
 
@@ -128,6 +129,51 @@ function Component (props: Props): React.ReactElement<Props> {
       </Tag>
     );
   }, [data.tags, t, tagMap]);
+
+  if (compactMode) {
+    return (
+      <div
+        className={CN(className, '-compact-mode')}
+        onClick={onClickContainer}
+      >
+         <div
+          className='__compact-item-background'
+          style={{ backgroundImage: data.logo ? `url("${data.logo}")` : undefined }}
+         ></div>
+
+        <div className={'__compact-item-inner'}>
+          <Image
+            height={40}
+            shape={'squircle'}
+            src={data.logo || logoMap.default as string}
+            width={40}
+          />
+
+          <div className={'__compact-item-content'}>
+            <div className={'__compact-item-content-part-1'}>
+              <div className='__compact-item-name'>
+                {data.name || ''}
+              </div>
+              <div className={'__compact-item-value-row'}>
+                <div className='__compact-item-label'>{t('Rewards')}:</div>
+                <div className='__compact-item-value'>
+                  {data.reward}
+                </div>
+              </div>
+            </div>
+            <div className={'__compact-item-content-part-2'}>
+              <div className={'__compact-item-tags'}>
+                {tagNode}
+              </div>
+              <div className={'__compact-item-value-row'}>
+                <div className='__compact-item-date-time'>{timeline}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -338,6 +384,91 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '.anticon': {
         height: 20,
         width: 20
+      }
+    },
+
+    '&.-compact-mode': {
+      padding: token.sizeSM,
+
+      '.__compact-item-background': {
+        height: '100%',
+        width: 32,
+        backgroundPosition: 'center',
+        backgroundSize: 'cover',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        filter: 'blur(4.5px)',
+      },
+
+      '.__compact-item-inner': {
+        display: 'flex',
+        alignItems: 'center',
+        gap: token.paddingSM
+      },
+
+      '.__compact-item-content': {
+        display: 'flex',
+        flex: 1,
+        flexDirection: 'column',
+        overflow: 'hidden',
+      },
+
+      '.__compact-item-content-part-1, .__compact-item-content-part-2': {
+        display: 'flex',
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: token.size,
+      },
+
+      '.__compact-item-content-part-2': {
+
+        overflow: 'hidden',
+      },
+
+      '.__compact-item-name': {
+        fontSize: token.fontSizeLG,
+        lineHeight: token.lineHeightLG,
+        color: token.colorTextLight1,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        'white-space': 'nowrap',
+        fontWeight: token.headingFontWeight,
+        flex: 1,
+      },
+
+      '.__compact-item-tags': {
+        minHeight: 22
+      },
+
+      '.__compact-item-value-row': {
+        display: 'flex',
+        fontSize: token.fontSizeSM,
+        lineHeight: token.lineHeightSM,
+        fontWeight: token.bodyFontWeight,
+        gap: token.sizeXXS,
+        overflow: 'hidden',
+      },
+
+      '.__compact-item-label': {
+        color: token.colorTextLight4
+      },
+
+      '.__compact-item-date-time': {
+        color: token.colorTextLight4,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      },
+
+      '.__compact-item-value': {
+        color: token.colorSuccess,
+        fontWeight: token.headingFontWeight,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        maxWidth: 100
       }
     }
   };

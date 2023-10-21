@@ -296,7 +296,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           {t('Settings')}
         </SwHeader>}
 
-        <div className={'__scroll-container'}>
+        <div className={'__content-container'}>
           {
             SettingGroupItemType.map((group) => {
               return (
@@ -358,7 +358,6 @@ export const Settings = styled(Component)<Props>(({ theme: { extendToken, token 
     backgroundColor: token.colorBgDefault,
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden',
 
     '.ant-sw-header-container': {
       paddingTop: token.padding,
@@ -382,8 +381,7 @@ export const Settings = styled(Component)<Props>(({ theme: { extendToken, token 
       paddingBottom: token.paddingLG
     },
 
-    '.__scroll-container': {
-      overflow: 'auto',
+    '.__content-container': {
       paddingTop: token.padding,
       paddingRight: token.padding,
       paddingLeft: token.padding,

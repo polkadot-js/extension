@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AddressInput } from '@subwallet/extension-koni-ui/components';
-import { CREATE_RETURN, CROWDLOAN_UNLOCK_TIME, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, WIKI_URL } from '@subwallet/extension-koni-ui/constants';
+import { CROWDLOAN_UNLOCK_TIME, WIKI_URL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_CROWDLOAN_UNLOCK_TIME } from '@subwallet/extension-koni-ui/constants/event';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
@@ -12,7 +12,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Button, ButtonProps, Form, Icon, Image, ModalContext, SwHeader } from '@subwallet/react-ui';
+import { Button, ButtonProps, Form, Icon, Image, SwHeader } from '@subwallet/react-ui';
 import { ValidateStatus } from '@subwallet/react-ui/es/form/FormItem';
 import { ArrowCounterClockwise, PlusCircle, Question, Vault, Wallet } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -44,7 +44,6 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const [isWrongAddress, setIsWrongAddress] = useState<boolean>(false);
   const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
   const { setWebBaseClassName } = useContext(WebUIContext);
-  const { activeModal } = useContext(ModalContext);
   const [crowdloanUnlockTime] = useLocalStorage<number>(CROWDLOAN_UNLOCK_TIME, DEFAULT_CROWDLOAN_UNLOCK_TIME);
   const { isWebUI } = useContext(ScreenContext);
 
@@ -88,16 +87,14 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   }, []);
 
   const { isNoAccount } = useSelector((state: RootState) => state.accountState);
-  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
 
   const onClickCreateNewWallet = useCallback(() => {
     if (isNoAccount) {
-      setReturnStorage('/home/earning/');
-      navigate('/welcome');
+      openInNewTab(`${window.location.origin}/welcome`)();
     } else {
-      activeModal(NEW_SEED_MODAL);
+      openInNewTab(`${window.location.origin}/home/tokens`)();
     }
-  }, [activeModal, isNoAccount, navigate, setReturnStorage]);
+  }, [isNoAccount]);
 
   useEffect(() => {
     setWebBaseClassName(`${className}-web-base-container`);
@@ -130,6 +127,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             background={'transparent'}
             className={'__header-area'}
             left='logo'
+            paddingVertical
             rightButtons={headerIcons}
             showLeftButton={true}
           />
@@ -327,6 +325,7 @@ const CheckCrowdloanContributions = styled(Component)<Props>(({ theme: { token }
       position: 'sticky',
       top: 0,
       zIndex: 10,
+      minHeight: 'auto',
       backgroundColor: token.colorBgDefault
     },
 

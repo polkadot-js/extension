@@ -110,7 +110,7 @@ const Component: React.FC<Props> = ({ className, transaction }: Props) => {
             className={CN(className, 'alert-area')}
             description={t("You are transferring {{symbol}} from {{network}} since you don't have enough DOT on the destination network.", { replace: { symbol: tokenInfo.symbol, network: chainInfo.name } })}
             title={t('Pay attention!')}
-            type='warning'
+            type='info'
           />
         )
       }

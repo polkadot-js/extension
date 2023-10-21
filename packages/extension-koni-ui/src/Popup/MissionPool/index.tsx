@@ -39,7 +39,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { missions } = useSelector((state: RootState) => state.missionPool);
 
   useEffect(() => {
-    if (location.pathname === '/mission-pools') {
+    if (location.pathname === '/home/mission-pools') {
       setTitle(t('Mission Pools'));
     }
   }, [location.pathname, setTitle, t]);

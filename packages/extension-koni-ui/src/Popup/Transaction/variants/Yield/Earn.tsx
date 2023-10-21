@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, OptimalYieldPathRequest, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, OptimalYieldPathRequest, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -30,7 +30,7 @@ import styled, { useTheme } from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../../helper';
-import { FreeBalanceToStake, TransactionContent, YieldOutlet } from '../../parts';
+import { FreeBalance, FreeBalanceToYield, TransactionContent, YieldOutlet } from '../../parts';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -81,6 +81,7 @@ const Component = () => {
   const [submitString, setSubmitString] = useState<string | undefined>();
 
   const currentStep = processState.currentStep;
+  const nextStepType = processState.steps?.[currentStep + 1]?.type;
 
   const [form] = Form.useForm<YieldParams>();
 
@@ -88,13 +89,11 @@ const Component = () => {
   const currentFrom = useWatchTransaction('from', form, defaultData);
   const currentPoolInfo = useMemo(() => poolInfoMap[methodSlug], [methodSlug, poolInfoMap]);
 
-  const needDotBalance = useMemo(() => !['westend', 'polkadot'].includes(currentPoolInfo.chain), [currentPoolInfo.chain]);
-
-  const [isDotBalanceReady, setIsDotBalanceReady] = useState<boolean>(!needDotBalance);
-
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
   const preCheckAction = usePreCheckAction(currentFrom);
+
+  const hasXcm = !['westend', 'polkadot'].includes(currentPoolInfo.chain);
 
   const extrinsicType = useMemo(() => getEarnExtrinsicType(methodSlug), [methodSlug]);
 
@@ -380,6 +379,28 @@ const Component = () => {
     return processState.currentStep === processState.steps.length - 1;
   }, [processState.currentStep, processState.steps.length]);
 
+  const balanceTokens = useMemo(() => {
+    const result: Array<{ chain: string, token: string }> = [];
+
+    const chain = currentPoolInfo.chain;
+
+    for (const inputAsset of currentPoolInfo.inputAssets) {
+      result.push({
+        token: inputAsset,
+        chain: chain
+      });
+    }
+
+    if (hasXcm) {
+      result.push({
+        token: dotPolkadotSlug,
+        chain: 'polkadot'
+      });
+    }
+
+    return result;
+  }, [currentPoolInfo.chain, currentPoolInfo.inputAssets, hasXcm]);
+
   const onClick = useCallback(() => {
     setSubmitLoading(true);
     dispatchProcessState({
@@ -592,18 +613,13 @@ const Component = () => {
                 />
               </Form.Item>
 
-              {
-                !['westend', 'polkadot'].includes(currentPoolInfo.chain) && (
-                  <FreeBalanceToStake
-                    address={currentFrom}
-                    chain={'polkadot'}
-                    className={'account-free-balance'}
-                    label={t('Available DOT on Polkadot:')}
-                    onBalanceReady={setIsDotBalanceReady}
-                    tokenSlug={dotPolkadotSlug}
-                  />
-                )
-              }
+              <FreeBalanceToYield
+                address={currentFrom}
+                className={CN('account-free-balance', { hidden: nextStepType !== YieldStepType.XCM })}
+                label={t('Available balance:')}
+                onBalanceReady={setIsBalanceReady}
+                tokens={balanceTokens}
+              />
 
               {currentPoolInfo.inputAssets.map((asset, index) => {
                 const name = formFieldPrefix + String(index);
@@ -618,12 +634,11 @@ const Component = () => {
                     key={name}
                     style={{ display: 'flex', flexDirection: 'column' }}
                   >
-                    <FreeBalanceToStake
+                    <FreeBalance
                       address={currentFrom}
                       chain={currentPoolInfo.chain}
-                      className={'account-free-balance'}
-                      label={t('Available to stake:')}
-                      onBalanceReady={setIsBalanceReady}
+                      className={CN('account-free-balance', { hidden: [YieldStepType.XCM].includes(nextStepType) })}
+                      label={t('Available balance:')}
                       tokenSlug={asset}
                     />
 
@@ -696,7 +711,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady || !isDotBalanceReady || stepLoading}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}
@@ -780,6 +795,10 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.earning-wrapper': {
       display: 'flex',
       flex: 1
+    },
+
+    '.hidden': {
+      display: 'none'
     },
 
     '.__transaction-block': {

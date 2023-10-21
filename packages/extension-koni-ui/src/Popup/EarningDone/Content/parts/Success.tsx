@@ -20,11 +20,12 @@ interface Props extends ThemeProps {
   goToNft: VoidFunction;
   shareOnTwitter: VoidFunction;
   url: string;
+  enableShare: boolean;
   viewInHistory: VoidFunction;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chain, className, contactUs, goToNft, shareOnTwitter, url, viewInHistory } = props;
+  const { chain, className, contactUs, enableShare, goToNft, shareOnTwitter, url, viewInHistory } = props;
 
   const { t } = useTranslation();
 
@@ -143,6 +144,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 ? (
                   <Button
                     block={true}
+                    disabled={!enableShare}
                     icon={(
                       <Icon
                         phosphorIcon={TwitterLogo}
@@ -189,10 +191,11 @@ const EarningDoneSuccess = styled(Component)<Props>(({ theme: { token } }: Props
 
     '.success-image': {
       width: 470,
-      position: 'absolute',
+      position: 'fixed',
       zIndex: -1,
       top: token.sizeLG,
-      marginLeft: -40
+      left: 'calc(50% - 5px)',
+      transform: 'translateX(-50%)'
     },
 
     '.image-container': {

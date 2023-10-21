@@ -540,10 +540,6 @@ const Component = () => {
       <div className={'__transaction-block'}>
         <TransactionContent>
           <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
-            {/* <EarningBtn icon={<Logo className={'earning-calculator-tag'} size={16} network={'polkadot'} />} size={'xs'}> */}
-            {/*  {'DOT'} */}
-            {/* </EarningBtn> */}
-
             <Form
               className={'form-container form-space-sm earning-calculator-form-container'}
               form={form}

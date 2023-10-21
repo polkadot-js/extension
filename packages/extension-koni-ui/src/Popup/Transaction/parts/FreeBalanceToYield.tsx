@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { useGetBalance, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -29,6 +29,7 @@ interface PartProps {
   setError: (val: string | null) => void;
   showNetwork: boolean;
   first: boolean;
+  showContent: boolean;
 }
 
 const parseToLoadingMap = (tokens: BalanceInfo[]): Record<string, boolean> => {
@@ -52,7 +53,7 @@ const parseToErrorMap = (tokens: BalanceInfo[]): Record<string, string | null> =
 };
 
 const PartComponent: React.FC<PartProps> = (props: PartProps) => {
-  const { address, chain, first, setError, setLoading, showNetwork, token } = props;
+  const { address, chain, first, setError, setLoading, showContent, showNetwork, token } = props;
 
   const { token: theme } = useTheme() as Theme;
   const { t } = useTranslation();
@@ -93,7 +94,7 @@ const PartComponent: React.FC<PartProps> = (props: PartProps) => {
     setError(error);
   }, [error, setError]);
 
-  if (isLoading || error) {
+  if (isLoading || !showContent) {
     return null;
   }
 
@@ -182,42 +183,6 @@ const Component = (props: Props) => {
     };
   }, []);
 
-  // const error = useMemo(() => noXcm ? originError : (originError || xcmError), [originError, xcmError, noXcm]);
-  // const isLoading = useMemo(() => noXcm ? originIsLoading : (originIsLoading || xcmIsLoading), [noXcm, originIsLoading, xcmIsLoading]);
-  //
-  // const renderBalance = useCallback(({ nativeTokenBalance, nativeTokenSlug, tokenBalance, tokenSlug }: BalanceData) => {
-  //   return (
-  //     <>
-  //       {
-  //         !isLoading && !error && !!nativeTokenSlug && (tokenSlug === nativeTokenSlug) && (
-  //           <Number
-  //             decimal={nativeTokenBalance.decimals || 18}
-  //             decimalColor={token.colorTextTertiary}
-  //             intColor={token.colorTextTertiary}
-  //             size={14}
-  //             suffix={nativeTokenBalance.symbol}
-  //             unitColor={token.colorTextTertiary}
-  //             value={nativeTokenBalance.value}
-  //           />
-  //         )
-  //       }
-  //       {
-  //         !isLoading && !error && !!tokenSlug && (tokenSlug !== nativeTokenSlug) && (
-  //           <Number
-  //             decimal={tokenBalance?.decimals || 18}
-  //             decimalColor={token.colorTextTertiary}
-  //             intColor={token.colorTextTertiary}
-  //             size={14}
-  //             suffix={tokenBalance?.symbol}
-  //             unitColor={token.colorTextTertiary}
-  //             value={tokenBalance.value}
-  //           />
-  //         )
-  //       }
-  //     </>
-  //   );
-  // }, [error, isLoading, token.colorTextTertiary, noXcm]);
-
   useEffect(() => {
     onBalanceReady?.(!isLoading && !error);
   }, [error, isLoading, onBalanceReady]);
@@ -241,6 +206,7 @@ const Component = (props: Props) => {
               key={token}
               setError={setError(token)}
               setLoading={setLoading(token)}
+              showContent={!error && !isLoading}
               showNetwork={showNetwork}
               token={token}
             />

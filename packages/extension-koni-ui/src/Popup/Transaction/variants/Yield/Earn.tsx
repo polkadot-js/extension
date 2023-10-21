@@ -81,7 +81,7 @@ const Component = () => {
   const [submitString, setSubmitString] = useState<string | undefined>();
 
   const currentStep = processState.currentStep;
-  const stepType = processState.steps?.[currentStep]?.type;
+  const nextStepType = processState.steps?.[currentStep + 1]?.type;
 
   const [form] = Form.useForm<YieldParams>();
 
@@ -615,23 +615,11 @@ const Component = () => {
 
               <FreeBalanceToYield
                 address={currentFrom}
-                className={CN('account-free-balance', { hidden: stepType !== YieldStepType.DEFAULT })}
+                className={CN('account-free-balance', { hidden: nextStepType !== YieldStepType.XCM })}
                 label={t('Available balance:')}
                 onBalanceReady={setIsBalanceReady}
                 tokens={balanceTokens}
               />
-
-              {
-                hasXcm && (
-                  <FreeBalance
-                    address={currentFrom}
-                    chain={'polkadot'}
-                    className={CN('account-free-balance', { hidden: stepType !== YieldStepType.XCM })}
-                    label={t('Available balance:')}
-                    tokenSlug={dotPolkadotSlug}
-                  />
-                )
-              }
 
               {currentPoolInfo.inputAssets.map((asset, index) => {
                 const name = formFieldPrefix + String(index);
@@ -649,7 +637,7 @@ const Component = () => {
                     <FreeBalance
                       address={currentFrom}
                       chain={currentPoolInfo.chain}
-                      className={CN('account-free-balance', { hidden: [YieldStepType.XCM, YieldStepType.DEFAULT].includes(stepType) })}
+                      className={CN('account-free-balance', { hidden: [YieldStepType.XCM].includes(nextStepType) })}
                       label={t('Available balance:')}
                       tokenSlug={asset}
                     />

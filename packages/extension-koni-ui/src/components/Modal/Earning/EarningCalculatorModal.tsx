@@ -3,12 +3,12 @@
 
 import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
-import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { usePreCheckAction } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getEarnExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { findNetworkJsonByGenesisHash, getEarnExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon, ModalContext, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
@@ -18,6 +18,8 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { EarningCalculatorInfo, EarningTokenList } from '../../Earning';
 import { AmountInput, EarningMethodSelector } from '../../Field';
@@ -61,6 +63,7 @@ const Component = (props: Props) => {
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount, isNoAccount } = useSelector((state: RootState) => state.accountState);
   const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
@@ -115,6 +118,32 @@ const Component = (props: Props) => {
 
     return { dailyEarnings, weeklyEarnings, monthlyEarnings, yearlyEarnings };
   }, [currentAmount, currentDecimal, currentItem?.stats?.assetEarning]);
+
+  const methodOptions = useMemo(() => {
+    return Object.values(poolInfo).filter((pool) => {
+      if (!currentAccount?.address) {
+        return true;
+      }
+
+      if (isAccountAll(currentAccount.address)) {
+        return true;
+      }
+
+      const isLedger = !!currentAccount.isHardware;
+      const validGen: string[] = currentAccount.availableGenesisHashes || [];
+      const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
+
+      if (isLedger) {
+        return validLedgerNetwork.includes(pool.chain);
+      }
+
+      const chain = chainInfoMap[pool.chain];
+      const isEvmChain = _isChainEvmCompatible(chain);
+      const isEvmAddress = isEthereumAddress(currentAccount.address);
+
+      return isEvmChain === isEvmAddress;
+    });
+  }, [chainInfoMap, currentAccount, poolInfo]);
 
   const onCloseModal = useCallback(() => {
     inactiveModal(modalId);
@@ -198,7 +227,7 @@ const Component = (props: Props) => {
             name={FormFieldName.METHOD}
           >
             <EarningMethodSelector
-              items={Object.values(poolInfo)}
+              items={methodOptions}
               showChainInSelected
             />
           </Form.Item>

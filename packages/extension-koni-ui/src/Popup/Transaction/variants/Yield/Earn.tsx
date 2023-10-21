@@ -16,7 +16,7 @@ import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, getEarnExtrinsicType, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, findNetworkJsonByGenesisHash, getEarnExtrinsicType, isAccountAll, parseNominations, simpleCheckForm, transactionDefaultFilterAccount } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -45,6 +45,8 @@ const loadingStepPromiseKey = 'earning.step.loading';
 interface _YieldAssetExpectedEarning extends YieldAssetExpectedEarning {
   symbol: string;
 }
+
+const dotPolkadotSlug = 'polkadot-NATIVE-DOT';
 
 const Component = () => {
   const { t } = useTranslation();
@@ -85,6 +87,10 @@ const Component = () => {
   const currentAmount = useWatchTransaction(`${formFieldPrefix}0`, form, defaultData);
   const currentFrom = useWatchTransaction('from', form, defaultData);
   const currentPoolInfo = useMemo(() => poolInfoMap[methodSlug], [methodSlug, poolInfoMap]);
+
+  const needDotBalance = useMemo(() => !['westend', 'polkadot'].includes(currentPoolInfo.chain), [currentPoolInfo.chain]);
+
+  const [isDotBalanceReady, setIsDotBalanceReady] = useState<boolean>(!needDotBalance);
 
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
@@ -206,6 +212,22 @@ const Component = () => {
     const chain = chainInfoMap[currentPoolInfo.chain];
     const isEvmChain = _isChainEvmCompatible(chain);
     const isEvmAddress = isEthereumAddress(account.address);
+
+    const isLedger = !!account.isHardware;
+    const validGen: string[] = account.availableGenesisHashes || [];
+    const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
+
+    if (!transactionDefaultFilterAccount(account)) {
+      return false;
+    }
+
+    if (isLedger) {
+      if (isEvmAddress) {
+        return false;
+      } else {
+        return validLedgerNetwork.includes(currentPoolInfo?.chain);
+      }
+    }
 
     return isEvmChain === isEvmAddress;
   }, [chainInfoMap, currentPoolInfo.chain]);
@@ -565,6 +587,19 @@ const Component = () => {
                 />
               </Form.Item>
 
+              {
+                !['westend', 'polkadot'].includes(currentPoolInfo.chain) && (
+                  <FreeBalanceToStake
+                    address={currentFrom}
+                    chain={'polkadot'}
+                    className={'account-free-balance'}
+                    label={t('Available DOT on Polkadot:')}
+                    onBalanceReady={setIsDotBalanceReady}
+                    tokenSlug={dotPolkadotSlug}
+                  />
+                )
+              }
+
               {currentPoolInfo.inputAssets.map((asset, index) => {
                 const name = formFieldPrefix + String(index);
                 const _asset = chainAsset[asset];
@@ -656,7 +691,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || !isDotBalanceReady || stepLoading}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}

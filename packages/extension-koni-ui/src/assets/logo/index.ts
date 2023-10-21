@@ -14,7 +14,7 @@ export const DefaultLogosMap: Record<string, string> = {
   walletconnect: '/images/projects/walletconnect.png',
   banxa: '/images/projects/banxa.png',
   coinbase: '/images/projects/coinbase.png',
-  rocketIcon: '/images/projects/rocket-icon.png',
+  rocketIcon: '/images/projects/rocket-icon.gif',
   invarch: '/images/projects/invarch.png',
   sora_polkadot: '/images/projects/sora_polkadot.png',
   logion: '/images/projects/logion.png',

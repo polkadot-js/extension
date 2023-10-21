@@ -34,10 +34,16 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
 
   return (
     <div className={CN(className, '__row -type-number')}>
-      <div className={'__col'}>
-        <div className={'__label'}>{label}</div>
-      </div>
-      <div className={'__col -to-right'}>
+      {
+        !!label && (
+          <div className={'__col __label-col'}>
+            <div className={'__label'}>
+              {label}
+            </div>
+          </div>
+        )
+      }
+      <div className={'__col __value-col -to-right'}>
         <Number
           className={`__number-item __value -schema-${valueColorSchema}`}
           decimal={decimals}

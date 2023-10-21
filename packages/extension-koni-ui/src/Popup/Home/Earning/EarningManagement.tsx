@@ -3,22 +3,28 @@
 
 import { APIItemState, NominatorMetadata, StakingRewardItem, StakingType, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { BaseModal, EarningCalculatorModal, EarningInfoModal, EarningMoreActionModal, EarningToolbar, EmptyList, HorizontalEarningItem, Layout, YieldPositionDetailModal, YieldStakingDetailModal } from '@subwallet/extension-koni-ui/components';
-import { BN_TEN, BN_ZERO, CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_CLAIM_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { BaseModal, EarningCalculatorModal, EarningInfoModal, EarningMoreActionModal, EarningToolbar, EmptyList, HorizontalEarningItem, YieldPositionDetailModal, YieldStakingDetailModal } from '@subwallet/extension-koni-ui/components';
+import { ActionListType } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningMoreActionModal';
+import Search from '@subwallet/extension-koni-ui/components/Search';
+import { BN_TEN, BN_ZERO, CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, DEFAULT_CANCEL_UN_YIELD_PARAMS, DEFAULT_CLAIM_YIELD_PARAMS, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, EARNING_MORE_ACTION_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, STAKING_CALCULATOR_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_STAKING_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { useAutoNavigateEarning, useFilterModal, useGroupYieldPosition, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Button, Divider, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Divider, Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { PlusCircle, Vault } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { FadersHorizontal, Plus, PlusCircle, PlusMinus, Question, Vault } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
+
+import { BN } from '@polkadot/util';
 
 import Transaction from '../../Transaction/Transaction';
 import YieldCancelUnstake from '../../Transaction/variants/Yield/YieldCancelUnstake';
@@ -40,6 +46,18 @@ interface SortOption {
   value: SortKey;
   desc: boolean;
 }
+
+const searchFunction = (item: YieldPoolInfo, searchText: string) => {
+  const searchTextLowerCase = searchText.toLowerCase();
+
+  if (!item.name && !searchTextLowerCase) {
+    return true;
+  }
+
+  return (
+    item.name?.toLowerCase().includes(searchTextLowerCase)
+  );
+};
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -70,6 +88,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const [selectedSlug, setSelectedSlug] = useState('');
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.TOTAL_VALUE);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const location = useLocation();
+  const { setTitle } = useContext(WebUIContext);
+  const [searchInput, setSearchInput] = useState<string>('');
+  const [isShowAdditionActionInActionsModal, setShowAdditionActionInActionsModal] = useState<boolean>(false);
 
   const selectedYieldPosition = useMemo(() => groupYieldPosition.find((item) => item.slug === selectedSlug), [groupYieldPosition, selectedSlug]);
   const selectedYieldPoolInfo = useMemo((): YieldPoolInfo | undefined => poolInfoMap[selectedSlug], [poolInfoMap, selectedSlug]);
@@ -91,7 +113,9 @@ const Component: React.FC<Props> = (props: Props) => {
           nominationPoolReward.name = stakingReward.name;
           nominationPoolReward.chain = stakingReward.chain;
 
-          nominationPoolReward.unclaimedReward = stakingReward.unclaimedReward;
+          const bnUnclaimedReward = new BN(stakingReward.unclaimedReward || '0');
+
+          nominationPoolReward.unclaimedReward = bnUnclaimedReward.add(new BN(nominationPoolReward.unclaimedReward || '0')).toString();
         }
       });
     } else {
@@ -325,6 +349,14 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [activeModal, poolInfoMap]);
 
+  const onClickItemMoreActions = useCallback((item: YieldPositionInfo) => {
+    return () => {
+      setSelectedSlug(item.slug);
+      setShowAdditionActionInActionsModal(true);
+      activeModal(EARNING_MORE_ACTION_MODAL);
+    };
+  }, [activeModal]);
+
   const renderEarningItem = useCallback((item: YieldPositionInfo) => {
     const poolInfo = poolInfoMap[item.slug];
     const key = [item.slug, item.address].join('-');
@@ -349,7 +381,9 @@ const Component: React.FC<Props> = (props: Props) => {
           nominationPoolReward.name = stakingReward.name;
           nominationPoolReward.chain = stakingReward.chain;
 
-          nominationPoolReward.unclaimedReward = stakingReward.unclaimedReward;
+          const bnUnclaimedReward = new BN(stakingReward.unclaimedReward || '0');
+
+          nominationPoolReward.unclaimedReward = bnUnclaimedReward.add(new BN(nominationPoolReward.unclaimedReward || '0')).toString();
         }
       });
     } else {
@@ -358,6 +392,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return (
       <HorizontalEarningItem
+        className={'__earning-item'}
+        compactMode={!isWebUI}
         key={key}
         nominationPoolReward={nominationPoolReward}
         onClickCalculatorBtn={onClickCalculatorBtn(item)}
@@ -365,6 +401,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onClickClaimBtn={onClickClaimBtn(item)}
         onClickInfoBtn={onClickInfoBtn(item)}
         onClickItem={onClickItem(item)}
+        onClickMoreBtn={onClickItemMoreActions(item)}
         onClickStakeBtn={onClickStakeBtn(item)}
         onClickUnStakeBtn={onClickUnStakeBtn(item)}
         onClickWithdrawBtn={onClickWithdrawBtn(item)}
@@ -372,7 +409,7 @@ const Component: React.FC<Props> = (props: Props) => {
         yieldPositionInfo={item}
       />
     );
-  }, [poolInfoMap, currentAccount?.address, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickInfoBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, stakingRewardMap, onClickClaimBtn]);
+  }, [poolInfoMap, currentAccount?.address, isWebUI, onClickCalculatorBtn, onClickCancelUnStakeBtn, onClickClaimBtn, onClickInfoBtn, onClickItem, onClickItemMoreActions, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, stakingRewardMap]);
 
   const resultList = useMemo((): YieldPositionInfo[] => {
     return [...groupYieldPosition]
@@ -412,15 +449,32 @@ const Component: React.FC<Props> = (props: Props) => {
       });
   }, [assetRegistry, chainStateMap, groupYieldPosition, poolInfoMap, sortSelection]);
 
+  const addMore = useCallback(() => {
+    navigate('/home/earning/overview');
+  }, [navigate]);
+
   const renderWhenEmpty = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Need message')}
-        emptyTitle={t('Need message')}
+        buttonProps={{
+          icon: (
+            <Icon
+              phosphorIcon={Vault}
+              size='sm'
+              weight='fill'
+            />
+          ),
+          onClick: addMore,
+          shape: 'circle',
+          size: 'xs',
+          children: t('Earn now')
+        }}
+        emptyMessage={t('Switch account, turn on networks or start earning to view pools')}
+        emptyTitle={t('No pools found')}
         phosphorIcon={Vault}
       />
     );
-  }, [t]);
+  }, [addMore, t]);
 
   const handleCloseUnstake = useCallback(() => {
     inactiveModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
@@ -442,67 +496,155 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(TRANSACTION_YIELD_CLAIM_MODAL);
   }, [inactiveModal]);
 
-  const addMore = useCallback(() => {
-    navigate('/home/earning/overview');
+  useEffect(() => {
+    if (location.pathname.startsWith('/home/earning')) {
+      setTitle(t('Earning'));
+    }
+  }, [location.pathname, setTitle, t]);
+
+  const headerIcons = useMemo<ButtonProps[]>(() => {
+    return [
+      {
+        icon: (
+          <Icon
+            customSize={'24px'}
+            phosphorIcon={Plus}
+            type='phosphor'
+            weight={'fill'}
+          />
+        ),
+        onClick: () => {
+          navigate('/home/earning/overview');
+        }
+      }
+    ];
   }, [navigate]);
 
+  const handleSearch = useCallback((value: string) => setSearchInput(value), [setSearchInput]);
+
+  const onClickSearchFilterBtn = useCallback(
+    (e?: SyntheticEvent) => {
+      e && e.stopPropagation();
+      activeModal(FILTER_MODAL_ID);
+    },
+    [activeModal]
+  );
+
+  const moreActions = useCallback((currentActions: ActionListType[]): ActionListType[] => {
+    return [
+      {
+        action: YieldAction.CUSTOM_ACTION,
+        backgroundIconColor: 'geekblue-6',
+        icon: PlusMinus,
+        label: t('Earning calculator'),
+        onClick: () => {
+          selectedYieldPosition && onClickCalculatorBtn(selectedYieldPosition)();
+        }
+      },
+      {
+        action: YieldAction.CUSTOM_ACTION,
+        backgroundIconColor: 'geekblue-6',
+        icon: Question,
+        label: t('Earning information'),
+        onClick: () => {
+          selectedYieldPosition && onClickInfoBtn(selectedYieldPosition)();
+        }
+      },
+      ...currentActions
+    ];
+  }, [onClickCalculatorBtn, onClickInfoBtn, selectedYieldPosition, t]);
+
+  const onCloseActionsModal = useCallback(() => {
+    setShowAdditionActionInActionsModal(false);
+  }, []);
+
   return (
-    <Layout.Base
-      className={className}
-      showSubHeader={true}
-      subHeaderBackground={'transparent'}
-      subHeaderCenter={false}
-      // subHeaderIcons={subHeaderButton}
-      subHeaderPaddingVertical={true}
-      title={t('Earning')}
-    >
-      <EarningToolbar
-        filterSelectionMap={filterSelectionMap}
-        onApplyFilter={onApplyFilter}
-        onChangeFilterOption={onChangeFilterOption}
-        onChangeSortOpt={onChangeSortOpt}
-        onCloseFilterModal={onCloseFilterModal}
-        onResetSort={onResetSort}
-        selectedFilters={selectedFilters}
-        selectedSort={sortSelection}
-        showAdd={true}
-        sortOptions={sortOptions}
-      />
-      <SwList.Section
-        className={CN('earning-management__container')}
-        enableSearchInput={false}
-        filterBy={filterFunction}
-        list={resultList}
-        renderItem={renderEarningItem}
-        renderOnScroll={true}
-        renderWhenEmpty={renderWhenEmpty}
-        searchMinCharactersCount={2}
-      />
-      <Divider className='divider' />
-      <div className='footer-group'>
-        <div className='footer-left'>
-          <Icon
-            iconColor='var(--icon-color)'
-            phosphorIcon={PlusCircle}
-            size='md'
-            weight='fill'
+    <div className={className}>
+      {
+        !isWebUI && (
+          <SwSubHeader
+            background={'transparent'}
+            className={'__header-area'}
+            paddingVertical
+            rightButtons={headerIcons}
+            showBackButton={false}
+            title={t('Earning')}
+          />)
+      }
+
+      <div className={'__body-area'}>
+        <div className='__toolbar-area'>
+          {
+            !isWebUI && (
+              <Search
+                actionBtnIcon={(
+                  <Icon
+                    phosphorIcon={FadersHorizontal}
+                    size='sm'
+                  />
+                )}
+                onClickActionBtn={onClickSearchFilterBtn}
+                onSearch={handleSearch}
+                placeholder={t('Search project')}
+                searchValue={searchInput}
+                showActionBtn
+              />
+            )
+          }
+
+          <EarningToolbar
+            className={'__earning-toolbar'}
+            filterSelectionMap={filterSelectionMap}
+            onApplyFilter={onApplyFilter}
+            onChangeFilterOption={onChangeFilterOption}
+            onChangeSortOpt={onChangeSortOpt}
+            onCloseFilterModal={onCloseFilterModal}
+            onResetSort={onResetSort}
+            selectedFilters={selectedFilters}
+            selectedSort={sortSelection}
+            showAdd={true}
+            sortOptions={sortOptions}
           />
-          <span className='footer-content'>{t('Do you want to add more funds or add funds to other pools')}</span>
         </div>
-        <Button
-          icon={(
+
+        <SwList
+          className={CN('earning-management-list')}
+          enableSearchInput={false}
+          filterBy={filterFunction}
+          list={resultList}
+          renderItem={renderEarningItem}
+          renderOnScroll={true}
+          renderWhenEmpty={renderWhenEmpty}
+          searchBy={searchFunction}
+          searchMinCharactersCount={1}
+          searchTerm={searchInput}
+        />
+        <Divider className='divider' />
+        <div className='footer-group'>
+          <div className='footer-left'>
             <Icon
-              phosphorIcon={Vault}
-              size='sm'
+              iconColor='var(--icon-color)'
+              phosphorIcon={PlusCircle}
+              size='md'
               weight='fill'
             />
-          )}
-          onClick={addMore}
-          shape='circle'
-          size='xs'
-        >
-          {t('Add more fund')}
-        </Button>
+            <span className='footer-content'>{t('Do you want to add more funds or add funds to other pools')}</span>
+          </div>
+          <Button
+            icon={(
+              <Icon
+                phosphorIcon={Vault}
+                size='sm'
+                weight='fill'
+              />
+            )}
+            onClick={addMore}
+            shape='circle'
+            size='xs'
+          >
+            {t('Add more fund')}
+          </Button>
+        </div>
       </div>
 
       {selectedYieldPoolInfo && <EarningCalculatorModal defaultItem={selectedYieldPoolInfo} />}
@@ -529,6 +671,8 @@ const Component: React.FC<Props> = (props: Props) => {
       {
         selectedYieldPosition && selectedYieldPoolInfo && (
           <EarningMoreActionModal
+            additionActions={isShowAdditionActionInActionsModal ? moreActions : undefined}
+            onAfterCancel={onCloseActionsModal}
             stakingRewardItem={selectedStakingRewardItem}
             yieldPoolInfo={selectedYieldPoolInfo}
             yieldPositionInfo={selectedYieldPosition}
@@ -605,51 +749,25 @@ const Component: React.FC<Props> = (props: Props) => {
           <YieldClaimReward />
         </Transaction>
       </BaseModal>
-    </Layout.Base>
+    </div>
   );
 };
 
 const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    height: '100%',
     display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
 
-    '.earning-management__container .ant-sw-list': {
-      paddingLeft: 0,
-      paddingRight: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: token.padding
-    },
+    '.__header-area': {
+      '.ant-sw-header-center-part': {
+        marginLeft: token.size
+      },
 
-    '.earning-filter-icon': {
-      width: '12px',
-      height: '12px'
-    },
-
-    '.divider': {
-      margin: `${token.margin}px 0`
-    },
-
-    '.footer-group': {
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginTop: token.marginXS,
-      marginBottom: token.marginXL,
-
-      '.footer-left': {
-        '--icon-color': token['gold-6'],
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: token.sizeXS,
-
-        '.footer-content': {
-          fontSize: token.fontSizeHeading5,
-          lineHeight: token.lineHeightHeading5,
-          color: token.colorTextSecondary
-        }
+      '.ant-sw-sub-header-center-part-pl': {
+        textAlign: 'left',
+        paddingLeft: 0
       }
     },
 
@@ -658,6 +776,111 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)'
+    },
+
+    '.__body-area': {
+      overflow: 'auto',
+      flex: 1,
+      width: '100%',
+      alignSelf: 'center',
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
+    '.earning-management-list': {
+      paddingLeft: 0,
+      paddingRight: 0,
+      overflowY: 'auto',
+      flex: 1,
+      paddingBottom: token.padding
+    },
+
+    '.__earning-item + .__earning-item': {
+      marginTop: token.size
+    },
+
+    '.earning-filter-icon': {
+      width: '12px',
+      height: '12px'
+    },
+
+    '.divider': {
+      marginTop: 0,
+      marginBottom: token.margin
+    },
+
+    '.footer-group': {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingXL,
+
+      '.footer-left': {
+        '--icon-color': token['gold-6'],
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: token.sizeXS
+      },
+
+      '.footer-content': {
+        fontSize: token.fontSizeHeading5,
+        lineHeight: token.lineHeightHeading5,
+        color: token.colorTextSecondary
+      }
+    },
+
+    '@media (max-width: 991px)': {
+      '.__body-area': {
+        paddingLeft: token.size,
+        paddingRight: token.size
+      },
+
+      '.empty-list': {
+        position: 'static',
+        transform: 'none'
+      },
+
+      '.__toolbar-area': {
+        position: 'sticky',
+        zIndex: 10,
+        top: 0,
+        backgroundColor: token.colorBgDefault
+      },
+
+      '.__earning-item + .__earning-item': {
+        marginTop: token.sizeXS
+      },
+
+      '.search-container': {
+        paddingBottom: token.size,
+
+        '.right-section, .ant-input-search': {
+          width: '100%'
+        }
+      },
+
+      '.__earning-toolbar': {
+        paddingBottom: token.sizeSM,
+        overflowX: 'auto',
+
+        '.button-group': {
+          display: 'none'
+        }
+      },
+
+      '.earning-management-list': {
+        overflow: 'visible'
+      },
+
+      '.footer-group': {
+        '.footer-content': {
+          fontSize: token.fontSize,
+          lineHeight: token.lineHeight
+        }
+      }
     }
   });
 });

@@ -4,10 +4,10 @@
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
 
@@ -99,6 +99,37 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
   return substrateApi.api.query.assets.account.multi(useAddresses.map((address) => [_getTokenOnChainAssetId(derivativeTokenInfo), address]), (balances) => {
     let totalBalance = new BN(0);
 
+    for (let i = 0; i < balances.length; i++) {
+      const b = balances[i];
+      const address = useAddresses[i];
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+      const bdata = b?.toHuman();
+
+      if (bdata) {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+        const addressBalance = new BN(String(bdata?.balance).replaceAll(',', '') || '0');
+
+        positionCallback({
+          slug: poolInfo.slug,
+          chain: chainInfo.slug,
+          address,
+          balance: [
+            {
+              slug: derivativeTokenSlug, // token slug
+              totalBalance: addressBalance.toString(),
+              activeBalance: addressBalance.toString()
+            }
+          ],
+
+          metadata: {
+            rewards: []
+          } as YieldPositionStats
+        } as YieldPositionInfo);
+      }
+    }
+
     balances.forEach((b) => {
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
@@ -113,27 +144,10 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
         totalBalance = totalBalance.add(addressBalance);
       }
     });
-
-    positionCallback({
-      slug: poolInfo.slug,
-      chain: chainInfo.slug,
-      address: useAddresses.length > 1 ? ALL_ACCOUNT_KEY : useAddresses[0], // TODO
-      balance: [
-        {
-          slug: derivativeTokenSlug, // token slug
-          totalBalance: totalBalance.toString(),
-          activeBalance: totalBalance.toString()
-        }
-      ],
-
-      metadata: {
-        rewards: []
-      } as YieldPositionStats
-    } as YieldPositionInfo);
   });
 }
 
-export async function getParallelLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit) {
+export async function getParallelLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit, balanceService: BalanceService) {
   const inputData = requestData.data as SubmitYieldStepData;
 
   if (path.steps[currentStep].type === YieldStepType.XCM) {
@@ -144,11 +158,14 @@ export async function getParallelLiquidStakingExtrinsic (address: string, params
     const destinationTokenInfo = params.assetInfoMap[destinationTokenSlug];
     const substrateApi = params.substrateApiMap[originChainInfo.slug];
 
+    const inputTokenBalance = await balanceService.getTokenFreeBalance(params.address, destinationTokenInfo.originChain, destinationTokenSlug);
+    const bnInputTokenBalance = new BN(inputTokenBalance.value);
+
     const xcmFee = path.totalFee[currentStep].amount || '0';
     const bnXcmFee = new BN(xcmFee);
     const bnAmount = new BN(inputData.amount);
 
-    const bnTotalAmount = bnAmount.add(bnXcmFee);
+    const bnTotalAmount = bnAmount.sub(bnInputTokenBalance).add(bnXcmFee);
 
     const extrinsic = await createXcmExtrinsic({
       chainInfoMap: params.chainInfoMap,

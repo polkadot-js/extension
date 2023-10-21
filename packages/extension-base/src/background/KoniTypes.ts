@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _FundStatus, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AddressJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAccountUnsubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
@@ -293,7 +293,15 @@ export interface BalanceJson {
 export interface CrowdloanItem {
   state: APIItemState,
   paraState?: CrowdloanParaState,
-  contribute: string
+  contribute: string,
+  fundId: string;
+  paraId: number;
+  status: _FundStatus;
+  startTime: Date;
+  endTime: Date;
+  auctionIndex: number;
+  firstPeriod: number;
+  lastPeriod: number;
 }
 
 export interface CrowdloanJson {
@@ -602,10 +610,10 @@ export interface NFTTransactionAdditionalInfo {
 export type TransactionAdditionalInfo = {
   [ExtrinsicType.TRANSFER_XCM]: XCMTransactionAdditionalInfo,
   [ExtrinsicType.SEND_NFT]: NFTTransactionAdditionalInfo,
-  [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate'>,
-  [ExtrinsicType.MINT_QDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate'>,
-  [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate'>,
-  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate'>
+  [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
+  [ExtrinsicType.MINT_QDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
+  [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
+  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>
 }
 
 // export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
@@ -2275,6 +2283,7 @@ export interface RequestYieldFastWithdrawal extends BaseRequestSign {
 }
 
 export type SubmitYieldStepData = { // TODO
+  slug: string,
   exchangeRate: number, // reward token amount = input token amount * exchange rate
   inputTokenSlug: string,
   derivativeTokenSlug?: string,
@@ -2342,7 +2351,6 @@ export interface KoniRequestSignatures {
   'pri(chainService.validateCustomChain)': [ValidateNetworkRequest, ValidateNetworkResponse];
   'pri(chainService.recoverSubstrateApi)': [string, boolean];
   'pri(chainService.disableAllChains)': [null, boolean];
-  'pri(chainService.getParaChainInfoMap)': [null, ParaChainInfoMap];
   'pri(assetSetting.getSubscription)': [null, Record<string, AssetSetting>, Record<string, AssetSetting>]
   'pri(assetSetting.update)': [AssetSettingUpdateReq, boolean];
 

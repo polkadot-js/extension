@@ -158,7 +158,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div className={className}>
-      <EarningTokenList />
+      <EarningTokenList className={'token-list-container'} />
 
       <div className={CN('button-group')}>
         {

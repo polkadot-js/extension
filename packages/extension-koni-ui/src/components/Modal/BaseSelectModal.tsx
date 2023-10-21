@@ -37,7 +37,7 @@ export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemePro
   return ({
     maxWidth: 404,
 
-    '.ant-sw-modal-content': {
+    '.ant-sw-modal-content.ant-sw-modal-content': {
       width: '100%'
     },
 

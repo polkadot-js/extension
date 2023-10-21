@@ -62,7 +62,8 @@ export const FilterTabs = styled(Component)<Props>(({ theme: { token } }: Props)
       lineHeight: token.lineHeightLG,
       paddingTop: token.sizeXS + 2,
       paddingBottom: token.sizeXS,
-      fontWeight: token.headingFontWeight
+      fontWeight: token.headingFontWeight,
+      'white-space': 'nowrap'
     },
 
     '.__tab-item:after': {

@@ -1,52 +1,37 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { CrowdloanParaState, ParaChainInfoMap } from '@subwallet/extension-base/background/KoniTypes';
-import { _getAssetDecimals, _getAssetPriceId, _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainInfo, _FundStatus } from '@subwallet/chain-list/types';
 import { CrowdloanContributionItem } from '@subwallet/extension-base/services/subscan-service/types';
-import { AddressInput, Layout, TokenBalance } from '@subwallet/extension-koni-ui/components';
+import { reformatAddress } from '@subwallet/extension-base/utils';
+import { AddressInput } from '@subwallet/extension-koni-ui/components';
+import CrowdloanTable from '@subwallet/extension-koni-ui/components/CrowdloanTable';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
-import { CREATE_RETURN, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
-import { getCrowdloanContributions, getParaChainInfoMap } from '@subwallet/extension-koni-ui/messaging';
+import { getCrowdloanContributions } from '@subwallet/extension-koni-ui/messaging';
 import NoteBox from '@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/components/NoteBox';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
-import { CrowdloanContributionsResultParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon, Logo, ModalContext, Table, Tag } from '@subwallet/react-ui';
+import { _CrowdloanItemType, CrowdloanContributionsResultParam, CrowdloanFundInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { ActivityIndicator, Button, ButtonProps, Form, Icon, Logo, SwSubHeader } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
-import BigN from 'bignumber.js';
-import { ArrowCounterClockwise, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
+import CN from 'classnames';
+import fetch from 'cross-fetch';
+import { ArrowCounterClockwise, FadersHorizontal, PlusCircle, RocketLaunch, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
-import { useLocalStorage } from 'usehooks-ts';
 
 import { isAddress } from '@polkadot/util-crypto';
 
 import EmptyList from '../../components/EmptyList/EmptyList';
 
 type Props = ThemeProps;
-
-type TableItem = {
-  id: string;
-  chainSlug: string;
-  chainName: string;
-  relayChainSlug: string;
-  relayChainName: string;
-  contribution: {
-    symbol: string;
-    value: BigN;
-    convertedValue: BigN;
-  };
-  paraState?: CrowdloanParaState,
-  unlockTime: string
-};
 
 type CrowdloanContributionsMap = {
   polkadot: CrowdloanContributionItem[],
@@ -67,108 +52,143 @@ const fetchContributionsMap = async (address: string): Promise<CrowdloanContribu
   };
 };
 
-function getTagColor (paraState?: CrowdloanParaState) {
-  if (!paraState) {
-    return 'default';
-  }
-
-  if (paraState.valueOf() === CrowdloanParaState.COMPLETED.valueOf()) {
-    return 'success';
-  }
-
-  if (paraState === CrowdloanParaState.FAILED.valueOf()) {
-    return 'error';
-  }
-
-  if (paraState === CrowdloanParaState.ONGOING.valueOf()) {
-    return 'warning';
-  }
-
-  return 'default';
-}
-
 enum FilterValue {
   ALL = 'all',
   POLKADOT_PARACHAIN = 'Polkadot parachain',
   KUSAMA_PARACHAIN = 'Kusama parachain',
-  WINNER = 'completed',
+  WON = 'won',
   FAIL = 'failed',
-  ACTIVE = 'active'
+  IN_AUCTION = 'in auction'
 }
 
-const acceptFundStatus: number[] = [1, 2];
+const ACALA_FUND_ID = '2000-0';
 
 const getTableItems = (
   relayChainSlug: 'polkadot' | 'kusama',
   contributionsMap: CrowdloanContributionsMap,
-  paraChainInfoMap: ParaChainInfoMap,
+  crowdloanFundInfoMap: Record<string, CrowdloanFundInfo>,
   chainInfoMap: Record<string, _ChainInfo>,
-  assetRegistryMap: Record<string, _ChainAsset>,
   priceMap: PriceStore['priceMap']
-) => {
-  const result: TableItem[] = [];
+): _CrowdloanItemType[] => {
+  const result: _CrowdloanItemType[] = [];
 
-  const relayChainInfo = chainInfoMap[relayChainSlug];
-  const relayChainNativeTokenSlug = _getChainNativeTokenSlug(relayChainInfo);
-  const relayChainAsset = assetRegistryMap[relayChainNativeTokenSlug];
-  const decimals = _getAssetDecimals(relayChainAsset);
-  const priceId = _getAssetPriceId(assetRegistryMap[relayChainNativeTokenSlug]);
+  const relayChainName = relayChainSlug === 'polkadot' ? 'Polkadot' : 'Kusama';
+  const decimals = relayChainSlug === 'polkadot' ? 10 : 12;
+  const priceId = relayChainSlug === 'polkadot' ? 'polkadot' : 'kusama';
+  const symbol = relayChainSlug === 'polkadot' ? 'DOT' : 'KSM';
   const price = priceMap[priceId] || 0;
+  const dateNow = Date.now();
 
   contributionsMap[relayChainSlug].forEach((c) => {
-    if (!acceptFundStatus.includes(c.fund_status)) {
+    if (!crowdloanFundInfoMap[c.fund_id]) {
       return;
     }
 
-    if (!paraChainInfoMap[relayChainSlug]?.[`${c.para_id}`]) {
+    const fundInfo = crowdloanFundInfoMap[c.fund_id];
+
+    if (!fundInfo.status || [_FundStatus.FAILED, _FundStatus.WITHDRAW].includes(fundInfo.status)) {
       return;
     }
 
-    const paraChainInfo = paraChainInfoMap[relayChainSlug][`${c.para_id}`];
+    if (!fundInfo.endTime || new Date(fundInfo.endTime).getTime() < dateNow) {
+      return;
+    }
 
     const contributedValue = getBalanceValue(c.contributed || '0', decimals);
     const convertedContributedValue = getConvertedBalanceValue(contributedValue, price);
-
-    const unlockTime = ((c.unlocking_block - c.block_num) * 6 + c.block_timestamp) * 1000;
+    const chainInfo: _ChainInfo | undefined = fundInfo.chain ? chainInfoMap[fundInfo.chain] : undefined;
 
     result.push({
-      id: `${paraChainInfo.slug}-${relayChainSlug}`,
-      chainSlug: paraChainInfo.slug,
-      chainName: paraChainInfo.name,
+      fundId: c.fund_id,
+      chainSlug: chainInfo?.slug || `unknown-${c.fund_id}`,
+      chainName: chainInfo?.name || `Unknown (${c.fund_id})`,
       relayChainSlug: relayChainSlug,
-      relayChainName: relayChainInfo.name,
+      relayChainName,
       contribution: {
-        symbol: relayChainAsset.symbol,
+        symbol,
         value: contributedValue,
         convertedValue: convertedContributedValue
       },
-      paraState: paraChainInfo.paraState,
-      unlockTime: customFormatDate(unlockTime, '#YYYY#-#MM#-#DD#')
+      fundStatus: fundInfo.status,
+      unlockTime: new Date(fundInfo.endTime).getTime()
     });
   });
 
   return result;
 };
 
+const getAcalaTableItem = (
+  value: string | undefined,
+  fundInfo: CrowdloanFundInfo | undefined,
+  chainInfo: _ChainInfo | undefined,
+  priceMap: PriceStore['priceMap']
+): _CrowdloanItemType | undefined => {
+  if (!value || !(fundInfo && fundInfo.endTime && fundInfo.status) || !chainInfo) {
+    return;
+  }
+
+  if (new Date(fundInfo.endTime).getTime() < Date.now()) {
+    return;
+  }
+
+  const price = priceMap.polkadot || 0;
+
+  const contributedValue = getBalanceValue(value || '0', 10);
+  const convertedContributedValue = getConvertedBalanceValue(contributedValue, price);
+
+  return {
+    fundId: ACALA_FUND_ID,
+    chainSlug: chainInfo.slug,
+    chainName: chainInfo.name,
+    relayChainSlug: 'polkadot',
+    relayChainName: 'Polkadot',
+    contribution: {
+      symbol: 'DOT',
+      value: contributedValue,
+      convertedValue: convertedContributedValue
+    },
+    fundStatus: fundInfo.status,
+    unlockTime: new Date(fundInfo.endTime).getTime()
+  };
+};
+
+enum RelayChainFilter {
+  ALL='all',
+  POLKADOT='polkadot',
+  KUSAMA='kusama'
+}
+
 const Component: React.FC<Props> = ({ className = '' }: Props) => {
   const locationState = useLocation().state as CrowdloanContributionsResultParam;
   const [propAddress] = useState<string | undefined>(locationState?.address);
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [paraChainInfoMap, setParaChainInfoMap] = useState<ParaChainInfoMap>({});
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
-  const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
   const { isNoAccount } = useSelector((state: RootState) => state.accountState);
-  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
   const { setOnBack, setWebBaseClassName } = useContext(WebUIContext);
-  const { activeModal } = useContext(ModalContext);
+  const [currentSelectRelayChainFilter, setCurrentSelectRelayChainFilter] = useState<RelayChainFilter>(RelayChainFilter.ALL);
+  const [acalaValue, setAcalaValue] = useState<string | undefined>(undefined);
+  const { isWebUI } = useContext(ScreenContext);
+  const { setTitle } = useContext(WebUIContext);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === '/crowdloan-unlock-campaign/contributions-result') {
+      setTitle(t('Your crowdloan contributions'));
+    }
+  }, [location.pathname, setTitle, t]);
 
   const [contributionsMap, setContributionsMap] = useState<CrowdloanContributionsMap>({
     polkadot: [],
     kusama: []
   });
+
+  const { chainInfoMap = {},
+    crowdloanFundInfoMap = {} }: {
+    crowdloanFundInfoMap: Record<string, CrowdloanFundInfo>,
+    chainInfoMap: Record<string, _ChainInfo>,
+  } = useOutletContext();
 
   const [form] = Form.useForm<FormParams>();
   const addressValue = Form.useWatch('address', form);
@@ -181,137 +201,74 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   }, [propAddress]);
 
   const goEarningDemo = useCallback(() => {
-    navigate('/earning-demo');
-  }, [navigate]);
+    openInNewTab(`${window.location.origin}/earning-demo`)();
+    // todo: ...
+  }, []);
 
   const onBack = useCallback(() => {
     navigate('/crowdloan-unlock-campaign/check-contributions');
   }, [navigate]);
 
-  const getParaStateLabel = useCallback((paraState?: CrowdloanParaState) => {
-    if (!paraState) {
-      return '';
-    }
-
-    if (paraState.valueOf() === CrowdloanParaState.COMPLETED.valueOf()) {
-      return t('Winner');
-    }
-
-    if (paraState === CrowdloanParaState.FAILED.valueOf()) {
-      return t('Fail');
-    }
-
-    if (paraState === CrowdloanParaState.ONGOING.valueOf()) {
-      return t('Active');
-    }
-
-    return '';
-  }, [t]);
-
-  const tableItems = useMemo<TableItem[]>(() => {
-    if (!contributionsMap.polkadot.length && !contributionsMap.kusama.length) {
+  const tableItems = useMemo<_CrowdloanItemType[]>(() => {
+    if (!contributionsMap.polkadot.length && !contributionsMap.kusama.length && !acalaValue) {
       return [];
     }
 
-    return [
-      ...getTableItems('polkadot', contributionsMap, paraChainInfoMap, chainInfoMap, assetRegistryMap, priceMap),
-      ...getTableItems('kusama', contributionsMap, paraChainInfoMap, chainInfoMap, assetRegistryMap, priceMap)
-    ];
-  }, [assetRegistryMap, chainInfoMap, contributionsMap, paraChainInfoMap, priceMap]);
+    const results: _CrowdloanItemType[] = [];
 
-  const filteredtableItems = useMemo(() => {
-    const filterTabFunction = (item: TableItem) => {
+    if (acalaValue) {
+      const acalaValueInfo = getAcalaTableItem(acalaValue, crowdloanFundInfoMap[ACALA_FUND_ID], chainInfoMap.acala, priceMap);
+
+      !!acalaValueInfo && results.push(acalaValueInfo);
+    }
+
+    results.push(
+      ...getTableItems('polkadot', contributionsMap, crowdloanFundInfoMap, chainInfoMap, priceMap),
+      ...getTableItems('kusama', contributionsMap, crowdloanFundInfoMap, chainInfoMap, priceMap)
+    );
+
+    return results.sort((a, b) => a.unlockTime - b.unlockTime);
+  }, [acalaValue, chainInfoMap, contributionsMap, crowdloanFundInfoMap, priceMap]);
+
+  const filteredTableItems = useMemo(() => {
+    const filterTabFunction = (item: _CrowdloanItemType) => {
       if (selectedFilterTab === FilterValue.ALL) {
         return true;
       }
 
-      if (selectedFilterTab === FilterValue.WINNER) {
-        return item.paraState === CrowdloanParaState.COMPLETED;
+      if (selectedFilterTab === FilterValue.WON) {
+        return item.fundStatus === _FundStatus.WON;
       }
 
-      if (selectedFilterTab === FilterValue.ACTIVE) {
-        return item.paraState === CrowdloanParaState.ONGOING;
+      if (selectedFilterTab === FilterValue.IN_AUCTION) {
+        return item.fundStatus === _FundStatus.IN_AUCTION;
       }
 
       return false;
     };
 
-    return tableItems.filter(filterTabFunction);
-  }, [selectedFilterTab, tableItems]);
-
-  const columns = useMemo(() => {
-    const getUnlockTexts = (paraState?: CrowdloanParaState): [string, string] => {
-      if (!paraState || paraState === CrowdloanParaState.COMPLETED) {
-        return [t('Locked'), t('Until')];
+    const filterRelaytChainFunction = (item: _CrowdloanItemType) => {
+      if (currentSelectRelayChainFilter === RelayChainFilter.ALL) {
+        return true;
       }
 
-      if (paraState === CrowdloanParaState.ONGOING) {
-        return [t('Crowdloan'), t('Ends on')];
+      if (currentSelectRelayChainFilter === RelayChainFilter.POLKADOT) {
+        return item.relayChainSlug === RelayChainFilter.POLKADOT;
       }
 
-      return [t('Refunded'), t('On')];
+      if (currentSelectRelayChainFilter === RelayChainFilter.KUSAMA) {
+        return item.relayChainSlug === RelayChainFilter.KUSAMA;
+      }
+
+      return false;
     };
 
-    return [
-      {
-        title: t('Project name'),
-        dataIndex: 'name',
-        key: 'name',
-        render: (_: any, row: TableItem) => {
-          return <div className='project-container'>
-            <Logo
-              isShowSubLogo={true}
-              network={row.chainSlug}
-              shape={'squircle'}
-              size={40}
-              subLogoShape={'circle'}
-              subNetwork={row.relayChainSlug}
-            />
-            <div className='project-information'>
-              <div className={'project-name'}>{row.chainName}</div>
-              <div className={'project-parachain'}>{`${row.relayChainName} ${t('parachain')}`}</div>
-            </div>
-          </div>;
-        }
-      },
-      {
-        title: t('Status'),
-        dataIndex: 'status',
-        key: 'status',
-        render: (_: any, item: TableItem) => {
-          return <Tag color={getTagColor(item.paraState)}>{getParaStateLabel(item.paraState)}</Tag>;
-        }
-      },
-      {
-        title: t('Details'),
-        dataIndex: 'details',
-        key: 'details',
-        render: (_: any, row: TableItem) => {
-          const [text1, text2] = getUnlockTexts(row.paraState);
+    const filterFunction = (item: _CrowdloanItemType) => {
+      return filterTabFunction(item) && filterRelaytChainFunction(item);
+    };
 
-          return <div className={'fund-unlock-detail'}>
-            <div className={'fund-unlock-detail-line-1'}>{text1}</div>
-            <div className={'fund-unlock-detail-line-2'}>{`${text2} ${row.unlockTime}`}</div>
-          </div>;
-        }
-      },
-      {
-        title: t('Contribution'),
-        dataIndex: 'contribution',
-        key: 'contribution',
-        render: (_: any, row: TableItem) => {
-          return (
-            <TokenBalance
-              autoHideBalance={false}
-              convertedValue={row.contribution.convertedValue}
-              symbol={row.contribution.symbol}
-              value={row.contribution.value}
-            />
-          );
-        }
-      }
-    ];
-  }, [getParaStateLabel, t]);
+    return tableItems.filter(filterFunction);
+  }, [currentSelectRelayChainFilter, selectedFilterTab, tableItems]);
 
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {
     return [
@@ -320,12 +277,12 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
         value: FilterValue.ALL
       },
       {
-        label: t('Active'),
-        value: FilterValue.ACTIVE
+        label: t('In Auction'),
+        value: FilterValue.IN_AUCTION
       },
       {
-        label: t('Winner'),
-        value: FilterValue.WINNER
+        label: t('Won'),
+        value: FilterValue.WON
       }
     ];
   }, [t]);
@@ -342,75 +299,25 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     };
   }, [className, setWebBaseClassName]);
 
-  useEffect(() => {
-    getParaChainInfoMap().then((rs) => {
-      rs.polkadot['3340'] = {
-        slug: 'invarch',
-        name: 'InvArch',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 3340
-      };
-      rs.polkadot['2025'] = {
-        slug: 'sora_polkadot',
-        name: 'SORA Polkadot',
-        paraState: CrowdloanParaState.ONGOING,
-        paraId: 2025
-      };
-      rs.polkadot['3341'] = {
-        slug: 'logion',
-        name: 'Logion',
-        paraState: CrowdloanParaState.ONGOING,
-        paraId: 3341
-      };
-      rs.polkadot['3345'] = {
-        slug: 'energy_web_x',
-        name: 'Energy Web X',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 3345
-      };
-      rs.polkadot['3334'] = {
-        slug: 'moonsama',
-        name: 'Moonsama',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 3334
-      };
-      rs.polkadot['2053'] = {
-        slug: 'omnibtc',
-        name: 'OmniBTC',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 2053
-      };
-      rs.polkadot['2027'] = {
-        slug: 'coinversation',
-        name: 'Coinversation',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 2027
-      };
-      rs.polkadot['3338'] = {
-        slug: 'peaq',
-        name: 'Peaq',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 3338
-      };
-      rs.polkadot['3333'] = {
-        slug: 't3rn',
-        name: 'T3rn',
-        paraState: CrowdloanParaState.COMPLETED,
-        paraId: 3333
-      };
-
-      setParaChainInfoMap(rs);
-    }).catch((e) => {
-      console.log('getParaChainInfoMap Error', e);
-    });
-  }, []);
-
   const fetchTableData = useCallback((address: string) => {
     setLoading(true);
-    fetchContributionsMap(address).then((rs) => {
-      setContributionsMap(rs);
+
+    const polkadotAddress = reformatAddress(address, 10, false);
+
+    Promise.all([
+      fetchContributionsMap(address),
+      (async () => {
+        const res = await fetch(`https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=${polkadotAddress}`);
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return await res.json();
+      })()
+    ]).then(([contributionsMap, acalaValueInfo]) => {
+      setContributionsMap(contributionsMap);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+      setAcalaValue(acalaValueInfo?.data?.acala?.[0]?.totalDOTLocked);
     }).catch((e) => {
-      console.log('fetchContributionsMap Error', e);
+      console.log('fetch Contributions Error', e);
     }).finally(() => {
       setLoading(false);
     });
@@ -444,12 +351,11 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
 
   const onClickCreateNewWallet = useCallback(() => {
     if (isNoAccount) {
-      setReturnStorage('/home/earning/');
-      navigate('/welcome');
+      openInNewTab(`${window.location.origin}/welcome`)();
     } else {
-      activeModal(NEW_SEED_MODAL);
+      openInNewTab(`${window.location.origin}/home/tokens`)();
     }
-  }, [activeModal, isNoAccount, navigate, setReturnStorage]);
+  }, [isNoAccount]);
 
   useEffect(() => {
     setOnBack(onBack);
@@ -459,45 +365,101 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
     };
   }, [onBack, setOnBack]);
 
-  return (
-    <Layout.Base
-      className={className}
-      showSubHeader={true}
-      subHeaderBackground={'transparent'}
-      subHeaderCenter={true}
-      subHeaderPaddingVertical={true}
-      title={t<string>('Your crowdloan contributions')}
-    >
-      <div className={'__tag-area'}>
-        <div className={'__tag-item'}>
-          <Logo
-            className={'__tag-item-logo'}
-            network={'polkadot'}
-            size={16}
-          />
-          <div className={'__tag-item-label'}>
-            DOT
-          </div>
-        </div>
-        <div className={'__tag-item -secondary'}>
-          <Logo
-            className={'__tag-item-logo'}
-            network={'kusama'}
-            size={16}
-          />
-          <div className={'__tag-item-label'}>
-            KSM
-          </div>
+  const onSelectRelayChainFilter = useCallback((relayChainFilter: RelayChainFilter) => {
+    return () => {
+      setCurrentSelectRelayChainFilter((prev) => {
+        if (prev === relayChainFilter) {
+          return RelayChainFilter.ALL;
+        }
+
+        return relayChainFilter;
+      });
+    };
+  }, []);
+
+  const tagAreaNode = (
+    <div className={'__tag-area'}>
+      <div
+        className={CN('__tag-item', {
+          '-active': currentSelectRelayChainFilter === RelayChainFilter.POLKADOT
+        })}
+        onClick={onSelectRelayChainFilter(RelayChainFilter.POLKADOT)}
+      >
+        <Logo
+          className={'__tag-item-logo'}
+          network={'polkadot'}
+          size={16}
+        />
+        <div className={'__tag-item-label'}>
+          DOT
         </div>
       </div>
-
-      <div className='__tool-area'>
-        <FilterTabs
-          className={'__filter-tabs-container'}
-          items={filterTabItems}
-          onSelect={onSelectFilterTab}
-          selectedItem={selectedFilterTab}
+      <div
+        className={CN('__tag-item', {
+          '-active': currentSelectRelayChainFilter === RelayChainFilter.KUSAMA
+        })}
+        onClick={onSelectRelayChainFilter(RelayChainFilter.KUSAMA)}
+      >
+        <Logo
+          className={'__tag-item-logo'}
+          network={'kusama'}
+          size={16}
         />
+        <div className={'__tag-item-label'}>
+          KSM
+        </div>
+      </div>
+    </div>
+  );
+
+  // @ts-ignore
+  const headerIcons = useMemo<ButtonProps[]>(() => {
+    return [
+      {
+        icon: (
+          <Icon
+            customSize={'24px'}
+            phosphorIcon={FadersHorizontal}
+            type='phosphor'
+          />
+        ),
+        onClick: () => {
+          //
+        }
+      }
+    ];
+  }, []);
+
+  return (
+    <div
+      className={className}
+    >
+      {isWebUI && tagAreaNode}
+      <div className='__tool-area'>
+        {
+          !isWebUI && (
+            <SwSubHeader
+              background={'transparent'}
+              className={'__header-area'}
+              onBack={onBack}
+              paddingVertical
+              // rightButtons={headerIcons}
+              showBackButton
+              title={t('Your contributions')}
+            />
+          )
+        }
+
+        {
+          isWebUI && (
+            <FilterTabs
+              className={'__filter-tabs-container'}
+              items={filterTabItems}
+              onSelect={onSelectFilterTab}
+              selectedItem={selectedFilterTab}
+            />
+          )
+        }
 
         <div className={'__form-area'}>
           <Form
@@ -514,7 +476,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
                 }
               ]}
               statusHelpAsTooltip
-              validateTrigger='onBlur'
+              validateTrigger='onChange'
             >
               <AddressInput
                 placeholder={t('Enter your Polkadot wallet address')}
@@ -532,23 +494,41 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             </Form.Item>
           </Form>
         </div>
+
+        {!isWebUI && tagAreaNode}
       </div>
 
       <div className={'__table-area'}>
-        {!!filteredtableItems.length && (
-          <Table
-            className={'__table'}
-            columns={columns}
-            dataSource={filteredtableItems}
-            pagination={false}
-            rowKey={'id'}
-          />
+        {loading && (
+          <div className={'__loading-area'}>
+            <ActivityIndicator
+              loading={true}
+              size={32}
+            />
+          </div>
         )}
-        {!filteredtableItems.length && (
+        {!!filteredTableItems.length && !loading && (
+          <CrowdloanTable items={filteredTableItems} />
+        )}
+        {!filteredTableItems.length && !loading && (
           <div className={'__empty-list-wrapper'}>
             <EmptyList
               className={'__empty-list'}
-              emptyMessage={t('Check again or create a new account.')}
+              emptyMessage={
+                <>
+                  <span className={'__has-suffix-space'}>
+                    {t('Check again, create a new account or visit our')}
+                  </span>
+                  <a
+                    className={'__link'}
+                    href='https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs'
+                    rel='noreferrer'
+                    target={'_blank'}
+                  >
+                    {t('FAQs')}
+                  </a>
+                </>
+              }
               emptyTitle={t('We can\'t find any crowdloan contributions from this address.')}
               phosphorIcon={RocketLaunch}
             />
@@ -613,12 +593,11 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
         >
           <div className={'__footer-button-content'}>
             <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>
-
-            <div className={'__footer-button-subtitle'}>{t('Earning with SubWallet Dashboard')}</div>
+            <div className={'__footer-button-subtitle'}>{t('Earn with SubWallet Dashboard')}</div>
           </div>
         </Button>
       </div>
-    </Layout.Base>
+    </div>
   );
 };
 
@@ -629,11 +608,21 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
     marginRight: 'auto',
     paddingLeft: token.padding,
     paddingRight: token.padding,
+    minHeight: '100%',
+    display: 'flex',
+    flexDirection: 'column',
 
     '&-web-base-container': {
       '.web-layout-header-simple': {
         paddingBottom: token.sizeLG
       }
+    },
+
+    '.__header-area': {
+      alignSelf: 'stretch',
+      marginLeft: -token.margin,
+      marginRight: -token.margin,
+      backgroundColor: token.colorBgDefault
     },
 
     '.__tag-area': {
@@ -651,8 +640,8 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       paddingLeft: token.paddingSM,
       paddingRight: token.paddingSM,
       height: 30,
-      backgroundColor: token.colorBgSecondary,
       borderRadius: 50,
+      cursor: 'pointer',
 
       '&:before': {
         content: '""',
@@ -661,14 +650,14 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
         border: '2px solid',
         borderColor: token.colorBorderBg,
         borderRadius: 50,
-        opacity: 0
+        opacity: 1
       },
 
-      '&.-secondary': {
-        backgroundColor: 'transparent',
+      '&.-active': {
+        backgroundColor: token.colorBgSecondary,
 
         '&:before': {
-          opacity: 1
+          opacity: 0
         }
       }
     },
@@ -693,6 +682,10 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
         flexDirection: 'column',
         alignItems: 'flex-start',
         paddingRight: token.paddingXS
+      },
+
+      '.project-information-part-1': {
+        display: 'flex'
       },
 
       '.project-name': {
@@ -725,6 +718,16 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       color: token.colorSuccess
     },
 
+    '.fund-unlock-detail-line-2-for-mobile': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      color: token.colorTextLight4,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      maxWidth: 156
+    },
+
     '.address-input-icon': {
       zIndex: 10
     },
@@ -738,8 +741,11 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
     },
 
     '.__form-area': {
-      maxWidth: 358,
-      flex: 1
+      flex: 1,
+
+      '.web-ui-enable &': {
+        maxWidth: 358
+      }
     },
 
     '.__form-item': {
@@ -747,14 +753,31 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
     },
 
     '.__table-area': {
+      display: 'flex',
+      flexDirection: 'column',
       flex: 1,
       paddingTop: token.padding,
       paddingBottom: token.paddingLG
     },
 
+    '.__loading-area': { display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center' },
+
     '.__empty-list-wrapper': {
       paddingTop: 70,
       paddingBottom: 100
+    },
+
+    '.__empty-list': {
+      '.__has-suffix-space': {
+        '&:after': {
+          content: '" "'
+        }
+      },
+
+      '.__link': {
+        textDecoration: 'underline',
+        color: token.colorPrimary
+      }
     },
 
     '.__buttons-block': {
@@ -762,7 +785,8 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       gap: token.size,
       maxWidth: 584,
       marginLeft: 'auto',
-      marginRight: 'auto'
+      marginRight: 'auto',
+      flexWrap: 'wrap'
     },
 
     '.__check-again-button, .__create-a-wallet-button': {
@@ -777,7 +801,12 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingTop: token.sizeLG,
-      paddingBottom: 42
+      paddingBottom: 42,
+      position: 'sticky',
+      bottom: 0,
+      background: token.colorBgDefault,
+      opacity: 1,
+      zIndex: 10
     },
 
     '.__note-box': {
@@ -815,6 +844,50 @@ const CrowdloanContributionsResult = styled(Component)<Props>(({ theme: { token 
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       color: token.colorTextLight3
+    },
+
+    '@media (max-width: 991px)': {
+      '.__footer-area': {
+        position: 'static',
+        paddingTop: token.padding
+      },
+
+      '.__table-area': {
+        paddingTop: 0,
+        paddingBottom: token.sizeXS
+      },
+
+      '.__tool-area': {
+        position: 'sticky',
+        display: 'block',
+        top: 0,
+        background: token.colorBgDefault,
+        zIndex: 10
+      },
+
+      '.__form-area': {
+        marginTop: token.marginXS,
+        marginBottom: token.margin
+      },
+
+      '.__tag-area': {
+        minWidth: '100%',
+        paddingBottom: token.padding,
+        marginBottom: 0,
+        justifyContent: 'flex-start'
+      }
+    },
+
+    '@media (max-width: 767px)': {
+      '.__footer-button': {
+        minWidth: '100%'
+      },
+
+      '.__buttons-block': {
+        '.ant-btn': {
+          minWidth: '100%'
+        }
+      }
     }
   };
 });

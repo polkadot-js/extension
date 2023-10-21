@@ -2904,7 +2904,7 @@ export default class KoniExtension {
     oldPassword }: RequestChangeMasterPassword): ResponseChangeMasterPassword {
     try {
       // Remove isMasterPassword meta if createNew
-      if (createNew) {
+      if (createNew && !keyring.keyring.hasMasterPassword) {
         const pairs = keyring.getPairs();
 
         for (const pair of pairs) {
@@ -3917,7 +3917,7 @@ export default class KoniExtension {
         chainInfoMap: this.#koniState.getChainInfoMap(),
         poolInfo: yieldPoolInfo,
         substrateApiMap: this.#koniState.getSubstrateApiMap()
-      }, inputData, path, inputData.currentStep);
+      }, inputData, path, inputData.currentStep, this.#koniState.balanceService);
 
     console.log('extrinsic', extrinsic.toHex());
 

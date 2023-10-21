@@ -4,17 +4,16 @@
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
+import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { sumBN } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { BN } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 const STATS_URL = 'https://api.bifrost.app/api/site';
 const BIFROST_GRAPHQL_ENDPOINT = 'https://bifrost-subsql.liebi.com/v1/graphql';
@@ -113,7 +112,7 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
   };
 }
 
-export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void, initialExchangeRate?: number) {
+export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void) {
   // @ts-ignore
   const derivativeTokenSlug = poolInfo.derivativeAssets[0];
   const inputTokenSlug = poolInfo.inputAssets[0];
@@ -122,33 +121,36 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
   return substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), (_balance) => {
     const balances = _balance as unknown as TokenBalanceRaw[];
 
-    const totalBalance = sumBN(balances.map((b) => (b.free || new BN(0))));
+    for (let i = 0; i < balances.length; i++) {
+      const balanceItem = balances[i];
+      const address = useAddresses[i];
+      const totalBalance = balanceItem.free || BN_ZERO;
 
-    positionCallback({
-      slug: poolInfo.slug,
-      chain: chainInfo.slug,
-      address: useAddresses.length > 1 ? ALL_ACCOUNT_KEY : useAddresses[0], // TODO
-      balance: [
-        {
-          slug: derivativeTokenSlug, // token slug
-          totalBalance: totalBalance.toString(),
-          activeBalance: totalBalance.toString()
-        }
-      ],
-
-      metadata: {
-        rewards: [
+      positionCallback({
+        slug: poolInfo.slug,
+        chain: chainInfo.slug,
+        address,
+        balance: [
           {
-            slug: inputTokenSlug
+            slug: derivativeTokenSlug, // token slug
+            totalBalance: totalBalance.toString(),
+            activeBalance: totalBalance.toString()
           }
         ],
-        initialExchangeRate
-      } as YieldPositionStats
-    } as YieldPositionInfo);
+
+        metadata: {
+          rewards: [
+            {
+              slug: inputTokenSlug
+            }
+          ]
+        } as YieldPositionStats
+      } as YieldPositionInfo);
+    }
   });
 }
 
-export async function getBifrostLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): Promise<HandleYieldStepData> {
+export async function getBifrostLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit, balanceService: BalanceService): Promise<HandleYieldStepData> {
   const inputData = requestData.data as SubmitYieldStepData;
 
   if (path.steps[currentStep].type === YieldStepType.XCM) {
@@ -159,11 +161,14 @@ export async function getBifrostLiquidStakingExtrinsic (address: string, params:
     const destinationTokenInfo = params.assetInfoMap[destinationTokenSlug];
     const substrateApi = params.substrateApiMap[originChainInfo.slug];
 
+    const inputTokenBalance = await balanceService.getTokenFreeBalance(params.address, destinationTokenInfo.originChain, destinationTokenSlug);
+    const bnInputTokenBalance = new BN(inputTokenBalance.value);
+
     const xcmFee = path.totalFee[currentStep].amount || '0';
     const bnXcmFee = new BN(xcmFee);
     const bnAmount = new BN(inputData.amount);
 
-    const bnTotalAmount = bnAmount.add(bnXcmFee);
+    const bnTotalAmount = bnAmount.sub(bnInputTokenBalance).add(bnXcmFee);
 
     const extrinsic = await createXcmExtrinsic({
       chainInfoMap: params.chainInfoMap,

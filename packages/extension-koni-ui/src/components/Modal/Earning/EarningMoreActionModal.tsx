@@ -19,24 +19,27 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
-type Props = ThemeProps & {
-  yieldPoolInfo: YieldPoolInfo;
-  yieldPositionInfo: YieldPositionInfo;
-  stakingRewardItem?: StakingRewardItem;
-}
-
-const modalId = EARNING_MORE_ACTION_MODAL;
-
-type ActionListType = {
+export type ActionListType = {
   backgroundIconColor: keyof GlobalToken;
   icon: PhosphorIcon;
   label: string;
   action: YieldAction;
   onClick: () => void;
+  disabled?: boolean;
 }
 
+type Props = ThemeProps & {
+  yieldPoolInfo: YieldPoolInfo;
+  yieldPositionInfo: YieldPositionInfo;
+  stakingRewardItem?: StakingRewardItem;
+  additionActions?: (currentActions: ActionListType[]) => ActionListType[],
+  onAfterCancel?: () => void;
+}
+
+const modalId = EARNING_MORE_ACTION_MODAL;
+
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, stakingRewardItem, yieldPoolInfo, yieldPositionInfo } = props;
+  const { additionActions, className, onAfterCancel, stakingRewardItem, yieldPoolInfo, yieldPositionInfo } = props;
 
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
@@ -60,8 +63,9 @@ const Component: React.FC<Props> = (props: Props) => {
   const onCancel = useCallback(
     () => {
       inactiveModal(modalId);
+      onAfterCancel?.();
     },
-    [inactiveModal]
+    [inactiveModal, onAfterCancel]
   );
 
   const onClickStakeBtn = useCallback(() => {
@@ -273,14 +277,26 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClickItem = useCallback((action: YieldAction, onClick: () => void) => {
     return () => {
-      onPreCheck(onClick, convertStakingActionToExtrinsicType(action))();
+      if (action === 'CUSTOM_ACTION') {
+        onClick();
+      } else {
+        onPreCheck(onClick, convertStakingActionToExtrinsicType(action))();
+      }
     };
   }, [convertStakingActionToExtrinsicType, onPreCheck]);
 
+  const _actionList = useMemo(() => {
+    if (additionActions) {
+      return additionActions(actionList);
+    }
+
+    return actionList;
+  }, [actionList, additionActions]);
+
   const modalContent = (
     <div className={CN(className, 'action-more-container')}>
-      {actionList.map((item) => {
-        const disabled = !availableActions.includes(item.action);
+      {_actionList.map((item) => {
+        const disabled = item.disabled || (item.action !== YieldAction.CUSTOM_ACTION && !availableActions.includes(item.action));
 
         return (
           <SettingItem

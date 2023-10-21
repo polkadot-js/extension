@@ -35,7 +35,7 @@ export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) 
   return ({
     maxWidth: 404,
 
-    '.ant-sw-modal-content': {
+    '.ant-sw-modal-content.ant-sw-modal-content': {
       width: '100%'
     },
 

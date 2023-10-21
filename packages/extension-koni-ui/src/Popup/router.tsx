@@ -142,6 +142,8 @@ const CrowdloanUnlockCampaign = new LazyLoader('CrowdloanUnlockCampaign', () => 
 const CheckCrowdloanContributions = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CheckCrowdloanContributions'));
 const CrowdloanContributionsResult = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CrowdloanContributionsResult'));
 
+const MissionPool = new LazyLoader('MissionPool', () => import('@subwallet/extension-koni-ui/Popup/MissionPool'));
+
 // A Placeholder page
 export function Example () {
   const location = useLocation();
@@ -190,6 +192,7 @@ export const router = createBrowserRouter([
               EarningNoRouter.generateRouterObject('')
             ]
           },
+          MissionPool.generateRouterObject('mission-pools'),
           History.generateRouterObject('history'),
           History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
           {

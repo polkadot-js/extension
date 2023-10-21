@@ -64,12 +64,12 @@ const Component: React.FC<NetworkGroupProps> = (props: NetworkGroupProps) => {
       className={CN(className, '__row -type-account')}
       onClick={onClick}
     >
-      {!!label && <div className={'__col'}>
+      {!!label && <div className={'__col __label-col'}>
         <div className={'__label'}>
           {label}
         </div>
       </div>}
-      <div className={'__col -to-right'}>
+      <div className={'__col __value-col -to-right'}>
         <div className={'__account-item __value -is-wrapper'}>
           {chainLogos}
           <div className={'__account-name ml-xs'}>

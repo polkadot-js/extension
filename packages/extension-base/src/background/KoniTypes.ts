@@ -2207,7 +2207,8 @@ export interface YieldStepDetail {
 
 export interface OptimalYieldPath {
   totalFee: YieldTokenBaseInfo[],
-  steps: YieldStepDetail[]
+  steps: YieldStepDetail[],
+  connectionError?: string
 }
 
 export enum YieldValidationStatus {

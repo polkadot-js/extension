@@ -3915,8 +3915,6 @@ export default class KoniExtension {
         substrateApiMap: this.#koniState.getSubstrateApiMap()
       }, inputData, path, inputData.currentStep, this.#koniState.balanceService);
 
-    console.log('extrinsic', extrinsic.toHex());
-
     const isMintingStep = YIELD_EXTRINSIC_TYPES.includes(extrinsicType);
     const isPoolSupportAlternativeFee = yieldPoolInfo.feeAssets.length > 1;
 
@@ -3952,8 +3950,6 @@ export default class KoniExtension {
         poolInfo: yieldPoolInfo,
         substrateApiMap: this.#koniState.getSubstrateApiMap()
       }, address, amount, yieldPositionInfo);
-
-    console.log('extrinsic', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address,
@@ -4009,6 +4005,8 @@ export default class KoniExtension {
       poolInfo: inputData.yieldPoolInfo,
       substrateApiMap: this.#koniState.getSubstrateApiMap()
     };
+
+    return [];
 
     return validateYieldProcess(
       inputData.address,

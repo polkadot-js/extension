@@ -5,7 +5,7 @@ import { YieldStepDetail } from '@subwallet/extension-base/background/KoniTypes'
 import { BaseModal, EarningProcessItem } from '@subwallet/extension-koni-ui/components';
 import { STAKING_PROCESS_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ModalContext, Typography } from '@subwallet/react-ui';
+import { Divider, ModalContext, Typography } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
@@ -52,6 +52,11 @@ const Component = ({ className, currentStep, yieldSteps }: Props) => {
             );
           })
         }
+        <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
+
+        <Typography.Text style={{ color: token.colorTextLight4 }}>
+          {t('All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.')}
+        </Typography.Text>
       </div>
     </BaseModal>
   );

@@ -2207,12 +2207,12 @@ export interface YieldStepDetail {
 
 export interface OptimalYieldPath {
   totalFee: YieldTokenBaseInfo[],
-  steps: YieldStepDetail[]
+  steps: YieldStepDetail[],
+  connectionError?: string
 }
 
 export enum YieldValidationStatus {
   NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
-  NOT_ENOUGH_MIN_AMOUNT = 'NOT_ENOUGH_MIN_AMOUNT',
   NOT_ENOUGH_BALANCE = 'NOT_ENOUGH_BALANCE',
   NOT_ENOUGH_MIN_JOIN_POOL = 'NOT_ENOUGH_MIN_JOIN_POOL',
   OK = 'OK'

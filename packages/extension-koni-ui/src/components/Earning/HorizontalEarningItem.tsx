@@ -203,11 +203,19 @@ const Component: React.FC<Props> = (props: Props) => {
 
       switch (item) {
         case YieldAction.STAKE:
+
+        // eslint-disable-next-line no-fallthrough
+        case YieldAction.START_EARNING: {
+          const text = yieldPoolInfo.type === YieldPoolType.LENDING ? t('Supply now') : t('Stake now');
+
           temp.icon = PlusCircle;
-          temp.label = !compact ? t('Stake now') : undefined;
-          temp.tooltip = compact ? t('Stake now') : undefined;
+          temp.label = !compact ? text : undefined;
+          temp.tooltip = compact ? text : undefined;
           temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(slug));
+          temp.label = yieldPoolInfo.type === YieldPoolType.LENDING ? t('Supply now') : t('Stake now');
           break;
+        }
+
         case YieldAction.CLAIM_REWARD:
           temp.icon = Wallet;
           temp.onClick = onClickButton(onClickClaimBtn, ExtrinsicType.STAKING_CLAIM_REWARD);
@@ -236,19 +244,13 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.tooltip = compact ? t('Cancel unstake') : undefined;
           temp.schema = 'secondary';
           break;
-        case YieldAction.START_EARNING:
-          temp.icon = PlusCircle;
-          temp.onClick = onClickButton(onClickStakeBtn, ExtrinsicType.JOIN_YIELD_POOL);
-          temp.label = !compact ? t('Earn now') : undefined;
-          temp.tooltip = compact ? t('Earn now') : undefined;
-          break;
       }
 
       result.push(temp);
     });
 
     return result;
-  }, [onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, onClickStakeBtn, slug, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
+  }, [onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, onClickStakeBtn, slug, yieldPoolInfo.type, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
 
   const derivativeTokenState = useMemo(() => {
     if (!yieldPoolInfo.derivativeAssets) {

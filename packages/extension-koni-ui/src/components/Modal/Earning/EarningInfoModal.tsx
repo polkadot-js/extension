@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
@@ -158,12 +158,26 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [chainInfoMap, currentAccount, poolInfo]);
 
   const rewardTextI18nKey = useMemo(() => {
-    if (['westend', 'polkadot'].includes(currentItem.chain)) {
-      return detectTranslate('Claimable and compoundable on your own schedule. <highlight>Learn more</highlight>');
-    } else {
-      return detectTranslate('Claimable on your own schedule. <highlight>Learn more</highlight>');
+    switch (currentItem?.type) {
+      case YieldPoolType.LENDING:
+      case YieldPoolType.LIQUID_STAKING:
+        return detectTranslate('Rewards are auto-compounded. <highlight>Learn more</highlight>');
+      case YieldPoolType.NOMINATION_POOL:
+      default:
+        return detectTranslate('Claimable and compoundable on your own schedule. <highlight>Learn more</highlight>');
     }
-  }, [currentItem.chain]);
+  }, [currentItem?.type]);
+
+  const unlockText = useMemo(() => {
+    switch (currentItem?.type) {
+      case YieldPoolType.LENDING:
+        return t('Unlocking period');
+      case YieldPoolType.LIQUID_STAKING:
+      case YieldPoolType.NOMINATION_POOL:
+      default:
+        return t('Unstaking period');
+    }
+  }, [currentItem?.type, t]);
 
   const onClose = useCallback(() => {
     inactiveModal(modalId);
@@ -356,7 +370,7 @@ const Component: React.FC<Props> = (props: Props) => {
               valueColorSchema={'success'}
             />
             <MetaInfo.Default
-              label={t('Unstaking period')}
+              label={unlockText}
               valueColorSchema={'success'}
             >
               {currentItem.metadata?.unstakingPeriod ? getUnstakingPeriod(t, currentItem.metadata.unstakingPeriod) : t('Instant')}

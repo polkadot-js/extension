@@ -178,115 +178,157 @@ export async function generatePathForLiquidStaking (params: OptimalYieldPathPara
     steps: [DEFAULT_YIELD_FIRST_STEP]
   };
 
-  const poolOriginSubstrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
+  try {
+    const poolOriginSubstrateApi = await params.substrateApiMap[params.poolInfo.chain].isReady;
 
-  const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
-  const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
+    const inputTokenSlug = params.poolInfo.inputAssets[0]; // assume that the pool only has 1 input token, will update later
+    const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
 
-  const altInputTokenSlug = params.poolInfo.altInputAssets ? params.poolInfo?.altInputAssets[0] : '';
-  const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
+    const altInputTokenSlug = params.poolInfo.altInputAssets ? params.poolInfo?.altInputAssets[0] : '';
+    const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
 
-  const [inputTokenBalance, altInputTokenBalance] = await Promise.all([
-    balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug),
-    balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug)
-  ]);
+    const [inputTokenBalance, altInputTokenBalance] = await Promise.all([
+      balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug),
+      balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug)
+    ]);
 
-  const bnInputTokenBalance = new BN(inputTokenBalance.value);
-  const defaultFeeTokenSlug = params.poolInfo.feeAssets[0];
+    const bnInputTokenBalance = new BN(inputTokenBalance.value);
+    const defaultFeeTokenSlug = params.poolInfo.feeAssets[0];
 
-  if (!bnInputTokenBalance.gte(bnAmount)) {
-    if (params.poolInfo.altInputAssets) {
-      const bnAltInputTokenBalance = new BN(altInputTokenBalance.value || '0');
+    if (!bnInputTokenBalance.gte(bnAmount)) {
+      if (params.poolInfo.altInputAssets) {
+        const bnAltInputTokenBalance = new BN(altInputTokenBalance.value || '0');
 
-      if (bnAltInputTokenBalance.gt(BN_ZERO)) {
-        result.steps.push({
-          id: result.steps.length,
-          metadata: {
-            sendingValue: bnAmount.toString(),
+        if (bnAltInputTokenBalance.gt(BN_ZERO)) {
+          result.steps.push({
+            id: result.steps.length,
+            metadata: {
+              sendingValue: bnAmount.toString(),
+              originTokenInfo: altInputTokenInfo,
+              destinationTokenInfo: inputTokenInfo
+            },
+            name: 'Transfer DOT from Polkadot',
+            type: YieldStepType.XCM
+          });
+
+          const xcmOriginSubstrateApi = await params.substrateApiMap[altInputTokenInfo.originChain].isReady;
+
+          const xcmTransfer = await createXcmExtrinsic({
             originTokenInfo: altInputTokenInfo,
-            destinationTokenInfo: inputTokenInfo
-          },
-          name: 'Transfer DOT from Polkadot',
-          type: YieldStepType.XCM
-        });
+            destinationTokenInfo: inputTokenInfo,
+            sendingValue: bnAmount.toString(),
+            recipient: fakeAddress,
+            chainInfoMap: params.chainInfoMap,
+            substrateApi: xcmOriginSubstrateApi
+          });
 
-        const xcmOriginSubstrateApi = await params.substrateApiMap[altInputTokenInfo.originChain].isReady;
+          const _xcmFeeInfo = await xcmTransfer.paymentInfo(fakeAddress);
+          const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+          // TODO: calculate fee for destination chain
 
-        const xcmTransfer = await createXcmExtrinsic({
-          originTokenInfo: altInputTokenInfo,
-          destinationTokenInfo: inputTokenInfo,
-          sendingValue: bnAmount.toString(),
-          recipient: fakeAddress,
-          chainInfoMap: params.chainInfoMap,
-          substrateApi: xcmOriginSubstrateApi
-        });
-
-        const _xcmFeeInfo = await xcmTransfer.paymentInfo(fakeAddress);
-        const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-        // TODO: calculate fee for destination chain
-
-        result.totalFee.push({
-          slug: altInputTokenSlug,
-          amount: (xcmFeeInfo.partialFee * 1.2).toString() // TODO
-        });
+          result.totalFee.push({
+            slug: altInputTokenSlug,
+            amount: (xcmFeeInfo.partialFee * 1.2).toString() // TODO
+          });
+        }
       }
     }
+
+    let mintFee = '0';
+
+    if (params.poolInfo.slug === 'DOT___bifrost_liquid_staking') {
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Mint vDOT',
+        type: YieldStepType.MINT_VDOT
+      });
+
+      const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount, null).paymentInfo(fakeAddress);
+      const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      mintFee = mintFeeInfo.partialFee.toString();
+    } else if (params.poolInfo.slug === 'DOT___acala_liquid_staking') {
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Mint LDOT',
+        type: YieldStepType.MINT_LDOT
+      });
+
+      const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.homa.mint(params.amount).paymentInfo(fakeAddress);
+      const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      mintFee = mintFeeInfo.partialFee.toString();
+    } else if (params.poolInfo.slug === 'DOT___interlay_lending') {
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Mint qDOT',
+        type: YieldStepType.MINT_QDOT
+      });
+
+      const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.loans.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount).paymentInfo(fakeAddress);
+      const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      mintFee = mintFeeInfo.partialFee.toString();
+    } else if (params.poolInfo.slug === 'DOT___parallel_liquid_staking') {
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Mint sDOT',
+        type: YieldStepType.MINT_SDOT
+      });
+
+      const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.liquidStaking.stake(params.amount).paymentInfo(fakeAddress);
+      const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      mintFee = mintFeeInfo.partialFee.toString();
+    }
+
+    result.totalFee.push({
+      slug: defaultFeeTokenSlug,
+      amount: mintFee
+    });
+
+    return result;
+  } catch (e) {
+    // @ts-ignore
+    const errorMessage = e.message as string;
+
+    if (errorMessage.includes('network')) {
+      result.connectionError = errorMessage.split(' ')[0];
+    }
+
+    if (params.poolInfo.slug === 'DOT___bifrost_liquid_staking') {
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Mint vDOT',
+        type: YieldStepType.MINT_VDOT
+      });
+    } else if (params.poolInfo.slug === 'DOT___acala_liquid_staking') {
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Mint LDOT',
+        type: YieldStepType.MINT_LDOT
+      });
+    } else if (params.poolInfo.slug === 'DOT___interlay_lending') {
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Mint qDOT',
+        type: YieldStepType.MINT_QDOT
+      });
+    } else if (params.poolInfo.slug === 'DOT___parallel_liquid_staking') {
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Mint sDOT',
+        type: YieldStepType.MINT_SDOT
+      });
+    }
+
+    result.totalFee.push({
+      slug: params.poolInfo.feeAssets[0],
+      amount: '0'
+    });
+
+    return result;
   }
-
-  let mintFee = '0';
-
-  if (params.poolInfo.slug === 'DOT___bifrost_liquid_staking') {
-    result.steps.push({
-      id: result.steps.length,
-      name: 'Mint vDOT',
-      type: YieldStepType.MINT_VDOT
-    });
-
-    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount, null).paymentInfo(fakeAddress);
-    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-
-    mintFee = mintFeeInfo.partialFee.toString();
-  } else if (params.poolInfo.slug === 'DOT___acala_liquid_staking') {
-    result.steps.push({
-      id: result.steps.length,
-      name: 'Mint LDOT',
-      type: YieldStepType.MINT_LDOT
-    });
-
-    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.homa.mint(params.amount).paymentInfo(fakeAddress);
-    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-
-    mintFee = mintFeeInfo.partialFee.toString();
-  } else if (params.poolInfo.slug === 'DOT___interlay_lending') {
-    result.steps.push({
-      id: result.steps.length,
-      name: 'Mint qDOT',
-      type: YieldStepType.MINT_QDOT
-    });
-
-    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.loans.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount).paymentInfo(fakeAddress);
-    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-
-    mintFee = mintFeeInfo.partialFee.toString();
-  } else if (params.poolInfo.slug === 'DOT___parallel_liquid_staking') {
-    result.steps.push({
-      id: result.steps.length,
-      name: 'Mint sDOT',
-      type: YieldStepType.MINT_SDOT
-    });
-
-    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.liquidStaking.stake(params.amount).paymentInfo(fakeAddress);
-    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-
-    mintFee = mintFeeInfo.partialFee.toString();
-  }
-
-  result.totalFee.push({
-    slug: defaultFeeTokenSlug,
-    amount: mintFee
-  });
-
-  return result;
 }
 
 export async function validateEarningProcess (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, balanceService: BalanceService): Promise<TransactionError[]> {

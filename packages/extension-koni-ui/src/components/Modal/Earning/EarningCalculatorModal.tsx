@@ -279,7 +279,7 @@ const Component = (props: Props) => {
       />
 
       <Typography.Text style={{ color: token.colorTextLight4 }}>
-        {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
+        {t('The provided information is for informational purposes only and should not be considered as guarantee. All rates are calculated on an annual basis and are subject to change.')}
       </Typography.Text>
 
       <Button

@@ -79,6 +79,7 @@ const Component = () => {
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitString, setSubmitString] = useState<string | undefined>();
+  const [connectionError, setConnectionError] = useState<string>();
 
   const currentStep = processState.currentStep;
   const nextStepType = processState.steps?.[currentStep + 1]?.type;
@@ -542,13 +543,27 @@ const Component = () => {
                 },
                 type: EarningActionType.STEP_CREATE
               });
+
+              const errorNetwork = res.connectionError;
+
+              if (errorNetwork) {
+                const networkName = chainInfoMap[errorNetwork].name;
+                const text = t('Please enable {{networkName}} network', { replace: { networkName } });
+
+                notify({
+                  type: 'error',
+                  message: text
+                });
+              }
+
+              setConnectionError(errorNetwork);
             })
             .catch(console.error)
             .finally(() => setStepLoading(false));
         }, 1000, 5000, false);
       }
     }
-  }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom]);
+  }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom, chainInfoMap, t, notify]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -711,7 +726,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading || !!connectionError}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}

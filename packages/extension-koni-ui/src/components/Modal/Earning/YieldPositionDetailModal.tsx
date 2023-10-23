@@ -292,10 +292,10 @@ const Component: React.FC<Props> = (props: Props) => {
             )
           }
           <MetaInfo.Default
-            label={t('Reward distribution period')}
+            label={t('Reward distribution')}
             valueColorSchema={'gray'}
           >
-            {t('{{number}} hours', { replace: { number: 24 } })}
+            {t('Every {{number}} hours', { replace: { number: 24 } })}
           </MetaInfo.Default>
         </MetaInfo>
       </>

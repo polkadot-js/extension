@@ -450,8 +450,6 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }
 
-  console.log('compact ----', isCompactButtons);
-
   return (
     <div
       className={CN(className, '-normal-mode')}
@@ -655,6 +653,10 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
       overflow: 'hidden'
     },
 
+    '.earning-status-item, .earning-item-total-balance-value': {
+      'white-space': 'nowrap'
+    },
+
     '.earning-item-name': {
       fontSize: token.fontSizeHeading4,
       lineHeight: token.lineHeightHeading4,
@@ -676,7 +678,11 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
       fontWeight: 500,
-      color: token.colorTextLight4
+      color: token.colorTextLight4,
+      display: '-webkit-box',
+      '-webkit-line-clamp': '2',
+      '-webkit-box-orient': 'vertical',
+      overflow: 'hidden'
     },
 
     '.earning-item-total-balance-value': {

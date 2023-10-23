@@ -187,7 +187,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onClickStakeMoreBtn,
             getEarnExtrinsicType(slug)
           )}
-        >{t('Earn more')}</Button>
+        >{t(yieldPoolInfo.slug === 'DOT___interlay_lending' ? t('Supply now') : t('Stake now'))}</Button>
       </div>
     );
   };

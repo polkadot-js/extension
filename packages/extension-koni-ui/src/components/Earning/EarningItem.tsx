@@ -64,6 +64,17 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [t, type]);
 
+  const totalTitle = useMemo(() => {
+    switch (type) {
+      case YieldPoolType.LENDING:
+        return t('Total value supplied');
+      case YieldPoolType.NOMINATION_POOL:
+      case YieldPoolType.LIQUID_STAKING:
+      default:
+        return t('Total value staked');
+    }
+  }, [t, type]);
+
   const childClick = useCallback((onClick: VoidFunction) => {
     return (e?: SyntheticEvent) => {
       e && e.stopPropagation();
@@ -215,7 +226,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: token.paddingXXS }}>
-            <div className='earning-item-total-value-staked'>{t('Total value staked')}:</div>
+            <div className='earning-item-total-value-staked'>{totalTitle}:</div>
             <Number
               decimal={0}
               decimalColor={token.colorSuccess}

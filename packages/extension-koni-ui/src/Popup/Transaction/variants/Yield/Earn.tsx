@@ -731,7 +731,7 @@ const Component = () => {
           <Divider className={'staking-modal-divider'} />
 
           <Typography.Text style={{ color: token.colorTextLight4 }}>
-            {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
+            {t('The provided information is for informational purposes only and should not be considered as guarantee. All rates are calculated on an annual basis and are subject to change.')}
           </Typography.Text>
         </TransactionContent>
       </div>
@@ -764,6 +764,11 @@ const Component = () => {
                 />
               )
             }
+            <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
+
+            <Typography.Text style={{ color: token.colorTextLight4 }}>
+              {t('All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.')}
+            </Typography.Text>
           </div>
         </div>
       )}

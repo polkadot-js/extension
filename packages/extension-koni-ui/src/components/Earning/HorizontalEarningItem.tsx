@@ -172,9 +172,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
       switch (item) {
         case YieldAction.STAKE:
+        case YieldAction.START_EARNING:
           temp.icon = PlusCircle;
-          temp.label = t('Stake now');
           temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(slug));
+          temp.label = yieldPoolInfo.type === YieldPoolType.LENDING ? t('Supply now') : t('Stake now');
           break;
         case YieldAction.CLAIM_REWARD:
           temp.icon = Wallet;
@@ -200,18 +201,13 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.label = t('Cancel unstake');
           temp.schema = 'secondary';
           break;
-        case YieldAction.START_EARNING:
-          temp.icon = PlusCircle;
-          temp.onClick = onClickButton(onClickStakeBtn, ExtrinsicType.JOIN_YIELD_POOL);
-          temp.label = t('Earn now');
-          break;
       }
 
       result.push(temp);
     });
 
     return result;
-  }, [onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, onClickStakeBtn, slug, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
+  }, [onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, onClickStakeBtn, slug, yieldPoolInfo.type, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
 
   const derivativeTokenState = useMemo(() => {
     if (!yieldPoolInfo.derivativeAssets) {

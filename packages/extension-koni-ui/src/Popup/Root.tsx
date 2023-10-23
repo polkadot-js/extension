@@ -183,6 +183,14 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
       }
     } else if (pathName === loginUrl && !needUnlock) {
       redirectTarget = DEFAULT_ROUTER_PATH;
+    } else if (pathName === welcomeUrl && !noAccount) {
+      redirectTarget = DEFAULT_ROUTER_PATH;
+    } else if (pathName === migratePasswordUrl && !needMigrate) {
+      if (noAccount) {
+        redirectTarget = welcomeUrl;
+      } else {
+        redirectTarget = DEFAULT_ROUTER_PATH;
+      }
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');
     } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {

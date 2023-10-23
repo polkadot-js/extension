@@ -5,11 +5,12 @@ import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvm
 import { addLazy, createPromiseHandler } from '@subwallet/extension-base/utils';
 import { Injected, InjectedAccountWithMeta, Unsubcall } from '@subwallet/extension-inject/types';
 import { DisconnectExtensionModal } from '@subwallet/extension-koni-ui/components';
-import { ENABLE_INJECT, win } from '@subwallet/extension-koni-ui/constants';
+import { ENABLE_INJECT, PREDEFINED_WALLETS, SELECT_EXTENSION_MODAL, win } from '@subwallet/extension-koni-ui/constants';
 import { useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
 import { noop, toShort } from '@subwallet/extension-koni-ui/utils';
-import React, { useCallback, useEffect, useState } from 'react';
+import { ModalContext } from '@subwallet/react-ui';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 interface Props {
@@ -17,8 +18,10 @@ interface Props {
 }
 
 interface InjectContextProps {
+  selectedWallet: string | null;
   disableInject: () => void;
-  enableInject: (callback?: VoidFunction) => void;
+  selectWallet: () => void;
+  enableInject: (walletKey: string) => void;
   enabled: boolean;
   evmWallet?: SubWalletEvmProvider;
   initCallback: (callback?: VoidFunction) => void;
@@ -57,8 +60,12 @@ const parseAccountMap = (values: AccountArrayMap): InjectedAccountWithMeta[] => 
 };
 
 export const InjectContext = React.createContext<InjectContextProps>({
+  selectedWallet: null,
   disableInject: noop,
-  enableInject: noop,
+  selectWallet: noop,
+  enableInject: (walletKey: string) => {
+    noop();
+  },
   enabled: false,
   initCallback: noop,
   initEnable: false,
@@ -80,16 +87,16 @@ class InjectHandler {
   errorSubject = new BehaviorSubject<InjectErrorMap>({});
   loadingPromiseHandler = createPromiseHandler<boolean>();
 
-  selectedWallet: string | undefined = undefined;
+  selectedWallet: string | null = null;
 
-  substrateKey = 'subwallet-js'; // Can be update later
+  substrateKey: string | null = null;
   substrateWallet?: Injected;
   substratePromiseHandler = createPromiseHandler<Injected | undefined>();
   substrateAccounts: InjectedAccountWithMeta[] = [];
   substrateAccountUnsubcall?: Unsubcall;
   substrateEnableCompleted = false;
 
-  evmKey = 'SubWallet'; // Can be update later
+  evmKey: string | null = null;
   evmWallet?: SubWalletEvmProvider;
   evmPromiseHandler = createPromiseHandler<SubWalletEvmProvider | undefined>();
   evmAccounts: InjectedAccountWithMeta[] = [];
@@ -100,15 +107,20 @@ class InjectHandler {
   accountArrayMap: AccountArrayMap = {};
 
   constructor () {
-    this.enableSubject = new BehaviorSubject<boolean>(localStorage.getItem(ENABLE_INJECT) === 'true');
+    this.selectedWallet = localStorage.getItem(ENABLE_INJECT) || null;
+    const walletInfo = PREDEFINED_WALLETS[this.selectedWallet || ''];
+
+    this.enableSubject = new BehaviorSubject<boolean>(!!this.selectedWallet);
     this.successSubject = new BehaviorSubject<number>(0);
     this.isInitEnable = this.enableSubject.value;
     this.loadingSubject = new BehaviorSubject<boolean>(true);
     this.hasInjected = !!win.injectedWeb3 || !!win.SubWallet;
+    this.evmKey = walletInfo?.evmKey || null;
+    this.substrateKey = walletInfo?.substrateKey || null;
 
     // Start to connect with injected wallet
-    if (this.enableSubject.value) {
-      this.enable().then(() => {
+    if (this.enableSubject.value && this.selectedWallet) {
+      this.enable(this.selectedWallet).then(() => {
         this.loadingPromiseHandler.resolve(this.enableSubject.value);
       }).catch(console.error);
     } else {
@@ -124,7 +136,19 @@ class InjectHandler {
       .catch(console.error);
   }
 
-  async enable () {
+  async enable (walletKey: string) {
+    const walletInfo = PREDEFINED_WALLETS[walletKey || ''];
+
+    if (!walletInfo) {
+      this.loadingSubject.next(false);
+
+      return;
+    }
+
+    this.selectedWallet = walletKey;
+    this.evmKey = walletInfo.evmKey;
+    this.substrateKey = walletInfo.substrateKey;
+
     return new Promise<void>((resolve, reject) => {
       let success = 0;
 
@@ -140,7 +164,7 @@ class InjectHandler {
         success++;
         this.enableSubject.next(true);
         this.successSubject.next(success);
-        localStorage.setItem(ENABLE_INJECT, 'true');
+        localStorage.setItem(ENABLE_INJECT, walletKey);
         resolve();
       };
 
@@ -187,21 +211,22 @@ class InjectHandler {
   disable () {
     this.unsubscribeSubstrateAccount();
     this.unsubscribeEvmAccount();
+    this.selectedWallet = null;
     this.substrateAccounts = [];
     this.evmAccounts = [];
     this.substrateEnableCompleted = false;
     this.evmEnableCompleted = false;
-    this.updateInjectedAccount(this.substrateKey, []);
-    this.updateInjectedAccount(this.evmKey, []);
+    this.substrateKey && this.updateInjectedAccount(this.substrateKey, []);
+    this.evmKey && this.updateInjectedAccount(this.evmKey, []);
     this.substrateWallet = undefined;
     this.evmWallet = undefined;
     this.successSubject.next(0);
     this.enableSubject.next(false);
-    localStorage.setItem(ENABLE_INJECT, 'false');
+    localStorage.removeItem(ENABLE_INJECT);
   }
 
   async enableSubstrate () {
-    if (this.substrateEnableCompleted) {
+    if (this.substrateEnableCompleted || !this.substrateKey) {
       return;
     }
 
@@ -233,7 +258,7 @@ class InjectHandler {
         },
         type: account.type
       }));
-      this.updateInjectedAccount(this.substrateKey, this.substrateAccounts);
+      this.substrateKey && this.updateInjectedAccount(this.substrateKey, this.substrateAccounts);
     });
   }
 
@@ -242,7 +267,7 @@ class InjectHandler {
   }
 
   async enableEvm () {
-    if (this.evmEnableCompleted) {
+    if (this.evmEnableCompleted || !this.evmKey) {
       return;
     }
 
@@ -258,7 +283,7 @@ class InjectHandler {
   subscribeEvmAccount () {
     const listener = (addresses: string[]) => {
       this.evmAccounts = addresses.map((adr) => evmConvertToInject(adr));
-      this.updateInjectedAccount(this.evmKey, this.evmAccounts);
+      this.evmKey && this.updateInjectedAccount(this.evmKey, this.evmAccounts);
     };
 
     if (this.evmWallet) {
@@ -337,20 +362,20 @@ const injectHandler = new InjectHandler();
 
 export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const notification = useNotification();
+  const { activeModal } = useContext(ModalContext);
   const { t } = useTranslation();
+  const [selectedWallet, setSelectedWallet] = useState<string | null>(injectHandler.selectedWallet);
   const [enabled, setEnabled] = useState<boolean>(injectHandler.enableSubject.value);
   const [evmWallet, setEvmWallet] = useState(injectHandler.evmWallet);
   const [substrateWallet, setSubstrateWallet] = useState(injectHandler.substrateWallet);
   const [loadingInject, setLoadingInject] = useState(injectHandler.loadingSubject.value);
 
-  // Todo: Select EVM Wallet
-  // Todo: Select Substrate Wallet
+  const selectWallet = useCallback(() => {
+    activeModal(SELECT_EXTENSION_MODAL);
+  }, [activeModal]);
 
-  const enableInject = useCallback((callback?: VoidFunction) => {
-    injectHandler.enable()
-      .then(() => {
-        callback?.();
-      }).catch(console.error);
+  const enableInject = useCallback((walletKey: string) => {
+    injectHandler.enable(walletKey).catch(console.error);
   }, []);
 
   const disableInject = useCallback(() => {
@@ -367,7 +392,10 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   }, []);
 
   useEffect(() => {
-    injectHandler.enableSubject.subscribe(setEnabled);
+    injectHandler.enableSubject.subscribe((v) => {
+      setEnabled(v);
+      setSelectedWallet(injectHandler.selectedWallet);
+    });
     injectHandler.loadingSubject.subscribe(setLoadingInject);
   }, []);
 
@@ -393,8 +421,10 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   return (
     <InjectContext.Provider
       value={{
+        selectedWallet,
         evmWallet,
         substrateWallet,
+        selectWallet,
         enableInject,
         loadingInject,
         enabled,

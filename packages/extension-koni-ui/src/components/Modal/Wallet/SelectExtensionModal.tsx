@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PREDEFINED_WALLETS, SELECT_EXTENSION_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { checkHasInjected } from '@subwallet/extension-koni-ui/utils/wallet';
 import { Icon, Image, ModalContext, SettingItem, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, MagnifyingGlass } from 'phosphor-react';
+import {CheckCircle, Download, DownloadSimple, MagnifyingGlass} from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
@@ -28,12 +29,12 @@ interface ExtensionOptions {
   injected: boolean;
 }
 
-interface ExtensionItemProps extends ExtensionOptions {
-  onClick: VoidFunction;
-}
+type ExtensionItemProps = ExtensionOptions
 
-const ExtensionItem: React.FC<ExtensionItemProps> = (props: ExtensionItemProps) => {
-  const { icon, injected, isSelected, onClick, title, url, value } = props;
+const ExtensionItem: React.FC<ExtensionItemProps> = (props: ExtensionOptions) => {
+  const { icon, injected, isSelected, title, url, value } = props;
+  const { inactiveModal } = useContext(ModalContext);
+  const { enableInject } = useContext(InjectContext);
 
   const { token } = useTheme() as Theme;
 
@@ -45,7 +46,7 @@ const ExtensionItem: React.FC<ExtensionItemProps> = (props: ExtensionItemProps) 
         width={28}
       />
     );
-  }, []);
+  }, [icon]);
 
   const onDownload = useCallback(() => {
     openInNewTab(url)();
@@ -53,28 +54,35 @@ const ExtensionItem: React.FC<ExtensionItemProps> = (props: ExtensionItemProps) 
 
   const _onClick = useCallback(() => {
     if (injected) {
-      onClick();
+      enableInject(value);
+      inactiveModal(modalId);
     } else {
       onDownload();
     }
-  }, [injected, onClick, onDownload]);
+  }, [enableInject, inactiveModal, injected, onDownload, value]);
 
   return (
     <SettingItem
+      className={'wallet-item'}
       leftItemIcon={leftItemIcon}
       name={title}
       onPressItem={_onClick}
       rightItem={(
-        isSelected &&
-        (
-          <Icon
-            className={'__selected-icon'}
-            iconColor={token.colorSecondary}
-            phosphorIcon={CheckCircle}
+        !injected
+          ? <Icon
+            className={'__download-icon'}
+            phosphorIcon={DownloadSimple}
             size='sm'
-            weight='fill'
-          />
-        )
+            weight='fill' />
+          : (isSelected &&
+            <Icon
+              className={'__selected-icon'}
+              iconColor={token.colorSecondary}
+              phosphorIcon={CheckCircle}
+              size='sm'
+              weight='fill'
+            />
+          )
       )}
     />
   );
@@ -87,6 +95,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { inactiveModal } = useContext(ModalContext);
 
+  const { selectedWallet } = useContext(InjectContext);
+
   const options = useMemo((): ExtensionOptions[] =>
     Object.values(PREDEFINED_WALLETS).map((item) => {
       return ({
@@ -95,9 +105,9 @@ const Component: React.FC<Props> = (props: Props) => {
         value: item.key,
         icon: item.icon,
         title: item.name,
-        isSelected: false
+        isSelected: selectedWallet === item.key
       });
-    }), []);
+    }), [selectedWallet]);
 
   const onClose = useCallback(() => {
     inactiveModal(modalId);
@@ -108,7 +118,6 @@ const Component: React.FC<Props> = (props: Props) => {
       <ExtensionItem
         key={item.value}
         {...item}
-        onClick={() => {}}
       />
     );
   }, []);
@@ -143,7 +152,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const SelectExtensionModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.wallet-item': {
+      paddingRight: 8,
 
+      '.ant-web3-block': {
+        paddingTop: 12,
+        paddingBottom: 12
+      }
+    }
   };
 });
 

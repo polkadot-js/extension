@@ -47,7 +47,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { enableInject, injected, loadingInject } = useContext(InjectContext);
+  const { injected, loadingInject, selectWallet } = useContext(InjectContext);
 
   const { accounts, isNoAccount } = useSelector((root: RootState) => root.accountState);
 
@@ -197,7 +197,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     return () => {
       if (id === CONNECT_EXTENSION) {
         if (injected) {
-          enableInject();
+          selectWallet();
         } else {
           openInNewTab(EXTENSION_URL)();
         }
@@ -214,7 +214,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       }
     };
   }
-  , [activeModal, enableInject, inactiveModal, injected, navigate, setSelectedAccountTypes]);
+  , [activeModal, selectWallet, inactiveModal, injected, navigate, setSelectedAccountTypes]);
 
   useLayoutEffect(() => {
     if (!isNoAccount) {

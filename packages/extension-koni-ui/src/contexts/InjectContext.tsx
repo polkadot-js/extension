@@ -3,9 +3,9 @@
 
 import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvmProvider';
 import { addLazy, createPromiseHandler } from '@subwallet/extension-base/utils';
-import { EvmProvider, Injected, InjectedAccountWithMeta, InjectedWindowProvider, Unsubcall } from '@subwallet/extension-inject/types';
+import { Injected, InjectedAccountWithMeta, Unsubcall } from '@subwallet/extension-inject/types';
 import { DisconnectExtensionModal } from '@subwallet/extension-koni-ui/components';
-import { ENABLE_INJECT } from '@subwallet/extension-koni-ui/constants';
+import { ENABLE_INJECT, win } from '@subwallet/extension-koni-ui/constants';
 import { useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
 import { noop, toShort } from '@subwallet/extension-koni-ui/utils';
@@ -14,12 +14,6 @@ import { BehaviorSubject } from 'rxjs';
 
 interface Props {
   children: React.ReactNode;
-}
-
-export interface InjectedWindow extends This {
-  injectedWeb3?: Record<string, InjectedWindowProvider>;
-  ethereum?: EvmProvider;
-  SubWallet?: SubWalletEvmProvider;
 }
 
 interface InjectContextProps {
@@ -34,11 +28,9 @@ interface InjectContextProps {
   substrateWallet?: Injected;
 }
 
-type This = typeof globalThis;
 type AccountArrayMap = Record<string, InjectedAccountWithMeta[]>;
 type AccountMap = Record<string, InjectedAccountWithMeta>;
 
-const win = window as Window & InjectedWindow;
 const updateInjectAccountPromiseKey = 'updateInjectAccounts';
 
 const evmConvertToInject = (address: string): InjectedAccountWithMeta => {
@@ -87,6 +79,8 @@ class InjectHandler {
   successSubject: BehaviorSubject<number>;
   errorSubject = new BehaviorSubject<InjectErrorMap>({});
   loadingPromiseHandler = createPromiseHandler<boolean>();
+
+  selectedWallet: string | undefined = undefined;
 
   substrateKey = 'subwallet-js'; // Can be update later
   substrateWallet?: Injected;

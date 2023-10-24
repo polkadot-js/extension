@@ -27,6 +27,10 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const { token } = useTheme() as Theme;
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => item.stats?.isAvailable !== false);
+  }, [items]);
+
   const chainLogo = useMemo(() => {
     const chainInfo = items.find((x) => x.slug === value);
 
@@ -111,7 +115,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       id={id}
       inputClassName={`${className} chain-selector-input`}
       itemKey={'slug'}
-      items={items}
+      items={filteredItems}
       label={label}
       onSelect={onSelect}
       placeholder={placeholder || t('Select protocol')}

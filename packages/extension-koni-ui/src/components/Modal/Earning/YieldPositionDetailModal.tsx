@@ -163,7 +163,9 @@ const Component: React.FC<Props> = (props: Props) => {
   //   activeModal(EARNING_MORE_ACTION_MODAL);
   // }, [activeModal, inactiveModal]);
 
-  const footer = () => {
+  const footer = useCallback(() => {
+    const isPoolUnavailable = yieldPoolInfo.stats?.isAvailable === false;
+
     return (
       <div className='staking-detail-modal-footer'>
         {/* <Button */}
@@ -173,7 +175,7 @@ const Component: React.FC<Props> = (props: Props) => {
         {/* /> */}
         <Button
           className='__action-btn'
-          disabled={!availableActions.includes(YieldAction.WITHDRAW_EARNING)}
+          disabled={!availableActions.includes(YieldAction.WITHDRAW_EARNING) || isPoolUnavailable}
           onClick={onClickFooterButton(
             onClickWithdrawBtn,
             getWithdrawExtrinsicType(slug)
@@ -182,7 +184,7 @@ const Component: React.FC<Props> = (props: Props) => {
         >{t('Withdraw')}</Button>
         <Button
           className='__action-btn'
-          disabled={!availableActions.includes(YieldAction.START_EARNING)}
+          disabled={!availableActions.includes(YieldAction.START_EARNING) || isPoolUnavailable}
           onClick={onClickFooterButton(
             onClickStakeMoreBtn,
             getEarnExtrinsicType(slug)
@@ -190,7 +192,7 @@ const Component: React.FC<Props> = (props: Props) => {
         >{t(yieldPoolInfo.slug === 'DOT___interlay_lending' ? t('Supply now') : t('Stake now'))}</Button>
       </div>
     );
-  };
+  }, [availableActions, onClickFooterButton, onClickStakeMoreBtn, onClickWithdrawBtn, slug, t, yieldPoolInfo.slug, yieldPoolInfo.stats?.isAvailable]);
 
   const onCloseModal = useCallback(() => {
     inactiveModal(modalId);

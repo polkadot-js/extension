@@ -25,6 +25,8 @@ import { useLocalStorage } from 'usehooks-ts';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import useNotification from '../../../../hooks/common/useNotification';
+
 type Props = ThemeProps;
 
 const FILTER_MODAL_ID = 'earning-filter-modal';
@@ -58,6 +60,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const notify = useNotification();
   const { isWebUI } = useContext(ScreenContext);
 
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
@@ -150,17 +153,29 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClickCalculatorBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
-      setSelectedSlug(item.slug);
-      activeModal(STAKING_CALCULATOR_MODAL);
+      if (item.stats?.isAvailable === false) {
+        notify({
+          message: 'Coming soon'
+        });
+      } else {
+        setSelectedSlug(item.slug);
+        activeModal(STAKING_CALCULATOR_MODAL);
+      }
     };
-  }, [activeModal]);
+  }, [activeModal, notify]);
 
   const onClickInfoBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
-      setSelectedSlug(item.slug);
-      activeModal(EARNING_INFO_MODAL);
+      if (item.stats?.isAvailable === false) {
+        notify({
+          message: 'Coming soon'
+        });
+      } else {
+        setSelectedSlug(item.slug);
+        activeModal(EARNING_INFO_MODAL);
+      }
     };
-  }, [activeModal]);
+  }, [activeModal, notify]);
 
   const onClickStakeBtn = useCallback((item: YieldPoolInfo) => {
     return () => {
@@ -168,25 +183,31 @@ const Component: React.FC<Props> = (props: Props) => {
         setReturnStorage('/home/earning/');
         navigate('/welcome');
       } else {
-        const callback = () => {
-          setSelectedSlug(item.slug);
-          const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
-
-          setYieldStorage({
-            ...DEFAULT_YIELD_PARAMS,
-            method: item.slug,
-            from: address,
-            chain: item.chain,
-            asset: item.inputAssets[0]
+        if (item.stats?.isAvailable === false) {
+          notify({
+            message: 'Coming soon'
           });
+        } else {
+          const callback = () => {
+            setSelectedSlug(item.slug);
+            const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
-          navigate('/transaction/earn');
-        };
+            setYieldStorage({
+              ...DEFAULT_YIELD_PARAMS,
+              method: item.slug,
+              from: address,
+              chain: item.chain,
+              asset: item.inputAssets[0]
+            });
 
-        preCheckAction(callback, getEarnExtrinsicType(item.slug))();
+            navigate('/transaction/earn');
+          };
+
+          preCheckAction(callback, getEarnExtrinsicType(item.slug))();
+        }
       }
     };
-  }, [currentAccount, isNoAccount, navigate, preCheckAction, setReturnStorage, setYieldStorage]);
+  }, [currentAccount, isNoAccount, navigate, notify, preCheckAction, setReturnStorage, setYieldStorage]);
 
   const renderEarningItem = useCallback((item: YieldPoolInfo) => {
     return (

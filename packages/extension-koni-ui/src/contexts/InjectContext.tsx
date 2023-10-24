@@ -345,15 +345,21 @@ class InjectHandler {
       const promises: Array<Promise<unknown>> = [];
 
       if (addArray.length) {
+        console.log('addArray', addArray);
         promises.push(addInjects(addArray));
       }
 
       if (removeArray.length) {
+        console.log('removeArray', removeArray);
         promises.push(removeInjects(removeArray.map((acc) => acc.address)));
       }
 
       // Promise.all(promises).finally(callback);
       this.oldAccountArrayMap = { ...this.accountArrayMap };
+
+      if (Object.keys(this.accountArrayMap).length === 0) {
+        this.disable();
+      }
     }, 300, 900, false);
   }
 }

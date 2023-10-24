@@ -217,7 +217,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <div className={'earning-item-reward'}>
             {
               stats?.isAvailable === false && totalApy <= 0
-                ? <div className={'earning-item-not-available-title'}>N/A</div>
+                ? <div className={'earning-item-not-available-title'}>TBD</div>
                 : <Number
                   decimal={0}
                   size={30}
@@ -234,7 +234,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
             {
               stats?.isAvailable === false && parseInt(tvl) <= 0
-                ? <div className={'.earning-item-not-available-info'}>N/A</div>
+                ? <div className={'.earning-item-not-available-info'}>TBD</div>
                 : <Number
                   decimal={0}
                   decimalColor={token.colorSuccess}

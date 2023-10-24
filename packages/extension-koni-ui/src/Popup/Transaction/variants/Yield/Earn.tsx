@@ -765,7 +765,7 @@ const Component = () => {
             loading={submitLoading}
             onClick={preCheckAction(onClick, extrinsicType)}
           >
-            {processState.currentStep === 0 ? t('Submit') : (!isProcessDone ? t('Continue') : t('Finish'))}
+            {processState.currentStep === 0 ? t('Submit') : t('Continue')}
           </Button>
 
           <Divider className={'staking-modal-divider'} />

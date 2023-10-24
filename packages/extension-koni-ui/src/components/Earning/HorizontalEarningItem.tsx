@@ -66,7 +66,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { chain, description, name, slug, type } = yieldPoolInfo;
+  const { chain, description, logo, name, slug, type } = yieldPoolInfo;
   const { address } = yieldPositionInfo;
 
   const preCheckAction = usePreCheckAction(address, false);
@@ -260,12 +260,12 @@ const Component: React.FC<Props> = (props: Props) => {
     return (
       <div
         className={CN(className, '-compact-mode')}
-        onClick={isAvailable ? onClickItem : undefined}
+        onClick={onClickItem}
       >
         <div className={'__item-upper-part'}>
           <Logo
             className={'__item-logo'}
-            network={chain}
+            network={logo || chain}
             size={38}
           />
 
@@ -321,6 +321,15 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
         <div className={'__item-lower-part'}>
           <div className='__item-tags-container'>
+            {
+              !isAvailable &&
+              (
+                <EarningTypeTag
+                  className={'__item-tag'}
+                  comingSoon={true}
+                />
+              )
+            }
             <EarningTypeTag
               className={'__item-tag'}
               type={type}
@@ -417,7 +426,7 @@ const Component: React.FC<Props> = (props: Props) => {
       className={className}
       leftItem={(
         <Logo
-          network={chain}
+          network={logo || chain}
           size={64}
         />
       )}
@@ -426,6 +435,15 @@ const Component: React.FC<Props> = (props: Props) => {
           <>
             <div className={'earning-item-name-wrapper'}>
               <div className={'earning-item-name'}>{name}</div>
+              {
+                !isAvailable &&
+                (
+                  <EarningTypeTag
+                    className={'earning-item-tag'}
+                    comingSoon={true}
+                  />
+                )
+              }
               <EarningTypeTag
                 className={'earning-item-tag'}
                 type={type}
@@ -465,7 +483,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
         </>
       )}
-      onClick={ isAvailable ? onClickItem : undefined}
+      onClick={onClickItem}
       rightItem={(
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
           <MetaInfo>

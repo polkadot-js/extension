@@ -214,9 +214,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
         const availableGen: string[] = currentAccount.availableGenesisHashes || [];
         const isEvmAddress = isEthereumAddress(currentAccount.address);
+        const isAll = isAccountAll(currentAccount.address);
         const chain = chainInfoMap[value.chain];
 
-        if (isEvmAddress !== _isChainEvmCompatible(chain)) {
+        if (!isAll && isEvmAddress !== _isChainEvmCompatible(chain)) {
           return false;
         }
 

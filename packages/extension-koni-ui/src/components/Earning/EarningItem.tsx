@@ -29,7 +29,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, compactMode, item, onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { chain, description, inputAssets, name, stats, type } = item;
+  const { chain, description, inputAssets, logo, name, stats, type } = item;
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { priceMap } = useSelector((state) => state.price);
   const isAvailable = stats?.isAvailable ?? true;
@@ -118,7 +118,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className={'__item-upper-part'}>
           <Logo
             className={'__item-logo'}
-            network={chain}
+            network={logo || chain}
             size={38}
           />
 
@@ -221,7 +221,7 @@ const Component: React.FC<Props> = (props: Props) => {
       middleItem={(
         <div className={'earning-item-content-wrapper'}>
           <Logo
-            network={chain}
+            network={logo || chain}
             size={64}
           />
 

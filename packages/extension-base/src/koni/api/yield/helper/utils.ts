@@ -45,7 +45,20 @@ export const DEFAULT_YIELD_FIRST_STEP: YieldStepDetail = {
   type: YieldStepType.DEFAULT
 };
 
-export const YIELD_EXTRINSIC_TYPES = [ExtrinsicType.MINT_VDOT, ExtrinsicType.MINT_LDOT, ExtrinsicType.MINT_SDOT, ExtrinsicType.MINT_QDOT];
+export const YIELD_EXTRINSIC_TYPES = [
+  ExtrinsicType.MINT_VDOT,
+  ExtrinsicType.MINT_LDOT,
+  ExtrinsicType.MINT_SDOT,
+  ExtrinsicType.MINT_QDOT,
+  ExtrinsicType.REDEEM_QDOT,
+  ExtrinsicType.REDEEM_SDOT,
+  ExtrinsicType.REDEEM_VDOT,
+  ExtrinsicType.REDEEM_LDOT,
+  ExtrinsicType.STAKING_JOIN_POOL,
+  ExtrinsicType.STAKING_CLAIM_REWARD,
+  ExtrinsicType.STAKING_LEAVE_POOL,
+  ExtrinsicType.STAKING_POOL_WITHDRAW
+];
 
 export const YIELD_POOL_STAT_REFRESH_INTERVAL = 300000;
 

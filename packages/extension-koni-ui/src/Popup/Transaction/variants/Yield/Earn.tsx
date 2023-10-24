@@ -13,6 +13,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useFetchChainState, useGetChainPrefixBySlug, useNotification, usePreCheckAction, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useGetYieldPositionByAddressAndSlug from '@subwallet/extension-koni-ui/hooks/screen/earning/useGetYieldPositionByAddressAndSlug';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
+import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
@@ -78,7 +79,10 @@ const Component = () => {
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [checkMintLoading, setCheckMintLoading] = useState(false);
+  const [canMint, setCanMint] = useState(false);
   const [submitString, setSubmitString] = useState<string | undefined>();
+  const [connectionError, setConnectionError] = useState<string>();
 
   const currentStep = processState.currentStep;
   const nextStepType = processState.steps?.[currentStep + 1]?.type;
@@ -102,8 +106,14 @@ const Component = () => {
   const onDone = useCallback((extrinsicHash: string) => {
     const chainType = isEthereumAddress(currentFrom) ? 'ethereum' : 'substrate';
 
-    navigate(`/transaction-done/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
-  }, [currentFrom, currentPoolInfo.chain, navigate]);
+    let donePath = 'transaction-done';
+
+    if (canMint) {
+      donePath = 'earning-done';
+    }
+
+    navigate(`/${donePath}/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
+  }, [currentFrom, currentPoolInfo.chain, canMint, navigate]);
 
   const onError = useCallback((error: Error) => {
     notify({
@@ -542,13 +552,47 @@ const Component = () => {
                 },
                 type: EarningActionType.STEP_CREATE
               });
+
+              const errorNetwork = res.connectionError;
+
+              if (errorNetwork) {
+                const networkName = chainInfoMap[errorNetwork].name;
+                const text = t('Please enable {{networkName}} network', { replace: { networkName } });
+
+                notify({
+                  type: 'error',
+                  message: text
+                });
+              }
+
+              setConnectionError(errorNetwork);
             })
             .catch(console.error)
             .finally(() => setStepLoading(false));
         }, 1000, 5000, false);
       }
     }
-  }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom]);
+  }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom, chainInfoMap, t, notify]);
+
+  useEffect(() => {
+    setCheckMintLoading(true);
+
+    unlockDotCheckCanMint({
+      slug: currentPoolInfo.slug,
+      address: currentFrom,
+      network: currentPoolInfo.chain
+    })
+      .then((value) => {
+        setCanMint(value);
+      })
+      .finally(() => {
+        setCheckMintLoading(false);
+      });
+
+    return () => {
+      setCanMint(false);
+    };
+  }, [currentFrom, currentPoolInfo.chain, currentPoolInfo.slug]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -711,7 +755,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading || !!connectionError || checkMintLoading}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}
@@ -721,7 +765,7 @@ const Component = () => {
             loading={submitLoading}
             onClick={preCheckAction(onClick, extrinsicType)}
           >
-            {processState.currentStep === 0 ? t('Submit') : (!isProcessDone ? t('Continue') : t('Finish'))}
+            {processState.currentStep === 0 ? t('Submit') : t('Continue')}
           </Button>
 
           <Divider className={'staking-modal-divider'} />
@@ -731,7 +775,7 @@ const Component = () => {
           <Divider className={'staking-modal-divider'} />
 
           <Typography.Text style={{ color: token.colorTextLight4 }}>
-            {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
+            {t('The provided information is for informational purposes only and should not be considered as guarantee. All rates are calculated on an annual basis and are subject to change.')}
           </Typography.Text>
         </TransactionContent>
       </div>
@@ -764,6 +808,11 @@ const Component = () => {
                 />
               )
             }
+            <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
+
+            <Typography.Text style={{ color: token.colorTextLight4 }}>
+              {t('All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.')}
+            </Typography.Text>
           </div>
         </div>
       )}

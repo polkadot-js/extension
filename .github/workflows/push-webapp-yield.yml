@@ -22,14 +22,12 @@ jobs:
       with:
         node-version: '18'
         cache: 'yarn'
-      env:
-        TRANSAK_API_KEY: ${{ secrets.TRANSAK_API_KEY }}
-        COINBASE_PAY_ID: ${{ secrets.COINBASE_PAY_ID }}
     - run: yarn install --immutable | grep -v 'YN0013'
     - name: Build
       env:
         TRANSAK_API_KEY: ${{ secrets.TRANSAK_API_KEY }}
         COINBASE_PAY_ID: ${{ secrets.COINBASE_PAY_ID }}
+        NFT_MINTING_HOST: ${{ secrets.NFT_MINTING_HOST }}
       run: |
         yarn webapp:build
     - name: Publish to Cloudflare Pages

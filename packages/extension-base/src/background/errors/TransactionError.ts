@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
-import { BasicTxErrorType, StakingTxErrorType, TransactionErrorType, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, StakingTxErrorType, TransactionErrorType, TransferTxErrorType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
 
@@ -82,6 +82,14 @@ const defaultErrorMap = {
   },
   [TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT]: {
     message: detectTranslate('Receiver is not enough existential deposit'),
+    code: undefined
+  },
+  [YieldValidationStatus.NOT_ENOUGH_FEE]: {
+    message: detectTranslate('Insufficient balance'),
+    code: undefined
+  },
+  [YieldValidationStatus.NOT_ENOUGH_MIN_JOIN_POOL]: {
+    message: detectTranslate('Not enough min earning amount'),
     code: undefined
   }
 } as Record<TransactionErrorType, { message: string, code?: number }>;

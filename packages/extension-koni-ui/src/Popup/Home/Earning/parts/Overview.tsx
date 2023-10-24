@@ -7,7 +7,7 @@ import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/exte
 import { EarningCalculatorModal, EarningItem, EarningToolbar, EmptyList } from '@subwallet/extension-koni-ui/components';
 import EarningInfoModal from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInfoModal';
 import Search from '@subwallet/extension-koni-ui/components/Search';
-import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, EXCLUSIVE_REWARD_SLUGS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, usePreCheckAction, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -82,7 +82,7 @@ const Component: React.FC<Props> = (props: Props) => {
       },
       {
         desc: true,
-        label: t('Incentive'),
+        label: t('Rewards'),
         value: SortKey.INCENTIVE
       }
     ];
@@ -238,12 +238,14 @@ const Component: React.FC<Props> = (props: Props) => {
         const aInputDecimals = aInputAsset.decimals || 0;
         const aTotalValue = new BigN(a.stats?.tvl || '0').div(BN_TEN.pow(aInputDecimals));
         const aTotalApy = a.stats?.totalApy ?? calculateReward(a.stats?.totalApr || 0, 0, YieldCompoundingPeriod.YEARLY).apy ?? 0;
+        const aIncentive = EXCLUSIVE_REWARD_SLUGS.includes(a.slug) ? 1 : 0;
 
         const bInputSlug = b.inputAssets[0];
         const bInputAsset = assetRegistry[bInputSlug];
         const bInputDecimals = bInputAsset.decimals || 0;
         const bTotalValue = new BigN(b.stats?.tvl || '0').div(BN_TEN.pow(bInputDecimals));
         const bTotalApy = b.stats?.totalApy ?? calculateReward(b.stats?.totalApr || 0, 0, YieldCompoundingPeriod.YEARLY).apy ?? 0;
+        const bIncentive = EXCLUSIVE_REWARD_SLUGS.includes(b.slug) ? 1 : 0;
 
         switch (sortSelection) {
           case SortKey.TOTAL_VALUE:
@@ -251,6 +253,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
           case SortKey.APY:
             return bTotalApy - aTotalApy;
+
+          case SortKey.INCENTIVE:
+            return (bIncentive - aIncentive) || new BigN(bTotalValue).minus(aTotalValue).toNumber();
 
           default:
             return 0;

@@ -62,6 +62,8 @@ const Component: React.FC<Props> = (props: Props) => {
     yieldPoolInfo,
     yieldPositionInfo } = props;
 
+  const isAvailable = yieldPoolInfo.stats?.isAvailable ?? true;
+
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { chain, description, name, slug, type } = yieldPoolInfo;
@@ -143,7 +145,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     // Calculator
     result.push({
-      disable: yieldPoolInfo.stats?.isAvailable === false,
+      disable: !isAvailable,
       icon: PlusMinus,
       onClick: onClickButton(onClickCalculatorBtn),
       key: 'calculator',
@@ -154,7 +156,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     // Info
     result.push({
-      disable: yieldPoolInfo.stats?.isAvailable === false,
+      disable: !isAvailable,
       icon: Question,
       onClick: onClickButton(onClickInfoBtn),
       key: 'info',
@@ -165,7 +167,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     actionListByChain.forEach((item) => {
       const temp: ButtonOptionProps = {
-        disable: !availableActionsByMetadata.includes(item) || yieldPoolInfo.stats?.isAvailable === false,
+        disable: !availableActionsByMetadata.includes(item) || !isAvailable,
         key: item,
         hidden: false
       } as ButtonOptionProps;
@@ -207,7 +209,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, yieldPoolInfo.stats?.isAvailable, yieldPoolInfo.type, onClickStakeBtn, slug, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
+  }, [isAvailable, onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, yieldPoolInfo.type, onClickStakeBtn, slug, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
 
   const derivativeTokenState = useMemo(() => {
     if (!yieldPoolInfo.derivativeAssets) {
@@ -258,7 +260,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return (
       <div
         className={CN(className, '-compact-mode')}
-        onClick={onClickItem}
+        onClick={isAvailable ? onClickItem : undefined}
       >
         <div className={'__item-upper-part'}>
           <Logo
@@ -330,7 +332,7 @@ const Component: React.FC<Props> = (props: Props) => {
               actionListByChain.includes(YieldAction.STAKE) && (
                 <Button
                   className={'__item-button __item-stake-button'}
-                  disabled={!availableActionsByMetadata.includes(YieldAction.STAKE)}
+                  disabled={!availableActionsByMetadata.includes(YieldAction.STAKE) || !isAvailable}
                   icon={(
                     <Icon
                       iconColor={token.colorPrimary}
@@ -350,7 +352,7 @@ const Component: React.FC<Props> = (props: Props) => {
               actionListByChain.includes(YieldAction.START_EARNING) && (
                 <Button
                   className={'__item-button __item-stake-button'}
-                  disabled={!availableActionsByMetadata.includes(YieldAction.START_EARNING)}
+                  disabled={!availableActionsByMetadata.includes(YieldAction.START_EARNING) || !isAvailable}
                   icon={(
                     <Icon
                       iconColor={token.colorPrimary}
@@ -370,7 +372,7 @@ const Component: React.FC<Props> = (props: Props) => {
               (actionListByChain.includes(YieldAction.CLAIM_REWARD)) && (
                 <Button
                   className={'__item-button __item-stake-button'}
-                  disabled={!availableActionsByMetadata.includes(YieldAction.CLAIM_REWARD)}
+                  disabled={!availableActionsByMetadata.includes(YieldAction.CLAIM_REWARD) || !isAvailable}
                   icon={(
                     <Icon
                       iconColor={token.colorSuccess}
@@ -390,6 +392,7 @@ const Component: React.FC<Props> = (props: Props) => {
               !!onClickMoreBtn && (
                 <Button
                   className={'__item-more-button'}
+                  disabled={!isAvailable}
                   icon={(
                     <Icon
                       phosphorIcon={DotsThree}
@@ -462,7 +465,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
         </>
       )}
-      onClick={onClickItem}
+      onClick={ isAvailable ? onClickItem : undefined}
       rightItem={(
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
           <MetaInfo>

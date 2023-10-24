@@ -164,7 +164,8 @@ const Component: React.FC<Props> = (props: Props) => {
   // }, [activeModal, inactiveModal]);
 
   const footer = useCallback(() => {
-    const isPoolUnavailable = yieldPoolInfo.stats?.isAvailable === false;
+    const isAvailable = yieldPoolInfo.stats?.isAvailable ?? true;
+    const isPoolUnavailable = !isAvailable;
 
     return (
       <div className='staking-detail-modal-footer'>

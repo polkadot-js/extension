@@ -4,34 +4,40 @@
 import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { EarningTagType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { createEarningTagTypes } from '@subwallet/extension-koni-ui/utils';
+import { convertHexColorToRGBA, createEarningTagTypes } from '@subwallet/extension-koni-ui/utils';
 import { Icon, Tag } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Medal } from 'phosphor-react';
+import { Medal, MegaphoneSimple } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   type?: YieldPoolType;
+  comingSoon?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, type } = props;
+  const { className, comingSoon, type } = props;
 
   const { t } = useTranslation();
 
   const earningTag = useMemo((): EarningTagType =>
     type
       ? createEarningTagTypes(t)[type]
-      : (
-        {
+      : comingSoon
+        ? ({
+          color: 'default',
+          label: t('Coming soon'),
+          icon: MegaphoneSimple,
+          weight: 'fill'
+        })
+        : ({
           color: 'lime',
           label: t('Exclusive rewards'),
           icon: Medal,
           weight: 'fill'
-        }
-      )
-  , [t, type]);
+        })
+  , [comingSoon, t, type]);
 
   return (
     <Tag
@@ -52,7 +58,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const EarningTypeTag = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-
+    '&.ant-tag-default': {
+      backgroundColor: convertHexColorToRGBA(token['gray-6'], 0.1)
+    }
   };
 });
 

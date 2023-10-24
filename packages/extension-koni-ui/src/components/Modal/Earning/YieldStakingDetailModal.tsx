@@ -40,6 +40,7 @@ const modalId = YIELD_STAKING_DETAIL_MODAL;
 const Component: React.FC<Props> = (props: Props) => {
   const { className, nominatorMetadata, rewardItem, yieldPoolInfo } = props;
   const { slug } = yieldPoolInfo;
+  const isAvailable = yieldPoolInfo.stats?.isAvailable ?? true;
 
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
 
@@ -132,13 +133,14 @@ const Component: React.FC<Props> = (props: Props) => {
     return (
       <div className='staking-detail-modal-footer'>
         <Button
+          disabled={!isAvailable}
           icon={<Icon phosphorIcon={DotsThree} />}
           onClick={onClickMoreAction}
           schema='secondary'
         />
         <Button
           className='__action-btn'
-          disabled={new BigN(activeStake || '0').lte(0) }
+          disabled={new BigN(activeStake || '0').lte(0) || !isAvailable}
           onClick={onClickFooterButton(
             onClickUnstakeBtn,
             yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND
@@ -147,6 +149,7 @@ const Component: React.FC<Props> = (props: Props) => {
         >{t('Unstake')}</Button>
         <Button
           className='__action-btn'
+          disabled={!isAvailable}
           onClick={onClickFooterButton(
             onClickStakeMoreBtn,
             yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_BOND : ExtrinsicType.STAKING_JOIN_POOL

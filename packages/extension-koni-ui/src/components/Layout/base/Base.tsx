@@ -196,6 +196,17 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
         }
       }
     }
+  },
+
+  '@media (max-width: 600px)': {
+    '.ant-sw-tab-bar-item': {
+      paddingBottom: token.sizeXS,
+      paddingTop: token.sizeXS
+    },
+
+    '.ant-sw-tab-bar-item-label': {
+      display: 'none'
+    }
   }
 }));
 

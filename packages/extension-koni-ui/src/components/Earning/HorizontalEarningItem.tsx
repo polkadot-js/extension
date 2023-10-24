@@ -212,7 +212,6 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.label = !compact ? text : undefined;
           temp.tooltip = compact ? text : undefined;
           temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(slug));
-          temp.label = yieldPoolInfo.type === YieldPoolType.LENDING ? t('Supply now') : t('Stake now');
           break;
         }
 

@@ -138,7 +138,7 @@ function Component (props: Props): React.ReactElement<Props> {
       >
         <div
           className='__compact-item-background'
-          style={{ backgroundImage: data.logo ? `url("${data.logo}")` : undefined }}
+          style={{ backgroundImage: data.backdrop_image ? `url("${data.backdrop_image}")` : undefined }}
         ></div>
 
         <div className={'__compact-item-inner'}>
@@ -393,7 +393,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '.__compact-item-background': {
         height: '100%',
         width: 32,
-        backgroundPosition: 'center',
+        backgroundPosition: 'left',
         backgroundSize: 'cover',
         position: 'absolute',
         top: 0,
@@ -423,7 +423,6 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       },
 
       '.__compact-item-content-part-2': {
-
         overflow: 'hidden'
       },
 
@@ -435,7 +434,8 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         textOverflow: 'ellipsis',
         'white-space': 'nowrap',
         fontWeight: token.headingFontWeight,
-        flex: 1
+        flex: 1,
+        minWidth: 80
       },
 
       '.__compact-item-tags': {
@@ -467,8 +467,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         fontWeight: token.headingFontWeight,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        maxWidth: 100
+        whiteSpace: 'nowrap'
       }
     }
   };

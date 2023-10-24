@@ -6,6 +6,23 @@ import BaseStoreWithAddressAndChain from '@subwallet/extension-base/services/sto
 import { ICrowdloanItem } from '../databases';
 
 export default class CrowdloanStore extends BaseStoreWithAddressAndChain<ICrowdloanItem> {
+  async removeEndedCrowdloans () {
+    const now = new Date();
+    const removeList: string[] = [];
+
+    await this.table.each((obj, cursor) => {
+      try {
+        if (!obj.endTime || new Date(obj.endTime) < now) {
+          removeList.push(cursor.primaryKey as string);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    await this.table.bulkDelete(removeList);
+  }
+
   getCrowdloan (address: string) {
     return this.table.where('address').equals(address).toArray();
   }

@@ -290,6 +290,9 @@ export default class KoniState {
     this.onAccountAdd();
     this.onAccountRemove();
 
+    // TODO: consider moving this to a separate service
+    await this.dbService.stores.crowdloan.removeEndedCrowdloans();
+
     await this.startSubscription();
   }
 

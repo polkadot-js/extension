@@ -215,27 +215,36 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
 
           <div className={'earning-item-reward'}>
-            <Number
-              decimal={0}
-              size={30}
-              suffix={'%'}
-              value={totalApy}
-            />
+            {
+              stats?.isAvailable === false && totalApy <= 0
+                ? <div className={'earning-item-not-available-title'}>N/A</div>
+                : <Number
+                  decimal={0}
+                  size={30}
+                  suffix={'%'}
+                  value={totalApy}
+                />
+            }
 
             <div className={'earning-item-reward-sub-text'}>{t('rewards')}</div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: token.paddingXXS }}>
             <div className='earning-item-total-value-staked'>{totalTitle}:</div>
-            <Number
-              decimal={0}
-              decimalColor={token.colorSuccess}
-              intColor={token.colorSuccess}
-              prefix={'$'}
-              size={14}
-              unitColor={token.colorSuccess}
-              value={tvl}
-            />
+
+            {
+              stats?.isAvailable === false && parseInt(tvl) <= 0
+                ? <div className={'.earning-item-not-available-info'}>N/A</div>
+                : <Number
+                  decimal={0}
+                  decimalColor={token.colorSuccess}
+                  intColor={token.colorSuccess}
+                  prefix={'$'}
+                  size={14}
+                  unitColor={token.colorSuccess}
+                  value={tvl}
+                />
+            }
           </div>
 
           <div className='earning-item-footer'>
@@ -297,6 +306,14 @@ const EarningItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
     padding: `${token.paddingXL}px ${token.paddingLG}px ${token.padding}px`,
+
+    '.earning-item-not-available-title': {
+      fontSize: token.fontSizeHeading2
+    },
+
+    '.earning-item-not-available-info': {
+      fontSize: token.fontSizeHeading6
+    },
 
     '.earning-item-name': {
       fontSize: token.fontSizeHeading4,

@@ -2250,6 +2250,7 @@ export interface YieldPoolStats {
   maxCandidatePerFarmer: number,
   maxWithdrawalRequestPerFarmer: number,
 
+  isAvailable?: boolean,
   assetEarning?: YieldAssetEarningStats[],
   farmerCount?: number,
   totalApr?: number,

@@ -143,7 +143,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     // Calculator
     result.push({
-      disable: false,
+      disable: yieldPoolInfo.stats?.isAvailable === false,
       icon: PlusMinus,
       onClick: onClickButton(onClickCalculatorBtn),
       key: 'calculator',
@@ -154,7 +154,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     // Info
     result.push({
-      disable: false,
+      disable: yieldPoolInfo.stats?.isAvailable === false,
       icon: Question,
       onClick: onClickButton(onClickInfoBtn),
       key: 'info',
@@ -165,7 +165,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     actionListByChain.forEach((item) => {
       const temp: ButtonOptionProps = {
-        disable: !availableActionsByMetadata.includes(item),
+        disable: !availableActionsByMetadata.includes(item) || yieldPoolInfo.stats?.isAvailable === false,
         key: item,
         hidden: false
       } as ButtonOptionProps;
@@ -207,7 +207,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, onClickStakeBtn, slug, yieldPoolInfo.type, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
+  }, [onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, yieldPoolInfo.stats?.isAvailable, yieldPoolInfo.type, onClickStakeBtn, slug, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
 
   const derivativeTokenState = useMemo(() => {
     if (!yieldPoolInfo.derivativeAssets) {

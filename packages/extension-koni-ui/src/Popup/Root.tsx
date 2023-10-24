@@ -196,6 +196,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       redirectObj.redirect = tokenUrl;
     } else if (pathName === loginUrl && !needUnlock) {
       redirectObj.redirect = DEFAULT_ROUTER_PATH;
+    } else if (pathName === welcomeUrl && !isNoAccount) {
+      redirectObj.redirect = DEFAULT_ROUTER_PATH;
+    } else if (pathName === migratePasswordUrl && !needMigrate) {
+      if (isNoAccount) {
+        redirectObj.redirect = welcomeUrl;
+      } else {
+        redirectObj.redirect = DEFAULT_ROUTER_PATH;
+      }
     } else if (hasInternalConfirmations) {
       redirectObj.modal = `open:${CONFIRMATION_MODAL}`;
     } else if (!hasInternalConfirmations) {

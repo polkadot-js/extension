@@ -14,15 +14,6 @@ export const PREDEFINED_WALLETS: Record<string, WalletInfo> = {
     substrateKey: 'subwallet-js',
     url: 'https://subwallet.app/download.html'
   },
-  PolkadotJs: {
-    description: '',
-    evmKey: null,
-    icon: DefaultLogosMap.polkadot_js,
-    key: 'PolkadotJs',
-    name: 'Polkadot{.js}',
-    substrateKey: 'polkadot-js',
-    url: 'https://polkadot.js.org/extension/'
-  },
   Talisman: {
     description: '',
     evmKey: 'talismanEth',
@@ -31,6 +22,15 @@ export const PREDEFINED_WALLETS: Record<string, WalletInfo> = {
     name: 'Talisman',
     substrateKey: 'talisman',
     url: 'https://talisman.xyz/download/'
+  },
+  PolkadotJs: {
+    description: '',
+    evmKey: null,
+    icon: DefaultLogosMap.polkadot_js,
+    key: 'PolkadotJs',
+    name: 'Polkadot{.js}',
+    substrateKey: 'polkadot-js',
+    url: 'https://polkadot.js.org/extension/'
   }
 };
 

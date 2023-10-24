@@ -23,7 +23,8 @@ const SwLogosMap: Record<string, string> = {
   omnibtc: DefaultLogosMap.omnibtc,
   coinversation: DefaultLogosMap.coinversation,
   peaq: DefaultLogosMap.peaq,
-  t3rn: DefaultLogosMap.t3rn
+  t3rn: DefaultLogosMap.t3rn,
+  moonwell: DefaultLogosMap.moonwell
 };
 
 export default SwLogosMap;

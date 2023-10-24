@@ -41,6 +41,8 @@ const modalId = EARNING_MORE_ACTION_MODAL;
 const Component: React.FC<Props> = (props: Props) => {
   const { additionActions, className, onAfterCancel, stakingRewardItem, yieldPoolInfo, yieldPositionInfo } = props;
 
+  const isAvailable = yieldPoolInfo.stats?.isAvailable ?? true;
+
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
@@ -296,7 +298,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const modalContent = (
     <div className={CN(className, 'action-more-container')}>
       {_actionList.map((item) => {
-        const disabled = item.disabled || (item.action !== YieldAction.CUSTOM_ACTION && !availableActions.includes(item.action));
+        const disabled = !isAvailable || item.disabled || (item.action !== YieldAction.CUSTOM_ACTION && !availableActions.includes(item.action));
 
         return (
           <SettingItem

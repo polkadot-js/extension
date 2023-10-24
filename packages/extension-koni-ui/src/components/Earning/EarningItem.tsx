@@ -29,9 +29,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, compactMode, item, onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { chain, description, inputAssets, name, stats, type } = item;
+  const { chain, description, inputAssets, logo, name, stats, type } = item;
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { priceMap } = useSelector((state) => state.price);
+  const isAvailable = stats?.isAvailable ?? true;
 
   const tokenSlug = useMemo(() => inputAssets[0] || '', [inputAssets]);
 
@@ -54,6 +55,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [stats?.totalApr, stats?.totalApy]);
 
   const submitText = useMemo(() => {
+    if (!isAvailable) {
+      return t('Coming soon');
+    }
+
     switch (type) {
       case YieldPoolType.LENDING:
         return t('Supply now');
@@ -62,7 +67,7 @@ const Component: React.FC<Props> = (props: Props) => {
       default:
         return t('Stake now');
     }
-  }, [t, type]);
+  }, [t, type, isAvailable]);
 
   const totalTitle = useMemo(() => {
     switch (type) {
@@ -108,12 +113,12 @@ const Component: React.FC<Props> = (props: Props) => {
     return (
       <div
         className={CN(className, '-compact-mode')}
-        onClick={onClickInfoBtn}
+        onClick={isAvailable ? onClickInfoBtn : undefined}
       >
         <div className={'__item-upper-part'}>
           <Logo
             className={'__item-logo'}
-            network={chain}
+            network={logo || chain}
             size={38}
           />
 
@@ -125,11 +130,17 @@ const Component: React.FC<Props> = (props: Props) => {
                   {t('Rewards')}:
                 </div>
                 <div className='__item-rewards-value'>
-                  <Number
-                    decimal={0}
-                    suffix={'%'}
-                    value={totalApy}
-                  />
+                  {
+                    !isAvailable && totalApy <= 0
+                      ? <div className={'earning-item-not-available-title'}>TBD</div>
+                      : (
+                        <Number
+                          decimal={0}
+                          suffix={'%'}
+                          value={totalApy}
+                        />
+                      )
+                  }
                 </div>
               </div>
             </div>
@@ -138,17 +149,29 @@ const Component: React.FC<Props> = (props: Props) => {
                 {t('Total value staked')}:
               </div>
               <div className='__item-total-staked-value'>
-                <Number
-                  decimal={0}
-                  prefix={'$'}
-                  value={tvl}
-                />
+                {
+                  !isAvailable && parseInt(tvl) <= 0
+                    ? <div className={'earning-item-not-available-info'}>TBD</div>
+                    : (
+                      <Number
+                        decimal={0}
+                        prefix={'$'}
+                        value={tvl}
+                      />
+                    )
+                }
               </div>
             </div>
           </div>
         </div>
         <div className={'__item-lower-part'}>
           <div className='__item-tags-container'>
+            {!isAvailable && (
+              <EarningTypeTag
+                className={'__item-tag'}
+                comingSoon={true}
+              />
+            )}
             <EarningTypeTag
               className={'__item-tag'}
               type={type}
@@ -158,6 +181,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <div className='__item-buttons-container'>
             <Button
               className={'__item-stake-more-button'}
+              disabled={!isAvailable}
               icon={(
                 <Icon
                   iconColor={token.colorPrimary}
@@ -173,6 +197,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
             <Button
               className={'__item-calculator-button'}
+              disabled={!isAvailable}
               icon={(
                 <Icon
                   phosphorIcon={PlusMinus}
@@ -196,7 +221,7 @@ const Component: React.FC<Props> = (props: Props) => {
       middleItem={(
         <div className={'earning-item-content-wrapper'}>
           <Logo
-            network={chain}
+            network={logo || chain}
             size={64}
           />
 
@@ -206,6 +231,12 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
 
           <div className='earning-item-tags-container'>
+            {!isAvailable && (
+              <EarningTypeTag
+                className={'__item-tag'}
+                comingSoon={true}
+              />
+            )}
             <EarningTypeTag
               className={'earning-item-tag'}
               type={type}
@@ -216,7 +247,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
           <div className={'earning-item-reward'}>
             {
-              stats?.isAvailable === false && totalApy <= 0
+              !isAvailable && totalApy <= 0
                 ? <div className={'earning-item-not-available-title'}>TBD</div>
                 : <Number
                   decimal={0}
@@ -233,8 +264,8 @@ const Component: React.FC<Props> = (props: Props) => {
             <div className='earning-item-total-value-staked'>{totalTitle}:</div>
 
             {
-              stats?.isAvailable === false && parseInt(tvl) <= 0
-                ? <div className={'.earning-item-not-available-info'}>TBD</div>
+              !isAvailable && parseInt(tvl) <= 0
+                ? <div className='earning-item-not-available-info'>TBD</div>
                 : <Number
                   decimal={0}
                   decimalColor={token.colorSuccess}
@@ -250,6 +281,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <div className='earning-item-footer'>
             <Button
               className='earning-item-icon-btn'
+              disabled={!isAvailable}
               icon={(
                 <Icon
                   phosphorIcon={PlusMinus}
@@ -264,6 +296,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
             <Button
               className='earning-item-icon-btn'
+              disabled={!isAvailable}
               icon={(
                 <Icon
                   phosphorIcon={Question}
@@ -278,6 +311,7 @@ const Component: React.FC<Props> = (props: Props) => {
               type='ghost'
             />
             <Button
+              disabled={!isAvailable}
               icon={(
                 <Icon
                   className={'earning-item-stake-btn'}
@@ -295,7 +329,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
         </div>
       )}
-      onClick={onClickInfoBtn}
+      onClick={isAvailable ? onClickInfoBtn : undefined}
     />
   );
 };
@@ -308,11 +342,15 @@ const EarningItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
     padding: `${token.paddingXL}px ${token.paddingLG}px ${token.padding}px`,
 
     '.earning-item-not-available-title': {
-      fontSize: token.fontSizeHeading2
+      fontSize: token.fontSizeHeading2,
+      lineHeight: token.lineHeightHeading2,
+      paddingBottom: 6
     },
 
     '.earning-item-not-available-info': {
-      fontSize: token.fontSizeHeading6
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: token.colorSuccess
     },
 
     '.earning-item-name': {
@@ -396,7 +434,20 @@ const EarningItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       paddingTop: token.sizeSM,
       paddingLeft: token.sizeSM,
       paddingRight: token.sizeSM,
-      paddingBottom: 0
+      paddingBottom: 0,
+
+      '.earning-item-not-available-title': {
+        fontSize: token.fontSizeLG,
+        lineHeight: token.lineHeightLG,
+        paddingBottom: 0,
+        fontWeight: token.headingFontWeight
+      },
+
+      '.earning-item-not-available-info': {
+        color: token.colorSuccess,
+        fontSize: token.fontSizeSM,
+        lineHeight: token.lineHeightSM
+      }
     },
 
     '.__item-logo': {

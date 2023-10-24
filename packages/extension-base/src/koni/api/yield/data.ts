@@ -183,7 +183,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
         waitingTime: 0 // 0 means immediately
       }
     ]
-  }
+  },
   // LcDOT___acala_euphrates_liquid_staking: {
   //   slug: 'LcDOT___acala_euphrates_liquid_staking',
   //   chain: 'acala',
@@ -214,34 +214,34 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
   //     }
   //   ]
   // },
-  // xcDOT___moonwell_lending: {
-  //   slug: 'xcDOT___moonwell_lending',
-  //   chain: 'moonbeam',
-  //   name: 'Moonwell Lending',
-  //   logo: 'moonwell',
-  //   description: 'Earn rewards by lending xcDOT',
-  //   type: YieldPoolType.LENDING,
-  //   inputAssets: [
-  //     'moonbeam-LOCAL-xcDOT'
-  //   ],
-  //   derivativeAssets: [
-  //     'moonbeam-LOCAL-mDOT' // TODO: add to chain-list
-  //   ],
-  //   rewardAssets: [
-  //     'moonbeam-LOCAL-xcDOT',
-  //     'moonbeam-ERC20-WELL-0x511ab53f793683763e5a8829738301368a2411e3',
-  //     'moonbeam-NATIVE-GLMR'
-  //   ],
-  //   feeAssets: [
-  //     'moonbeam-NATIVE-GLMR'
-  //   ],
-  //   altInputAssets: [],
-  //   withdrawalMethods: [
-  //     {
-  //       name: 'Default withdrawal',
-  //       description: 'Withdraw your DOT',
-  //       waitingTime: 0 // 0 means immediately
-  //     }
-  //   ]
-  // }
+  xcDOT___moonwell_lending: {
+    slug: 'xcDOT___moonwell_lending',
+    chain: 'moonbeam',
+    name: 'Moonwell Lending',
+    logo: 'moonwell',
+    description: 'Earn rewards by lending xcDOT',
+    type: YieldPoolType.LENDING,
+    inputAssets: [
+      'moonbeam-LOCAL-xcDOT'
+    ],
+    derivativeAssets: [
+      'moonbeam-LOCAL-mDOT' // TODO: add to chain-list
+    ],
+    rewardAssets: [
+      'moonbeam-LOCAL-xcDOT',
+      'moonbeam-ERC20-WELL-0x511ab53f793683763e5a8829738301368a2411e3',
+      'moonbeam-NATIVE-GLMR'
+    ],
+    feeAssets: [
+      'moonbeam-NATIVE-GLMR'
+    ],
+    altInputAssets: [],
+    withdrawalMethods: [
+      {
+        name: 'Default withdrawal',
+        description: 'Withdraw your DOT',
+        waitingTime: 0 // 0 means immediately
+      }
+    ]
+  }
 };

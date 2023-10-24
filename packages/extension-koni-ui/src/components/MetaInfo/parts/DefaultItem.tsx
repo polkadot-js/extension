@@ -18,18 +18,23 @@ const Component: React.FC<DefaultInfoItem> = (props: DefaultInfoItem) => {
 
   return (
     <div className={CN(className, '__row', '-type-default')}>
-      <div className={CN('__col', {
-        '-v-align-top': labelAlign === 'top',
-        '-v-align-center': labelAlign === 'center'
-      })}
-      >
-        <div className={'__label'}>
-          {label}
-        </div>
-      </div>
+      {
+        !!label && (
+          <div className={CN('__col', {
+            '-v-align-top': labelAlign === 'top',
+            '-v-align-center': labelAlign === 'center'
+          }, '__label-col')}
+          >
+            <div className={'__label'}>
+              {label}
+            </div>
+          </div>
+        )
+      }
+
       <div className={CN('__col', {
         '-to-right': valueAlign === 'right'
-      })}
+      }, '__value-col')}
       >
         <div className={`__value -schema-${valueColorSchema}`}>
           {children}

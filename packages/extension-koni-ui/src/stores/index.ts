@@ -16,6 +16,7 @@ import ChainStoreReducer from './feature/common/ChainStore';
 import CrowdloanReducer from './feature/Crowdloan';
 import DAppReducer from './feature/DApp';
 import MantaPayReducer from './feature/MantaPay';
+import MissionPoolReducer from './feature/MissionPool';
 import NftReducer from './feature/Nft';
 import PriceReducer from './feature/Price';
 import StakingReducer from './feature/Staking';
@@ -62,7 +63,10 @@ const rootReducers = combineReducers({
   walletConnect: WalletConnectReducer,
 
   // dApp
-  dApp: DAppReducer
+  dApp: DAppReducer,
+
+  // mission pool
+  missionPool: MissionPoolReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducers);

@@ -19,7 +19,7 @@ interface Props extends ThemeProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { active, available, className, disable, size = 'xs', symbol } = props;
+  const { active, available, className, disable, size = 'xs', symbol, token } = props;
 
   const { t } = useTranslation();
 
@@ -44,7 +44,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <Logo
           className={'earning-btn-icon'}
           size={16}
-          token={symbol.toLowerCase()}
+          token={token.toLowerCase()}
         />
       )}
       shape={'round'}

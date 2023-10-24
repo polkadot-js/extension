@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, OptimalYieldPathRequest, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, OptimalYieldPathRequest, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -31,7 +31,7 @@ import styled, { useTheme } from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../../helper';
-import { FreeBalanceToStake, TransactionContent, YieldOutlet } from '../../parts';
+import { FreeBalance, FreeBalanceToYield, TransactionContent, YieldOutlet } from '../../parts';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -82,8 +82,10 @@ const Component = () => {
   const [checkMintLoading, setCheckMintLoading] = useState(false);
   const [canMint, setCanMint] = useState(false);
   const [submitString, setSubmitString] = useState<string | undefined>();
+  const [connectionError, setConnectionError] = useState<string>();
 
   const currentStep = processState.currentStep;
+  const nextStepType = processState.steps?.[currentStep + 1]?.type;
 
   const [form] = Form.useForm<YieldParams>();
 
@@ -91,13 +93,11 @@ const Component = () => {
   const currentFrom = useWatchTransaction('from', form, defaultData);
   const currentPoolInfo = useMemo(() => poolInfoMap[methodSlug], [methodSlug, poolInfoMap]);
 
-  const needDotBalance = useMemo(() => !['westend', 'polkadot'].includes(currentPoolInfo.chain), [currentPoolInfo.chain]);
-
-  const [isDotBalanceReady, setIsDotBalanceReady] = useState<boolean>(!needDotBalance);
-
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
   const preCheckAction = usePreCheckAction(currentFrom);
+
+  const hasXcm = !['westend', 'polkadot'].includes(currentPoolInfo.chain);
 
   const extrinsicType = useMemo(() => getEarnExtrinsicType(methodSlug), [methodSlug]);
 
@@ -273,6 +273,7 @@ const Component = () => {
     return (
       <MetaInfo
         labelColorScheme={'gray'}
+        spaceSize={'sm'}
         valueColorScheme={'gray'}
       >
         {
@@ -387,6 +388,28 @@ const Component = () => {
   const isProcessDone = useMemo(() => {
     return processState.currentStep === processState.steps.length - 1;
   }, [processState.currentStep, processState.steps.length]);
+
+  const balanceTokens = useMemo(() => {
+    const result: Array<{ chain: string, token: string }> = [];
+
+    const chain = currentPoolInfo.chain;
+
+    for (const inputAsset of currentPoolInfo.inputAssets) {
+      result.push({
+        token: inputAsset,
+        chain: chain
+      });
+    }
+
+    if (hasXcm) {
+      result.push({
+        token: dotPolkadotSlug,
+        chain: 'polkadot'
+      });
+    }
+
+    return result;
+  }, [currentPoolInfo.chain, currentPoolInfo.inputAssets, hasXcm]);
 
   const onClick = useCallback(() => {
     setSubmitLoading(true);
@@ -529,13 +552,27 @@ const Component = () => {
                 },
                 type: EarningActionType.STEP_CREATE
               });
+
+              const errorNetwork = res.connectionError;
+
+              if (errorNetwork) {
+                const networkName = chainInfoMap[errorNetwork].name;
+                const text = t('Please enable {{networkName}} network', { replace: { networkName } });
+
+                notify({
+                  type: 'error',
+                  message: text
+                });
+              }
+
+              setConnectionError(errorNetwork);
             })
             .catch(console.error)
             .finally(() => setStepLoading(false));
         }, 1000, 5000, false);
       }
     }
-  }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom]);
+  }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom, chainInfoMap, t, notify]);
 
   useEffect(() => {
     setCheckMintLoading(true);
@@ -569,40 +606,48 @@ const Component = () => {
               onFieldsChange={onFieldsChange}
             >
               <HiddenInput fields={hiddenFields} />
-              {/* <Form.Item */}
-              {/*  name={FormFieldName.METHOD} */}
-              {/*  label={t('Select method')} */}
-              {/*  colon={false} */}
-              {/* > */}
-              {/*  <EarningMethodSelector items={Object.values(poolInfo)} /> */}
-              {/* </Form.Item> */}
-
-              {/* <Divider className={'staking-modal-divider'} /> */}
 
               {processState.steps && (
-                <div style={{ display: 'flex', alignItems: 'center', paddingBottom: token.paddingSM }}>
-                  {stepLoading
-                    ? (
-                      <ActivityIndicator
-                        prefixCls={'ant'}
-                        size={'24px'}
-                      />
-                    )
-                    : (
-                      <Typography.Text
-                        size={'lg'}
-                        style={{ fontWeight: '600' }}
-                      >
-                        {t('Step {{step}}: {{label}}', {
-                          replace: { step: processState.currentStep + 1, label: processState.steps[processState.currentStep]?.name }
-                        })}
-                      </Typography.Text>
-                    )}
-                </div>
+                <>
+                  <div className={'__step-wrapper'}>
+                    {stepLoading
+                      ? (
+                        <ActivityIndicator
+                          prefixCls={'ant'}
+                          size={'24px'}
+                        />
+                      )
+                      : (
+                        <>
+                          {isWebUI && (
+                            <Typography.Text
+                              size={'lg'}
+                              style={{ fontWeight: '600' }}
+                            >
+                              {t('Step {{step}}: {{label}}', {
+                                replace: { step: processState.currentStep + 1, label: processState.steps[processState.currentStep]?.name }
+                              })}
+                            </Typography.Text>
+                          )}
+                          {
+                            !isWebUI && (
+                              <EarningProcessItem
+                                index={processState.currentStep}
+                                isSelected
+                                stepName={processState.steps[processState.currentStep]?.name}
+                                stepStatus={processState.stepResults[processState.currentStep]?.status}
+                              />
+                            )
+                          }
+                        </>
+                      )}
+                  </div>
+
+                  <Divider className={'staking-modal-divider'} />
+                </>
               )}
 
               <Form.Item
-                // className={CN({ hidden: !isAllAccount })}
                 name={'from'}
               >
                 <AccountSelector
@@ -612,18 +657,13 @@ const Component = () => {
                 />
               </Form.Item>
 
-              {
-                !['westend', 'polkadot'].includes(currentPoolInfo.chain) && (
-                  <FreeBalanceToStake
-                    address={currentFrom}
-                    chain={'polkadot'}
-                    className={'account-free-balance'}
-                    label={t('Available DOT on Polkadot:')}
-                    onBalanceReady={setIsDotBalanceReady}
-                    tokenSlug={dotPolkadotSlug}
-                  />
-                )
-              }
+              <FreeBalanceToYield
+                address={currentFrom}
+                className={CN('account-free-balance', { hidden: nextStepType !== YieldStepType.XCM })}
+                label={t('Available balance:')}
+                onBalanceReady={setIsBalanceReady}
+                tokens={balanceTokens}
+              />
 
               {currentPoolInfo.inputAssets.map((asset, index) => {
                 const name = formFieldPrefix + String(index);
@@ -638,12 +678,11 @@ const Component = () => {
                     key={name}
                     style={{ display: 'flex', flexDirection: 'column' }}
                   >
-                    <FreeBalanceToStake
+                    <FreeBalance
                       address={currentFrom}
                       chain={currentPoolInfo.chain}
-                      className={'account-free-balance'}
-                      label={t('Available to stake:')}
-                      onBalanceReady={setIsBalanceReady}
+                      className={CN('account-free-balance', { hidden: [YieldStepType.XCM].includes(nextStepType) })}
+                      label={t('Available balance:')}
                       tokenSlug={asset}
                     />
 
@@ -663,7 +702,7 @@ const Component = () => {
                           <Logo
                             className={'amount-prefix'}
                             size={20}
-                            token={asset.split('-')[2].toLowerCase()}
+                            token={asset.toLowerCase()}
                           />
                         )}
                         showMaxButton={false}
@@ -716,7 +755,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady || !isDotBalanceReady || stepLoading || checkMintLoading}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading || !!connectionError || checkMintLoading}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}
@@ -736,7 +775,7 @@ const Component = () => {
           <Divider className={'staking-modal-divider'} />
 
           <Typography.Text style={{ color: token.colorTextLight4 }}>
-            {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
+            {t('The provided information is for informational purposes only and should not be considered as guarantee. All rates are calculated on an annual basis and are subject to change.')}
           </Typography.Text>
         </TransactionContent>
       </div>
@@ -769,6 +808,11 @@ const Component = () => {
                 />
               )
             }
+            <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
+
+            <Typography.Text style={{ color: token.colorTextLight4 }}>
+              {t('All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.')}
+            </Typography.Text>
           </div>
         </div>
       )}
@@ -800,6 +844,10 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.earning-wrapper': {
       display: 'flex',
       flex: 1
+    },
+
+    '.hidden': {
+      display: 'none'
     },
 
     '.__transaction-block': {
@@ -839,7 +887,6 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       '.meta-info': {
         marginBottom: token.marginSM
       }
-
     },
 
     '.__transaction-process': {
@@ -867,6 +914,26 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.ant-loading-icon': {
       display: 'flex',
       justifyContent: 'center'
+    },
+
+    '@media (max-width: 991px)': {
+      '.earning-wrapper': {
+        height: '100%'
+      },
+
+      '.__step-wrapper': {
+        display: 'flex',
+        alignItems: 'center',
+        minHeight: 32
+      },
+
+      '.transaction-content': {
+        paddingBottom: token.padding
+      },
+
+      '.__transaction-block': {
+        overflow: 'hidden'
+      }
     }
   };
 });

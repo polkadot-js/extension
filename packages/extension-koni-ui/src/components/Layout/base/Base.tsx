@@ -73,16 +73,6 @@ const Component = ({ children, className, headerIcons, isSetTitleContext = true,
       key: 'crowdloans',
       url: '/home/crowdloans'
     },
-    // {
-    //   icon: {
-    //     type: 'phosphor',
-    //     phosphorIcon: Database,
-    //     weight: 'fill'
-    //   },
-    //   label: t('Staking'),
-    //   key: 'staking',
-    //   url: '/home/staking'
-    // },
     {
       icon: {
         type: 'phosphor',
@@ -91,7 +81,7 @@ const Component = ({ children, className, headerIcons, isSetTitleContext = true,
       },
       label: t('Earning'),
       key: 'earning',
-      url: '/home/earning/'
+      url: '/home/earning'
     },
     {
       icon: {

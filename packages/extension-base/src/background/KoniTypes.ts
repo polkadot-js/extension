@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _FundStatus, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AddressJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAccountUnsubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
@@ -294,7 +294,15 @@ export interface BalanceJson {
 export interface CrowdloanItem {
   state: APIItemState,
   paraState?: CrowdloanParaState,
-  contribute: string
+  contribute: string,
+  fundId: string;
+  paraId: number;
+  status: _FundStatus;
+  startTime: Date;
+  endTime: Date;
+  auctionIndex: number;
+  firstPeriod: number;
+  lastPeriod: number;
 }
 
 export interface CrowdloanJson {
@@ -2200,12 +2208,12 @@ export interface YieldStepDetail {
 
 export interface OptimalYieldPath {
   totalFee: YieldTokenBaseInfo[],
-  steps: YieldStepDetail[]
+  steps: YieldStepDetail[],
+  connectionError?: string
 }
 
 export enum YieldValidationStatus {
   NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
-  NOT_ENOUGH_MIN_AMOUNT = 'NOT_ENOUGH_MIN_AMOUNT',
   NOT_ENOUGH_BALANCE = 'NOT_ENOUGH_BALANCE',
   NOT_ENOUGH_MIN_JOIN_POOL = 'NOT_ENOUGH_MIN_JOIN_POOL',
   OK = 'OK'
@@ -2344,7 +2352,6 @@ export interface KoniRequestSignatures {
   'pri(chainService.validateCustomChain)': [ValidateNetworkRequest, ValidateNetworkResponse];
   'pri(chainService.recoverSubstrateApi)': [string, boolean];
   'pri(chainService.disableAllChains)': [null, boolean];
-  'pri(chainService.getParaChainInfoMap)': [null, ParaChainInfoMap];
   'pri(assetSetting.getSubscription)': [null, Record<string, AssetSetting>, Record<string, AssetSetting>]
   'pri(assetSetting.update)': [AssetSettingUpdateReq, boolean];
 

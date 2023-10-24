@@ -6,16 +6,18 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EarningCalculatorModal, EarningItem, EarningToolbar, EmptyList } from '@subwallet/extension-koni-ui/components';
 import EarningInfoModal from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInfoModal';
-import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import Search from '@subwallet/extension-koni-ui/components/Search';
+import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, EXCLUSIVE_REWARD_SLUGS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, usePreCheckAction, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getEarnExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { ModalContext, SwList } from '@subwallet/react-ui';
+import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { Vault } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { FadersHorizontal, Vault } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -39,16 +41,30 @@ interface SortOption {
   desc: boolean;
 }
 
+const searchFunction = (item: YieldPoolInfo, searchText: string) => {
+  const searchTextLowerCase = searchText.toLowerCase();
+
+  if (!item.name && !searchTextLowerCase) {
+    return true;
+  }
+
+  return (
+    item.name?.toLowerCase().includes(searchTextLowerCase)
+  );
+};
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isWebUI } = useContext(ScreenContext);
 
   const { poolInfo } = useSelector((state: RootState) => state.yieldPool);
   const { currentAccount, isNoAccount } = useSelector((state: RootState) => state.accountState);
   const { chainInfoMap, chainStateMap } = useSelector((state: RootState) => state.chainStore);
   const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
+  const [searchInput, setSearchInput] = useState<string>('');
 
   const { activeModal } = useContext(ModalContext);
 
@@ -66,7 +82,7 @@ const Component: React.FC<Props> = (props: Props) => {
       },
       {
         desc: true,
-        label: t('Incentive'),
+        label: t('Rewards'),
         value: SortKey.INCENTIVE
       }
     ];
@@ -175,6 +191,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const renderEarningItem = useCallback((item: YieldPoolInfo) => {
     return (
       <EarningItem
+        compactMode={!isWebUI}
         item={item}
         key={item.slug}
         onClickCalculatorBtn={onClickCalculatorBtn(item)}
@@ -182,7 +199,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onClickStakeBtn={onClickStakeBtn(item)}
       />
     );
-  }, [onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn]);
+  }, [isWebUI, onClickCalculatorBtn, onClickInfoBtn, onClickStakeBtn]);
 
   const resultList = useMemo((): YieldPoolInfo[] => {
     return [...Object.values(poolInfo)]
@@ -221,12 +238,14 @@ const Component: React.FC<Props> = (props: Props) => {
         const aInputDecimals = aInputAsset.decimals || 0;
         const aTotalValue = new BigN(a.stats?.tvl || '0').div(BN_TEN.pow(aInputDecimals));
         const aTotalApy = a.stats?.totalApy ?? calculateReward(a.stats?.totalApr || 0, 0, YieldCompoundingPeriod.YEARLY).apy ?? 0;
+        const aIncentive = EXCLUSIVE_REWARD_SLUGS.includes(a.slug) ? 1 : 0;
 
         const bInputSlug = b.inputAssets[0];
         const bInputAsset = assetRegistry[bInputSlug];
         const bInputDecimals = bInputAsset.decimals || 0;
         const bTotalValue = new BigN(b.stats?.tvl || '0').div(BN_TEN.pow(bInputDecimals));
         const bTotalApy = b.stats?.totalApy ?? calculateReward(b.stats?.totalApr || 0, 0, YieldCompoundingPeriod.YEARLY).apy ?? 0;
+        const bIncentive = EXCLUSIVE_REWARD_SLUGS.includes(b.slug) ? 1 : 0;
 
         switch (sortSelection) {
           case SortKey.TOTAL_VALUE:
@@ -234,6 +253,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
           case SortKey.APY:
             return bTotalApy - aTotalApy;
+
+          case SortKey.INCENTIVE:
+            return (bIncentive - aIncentive) || new BigN(bTotalValue).minus(aTotalValue).toNumber();
 
           default:
             return 0;
@@ -251,31 +273,64 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [t]);
 
+  const onClickActionBtn = useCallback(
+    (e?: SyntheticEvent) => {
+      e && e.stopPropagation();
+      activeModal(FILTER_MODAL_ID);
+    },
+    [activeModal]
+  );
+
+  const handleSearch = useCallback((value: string) => setSearchInput(value), [setSearchInput]);
+
   return (
     <div className={className}>
-      <EarningToolbar
-        filterSelectionMap={filterSelectionMap}
-        onApplyFilter={onApplyFilter}
-        onChangeFilterOption={onChangeFilterOption}
-        onChangeSortOpt={onChangeSortOpt}
-        onCloseFilterModal={onCloseFilterModal}
-        onResetSort={onResetSort}
-        selectedFilters={selectedFilters}
-        selectedSort={sortSelection}
-        sortOptions={sortOptions}
-      />
-      <SwList.Section
-        className={CN('nft_collection_list__container')}
+      <div className='__toolbar-area'>
+        {
+          !isWebUI && (
+            <Search
+              actionBtnIcon={(
+                <Icon
+                  phosphorIcon={FadersHorizontal}
+                  size='sm'
+                />
+              )}
+              onClickActionBtn={onClickActionBtn}
+              onSearch={handleSearch}
+              placeholder={t('Search project')}
+              searchValue={searchInput}
+              showActionBtn
+            />
+          )
+        }
+
+        <EarningToolbar
+          className={'__earning-toolbar'}
+          filterSelectionMap={filterSelectionMap}
+          onApplyFilter={onApplyFilter}
+          onChangeFilterOption={onChangeFilterOption}
+          onChangeSortOpt={onChangeSortOpt}
+          onCloseFilterModal={onCloseFilterModal}
+          onResetSort={onResetSort}
+          selectedFilters={selectedFilters}
+          selectedSort={sortSelection}
+          sortOptions={sortOptions}
+        />
+      </div>
+
+      <SwList
+        className={CN('__list-container')}
         displayGrid={true}
-        enableSearchInput={false}
         filterBy={filterFunction}
-        gridGap={'14px'}
+        gridGap={isWebUI ? '16px' : '8px'}
         list={resultList}
-        minColumnWidth={'384px'}
+        minColumnWidth={'360px'}
         renderItem={renderEarningItem}
         renderOnScroll={true}
         renderWhenEmpty={renderWhenEmpty}
-        searchMinCharactersCount={2}
+        searchBy={searchFunction}
+        searchMinCharactersCount={1}
+        searchTerm={searchInput}
       />
 
       {selectedItem && <EarningCalculatorModal defaultItem={selectedItem} />}
@@ -309,6 +364,48 @@ const EarningOverviewContent = styled(Component)<Props>(({ theme: { token } }: P
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)'
+    },
+
+    '@media (max-width: 991px)': {
+      '.__toolbar-area': {
+        position: 'sticky',
+        zIndex: 10,
+        top: 0,
+        backgroundColor: token.colorBgDefault
+      },
+
+      '.empty-list': {
+        position: 'static',
+        transform: 'none'
+      },
+
+      '.search-container': {
+        paddingBottom: token.size,
+
+        '.right-section, .ant-input-search': {
+          width: '100%'
+        }
+      },
+
+      '.__earning-toolbar': {
+        paddingBottom: token.sizeSM,
+        overflowX: 'auto',
+
+        '.button-group': {
+          display: 'none'
+        }
+      },
+
+      '.__list-container': {
+        paddingBottom: token.paddingXS
+      }
+    },
+
+    '@media (max-width: 767px)': {
+      '.__list-container': {
+        display: 'flex',
+        flexDirection: 'column'
+      }
     }
   });
 });

@@ -4,6 +4,7 @@
 export * from './account';
 export * from './buy';
 export * from './common';
+export * from './earning';
 export * from './history';
 export * from './ledger';
 export * from './localStorage';

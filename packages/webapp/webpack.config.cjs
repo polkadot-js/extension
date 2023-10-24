@@ -55,6 +55,8 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
     devtool: false,
     entry,
     devServer: {
+      host: '0.0.0.0',
+      allowedHosts: 'all',
       static: {
         directory: path.join(__dirname, 'public')
       },

@@ -222,6 +222,11 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       }
     },
 
+    '.ant-sw-header-left-part + .ant-sw-header-center-part .ant-sw-sub-header-title': {
+      display: 'block',
+      textAlign: 'center'
+    },
+
     '.ant-sw-qr-scanner-camera-items-container.ant-select-modal': {
       maxWidth: 404,
       width: '100% !important',

@@ -9,6 +9,7 @@ import { _ChainState } from '@subwallet/extension-base/services/chain-service/ty
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { DAppCategory, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
+import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
 import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
@@ -178,4 +179,8 @@ export interface DAppStore extends BaseReduxStore {
   categories: DAppCategory[];
   featureDApps: DAppInfo[];
   dApps: DAppInfo[];
+}
+
+export interface MissionPoolStore extends BaseReduxStore {
+  missions: MissionInfo[];
 }

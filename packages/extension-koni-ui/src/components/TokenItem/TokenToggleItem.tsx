@@ -41,7 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
       rightItem={renderTokenRightItem(tokenInfo)}
       subName={''}
       subNetworkKey={tokenInfo.originChain}
-      symbol={tokenInfo.symbol.toLowerCase()}
+      symbol={tokenInfo.slug.toLowerCase()}
       withDivider={true}
     />
   );

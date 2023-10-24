@@ -351,7 +351,8 @@ export enum YieldAction {
   CANCEL_UNSTAKE = 'CANCEL_UNSTAKE',
 
   START_EARNING = 'EARN',
-  WITHDRAW_EARNING = 'WITHDRAW_EARNING'
+  WITHDRAW_EARNING = 'WITHDRAW_EARNING',
+  CUSTOM_ACTION = 'CUSTOM_ACTION'
 }
 
 export function getYieldAvailableActionsByType (yieldPoolInfo: YieldPoolInfo): YieldAction[] {

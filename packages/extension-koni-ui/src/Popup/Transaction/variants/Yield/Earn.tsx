@@ -13,6 +13,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useFetchChainState, useGetChainPrefixBySlug, useNotification, usePreCheckAction, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useGetYieldPositionByAddressAndSlug from '@subwallet/extension-koni-ui/hooks/screen/earning/useGetYieldPositionByAddressAndSlug';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
+import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
@@ -78,6 +79,8 @@ const Component = () => {
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [checkMintLoading, setCheckMintLoading] = useState(false);
+  const [canMint, setCanMint] = useState(false);
   const [submitString, setSubmitString] = useState<string | undefined>();
   const [connectionError, setConnectionError] = useState<string>();
 
@@ -103,8 +106,14 @@ const Component = () => {
   const onDone = useCallback((extrinsicHash: string) => {
     const chainType = isEthereumAddress(currentFrom) ? 'ethereum' : 'substrate';
 
-    navigate(`/transaction-done/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
-  }, [currentFrom, currentPoolInfo.chain, navigate]);
+    let donePath = 'transaction-done';
+
+    if (canMint) {
+      donePath = 'earning-done';
+    }
+
+    navigate(`/${donePath}/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
+  }, [currentFrom, currentPoolInfo.chain, canMint, navigate]);
 
   const onError = useCallback((error: Error) => {
     notify({
@@ -565,6 +574,26 @@ const Component = () => {
     }
   }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom, chainInfoMap, t, notify]);
 
+  useEffect(() => {
+    setCheckMintLoading(true);
+
+    unlockDotCheckCanMint({
+      slug: currentPoolInfo.slug,
+      address: currentFrom,
+      network: currentPoolInfo.chain
+    })
+      .then((value) => {
+        setCanMint(value);
+      })
+      .finally(() => {
+        setCheckMintLoading(false);
+      });
+
+    return () => {
+      setCanMint(false);
+    };
+  }, [currentFrom, currentPoolInfo.chain, currentPoolInfo.slug]);
+
   return (
     <div className={'earning-wrapper'}>
       <div className={'__transaction-block'}>
@@ -726,7 +755,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading || !!connectionError}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading || !!connectionError || checkMintLoading}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}

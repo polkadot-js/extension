@@ -35,6 +35,7 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionE
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData } from '@subwallet/extension-base/types';
 import { isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
@@ -4137,6 +4138,28 @@ export default class KoniExtension {
     });
   }
 
+  /* Campaign */
+
+  private unlockDotCheckCanMint ({ address, network, slug }: RequestUnlockDotCheckCanMint) {
+    return this.#koniState.mintCampaignService.unlockDotCampaign.canMint(address, slug, network);
+  }
+
+  private unlockDotSubscribeMintedData (id: string, port: chrome.runtime.Port, { transactionId }: RequestUnlockDotSubscribeMintedData) {
+    const cb = createSubscription<'pri(campaign.unlockDot.subscribe)'>(id, port);
+
+    const subscription = this.#koniState.mintCampaignService.unlockDotCampaign.subscribeMintedNft(transactionId, cb);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.mintCampaignService.unlockDotCampaign.getMintedNft(transactionId);
+  }
+
+  /* Campaign */
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -4633,6 +4656,15 @@ export default class KoniExtension {
         return await this.disableMantaPay(request as string);
       case 'pri(mantaPay.subscribeSyncingState)':
         return this.subscribeMantaPaySyncState(id, port);
+
+        /* Campaign */
+
+      case 'pri(campaign.unlockDot.canMint)':
+        return this.unlockDotCheckCanMint(request as RequestUnlockDotCheckCanMint);
+      case 'pri(campaign.unlockDot.subscribe)':
+        return this.unlockDotSubscribeMintedData(id, port, request as RequestUnlockDotSubscribeMintedData);
+
+        /* Campaign */
 
       // Metadata
       case 'pri(metadata.find)':

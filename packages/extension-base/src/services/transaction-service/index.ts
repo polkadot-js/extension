@@ -3,15 +3,17 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, SubmitYieldStepData, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, RequestYieldStepSubmit, SubmitYieldStepData, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
+import MintCampaignService from '@subwallet/extension-base/services/mint-campaign-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
@@ -54,6 +56,7 @@ export default class TransactionService {
   private readonly requestService: RequestService;
   private readonly historyService: HistoryService;
   private readonly notificationService: NotificationService;
+  private readonly mintCampaignService: MintCampaignService;
   private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
 
   private readonly watchTransactionSubscribes: Record<string, Promise<void>> = {};
@@ -62,7 +65,7 @@ export default class TransactionService {
     return this.transactionSubject.getValue();
   }
 
-  constructor (chainService: ChainService, eventService: EventService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService, notificationService: NotificationService, databaseService: DatabaseService) {
+  constructor (chainService: ChainService, eventService: EventService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService, notificationService: NotificationService, databaseService: DatabaseService, mintCampaignService: MintCampaignService) {
     this.chainService = chainService;
     this.eventService = eventService;
     this.requestService = requestService;
@@ -70,6 +73,7 @@ export default class TransactionService {
     this.historyService = historyService;
     this.notificationService = notificationService;
     this.databaseService = databaseService;
+    this.mintCampaignService = mintCampaignService;
   }
 
   private get allTransactions (): SWTransaction[] {
@@ -640,6 +644,19 @@ export default class TransactionService {
     this.historyService.updateHistoryByExtrinsicHash(id, updateData).catch(console.error);
 
     console.debug(`Transaction "${id}" is submitted with hash ${extrinsicHash || ''}`);
+
+    const transaction = this.getTransaction(id);
+
+    if ([
+      ExtrinsicType.STAKING_JOIN_POOL,
+      ExtrinsicType.JOIN_YIELD_POOL,
+      ExtrinsicType.MINT_LDOT,
+      ExtrinsicType.MINT_QDOT,
+      ExtrinsicType.MINT_SDOT,
+      ExtrinsicType.MINT_VDOT
+    ].includes(transaction.extrinsicType)) {
+      this.handlePostEarningTransaction(id);
+    }
   }
 
   private handlePostProcessing (id: string) { // must be done after success/failure to make sure the transaction is finalized
@@ -1065,6 +1082,34 @@ export default class TransactionService {
     emitter.once('error', () => {
       clearTimeout(timeout);
     });
+  }
+
+  private handlePostEarningTransaction (id: string) {
+    const transaction = this.getTransaction(id);
+
+    const data = transaction.data as RequestYieldStepSubmit;
+
+    let slug = '';
+
+    if ('yieldPoolInfo' in data) {
+      slug = data.yieldPoolInfo.slug;
+    } else {
+      for (const value of Object.values(YIELD_POOLS_INFO)) {
+        if (value.type === YieldPoolType.NOMINATION_POOL && transaction.chain === value.chain) {
+          slug = value.slug;
+          break;
+        }
+      }
+    }
+
+    this.mintCampaignService.unlockDotCampaign.mintNft({
+      transactionId: id,
+      address: transaction.address,
+      slug: slug,
+      network: transaction.chain,
+      extrinsicHash: transaction.extrinsicHash
+    })
+      .catch(console.error);
   }
 
   public resetWallet (): void {

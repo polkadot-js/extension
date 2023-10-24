@@ -151,8 +151,6 @@
   "APY": "APY",
   "Show QR code": "展示二维码",
   "{{number}} accounts connected": "已连接{{number}}帐户",
-  "You don’t have any accounts. Please create a new account": "当前没有任何帐户。请创建新帐户",
-  "No accounts found": "未找到账户",
   "Apply {{number}} accounts": "应用{{number}}账户",
   "Make sure you trust this site before connecting": "连接前请确保您信任此网站",
   "Unknown network": "未知网络",
@@ -330,7 +328,6 @@
   "Contract address": "合约地址",
   "No available account": "无可用账户",
   "Choose the account(s) you’d like to connect": "选择你想要连接的帐户",
-  "You don't have any accounts to connect. Please create or import an account.": "当前没有任何可连接的帐户。请创建或导入帐户。",
   "Connect": "连接",
   "Create one": "创建",
   "EVM networks": "EVM网络",
@@ -846,5 +843,10 @@
   "No staking found": "未找到质押",
   "Try searching or importing one": "请搜索或手动导入",
   "Your dApps will show up here": "您的dApp将在此处出现",
-  "This feature is not yet available for this NFT": ""
+  "This feature is not yet available for this NFT": "",
+  "No available Substrate account": "",
+  "No available EVM account": "",
+  "You don't have any Substrate account to connect. Please create one or skip this step by hitting Cancel.": "",
+  "You don't have any EVM account to connect. Please create one or skip this step by hitting Cancel.": "",
+  "You don't have any account to connect. Please create one or skip this step by hitting Cancel.": ""
 }

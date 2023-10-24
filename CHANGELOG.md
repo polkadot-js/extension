@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.1.18
+Build date: Oct 20, 2023.
+
+Features & Update:
+- Support notification in browser and banner in app (#2000)
+- Update crowdloan data (#2035)
+- Update message on the Create on account screen (#2039)
+
+Bugs fixed:
+- Fixed bug IPFS in Firefox browser (#1995)
+- Fixed bug Do not show Acala, Karura NFT (#2029)
+- Fixed bug Show apply master password when access via URL (2040)
+
+
 ## 1.1.17
 Build date: Oct 17, 2023.
 

@@ -380,7 +380,8 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
 
   const disableInject = useCallback(() => {
     injectHandler.disable();
-  }, []);
+    selectWallet();
+  }, [selectWallet]);
 
   const initCallback = useCallback(() => {
     injectHandler.onLoaded();

@@ -325,11 +325,13 @@ class InjectHandler {
       for (const account of newArray) {
         const exists = oldArray.find((acc) => acc.address === account.address);
 
-        if (!exists) {
-          addArray.push(account);
-        } else {
-          if (exists.meta.source !== account.meta.source) {
+        if (!account.meta.genesisHash) {
+          if (!exists) {
             addArray.push(account);
+          } else {
+            if (exists.meta.source !== account.meta.source) {
+              addArray.push(account);
+            }
           }
         }
       }
@@ -345,12 +347,10 @@ class InjectHandler {
       const promises: Array<Promise<unknown>> = [];
 
       if (addArray.length) {
-        console.log('addArray', addArray);
         promises.push(addInjects(addArray));
       }
 
       if (removeArray.length) {
-        console.log('removeArray', removeArray);
         promises.push(removeInjects(removeArray.map((acc) => acc.address)));
       }
 

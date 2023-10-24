@@ -163,7 +163,7 @@ export class KeyringService {
     await new Promise<void>((resolve) => {
       setTimeout(() => {
         resolve();
-      }, 500);
+      }, 1500);
     });
     this.updateKeyringState();
     this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });

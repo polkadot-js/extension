@@ -99,7 +99,7 @@ const FeatureDAppItem = styled(Component)<Props>(({ theme: { token } }: Props) =
 
     '.__item-preview-area': {
       backgroundSize: 'cover',
-      backgroundPosition: 'top center'
+      backgroundPosition: 'center'
     },
 
     '.__item-overlay': {
@@ -176,8 +176,11 @@ const FeatureDAppItem = styled(Component)<Props>(({ theme: { token } }: Props) =
 
     '&.-compact-mode': {
       '.__item-preview-area': {
-        height: 120,
-        backgroundPosition: 'center'
+        '&:before': {
+          content: '""',
+          display: 'block',
+          paddingTop: `${1 / 3 * 100}%`
+        }
       }
     }
   };

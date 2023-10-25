@@ -1986,13 +1986,18 @@ export default class KoniExtension {
               destinationTokenInfo,
               originTokenInfo: tokenInfo,
               recipient: recipient,
+              // sendingValue: '1000000000000000000',
               sendingValue: '0',
               substrateApi
             });
 
-            const paymentInfo = await mockTx.paymentInfo(address);
+            try {
+              const paymentInfo = await mockTx.paymentInfo(address);
 
-            estimatedFee = paymentInfo?.partialFee?.toString() || '0';
+              estimatedFee = paymentInfo?.partialFee?.toString() || '0';
+            } catch (e) {
+              estimatedFee = tokenInfo.minAmount || '0';
+            }
           }
         } else {
           const chainInfo = this.#koniState.chainService.getChainInfoByKey(networkKey);
@@ -2018,7 +2023,7 @@ export default class KoniExtension {
               to: address,
               tokenInfo,
               transferAll: true,
-              value: '0'
+              value: '1000000000000000000'
             });
 
             const paymentInfo = await mockTx?.paymentInfo(address);
@@ -2032,6 +2037,11 @@ export default class KoniExtension {
       }
 
       maxTransferable = maxTransferable.sub(new BN(estimatedFee));
+
+      console.log('freeBalance', freeBalance.value);
+      console.log('estimatedFee', estimatedFee);
+      console.log('ED', tokenInfo.minAmount);
+      console.log('maxTransferable', maxTransferable.toString());
 
       return {
         ...freeBalance,

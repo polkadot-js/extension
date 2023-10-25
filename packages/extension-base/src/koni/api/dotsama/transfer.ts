@@ -196,7 +196,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     if (transferAll) {
       transfer = api.tx.balances.transferAll(to, false);
     } else if (value) {
-      transfer = api.tx.balances.transfer(to, new BN(value));
+      transfer = api.tx.balances.transferKeepAlive(to, new BN(value));
     }
   }
 

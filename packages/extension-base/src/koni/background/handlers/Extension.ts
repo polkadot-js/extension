@@ -1986,8 +1986,7 @@ export default class KoniExtension {
               destinationTokenInfo,
               originTokenInfo: tokenInfo,
               recipient: recipient,
-              // sendingValue: '1000000000000000000',
-              sendingValue: '0',
+              sendingValue: '1000000000000000000',
               substrateApi
             });
 

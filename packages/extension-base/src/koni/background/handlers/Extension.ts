@@ -1712,7 +1712,7 @@ export default class KoniExtension {
 
         const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter);
 
-        inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}}{{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: tokenInfo.symbol } })));
+        inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}} {{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: tokenInfo.symbol } })));
       }
     };
 
@@ -1785,7 +1785,7 @@ export default class KoniExtension {
         if (new BigN(value).lt(atLeast)) {
           const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
 
-          inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}}{{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: originTokenInfo.symbol } })));
+          inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}} {{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: originTokenInfo.symbol } })));
         }
 
         const srcMinAmount = originTokenInfo.minAmount || '0';
@@ -2029,11 +2029,6 @@ export default class KoniExtension {
       }
 
       maxTransferable = maxTransferable.sub(new BN(estimatedFee));
-
-      console.log('freeBalance', freeBalance.value);
-      console.log('estimatedFee', estimatedFee);
-      console.log('ED', tokenInfo.minAmount);
-      console.log('maxTransferable', maxTransferable.toString());
 
       return {
         ...freeBalance,

@@ -32,7 +32,7 @@ const handleCancel = async ({ id }: ConfirmationDefinitions['addTokenRequest'][0
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, request } = props;
-  const { payload: { contractAddress, contractError, decimals, originChain, slug, symbol, type, validated, name } } = request;
+  const { payload: { contractAddress, contractError, decimals, name, originChain, slug, symbol, type, validated } } = request;
 
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 

@@ -54,7 +54,6 @@ function getTokenTypeSupported (chainInfo: _ChainInfo) {
   return result;
 }
 
-
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { goBack } = useDefaultNavigate();
@@ -85,6 +84,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const selectedChain = Form.useWatch('chain', form);
   const symbol = Form.useWatch('symbol', form);
   const decimals = Form.useWatch('decimals', form);
+  const tokenName = Form.useWatch('tokenName', form);
   const selectedTokenType = Form.useWatch('type', form);
 
   const chainChecker = useChainChecker();
@@ -146,7 +146,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [chainNetworkPrefix, form, selectedChain, t]);
 
   const onFieldChange: FormCallbacks<TokenImportFormType>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
-    const { empty, error } = simpleCheckForm(allFields, ['--priceId']);
+    const { empty, error } = simpleCheckForm(allFields, ['--priceId', '--tokenName']);
 
     const changes = convertFieldToObject<TokenImportFormType>(changedFields);
     const all = convertFieldToObject<TokenImportFormType>(allFields);
@@ -154,7 +154,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     const { chain, type } = changes;
 
-    const baseResetFields = ['tokenName', 'symbol', 'decimals', 'priceId']
+    const baseResetFields = ['tokenName', 'symbol', 'decimals', 'priceId'];
 
     if (chain) {
       const nftTypes = getTokenTypeSupported(chainInfoMap[chain]);
@@ -178,7 +178,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     setFieldDisabled(!all.chain || !all.type || allError.contractAddress.length > 0);
     setIsDisabled(empty || error);
-  }, []);
+  }, [chainInfoMap, form]);
 
   const onSubmit: FormCallbacks<TokenImportFormType>['onFinish'] = useCallback((formValues: TokenImportFormType) => {
     const { chain, contractAddress, decimals, priceId, symbol, tokenName, type } = formValues;
@@ -190,7 +190,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     upsertCustomToken({
       originChain: chain,
       slug: '',
-      name: tokenName,
+      name: tokenName || symbol,
       symbol,
       decimals,
       priceId: priceId || null,
@@ -269,9 +269,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             className='form-space-sm'
             form={form}
             initialValues={formDefault}
-            onFinish={onSubmit}
-            onFieldsChange={onFieldChange}
             name={'token-import'}
+            onFieldsChange={onFieldChange}
+            onFinish={onSubmit}
           >
             <Form.Item
               name={'chain'}
@@ -344,18 +344,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
             <Form.Item
               name={'tokenName'}
-              statusHelpAsTooltip={true}
               rules={[
                 {
                   required: true,
                   message: t('Token name is required')
                 }
               ]}
+              statusHelpAsTooltip={true}
             >
-              <Input
-                disabled={fieldDisabled}
-                placeholder={t('Token name')}
+              <Field
+                content={tokenName}
+                placeholder={t<string>('Token name')}
                 tooltip={t('Token name')}
+                tooltipPlacement={'topLeft'}
               />
             </Form.Item>
 

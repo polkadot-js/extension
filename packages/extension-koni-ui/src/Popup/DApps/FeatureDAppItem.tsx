@@ -12,15 +12,32 @@ import React, { Context, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { ThemeContext } from 'styled-components';
 
-type Props = ThemeProps & DAppInfo;
+type Props = ThemeProps & DAppInfo & {
+  compactMode?: boolean
+};
 
 function Component (props: Props): React.ReactElement<Props> {
-  const { className = '', description, icon, preview_image: previewImage, subtitle,
+  const { className = '', compactMode, description, icon, preview_image: previewImage, subtitle,
     title, url } = props;
 
   const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
 
   const { t } = useTranslation();
+
+  if (compactMode) {
+    return (
+      <div
+        className={CN(className, '-compact-mode')}
+        onClick={openInNewTab(url)}
+      >
+        <div
+          className={'__item-preview-area'}
+          style={{ backgroundImage: previewImage ? `url("${previewImage}")` : undefined }}
+        >
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -152,6 +169,15 @@ const FeatureDAppItem = styled(Component)<Props>(({ theme: { token } }: Props) =
 
       '.__item-meta-area': {
         backgroundColor: token.colorBgInput
+      }
+    },
+
+    // compact
+
+    '&.-compact-mode': {
+      '.__item-preview-area': {
+        height: 120,
+        backgroundPosition: 'center'
       }
     }
   };

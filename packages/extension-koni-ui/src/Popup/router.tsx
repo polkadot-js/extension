@@ -195,10 +195,7 @@ export const router = createBrowserRouter([
           MissionPool.generateRouterObject('mission-pools'),
           History.generateRouterObject('history'),
           History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
-          {
-            path: 'dapps',
-            element: <Outlet />
-          }
+          DApps.generateRouterObject('dapps')
         ]
       },
       {
@@ -298,12 +295,6 @@ export const router = createBrowserRouter([
           ConnectWalletConnect.generateRouterObject('connect'),
           ConnectionList.generateRouterObject('list'),
           ConnectionDetail.generateRouterObject('detail/:topic')
-        ]
-      },
-      {
-        path: '/dapps',
-        children: [
-          DApps.generateRouterObject('/dapps')
         ]
       },
       {

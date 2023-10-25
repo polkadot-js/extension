@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BuyService, BuyTokenInfo, SupportService } from '@subwallet/extension-koni-ui/types';
+import { BuyService, BuyTokenInfo, SupportService } from '@subwallet/extension-base/types';
 
 const DEFAULT_BUY_SERVICE: BuyService = { symbol: '', network: '' };
 
@@ -99,9 +99,29 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       'banxa'
     ]
   },
+  'dockPosMainnet-NATIVE-DOCK': {
+    serviceInfo: {
+      ...DEFAULT_SERVICE_INFO,
+      transak: {
+        network: 'mainnet',
+        symbol: 'DOCK'
+      }
+    },
+    network: 'dockPosMainnet',
+    slug: 'dockPosMainnet-NATIVE-DOCK',
+    symbol: 'DOCK',
+    support: 'SUBSTRATE',
+    services: [
+      'transak'
+    ]
+  },
   'polkadot-NATIVE-DOT': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
+      transak: {
+        network: 'mainnet',
+        symbol: 'DOT'
+      },
       banxa: {
         network: 'DOT',
         symbol: 'DOT'
@@ -116,6 +136,7 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     symbol: 'DOT',
     support: 'SUBSTRATE',
     services: [
+      'transak',
       'banxa',
       'coinbase'
     ]
@@ -233,6 +254,10 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
   'moonbeam-NATIVE-GLMR': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
+      transak: {
+        network: 'mainnet',
+        symbol: 'GLMR'
+      },
       banxa: {
         network: 'GLMR',
         symbol: 'GLMR'
@@ -243,12 +268,17 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     symbol: 'GLMR',
     support: 'ETHEREUM',
     services: [
+      'transak',
       'banxa'
     ]
   },
   'kusama-NATIVE-KSM': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
+      transak: {
+        network: 'mainnet',
+        symbol: 'KSM'
+      },
       banxa: {
         network: 'KSM',
         symbol: 'KSM'
@@ -263,6 +293,7 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     symbol: 'KSM',
     support: 'SUBSTRATE',
     services: [
+      'transak',
       'banxa',
       'coinbase'
     ]
@@ -399,22 +430,22 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       'banxa'
     ]
   },
-  // 'binance-ERC20-BUSD-0xe9e7cea3dedca5984780bafc599bd69add087d56': {
-  //   serviceInfo: {
-  //     ...DEFAULT_SERVICE_INFO,
-  //     transak: {
-  //       network: 'bsc',
-  //       symbol: 'BUSD'
-  //     }
-  //   },
-  //   network: 'binance',
-  //   slug: 'binance-ERC20-BUSD-0xe9e7cea3dedca5984780bafc599bd69add087d56',
-  //   symbol: 'BUSD',
-  //   support: 'ETHEREUM',
-  //   services: [
-  //     'transak'
-  //   ]
-  // },
+  'binance-ERC20-BUSD-0xe9e7cea3dedca5984780bafc599bd69add087d56': {
+    serviceInfo: {
+      ...DEFAULT_SERVICE_INFO,
+      transak: {
+        network: 'bsc',
+        symbol: 'BUSD'
+      }
+    },
+    network: 'binance',
+    slug: 'binance-ERC20-BUSD-0xe9e7cea3dedca5984780bafc599bd69add087d56',
+    symbol: 'BUSD',
+    support: 'ETHEREUM',
+    services: [
+      'transak'
+    ]
+  },
   'ethereum-ERC20-BUSD-0x4Fabb145d64652a948d72533023f6E7A623C7C53': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
@@ -608,6 +639,10 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
   'ethereum-ERC20-SAND-0x3845badAde8e6dFF049820680d1F14bD3903a5d0': {
     serviceInfo: {
       ...DEFAULT_SERVICE_INFO,
+      transak: {
+        network: 'ethereum',
+        symbol: 'SAND'
+      },
       banxa: {
         network: 'ETH',
         symbol: 'SAND'
@@ -618,6 +653,7 @@ export const MAP_PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
     symbol: 'SAND',
     support: 'ETHEREUM',
     services: [
+      'transak',
       'banxa'
     ]
   },

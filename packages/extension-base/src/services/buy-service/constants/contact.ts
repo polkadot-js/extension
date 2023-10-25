@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BuyServiceInfo, SupportService } from '@subwallet/extension-koni-ui/types';
+import { BuyServiceInfo, SupportService } from '@subwallet/extension-base/types';
 
 export const BUY_SERVICE_CONTACTS: Record<SupportService, BuyServiceInfo> = {
   transak: {

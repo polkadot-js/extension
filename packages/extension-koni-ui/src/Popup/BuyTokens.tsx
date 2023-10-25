@@ -7,7 +7,6 @@ import { baseServiceItems, Layout, PageWrapper, ServiceItem } from '@subwallet/e
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { ServiceSelector } from '@subwallet/extension-koni-ui/components/Field/BuyTokens/ServiceSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { BUY_SERVICE_CONTACTS, LIST_PREDEFINED_BUY_TOKEN, MAP_PREDEFINED_BUY_TOKEN } from '@subwallet/extension-koni-ui/constants';
 import { useAssetChecker, useDefaultNavigate, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType, BuyServiceInfo, CreateBuyOrderFunction, SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -40,22 +39,6 @@ interface LinkUrlProps {
   content: string;
 }
 
-const getServiceItems = (tokenSlug: string): ServiceItem[] => {
-  const buyInfo = MAP_PREDEFINED_BUY_TOKEN[tokenSlug];
-  const result: ServiceItem[] = [];
-
-  for (const serviceItem of baseServiceItems) {
-    const temp: ServiceItem = {
-      ...serviceItem,
-      disabled: buyInfo ? !buyInfo.services.includes(serviceItem.key) : true
-    };
-
-    result.push(temp);
-  }
-
-  return result;
-};
-
 const LinkUrl: React.FC<LinkUrlProps> = (props: LinkUrlProps) => {
   if (props.url) {
     return (
@@ -77,14 +60,6 @@ function Component ({ className }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
   const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
 
-  const fixedTokenKey = useMemo((): string | undefined => {
-    if (currentSymbol) {
-      return LIST_PREDEFINED_BUY_TOKEN.filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol)[0]?.slug;
-    } else {
-      return undefined;
-    }
-  }, [currentSymbol]);
-
   const notify = useNotification();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -92,7 +67,16 @@ function Component ({ className }: Props) {
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const { walletReference } = useSelector((state: RootState) => state.settings);
+  const { services, tokens } = useSelector((state: RootState) => state.buyService);
   const checkAsset = useAssetChecker();
+
+  const fixedTokenKey = useMemo((): string | undefined => {
+    if (currentSymbol) {
+      return Object.values(tokens).filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol)[0]?.slug;
+    } else {
+      return undefined;
+    }
+  }, [currentSymbol, tokens]);
 
   const [currentAddress] = useState<string | undefined>(currentAccount?.address);
   const { t } = useTranslation();
@@ -120,8 +104,24 @@ function Component ({ className }: Props) {
   const selectedService = Form.useWatch('service', form);
 
   const { contactUrl, name: serviceName, policyUrl, termUrl, url } = useMemo((): BuyServiceInfo => {
-    return BUY_SERVICE_CONTACTS[selectedService] || { name: '', url: '', contactUrl: '', policyUrl: '', termUrl: '' };
-  }, [selectedService]);
+    return services[selectedService] || { name: '', url: '', contactUrl: '', policyUrl: '', termUrl: '' };
+  }, [selectedService, services]);
+
+  const getServiceItems = useCallback((tokenSlug: string): ServiceItem[] => {
+    const buyInfo = tokens[tokenSlug];
+    const result: ServiceItem[] = [];
+
+    for (const serviceItem of baseServiceItems) {
+      const temp: ServiceItem = {
+        ...serviceItem,
+        disabled: buyInfo ? !buyInfo.services.includes(serviceItem.key) : true
+      };
+
+      result.push(temp);
+    }
+
+    return result;
+  }, [tokens]);
 
   const onConfirm = useCallback((): Promise<void> => {
     activeModal(modalId);
@@ -162,7 +162,7 @@ function Component ({ className }: Props) {
   const tokenItems = useMemo<TokenItemType[]>(() => {
     const result: TokenItemType[] = [];
 
-    const list = [...LIST_PREDEFINED_BUY_TOKEN];
+    const list = [...Object.values(tokens)];
 
     const filtered = currentSymbol ? list.filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol) : list;
 
@@ -189,20 +189,20 @@ function Component ({ className }: Props) {
     });
 
     return result;
-  }, [accountType, currentSymbol, ledgerNetwork]);
+  }, [accountType, currentSymbol, ledgerNetwork, tokens]);
 
-  const serviceItems = useMemo(() => getServiceItems(selectedTokenKey), [selectedTokenKey]);
+  const serviceItems = useMemo(() => getServiceItems(selectedTokenKey), [getServiceItems, selectedTokenKey]);
 
   const isSupportBuyTokens = useMemo(() => {
     if (selectedService && selectedAddress && selectedTokenKey) {
-      const buyInfo = MAP_PREDEFINED_BUY_TOKEN[selectedTokenKey];
+      const buyInfo = tokens[selectedTokenKey];
       const accountType = getAccountType(selectedAddress);
 
       return buyInfo && buyInfo.support === accountType && buyInfo.services.includes(selectedService) && tokenItems.find((item) => item.slug === selectedTokenKey);
     }
 
     return false;
-  }, [selectedService, selectedAddress, selectedTokenKey, tokenItems]);
+  }, [selectedService, selectedAddress, selectedTokenKey, tokens, tokenItems]);
 
   const onClickNext = useCallback(() => {
     setLoading(true);
@@ -211,7 +211,7 @@ function Component ({ className }: Props) {
 
     let urlPromise: CreateBuyOrderFunction | undefined;
 
-    const buyInfo = MAP_PREDEFINED_BUY_TOKEN[tokenKey];
+    const buyInfo = tokens[tokenKey];
     const { network } = buyInfo;
 
     const serviceInfo = buyInfo.serviceInfo[service];
@@ -269,13 +269,13 @@ function Component ({ className }: Props) {
     } else {
       setLoading(false);
     }
-  }, [form, chainInfoMap, disclaimerAgree, onConfirm, walletReference, notify, t]);
+  }, [form, tokens, chainInfoMap, disclaimerAgree, onConfirm, walletReference, notify, t]);
 
   const filterAccountType = useMemo((): AccountType => {
     if (currentSymbol) {
       let result: AccountType = '' as AccountType;
 
-      const list = LIST_PREDEFINED_BUY_TOKEN.filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol);
+      const list = Object.values(tokens).filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol);
 
       list.forEach((info) => {
         if (result) {
@@ -293,7 +293,7 @@ function Component ({ className }: Props) {
     } else {
       return 'ALL';
     }
-  }, [currentSymbol]);
+  }, [currentSymbol, tokens]);
 
   const accountsFilter = useCallback((account: AccountJson) => {
     if (isAccountAll(account.address)) {
@@ -352,7 +352,7 @@ function Component ({ className }: Props) {
         form.setFieldValue('service', filtered[0]?.key || '');
       }
     }
-  }, [selectedTokenKey, form]);
+  }, [selectedTokenKey, form, getServiceItems]);
 
   return (
     <Layout.Home

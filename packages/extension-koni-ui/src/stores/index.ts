@@ -11,6 +11,7 @@ import SettingsReducer from './base/Settings';
 import UIViewStateReducer from './base/UIViewState';
 import BalanceReducer from './feature/Balance';
 import BondingReducer from './feature/Bonding';
+import BuyServiceReducer from './feature/Buy';
 import CampaignReducer from './feature/Campaign';
 import AssetRegistryReducer from './feature/common/AssetRegistry';
 import ChainStoreReducer from './feature/common/ChainStore';
@@ -30,7 +31,8 @@ const persistConfig = {
     'settings',
     'uiViewState',
     'staking',
-    'campaign'
+    'campaign',
+    'buyService'
   ]
 };
 
@@ -45,6 +47,7 @@ const rootReducers = combineReducers({
   bonding: BondingReducer,
   mantaPay: MantaPayReducer,
   campaign: CampaignReducer,
+  buyService: BuyServiceReducer,
 
   // common
   chainStore: ChainStoreReducer,

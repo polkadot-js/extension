@@ -314,6 +314,10 @@ class InjectHandler {
       }
     }
 
+    accounts.forEach((a) => {
+      a.meta.source = this.selectedWallet || 'SubWallet';
+    });
+
     this.accountArrayMap = { ...this.accountArrayMap, [key]: accounts };
 
     addLazy(updateInjectAccountPromiseKey, () => {

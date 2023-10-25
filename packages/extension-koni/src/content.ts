@@ -55,6 +55,8 @@ window.addEventListener('message', ({ data, source }: Message): void => {
 const container = document.head || document.documentElement;
 const placeholderScript = document.createElement('script');
 const script = document.createElement('script');
+const version = process.env.PKG_VERSION as string;
+const walletKey = 'subwallet-js';
 
 script.src = chrome.extension.getURL('page.js');
 
@@ -73,14 +75,14 @@ placeholderScript.textContent = `class SubWalletPlaceholder {
         const interval = setInterval(() => {
           if (++retry > 30) {
             clearInterval(interval);
-            reject(new Error('SubWallet provider not found'))
+            reject(new Error("SubWallet provider not found"));
           }
           if (self.provider) {
             clearInterval(interval);
-            resolve(self.provider)
+            resolve(self.provider);
           }
         }, 100);
-      })
+      });
     }
   })();
   on() {
@@ -131,10 +133,44 @@ placeholderScript.textContent = `class SubWalletPlaceholder {
   }
 }
 
+class SubWalletPolkadotPlaceholder {
+  isPlaceholder;
+
+  async enable(origin) {
+    const provider = await this.__waitProvider;
+    return await provider.enable(...arguments);
+  }
+}
+
+window.injectedWeb3 = window.injectedWeb3 || {};
+
+if (!window.injectedWeb3['${walletKey}']) {
+  window.injectedWeb3['${walletKey}'] = {
+    isPlaceholder: true,
+    version: '${version}',
+    enable: async (origin) => {
+      const wallet = await new Promise((resolve, reject) => {
+        let retry = 0;
+        const interval = setInterval(() => {
+          if (++retry > 30) {
+            clearInterval(interval);
+            reject(new Error("SubWallet provider not found"));
+          }
+          if (!window.injectedWeb3['${walletKey}'].isPlaceholder) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 100);
+      });
+
+      return await window.injectedWeb3['${walletKey}'].enable(origin);
+    }
+  };
+}
 
 window.SubWallet = new Proxy(new SubWalletPlaceholder(), {
   get(obj, prop) {
-    if (prop === 'provider') {
+    if (prop === "provider") {
       return undefined;
     }
 
@@ -144,7 +180,8 @@ window.SubWallet = new Proxy(new SubWalletPlaceholder(), {
       return Reflect.get(obj, prop);
     }
   }
-})`;
+});
+`;
 
 container.insertBefore(script, container.children[0]);
 container.insertBefore(placeholderScript, container.children[0]);

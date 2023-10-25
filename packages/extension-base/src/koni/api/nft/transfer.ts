@@ -82,6 +82,19 @@ export function statemineGetExtrinsic (substrateApi: _SubstrateApi, senderAddres
   }
 }
 
+export function statemintGetExtrinsic (substrateApi: _SubstrateApi, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+  try {
+    const itemId = params.itemId as number;
+    const collectionId = params.collectionId as number;
+
+    return substrateApi.api.tx.nfts.transfer(collectionId, itemId, recipientAddress);
+  } catch (e) {
+    console.error(e);
+
+    return null;
+  }
+}
+
 export function getNftTransferExtrinsic (networkKey: string, substrateApi: _SubstrateApi, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   switch (networkKey) {
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.acala:
@@ -99,7 +112,7 @@ export function getNftTransferExtrinsic (networkKey: string, substrateApi: _Subs
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemine:
       return statemineGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemint:
-      return statemineGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
+      return statemintGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.bitcountry:
       return acalaGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.pioneer:

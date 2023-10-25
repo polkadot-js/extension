@@ -1,5 +1,86 @@
 # CHANGELOG
 
+## 1.1.18
+Build date: Oct 20, 2023.
+
+Features & Update:
+- Support notification in browser and banner in app (#2000)
+- Update crowdloan data (#2035)
+- Update message on the Create on account screen (#2039)
+
+Bugs fixed:
+- Fixed bug IPFS in Firefox browser (#1995)
+- Fixed bug Do not show Acala, Karura NFT (#2029)
+- Fixed bug Show apply master password when access via URL (2040)
+
+
+## 1.1.17
+Build date: Oct 17, 2023.
+
+Features & Update:
+The default Vara network is enabled (#2019)
+- Update coinable ID for product environment (#2017)
+- Replace the user feedback form when uninstalling extension (#2010)
+- Update chain list (#1998)
+  - Update RPC for Pioneer network
+  - Add support for Vara NFTs
+- Updated list of tokens supported by Transak (#2026)
+
+## 1.1.16
+Build date: Oct 07, 2023.
+
+Features & Update:
+- Add support for the sub0 2023 Biodiversity NFT Collection (#1982)
+
+Bugs fixed:
+- Fixed bug when connect to dApp via WallectConnect (#1981)
+
+
+## 1.1.15
+Build date: Sep 30, 2023.
+
+Features & Update:
+- Update token’s logo retrieval mechanism (#1947)
+- Support Ledger for more chains (#1942)
+  - Karura
+  - xx network
+  - Polymesh
+  - Edgeware
+- Update chain list (#1941)
+  - Add XCM support for more tokens:
+    - KSM: Kusma —> Amplitude
+    - USDC: Polkadot Asset Hub <—> HydraDX
+  - Integrated Neuroguns NFT Collection on the Astar network
+  - Integrated new networks: Bittensor, Dancebox
+  - Add staking support for Vara network
+  - Update price for some tokens: PANX, VARA
+  - Update RPC for Imbue network
+
+Bugs fixed:
+- Fixed bug Do not scroll the network list in case of connecting dApp via WalletConnect (#1926)
+- Fixed bug Navigate incorrect in case Create one when connect dApp (#1930)
+
+## 1.1.14
+Build date: Sep 26, 2023.
+
+Features & Update:
+- Improve network and asset subscription (#1939)
+- Update transfer function for Pendulum (#1950)
+
+## 1.1.13
+Build date: Sep 21, 2023.
+
+Features & Update:
+- Update empty list screens (#1857)
+- Allow paste Amount to send (#1872)
+- Add injected placeholder to avoid extension cannot load in the first time (#1906)
+
+Bugs fixed:
+- Fixed bug Do not show status of the crowd loans item (Acala) (#1860)
+- Fixed bug Do not auto-lock after imported multiple account (#1910)
+- Fixed bug Do not show selected account (#1919)
+
+
 ## 1.1.12
 Build date: Sep 15, 2023.
 

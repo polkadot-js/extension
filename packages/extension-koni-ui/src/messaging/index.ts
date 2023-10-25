@@ -1,21 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { MetadataRequest, SigningRequest, WindowOpenParams } from '@subwallet/extension-base/background/types';
+import type { WindowOpenParams } from '@subwallet/extension-base/background/types';
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { AllLogoMap, BalanceJson, ConfirmationsQueue, CronReloadRequest, CrowdloanJson, Notification, PriceJson, RequestGetTransaction, RequestParseEvmContractInput, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribePrice, ResponseParseEvmContractInput, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceJson, ConfirmationsQueue, CronReloadRequest, CrowdloanJson, Notification, PriceJson, RequestGetTransaction, RequestParseEvmContractInput, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribePrice, ResponseParseEvmContractInput, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
-
-export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(metadata.requests)', null, cb);
-}
-
-export async function subscribeSigningRequests (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(signing.requests)', null, cb);
-}
 
 export async function windowOpen (params: WindowOpenParams): Promise<boolean> {
   return sendMessage('pri(window.open)', params);
@@ -78,16 +70,8 @@ export async function getTransaction (request: RequestGetTransaction): Promise<S
   return sendMessage('pri(transactions.getOne)', request);
 }
 
-export async function subscribeTransactions (callback: (rs: Record<string, SWTransactionResult>) => void): Promise<Record<string, SWTransactionResult>> {
-  return sendMessage('pri(transactions.subscribe)', null, callback);
-}
-
 export async function subscribeNotifications (callback: (rs: Notification[]) => void): Promise<Notification[]> {
   return sendMessage('pri(notifications.subscribe)', null, callback);
-}
-
-export async function getLogoMap (): Promise<AllLogoMap> {
-  return sendMessage('pri(settings.getLogoMaps)', null);
 }
 
 export async function reloadCron (request: CronReloadRequest): Promise<boolean> {

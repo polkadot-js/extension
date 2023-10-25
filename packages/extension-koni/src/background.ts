@@ -77,7 +77,7 @@ chrome.runtime.onConnect.addListener((port): void => {
 // });
 
 // Setup uninstall URL every background start
-chrome.runtime.setUninstallURL('https://forms.gle/mAxcUCumXfnEaQHm7');
+chrome.runtime.setUninstallURL('https://slink.subwallet.app/uninstall-feedback');
 
 chrome.runtime.onStartup.addListener(function () {
   handleExtensionIdling();

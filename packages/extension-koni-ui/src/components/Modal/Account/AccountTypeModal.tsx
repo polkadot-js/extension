@@ -5,7 +5,6 @@ import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/S
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -19,9 +18,9 @@ import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useLocalStorage } from 'usehooks-ts';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { useSetSelectedAccountTypes } from '@subwallet/extension-koni-ui/hooks';
 
 interface Props extends ThemeProps {
   id: string;
@@ -39,8 +38,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const isActive = checkActive(id);
   const navigate = useNavigate();
   const { isWebUI } = useContext(ScreenContext);
+
+  const setSelectedAccountTypes = useSetSelectedAccountTypes(false);
+
   const [selectedItems, setSelectedItems] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
-  const [, setSelectedAccountTypes] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
 
   const onCancel = useCallback(() => {
     inactiveModal(id);
@@ -56,7 +57,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     inactiveModal(id);
-  }, [selectedItems, isWebUI, inactiveModal, id, activeModal, navigate, url, nextId, setSelectedAccountTypes]);
+  }, [setSelectedAccountTypes, selectedItems, isWebUI, inactiveModal, id, activeModal, navigate, url, nextId]);
 
   const onBack = useSwitchModal(id, previousId);
 

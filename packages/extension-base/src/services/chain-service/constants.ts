@@ -31,7 +31,7 @@ export const _BALANCE_CHAIN_GROUP = {
   kintsugi: ['kintsugi', 'interlay', 'kintsugi_test', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
-  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum'],
+  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude'],
   statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'] // perhaps there are some runtime updates
 };
@@ -45,15 +45,17 @@ export const _NFT_CHAIN_GROUP = {
   acala: ['acala'],
   karura: ['karura'], // TODO: karura and acala should be the same
   rmrk: ['kusama'],
-  statemine: ['statemine', 'statemint'],
+  statemine: ['statemine'],
+  statemint: ['statemint'],
   unique_network: ['unique_network'],
-  bitcountry: ['bitcountry', 'pioneer']
+  bitcountry: ['bitcountry', 'pioneer'],
+  vara: ['vara_network']
 };
 
 // Staking--------------------------------------------------------------------------------------------------------------
 
 export const _STAKING_CHAIN_GROUP = {
-  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend', 'kate', 'edgeware', 'creditcoin'],
+  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend', 'kate', 'edgeware', 'creditcoin', 'vara_network'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
   astar: ['astar', 'shiden', 'shibuya'],
   amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine', 'pendulum'], // amplitude and kilt only share some common logic
@@ -92,7 +94,8 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   kilt_peregrine: 2,
   edgeware: 6,
   kate: 6,
-  creditcoin: 24
+  creditcoin: 24,
+  vara_network: 12
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
@@ -190,7 +193,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
   avail: ['kate'],
-  pendulum: ['pendulum']
+  pendulum: ['pendulum', 'amplitude', 'amplitude_test']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {
@@ -219,6 +222,7 @@ export const _XCM_TYPE = {
 
 export const _DEFAULT_ACTIVE_CHAINS = [
   ..._DEFAULT_CHAINS,
+  'vara_network',
   'bifrost_dot',
   'parallel',
   'acala',

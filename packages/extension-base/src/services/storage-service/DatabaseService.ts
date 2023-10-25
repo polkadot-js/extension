@@ -4,9 +4,10 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { EventService } from '@subwallet/extension-base/services/event-service';
-import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
+import KoniDatabase, { IBalance, ICampaign, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MetadataStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
 import BaseStore from '@subwallet/extension-base/services/storage-service/db-stores/BaseStore';
+import CampaignStore from '@subwallet/extension-base/services/storage-service/db-stores/Campaign';
 import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
 import MantaPayStore from '@subwallet/extension-base/services/storage-service/db-stores/MantaPay';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
@@ -56,7 +57,8 @@ export default class DatabaseService {
       chainStakingMetadata: new ChainStakingMetadataStore(this._db.chainStakingMetadata),
       nominatorMetadata: new NominatorMetadataStore(this._db.nominatorMetadata),
 
-      mantaPay: new MantaPayStore(this._db.mantaPay)
+      mantaPay: new MantaPayStore(this._db.mantaPay),
+      campaign: new CampaignStore(this._db.campaign)
     };
   }
 
@@ -375,5 +377,23 @@ export default class DatabaseService {
 
   async getYieldNominationPoolPosition (addresses: string[], chains: string[]) {
     return this.stores.yieldPosition.getByAddressAndChains(addresses, chains);
+  }
+
+  /* Campaign */
+
+  public subscribeProcessingCampaign () {
+    return this.stores.campaign.subscribeProcessingCampaign();
+  }
+
+  public getProcessingCampaign () {
+    return this.stores.campaign.getProcessingCampaign();
+  }
+
+  public getCampaign (slug: string) {
+    return this.stores.campaign.getCampaign(slug);
+  }
+
+  public upsertCampaign (campaign: ICampaign) {
+    return this.stores.campaign.upsertCampaign(campaign);
   }
 }

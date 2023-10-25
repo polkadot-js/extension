@@ -32,10 +32,16 @@ function Component ({ className,
     <div className={className}>
       <div className='__box'>
         <div className={'__left-part'}>
-          <Logo2D
-            height={24}
-            width={24}
-          />
+          <div
+            className='__logo'
+            onClick={goHome}
+            style={{ cursor: 'pointer' }}
+          >
+            <Logo2D
+              height={24}
+              width={24}
+            />
+          </div>
           {!!title && showBackButton && (
             <Button
               className='__back-button'

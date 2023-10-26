@@ -4,6 +4,9 @@
 import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { InjectedWindow, WalletInfo } from '@subwallet/extension-koni-ui/types';
 
+const currentOrigin = new URL(window.location.href).origin;
+const encodedOrigin = encodeURIComponent(currentOrigin);
+
 export const PREDEFINED_WALLETS: Record<string, WalletInfo> = {
   SubWallet: {
     description: '',
@@ -15,8 +18,8 @@ export const PREDEFINED_WALLETS: Record<string, WalletInfo> = {
     substrateKey: 'subwallet-js',
     url: 'https://chrome.google.com/webstore/detail/subwallet-polkadot-wallet/onhogfjeacnfoofkfgppdlbmlmnplgbn',
     firefoxUrl: 'https://addons.mozilla.org/firefox/addon/subwallet/',
-    googlePlayUrl: 'https://mobile.subwallet.app/browser?url=https%3A%2F%2Fweb.subwallet.app',
-    appStoreUrl: 'https://mobile.subwallet.app/browser?url=https%3A%2F%2Fweb.subwallet.app',
+    googlePlayUrl: `https://mobile.subwallet.app/browser?url=${encodedOrigin}`,
+    appStoreUrl: `https://mobile.subwallet.app/browser?url=${encodedOrigin}`,
     supportWeb: true,
     supportMobile: true
   },

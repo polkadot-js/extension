@@ -384,10 +384,10 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const selectWallet = useCallback(() => {
     // Auto active injected on mobile
     if (isMobile) {
-      const activeWallet = Object.values(PREDEFINED_WALLETS).find((w) => (w.supportMobile && checkHasInjected(w.key)));
+      const installedWallet = Object.values(PREDEFINED_WALLETS).find((w) => (w.supportMobile && checkHasInjected(w.key)));
 
-      if (activeWallet) {
-        injectHandler.enable(activeWallet.key).catch((e) => {
+      if (installedWallet) {
+        injectHandler.enable(installedWallet.key).catch((e) => {
           console.error(e);
           activeModal(SELECT_EXTENSION_MODAL);
         });
@@ -405,7 +405,16 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
 
   const disableInject = useCallback(() => {
     injectHandler.disable();
-    selectWallet();
+
+    if (isMobile) {
+      const installedWallet = Object.values(PREDEFINED_WALLETS).find((w) => (w.supportMobile && checkHasInjected(w.key)));
+
+      if (!installedWallet) {
+        selectWallet();
+      }
+    } else {
+      selectWallet();
+    }
   }, [selectWallet]);
 
   const initCallback = useCallback(() => {

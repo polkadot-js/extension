@@ -8,10 +8,11 @@ import { DisconnectExtensionModal } from '@subwallet/extension-koni-ui/component
 import { ENABLE_INJECT, PREDEFINED_WALLETS, SELECT_EXTENSION_MODAL, win } from '@subwallet/extension-koni-ui/constants';
 import { useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
-import { noop, toShort } from '@subwallet/extension-koni-ui/utils';
+import { isMobile, noop, toShort } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { checkHasInjected } from '../utils/wallet';
 
 interface Props {
   children: React.ReactNode;
@@ -381,6 +382,20 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const [loadingInject, setLoadingInject] = useState(injectHandler.loadingSubject.value);
 
   const selectWallet = useCallback(() => {
+    // Auto active injected on mobile
+    if (isMobile) {
+      const activeWallet = Object.values(PREDEFINED_WALLETS).find((w) => (w.supportMobile && checkHasInjected(w.key)));
+
+      if (activeWallet) {
+        injectHandler.enable(activeWallet.key).catch((e) => {
+          console.error(e);
+          activeModal(SELECT_EXTENSION_MODAL);
+        });
+
+        return;
+      }
+    }
+
     activeModal(SELECT_EXTENSION_MODAL);
   }, [activeModal]);
 

@@ -6044,7 +6044,6 @@ __metadata:
     "@subwallet/keyring": ^0.1.1
     "@subwallet/react-ui": 5.1.2-b73
     "@subwallet/ui-keyring": ^0.1.1
-    "@trendyol-js/react-carousel": ^3.0.2
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
     "@types/enzyme-adapter-react-16": ^1.0.6
@@ -6052,6 +6051,7 @@ __metadata:
     "@types/react-copy-to-clipboard": ^5.0.4
     "@types/react-dom": ^18.0.9
     "@types/react-lazy-load-image-component": ^1.5.3
+    "@types/react-slick": ^0.23.11
     "@types/redux-persist": ^4.3.1
     "@types/sinon-chrome": ^2.2.11
     "@types/store": ^2.0.2
@@ -6087,6 +6087,7 @@ __metadata:
     react-router-dom: ~6.9.0
     react-select: ^5.7.0
     react-share: ^4.4.1
+    react-slick: ^0.29.0
     react-tabs: ^6.0.0
     react-tooltip: 4.5.1
     react-transition-group: ^4.4.5
@@ -6359,15 +6360,6 @@ __metadata:
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
   checksum: ad87447820dd3f24825d2d947ebc03072b20a42bfc96cbafec16bff8bbda6c1a81fcb0be56d5b21968560c5359a0af4038a68ba150c3e1694fe4c109a063bed8
-  languageName: node
-  linkType: hard
-
-"@trendyol-js/react-carousel@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "@trendyol-js/react-carousel@npm:3.0.2"
-  peerDependencies:
-    react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: d55b0abea0684bf7550f7a6812cae8a598e1779374a7023fe4b748dee30eade988f78e495028c0c966e16589f444f2b07f702be3cff7032f822affb02dbcc899
   languageName: node
   linkType: hard
 
@@ -6854,6 +6846,15 @@ __metadata:
     "@types/react": "*"
     csstype: ^3.0.2
   checksum: 4e164a897fa750bbb216b97a9fe5b01e98e9620c68a98269d2e73f1416b9dd93277a5ab4052253ab74d0ad058462577f2eae35f94027ff9b4740242e20b185c7
+  languageName: node
+  linkType: hard
+
+"@types/react-slick@npm:^0.23.11":
+  version: 0.23.11
+  resolution: "@types/react-slick@npm:0.23.11"
+  dependencies:
+    "@types/react": "*"
+  checksum: 33f7d7e1c116b4d59a75a7e4d775436bdc7bb15b8ca6968e22c4a0b6de360d853d25f1937fa26d8d2445e8c477f6569b739965ef7273ced75b3e62ca3c5308d8
   languageName: node
   linkType: hard
 
@@ -12064,6 +12065,13 @@ __metadata:
     graceful-fs: ^4.2.4
     tapable: ^2.2.0
   checksum: 0bb9830704db271610f900e8d79d70a740ea16f251263362b0c91af545576d09fe50103496606c1300a05e588372d6f9780a9bc2e30ce8ef9b827ec8f44687ff
+  languageName: node
+  linkType: hard
+
+"enquire.js@npm:^2.1.6":
+  version: 2.1.6
+  resolution: "enquire.js@npm:2.1.6"
+  checksum: bb094054ee2768edafc3b80fb2b65b79d63160d625085162e9c9016843b6eaa13d7430201bf593c2e31e1725b3208f47f57aa27e03b19729e7590d1ca2241451
   languageName: node
   linkType: hard
 
@@ -21431,6 +21439,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-slick@npm:^0.29.0":
+  version: 0.29.0
+  resolution: "react-slick@npm:0.29.0"
+  dependencies:
+    classnames: ^2.2.5
+    enquire.js: ^2.1.6
+    json2mq: ^0.2.0
+    lodash.debounce: ^4.0.8
+    resize-observer-polyfill: ^1.5.0
+  peerDependencies:
+    react: ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 67ce4981914da8a76c6efb4bc8ee7ab69e04c33bd4b3517419ab2165679a3c701dae781556149713fe2c542f84188b7ca101ea58883537be5c05756408f48c8b
+  languageName: node
+  linkType: hard
+
 "react-superellipse@npm:^0.0.6":
   version: 0.0.6
   resolution: "react-superellipse@npm:0.0.6"
@@ -21981,7 +22005,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resize-observer-polyfill@npm:^1.5.1":
+"resize-observer-polyfill@npm:^1.5.0, resize-observer-polyfill@npm:^1.5.1":
   version: 1.5.1
   resolution: "resize-observer-polyfill@npm:1.5.1"
   checksum: 57e7f79489867b00ba43c9c051524a5c8f162a61d5547e99333549afc23e15c44fd43f2f318ea0261ea98c0eb3158cca261e6f48d66e1ed1cd1f340a43977094

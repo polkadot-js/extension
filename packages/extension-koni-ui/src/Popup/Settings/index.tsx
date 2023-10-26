@@ -287,14 +287,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <PageWrapper className={`settings ${className}`}>
       <>
-        {!isWebUI && <SwHeader
-          left='logo'
-          onClickLeft={goHome}
-          rightButtons={headerIcons}
-          showLeftButton={true}
-        >
-          {t('Settings')}
-        </SwHeader>}
+        {!isWebUI && (
+          <SwHeader
+            left='logo'
+            onClickLeft={goHome}
+            paddingVertical
+            rightButtons={headerIcons}
+            showLeftButton={true}
+          >
+            {t('Settings')}
+          </SwHeader>
+        )}
 
         <div className={'__content-container'}>
           {
@@ -360,9 +363,11 @@ export const Settings = styled(Component)<Props>(({ theme: { extendToken, token 
     flexDirection: 'column',
 
     '.ant-sw-header-container': {
-      paddingTop: token.padding,
-      paddingBottom: token.padding,
-      backgroundColor: token.colorBgDefault
+      backgroundColor: token.colorBgDefault,
+      minHeight: 'auto',
+      position: 'sticky',
+      top: 0,
+      zIndex: 10
     },
 
     '.web-ui-enable &, .web-ui-enable & .ant-sw-header-container': {

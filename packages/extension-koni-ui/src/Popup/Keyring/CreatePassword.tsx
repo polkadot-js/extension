@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { AlertBox, InfoIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { CREATE_RETURN, REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
@@ -49,7 +50,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const navigate = useNavigate();
   const previousInfo = (useLocation().state || {}) as { prevPathname: string, prevState: any };
 
-  const { isNoAccount } = useSelector((state: RootState) => state.accountState);
+  const { accounts } = useSelector((state: RootState) => state.accountState);
+
+  const needMigrate = useMemo(
+    () => !!accounts
+      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected)
+      .filter((acc) => !acc.isMasterPassword)
+      .length
+    , [accounts]
+  );
 
   const [returnPath, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
 
@@ -132,10 +141,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [inactiveModal]);
 
   useEffect(() => {
-    if (!isNoAccount && !isWebUI) {
+    if (needMigrate && !isWebUI) {
       activeModal(REQUEST_CREATE_PASSWORD_MODAL);
     }
-  }, [activeModal, isWebUI, isNoAccount]);
+  }, [activeModal, isWebUI, needMigrate]);
+
+  const onConfirmPasswordKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      form.submit();
+    }
+  }, [form]);
 
   useFocusFormItem(form, FormFieldName.PASSWORD, !checkActive(REQUEST_CREATE_PASSWORD_MODAL));
 
@@ -151,7 +166,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             icon: FooterIcon
           }
           : undefined}
-        showBackButton={isNoAccount}
+        showBackButton={!needMigrate}
         subHeaderIcons={[
           {
             icon: <InfoIcon />,
@@ -208,6 +223,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 statusHelpAsTooltip={true}
               >
                 <Input
+                  onKeyDown={onConfirmPasswordKeyPress}
                   placeholder={t('Confirm password')}
                   type='password'
                 />

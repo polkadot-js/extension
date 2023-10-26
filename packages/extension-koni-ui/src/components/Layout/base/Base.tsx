@@ -11,7 +11,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
-import { Aperture, Clock, Rocket, Vault, Wallet } from 'phosphor-react';
+import { Aperture, Clock, Parachute, Rocket, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -86,6 +86,16 @@ const Component = ({ children, className, headerIcons, isSetTitleContext = true,
     {
       icon: {
         type: 'phosphor',
+        phosphorIcon: Parachute,
+        weight: 'fill'
+      },
+      label: t('Mission Pools'),
+      key: 'mission-pools',
+      url: '/home/mission-pools'
+    },
+    {
+      icon: {
+        type: 'phosphor',
         phosphorIcon: Clock,
         weight: 'fill'
       },
@@ -155,8 +165,16 @@ const Component = ({ children, className, headerIcons, isSetTitleContext = true,
 
 const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBaseProps) => ({
   '.ant-sw-tab-bar-container': {
+    'white-space': 'nowrap',
+    overflowX: 'auto',
+
     padding: `${token.paddingXS}px ${token.paddingSM}px ${token.paddingSM}px`,
     alignItems: 'flex-start',
+
+    '.ant-sw-tab-bar-item': {
+      paddingLeft: token.paddingXS,
+      paddingRight: token.paddingXS
+    },
 
     '.ant-sw-tab-bar-item-label': {
       textAlign: 'center'
@@ -177,6 +195,17 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
           overflowWrap: 'break-word'
         }
       }
+    }
+  },
+
+  '@media (max-width: 600px)': {
+    '.ant-sw-tab-bar-item': {
+      paddingBottom: token.sizeXS,
+      paddingTop: token.sizeXS
+    },
+
+    '.ant-sw-tab-bar-item-label': {
+      display: 'none'
     }
   }
 }));

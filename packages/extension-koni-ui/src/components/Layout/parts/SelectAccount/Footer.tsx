@@ -1,11 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, DISCONNECT_EXTENSION_MODAL, EXTENSION_URL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, DISCONNECT_EXTENSION_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL, SELECT_EXTENSION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
@@ -16,7 +15,7 @@ type Props = ThemeProps;
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const { enableInject, enabled, injected, loadingInject } = useContext(InjectContext);
+  const { enabled, injected, loadingInject } = useContext(InjectContext);
 
   const openModal = useCallback((id: string) => {
     inactiveModal(SELECT_ACCOUNT_MODAL);
@@ -39,13 +38,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     if (enabled) {
       activeModal(DISCONNECT_EXTENSION_MODAL);
     } else {
-      if (injected) {
-        enableInject();
-      } else {
-        openInNewTab(EXTENSION_URL)();
-      }
+      activeModal(SELECT_EXTENSION_MODAL);
     }
-  }, [activeModal, enableInject, enabled, injected]);
+  }, [activeModal, enabled]);
 
   return (
     <div className={className}>

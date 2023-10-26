@@ -30,7 +30,6 @@ export const EDIT_UNLOCK_TYPE_MODAL = 'edit-unlock-type-modal';
 export const RESET_WALLET_MODAL = 'reset-wallet-modal';
 export const SEED_PHRASE_MODAL = 'seed-phrase-modal';
 export const ADD_CONNECTION_MODAL = 'add-connection-modal';
-export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
 
 export const TRANSFER_NFT_MODAL = 'transfer-nft-modal';
 
@@ -42,6 +41,13 @@ export const WALLET_CONNECT_LIST_MODAL = 'wallet-connect-list-modal';
 
 export const CONFIRMATION_MODAL = 'confirmation-modal';
 export const BUY_TOKEN_MODAL = 'buy-token-modal';
+
+/* Extension */
+
+export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
+export const SELECT_EXTENSION_MODAL = 'select-extension-modal';
+
+/*  */
 
 /* Earning */
 

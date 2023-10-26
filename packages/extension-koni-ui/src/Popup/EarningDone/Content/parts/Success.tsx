@@ -1,24 +1,32 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { baseParseIPFSUrl, detectTranslate } from '@subwallet/extension-base/utils';
+import { ImageSlash } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, Image, Logo } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, Icon, Image, Logo } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { TwitterLogo } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-type Props = ThemeProps;
+interface Props extends ThemeProps {
+  chain?: string;
+  contactUs: VoidFunction;
+  goToNft: VoidFunction;
+  shareOnTwitter: VoidFunction;
+  url: string;
+  enableShare: boolean;
+  viewInHistory: VoidFunction;
+}
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className } = props;
-  const { chain, transactionId } = useParams<{chain: string, transactionId: string}>();
+  const { chain, className, contactUs, enableShare, goToNft, shareOnTwitter, url, viewInHistory } = props;
 
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const { isWebUI } = useContext(ScreenContext);
@@ -27,79 +35,136 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const pool = useMemo(() => Object.values(poolInfo).find((value) => value.chain === chain), [chain, poolInfo]);
 
-  const viewInHistory = useCallback(
-    () => {
-      if (chain && transactionId) {
-        navigate(`/home/history/${chain}/${transactionId}`);
-      } else {
-        navigate('/home/history');
-      }
-    },
-    [chain, transactionId, navigate]
-  );
+  const [imageDone, setImageDone] = useState(false);
 
-  const shareOnTwitter = useCallback(() => {
-    // TODO: add callback
+  const onImageLoad = useCallback(() => {
+    setImageDone(true);
   }, []);
 
-  const goToNft = useCallback(() => {
-    navigate('/home/nfts/collections');
-  }, [navigate]);
-
   return (
-    <div className={CN(className)}>
-      <Trans
-        components={{
-          main: <div className='title' />,
-          sub: <div className='sub-title' />,
-          logo: (
-            <Logo
-              network={chain}
-              shape='squircle'
-              size={24}
+    <div className={CN(className, { mt: !isWebUI })}>
+      {
+        url && isWebUI && (
+          <img
+            alt='success-gif'
+            className={CN('success-image')}
+            src='/images/subwallet/mint-nft-done.gif'
+          />
+        )
+      }
+      {
+        url
+          ? (
+            <Trans
+              components={{
+                main: <div className='title' />,
+                sub: <div className='sub-title' />,
+                logo: (
+                  <Logo
+                    network={chain}
+                    shape='squircle'
+                    size={24}
+                  />
+                ),
+                span: <span />
+              }}
+              i18nKey={
+                pool?.type !== YieldPoolType.LENDING
+                  ? detectTranslate('<main>Yay! You staked</main><sub><span>in</span><logo /><span>{{poolName}}</span></sub>')
+                  : detectTranslate('<main>Yay! You supplied</main><sub><span>in</span><logo /><span>{{poolName}}</span></sub>')
+              }
+              values={{
+                poolName: pool?.name || ''
+              }}
             />
-          ),
-          span: <span />
-        }}
-        i18nKey={'<main>Yay! You staked</main><sub><span>in</span><logo /><span>{{poolName}}</span></sub>'}
-        values={{
-          poolName: pool?.name || ''
-        }}
-      />
-      <Image
-        height={300}
-        shape='default'
-        src='/images/subwallet/nft.png'
-        width={300}
-      />
+          )
+          : (
+            <div className={CN('title', 'warn')}>
+              {t("Oops!Your NFT can't be minted")}
+            </div>
+          )
+      }
+      <div className='image-container'>
+        <div className={CN('image-placeholder', { placeholder: !!url, hidden: imageDone })} />
+        {
+          url && (
+            <Image
+              className='nft-image'
+              height={300}
+              onLoad={onImageLoad}
+              shape='default'
+              src={baseParseIPFSUrl(url)}
+              width={300}
+            />
+          )
+        }
+        <div
+          className={CN('image-placeholder', 'transparent', 'placeholder', { hidden: imageDone })}
+        >
+          {
+            url
+              ? (
+                <ActivityIndicator size={52} />
+              )
+              : (
+                <ImageSlash
+                  height={52}
+                  width={52}
+                />
+              )
+          }
+        </div>
+      </div>
       <div className='description'>
-        <Trans
-          components={{
-            highlight: (
-              <span
-                className='highlight'
-                onClick={goToNft}
+        {
+          url
+            ? (
+              <Trans
+                components={{
+                  highlight: (
+                    <span
+                      className='highlight'
+                      onClick={goToNft}
+                    />
+                  )
+                }}
+                i18nKey={'T&C: From Oct 24 to Nov 7, each address that initiates transactions on each protocol on the SubWallet Earning Dashboard is eligible for 01 free NFT. Check your NFT <highlight>here</highlight>!'}
               />
             )
-          }}
-          i18nKey={'T&C: From Oct 24 to Nov 7, each address that initiates transactions on each protocol on the SubWallet Earning Dashboard is eligible for 01 free NFT. Check your NFT <highlight>here</highlight>!'}
-        />
+            : (
+              t("Too many people are using SubWallet web dashboard! Don't worry, your transaction is successful and we'll mint another NFT for you. Check back in a few hours or contact us for support.")
+            )
+        }
       </div>
       {
         isWebUI && (
           <div className='button-container'>
-            <Button
-              block={true}
-              icon={(
-                <Icon
-                  phosphorIcon={TwitterLogo}
-                  weight='fill'
-                />
-              )}
-              onClick={shareOnTwitter}
-            >
-              {t('Share to Twitter')}
-            </Button>
+            {
+              url
+                ? (
+                  <Button
+                    block={true}
+                    disabled={!enableShare}
+                    icon={(
+                      <Icon
+                        phosphorIcon={TwitterLogo}
+                        weight='fill'
+                      />
+                    )}
+                    onClick={shareOnTwitter}
+                  >
+                    {t('Share to Twitter')}
+                  </Button>
+                )
+                : (
+                  <Button
+                    block={true}
+                    onClick={contactUs}
+                  >
+                    {t('Contact us')}
+                  </Button>
+                )
+            }
             <Button
               block={true}
               onClick={viewInHistory}
@@ -120,6 +185,54 @@ const EarningDoneSuccess = styled(Component)<Props>(({ theme: { token } }: Props
     flexDirection: 'column',
     gap: token.sizeLG,
 
+    '&.mt': {
+      marginTop: token.marginLG
+    },
+
+    '.success-image': {
+      width: 470,
+      position: 'fixed',
+      zIndex: -1,
+      top: token.sizeLG,
+      left: 'calc(50% - 5px)',
+      transform: 'translateX(-50%)'
+    },
+
+    '.image-container': {
+      position: 'relative'
+    },
+
+    '.image-placeholder': {
+      width: 300,
+      height: 300,
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      backgroundColor: token.colorBgInput,
+      borderRadius: 12,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+
+      '&.placeholder': {
+        top: 0,
+        left: 0,
+        right: 0,
+        position: 'absolute'
+      },
+
+      '&.hidden': {
+        display: 'none'
+      },
+
+      '&.transparent': {
+        backgroundColor: token.colorTransparent
+      }
+    },
+
+    '.nft-image': {
+      borderRadius: 12
+    },
+
     '.button-container': {
       display: 'flex',
       flexDirection: 'column',
@@ -131,7 +244,17 @@ const EarningDoneSuccess = styled(Component)<Props>(({ theme: { token } }: Props
       fontSize: token.fontSizeHeading2,
       lineHeight: token.lineHeightHeading2,
       fontWeight: token.fontWeightStrong,
-      color: token.colorSecondary
+      color: token.colorSecondary,
+      padding: `0 ${token.size}px`,
+
+      '.web-ui-enable &': {
+        padding: `0 ${token.sizeXS}px`
+      },
+
+      '&.warn': {
+        color: token.colorWarning,
+        whiteSpace: 'pre-line'
+      }
     },
 
     '.sub-title': {
@@ -144,16 +267,24 @@ const EarningDoneSuccess = styled(Component)<Props>(({ theme: { token } }: Props
       flexDirection: 'row',
       gap: token.sizeXXS,
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      padding: `0 ${token.size}px`,
+
+      '.web-ui-enable &': {
+        padding: `0 ${token.sizeXS}px`
+      }
     },
 
     '.description': {
-      paddingLeft: token.paddingXS,
-      paddingRight: token.paddingXS,
       color: token.colorTextDescription,
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,
-      fontWeight: token.bodyFontWeight
+      fontWeight: token.bodyFontWeight,
+      padding: `0 ${token.size}px`,
+
+      '.web-ui-enable &': {
+        padding: `0 ${token.sizeXS}px`
+      }
     },
 
     '.highlight': {

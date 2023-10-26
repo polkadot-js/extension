@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension authors & contributors
+// Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 export interface Message extends MessageEvent {
@@ -11,3 +11,5 @@ export interface Message extends MessageEvent {
     sender?: string;
   }
 }
+
+export * from './campaigns';

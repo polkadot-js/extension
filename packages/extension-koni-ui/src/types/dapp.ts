@@ -20,10 +20,11 @@ export type DAppCategory = {
   name: string;
   slug: string;
   id: DAppCategoryType;
-  theme?: TagProps['color'];
+  color?: TagProps['color'];
 };
 
 export type DAppInfo = {
+  categoryMap: Record<string, DAppCategory>;
   title: string;
   id: string;
   subtitle: string;

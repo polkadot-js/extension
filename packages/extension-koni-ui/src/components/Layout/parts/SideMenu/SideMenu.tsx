@@ -3,7 +3,7 @@
 
 import { MenuItem, MenuItemType } from '@subwallet/extension-koni-ui/components/Layout/parts/SideMenu/MenuItem';
 import { CONTACT_US, FAQS_URL, TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants';
-import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useDefaultNavigate, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import usePreloadView from '@subwallet/extension-koni-ui/hooks/router/usePreloadView';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
@@ -121,6 +121,10 @@ function Component ({ className,
     navigate(`${value}`);
   }, [navigate]);
 
+  const goHome = useCallback(() => {
+    navigate('/home');
+  }, [navigate]);
+
   const getSelectedKeys = useCallback((pathname: string) => {
     if (pathname.startsWith('/accounts') || pathname.startsWith('/transaction-done')) {
       return undefined;
@@ -177,8 +181,11 @@ function Component ({ className,
     >
       <div className='__logo-container'>
         <Image
+          alt={'SubWallet'}
+          onClick={goHome}
           shape={'square'}
           src='/images/subwallet/gradient-logo.png'
+          style={{ cursor: 'pointer' }}
         />
 
         <Button

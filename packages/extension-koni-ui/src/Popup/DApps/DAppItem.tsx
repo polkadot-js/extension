@@ -4,7 +4,6 @@
 import NetworkGroup from '@subwallet/extension-koni-ui/components/MetaInfo/parts/NetworkGroup';
 import { DAPPS_FAVORITE } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_DAPPS_FAVORITE } from '@subwallet/extension-koni-ui/constants/dapps';
-import { dAppCategoryMap } from '@subwallet/extension-koni-ui/Popup/DApps/predefined';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
@@ -21,7 +20,7 @@ import { useLocalStorage } from 'usehooks-ts';
 type Props = ThemeProps & DAppInfo;
 
 function Component (props: Props): React.ReactElement<Props> {
-  const { categories, chains,
+  const { categories, categoryMap, chains,
     className = '', description, icon, id, subtitle,
     title, url } = props;
   const { t } = useTranslation();
@@ -84,10 +83,10 @@ function Component (props: Props): React.ReactElement<Props> {
               {categories.map((c) => (
                 <Tag
                   className='__item-tag'
-                  color={dAppCategoryMap[c]?.theme || 'gray'}
+                  color={categoryMap[c]?.color || 'gray'}
                   key={c}
                 >
-                  {t(dAppCategoryMap[c]?.name || capitalize(c))}
+                  {t(categoryMap[c]?.name || capitalize(c))}
                 </Tag>
               ))}
             </div>

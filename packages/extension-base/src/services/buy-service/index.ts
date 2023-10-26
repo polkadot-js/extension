@@ -3,11 +3,12 @@
 
 import { BUY_SERVICE_CONTACT_URL, BUY_TOKEN_URL } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
+import { ListBuyServicesResponse, ListBuyTokenResponse } from '@subwallet/extension-base/services/buy-service/types';
+import { BuyServiceInfo, BuyTokenInfo, SupportService } from '@subwallet/extension-base/types';
 import axios from 'axios';
 import { BehaviorSubject } from 'rxjs';
 
-import { BUY_SERVICE_CONTACTS, MAP_PREDEFINED_BUY_TOKEN } from './constants';
+import { DEFAULT_SERVICE_INFO } from './constants';
 
 export default class BuyService {
   readonly #state: KoniState;
@@ -40,9 +41,43 @@ export default class BuyService {
       url: BUY_TOKEN_URL
     });
 
-    console.log(response);
+    const data = response.data as ListBuyTokenResponse;
 
-    this.buyTokensSubject.next(MAP_PREDEFINED_BUY_TOKEN);
+    const result: Record<string, BuyTokenInfo> = {};
+
+    for (const datum of data) {
+      const temp: BuyTokenInfo = {
+        serviceInfo: {
+          ...DEFAULT_SERVICE_INFO
+        },
+        support: datum.support,
+        services: [],
+        slug: datum.slug,
+        symbol: datum.symbol,
+        network: datum.network
+      };
+
+      for (const [_service, info] of Object.entries(datum.serviceInfo)) {
+        const service = _service as SupportService;
+
+        if (info.isSuspended) {
+          continue;
+        }
+
+        temp.serviceInfo[service] = {
+          network: info.network,
+          symbol: info.symbol
+        };
+
+        temp.services.push(service);
+      }
+
+      if (temp.services.length) {
+        result[temp.slug] = temp;
+      }
+    }
+
+    this.buyTokensSubject.next(result);
 
     this.#state.eventService.emit('buy.tokens.ready', true);
   }
@@ -53,9 +88,17 @@ export default class BuyService {
       url: BUY_SERVICE_CONTACT_URL
     });
 
-    console.log(response);
+    const data = response.data as ListBuyServicesResponse;
 
-    this.buyServicesSubject.next(BUY_SERVICE_CONTACTS);
+    const result: Record<string, BuyServiceInfo> = {};
+
+    for (const datum of data) {
+      const { id, slug, ...info } = datum;
+
+      result[slug] = { ...info };
+    }
+
+    this.buyServicesSubject.next(result);
 
     this.#state.eventService.emit('buy.services.ready', true);
   }

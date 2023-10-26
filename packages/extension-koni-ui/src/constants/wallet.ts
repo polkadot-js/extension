@@ -13,7 +13,12 @@ export const PREDEFINED_WALLETS: Record<string, WalletInfo> = {
     key: 'SubWallet',
     name: 'SubWallet',
     substrateKey: 'subwallet-js',
-    url: 'https://subwallet.app/download.html'
+    url: 'https://chrome.google.com/webstore/detail/subwallet-polkadot-wallet/onhogfjeacnfoofkfgppdlbmlmnplgbn',
+    firefoxUrl: 'https://addons.mozilla.org/firefox/addon/subwallet/',
+    googlePlayUrl: 'https://mobile.subwallet.app/browser?url=https%3A%2F%2Fweb.subwallet.app',
+    appStoreUrl: 'https://mobile.subwallet.app/browser?url=https%3A%2F%2Fweb.subwallet.app',
+    supportWeb: true,
+    supportMobile: true
   },
   Talisman: {
     description: '',
@@ -23,7 +28,10 @@ export const PREDEFINED_WALLETS: Record<string, WalletInfo> = {
     key: 'Talisman',
     name: 'Talisman',
     substrateKey: 'talisman',
-    url: 'https://talisman.xyz/download/'
+    url: 'https://chrome.google.com/webstore/detail/talisman-polkadot-and-eth/fijngjgcjhjmmpcmkeiomlglpeiijkld',
+    firefoxUrl: 'https://addons.mozilla.org/firefox/addon/talisman-wallet-extension/',
+    supportWeb: true,
+    supportMobile: false
   },
   PolkadotJs: {
     description: '',
@@ -33,7 +41,10 @@ export const PREDEFINED_WALLETS: Record<string, WalletInfo> = {
     key: 'PolkadotJs',
     name: 'Polkadot{.js}',
     substrateKey: 'polkadot-js',
-    url: 'https://polkadot.js.org/extension/'
+    url: 'https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd',
+    firefoxUrl: 'https://addons.mozilla.org/firefox/addon/polkadot-js-extension/',
+    supportWeb: true,
+    supportMobile: false
   }
 };
 

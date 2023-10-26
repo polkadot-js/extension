@@ -156,7 +156,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     }
   }, [reformatAttachAddress, autoGenAttachReadonlyAccountName, isAttachAddressEthereum, form, navigate]);
 
-  const items = useMemo((): WelcomeButtonItem[] => [
+  const buttonList = useMemo((): WelcomeButtonItem[] => [
     {
       description: t('Create a new account with SubWallet'),
       icon: PlusCircle,
@@ -182,30 +182,20 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       loading: false
     },
     {
-      description: injected ? t('Connect to your existing extension wallet') : t('For management of your account keys'),
+      description: t('Connect to your existing wallet'),
       icon: PuzzlePiece,
       id: CONNECT_EXTENSION,
       schema: 'secondary',
-      title: injected ? t('Connect extension wallet') : t('Download SubWallet extension'),
+      title: t('Connect wallet'),
       loading: loadingInject
     }
-  ], [injected, isWebUI, t, loadingInject]);
-
-  const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI, items]);
+  ], [isWebUI, t, loadingInject]);
 
   const openModal = useCallback((id: string) => {
     return () => {
       if (id === CONNECT_EXTENSION) {
-        if (injected) {
-          selectWallet();
-        } else {
-          openInNewTab(EXTENSION_URL)();
-        }
-
-        return;
-      }
-
-      if (id === CREATE_ACCOUNT_MODAL) {
+        selectWallet();
+      } else if (id === CREATE_ACCOUNT_MODAL) {
         setSelectedAccountTypes(DEFAULT_ACCOUNT_TYPES);
         navigate('/accounts/new-seed-phrase');
       } else {
@@ -214,7 +204,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       }
     };
   }
-  , [activeModal, selectWallet, inactiveModal, injected, navigate, setSelectedAccountTypes]);
+  , [activeModal, selectWallet, inactiveModal, navigate, setSelectedAccountTypes]);
 
   useEffect(() => {
     if (!isNoAccount) {

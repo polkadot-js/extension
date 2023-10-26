@@ -17,11 +17,13 @@ import { useTranslation } from 'react-i18next';
 import styled, { ThemeContext } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
-type Props = ThemeProps & DAppInfo;
+type Props = ThemeProps & DAppInfo & {
+  compactMode?: boolean
+};
 
 function Component (props: Props): React.ReactElement<Props> {
   const { categories, categoryMap, chains,
-    className = '', description, icon, id, subtitle,
+    className = '', compactMode, description, icon, id, subtitle,
     title, url } = props;
   const { t } = useTranslation();
   const [dAppsFavorite, setDAppsFavorite] = useLocalStorage(DAPPS_FAVORITE, DEFAULT_DAPPS_FAVORITE);
@@ -37,14 +39,69 @@ function Component (props: Props): React.ReactElement<Props> {
 
   const isStared = dAppsFavorite[id];
 
+  if (compactMode) {
+    return (
+      <div
+        className={CN(className, '-compact-mode', { '-is-stared': isStared })}
+        onClick={openInNewTab(url)}
+      >
+        <Image
+          height={'100%'}
+          src={icon || logoMap.default as string}
+          width={'100%'}
+        />
+        <div className={'__item-title-group'}>
+          <div className={'__item-title-wrapper'}>
+            <div className='__item-title'>
+              {title}
+            </div>
+
+            {
+              !!categories && !!categories.length && (
+                <div className='__item-tags-area'>
+                  {categories.map((c) => (
+                    <Tag
+                      className='__item-tag'
+                      color={categoryMap[c]?.color || 'gray'}
+                      key={c}
+                    >
+                      {t(categoryMap[c]?.name || capitalize(c))}
+                    </Tag>
+                  ))}
+                </div>
+              )
+            }
+          </div>
+          <div className='__item-subtitle'>
+            {subtitle}
+          </div>
+        </div>
+        <Button
+          className={CN('__star-button', {
+            '-active': isStared
+          })}
+          icon={(
+            <Icon
+              phosphorIcon={Star}
+              size='sm'
+              weight={isStared ? 'fill' : undefined}
+            />
+          )}
+          onClick={onClickStar}
+          size={'xs'}
+          type='ghost'
+        />
+      </div>
+    );
+  }
+
   return (
     <div
-      className={CN(className, { '-is-stared': isStared })}
+      className={CN(className, '-normal-mode', { '-is-stared': isStared })}
       onClick={openInNewTab(url)}
     >
       <div className={'__item-header'}>
         <Image
-          className={CN('__item-logo')}
           height={'100%'}
           src={icon || logoMap.default as string}
           width={'100%'}
@@ -106,11 +163,14 @@ function Component (props: Props): React.ReactElement<Props> {
 
 const DAppItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    padding: token.padding,
     overflow: 'hidden',
-    backgroundColor: token.colorBgSecondary,
-    borderRadius: token.borderRadiusLG,
     cursor: 'pointer',
+
+    '&.-normal-mode': {
+      padding: token.padding,
+      backgroundColor: token.colorBgSecondary,
+      borderRadius: token.borderRadiusLG
+    },
 
     '.__item-header': {
       display: 'flex',
@@ -154,6 +214,13 @@ const DAppItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       overflow: 'hidden',
       marginBottom: token.marginSM
     },
+    '.__item-tags-area': {
+      display: 'flex',
+      gap: token.sizeXS
+    },
+    '.__item-tag': {
+      marginRight: 0
+    },
     '.__item-footer': {
       display: 'flex',
       justifyContent: 'space-between',
@@ -168,8 +235,29 @@ const DAppItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       }
     },
 
-    '&:hover': {
+    '&.-normal-mode:hover': {
       backgroundColor: token.colorBgInput
+    },
+
+    // compact
+
+    '&.-compact-mode': {
+      display: 'flex',
+      overflow: 'hidden',
+      gap: token.sizeXS,
+      alignItems: 'center',
+
+      '.ant-image': {
+        width: 44,
+        height: 44,
+        minWidth: 44
+      },
+
+      '.__item-title-wrapper': {
+        display: 'flex',
+        alignItems: 'center',
+        gap: token.sizeXXS
+      }
     }
   };
 });

@@ -1986,13 +1986,17 @@ export default class KoniExtension {
               destinationTokenInfo,
               originTokenInfo: tokenInfo,
               recipient: recipient,
-              sendingValue: '0',
+              sendingValue: '1000000000000000000',
               substrateApi
             });
 
-            const paymentInfo = await mockTx.paymentInfo(address);
+            try {
+              const paymentInfo = await mockTx.paymentInfo(address);
 
-            estimatedFee = paymentInfo?.partialFee?.toString() || '0';
+              estimatedFee = paymentInfo?.partialFee?.toString() || '0';
+            } catch (e) {
+              estimatedFee = tokenInfo.minAmount || '0';
+            }
           }
         } else {
           const chainInfo = this.#koniState.chainService.getChainInfoByKey(networkKey);
@@ -2018,7 +2022,7 @@ export default class KoniExtension {
               to: address,
               tokenInfo,
               transferAll: true,
-              value: '0'
+              value: '1000000000000000000'
             });
 
             const paymentInfo = await mockTx?.paymentInfo(address);
@@ -4006,8 +4010,6 @@ export default class KoniExtension {
       poolInfo: inputData.yieldPoolInfo,
       substrateApiMap: this.#koniState.getSubstrateApiMap()
     };
-
-    return [];
 
     return validateYieldProcess(
       inputData.address,

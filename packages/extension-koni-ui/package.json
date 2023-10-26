@@ -71,6 +71,7 @@
     "react-router-dom": "~6.9.0",
     "react-select": "^5.7.0",
     "react-share": "^4.4.1",
+    "react-slick": "^0.29.0",
     "react-tabs": "^6.0.0",
     "react-tooltip": "4.5.1",
     "react-transition-group": "^4.4.5",
@@ -79,8 +80,7 @@
     "redux-toolkit": "^1.1.2-1",
     "semantic-ui-react": "^2.1.4",
     "styled-components": "^5.3.6",
-    "usehooks-ts": "^2.9.1",
-    "react-slick": "^0.29.0"
+    "usehooks-ts": "^2.9.1"
   },
   "devDependencies": {
     "@subwallet/extension-mocks": "^1.1.12-1",
@@ -91,10 +91,10 @@
     "@types/react-copy-to-clipboard": "^5.0.4",
     "@types/react-dom": "^18.0.9",
     "@types/react-lazy-load-image-component": "^1.5.3",
+    "@types/react-slick": "^0.23.11",
     "@types/redux-persist": "^4.3.1",
     "@types/sinon-chrome": "^2.2.11",
     "@types/store": "^2.0.2",
-    "@types/react-slick": "^0.23.11",
     "@types/styled-components": "^5.1.26",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.8.0",
     "enzyme": "^3.11.0",

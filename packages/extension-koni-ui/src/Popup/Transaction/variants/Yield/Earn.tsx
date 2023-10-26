@@ -682,6 +682,7 @@ const Component = () => {
                       address={currentFrom}
                       chain={currentPoolInfo.chain}
                       className={CN('account-free-balance', { hidden: [YieldStepType.XCM].includes(nextStepType) })}
+                      isSubscribe={true}
                       label={t('Available balance:')}
                       tokenSlug={asset}
                     />

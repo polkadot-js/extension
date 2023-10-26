@@ -16,12 +16,13 @@ type Props = ThemeProps & {
   label?: string;
   chain?: string;
   onBalanceReady?: (rs: boolean) => void;
+  isSubscribe?: boolean;
 }
 
-const Component = ({ address, chain, className, customTokenBalance, label, onBalanceReady, tokenSlug }: Props) => {
+const Component = ({ address, chain, className, customTokenBalance, isSubscribe, label, onBalanceReady, tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug);
+  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug, isSubscribe);
 
   useEffect(() => {
     onBalanceReady?.(!isLoading && !error);

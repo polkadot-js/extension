@@ -45,6 +45,20 @@ export const PREDEFINED_WALLETS: Record<string, WalletInfo> = {
     firefoxUrl: 'https://addons.mozilla.org/firefox/addon/polkadot-js-extension/',
     supportWeb: true,
     supportMobile: false
+  },
+  Nova: {
+    description: '',
+    evmKey: null,
+    icon: DefaultLogosMap.nova,
+    mcicon: DefaultLogosMap.nova_mc,
+    key: 'Nova',
+    name: 'Nova',
+    substrateKey: 'polkadot-js',
+    url: 'https://novawallet.io/',
+    googlePlayUrl: 'https://play.google.com/store/apps/details?id=io.novafoundation.nova.market',
+    appStoreUrl: 'https://apps.apple.com/us/app/nova-polkadot-kusama-wallet/id1597119355',
+    supportWeb: false,
+    supportMobile: true
   }
 };
 

@@ -13,18 +13,17 @@ import { Button, ButtonProps, Form, Icon, Image, Input, ModalContext } from '@su
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 import SocialGroup from '../components/SocialGroup';
-import { EXTENSION_URL } from '../constants';
 import { ScreenContext } from '../contexts/ScreenContext';
 import useGetDefaultAccountName from '../hooks/account/useGetDefaultAccountName';
 import usePreloadView from '../hooks/router/usePreloadView';
-import { convertFieldToObject, openInNewTab, readOnlyScan, simpleCheckForm } from '../utils';
+import { convertFieldToObject, readOnlyScan, simpleCheckForm } from '../utils';
 
 type Props = ThemeProps;
 
@@ -47,7 +46,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { injected, loadingInject, selectWallet } = useContext(InjectContext);
+  const { loadingInject, selectWallet } = useContext(InjectContext);
 
   const { accounts, isNoAccount } = useSelector((root: RootState) => root.accountState);
 
@@ -158,10 +157,18 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const buttonList = useMemo((): WelcomeButtonItem[] => [
     {
+      description: t('Connect to your existing wallet'),
+      icon: PuzzlePiece,
+      id: CONNECT_EXTENSION,
+      schema: 'primary',
+      title: t('Connect wallet'),
+      loading: loadingInject
+    },
+    {
       description: t('Create a new account with SubWallet'),
       icon: PlusCircle,
       id: CREATE_ACCOUNT_MODAL,
-      schema: isWebUI ? 'secondary' : 'primary',
+      schema: 'secondary',
       title: t('Create a new account'),
       loading: false
     },
@@ -180,16 +187,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       schema: 'secondary',
       title: t('Attach an account'),
       loading: false
-    },
-    {
-      description: t('Connect to your existing wallet'),
-      icon: PuzzlePiece,
-      id: CONNECT_EXTENSION,
-      schema: 'secondary',
-      title: t('Connect wallet'),
-      loading: loadingInject
     }
-  ], [isWebUI, t, loadingInject]);
+  ], [t, loadingInject]);
 
   const openModal = useCallback((id: string) => {
     return () => {

@@ -61,7 +61,6 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, po
     callback({
       ...poolInfo,
       stats: {
-        isAvailable: false,
         assetEarning: [
           {
             slug: poolInfo.rewardAssets[0],

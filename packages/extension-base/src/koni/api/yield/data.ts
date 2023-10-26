@@ -214,6 +214,34 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
   //     }
   //   ]
   // },
+  stDOT___stellaswap_staking: {
+    slug: 'stDOT___stellaswap_staking',
+    chain: 'moonbeam',
+    name: 'Stellaswap stDOT Staking',
+    logo: 'stellaswap',
+    description: 'Earn rewards by staking xcDOT',
+    type: YieldPoolType.LIQUID_STAKING,
+    inputAssets: [
+      'moonbeam-LOCAL-xcDOT'
+    ],
+    derivativeAssets: [
+      'moonbeam-LOCAL-stDOT' // TODO: add to chain-list
+    ],
+    rewardAssets: [
+      'moonbeam-LOCAL-xcDOT',
+    ],
+    feeAssets: [
+      'moonbeam-NATIVE-GLMR'
+    ],
+    altInputAssets: [],
+    withdrawalMethods: [
+      {
+        name: 'Default withdrawal',
+        description: 'Withdraw your DOT',
+        waitingTime: 0 // 0 means immediately
+      }
+    ]
+  },
   xcDOT___moonwell_lending: {
     slug: 'xcDOT___moonwell_lending',
     chain: 'moonbeam',

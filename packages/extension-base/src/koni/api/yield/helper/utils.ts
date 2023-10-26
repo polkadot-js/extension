@@ -60,7 +60,7 @@ export const YIELD_EXTRINSIC_TYPES = [
   ExtrinsicType.STAKING_POOL_WITHDRAW
 ];
 
-export const YIELD_POOL_STAT_REFRESH_INTERVAL = 300000;
+export const YIELD_POOL_STAT_REFRESH_INTERVAL = 90000;
 
 export function convertDerivativeToOriginToken (amount: string, poolInfo: YieldPoolInfo, derivativeTokenInfo: _ChainAsset, originTokenInfo: _ChainAsset) {
   const derivativeDecimals = _getAssetDecimals(derivativeTokenInfo);

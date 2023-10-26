@@ -2037,11 +2037,6 @@ export default class KoniExtension {
 
       maxTransferable = maxTransferable.sub(new BN(estimatedFee));
 
-      console.log('freeBalance', freeBalance.value);
-      console.log('estimatedFee', estimatedFee);
-      console.log('ED', tokenInfo.minAmount);
-      console.log('maxTransferable', maxTransferable.toString());
-
       return {
         ...freeBalance,
         value: maxTransferable.gt(BN_ZERO) ? (maxTransferable.toString() || '0') : '0'
@@ -4015,8 +4010,6 @@ export default class KoniExtension {
       poolInfo: inputData.yieldPoolInfo,
       substrateApiMap: this.#koniState.getSubstrateApiMap()
     };
-
-    return [];
 
     return validateYieldProcess(
       inputData.address,

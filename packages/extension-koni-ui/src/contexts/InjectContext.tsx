@@ -5,13 +5,14 @@ import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvm
 import { addLazy, createPromiseHandler } from '@subwallet/extension-base/utils';
 import { Injected, InjectedAccountWithMeta, Unsubcall } from '@subwallet/extension-inject/types';
 import { DisconnectExtensionModal } from '@subwallet/extension-koni-ui/components';
-import { ENABLE_INJECT, PREDEFINED_WALLETS, SELECT_EXTENSION_MODAL, win } from '@subwallet/extension-koni-ui/constants';
+import { AutoConnect, ENABLE_INJECT, PREDEFINED_WALLETS, SELECT_EXTENSION_MODAL, win } from '@subwallet/extension-koni-ui/constants';
 import { useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { addInjects, removeInjects } from '@subwallet/extension-koni-ui/messaging';
 import { isMobile, noop, toShort } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+
 import { checkHasInjected } from '../utils/wallet';
 
 interface Props {
@@ -405,6 +406,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
 
   const disableInject = useCallback(() => {
     injectHandler.disable();
+    AutoConnect.ignore = true;
 
     if (isMobile) {
       const installedWallet = Object.values(PREDEFINED_WALLETS).find((w) => (w.supportMobile && checkHasInjected(w.key)));

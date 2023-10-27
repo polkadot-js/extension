@@ -66,3 +66,5 @@ export const PREDEFINED_WALLETS: Record<string, WalletInfo> = {
 };
 
 export const win = window as Window & InjectedWindow;
+
+export const AutoConnect = { ignore: false };

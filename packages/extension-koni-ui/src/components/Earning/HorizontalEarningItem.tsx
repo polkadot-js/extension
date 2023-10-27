@@ -9,7 +9,7 @@ import { EXCLUSIVE_REWARD_SLUGS, ExclusiveRewardContentMap } from '@subwallet/ex
 import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getEarnExtrinsicType, getWithdrawExtrinsicType, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { getEarnExtrinsicType, getUnstakeExtrinsicType, getWithdrawExtrinsicType, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Logo, Number, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { DotsThree, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
@@ -233,7 +233,7 @@ const Component: React.FC<Props> = (props: Props) => {
           break;
         case YieldAction.UNSTAKE:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickUnStakeBtn, ExtrinsicType.STAKING_LEAVE_POOL);
+          temp.onClick = onClickButton(onClickUnStakeBtn, getUnstakeExtrinsicType(slug));
           temp.label = !compact ? t('Unstake') : undefined;
           temp.tooltip = compact ? t('Unstake') : undefined;
           temp.schema = 'secondary';

@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
@@ -115,7 +115,6 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
 export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, useAddresses: string[], chainInfo: _ChainInfo, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void) {
   // @ts-ignore
   const derivativeTokenSlug = poolInfo.derivativeAssets[0];
-  const inputTokenSlug = poolInfo.inputAssets[0];
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
 
   return substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), (_balance) => {
@@ -124,7 +123,7 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
     for (let i = 0; i < balances.length; i++) {
       const balanceItem = balances[i];
       const address = useAddresses[i];
-      const totalBalance = balanceItem.free || BN_ZERO;
+      const activeBalance = balanceItem.free || BN_ZERO;
 
       positionCallback({
         slug: poolInfo.slug,
@@ -133,18 +132,21 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
         balance: [
           {
             slug: derivativeTokenSlug, // token slug
-            totalBalance: totalBalance.toString(),
-            activeBalance: totalBalance.toString()
+            totalBalance: activeBalance.toString(),
+            activeBalance: activeBalance.toString()
           }
         ],
 
         metadata: {
-          rewards: [
-            {
-              slug: inputTokenSlug
-            }
-          ]
-        } as YieldPositionStats
+          chain: chainInfo.slug,
+          type: StakingType.LIQUID_STAKING,
+
+          status: StakingStatus.EARNING_REWARD,
+          address,
+          activeStake: activeBalance.toString(),
+          nominations: [],
+          unstakings: []
+        } as NominatorMetadata
       } as YieldPositionInfo);
     }
   });

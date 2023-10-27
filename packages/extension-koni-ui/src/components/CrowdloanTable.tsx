@@ -25,8 +25,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const { isWebUI } = useContext(ScreenContext);
 
   const columns = useMemo(() => {
-    const getUnlockTexts = (fundStatus: _FundStatus): [string, string, string] => {
+    const getUnlockTexts = (fundStatus: _FundStatus, unlockTime: number): [string, string, string] => {
       if (fundStatus === _FundStatus.WON) {
+        if (unlockTime < Date.now()) {
+          return [t('Dissolved'), t('On'), '-won'];
+        }
+
         return [t('Locked'), t('Until'), '-won'];
       }
 
@@ -81,7 +85,7 @@ const Component: React.FC<Props> = (props: Props) => {
         dataIndex: 'details',
         key: 'details',
         render: (_: any, row: _CrowdloanItemType) => {
-          const [text1, text2, statusClass] = getUnlockTexts(row.fundStatus);
+          const [text1, text2, statusClass] = getUnlockTexts(row.fundStatus, row.unlockTime);
           const unlockTime = customFormatDate(new Date(row.unlockTime), '#YYYY#-#MM#-#DD#');
 
           return <div className={'__row-fund-unlock-detail'}>

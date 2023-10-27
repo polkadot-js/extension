@@ -13,6 +13,7 @@ module.exports = {
 
 const path = require('path');
 const webpack = require('webpack');
+const dotenv = require('dotenv');
 
 const CopyPlugin = require('copy-webpack-plugin');
 
@@ -32,6 +33,10 @@ if (args) {
 
 console.log('You are using ' + mode + ' mode.');
 
+const envPath = mode === 'production' ? '.env' : '.env.local';
+
+dotenv.config({ path: `../../${envPath}` });
+
 const packages = [
   'extension-base',
   'extension-chains',
@@ -42,6 +47,13 @@ const packages = [
 ];
 
 const polkadotDevOptions = require('@polkadot/dev/config/babel-config-webpack.cjs');
+
+const _additionalEnv = {
+  MARKETING_CAMPAIGN_URL: JSON.stringify(process.env.MARKETING_CAMPAIGN_URL),
+  BUY_TOKEN_URL: JSON.stringify(process.env.BUY_TOKEN_URL),
+  BUY_SERVICE_CONTACT_URL: JSON.stringify(process.env.BUY_SERVICE_CONTACT_URL)
+};
+
 // Overwrite babel babel config from polkadot dev
 
 const createConfig = (entry, alias = {}, useSplitChunk = false) => {
@@ -106,7 +118,8 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           NODE_ENV: JSON.stringify(mode),
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
-          TARGET_ENV: JSON.stringify('mobile')
+          TARGET_ENV: JSON.stringify('mobile'),
+          ..._additionalEnv
         }
       }),
       new CopyPlugin({

@@ -30,7 +30,9 @@ export const DefaultLogosMap: Record<string, string> = {
   polkadot_js: '/images/projects/polkadot-js.png',
   polkadot_js_mc: '/images/projects/polkadot-js-monochrome.svg',
   talisman: '/images/projects/talisman.png',
-  talisman_mc: '/images/projects/talisman-monochrome.svg'
+  talisman_mc: '/images/projects/talisman-monochrome.svg',
+  nova: '/images/projects/nova-wallet.png',
+  nova_mc: '/images/projects/nova-wallet-monochrome.svg'
 };
 
 export const IconMap = {

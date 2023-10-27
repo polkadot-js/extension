@@ -12,7 +12,12 @@ export interface WalletInfo {
   key: string;
   name: string;
   substrateKey: string | null;
+  supportWeb: boolean;
+  supportMobile: boolean;
   url: string;
+  firefoxUrl?: string;
+  googlePlayUrl?: string;
+  appStoreUrl?: string;
 }
 
 type This = typeof globalThis;

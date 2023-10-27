@@ -11,3 +11,4 @@ export * from './function';
 export * from './getLanguageOptions';
 export * from './i18n';
 export * from './number';
+export * from './mobile';

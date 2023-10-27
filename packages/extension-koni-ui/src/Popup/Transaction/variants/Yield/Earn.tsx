@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, OptimalYieldPathRequest, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, OptimalYieldPathRequest, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -13,6 +13,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useFetchChainState, useGetChainPrefixBySlug, useNotification, usePreCheckAction, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useGetYieldPositionByAddressAndSlug from '@subwallet/extension-koni-ui/hooks/screen/earning/useGetYieldPositionByAddressAndSlug';
 import { getOptimalYieldPath } from '@subwallet/extension-koni-ui/messaging';
+import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
@@ -30,7 +31,7 @@ import styled, { useTheme } from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../../helper';
-import { FreeBalanceToStake, TransactionContent, YieldOutlet } from '../../parts';
+import { FreeBalance, FreeBalanceToYield, TransactionContent, YieldOutlet } from '../../parts';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -78,9 +79,13 @@ const Component = () => {
   const [isSubmitDisable, setIsSubmitDisable] = useState<boolean>(true);
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [checkMintLoading, setCheckMintLoading] = useState(false);
+  const [canMint, setCanMint] = useState(false);
   const [submitString, setSubmitString] = useState<string | undefined>();
+  const [connectionError, setConnectionError] = useState<string>();
 
   const currentStep = processState.currentStep;
+  const nextStepType = processState.steps?.[currentStep + 1]?.type;
 
   const [form] = Form.useForm<YieldParams>();
 
@@ -88,13 +93,11 @@ const Component = () => {
   const currentFrom = useWatchTransaction('from', form, defaultData);
   const currentPoolInfo = useMemo(() => poolInfoMap[methodSlug], [methodSlug, poolInfoMap]);
 
-  const needDotBalance = useMemo(() => !['westend', 'polkadot'].includes(currentPoolInfo.chain), [currentPoolInfo.chain]);
-
-  const [isDotBalanceReady, setIsDotBalanceReady] = useState<boolean>(!needDotBalance);
-
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
   const preCheckAction = usePreCheckAction(currentFrom);
+
+  const hasXcm = !['westend', 'polkadot'].includes(currentPoolInfo.chain);
 
   const extrinsicType = useMemo(() => getEarnExtrinsicType(methodSlug), [methodSlug]);
 
@@ -103,8 +106,14 @@ const Component = () => {
   const onDone = useCallback((extrinsicHash: string) => {
     const chainType = isEthereumAddress(currentFrom) ? 'ethereum' : 'substrate';
 
-    navigate(`/transaction-done/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
-  }, [currentFrom, currentPoolInfo.chain, navigate]);
+    let donePath = 'transaction-done';
+
+    if (canMint) {
+      donePath = 'earning-done';
+    }
+
+    navigate(`/${donePath}/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
+  }, [currentFrom, currentPoolInfo.chain, canMint, navigate]);
 
   const onError = useCallback((error: Error) => {
     notify({
@@ -380,6 +389,28 @@ const Component = () => {
     return processState.currentStep === processState.steps.length - 1;
   }, [processState.currentStep, processState.steps.length]);
 
+  const balanceTokens = useMemo(() => {
+    const result: Array<{ chain: string, token: string }> = [];
+
+    const chain = currentPoolInfo.chain;
+
+    for (const inputAsset of currentPoolInfo.inputAssets) {
+      result.push({
+        token: inputAsset,
+        chain: chain
+      });
+    }
+
+    if (hasXcm) {
+      result.push({
+        token: dotPolkadotSlug,
+        chain: 'polkadot'
+      });
+    }
+
+    return result;
+  }, [currentPoolInfo.chain, currentPoolInfo.inputAssets, hasXcm]);
+
   const onClick = useCallback(() => {
     setSubmitLoading(true);
     dispatchProcessState({
@@ -521,13 +552,47 @@ const Component = () => {
                 },
                 type: EarningActionType.STEP_CREATE
               });
+
+              const errorNetwork = res.connectionError;
+
+              if (errorNetwork) {
+                const networkName = chainInfoMap[errorNetwork].name;
+                const text = t('Please enable {{networkName}} network', { replace: { networkName } });
+
+                notify({
+                  type: 'error',
+                  message: text
+                });
+              }
+
+              setConnectionError(errorNetwork);
             })
             .catch(console.error)
             .finally(() => setStepLoading(false));
         }, 1000, 5000, false);
       }
     }
-  }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom]);
+  }, [submitString, currentPoolInfo, currentAmount, currentStep, currentFrom, chainInfoMap, t, notify]);
+
+  useEffect(() => {
+    setCheckMintLoading(true);
+
+    unlockDotCheckCanMint({
+      slug: currentPoolInfo.slug,
+      address: currentFrom,
+      network: currentPoolInfo.chain
+    })
+      .then((value) => {
+        setCanMint(value);
+      })
+      .finally(() => {
+        setCheckMintLoading(false);
+      });
+
+    return () => {
+      setCanMint(false);
+    };
+  }, [currentFrom, currentPoolInfo.chain, currentPoolInfo.slug]);
 
   return (
     <div className={'earning-wrapper'}>
@@ -592,18 +657,13 @@ const Component = () => {
                 />
               </Form.Item>
 
-              {
-                !['westend', 'polkadot'].includes(currentPoolInfo.chain) && (
-                  <FreeBalanceToStake
-                    address={currentFrom}
-                    chain={'polkadot'}
-                    className={'account-free-balance'}
-                    label={t('Available DOT on Polkadot:')}
-                    onBalanceReady={setIsDotBalanceReady}
-                    tokenSlug={dotPolkadotSlug}
-                  />
-                )
-              }
+              <FreeBalanceToYield
+                address={currentFrom}
+                className={CN('account-free-balance', { hidden: nextStepType !== YieldStepType.XCM })}
+                label={t('Available balance:')}
+                onBalanceReady={setIsBalanceReady}
+                tokens={balanceTokens}
+              />
 
               {currentPoolInfo.inputAssets.map((asset, index) => {
                 const name = formFieldPrefix + String(index);
@@ -618,12 +678,12 @@ const Component = () => {
                     key={name}
                     style={{ display: 'flex', flexDirection: 'column' }}
                   >
-                    <FreeBalanceToStake
+                    <FreeBalance
                       address={currentFrom}
                       chain={currentPoolInfo.chain}
-                      className={'account-free-balance'}
-                      label={t('Available to stake:')}
-                      onBalanceReady={setIsBalanceReady}
+                      className={CN('account-free-balance', { hidden: [YieldStepType.XCM].includes(nextStepType) })}
+                      isSubscribe={true}
+                      label={t('Available balance:')}
                       tokenSlug={asset}
                     />
 
@@ -696,7 +756,7 @@ const Component = () => {
 
           <Button
             block
-            disabled={submitLoading || isSubmitDisable || !isBalanceReady || !isDotBalanceReady || stepLoading}
+            disabled={submitLoading || isSubmitDisable || !isBalanceReady || stepLoading || !!connectionError || checkMintLoading}
             icon={
               <Icon
                 phosphorIcon={isProcessDone ? CheckCircle : ArrowCircleRight}
@@ -706,7 +766,7 @@ const Component = () => {
             loading={submitLoading}
             onClick={preCheckAction(onClick, extrinsicType)}
           >
-            {processState.currentStep === 0 ? t('Submit') : (!isProcessDone ? t('Continue') : t('Finish'))}
+            {processState.currentStep === 0 ? t('Submit') : t('Continue')}
           </Button>
 
           <Divider className={'staking-modal-divider'} />
@@ -716,7 +776,7 @@ const Component = () => {
           <Divider className={'staking-modal-divider'} />
 
           <Typography.Text style={{ color: token.colorTextLight4 }}>
-            {t('This content is for informational purposes only and does not constitute a guarantee. All rates are annualized and are subject to change.')}
+            {t('The provided information is for informational purposes only and should not be considered as guarantee. All rates are calculated on an annual basis and are subject to change.')}
           </Typography.Text>
         </TransactionContent>
       </div>
@@ -749,6 +809,11 @@ const Component = () => {
                 />
               )
             }
+            <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
+
+            <Typography.Text style={{ color: token.colorTextLight4 }}>
+              {t('All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.')}
+            </Typography.Text>
           </div>
         </div>
       )}
@@ -780,6 +845,10 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.earning-wrapper': {
       display: 'flex',
       flex: 1
+    },
+
+    '.hidden': {
+      display: 'none'
     },
 
     '.__transaction-block': {

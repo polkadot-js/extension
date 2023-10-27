@@ -5,6 +5,7 @@ import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { FilterModal, SortingModal } from '@subwallet/extension-koni-ui/components';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, Icon, ModalContext, Typography } from '@subwallet/react-ui';
 import { ButtonType } from '@subwallet/react-ui/es/button';
 import CN from 'classnames';
@@ -14,7 +15,6 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import EarningTokenList from './EarningTokenList';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 
 interface FilterOption {
   label: string;

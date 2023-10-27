@@ -97,8 +97,6 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
 
   return substrateApi.api.query.assets.account.multi(useAddresses.map((address) => [_getTokenOnChainAssetId(derivativeTokenInfo), address]), (balances) => {
-    let totalBalance = new BN(0);
-
     for (let i = 0; i < balances.length; i++) {
       const b = balances[i];
       const address = useAddresses[i];
@@ -106,44 +104,27 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
       const bdata = b?.toHuman();
 
-      if (bdata) {
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
-        const addressBalance = new BN(String(bdata?.balance).replaceAll(',', '') || '0');
-
-        positionCallback({
-          slug: poolInfo.slug,
-          chain: chainInfo.slug,
-          address,
-          balance: [
-            {
-              slug: derivativeTokenSlug, // token slug
-              totalBalance: addressBalance.toString(),
-              activeBalance: addressBalance.toString()
-            }
-          ],
-
-          metadata: {
-            rewards: []
-          } as YieldPositionStats
-        } as YieldPositionInfo);
-      }
-    }
-
-    balances.forEach((b) => {
       // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-      const bdata = b?.toHuman();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+      const addressBalance = bdata && bdata.balance ? new BN(String(bdata?.balance).replaceAll(',', '') || '0') : BN_ZERO;
 
-      if (bdata) {
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
-        const addressBalance = new BN(String(bdata?.balance).replaceAll(',', '') || '0');
+      positionCallback({
+        slug: poolInfo.slug,
+        chain: chainInfo.slug,
+        address,
+        balance: [
+          {
+            slug: derivativeTokenSlug, // token slug
+            totalBalance: addressBalance.toString(),
+            activeBalance: addressBalance.toString()
+          }
+        ],
 
-        // @ts-ignore
-        totalBalance = totalBalance.add(addressBalance);
-      }
-    });
+        metadata: {
+          rewards: []
+        } as YieldPositionStats
+      } as YieldPositionInfo);
+    }
   });
 }
 

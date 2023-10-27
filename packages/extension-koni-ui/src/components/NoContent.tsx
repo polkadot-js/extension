@@ -184,7 +184,8 @@ const NoContent = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '.title': {
         fontSize: 16,
-        lineHeight: '24px'
+        lineHeight: '24px',
+        textAlign: 'center'
       },
 
       '.content': {

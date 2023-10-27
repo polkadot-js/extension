@@ -137,7 +137,14 @@ export class KeyringService {
     }
   }
 
-  public removeInjectAccounts (addresses: string[]) {
+  public removeInjectAccounts (_addresses: string[]) {
+    const addresses = _addresses.map((address) => {
+      try {
+        return keyring.getPair(address).address;
+      } catch (error) {
+        return address;
+      }
+    });
     const currentAddress = this.currentAccountSubject.value.address;
     const afterAccounts = Object.keys(this.accounts).filter((address) => (addresses.indexOf(address) < 0));
 
@@ -163,7 +170,7 @@ export class KeyringService {
     await new Promise<void>((resolve) => {
       setTimeout(() => {
         resolve();
-      }, 500);
+      }, 1500);
     });
     this.updateKeyringState();
     this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });

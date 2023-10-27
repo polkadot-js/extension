@@ -10,6 +10,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -2207,12 +2208,12 @@ export interface YieldStepDetail {
 
 export interface OptimalYieldPath {
   totalFee: YieldTokenBaseInfo[],
-  steps: YieldStepDetail[]
+  steps: YieldStepDetail[],
+  connectionError?: string
 }
 
 export enum YieldValidationStatus {
   NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
-  NOT_ENOUGH_MIN_AMOUNT = 'NOT_ENOUGH_MIN_AMOUNT',
   NOT_ENOUGH_BALANCE = 'NOT_ENOUGH_BALANCE',
   NOT_ENOUGH_MIN_JOIN_POOL = 'NOT_ENOUGH_MIN_JOIN_POOL',
   OK = 'OK'
@@ -2250,6 +2251,7 @@ export interface YieldPoolStats {
   maxCandidatePerFarmer: number,
   maxWithdrawalRequestPerFarmer: number,
 
+  isAvailable?: boolean,
   assetEarning?: YieldAssetEarningStats[],
   farmerCount?: number,
   totalApr?: number,
@@ -2303,15 +2305,6 @@ export interface SubmitJoinNominationPool {
   selectedPool: NominationPoolInfo,
   nominatorMetadata?: NominatorMetadata
 }
-
-export interface ParaChainInfo {
-  slug: string,
-  name: string,
-  paraState?: CrowdloanParaState,
-  paraId: number | null
-}
-
-export type ParaChainInfoMap = Record<string, Record<string, ParaChainInfo>>;
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
@@ -2595,6 +2588,13 @@ export interface KoniRequestSignatures {
 
   /// Metadata
   'pri(metadata.find)': [RequestFindRawMetadata, ResponseFindRawMetadata];
+
+  /* Campaign */
+
+  'pri(campaign.unlockDot.canMint)': [RequestUnlockDotCheckCanMint, boolean]
+  'pri(campaign.unlockDot.subscribe)': [RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft, UnlockDotTransactionNft]
+
+  /* Campaign */
 }
 
 export interface ApplicationMetadataType {

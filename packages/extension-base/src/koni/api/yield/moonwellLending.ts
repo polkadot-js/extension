@@ -12,19 +12,20 @@ export function subscribeMoonwellLendingStats (chainApi: _SubstrateApi, chainInf
     callback({
       ...poolInfo,
       stats: {
+        isAvailable: false,
         assetEarning: [
           {
             slug: poolInfo.rewardAssets[0],
-            apr: 232.45,
-            exchangeRate: 1 / 7.46544
+            apr: -1,
+            exchangeRate: -1
           }
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '50000000000',
         minWithdrawal: '0',
-        totalApr: 232.45,
-        tvl: '6579642367262479'
+        totalApr: -1,
+        tvl: '0'
       }
     });
   }

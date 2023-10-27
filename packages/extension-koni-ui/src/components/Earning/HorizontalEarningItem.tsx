@@ -10,10 +10,10 @@ import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/exten
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getEarnExtrinsicType, getWithdrawExtrinsicType, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Button, ButtonProps, Icon, Logo, Number, Tooltip, Typography, Web3Block } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, Logo, Number, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { DotsThree, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 import MetaInfo from '../MetaInfo/MetaInfo';
@@ -62,9 +62,11 @@ const Component: React.FC<Props> = (props: Props) => {
     yieldPoolInfo,
     yieldPositionInfo } = props;
 
+  const isAvailable = yieldPoolInfo.stats?.isAvailable ?? true;
+
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { chain, description, name, slug, type } = yieldPoolInfo;
+  const { chain, description, logo, name, slug, type } = yieldPoolInfo;
   const { address } = yieldPositionInfo;
 
   const preCheckAction = usePreCheckAction(address, false);
@@ -138,12 +140,43 @@ const Component: React.FC<Props> = (props: Props) => {
     return getYieldAvailableActionsByType(yieldPoolInfo);
   }, [yieldPoolInfo]);
 
-  const buttons = useMemo((): ButtonOptionProps[] => {
+  const line3Ref = useRef<HTMLDivElement | null>(null);
+  const line3LeftPartRef = useRef<HTMLDivElement | null>(null);
+  const line3RightPartRef = useRef<HTMLDivElement | null>(null);
+
+  const [isCompactButtons, setCompactButtons] = useState<boolean>(false);
+
+  useEffect(() => {
+    const updateCompactButtons = () => {
+      if (line3Ref.current && line3LeftPartRef.current && line3RightPartRef.current) {
+        const line3 = line3Ref.current.clientWidth;
+        const line3LeftPart = line3LeftPartRef.current.clientWidth;
+        const line3RightPart = line3RightPartRef.current.clientWidth;
+
+        if (line3LeftPart + 16 + line3RightPart > line3) {
+          setCompactButtons(true);
+        } else {
+          setCompactButtons(false);
+        }
+      }
+    };
+
+    updateCompactButtons();
+
+    window.addEventListener('resize', updateCompactButtons);
+
+    // Cleanup the event listener when the component unmounts
+    return () => {
+      window.removeEventListener('resize', updateCompactButtons);
+    };
+  }, []);
+
+  const getButtons = useCallback((compact?: boolean): ButtonOptionProps[] => {
     const result: ButtonOptionProps[] = [];
 
     // Calculator
     result.push({
-      disable: false,
+      disable: !isAvailable,
       icon: PlusMinus,
       onClick: onClickButton(onClickCalculatorBtn),
       key: 'calculator',
@@ -154,7 +187,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     // Info
     result.push({
-      disable: false,
+      disable: !isAvailable,
       icon: Question,
       onClick: onClickButton(onClickInfoBtn),
       key: 'info',
@@ -165,45 +198,52 @@ const Component: React.FC<Props> = (props: Props) => {
 
     actionListByChain.forEach((item) => {
       const temp: ButtonOptionProps = {
-        disable: !availableActionsByMetadata.includes(item),
+        disable: !availableActionsByMetadata.includes(item) || !isAvailable,
         key: item,
         hidden: false
       } as ButtonOptionProps;
 
       switch (item) {
         case YieldAction.STAKE:
+
+        // eslint-disable-next-line no-fallthrough
+        case YieldAction.START_EARNING: {
+          const text = yieldPoolInfo.type === YieldPoolType.LENDING ? t('Supply now') : t('Stake now');
+
           temp.icon = PlusCircle;
-          temp.label = t('Stake now');
+          temp.label = !compact ? text : undefined;
+          temp.tooltip = compact ? text : undefined;
           temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(slug));
           break;
+        }
+
         case YieldAction.CLAIM_REWARD:
           temp.icon = Wallet;
           temp.onClick = onClickButton(onClickClaimBtn, ExtrinsicType.STAKING_CLAIM_REWARD);
-          temp.label = t('Claim rewards');
+          temp.label = !compact ? t('Claim rewards') : undefined;
+          temp.tooltip = compact ? t('Claim rewards') : undefined;
           break;
         case YieldAction.WITHDRAW:
         case YieldAction.WITHDRAW_EARNING:
           temp.icon = StopCircle;
           temp.onClick = onClickButton(onClickWithdrawBtn, getWithdrawExtrinsicType(slug));
-          temp.label = t('Withdraw');
+          temp.label = !compact ? t('Withdraw') : undefined;
+          temp.tooltip = compact ? t('Withdraw') : undefined;
           temp.schema = 'secondary';
           break;
         case YieldAction.UNSTAKE:
           temp.icon = MinusCircle;
           temp.onClick = onClickButton(onClickUnStakeBtn, ExtrinsicType.STAKING_LEAVE_POOL);
-          temp.label = t('Unstake');
+          temp.label = !compact ? t('Unstake') : undefined;
+          temp.tooltip = compact ? t('Unstake') : undefined;
           temp.schema = 'secondary';
           break;
         case YieldAction.CANCEL_UNSTAKE:
           temp.icon = MinusCircle;
           temp.onClick = onClickButton(onClickCancelUnStakeBtn, ExtrinsicType.STAKING_CANCEL_UNSTAKE);
-          temp.label = t('Cancel unstake');
+          temp.label = !compact ? t('Cancel unstake') : undefined;
+          temp.tooltip = compact ? t('Cancel unstake') : undefined;
           temp.schema = 'secondary';
-          break;
-        case YieldAction.START_EARNING:
-          temp.icon = PlusCircle;
-          temp.onClick = onClickButton(onClickStakeBtn, ExtrinsicType.JOIN_YIELD_POOL);
-          temp.label = t('Earn now');
           break;
       }
 
@@ -211,7 +251,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, onClickStakeBtn, slug, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
+  }, [isAvailable, onClickButton, onClickCalculatorBtn, t, onClickInfoBtn, actionListByChain, availableActionsByMetadata, yieldPoolInfo.type, onClickStakeBtn, slug, onClickClaimBtn, onClickWithdrawBtn, onClickUnStakeBtn, onClickCancelUnStakeBtn]);
 
   const derivativeTokenState = useMemo(() => {
     if (!yieldPoolInfo.derivativeAssets) {
@@ -267,7 +307,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className={'__item-upper-part'}>
           <Logo
             className={'__item-logo'}
-            network={chain}
+            network={logo || chain}
             size={38}
           />
 
@@ -323,6 +363,15 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
         <div className={'__item-lower-part'}>
           <div className='__item-tags-container'>
+            {
+              !isAvailable &&
+              (
+                <EarningTypeTag
+                  className={'__item-tag'}
+                  comingSoon={true}
+                />
+              )
+            }
             <EarningTypeTag
               className={'__item-tag'}
               type={type}
@@ -334,7 +383,7 @@ const Component: React.FC<Props> = (props: Props) => {
               actionListByChain.includes(YieldAction.STAKE) && (
                 <Button
                   className={'__item-button __item-stake-button'}
-                  disabled={!availableActionsByMetadata.includes(YieldAction.STAKE)}
+                  disabled={!availableActionsByMetadata.includes(YieldAction.STAKE) || !isAvailable}
                   icon={(
                     <Icon
                       iconColor={token.colorPrimary}
@@ -354,7 +403,7 @@ const Component: React.FC<Props> = (props: Props) => {
               actionListByChain.includes(YieldAction.START_EARNING) && (
                 <Button
                   className={'__item-button __item-stake-button'}
-                  disabled={!availableActionsByMetadata.includes(YieldAction.START_EARNING)}
+                  disabled={!availableActionsByMetadata.includes(YieldAction.START_EARNING) || !isAvailable}
                   icon={(
                     <Icon
                       iconColor={token.colorPrimary}
@@ -374,7 +423,7 @@ const Component: React.FC<Props> = (props: Props) => {
               (actionListByChain.includes(YieldAction.CLAIM_REWARD)) && (
                 <Button
                   className={'__item-button __item-stake-button'}
-                  disabled={!availableActionsByMetadata.includes(YieldAction.CLAIM_REWARD)}
+                  disabled={!availableActionsByMetadata.includes(YieldAction.CLAIM_REWARD) || !isAvailable}
                   icon={(
                     <Icon
                       iconColor={token.colorSuccess}
@@ -394,6 +443,7 @@ const Component: React.FC<Props> = (props: Props) => {
               !!onClickMoreBtn && (
                 <Button
                   className={'__item-more-button'}
+                  disabled={!isAvailable}
                   icon={(
                     <Icon
                       phosphorIcon={DotsThree}
@@ -414,61 +464,37 @@ const Component: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Web3Block
-      className={className}
-      leftItem={(
-        <Logo
-          network={chain}
-          size={64}
-        />
-      )}
-      middleItem={(
-        <>
-          <>
-            <div className={'earning-item-name-wrapper'}>
-              <div className={'earning-item-name'}>{name}</div>
-              <EarningTypeTag
-                className={'earning-item-tag'}
-                type={type}
-              />
-
-              {exclusiveRewardTagNode}
-            </div>
-
-            <div className={'earning-item-description'}>{description}</div>
-          </>
-
-          <div className='earning-item-footer'>
-            {buttons.map((item) => {
-              return (
-                <Button
-                  className='earning-action'
-                  disabled={item.disable}
-                  icon={(
-                    <Icon
-                      className={'earning-item-stake-btn'}
-                      phosphorIcon={item.icon}
-                      size='sm'
-                      weight='fill'
-                    />
-                  )}
-                  key={item.key}
-                  onClick={item.onClick}
-                  schema={item.schema}
-                  shape='circle'
-                  size='xs'
-                  tooltip={item.tooltip}
-                >
-                  {item.label}
-                </Button>
-              );
-            })}
-          </div>
-        </>
-      )}
+    <div
+      className={CN(className, '-normal-mode')}
       onClick={onClickItem}
-      rightItem={(
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+    >
+      <Logo
+        className='earning-item-logo'
+        network={logo || chain}
+        size={64}
+      />
+
+      <div className='earning-item-lines-container'>
+        <div className='earning-item-line-1 earning-item-line'>
+          <div className={'earning-item-name-wrapper'}>
+            <div className={'earning-item-name'}>{name}</div>
+            {
+              !isAvailable &&
+                (
+                  <EarningTypeTag
+                    className={'earning-item-tag'}
+                    comingSoon={true}
+                  />
+                )
+            }
+            <EarningTypeTag
+              className={'earning-item-tag'}
+              type={type}
+            />
+
+            {exclusiveRewardTagNode}
+          </div>
+
           <MetaInfo>
             <MetaInfo.Status
               className={'earning-status-item'}
@@ -477,46 +503,132 @@ const Component: React.FC<Props> = (props: Props) => {
               valueColorSchema={getStakingStatus.schema}
             />
           </MetaInfo>
-          <Number
-            decimal={inputTokenInfo ? inputTokenInfo.decimals || 0 : 0}
-            decimalOpacity={0.4}
-            size={30}
-            suffix={inputTokenInfo ? inputTokenInfo.symbol : ''}
-            unitOpacity={0.4}
-            value={yieldPositionInfoBalance.totalBalance} // TODO
-          />
-
-          {/* TODO: move to a useCallBack */}
-          {
-            derivativeTokenState && <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
-              <Typography.Text style={{ color: token.colorTextLight4 }}>{t('Equivalent to:')}</Typography.Text>
-              <Number
-                decimal={derivativeTokenState.decimals}
-                decimalColor={token.colorSuccess}
-                intColor={token.colorSuccess}
-                suffix={derivativeTokenState.symbol}
-                unitColor={token.colorSuccess}
-                value={derivativeTokenState.amount}
-              />
-            </div>
-          }
-
-          {
-            yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL && <div style={{ display: 'flex', alignItems: 'center', gap: token.paddingXXS }}>
-              <Typography.Text style={{ color: token.colorTextLight4 }}>{t('Unclaimed rewards:')}</Typography.Text>
-              <Number
-                decimal={_getAssetDecimals(inputTokenInfo)}
-                decimalColor={token.colorSuccess}
-                intColor={token.colorSuccess}
-                suffix={_getAssetSymbol(inputTokenInfo)}
-                unitColor={token.colorSuccess}
-                value={nominationPoolReward?.unclaimedReward || '0'}
-              />
-            </div>
-          }
         </div>
-      )}
-    />
+
+        <div className='earning-item-line-2 earning-item-line'>
+          <div className={'earning-item-description'}>{description}</div>
+
+          <div className='earning-item-total-balance-value'>
+            <Number
+              decimal={inputTokenInfo ? inputTokenInfo.decimals || 0 : 0}
+              decimalOpacity={0.4}
+              size={30}
+              suffix={inputTokenInfo ? inputTokenInfo.symbol : ''}
+              unitOpacity={0.4}
+              value={yieldPositionInfoBalance.totalBalance} // TODO
+            />
+          </div>
+        </div>
+
+        <div
+          className='earning-item-line-3 earning-item-line'
+          ref={line3Ref}
+        >
+          <div className={CN('earning-item-buttons-wrapper', { '-compact': isCompactButtons })}>
+            <div
+              className='earning-item-buttons'
+            >
+              {getButtons(true).map((item) => {
+                return (
+                  <Button
+                    className='earning-action'
+                    disabled={item.disable}
+                    icon={(
+                      <Icon
+                        className={'earning-item-stake-btn'}
+                        phosphorIcon={item.icon}
+                        size='sm'
+                        weight='fill'
+                      />
+                    )}
+                    key={item.key}
+                    onClick={item.onClick}
+                    schema={item.schema}
+                    shape='circle'
+                    size='xs'
+                    tooltip={item.tooltip}
+                  >
+                    {item.label}
+                  </Button>
+                );
+              })}
+            </div>
+
+            <div
+              className='earning-item-shadow-buttons'
+              ref={line3LeftPartRef}
+            >
+              {getButtons().map((item) => {
+                return (
+                  <Button
+                    className='earning-action'
+                    disabled={item.disable}
+                    icon={(
+                      <Icon
+                        className={'earning-item-stake-btn'}
+                        phosphorIcon={item.icon}
+                        size='sm'
+                        weight='fill'
+                      />
+                    )}
+                    key={item.key}
+                    onClick={item.onClick}
+                    schema={item.schema}
+                    shape='circle'
+                    size='xs'
+                    tooltip={item.tooltip}
+                  >
+                    {item.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div
+            className={'earning-item-label-and-value'}
+            ref={line3RightPartRef}
+          >
+            {
+              derivativeTokenState && <div className={'earning-item-equivalent'}>
+                <div className={'earning-item-equivalent-label'}>
+                  {t('Equivalent to:')}
+                </div>
+
+                <div className={'earning-item-equivalent-value'}>
+                  <Number
+                    decimal={derivativeTokenState.decimals}
+                    decimalColor={token.colorSuccess}
+                    intColor={token.colorSuccess}
+                    suffix={derivativeTokenState.symbol}
+                    unitColor={token.colorSuccess}
+                    value={derivativeTokenState.amount}
+                  />
+                </div>
+              </div>
+            }
+
+            {
+              yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL && <div className={'earning-item-unclaimed-rewards'}>
+                <div className={'earning-item-unclaimed-rewards-label'}>
+                  {t('Unclaimed rewards:')}
+                </div>
+                <div className={'earning-item-unclaimed-rewards-value'}>
+                  <Number
+                    decimal={_getAssetDecimals(inputTokenInfo)}
+                    decimalColor={token.colorSuccess}
+                    intColor={token.colorSuccess}
+                    suffix={_getAssetSymbol(inputTokenInfo)}
+                    unitColor={token.colorSuccess}
+                    value={nominationPoolReward?.unclaimedReward || '0'}
+                  />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -524,15 +636,46 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
   return ({
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
-    padding: `${token.paddingXL}px ${token.paddingMD}px ${token.padding}px`,
     cursor: 'pointer',
+
+    '&.-normal-mode': {
+      padding: `${token.paddingXL}px ${token.paddingMD}px ${token.padding}px`,
+      display: 'flex',
+
+      '&:hover': {
+        backgroundColor: token.colorBgInput
+      }
+    },
+
+    '.earning-item-logo': {
+      marginRight: token.size
+    },
+
+    '.earning-item-lines-container': {
+      overflow: 'hidden',
+      flex: 1
+    },
+
+    '.earning-item-line': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      overflow: 'hidden',
+      gap: token.size
+    },
+
+    '.earning-item-line-1': {
+      marginBottom: 2
+    },
 
     '.earning-item-name-wrapper': {
       display: 'flex',
       alignItems: 'center',
       gap: token.paddingSM,
-      paddingBottom: token.paddingXS,
       overflow: 'hidden'
+    },
+
+    '.earning-status-item, .earning-item-total-balance-value': {
+      'white-space': 'nowrap'
     },
 
     '.earning-item-name': {
@@ -556,26 +699,40 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
       fontWeight: 500,
-      color: token.colorTextLight4
-    },
-
-    '.earning-item-reward': {
-      display: 'flex',
-      alignItems: 'flex-end',
-      gap: token.paddingSM
-    },
-
-    '.earning-item-total-value-staked': {
-      fontSize: token.fontSize,
-      lineHeight: token.lineHeight,
-      color: token.colorTextLight4
-    },
-
-    '.earning-item-reward-sub-text': {
-      fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG,
       color: token.colorTextLight4,
-      paddingBottom: 6
+      display: '-webkit-box',
+      '-webkit-line-clamp': '2',
+      '-webkit-box-orient': 'vertical',
+      overflow: 'hidden'
+    },
+
+    '.earning-item-total-balance-value': {
+      fontSize: 30,
+      lineHeight: `${38}px`,
+      color: token.colorTextLight1,
+      fontWeight: token.headingFontWeight,
+
+      '.ant-number, .ant-number-integer': {
+        color: 'inherit !important',
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      },
+
+      '.ant-number-decimal, .ant-number-suffix': {
+        color: 'inherit !important',
+        fontSize: '24px !important',
+        fontWeight: 'inherit !important',
+        lineHeight: `${24}px`
+      }
+    },
+
+    '.earning-item-line-2': {
+      marginBottom: token.marginXXS
+    },
+
+    '.earning-item-label-and-value': {
+      overflow: 'hidden'
     },
 
     '.earning-item-icon-btn': {
@@ -583,25 +740,9 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
       borderRadius: '50%'
     },
 
-    '.earning-item-footer': {
-      display: 'flex',
-      gap: token.padding,
-      paddingTop: token.paddingLG,
-      paddingBottom: token.paddingXS
-    },
-
     '.earning-item-stake-btn': {
       width: token.sizeMD,
       height: token.sizeMD
-    },
-
-    '& > .ant-web3-block-left-item': {
-      alignItems: 'flex-start'
-    },
-
-    '& > .ant-web3-block-right-item': {
-      marginRight: 0,
-      alignItems: 'flex-start'
     },
 
     '.earning-status-item': {
@@ -616,6 +757,74 @@ const HorizontalEarningItem = styled(Component)<Props>(({ theme: { token } }: Pr
 
         '&:hover:not(:disabled)': {
           borderColor: token['gray-2']
+        }
+      }
+    },
+
+    '.earning-item-equivalent, .earning-item-unclaimed-rewards': {
+      display: 'flex',
+      'white-space': 'nowrap',
+      overflow: 'hidden',
+      gap: token.sizeXXS,
+      fontWeight: token.headingFontWeight,
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight
+    },
+
+    '.earning-item-equivalent-label, .earning-item-unclaimed-rewards-label': {
+      color: token.colorTextLight4,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
+    },
+
+    '.earning-item-equivalent-value, .earning-item-unclaimed-rewards-value': {
+      '.ant-number .ant-typography': {
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit',
+        textAlign: 'end'
+      }
+    },
+
+    '.earning-item-buttons, .earning-item-shadow-buttons': {
+      display: 'flex',
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingXS
+    },
+
+    '.earning-item-buttons': {
+      gap: token.paddingSM
+    },
+
+    '.earning-item-shadow-buttons': {
+      gap: token.paddingSM,
+      position: 'absolute',
+      left: 0,
+      top: 0
+    },
+
+    '.earning-item-buttons-wrapper': {
+      position: 'relative',
+
+      '.earning-item-buttons': {
+        opacity: 0,
+        pointerEvents: 'none'
+      },
+
+      '.earning-item-shadow-buttons': {
+        opacity: 1,
+        pointerEvents: 'auto'
+      },
+
+      '&.-compact': {
+        '.earning-item-buttons': {
+          opacity: 1,
+          pointerEvents: 'auto'
+        },
+
+        '.earning-item-shadow-buttons': {
+          opacity: 0,
+          pointerEvents: 'none'
         }
       }
     },

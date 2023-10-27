@@ -508,7 +508,10 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
           </div>
         )}
         {!!filteredTableItems.length && !loading && (
-          <CrowdloanTable items={filteredTableItems} />
+          <CrowdloanTable
+            hideBalance={false}
+            items={filteredTableItems}
+          />
         )}
         {!filteredTableItems.length && !loading && (
           <div className={'__empty-list-wrapper'}>

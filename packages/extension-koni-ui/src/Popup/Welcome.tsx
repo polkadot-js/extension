@@ -13,7 +13,7 @@ import { Button, ButtonProps, Form, Icon, Image, Input, ModalContext } from '@su
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -47,7 +47,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { enableInject, injected, loadingInject } = useContext(InjectContext);
+  const { injected, loadingInject, selectWallet } = useContext(InjectContext);
 
   const { accounts, isNoAccount } = useSelector((root: RootState) => root.accountState);
 
@@ -197,7 +197,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     return () => {
       if (id === CONNECT_EXTENSION) {
         if (injected) {
-          enableInject();
+          selectWallet();
         } else {
           openInNewTab(EXTENSION_URL)();
         }
@@ -214,9 +214,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       }
     };
   }
-  , [activeModal, enableInject, inactiveModal, injected, navigate, setSelectedAccountTypes]);
+  , [activeModal, selectWallet, inactiveModal, injected, navigate, setSelectedAccountTypes]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!isNoAccount) {
       navigate(returnPath);
       setReturnStorage(DEFAULT_ROUTER_PATH);

@@ -23,7 +23,14 @@ export const DefaultLogosMap: Record<string, string> = {
   omnibtc: '/images/projects/omnibtc.jpg',
   coinversation: '/images/projects/coinversation.jpg',
   peaq: '/images/projects/peaq.jpg',
-  t3rn: '/images/projects/t3rn.png'
+  t3rn: '/images/projects/t3rn.png',
+  moonwell: '/images/projects/moonwell-apollo.png',
+  subwallet_gradient: '/images/projects/subwallet-gradient.png',
+  subwallet_mc: '/images/projects/subwallet-monochrome.svg',
+  polkadot_js: '/images/projects/polkadot-js.png',
+  polkadot_js_mc: '/images/projects/polkadot-js-monochrome.svg',
+  talisman: '/images/projects/talisman.png',
+  talisman_mc: '/images/projects/talisman-monochrome.svg'
 };
 
 export const IconMap = {

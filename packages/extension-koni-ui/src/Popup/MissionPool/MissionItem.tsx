@@ -136,10 +136,10 @@ function Component (props: Props): React.ReactElement<Props> {
         className={CN(className, '-compact-mode')}
         onClick={onClickContainer}
       >
-         <div
+        <div
           className='__compact-item-background'
-          style={{ backgroundImage: data.logo ? `url("${data.logo}")` : undefined }}
-         ></div>
+          style={{ backgroundImage: data.backdrop_image ? `url("${data.backdrop_image}")` : undefined }}
+        ></div>
 
         <div className={'__compact-item-inner'}>
           <Image
@@ -393,12 +393,12 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '.__compact-item-background': {
         height: '100%',
         width: 32,
-        backgroundPosition: 'center',
+        backgroundPosition: 'left',
         backgroundSize: 'cover',
         position: 'absolute',
         top: 0,
         left: 0,
-        filter: 'blur(4.5px)',
+        filter: 'blur(4.5px)'
       },
 
       '.__compact-item-inner': {
@@ -411,7 +411,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         display: 'flex',
         flex: 1,
         flexDirection: 'column',
-        overflow: 'hidden',
+        overflow: 'hidden'
       },
 
       '.__compact-item-content-part-1, .__compact-item-content-part-2': {
@@ -419,12 +419,11 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: token.size,
+        gap: token.size
       },
 
       '.__compact-item-content-part-2': {
-
-        overflow: 'hidden',
+        overflow: 'hidden'
       },
 
       '.__compact-item-name': {
@@ -436,6 +435,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         'white-space': 'nowrap',
         fontWeight: token.headingFontWeight,
         flex: 1,
+        minWidth: 80
       },
 
       '.__compact-item-tags': {
@@ -448,7 +448,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         lineHeight: token.lineHeightSM,
         fontWeight: token.bodyFontWeight,
         gap: token.sizeXXS,
-        overflow: 'hidden',
+        overflow: 'hidden'
       },
 
       '.__compact-item-label': {
@@ -459,7 +459,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         color: token.colorTextLight4,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
+        whiteSpace: 'nowrap'
       },
 
       '.__compact-item-value': {
@@ -467,8 +467,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         fontWeight: token.headingFontWeight,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        maxWidth: 100
+        whiteSpace: 'nowrap'
       }
     }
   };

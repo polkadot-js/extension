@@ -12,16 +12,14 @@ import DAppItem from '@subwallet/extension-koni-ui/Popup/DApps/DAppItem';
 import FeatureDAppItem from '@subwallet/extension-koni-ui/Popup/DApps/FeatureDAppItem';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { DAppCategoryType, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
-import { ButtonProps, Icon, ModalContext, SwHeader } from '@subwallet/react-ui';
-import { Carousel } from '@trendyol-js/react-carousel';
-import { ArrowCircleLeft, ArrowCircleRight, FadersHorizontal, X } from 'phosphor-react';
+import { DAppCategory, DAppCategoryType, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
+import { Icon, ModalContext, SwSubHeader } from '@subwallet/react-ui';
+import { ArrowCircleLeft, ArrowCircleRight, FadersHorizontal } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
+import Slider, { Settings } from 'react-slick';
 import styled from 'styled-components';
-
-import useDefaultNavigate from '../../hooks/router/useDefaultNavigate';
 
 type Props = ThemeProps;
 
@@ -37,12 +35,46 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [searchInput, setSearchInput] = useState<string>('');
   const { activeModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { goHome } = useDefaultNavigate();
   const { categories, dApps, featureDApps } = useSelector((state: RootState) => state.dApp);
   const [sliderDisplayCount, setSliderDisplayCount] = useState<number>(0);
 
+  const sliderSettings: Settings = useMemo(() => {
+    return {
+      dots: true,
+      infinite: sliderDisplayCount <= featureDApps.length,
+      speed: 500,
+      slidesToShow: sliderDisplayCount,
+      slidesToScroll: 1,
+      swipeToSlide: true,
+      waitForAnimate: true,
+      autoplay: true,
+      nextArrow: (
+        <div>
+          <div className={'__right-arrow'}>
+            <Icon
+              customSize={'28px'}
+              phosphorIcon={ArrowCircleRight}
+              weight={'fill'}
+            />
+          </div>
+        </div>
+      ),
+      prevArrow: (
+        <div>
+          <div className={'__left-arrow'}>
+            <Icon
+              customSize={'28px'}
+              phosphorIcon={ArrowCircleLeft}
+              weight={'fill'}
+            />
+          </div>
+        </div>
+      )
+    };
+  }, [featureDApps.length, sliderDisplayCount]);
+
   useEffect(() => {
-    if (location.pathname === '/dapps') {
+    if (location.pathname === '/home/dapps') {
       setTitle(t('DApps'));
     }
   }, [location.pathname, setTitle, t]);
@@ -53,6 +85,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       value: c.slug
     }))
   ], [categories, t]);
+
+  const categoryMap = useMemo<Record<string, DAppCategory>>(() => (Object.fromEntries(categories.map((c) => [c.slug, c]))), [categories]);
 
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {
     return [
@@ -119,22 +153,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     [activeModal]
   );
 
-  const headerIcons = useMemo<ButtonProps[]>(() => {
-    return [
-      {
-        icon: (
-          <Icon
-            customSize={'24px'}
-            phosphorIcon={X}
-            type='phosphor'
-            weight={'bold'}
-          />
-        ),
-        onClick: goHome
-      }
-    ];
-  }, [goHome]);
-
   const updateSliderDisplayCount = () => {
     const element = document.getElementById('feature-dapp-slider-wrapper'); // Replace with your element's ID
 
@@ -161,14 +179,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     <div className={className}>
       {
         !isWebUI && (
-          <SwHeader
-            left='logo'
-            onClickLeft={goHome}
-            rightButtons={headerIcons}
-            showLeftButton={true}
-          >
-            {t('DApps')}
-          </SwHeader>
+          <SwSubHeader
+            background={'transparent'}
+            className={'__header-area'}
+            paddingVertical
+            showBackButton={false}
+            title={t('DApps')}
+          />
         )
       }
 
@@ -182,43 +199,19 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           >
             {
               !!featureDApps.length && !!sliderDisplayCount && (
-                <Carousel
+                <Slider
                   className={'__carousel-container'}
-                  infinite={false}
-                  key={`feature-dapp-slider-${sliderDisplayCount}`}
-                  leftArrow={(
-                    <div className={'__left-arrow'}>
-                      <Icon
-                        customSize={'28px'}
-                        phosphorIcon={ArrowCircleLeft}
-                        weight={'fill'}
-                      />
-                    </div>
-                  )}
-                  responsive={true}
-                  rightArrow={(
-                    <div className={'__right-arrow'}>
-                      <Icon
-                        customSize={'28px'}
-                        phosphorIcon={ArrowCircleRight}
-                        weight={'fill'}
-                      />
-                    </div>
-                  )}
-                  show={sliderDisplayCount}
-                  slide={1}
+                  {...sliderSettings}
                 >
-                  {
-                    // [featureDApps[0]].map((i, index) => (
-                    featureDApps.map((i, index) => (
-                      <FeatureDAppItem
-                        className={'__feature-dapp-item'}
-                        key={`${i.id}-${index}`}
-                        {...i}
-                      />
-                    ))
-                  }
-                </Carousel>
+                  {featureDApps.map((i, index) => (
+                    <FeatureDAppItem
+                      className={'__feature-dapp-item'}
+                      compactMode={!isWebUI}
+                      key={`${i.id}-${index}`}
+                      {...i}
+                    />
+                  ))}
+                </Slider>
               )
             }
           </div>
@@ -258,8 +251,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 filteredItems.map((i) => (
                   <DAppItem
                     className={'__dapp-item'}
+                    compactMode={!isWebUI}
                     key={i.id}
                     {...i}
+                    categoryMap={categoryMap}
                   />
                 ))
               }
@@ -285,26 +280,51 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
 
-    '.ant-sw-header-container': {
-      paddingTop: token.padding,
-      paddingBottom: token.padding,
-      backgroundColor: token.colorBgDefault
+    '.__header-area': {
+      '.ant-sw-header-center-part': {
+        marginLeft: 0
+      },
+
+      '.ant-sw-sub-header-center-part-pl': {
+        textAlign: 'left'
+      }
     },
 
-    '.ant-sw-header-center-part': {
-      color: token.colorTextLight1,
-      fontSize: token.fontSizeHeading4,
-      lineHeight: token.lineHeightHeading4,
-      fontWeight: token.headingFontWeight
+    '.slick-dots': {
+      display: 'flex !important',
+      listStyle: 'none',
+      gap: 6,
+      marginBottom: 0,
+      paddingLeft: 0,
+      position: 'absolute',
+      right: 28,
+      bottom: 8,
+      pointerEvents: 'none',
+      opacity: 0,
+
+      li: {
+        width: 4,
+        height: 4,
+        backgroundColor: 'rgba(255, 255, 255, 0.30)',
+        borderRadius: 4
+      },
+
+      'li.slick-active': {
+        width: 16,
+        height: 4,
+        backgroundColor: token.colorWhite
+      },
+
+      button: {
+        display: 'none'
+      }
     },
 
     '.__scroll-container': {
-      height: '100%',
-      marginLeft: -44,
-      marginRight: -44,
-      paddingLeft: 44,
-      paddingRight: 44,
+      flex: 1,
       overflow: 'auto'
     },
 
@@ -330,8 +350,7 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '.filter-tabs-container': {
         flex: 1,
-        overflowX: 'auto',
-        flexBasis: 650
+        overflowX: 'auto'
       },
 
       '.search-container': {
@@ -352,7 +371,6 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.__feature-dapp-item': {
       marginRight: token.size,
-      height: '100%',
       display: 'flex',
       flexDirection: 'column',
 
@@ -378,40 +396,32 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__carousel-container': {
+      position: 'relative',
       marginBottom: 40,
 
-      '> div:first-of-type, > div:last-of-type': {
-        '&:not(.styles-module_item-provider__YgMwz)': {
-          position: 'relative',
-          zIndex: 10
-        }
-      },
-
-      '.styles-module_item-provider__YgMwz': {
-        cursor: 'default'
-      },
-
-      '.styles-module_item-tracker__3bypy': {
-        alignItems: 'stretch'
-      },
-
-      '.__left-arrow, .__right-arrow': {
+      '.slick-prev, .slick-next': {
         width: 40,
-        display: 'flex',
         position: 'absolute',
         top: 0,
         bottom: 0,
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        zIndex: 20
       },
 
-      '.__left-arrow': {
+      '.slick-prev': {
         left: 0
       },
 
-      '.__right-arrow': {
+      '.slick-next': {
         right: token.size
+      },
+
+      '.__left-arrow, .__right-arrow': {
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }
     },
 
@@ -441,8 +451,36 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '@media (max-width: 767px)': {
+      '.__carousel-container': {
+        marginBottom: 24
+      },
+
+      '.__dapp-list-area': {
+        marginTop: 24
+      },
+
       '.__dapp-list-container': {
         gridTemplateColumns: 'repeat(1, 1fr)'
+      },
+
+      '.slick-arrow': {
+        opacity: 0
+      },
+
+      '.slick-dots': {
+        opacity: 1
+      },
+
+      '.__tool-area': {
+        '.filter-tabs-container': {
+          order: 1
+        },
+
+        '.search-container': {
+          maxWidth: 'none',
+          order: -1,
+          flexBasis: '100%'
+        }
       }
     }
   };

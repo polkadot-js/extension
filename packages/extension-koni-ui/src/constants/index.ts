@@ -4,6 +4,7 @@
 export * from './account';
 export * from './buy';
 export * from './common';
+export * from './earning';
 export * from './history';
 export * from './ledger';
 export * from './localStorage';
@@ -16,3 +17,4 @@ export * from './signing';
 export * from './stakingStatusUi';
 export * from './strings';
 export * from './transaction';
+export * from './wallet';

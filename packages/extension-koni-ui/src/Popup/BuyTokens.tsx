@@ -10,7 +10,7 @@ import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/compo
 import { BUY_SERVICE_CONTACTS, LIST_PREDEFINED_BUY_TOKEN, MAP_PREDEFINED_BUY_TOKEN } from '@subwallet/extension-koni-ui/constants';
 import { useAssetChecker, useDefaultNavigate, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { AccountType, BuyServiceInfo, CreateBuyOrderFunction, SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AccountType, BuyServiceInfo, BuyTokenInfo, CreateBuyOrderFunction, SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BuyTokensParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { createBanxaOrder, createCoinbaseOrder, createTransakOrder, findAccountByAddress, noop, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { getAccountType } from '@subwallet/extension-koni-ui/utils/account/account';
@@ -91,6 +91,7 @@ function Component ({ className }: Props) {
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
   const { walletReference } = useSelector((state: RootState) => state.settings);
   const checkAsset = useAssetChecker();
 
@@ -166,30 +167,31 @@ function Component ({ className }: Props) {
 
     const filtered = currentSymbol ? list.filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol) : list;
 
+    const convertToItem = (info: BuyTokenInfo): TokenItemType => {
+      return {
+        name: assetRegistry[info.slug]?.name || info.symbol,
+        slug: info.slug,
+        symbol: info.symbol,
+        originChain: info.network
+      };
+    };
+
     filtered.forEach((info) => {
+      const item = convertToItem(info);
+
       if (ledgerNetwork) {
         if (info.network === ledgerNetwork) {
-          result.push({
-            name: info.symbol,
-            slug: info.slug,
-            symbol: info.symbol,
-            originChain: info.network
-          });
+          result.push(item);
         }
       } else {
         if (accountType === 'ALL' || accountType === info.support) {
-          result.push({
-            name: info.symbol,
-            slug: info.slug,
-            symbol: info.symbol,
-            originChain: info.network
-          });
+          result.push(item);
         }
       }
     });
 
     return result;
-  }, [accountType, currentSymbol, ledgerNetwork]);
+  }, [accountType, assetRegistry, currentSymbol, ledgerNetwork]);
 
   const serviceItems = useMemo(() => getServiceItems(selectedTokenKey), [selectedTokenKey]);
 

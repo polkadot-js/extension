@@ -151,7 +151,7 @@ const Component: React.FC<Props> = (props: Props) => {
       className={CN(className)}
       id={modalId}
       onCancel={onClose}
-      title={t('Connect extension')}
+      title={t('Connect wallet')}
     >
       <SwList
         displayRow

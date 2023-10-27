@@ -522,6 +522,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return (
       <SwList.Section
         actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+        autoFocusSearch={false}
         enableSearchInput
         filterBy={filterFunction}
         groupBy={groupBy}

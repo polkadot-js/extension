@@ -68,7 +68,7 @@ const ExtensionItem: React.FC<ExtensionItemProps> = (props: ExtensionOptions) =>
       name={title}
       onPressItem={_onClick}
       rightItem={(
-        !injected
+        !injected && !isMobile
           ? <Icon
             className={'__download-icon'}
             phosphorIcon={DownloadSimple}

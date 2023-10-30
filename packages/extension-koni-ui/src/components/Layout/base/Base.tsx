@@ -22,7 +22,7 @@ import SelectAccount from '../parts/SelectAccount';
 
 export interface LayoutBaseProps extends Omit<
 SwScreenLayoutProps,
-'tabBarItems' | 'footer' | 'headerContent' | 'selectedTabBarItem'
+'tabBarItems' | 'headerContent' | 'selectedTabBarItem'
 >, ThemeProps {
   children: React.ReactNode | React.ReactNode[];
   showFooter?: boolean;
@@ -31,7 +31,7 @@ SwScreenLayoutProps,
 
 const specialLanguages: Array<LanguageType> = ['ja', 'ru'];
 
-const Component = ({ children, className, headerIcons, isSetTitleContext = true, onBack, showFooter, ...props }: LayoutBaseProps) => {
+const Component = ({ children, className, footer, headerIcons, isSetTitleContext = true, onBack, showFooter, ...props }: LayoutBaseProps) => {
   const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
@@ -155,7 +155,7 @@ const Component = ({ children, className, headerIcons, isSetTitleContext = true,
     <SwScreenLayout
       {...props}
       className={CN(className, customClassName, { 'special-language': specialLanguages.includes(language) })}
-      footer={showFooter && <Footer />}
+      footer={showFooter && (footer || <Footer />)}
       headerContent={props.showHeader && <SelectAccount />}
       headerIcons={headerIcons}
       onBack={onBack || defaultOnBack}

@@ -8,9 +8,10 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { unlockDotCheckSubscribe } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, Icon } from '@subwallet/react-ui';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { Button, ButtonProps, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { TwitterLogo } from 'phosphor-react';
+import { ArrowCircleRight, TwitterLogo } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -18,7 +19,6 @@ import { TwitterShareButton } from 'react-share';
 import styled from 'styled-components';
 
 import { EarningDoneFail, EarningDoneProcessing, EarningDoneSuccess } from './parts';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 
 type Props = ThemeProps;
 
@@ -139,6 +139,10 @@ const Component: React.FC<Props> = (props: Props) => {
     openInNewTab('https://linktr.ee/subwallet.app')();
   }, []);
 
+  const joinQuest = useCallback(() => {
+    openInNewTab('https://airlyft.one/subwallet/stake-dot-earn-many-by-subwallet')();
+  }, []);
+
   const goToNft = useCallback(() => {
     navigate('/home/nfts/collections');
   }, [navigate]);
@@ -158,15 +162,20 @@ const Component: React.FC<Props> = (props: Props) => {
           schema: 'secondary',
           children: t('Back to Earning')
         };
+
       case ProcessStatus.SUCCESS:
-        return {
-          block: true,
-          onClick: viewInHistory,
-          schema: 'secondary',
-          children: t('View transaction')
-        };
+        if (nftData?.nftImage) {
+          return undefined;
+        } else {
+          return {
+            block: true,
+            onClick: viewInHistory,
+            schema: 'secondary',
+            children: t('View transaction')
+          };
+        }
     }
-  }, [backToEarning, isWebUI, status, t, viewInHistory]);
+  }, [backToEarning, isWebUI, nftData?.nftImage, status, t, viewInHistory]);
 
   const leftFooterButton = useMemo((): ButtonProps | undefined => {
     if (isWebUI) {
@@ -186,19 +195,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
       case ProcessStatus.SUCCESS: {
         if (nftData?.nftImage) {
-          return {
-            block: true,
-            icon: (
-              <Icon
-                phosphorIcon={TwitterLogo}
-                weight='fill'
-              />
-            ),
-            schema: 'primary',
-            onClick: shareOnTwitter,
-            disabled: !enableShare,
-            children: t('Share to Twitter')
-          };
+          return undefined;
         } else {
           return {
             block: true,
@@ -209,7 +206,64 @@ const Component: React.FC<Props> = (props: Props) => {
         }
       }
     }
-  }, [contactUs, isWebUI, nftData?.nftImage, shareOnTwitter, status, t, viewInHistory, enableShare]);
+  }, [contactUs, isWebUI, nftData?.nftImage, status, t, viewInHistory]);
+
+  const footer = useMemo(() => {
+    if (isWebUI) {
+      return undefined;
+    }
+
+    switch (status) {
+      case ProcessStatus.PROCESSING:
+      case ProcessStatus.FAIL:
+        return undefined;
+
+      case ProcessStatus.SUCCESS: {
+        if (nftData?.nftImage) {
+          return (
+            <div className='footer-button-container'>
+              <Button
+                block={true}
+                disabled={!enableShare}
+                icon={(
+                  <Icon
+                    phosphorIcon={ArrowCircleRight}
+                    weight='fill'
+                  />
+                )}
+                onClick={joinQuest}
+              >
+                {t('Join quest now')}
+              </Button>
+              <Button
+                block={true}
+                disabled={!enableShare}
+                icon={(
+                  <Icon
+                    phosphorIcon={TwitterLogo}
+                    weight='fill'
+                  />
+                )}
+                onClick={shareOnTwitter}
+                schema='secondary'
+              >
+                {t('Share to Twitter')}
+              </Button>
+              <Button
+                block={true}
+                onClick={viewInHistory}
+                schema='secondary'
+              >
+                {t('View transaction')}
+              </Button>
+            </div>
+          );
+        } else {
+          return undefined;
+        }
+      }
+    }
+  }, [enableShare, isWebUI, joinQuest, nftData?.nftImage, shareOnTwitter, status, t, viewInHistory]);
 
   useEffect(() => {
     let unmount = false;
@@ -232,8 +286,10 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <Layout.WithSubHeaderOnly
       className={className}
+      footer={footer}
       leftFooterButton={leftFooterButton}
       rightFooterButton={rightFooterButton}
+      showFooter={!!footer}
       title={t('Earning result')}
     >
       <div className={CN('content-container', {
@@ -260,6 +316,7 @@ const Component: React.FC<Props> = (props: Props) => {
               contactUs={contactUs}
               enableShare={enableShare}
               goToNft={goToNft}
+              joinQuest={joinQuest}
               shareOnTwitter={shareOnTwitter}
               url={nftData?.nftImage || ''}
               viewInHistory={viewInHistory}
@@ -323,6 +380,13 @@ const EarningDoneContent = styled(Component)<Props>(({ theme: { extendToken, tok
       '.highlight': {
         color: token.colorTextBase
       }
+    },
+
+    '.footer-button-container': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.size,
+      padding: `${token.padding}px 0`
     },
 
     '.ant-sw-screen-layout-footer-button-container': {

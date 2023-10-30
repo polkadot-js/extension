@@ -16,9 +16,7 @@ export const getBrowserName = (): string => {
   return (localStorage.getItem('browserInfo') || Bowser.getParser(window.navigator.userAgent).getBrowserName());
 };
 
-export const isFirefox = (): boolean => {
-  return getBrowserName().toLowerCase() === 'firefox';
-};
+export const isFirefox = getBrowserName().toLowerCase() === 'firefox';
 
 export const setSelectedAccountTypes = (keypairTypes: KeypairType[]) => {
   localStorage.setItem(SELECTED_ACCOUNT_TYPE, JSON.stringify(keypairTypes));

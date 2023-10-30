@@ -77,7 +77,6 @@ const getTableItems = (
   const priceId = relayChainSlug === 'polkadot' ? 'polkadot' : 'kusama';
   const symbol = relayChainSlug === 'polkadot' ? 'DOT' : 'KSM';
   const price = priceMap[priceId] || 0;
-  const dateNow = Date.now();
 
   contributionsMap[relayChainSlug].forEach((c) => {
     if (!crowdloanFundInfoMap[c.fund_id]) {
@@ -90,7 +89,7 @@ const getTableItems = (
       return;
     }
 
-    if (!fundInfo.endTime || new Date(fundInfo.endTime).getTime() < dateNow) {
+    if (!fundInfo.endTime) {
       return;
     }
 
@@ -124,10 +123,6 @@ const getAcalaTableItem = (
   priceMap: PriceStore['priceMap']
 ): _CrowdloanItemType | undefined => {
   if (!value || !(fundInfo && fundInfo.endTime && fundInfo.status) || !chainInfo) {
-    return;
-  }
-
-  if (new Date(fundInfo.endTime).getTime() < Date.now()) {
     return;
   }
 

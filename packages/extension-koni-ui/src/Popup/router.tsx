@@ -118,6 +118,8 @@ const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import
 const ConnectionList = new LazyLoader('ConnectionList', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
 const ConnectionDetail = new LazyLoader('ConnectionDetail', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
+const NotFound = new LazyLoader('NotFound', () => import('@subwallet/extension-koni-ui/Popup/NotFound'));
+
 // A Placeholder page
 export function Example () {
   const location = useLocation();
@@ -244,7 +246,8 @@ export const router = createHashRouter([
           ConnectionList.generateRouterObject('list'),
           ConnectionDetail.generateRouterObject('detail/:topic')
         ]
-      }
+      },
+      NotFound.generateRouterObject('*')
     ]
   },
   PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)

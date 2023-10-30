@@ -37,8 +37,6 @@ function Component ({ children, className, fullSize, motion, ...props }: Props):
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    maxWidth: 404,
-
     '.ant-sw-modal-content.ant-sw-modal-content': {
       width: '100%'
     },
@@ -48,6 +46,7 @@ export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) 
       right: token.paddingLG,
       bottom: token.paddingLG,
       top: token.paddingLG,
+      maxWidth: 404,
 
       '.ant-sw-modal-content': {
         width: '100%',

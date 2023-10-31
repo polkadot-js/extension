@@ -1,11 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BUY_SERVICE_CONTACT_URL, BUY_TOKEN_URL } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { ListBuyServicesResponse, ListBuyTokenResponse } from '@subwallet/extension-base/services/buy-service/types';
 import { BuyServiceInfo, BuyTokenInfo, SupportService } from '@subwallet/extension-base/types';
-import axios from 'axios';
+import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
 import { BehaviorSubject } from 'rxjs';
 
 import { DEFAULT_SERVICE_INFO } from './constants';
@@ -36,12 +35,7 @@ export default class BuyService {
   }
 
   private async fetchTokens () {
-    const response = await axios.request({
-      method: 'GET',
-      url: BUY_TOKEN_URL
-    });
-
-    const data = response.data as ListBuyTokenResponse;
+    const data = await fetchStaticData<ListBuyTokenResponse>('buy-token-configs');
 
     const result: Record<string, BuyTokenInfo> = {};
 
@@ -83,12 +77,7 @@ export default class BuyService {
   }
 
   private async fetchServices () {
-    const response = await axios.request({
-      method: 'GET',
-      url: BUY_SERVICE_CONTACT_URL
-    });
-
-    const data = response.data as ListBuyServicesResponse;
+    const data = await fetchStaticData<ListBuyServicesResponse>('buy-service-infos');
 
     const result: Record<string, BuyServiceInfo> = {};
 

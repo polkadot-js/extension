@@ -42,9 +42,6 @@ const packages = [
 const _additionalEnv = {
   TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
   COINBASE_PAY_ID: JSON.stringify(process.env.COINBASE_PAY_ID),
-  MARKETING_CAMPAIGN_URL: JSON.stringify(process.env.MARKETING_CAMPAIGN_URL),
-  BUY_TOKEN_URL: JSON.stringify(process.env.BUY_TOKEN_URL),
-  BUY_SERVICE_CONTACT_URL: JSON.stringify(process.env.BUY_SERVICE_CONTACT_URL),
   TRANSAK_TEST_MODE: JSON.stringify(false),
   BANXA_TEST_MODE: JSON.stringify(false)
 };
@@ -116,6 +113,7 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
           TARGET_ENV: JSON.stringify('extension'),
+          BRANCH_NAME: JSON.stringify(process.env.BRANCH_NAME),
           ID_PREDIX: JSON.stringify('sw-ext-'),
           ...additionalEnv
         }

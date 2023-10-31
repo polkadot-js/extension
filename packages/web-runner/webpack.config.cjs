@@ -49,9 +49,7 @@ const packages = [
 const polkadotDevOptions = require('@polkadot/dev/config/babel-config-webpack.cjs');
 
 const _additionalEnv = {
-  MARKETING_CAMPAIGN_URL: JSON.stringify(process.env.MARKETING_CAMPAIGN_URL),
-  BUY_TOKEN_URL: JSON.stringify(process.env.BUY_TOKEN_URL),
-  BUY_SERVICE_CONTACT_URL: JSON.stringify(process.env.BUY_SERVICE_CONTACT_URL)
+
 };
 
 // Overwrite babel babel config from polkadot dev
@@ -119,6 +117,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
           TARGET_ENV: JSON.stringify('mobile'),
+          BRANCH_NAME: JSON.stringify(process.env.BRANCH_NAME),
           ..._additionalEnv
         }
       }),

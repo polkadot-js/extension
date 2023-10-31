@@ -1,13 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { CaretLeft, CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -34,6 +35,7 @@ function Component (
     symbol }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state: RootState) => state.settings);
+  const { isWebUI } = useContext(ScreenContext);
 
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
@@ -75,7 +77,7 @@ function Component (
             onClick={onOpenReceive}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
-            tooltip={t('Get address')}
+            tooltip={isWebUI ? t('Get address') : undefined}
           />
           <div className={'__button-space'} />
           <Button
@@ -89,7 +91,7 @@ function Component (
             onClick={onOpenSendFund}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
-            tooltip={t('Send tokens')}
+            tooltip={isWebUI ? t('Send tokens') : undefined}
           />
           <div className={'__button-space'} />
           <Button
@@ -104,7 +106,7 @@ function Component (
             onClick={onOpenBuyTokens}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
-            tooltip={t('Buy token')}
+            tooltip={isWebUI ? t('Buy token') : undefined}
           />
         </div>
       </div>
@@ -172,7 +174,6 @@ export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: 
     },
 
     '&.-shrink': {
-
       '.__bottom': {
         display: 'flex'
       },

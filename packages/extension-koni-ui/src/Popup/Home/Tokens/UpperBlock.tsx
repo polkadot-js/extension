@@ -1,12 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
 import { CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -32,6 +33,7 @@ function Component (
     totalValue }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state) => state.settings);
+  const { isWebUI } = useContext(ScreenContext);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -67,7 +69,7 @@ function Component (
             )}
             onClick={onChangeShowBalance}
             size='xs'
-            tooltip={isShowBalance ? t('Hide balance') : t('Show balance')}
+            tooltip={isWebUI ? (isShowBalance ? t('Hide balance') : t('Show balance')) : undefined}
             type='ghost'
           />
           <Number
@@ -105,7 +107,7 @@ function Component (
           onClick={onOpenReceive}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
-          tooltip={t('Get address')}
+          tooltip={isWebUI ? t('Get address') : undefined}
         />
         <div className={'__button-space'} />
         <Button
@@ -119,7 +121,7 @@ function Component (
           onClick={onOpenSendFund}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
-          tooltip={t('Send tokens')}
+          tooltip={isWebUI ? t('Send tokens') : undefined}
         />
         <div className={'__button-space'} />
         <Button
@@ -133,7 +135,7 @@ function Component (
           onClick={onOpenBuyTokens}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
-          tooltip={t('Buy token')}
+          tooltip={isWebUI ? t('Buy token') : undefined}
         />
       </div>
     </div>

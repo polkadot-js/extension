@@ -8,6 +8,7 @@ export interface WalletInfo {
   description: string;
   evmKey: string | null;
   icon: string;
+  mcicon: string;
   key: string;
   name: string;
   substrateKey: string | null;

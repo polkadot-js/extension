@@ -1,13 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { PREDEFINED_WALLETS } from '@subwallet/extension-koni-ui/constants';
 import useAccountAvatarInfo from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarInfo';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, Image } from '@subwallet/react-ui';
 import AccountCard, { AccountCardProps } from '@subwallet/react-ui/es/web3-block/account-card';
 import { Eye, PencilSimpleLine, PuzzlePiece, QrCode, ShieldCheck, Swatches } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
@@ -52,6 +53,7 @@ function Component (props: _AccountCardProps): React.ReactElement<_AccountCardPr
     onPressMoreBtn,
     preventPrefix,
     showMoreBtn,
+    source,
     type: givenType } = props;
   const { address: avatarAddress, prefix } = useAccountAvatarInfo(address ?? '', preventPrefix, genesisHash, givenType);
   const avatarTheme = useAccountAvatarTheme(address || '');
@@ -76,25 +78,24 @@ function Component (props: _AccountCardProps): React.ReactElement<_AccountCardPr
           type: 'icon',
           value: Eye
         };
-      case AccountSignMode.INJECTED:
-        // if (source === 'SubWallet') {
-        //   return {
-        //     type: 'node',
-        //     value: (
-        //       <Image
-        //         className='logo-image'
-        //         height='var(--height)'
-        //         shape='square'
-        //         src={'/images/subwallet/gradient-logo.png'}
-        //       />
-        //     )
-        //   };
-        // }
 
-        return {
-          type: 'icon',
-          value: PuzzlePiece
-        };
+      case AccountSignMode.INJECTED:
+        if (source && PREDEFINED_WALLETS[source]) {
+          return {
+            type: 'node',
+            value: <Image
+              className='logo-image'
+              height='var(--height)'
+              shape='square'
+              src={PREDEFINED_WALLETS[source].mcicon}
+            />
+          };
+        } else {
+          return {
+            type: 'icon',
+            value: PuzzlePiece
+          };
+        }
     }
 
     if (isMantaPayEnabled) {
@@ -105,7 +106,7 @@ function Component (props: _AccountCardProps): React.ReactElement<_AccountCardPr
     }
 
     return undefined;
-  }, [isMantaPayEnabled, signMode]);
+  }, [isMantaPayEnabled, signMode, source]);
 
   const _onClickMore: React.MouseEventHandler<HTMLAnchorElement | HTMLButtonElement> = useCallback((event) => {
     event.stopPropagation();
@@ -171,7 +172,7 @@ const AccountCardBase = styled(Component)<_AccountCardProps>(({ theme: { token }
     },
 
     '.logo-image': {
-      '--height': `${token.sizeLG}px`
+      '--height': `${token.sizeMD}px`
     },
 
     '.ant-web3-block-middle-item': {

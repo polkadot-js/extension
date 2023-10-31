@@ -368,6 +368,10 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       return Promise.reject(t('Amount is required'));
     }
 
+    if ((new BN(maxTransfer)).lte(BN_ZERO)) {
+      return Promise.reject(t('You don\'t have enough tokens to proceed'));
+    }
+
     if ((new BigN(amount)).eq(new BigN(0))) {
       return Promise.reject(t('Amount must be greater than 0'));
     }

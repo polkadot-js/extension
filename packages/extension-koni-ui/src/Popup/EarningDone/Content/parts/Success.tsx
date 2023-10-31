@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import { baseParseIPFSUrl, detectTranslate } from '@subwallet/extension-base/utils';
+import { detectTranslate, swParseIPFSUrl } from '@subwallet/extension-base/utils';
 import { ImageSlash } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -35,6 +35,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const { poolInfo } = useSelector((state) => state.yieldPool);
 
   const pool = useMemo(() => Object.values(poolInfo).find((value) => value.chain === chain), [chain, poolInfo]);
+
+  const imageUrl = useMemo(() => {
+    return swParseIPFSUrl(url);
+  }, [url]);
 
   const [imageDone, setImageDone] = useState(false);
 
@@ -94,7 +98,7 @@ const Component: React.FC<Props> = (props: Props) => {
               height={300}
               onLoad={onImageLoad}
               shape='default'
-              src={baseParseIPFSUrl(url)}
+              src={imageUrl}
               width={300}
             />
           )

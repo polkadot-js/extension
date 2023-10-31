@@ -24,7 +24,8 @@ const SwLogosMap: Record<string, string> = {
   coinversation: DefaultLogosMap.coinversation,
   peaq: DefaultLogosMap.peaq,
   t3rn: DefaultLogosMap.t3rn,
-  moonwell: DefaultLogosMap.moonwell
+  moonwell: DefaultLogosMap.moonwell,
+  stellaswap: DefaultLogosMap.stellaswap
 };
 
 export default SwLogosMap;

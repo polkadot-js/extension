@@ -127,7 +127,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   };
 
   useEffect(() => {
-    if (isPopup && isFirefox() && hasMasterPassword && !isOpenWindowRef.current) {
+    if (isPopup && isFirefox && hasMasterPassword && !isOpenWindowRef.current) {
       isOpenWindowRef.current = true;
       windowOpen({ allowedPath: '/accounts/new-seed-phrase' }).then(window.close).catch(console.log);
     }

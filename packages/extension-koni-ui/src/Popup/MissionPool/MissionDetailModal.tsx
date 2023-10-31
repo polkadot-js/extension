@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import NetworkGroup from '@subwallet/extension-koni-ui/components/MetaInfo/parts/NetworkGroup';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { missionCategoryMap } from '@subwallet/extension-koni-ui/Popup/MissionPool/predefined';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
@@ -108,7 +109,17 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
               </MetaInfo.Default>
 
               {
-                !!data.chains && !!data.chains.length && (
+                !!data.chains && data.chains.length > 1 && (
+                  <MetaInfo.Default
+                    label={t('Network')}
+                  >
+                    <NetworkGroup chains={data.chains} />
+                  </MetaInfo.Default>
+                )
+              }
+
+              {
+                !!data.chains && data.chains.length === 1 && (
                   <MetaInfo.Chain
                     chain={data.chains[0]}
                     label={t('Network')}

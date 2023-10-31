@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import { baseParseIPFSUrl, detectTranslate } from '@subwallet/extension-base/utils';
+import { detectTranslate, swParseIPFSUrl } from '@subwallet/extension-base/utils';
 import { ImageSlash } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Button, Icon, Image, Logo } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { TwitterLogo } from 'phosphor-react';
+import { ArrowCircleRight, TwitterLogo } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
 import styled from 'styled-components';
@@ -19,13 +19,14 @@ interface Props extends ThemeProps {
   contactUs: VoidFunction;
   goToNft: VoidFunction;
   shareOnTwitter: VoidFunction;
+  joinQuest: VoidFunction;
   url: string;
   enableShare: boolean;
   viewInHistory: VoidFunction;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chain, className, contactUs, enableShare, goToNft, shareOnTwitter, url, viewInHistory } = props;
+  const { chain, className, contactUs, enableShare, goToNft, joinQuest, shareOnTwitter, url, viewInHistory } = props;
 
   const { t } = useTranslation();
 
@@ -34,6 +35,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const { poolInfo } = useSelector((state) => state.yieldPool);
 
   const pool = useMemo(() => Object.values(poolInfo).find((value) => value.chain === chain), [chain, poolInfo]);
+
+  const imageUrl = useMemo(() => {
+    return swParseIPFSUrl(url);
+  }, [url]);
 
   const [imageDone, setImageDone] = useState(false);
 
@@ -93,7 +98,7 @@ const Component: React.FC<Props> = (props: Props) => {
               height={300}
               onLoad={onImageLoad}
               shape='default'
-              src={baseParseIPFSUrl(url)}
+              src={imageUrl}
               width={300}
             />
           )
@@ -128,7 +133,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     />
                   )
                 }}
-                i18nKey={'T&C: From Oct 24 to Nov 7, each address that initiates transactions on each protocol on the SubWallet Earning Dashboard is eligible for 01 free NFT. Check your NFT <highlight>here</highlight>!'}
+                i18nKey={'T&C: From Oct 24 to Nov 7, each address that initiates transactions on each protocol on the SubWallet Earning Dashboard is eligible for 01 free NFT. NFT holders can join quest on Airlyft to earn up to 10 USDT. Check your NFT <highlight>here</highlight>!'}
               />
             )
             : (
@@ -142,19 +147,37 @@ const Component: React.FC<Props> = (props: Props) => {
             {
               url
                 ? (
-                  <Button
-                    block={true}
-                    disabled={!enableShare}
-                    icon={(
-                      <Icon
-                        phosphorIcon={TwitterLogo}
-                        weight='fill'
-                      />
-                    )}
-                    onClick={shareOnTwitter}
-                  >
-                    {t('Share to Twitter')}
-                  </Button>
+                  (
+                    <div className='button-top'>
+                      <Button
+                        block={true}
+                        disabled={!enableShare}
+                        icon={(
+                          <Icon
+                            phosphorIcon={ArrowCircleRight}
+                            weight='fill'
+                          />
+                        )}
+                        onClick={joinQuest}
+                      >
+                        {t('Join quest now')}
+                      </Button>
+                      <Button
+                        block={true}
+                        disabled={!enableShare}
+                        icon={(
+                          <Icon
+                            phosphorIcon={TwitterLogo}
+                            weight='fill'
+                          />
+                        )}
+                        onClick={shareOnTwitter}
+                        schema='secondary'
+                      >
+                        {t('Share to Twitter')}
+                      </Button>
+                    </div>
+                  )
                 )
                 : (
                   <Button
@@ -238,6 +261,12 @@ const EarningDoneSuccess = styled(Component)<Props>(({ theme: { token } }: Props
       flexDirection: 'column',
       gap: token.size,
       padding: `0 ${token.sizeXS}px`
+    },
+
+    '.button-top': {
+      display: 'flex',
+      flexDirection: 'row',
+      gap: token.size
     },
 
     '.title': {

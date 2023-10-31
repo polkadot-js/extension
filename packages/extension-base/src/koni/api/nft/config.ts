@@ -55,6 +55,8 @@ export const IPFS_GATEWAY_4EVERLAND = 'https://4everland.io/ipfs/';
 
 export const IPFS_FLEEK = 'https://ipfs.fleek.co/ipfs/';
 
+export const SUBWALLET_IPFS = 'https://ipfs.subwallet.app/ipfs/'; // ???
+
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',

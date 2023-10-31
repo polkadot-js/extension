@@ -8,6 +8,7 @@ import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@subwallet/extension-base/cons
 import registry from '@subwallet/extension-base/koni/api/dotsama/typeRegistry';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { categoryAddresses, reformatAddress } from '@subwallet/extension-base/utils';
+import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
 import axios from 'axios';
 
 import { DeriveOwnContributions } from '@polkadot/api-derive/types';
@@ -24,11 +25,7 @@ export type CrowdloanFundInfo = _CrowdloanFund & {
   chain: string;
 }
 
-const getOnlineFundList = (async () => {
-  const request = await axios.get<CrowdloanFundInfo[]>('https://static-data.subwallet.app/crowdloan-funds/list.json');
-
-  return request.data;
-})();
+const getOnlineFundList = fetchStaticData<CrowdloanFundInfo[]>('crowdloan-funds');
 
 function getRPCCrowdloan (parentAPI: _SubstrateApi, fundInfo: _CrowdloanFund, hexAddresses: string[], callback: (rs: CrowdloanItem) => void) {
   const { auctionIndex, endTime, firstPeriod, fundId, lastPeriod, paraId, startTime, status } = fundInfo;

@@ -336,16 +336,6 @@ const NftImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.nft_import__selected_option': {
       color: token.colorTextHeading
-    },
-
-    '.nft-type-item': {
-      '--nft-type-icon-bg-color': token['orange-6'],
-      '--nft-type-icon-color': token.colorWhite,
-      '--nft-selected-icon-color': token.colorSuccess,
-
-      '.ant-web3-block-right-item': {
-        marginRight: 0
-      }
     }
   });
 });

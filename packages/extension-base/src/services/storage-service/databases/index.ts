@@ -97,9 +97,12 @@ export default class KoniDatabase extends Dexie {
     });
 
     this.conditionalVersion(4, {
-      campaign: 'slug',
       yieldPoolInfo: 'slug, chain, type',
       yieldPosition: '[slug+chain+address], [address+slug], address, chain'
+    });
+
+    this.conditionalVersion(5, {
+      campaign: 'slug'
     });
   }
 

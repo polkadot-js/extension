@@ -10,16 +10,20 @@ import axios from 'axios';
 
 import { runCampaign } from './helpers';
 
+const targetEnvs = ['extension', 'mobile'];
+
 export default class CampaignService {
   readonly #state: KoniState;
 
   constructor (state: KoniState) {
     this.#state = state;
 
-    this.fetchCampaign()
-      .catch((e) => {
-        console.error('Error on fetch campaigns', e);
-      });
+    if (targetEnvs.includes(TARGET_ENV)) {
+      this.fetchCampaign()
+        .catch((e) => {
+          console.error('Error on fetch campaigns', e);
+        });
+    }
 
     this.runCampaign()
       .catch((e) => {

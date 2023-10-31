@@ -513,6 +513,11 @@ export enum ExtrinsicType {
   REDEEM_LDOT = 'earn.redeem_ldot',
   REDEEM_SDOT = 'earn.redeem_sdot',
 
+  UNSTAKE_QDOT = 'earn.unstake_qdot',
+  UNSTAKE_VDOT = 'earn.unstake_vdot',
+  UNSTAKE_LDOT = 'earn.unstake_ldot',
+  UNSTAKE_SDOT = 'earn.unstake_sdot',
+
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }

@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { CONNECT_EXTENSION, CREATE_RETURN, DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { AutoConnect, CONNECT_EXTENSION, CREATE_RETURN, DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, PREDEFINED_WALLETS, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { checkHasInjected } from '@subwallet/extension-koni-ui/utils/wallet';
 import { Button, ButtonProps, Form, Icon, Image, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
@@ -20,11 +21,10 @@ import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 import SocialGroup from '../components/SocialGroup';
-import { EXTENSION_URL } from '../constants';
 import { ScreenContext } from '../contexts/ScreenContext';
 import useGetDefaultAccountName from '../hooks/account/useGetDefaultAccountName';
 import usePreloadView from '../hooks/router/usePreloadView';
-import { convertFieldToObject, openInNewTab, readOnlyScan, simpleCheckForm } from '../utils';
+import { convertFieldToObject, isMobile, readOnlyScan, simpleCheckForm } from '../utils';
 
 type Props = ThemeProps;
 
@@ -47,7 +47,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { injected, loadingInject, selectWallet } = useContext(InjectContext);
+  const { enableInject, loadingInject, selectWallet } = useContext(InjectContext);
 
   const { accounts, isNoAccount } = useSelector((root: RootState) => root.accountState);
 
@@ -156,12 +156,20 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     }
   }, [reformatAttachAddress, autoGenAttachReadonlyAccountName, isAttachAddressEthereum, form, navigate]);
 
-  const items = useMemo((): WelcomeButtonItem[] => [
+  const buttonList = useMemo((): WelcomeButtonItem[] => [
+    {
+      description: t('Connect to your existing wallet'),
+      icon: PuzzlePiece,
+      id: CONNECT_EXTENSION,
+      schema: 'primary',
+      title: t('Connect wallet'),
+      loading: loadingInject
+    },
     {
       description: t('Create a new account with SubWallet'),
       icon: PlusCircle,
       id: CREATE_ACCOUNT_MODAL,
-      schema: isWebUI ? 'secondary' : 'primary',
+      schema: 'secondary',
       title: t('Create a new account'),
       loading: false
     },
@@ -180,32 +188,14 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       schema: 'secondary',
       title: t('Attach an account'),
       loading: false
-    },
-    {
-      description: injected ? t('Connect to your existing extension wallet') : t('For management of your account keys'),
-      icon: PuzzlePiece,
-      id: CONNECT_EXTENSION,
-      schema: 'secondary',
-      title: injected ? t('Connect extension wallet') : t('Download SubWallet extension'),
-      loading: loadingInject
     }
-  ], [injected, isWebUI, t, loadingInject]);
-
-  const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI, items]);
+  ], [t, loadingInject]);
 
   const openModal = useCallback((id: string) => {
     return () => {
       if (id === CONNECT_EXTENSION) {
-        if (injected) {
-          selectWallet();
-        } else {
-          openInNewTab(EXTENSION_URL)();
-        }
-
-        return;
-      }
-
-      if (id === CREATE_ACCOUNT_MODAL) {
+        selectWallet();
+      } else if (id === CREATE_ACCOUNT_MODAL) {
         setSelectedAccountTypes(DEFAULT_ACCOUNT_TYPES);
         navigate('/accounts/new-seed-phrase');
       } else {
@@ -214,7 +204,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       }
     };
   }
-  , [activeModal, selectWallet, inactiveModal, injected, navigate, setSelectedAccountTypes]);
+  , [activeModal, selectWallet, inactiveModal, navigate, setSelectedAccountTypes]);
 
   useEffect(() => {
     if (!isNoAccount) {
@@ -222,6 +212,16 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       setReturnStorage(DEFAULT_ROUTER_PATH);
     }
   }, [isNoAccount, navigate, returnPath, setReturnStorage]);
+
+  useEffect(() => {
+    if (isMobile && !AutoConnect.ignore) {
+      const installedWallet = Object.values(PREDEFINED_WALLETS).find((w) => (w.supportMobile && checkHasInjected(w.key)));
+
+      if (installedWallet) {
+        enableInject(installedWallet.key);
+      }
+    }
+  }, [enableInject]);
 
   return (
     <Layout.Base

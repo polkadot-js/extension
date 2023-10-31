@@ -4011,8 +4011,6 @@ export default class KoniExtension {
       substrateApiMap: this.#koniState.getSubstrateApiMap()
     };
 
-    return [];
-
     return validateYieldProcess(
       inputData.address,
       params,

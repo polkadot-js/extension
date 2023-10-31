@@ -5,7 +5,7 @@ import { PREDEFINED_WALLETS, SELECT_EXTENSION_MODAL } from '@subwallet/extension
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { isAndroid, isFirefox, isIOS, isMobile, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { checkHasInjected } from '@subwallet/extension-koni-ui/utils/wallet';
 import { Icon, Image, ModalContext, SettingItem, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -68,7 +68,7 @@ const ExtensionItem: React.FC<ExtensionItemProps> = (props: ExtensionOptions) =>
       name={title}
       onPressItem={_onClick}
       rightItem={(
-        !injected
+        !injected && !isMobile
           ? <Icon
             className={'__download-icon'}
             phosphorIcon={DownloadSimple}
@@ -99,14 +99,27 @@ const Component: React.FC<Props> = (props: Props) => {
   const { selectedWallet } = useContext(InjectContext);
 
   const options = useMemo((): ExtensionOptions[] =>
-    Object.values(PREDEFINED_WALLETS).map((item) => {
+    Object.values(PREDEFINED_WALLETS).filter((w) => ((isMobile && w.supportMobile) || (!isMobile && w.supportWeb))).map((item) => {
+      const { appStoreUrl, firefoxUrl, googlePlayUrl, icon, key, name, url } = item;
+      const isSelected = selectedWallet === key;
+      let installUrl = url;
+
+      //  Detect the platform and set the install url
+      if (isAndroid && googlePlayUrl) {
+        installUrl = googlePlayUrl;
+      } else if (isIOS && appStoreUrl) {
+        installUrl = appStoreUrl;
+      } else if (isFirefox && firefoxUrl) {
+        installUrl = firefoxUrl;
+      }
+
       return ({
-        url: item.url,
-        injected: checkHasInjected(item.key),
-        value: item.key,
-        icon: item.icon,
-        title: item.name,
-        isSelected: selectedWallet === item.key
+        url: installUrl,
+        injected: checkHasInjected(key),
+        value: key,
+        icon: icon,
+        title: name,
+        isSelected
       });
     }), [selectedWallet]);
 
@@ -138,7 +151,7 @@ const Component: React.FC<Props> = (props: Props) => {
       className={CN(className)}
       id={modalId}
       onCancel={onClose}
-      title={t('Connect extension')}
+      title={t('Connect wallet')}
     >
       <SwList
         displayRow

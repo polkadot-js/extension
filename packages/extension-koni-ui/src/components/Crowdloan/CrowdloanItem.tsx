@@ -26,7 +26,11 @@ const Component: React.FC<Props> = (props: Props) => {
     let label;
 
     if (item.fundStatus === _FundStatus.WON) {
-      label = t('Locked until');
+      if (item.unlockTime < Date.now()) {
+        label = t('Dissolved on');
+      } else {
+        label = t('Locked until');
+      }
     } else if (item.fundStatus === _FundStatus.IN_AUCTION) {
       label = t('Crowdloan ends on');
     } else {

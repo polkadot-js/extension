@@ -6067,6 +6067,7 @@ __metadata:
     enzyme-adapter-react-16: ^1.15.7
     file-saver: ^2.0.5
     i18next: ^21.9.2
+    mobile-detect: ^1.4.5
     moment: ^2.29.4
     phosphor-react: ^1.4.1
     querystring: ^0.2.1
@@ -18610,6 +18611,13 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: 0c91b721bb12c3f9af4b77ebf73604baf350e64d80df91754dc509491ae93bf238581e59c7188360cec7cb62fc4100959245a42cfe01834efedc5e9d068376c2
+  languageName: node
+  linkType: hard
+
+"mobile-detect@npm:^1.4.5":
+  version: 1.4.5
+  resolution: "mobile-detect@npm:1.4.5"
+  checksum: 317d170f3bc27c3e36c3f4ab7809c33d20e81914147cdc74a8551f0ecad2c5ec067bd59dd1a240caf66c1df7fd793021a36677c3a6ed8bdf027d4715dc3f0973
   languageName: node
   linkType: hard
 

@@ -118,6 +118,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
           TARGET_ENV: JSON.stringify('webapp'),
+          BRANCH_NAME: JSON.stringify(process.env.BRANCH_NAME),
           ID_PREFIX: JSON.stringify('sw-app-'),
           TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
           COINBASE_PAY_ID: JSON.stringify(process.env.COINBASE_PAY_ID),

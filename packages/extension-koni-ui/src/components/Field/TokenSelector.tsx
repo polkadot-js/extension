@@ -102,8 +102,17 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         isShowSubLogo={true}
         middleItem={(
           <div className='token-info-container'>
-            <div className='token-symbol'>
-              {item.symbol}
+            <div className='token-info'>
+              <span>{item.symbol}</span>
+              {
+                item.name && (
+                  <span className='__token-name'>
+                    &nbsp;(
+                    <span className='name'>{item.name}</span>
+                    )
+                  </span>
+                )
+              }
             </div>
             <div className='token-original-chain'>
               {chainInfoMap[item.originChain]?.name || item.originChain}
@@ -217,11 +226,28 @@ export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { to
       justifyContent: 'center'
     },
 
-    '.token-symbol': {
-      fontWeight: token.fontWeightStrong,
+    '.token-info': {
+      display: 'flex',
+      flexDirection: 'row',
+      overflow: 'hidden',
+
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,
-      color: token.colorTextBase
+      fontWeight: token.fontWeightStrong,
+      color: token.colorWhite,
+
+      '.__token-name': {
+        color: token.colorTextTertiary,
+        display: 'flex',
+        flexDirection: 'row',
+        overflow: 'hidden',
+
+        '.name': {
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap'
+        }
+      }
     },
 
     '.token-original-chain': {

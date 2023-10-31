@@ -48,7 +48,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
           selected &&
           (
             <Icon
-              iconColor='var(--nft-selected-icon-color)'
+              iconColor='var(--token-selected-icon-color)'
               phosphorIcon={CheckCircle}
               size='sm'
               weight='fill'
@@ -89,6 +89,10 @@ export const TokenTypeSelector = styled(forwardRef(Component))<Props>(({ theme: 
 
     '&.token-type-selector-input .__selected-item': {
       color: token.colorText
+    },
+
+    '.ant-web3-block-right-item': {
+      marginRight: 0
     },
 
     '.ant-sw-list-section .ant-sw-list-wrapper': {

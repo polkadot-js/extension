@@ -301,6 +301,36 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Col span={12}>
                 <Tooltip
                   placement={'topLeft'}
+                  title={t('Token name')}
+                >
+                  <div>
+                    <Field
+                      content={tokenInfo.name}
+                      placeholder={t<string>('Token name')}
+                    />
+                  </div>
+                </Tooltip>
+              </Col>
+            </Row>
+            <Row gutter={token.marginSM}>
+              <Col span={12}>
+                <Tooltip
+                  placement={'topLeft'}
+                  title={t('Price ID')}
+                >
+                  <div>
+                    <Input
+                      disabled={!_isCustomAsset(tokenInfo.slug)}
+                      onChange={onChangePriceId}
+                      placeholder={t('Price ID')}
+                      value={priceId}
+                    />
+                  </div>
+                </Tooltip>
+              </Col>
+              <Col span={12}>
+                <Tooltip
+                  placement={'topLeft'}
                   title={t('Decimals')}
                 >
                   <div>
@@ -312,20 +342,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 </Tooltip>
               </Col>
             </Row>
-
-            <Tooltip
-              placement={'topLeft'}
-              title={t('Price ID')}
-            >
-              <div>
-                <Input
-                  disabled={!_isCustomAsset(tokenInfo.slug)}
-                  onChange={onChangePriceId}
-                  placeholder={t('Price ID')}
-                  value={priceId}
-                />
-              </div>
-            </Tooltip>
           </div>
         </div>
       </Layout.Base>

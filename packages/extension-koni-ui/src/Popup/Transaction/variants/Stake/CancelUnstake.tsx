@@ -67,7 +67,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onFieldsChange: FormCallbacks<CancelUnStakeParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
-    const { empty, error } = simpleCheckForm(allFields, ['asset']);
+    const { empty, error } = simpleCheckForm(allFields, ['--asset']);
 
     const values = convertFieldToObject<CancelUnStakeParams>(allFields);
     const changes = convertFieldToObject<CancelUnStakeParams>(changedFields);

@@ -75,7 +75,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onFieldsChange: FormCallbacks<WithdrawParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
-    const { empty, error } = simpleCheckForm(allFields, ['asset']);
+    const { empty, error } = simpleCheckForm(allFields, ['--asset']);
 
     const values = convertFieldToObject<WithdrawParams>(allFields);
 

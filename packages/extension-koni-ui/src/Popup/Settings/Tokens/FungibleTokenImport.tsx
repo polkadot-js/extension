@@ -408,6 +408,10 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
 
       '.ant-form .ant-form-item:last-of-type': {
         marginBottom: 0
+      },
+
+      '.ant-form .ant-row .ant-form-item': {
+        marginBottom: token.marginSM
       }
     }
   });

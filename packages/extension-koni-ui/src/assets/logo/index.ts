@@ -25,6 +25,7 @@ export const DefaultLogosMap: Record<string, string> = {
   peaq: '/images/projects/peaq.jpg',
   t3rn: '/images/projects/t3rn.png',
   moonwell: '/images/projects/moonwell-apollo.png',
+  stellaswap: '/images/projects/stellaswap.png',
   subwallet_gradient: '/images/projects/subwallet-gradient.png',
   subwallet_mc: '/images/projects/subwallet-monochrome.svg',
   polkadot_js: '/images/projects/polkadot-js.png',

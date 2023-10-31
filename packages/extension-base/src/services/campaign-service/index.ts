@@ -23,12 +23,12 @@ export default class CampaignService {
         .catch((e) => {
           console.error('Error on fetch campaigns', e);
         });
-    }
 
-    this.runCampaign()
-      .catch((e) => {
-        console.error('Error on run campaigns', e);
-      });
+      this.runCampaign()
+        .catch((e) => {
+          console.error('Error on run campaigns', e);
+        });
+    }
   }
 
   private async fetchCampaign () {

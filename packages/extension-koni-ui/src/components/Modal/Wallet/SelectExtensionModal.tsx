@@ -9,7 +9,7 @@ import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { checkHasInjected } from '@subwallet/extension-koni-ui/utils/wallet';
 import { Icon, Image, ModalContext, SettingItem, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import {CheckCircle, Download, DownloadSimple, MagnifyingGlass} from 'phosphor-react';
+import { CheckCircle, DownloadSimple, MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
@@ -73,7 +73,8 @@ const ExtensionItem: React.FC<ExtensionItemProps> = (props: ExtensionOptions) =>
             className={'__download-icon'}
             phosphorIcon={DownloadSimple}
             size='sm'
-            weight='fill' />
+            weight='fill'
+          />
           : (isSelected &&
             <Icon
               className={'__selected-icon'}

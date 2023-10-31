@@ -4198,7 +4198,7 @@ export default class KoniExtension {
     const campaign = await this.#koniState.dbService.getCampaign(slug);
 
     if (campaign) {
-      await this.#koniState.dbService.upsertCa   mpaign({
+      await this.#koniState.dbService.upsertCampaign({
         ...campaign,
         isDone: true
       });

@@ -12,7 +12,7 @@ import { isFirefox } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
-import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -76,7 +76,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         activeModal(NEW_SEED_MODAL);
       }
     }
-  }, [navigate, activeModal, isNoAccount]);
+  }, [navigate, preventModal, isNoAccount, activeModal]);
 
   const _onCreate = useCallback((): void => {
     if (!seedPhrase) {

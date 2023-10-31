@@ -7,6 +7,7 @@ import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { useSetSelectedAccountTypes } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
@@ -20,7 +21,6 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { useSetSelectedAccountTypes } from '@subwallet/extension-koni-ui/hooks';
 
 interface Props extends ThemeProps {
   id: string;

@@ -8,6 +8,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { unlockDotCheckSubscribe } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { ButtonProps, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { TwitterLogo } from 'phosphor-react';
@@ -18,7 +19,6 @@ import { TwitterShareButton } from 'react-share';
 import styled from 'styled-components';
 
 import { EarningDoneFail, EarningDoneProcessing, EarningDoneSuccess } from './parts';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 
 type Props = ThemeProps;
 

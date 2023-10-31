@@ -9,6 +9,7 @@ import { _ChainState } from '@subwallet/extension-base/services/chain-service/ty
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { addLazy, canDerive, isEmptyObject } from '@subwallet/extension-base/utils';
+import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { DAppCategory, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
@@ -16,7 +17,6 @@ import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
 import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
 import { SessionTypes } from '@walletconnect/types';
-import fetch from 'cross-fetch';
 
 // Setup redux stores
 
@@ -342,16 +342,8 @@ export const getDAppsData = (() => {
     promise,
     start: () => {
       Promise.all([
-        (async () => {
-          const res = await fetch('https://static-data.subwallet.app/dapps/list.json');
-
-          return await res.json() as [];
-        })(),
-        (async () => {
-          const res = await fetch('https://static-data.subwallet.app/categories/list.json');
-
-          return await res.json() as [];
-        })()
+        fetchStaticData<DAppInfo[]>('dapps'),
+        fetchStaticData<DAppCategory[]>('categories')
       ])
         .then((data) => {
           handler.resolve?.(data);
@@ -388,11 +380,7 @@ export const getMissionPoolData = (() => {
   const rs = {
     promise,
     start: () => {
-      (async () => {
-        const res = await fetch('https://static-data.subwallet.app/airdrop-campaigns/list.json');
-
-        return await res.json() as [];
-      })()
+      fetchStaticData<MissionInfo[]>('airdrop-campaigns')
         .then((data) => {
           handler.resolve?.(data);
         })

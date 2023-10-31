@@ -4,7 +4,7 @@
 import { ChainAssetMap, ChainInfoMap } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { OptimalYieldPath, YieldPoolInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
-import { BifrostLiquidStakingMeta } from '@subwallet/extension-base/koni/api/yield/bifrostLiquidStaking';
+import { BifrostLiquidStakingMeta } from '@subwallet/extension-base/koni/api/yield/bifrost-liquid-staking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import fetch from 'cross-fetch';

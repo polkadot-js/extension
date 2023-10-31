@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { CROWDLOAN_UNLOCK_TIME } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_CROWDLOAN_UNLOCK_TIME } from '@subwallet/extension-koni-ui/constants/event';
@@ -9,7 +10,6 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { updateLogoMaps } from '@subwallet/extension-koni-ui/stores/utils';
 import { CrowdloanFundInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import fetch from 'cross-fetch';
 import React, { useContext, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
@@ -68,21 +68,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     Promise.all([
-      (async () => {
-        const res = await fetch('https://static-data.subwallet.app/crowdloan-funds/list.json');
-
-        return await res.json() as CrowdloanFundInfo[];
-      })(),
-      (async () => {
-        const res = await fetch('https://static-data.subwallet.app/chains/preview.json');
-
-        return await res.json() as _ChainInfo[];
-      })(),
-      (async () => {
-        const res = await fetch('https://static-data.subwallet.app/events/period-time.json');
-
-        return await res.json() as PeriodTimeInfo;
-      })()
+      fetchStaticData<CrowdloanFundInfo[]>('crowdloan-funds'),
+      fetchStaticData<_ChainInfo[]>('chains'),
+      fetchStaticData<PeriodTimeInfo>('events', 'period-time.json')
     ]).then(([crowdloanFunds, chainInfoItems, periodTimeInfo]) => {
       setCrowdloanFundInfoMap(crowdloanFundsToMap(crowdloanFunds));
       setChainInfoMap(chainInfoItemsToMap(chainInfoItems));

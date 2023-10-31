@@ -86,7 +86,7 @@ const Component: React.FC<Props> = (props: Props) => {
       }
 
       <div className={'__body-area'}>
-        <EarningOverviewContent />
+        <EarningOverviewContent className={'earning-overview-content'} />
       </div>
     </div>
   );
@@ -118,9 +118,17 @@ const EarningOverview = styled(Component)<Props>(({ theme: { token } }: Props) =
     },
 
     '@media (max-width: 991px)': {
-      '.__body-area': {
+      '.earning-overview-content': {
         paddingLeft: token.size,
-        paddingRight: token.size
+        paddingRight: token.size,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'auto',
+        height: '100%'
+      },
+
+      '.__list-container': {
+        flex: 1
       }
     }
   });

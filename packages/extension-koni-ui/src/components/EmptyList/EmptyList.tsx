@@ -21,28 +21,30 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div className={CN(className, 'empty-list')}>
-      <div className={'empty_icon_wrapper'}>
-        <PageIcon
-          color={token['gray-4']}
-          iconProps={{
-            phosphorIcon,
-            weight: 'fill'
-          }}
-        />
-      </div>
+      <div className={'empty-list-inner'}>
+        <div className={'empty_icon_wrapper'}>
+          <PageIcon
+            color={token['gray-4']}
+            iconProps={{
+              phosphorIcon,
+              weight: 'fill'
+            }}
+          />
+        </div>
 
-      <div className={'empty_text_container'}>
-        <div className={'empty_title'}>{emptyTitle}</div>
-        <div className={'empty_subtitle'}>{emptyMessage}</div>
-      </div>
+        <div className={'empty_text_container'}>
+          <div className={'empty_title'}>{emptyTitle}</div>
+          <div className={'empty_subtitle'}>{emptyMessage}</div>
+        </div>
 
-      {
-        buttonProps && (
-          <div className='button-container'>
-            <Button {...buttonProps} />
-          </div>
-        )
-      }
+        {
+          buttonProps && (
+            <div className='button-container'>
+              <Button {...buttonProps} />
+            </div>
+          )
+        }
+      </div>
     </div>
   );
 };
@@ -52,13 +54,19 @@ const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
     overflow: 'hidden',
     marginTop: 48,
     marginBottom: 48,
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: token.padding,
-    flexDirection: 'column',
-    alignContent: 'center',
+
     position: 'relative',
     zIndex: 2,
+
+    '.empty-list-inner': {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: token.padding,
+      flexDirection: 'column',
+      alignContent: 'center',
+      overflow: 'auto',
+      height: '100%'
+    },
 
     '.empty_text_container': {
       display: 'flex',

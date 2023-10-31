@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TokenBalanceSelectionItem, TokenEmptyList } from '@subwallet/extension-koni-ui/components';
+import { BaseModal, TokenBalanceSelectionItem, TokenEmptyList } from '@subwallet/extension-koni-ui/components';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { AccountBalanceHookType, ThemeProps, TokenBalanceItemType, TokenGroupHookType } from '@subwallet/extension-koni-ui/types';
 import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
-import { SwList, SwModal } from '@subwallet/react-ui';
+import { SwList } from '@subwallet/react-ui';
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -79,9 +79,10 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
   }, [id]);
 
   return (
-    <SwModal
+    <BaseModal
       className={className}
       destroyOnClose={true}
+      fullSize
       id={id}
       onCancel={onCancel}
       title={t('Select token')}
@@ -97,7 +98,7 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Token name')}
       />
-    </SwModal>
+    </BaseModal>
   );
 }
 

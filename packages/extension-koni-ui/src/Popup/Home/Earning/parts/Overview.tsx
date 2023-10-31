@@ -377,7 +377,18 @@ const EarningOverviewContent = styled(Component)<Props>(({ theme: { token } }: P
 
       '.empty-list': {
         position: 'static',
-        transform: 'none'
+        transform: 'none',
+        marginTop: 0,
+        marginBottom: 0,
+        height: '100%'
+      },
+
+      '.empty-list-inner': {
+        paddingTop: 64,
+        paddingBottom: 70,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
       },
 
       '.search-container': {
@@ -398,12 +409,7 @@ const EarningOverviewContent = styled(Component)<Props>(({ theme: { token } }: P
       },
 
       '.__list-container': {
-        paddingBottom: token.paddingXS
-      }
-    },
-
-    '@media (max-width: 767px)': {
-      '.__list-container': {
+        paddingBottom: token.paddingXS,
         display: 'flex',
         flexDirection: 'column'
       }

@@ -840,7 +840,18 @@ const EarningManagement = styled(Component)<Props>(({ theme: { token } }: Props)
 
       '.empty-list': {
         position: 'static',
-        transform: 'none'
+        transform: 'none',
+        marginTop: 0,
+        marginBottom: 0,
+        height: '100%'
+      },
+
+      '.empty-list-inner': {
+        paddingTop: 64,
+        paddingBottom: 62,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
       },
 
       '.__toolbar-area': {

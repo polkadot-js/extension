@@ -605,6 +605,11 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
       }
     },
 
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
     '.history-header.ant-sw-sub-header-container': {
       marginBottom: 0
     },

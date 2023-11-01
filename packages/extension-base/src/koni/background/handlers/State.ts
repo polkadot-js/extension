@@ -510,7 +510,9 @@ export default class KoniState {
   }
 
   public subscribeNftCollection () {
-    return this.dbService.stores.nftCollection.subscribeNftCollection(this.activeChainSlugs);
+    const getChains = () => this.activeChainSlugs;
+
+    return this.dbService.stores.nftCollection.subscribeNftCollection(getChains);
   }
 
   resetNft (newAddress: string): void {

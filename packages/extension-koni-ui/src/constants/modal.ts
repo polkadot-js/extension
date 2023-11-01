@@ -42,12 +42,18 @@ export const WALLET_CONNECT_LIST_MODAL = 'wallet-connect-list-modal';
 export const CONFIRMATION_MODAL = 'confirmation-modal';
 export const BUY_TOKEN_MODAL = 'buy-token-modal';
 
+/* Token */
+
+export const IMPORT_NFT_MODAL = 'import-nft-modal';
+
+/* Token */
+
 /* Extension */
 
 export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
 export const SELECT_EXTENSION_MODAL = 'select-extension-modal';
 
-/*  */
+/* Extension  */
 
 /* Earning */
 

@@ -5,6 +5,7 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
+import { IMPORT_NFT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetNftByAccount, useNotification, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -12,7 +13,7 @@ import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowClockwise, Image, Plus, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -39,7 +40,7 @@ const rightIcon = (
   />
 );
 
-const IMPORT_NFT_MODAL = 'import-nft-modal';
+const modalId = IMPORT_NFT_MODAL;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useSetCurrentPage('/home/nfts/collections');
@@ -56,6 +57,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
+
+  useExcludeModal(modalId);
+
   const { nftCollections, nftItems } = useGetNftByAccount();
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
@@ -189,11 +193,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [emptyButtonProps, isWebUI, t]);
 
   const openImportModal = useCallback(() => {
-    activeModal(IMPORT_NFT_MODAL);
+    activeModal(modalId);
   }, [activeModal]);
 
   const closeImportModal = useCallback(() => {
-    inactiveModal(IMPORT_NFT_MODAL);
+    inactiveModal(modalId);
     setImportNftKey(`importNftKey-${Date.now()}`);
   }, [inactiveModal]);
 
@@ -283,7 +287,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       <BaseModal
         className={CN('import-nft-modal', className)}
-        id={IMPORT_NFT_MODAL}
+        id={modalId}
         onCancel={closeImportModal}
         title={t('Import NFT')}
       >

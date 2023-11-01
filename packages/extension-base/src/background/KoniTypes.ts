@@ -1658,9 +1658,12 @@ export type RequestBondingSubmit = InternalRequestSign<BondingSubmitParams>;
 export interface UnbondingSubmitParams extends BaseRequestSign {
   amount: string,
   chain: string,
+
   nominatorMetadata: NominatorMetadata,
   // for some chains
   validatorAddress?: string
+
+  isLiquidStaking?: boolean
 }
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;

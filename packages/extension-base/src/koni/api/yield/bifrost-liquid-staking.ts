@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, TokenBalanceRaw, UnbondingSubmitParams, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
@@ -233,4 +233,13 @@ export async function getBifrostLiquidStakingRedeem (params: OptimalYieldPathPar
   const extrinsic = substrateApi.api.tx.stablePool.swap(0, 1, 0, amount, formattedMinAmount);
 
   return [ExtrinsicType.REDEEM_VDOT, extrinsic];
+}
+
+export async function getBifrostLiquidStakingDefaultUnstake (params: UnbondingSubmitParams, substrateApi: _SubstrateApi, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>): Promise<SubmittableExtrinsic<'promise'>> {
+  const chainApi = await substrateApi.isReady;
+
+  const rewardTokenSlug = poolInfo?.derivativeAssets?.[0] || '';
+  const rewardTokenInfo = assetInfoMap[rewardTokenSlug];
+
+  return chainApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(rewardTokenInfo), params.amount);
 }

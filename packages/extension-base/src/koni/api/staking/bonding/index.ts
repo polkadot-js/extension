@@ -14,6 +14,10 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 // all addresses must be converted to its chain format
 
 export function validateUnbondingCondition (nominatorMetadata: NominatorMetadata, amount: string, chain: string, chainStakingMetadata: ChainStakingMetadata, selectedValidator?: string): TransactionError[] {
+  if (nominatorMetadata.type === StakingType.LIQUID_STAKING) {
+    return [];
+  }
+
   if (_STAKING_CHAIN_GROUP.relay.includes(chain)) {
     return validateRelayUnbondingCondition(amount, chainStakingMetadata, nominatorMetadata);
   }

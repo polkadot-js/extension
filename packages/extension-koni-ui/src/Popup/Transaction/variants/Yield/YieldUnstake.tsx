@@ -144,7 +144,7 @@ const Component: React.FC = () => {
 
       if (defaultWaitingTime >= 24) {
         const days = Math.floor(defaultWaitingTime / 24);
-        const hours = time - days * 24;
+        const hours = defaultWaitingTime - days * 24;
 
         return `${days} ${t('days')}${hours ? ` ${hours} ${t('hours')}` : ''}`;
       } else {
@@ -201,6 +201,7 @@ const Component: React.FC = () => {
     }
 
     checkEmpty.asset = true;
+    checkEmpty.fastUnstake = true;
 
     if (!mustChooseValidator) {
       checkEmpty.validator = true;
@@ -211,8 +212,10 @@ const Component: React.FC = () => {
   }, [form, mustChooseValidator, persistData]);
 
   const onSubmit: FormCallbacks<UnYieldParams>['onFinish'] = useCallback((values: UnYieldParams) => {
-    const { validator: selectedValidator, value } = values;
+    const { fastUnstake, validator: selectedValidator, value } = values;
     // const selectedValidator = nominatorMetadata.nominations[0].validatorAddress;
+
+    console.log('fastUnstake', fastUnstake);
 
     let unbondingPromise: Promise<SWTransactionResponse>;
 
@@ -228,7 +231,8 @@ const Component: React.FC = () => {
       const params: RequestUnbondingSubmit = {
         amount: value,
         chain: nominatorMetadata.chain,
-        nominatorMetadata: nominatorMetadata
+        nominatorMetadata: nominatorMetadata,
+        isLiquidStaking: nominatorMetadata.type === StakingType.LIQUID_STAKING
       };
 
       if (mustChooseValidator) {

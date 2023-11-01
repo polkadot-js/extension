@@ -26,7 +26,5 @@ export const IGNORE_QR_SIGNER: string[] = [];
 
 export const XCM_MIN_AMOUNT_RATIO = 1.2;
 
-export const MARKETING_CAMPAIGN_URL = process.env.MARKETING_CAMPAIGN_URL || '';
-
 export * from './staking';
 export * from './storage';

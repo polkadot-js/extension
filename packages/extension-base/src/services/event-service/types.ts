@@ -33,6 +33,10 @@ export interface EventRegistry {
 
   'migration.done': [boolean];
   'campaign.ready': [boolean];
+
+  // Buy token
+  'buy.tokens.ready': [boolean];
+  'buy.services.ready': [boolean];
 }
 
 export type EventType = keyof EventRegistry;

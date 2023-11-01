@@ -74,7 +74,7 @@ export default function useAssetChecker () {
         duration: 3,
         btn
       });
-    } else if (chainState && chainState.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
+    } else if (chainState && chainState.active && chainState.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
       const message = t('Chain {{name}} is disconnected', { replace: { name: chainInfo?.name } });
 
       notify({

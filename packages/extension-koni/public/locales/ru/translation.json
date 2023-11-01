@@ -797,7 +797,6 @@
   "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": "",
   "{{deviceName}} will provide you with a QR code to scan. Read <highlight>this instruction</highlight>, for more details.": "",
   "Click the \"Scan QR\" button, or read <highlight>this instruction</highlight>, for more details.": "",
-  "You must transfer at least {{amount}}{{symbol}} to keep the destination account alive": "",
   "Transaction completed": "",
   "Transaction {{info}} completed": "",
   "Transaction failed": "",
@@ -848,5 +847,7 @@
   "No available EVM account": "",
   "You don't have any Substrate account to connect. Please create one or skip this step by hitting Cancel.": "",
   "You don't have any EVM account to connect. Please create one or skip this step by hitting Cancel.": "",
-  "You don't have any account to connect. Please create one or skip this step by hitting Cancel.": ""
+  "You don't have any account to connect. Please create one or skip this step by hitting Cancel.": "",
+  "You must transfer at least {{amount}} {{symbol}} to keep the destination account alive": "",
+  "You don't have enough tokens to proceed": ""
 }

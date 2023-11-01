@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 1.1.19
+Build date: Oct 26, 2023.
+
+Features & Update:
+- Update chainlist (#2033)
+  - Review and update OnFinality RPC
+  - Remove Bobabeam network
+  - Add support ZetaChain EVM
+  - Add support Xcavate testnet
+
+Bugs fixed:
+- Fixed bug estimating fee on calculating max transferable (#2079)
+- Fixed bug Get Ledger account addresses on incompatible networks (#2075)
+- Fixed bug transfer on Rococo (#2042)
+
 ## 1.1.18
 Build date: Oct 20, 2023.
 

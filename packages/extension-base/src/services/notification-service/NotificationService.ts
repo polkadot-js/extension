@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Notification, NotificationParams } from '@subwallet/extension-base/background/KoniTypes';
+import { Notification, NotificationButton, NotificationParams } from '@subwallet/extension-base/background/KoniTypes';
 import { BehaviorSubject } from 'rxjs';
 
 export default class NotificationService {
@@ -21,24 +21,41 @@ export default class NotificationService {
     this.notificationSubject.next(notifications);
 
     if (notification.notifyViaBrowser) {
-      NotificationService.createBrowserNotification(notification.title, notification.message, notification?.action?.url);
+      NotificationService.createBrowserNotification(notification.title, notification.message, notification.action, notification.buttons);
     }
   }
 
   // Create a new chrome notification with link
-  public static createBrowserNotification (title: string, message: string, link?: string): void {
+  public static createBrowserNotification (title: string, message: string, action?: NotificationParams['action'], buttons?: NotificationButton[]): void {
+    const link = action?.url;
+    const onClick = action?.click;
+    const onButtonClick = action?.buttonClick;
+
     chrome?.notifications?.create({
       type: 'basic',
       title,
       message,
       iconUrl: '/images/icon-128.png',
       priority: 2,
-      isClickable: !!link
+      isClickable: !!link || !!onClick,
+      buttons
     }, (notificationId: string) => {
-      if (link) {
+      if (link || onClick) {
         chrome.notifications.onClicked.addListener((nId) => {
           if (nId === notificationId) {
-            window.open(link);
+            if (onClick) {
+              onClick();
+            } else {
+              window.open(link);
+            }
+          }
+        });
+      }
+
+      if (onButtonClick) {
+        chrome.notifications.onButtonClicked.addListener((nId, btnIndex) => {
+          if (nId === notificationId) {
+            onButtonClick(btnIndex);
           }
         });
       }

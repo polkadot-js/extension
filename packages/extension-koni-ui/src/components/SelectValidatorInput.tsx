@@ -7,7 +7,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Book, Lightning } from 'phosphor-react';
+import { Book } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -91,26 +91,15 @@ const Component: React.FC<Props> = (props: Props) => {
                 />
               )
               : (
-                <>
-                  <Button
-                    disabled={disabled}
-                    icon={<Icon
-                      phosphorIcon={Book}
-                      size={'sm'}
-                    />}
-                    size={'xs'}
-                    type={'ghost'}
-                  />
-                  <Button
-                    disabled={disabled}
-                    icon={<Icon
-                      phosphorIcon={Lightning}
-                      size={'sm'}
-                    />}
-                    size={'xs'}
-                    type={'ghost'}
-                  />
-                </>
+                <Button
+                  disabled={disabled}
+                  icon={<Icon
+                    phosphorIcon={Book}
+                    size={'sm'}
+                  />}
+                  size={'xs'}
+                  type={'ghost'}
+                />
               )
           }
         </div>

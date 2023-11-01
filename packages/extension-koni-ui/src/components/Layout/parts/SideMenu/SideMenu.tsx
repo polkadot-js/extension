@@ -3,7 +3,7 @@
 
 import { MenuItem, MenuItemType } from '@subwallet/extension-koni-ui/components/Layout/parts/SideMenu/MenuItem';
 import { CONTACT_US, FAQS_URL, TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants';
-import { useDefaultNavigate, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import usePreloadView from '@subwallet/extension-koni-ui/hooks/router/usePreloadView';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';

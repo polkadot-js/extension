@@ -261,7 +261,7 @@ export default class Extension {
     return true;
   }
 
-  private metadataSubscribe (id: string, port: chrome.runtime.Port): boolean {
+  private metadataSubscribe (id: string, port: chrome.runtime.Port): MetadataRequest[] {
     const cb = createSubscription<'pri(metadata.requests)'>(id, port);
     const subscription = this.#state.metaSubject.subscribe((requests: MetadataRequest[]): void =>
       cb(requests)
@@ -272,7 +272,7 @@ export default class Extension {
       subscription.unsubscribe();
     });
 
-    return true;
+    return this.#state.metaSubject.value;
   }
 
   private jsonRestore ({ file, password }: RequestJsonRestore): void {
@@ -437,7 +437,7 @@ export default class Extension {
   }
 
   // FIXME This looks very much like what we have in authorization
-  private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
+  private signingSubscribe (id: string, port: chrome.runtime.Port): SigningRequest[] {
     const cb = createSubscription<'pri(signing.requests)'>(id, port);
     const subscription = this.#state.signSubject.subscribe((requests: SigningRequest[]): void =>
       cb(requests)
@@ -448,7 +448,7 @@ export default class Extension {
       subscription.unsubscribe();
     });
 
-    return true;
+    return this.#state.signSubject.value;
   }
 
   private windowOpen ({ allowedPath: path, params, subPath }: WindowOpenParams): boolean {

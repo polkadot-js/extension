@@ -60,7 +60,6 @@ const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.empty-list-inner': {
       display: 'flex',
-      flexWrap: 'wrap',
       gap: token.padding,
       flexDirection: 'column',
       alignContent: 'center',

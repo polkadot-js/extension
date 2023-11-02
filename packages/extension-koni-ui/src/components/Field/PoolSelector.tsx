@@ -134,6 +134,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       });
   }, [items, selectedFilters, sortSelection]);
 
+  const havePredefinedPool = useMemo(() => PREDEFINED_STAKING_POOL[chain] !== undefined, [chain]);
+
   const _onSelectItem = useCallback((value: string) => {
     onChange && onChange({ target: { value } });
   }, [onChange]);
@@ -295,18 +297,22 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
               size='xs'
               type='ghost'
             />
-            <Button
-              disabled={isDisabled}
-              icon={(
-                <Icon
-                  phosphorIcon={Lightning}
-                  size='sm'
+            {
+              havePredefinedPool && (
+                <Button
+                  disabled={isDisabled}
+                  icon={(
+                    <Icon
+                      phosphorIcon={Lightning}
+                      size='sm'
+                    />
+                  )}
+                  onClick={onClickLightningBtn}
+                  size='xs'
+                  type='ghost'
                 />
-              )}
-              onClick={onClickLightningBtn}
-              size='xs'
-              type='ghost'
-            />
+              )
+            }
           </div>
         )}
         title={label || placeholder || t('Select pool')}

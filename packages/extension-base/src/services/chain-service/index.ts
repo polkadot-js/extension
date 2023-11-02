@@ -10,7 +10,7 @@ import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-se
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -793,9 +793,37 @@ export class ChainService {
 
       for (const [storedSlug, storedChainInfo] of Object.entries(storedChainSettingMap)) {
         if (storedSlug in latestChainInfoMap) { // check predefined chains first, keep setting for providers and currentProvider
-          mergedChainInfoMap[storedSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[storedSlug].providers }; // TODO: review merging providers
+          // TODO: review merging providers
+          // Keep customer provider only
+          const providers: Record<string, string> = { ...mergedChainInfoMap[storedSlug].providers };
+
+          for (const [key, value] of Object.entries(storedChainInfo.providers)) {
+            if (_isCustomProvider(key)) {
+              if (!Object.values(providers).includes(value)) {
+                providers[key] = value;
+              }
+            }
+          }
+
+          mergedChainInfoMap[storedSlug].providers = providers;
+
+          // Merge current provider
+          let currentProvider = storedChainInfo.currentProvider;
+          const providerValue = storedChainInfo.providers[currentProvider] || '';
+
+          if (!providers[currentProvider]) {
+            currentProvider = Object.keys(providers)[0];
+
+            for (const [key, value] of Object.entries(providers)) {
+              if (providerValue === value) {
+                currentProvider = key;
+                break;
+              }
+            }
+          }
+
           this.dataMap.chainStateMap[storedSlug] = {
-            currentProvider: storedChainInfo.currentProvider,
+            currentProvider: currentProvider,
             slug: storedSlug,
             connectionStatus: _ChainConnectionStatus.DISCONNECTED,
             active: storedChainInfo.active
@@ -804,7 +832,7 @@ export class ChainService {
           newStorageData.push({
             ...mergedChainInfoMap[storedSlug],
             active: storedChainInfo.active,
-            currentProvider: storedChainInfo.currentProvider
+            currentProvider: currentProvider
           });
         } else { // only custom chains are left
           // check custom chain duplicated with predefined chain => merge into predefined chain
@@ -1018,6 +1046,8 @@ export class ChainService {
 
     if (params.chainSpec.genesisHash !== '') {
       substrateInfo = {
+        crowdloanFunds: params.chainSpec.crowdloanFunds || null,
+        crowdloanParaId: params.chainSpec.crowdloanParaId || null,
         addressPrefix: params.chainSpec.addressPrefix,
         blockExplorer: params.chainEditInfo.blockExplorer || null,
         chainType: params.chainSpec.paraId !== null ? _SubstrateChainType.PARACHAIN : _SubstrateChainType.RELAYCHAIN,
@@ -1030,9 +1060,7 @@ export class ChainService {
         relaySlug: null,
         hasNativeNft: false,
         supportStaking: params.chainSpec.paraId === null,
-        supportSmartContract: null,
-        crowdloanFunds: [],
-        crowdloanParaId: null
+        supportSmartContract: null
       };
     } else if (params.chainSpec.evmChainId !== null) {
       evmInfo = {

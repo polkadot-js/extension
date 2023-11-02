@@ -77,16 +77,11 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
     return (
       <TokenSelectionItem
         address={isMantaZkAsset ? zkAddress : address}
-        chain={item.originChain}
         className={'token-selector-item'}
+        item={item}
         key={item.slug}
-        name={item.symbol}
         onClickQrBtn={onClickQrBtn(item)}
         onPressItem={onClickQrBtn(item)}
-        slug={item.slug}
-        subName={item.name}
-        subNetworkKey={item.originChain || ''}
-        symbol={item.symbol}
       />
     );
   }, [address, onClickQrBtn, zkAddress]);

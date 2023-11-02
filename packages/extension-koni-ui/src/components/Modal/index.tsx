@@ -12,6 +12,7 @@ export * from './AddressBook';
 export * from './BaseModal';
 export * from './BaseSelectModal';
 export * from './CustomModal';
+export * from './Campaign';
 export * from './Customize/CustomizeModal';
 export * from './Earning';
 export * from './FilterModal';

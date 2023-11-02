@@ -44,6 +44,7 @@ jobs:
         GH_RELEASE_GITHUB_API_TOKEN: ${{ secrets.GH_PAT }}
         TRANSAK_API_KEY: ${{ secrets.TRANSAK_API_KEY }}
         COINBASE_PAY_ID: ${{ secrets.COINBASE_PAY_ID }}
+        MARKETING_CAMPAIGN_URL: https://static-data.subwallet.app/marketing-campaigns/preview.json
         GH_RELEASE_FILES: master-build.zip,master-src.zip
         COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         REF_NAME: ${{ github.ref_name }}

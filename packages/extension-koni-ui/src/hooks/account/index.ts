@@ -15,6 +15,7 @@ export { default as useGoBackFromCreateAccount } from './useGoBackFromCreateAcco
 export { default as useHandleMantaPaySync } from './useHandleMantaPaySync';
 export { default as useIsReadOnlyAccount } from './useIsReadOnlyAccount';
 export { default as usePreCheckAction } from './usePreCheckAction';
+export { default as useSetSelectedAccountTypes } from './useSetSelectedAccountTypes';
 
 export * from './useGetMantaPayConfig';
 export * from './useGetZkAddress';

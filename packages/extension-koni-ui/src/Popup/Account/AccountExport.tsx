@@ -13,10 +13,10 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
+import { downloadFile } from '@subwallet/extension-koni-ui/utils';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
 import { BackgroundIcon, Button, Field, Form, Icon, Input, PageIcon, SettingItem, SwQRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { saveAs } from 'file-saver';
 import { CheckCircle, CopySimple, DownloadSimple, FileJs, Leaf, QrCode, Wallet } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -57,7 +57,7 @@ const onExportJson = (jsonData: KeyringPair$Json, address: string): (() => void)
     if (jsonData) {
       const blob = new Blob([JSON.stringify(jsonData)], { type: 'application/json; charset=utf-8' });
 
-      saveAs(blob, `${address}.json`);
+      downloadFile(blob, `${address}.json`);
     }
   };
 };

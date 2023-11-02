@@ -6052,6 +6052,7 @@ __metadata:
     boring-avatars: ^1.7.0
     bowser: ^2.11.0
     classnames: ^2.3.2
+    copy-to-clipboard: ^3.3.3
     enzyme: ^3.11.0
     enzyme-adapter-react-16: ^1.15.7
     file-saver: ^2.0.5
@@ -10885,7 +10886,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"copy-to-clipboard@npm:^3.2.0, copy-to-clipboard@npm:^3.3.1":
+"copy-to-clipboard@npm:^3.2.0, copy-to-clipboard@npm:^3.3.1, copy-to-clipboard@npm:^3.3.3":
   version: 3.3.3
   resolution: "copy-to-clipboard@npm:3.3.3"
   dependencies:

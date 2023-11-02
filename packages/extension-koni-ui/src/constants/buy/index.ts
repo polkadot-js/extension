@@ -3,6 +3,4 @@
 
 export * from './banxa';
 export * from './coinbase';
-export * from './contact';
 export * from './transak';
-export * from './token';

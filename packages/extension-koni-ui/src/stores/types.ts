@@ -8,6 +8,7 @@ import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, Signin
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
 import { DAppCategory, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
 import { SessionTypes } from '@walletconnect/types';
@@ -127,6 +128,11 @@ export interface BalanceStore extends BaseReduxStore {
 
 export interface CampaignStore extends BaseReduxStore {
   banners: CampaignBanner[]
+}
+
+export interface BuyServiceStore extends BaseReduxStore {
+  tokens: Record<string, BuyTokenInfo>;
+  services: Record<string, BuyServiceInfo>;
 }
 
 export type PriceStore = PriceJson

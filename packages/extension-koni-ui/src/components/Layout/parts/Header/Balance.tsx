@@ -4,12 +4,12 @@
 import { ReceiveQrModal, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { BUY_TOKEN_MODAL, DEFAULT_TRANSFER_PARAMS, MAP_PREDEFINED_BUY_TOKEN, TRANSACTION_TRANSFER_MODAL, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { BUY_TOKEN_MODAL, DEFAULT_TRANSFER_PARAMS, TRANSACTION_TRANSFER_MODAL, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { BackgroundColorMap, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
-import { useNotification, useReceiveQR, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useNotification, useReceiveQR, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import BuyTokens from '@subwallet/extension-koni-ui/Popup/BuyTokens';
 import Transaction from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
@@ -21,7 +21,6 @@ import { Button, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/
 import CN from 'classnames';
 import { ArrowFatLinesDown, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -69,7 +68,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     selectedNetwork,
     tokenSelectorItems } = useReceiveQR(_tokenGroupSlug);
 
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+  const currentAccount = useSelector((state) => state.accountState.currentAccount);
+  const { tokens } = useSelector((state) => state.buyService);
   const [sendFundKey, setSendFundKey] = useState<string>('sendFundKey');
   const [buyTokensKey, setBuyTokensKey] = useState<string>('buyTokensKey');
   const [buyTokenSymbol, setBuyTokenSymbol] = useState<string>('');
@@ -80,7 +80,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const totalChangeValue = totalBalanceInfo.change.value;
   const totalValue = totalBalanceInfo.convertedValue;
 
-  const accounts = useSelector((state: RootState) => state.accountState.accounts);
+  const accounts = useSelector((state) => state.accountState.accounts);
   const [, setStorage] = useLocalStorage(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
 
   const buyInfos = useMemo(() => {
@@ -92,7 +92,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     const slugs = tokenGroupMap[slug] ? tokenGroupMap[slug] : [slug];
     const result: BuyTokenInfo[] = [];
 
-    for (const [slug, buyInfo] of Object.entries(MAP_PREDEFINED_BUY_TOKEN)) {
+    for (const [slug, buyInfo] of Object.entries(tokens)) {
       if (slugs.includes(slug)) {
         const supportType = buyInfo.support;
 
@@ -111,7 +111,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     }
 
     return result;
-  }, [accounts, currentAccount?.address, locationPathname, tokenGroupMap, tokenGroupSlug]);
+  }, [accounts, currentAccount?.address, locationPathname, tokenGroupMap, tokenGroupSlug, tokens]);
 
   const onOpenBuyTokens = useCallback(() => {
     let symbol = '';

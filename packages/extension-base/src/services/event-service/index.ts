@@ -19,6 +19,8 @@ export class EventService extends EventEmitter<EventRegistry> {
   public readonly waitAssetReady: Promise<boolean>;
   public readonly waitMigrateReady: Promise<boolean>;
   public readonly waitCampaignReady: Promise<boolean>;
+  public readonly waitBuyTokenReady: Promise<boolean>;
+  public readonly waitBuyServiceReady: Promise<boolean>;
 
   constructor (options: { lazyTime: number } = { lazyTime: 300 }) {
     super();
@@ -32,6 +34,8 @@ export class EventService extends EventEmitter<EventRegistry> {
     this.waitAssetReady = this.generateWaitPromise('asset.ready');
     this.waitMigrateReady = this.generateWaitPromise('migration.done');
     this.waitCampaignReady = this.generateWaitPromise('campaign.ready');
+    this.waitBuyTokenReady = this.generateWaitPromise('buy.tokens.ready');
+    this.waitBuyServiceReady = this.generateWaitPromise('buy.services.ready');
   }
 
   private generateWaitPromise<T extends EventType> (eventType: T): Promise<boolean> {

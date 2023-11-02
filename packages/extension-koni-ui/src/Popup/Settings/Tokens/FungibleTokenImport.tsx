@@ -7,6 +7,7 @@ import { isValidSubstrateAddress, reformatAddress } from '@subwallet/extension-b
 import { AddressInput, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useChainChecker, useDefaultNavigate, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -68,6 +69,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const logosMaps = useSelector((state: RootState) => state.settings.logoMaps.chainLogoMap);
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
+  const { isWebUI } = useContext(ScreenContext);
 
   const formRef = useRef<FormInstance<TokenImportFormType>>(null);
   const chainInfoMap = useGetContractSupportedChains();
@@ -397,7 +399,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name={'contractAddress'}
               rules={[{ validator: contractAddressValidator }]}
-              statusHelpAsTooltip={true}
+              statusHelpAsTooltip={isWebUI}
             >
               <AddressInput
                 {
@@ -427,7 +429,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   content={symbol}
                   placeholder={t<string>('Symbol')}
                   prefix={tokenDecimalsPrefix()}
-                  tooltip={t('Symbol')}
+                  tooltip={isWebUI ? t('Symbol') : undefined}
                   tooltipPlacement={'topLeft'}
                 />
               </Col>
@@ -435,7 +437,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <Field
                   content={decimals === -1 ? '' : decimals}
                   placeholder={t<string>('Decimals')}
-                  tooltip={t('Decimals')}
+                  tooltip={isWebUI ? t('Decimals') : undefined}
                   tooltipPlacement={'topLeft'}
                 />
               </Col>
@@ -443,12 +445,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
             <Form.Item
               name={'priceId'}
-              statusHelpAsTooltip={true}
+              statusHelpAsTooltip={isWebUI}
             >
               <Input
                 disabled={selectedTokenType === ''}
                 placeholder={t('Price ID')}
-                tooltip={t('Price ID')}
+                tooltip={isWebUI ? t('Price ID') : undefined}
               />
             </Form.Item>
           </Form>

@@ -6,6 +6,7 @@ import { _getNftTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartCo
 import { isValidSubstrateAddress, reformatAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, Layout, PageWrapper, TokenTypeSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useChainChecker, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -59,6 +60,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
   const { t } = useTranslation();
   const showNotification = useNotification();
   const navigate = useNavigate();
+  const { isWebUI } = useContext(ScreenContext);
 
   const dataContext = useContext(DataContext);
 
@@ -301,7 +303,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
             <Form.Item
               name='contractAddress'
               rules={[{ validator: contractAddressValidator }]}
-              statusHelpAsTooltip={true}
+              statusHelpAsTooltip={isWebUI}
             >
               <AddressInput
                 addressPrefix={chainNetworkPrefix}
@@ -316,7 +318,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
               name='collectionName'
               required={true}
               rules={[{ validator: collectionNameValidator }]}
-              statusHelpAsTooltip={true}
+              statusHelpAsTooltip={isWebUI}
             >
               <Input
                 disabled={nameDisabled}

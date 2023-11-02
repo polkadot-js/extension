@@ -254,7 +254,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                         rules={[{
                           validator: seedValidator
                         }]}
-                        statusHelpAsTooltip={true}
+                        statusHelpAsTooltip={isWebUI}
                         validateTrigger={['onChange']}
                       >
                         <SeedPhraseInput

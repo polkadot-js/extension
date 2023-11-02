@@ -8,6 +8,7 @@ import { getValidatorLabel, isActionFromValidator } from '@subwallet/extension-b
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector, AmountInput, HiddenInput, NominationSelector } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetNativeTokenBasicInfo, useGetYieldMetadata, useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitNominationPoolUnstaking, yieldSubmitUnstaking } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams, UnYieldParams } from '@subwallet/extension-koni-ui/types';
@@ -16,7 +17,7 @@ import { Button, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { MinusCircle } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -43,6 +44,7 @@ const validateFields: Array<keyof UnYieldParams> = ['value'];
 
 const Component: React.FC = () => {
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
 
   const { defaultData, onDone, persistData } = useTransactionContext<UnYieldParams>();
   const { chain, method } = defaultData;
@@ -289,7 +291,7 @@ const Component: React.FC = () => {
               { required: true, message: t('Amount is required') },
               validateUnStakeValue(minValue, bondedValue, decimals, t)
             ]}
-            statusHelpAsTooltip={true}
+            statusHelpAsTooltip={isWebUI}
           >
             <AmountInput
               decimals={decimals}

@@ -495,7 +495,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         }
                       })
                     ]}
-                    statusHelpAsTooltip={true}
+                    statusHelpAsTooltip={isWebUI}
                   >
                     <AmountInput
                       decimals={(chain && from) ? decimals : -1}

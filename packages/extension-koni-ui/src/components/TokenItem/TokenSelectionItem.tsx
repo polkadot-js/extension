@@ -3,6 +3,7 @@
 
 import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
@@ -12,7 +13,7 @@ import { Button, Icon } from '@subwallet/react-ui';
 import TokenItem, { TokenItemProps } from '@subwallet/react-ui/es/web3-block/token-item';
 import classNames from 'classnames';
 import { Copy, QrCode } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
@@ -29,6 +30,7 @@ const Component = (props: Props) => {
   const chainInfo = useFetchChainInfo(chain || '');
   const notify = useNotification();
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
 
   const formattedAddress = useMemo(() => {
     const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
@@ -81,7 +83,7 @@ const Component = (props: Props) => {
                   }
                   onClick={_onCLickCopyBtn}
                   size='xs'
-                  tooltip={t('Copy address')}
+                  tooltip={isWebUI ? t('Copy address') : undefined}
                   type='ghost'
                 />
               </CopyToClipboard>
@@ -95,7 +97,7 @@ const Component = (props: Props) => {
                 }
                 onClick={onClickQrBtn}
                 size='xs'
-                tooltip={t('Show QR code')}
+                tooltip={isWebUI ? t('Show QR code') : undefined}
                 type='ghost'
               />
             </>

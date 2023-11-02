@@ -209,7 +209,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               <Form.Item
                 name={FormFieldName.PASSWORD}
                 rules={passwordRules}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
               >
                 <Input
                   onChange={onChangePassword}
@@ -220,7 +220,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               <Form.Item
                 name={FormFieldName.CONFIRM_PASSWORD}
                 rules={confirmPasswordRules}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
               >
                 <Input
                   onKeyDown={onConfirmPasswordKeyPress}

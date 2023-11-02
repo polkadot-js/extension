@@ -1038,13 +1038,15 @@
   "Once unstaked, your funds will be available for withdrawal after {{time}}.": "",
   "Withdraw from account": "",
   "Invalid address": "",
-  "Connect to your existing extension wallet": "",
-  "For management of your account keys": "",
-  "Connect extension wallet": "",
-  "Download SubWallet extension": "",
   "Welcome to SubWallet!": "",
   "Watch any wallet": "",
   "Enter address": "",
   "Add watch-only wallet": "",
-  "{{name}} must be equal or greater than {{minString}}": ""
+  "{{name}} must be equal or greater than {{minString}}": "",
+  "Dissolved on": "",
+  "Dissolved": "",
+  "Connect wallet": "",
+  "Join quest now": "",
+  "Token name is required": "",
+  "Connect to your existing wallet": ""
 }

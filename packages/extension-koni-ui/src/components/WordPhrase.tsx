@@ -3,9 +3,10 @@
 
 import { useCopy } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, WordItem } from '@subwallet/extension-koni-ui/types';
-import { convertToWords, downloadFile } from '@subwallet/extension-koni-ui/utils';
+import { convertToWords } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
+import { saveAs } from 'file-saver';
 import { CopySimple, EyeSlash } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,9 +29,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const backupMnemonicSeed = useCallback(() => {
     const blob = new Blob([seedPhrase], { type: 'text/plain' });
 
-    const filename = 'mnemonic-seed.txt';
-
-    downloadFile(blob, filename);
+    saveAs(blob, 'mnemonic-seed.txt');
   }, [seedPhrase]);
 
   const onClick = useCallback(() => {

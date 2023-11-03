@@ -35,7 +35,7 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionE
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData } from '@subwallet/extension-base/types';
+import { BuyServiceInfo, BuyTokenInfo, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData } from '@subwallet/extension-base/types';
 import { isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
@@ -4207,6 +4207,58 @@ export default class KoniExtension {
 
   /* Campaign */
 
+  /* Buy service */
+
+  private async subscribeBuyTokens (id: string, port: chrome.runtime.Port): Promise<Record<string, BuyTokenInfo>> {
+    const cb = createSubscription<'pri(buyService.tokens.subscribe)'>(id, port);
+    let ready = false;
+
+    const callback = (rs: Record<string, BuyTokenInfo>) => {
+      if (ready) {
+        cb(rs);
+      }
+    };
+
+    const subscription = this.#koniState.buyService.subscribeBuyTokens(callback);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    await this.#koniState.eventService.waitBuyTokenReady;
+    ready = true;
+
+    return this.#koniState.buyService.getBuyTokens();
+  }
+
+  private async subscribeBuyServices (id: string, port: chrome.runtime.Port): Promise<Record<string, BuyServiceInfo>> {
+    const cb = createSubscription<'pri(buyService.services.subscribe)'>(id, port);
+    let ready = false;
+
+    const callback = (rs: Record<string, BuyServiceInfo>) => {
+      if (ready) {
+        cb(rs);
+      }
+    };
+
+    const subscription = this.#koniState.buyService.subscribeBuyServices(callback);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    await this.#koniState.eventService.waitBuyServiceReady;
+    ready = true;
+
+    return this.#koniState.buyService.getBuyServices();
+  }
+
+  /* Buy service */
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -4723,6 +4775,13 @@ export default class KoniExtension {
       case 'pri(campaign.banner.complete)':
         return this.completeCampaignBanner(request as RequestCampaignBannerComplete);
         /* Campaign */
+
+        /* Buy service */
+      case 'pri(buyService.tokens.subscribe)':
+        return this.subscribeBuyTokens(id, port);
+      case 'pri(buyService.services.subscribe)':
+        return this.subscribeBuyServices(id, port);
+        /* Buy service */
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

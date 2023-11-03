@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { CaretLeft, CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -35,6 +36,10 @@ function Component (
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state: RootState) => state.settings);
 
+  const onChangeShowBalance = useCallback(() => {
+    saveShowBalance(!isShowBalance).catch(console.error);
+  }, [isShowBalance]);
+
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
       <div className='__top'>
@@ -53,16 +58,21 @@ function Component (
         <div className={'__token-display'}>{t('Token')}: {symbol}</div>
       </div>
       <div className='__bottom'>
-        <Number
-          className={'__balance-value'}
-          decimal={0}
-          decimalOpacity={0.45}
-          hide={!isShowBalance}
-          prefix='$'
-          size={38}
-          subFloatNumber
-          value={balanceValue}
-        />
+        <div
+          className='__balance-value-wrapper'
+          onClick={isShrink ? onChangeShowBalance : undefined}
+        >
+          <Number
+            className={'__balance-value'}
+            decimal={0}
+            decimalOpacity={0.45}
+            hide={!isShowBalance}
+            prefix='$'
+            size={38}
+            subFloatNumber
+            value={balanceValue}
+          />
+        </div>
         <div className={'__action-button-container'}>
           <Button
             icon={(
@@ -172,18 +182,22 @@ export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: 
     },
 
     '&.-shrink': {
-
       '.__bottom': {
         display: 'flex'
+      },
+
+      '.__balance-value-wrapper': {
+        flex: 1
       },
 
       '.__balance-value': {
         textAlign: 'left',
         lineHeight: token.lineHeightHeading2,
         fontSize: token.fontSizeHeading2,
-        flex: 1,
+        cursor: 'pointer',
+        width: 'fit-content',
 
-        '.ant-number-prefix, .ant-number-integer': {
+        '.ant-number-prefix, .ant-number-integer, .ant-number-hide-content': {
           fontSize: 'inherit !important'
         }
       },

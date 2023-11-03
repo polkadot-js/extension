@@ -8,6 +8,7 @@ import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
 import { addLazy, canDerive, isEmptyObject } from '@subwallet/extension-base/utils';
 import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
@@ -403,3 +404,17 @@ export const updateBanner = (data: CampaignBanner[]) => {
 
 export const subscribeProcessingCampaign = lazySubscribeMessage('pri(campaign.banner.subscribe)', null, updateBanner, updateBanner);
 /* Campaign */
+
+/* Buy service */
+export const updateBuyTokens = (data: Record<string, BuyTokenInfo>) => {
+  store.dispatch({ type: 'buyService/updateBuyTokens', payload: data });
+};
+
+export const subscribeBuyTokens = lazySubscribeMessage('pri(buyService.tokens.subscribe)', null, updateBuyTokens, updateBuyTokens);
+
+export const updateBuyServices = (data: Record<string, BuyServiceInfo>) => {
+  store.dispatch({ type: 'buyService/updateBuyServices', payload: data });
+};
+
+export const subscribeBuyServices = lazySubscribeMessage('pri(buyService.services.subscribe)', null, updateBuyServices, updateBuyServices);
+/* Buy service */

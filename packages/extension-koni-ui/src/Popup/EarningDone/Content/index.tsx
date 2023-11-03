@@ -42,6 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
 
   const { historyList } = useSelector((state) => state.transactionHistory);
+  const { transactionRequest } = useSelector((state) => state.requestState);
   const { poolInfo } = useSelector((state) => state.yieldPool);
 
   const twitterRef = useRef<HTMLButtonElement>(null);
@@ -51,6 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [historyList, transactionId]);
 
   const pool = useMemo(() => Object.values(poolInfo).find((value) => value.chain === chain), [chain, poolInfo]);
+  const transaction = useMemo(() => transactionRequest[transactionId || ''], [transactionId, transactionRequest]);
 
   const twitterData = useMemo((): TwitterData | undefined => {
     if (pool) {
@@ -282,6 +284,12 @@ const Component: React.FC<Props> = (props: Props) => {
       unmount = true;
     };
   }, [transactionId]);
+
+  useEffect(() => {
+    if (!transaction) {
+      navigate('/home/earning');
+    }
+  }, [navigate, transaction]);
 
   return (
     <Layout.WithSubHeaderOnly

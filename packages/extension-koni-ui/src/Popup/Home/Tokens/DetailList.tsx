@@ -6,7 +6,7 @@ import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Mo
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
-import { DEFAULT_TRANSFER_PARAMS, MAP_PREDEFINED_BUY_TOKEN, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_TRANSFER_PARAMS, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useDefaultNavigate, useNavigateOnChangeAccount, useNotification, useReceiveQR, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -62,6 +62,7 @@ function Component (): React.ReactElement {
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
+  const { tokens } = useSelector((state: RootState) => state.buyService);
   const [, setStorage] = useLocalStorage(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -96,7 +97,7 @@ function Component (): React.ReactElement {
     const slugs = tokenGroupMap[slug] ? tokenGroupMap[slug] : [slug];
     const result: BuyTokenInfo[] = [];
 
-    for (const [slug, buyInfo] of Object.entries(MAP_PREDEFINED_BUY_TOKEN)) {
+    for (const [slug, buyInfo] of Object.entries(tokens)) {
       if (slugs.includes(slug)) {
         const supportType = buyInfo.support;
 
@@ -115,7 +116,7 @@ function Component (): React.ReactElement {
     }
 
     return result;
-  }, [accounts, currentAccount?.address, tokenGroupMap, tokenGroupSlug]);
+  }, [accounts, currentAccount?.address, tokenGroupMap, tokenGroupSlug, tokens]);
 
   const tokenBalanceValue = useMemo<SwNumberProps['value']>(() => {
     if (tokenGroupSlug) {

@@ -5,7 +5,7 @@ import { NotificationType } from '@subwallet/extension-base/background/KoniTypes
 import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { updateAssetSetting } from '@subwallet/extension-koni-ui/messaging';
+import { enableChain, updateAssetSetting } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Button } from '@subwallet/react-ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -74,6 +74,8 @@ export default function useAssetChecker () {
         duration: 3,
         btn
       });
+    } else if (!!assetSetting?.visible && !chainState?.active) {
+      enableChain(assetInfo.originChain, false).catch(console.error);
     } else if (chainState && chainState.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
       const message = t('Chain {{name}} is disconnected', { replace: { name: chainInfo?.name } });
 

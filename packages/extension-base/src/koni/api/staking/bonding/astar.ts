@@ -131,7 +131,7 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
         nominationList.push({
           status: dappStakingStatus,
           chain: chainInfo.slug,
-          validatorAddress: dappAddress.toLowerCase(),
+          validatorAddress: isEthereumAddress(dappAddress) ? dappAddress.toLowerCase() : dappAddress,
           activeStake: currentStake,
           validatorMinStake: '0',
           validatorIdentity: dappInfo?.name,

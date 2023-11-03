@@ -19,6 +19,7 @@ export class KeyringService {
   readonly addressesSubject = keyring.addresses.subject;
   public readonly accountSubject = keyring.accounts.subject;
   private beforeAccount: SubjectInfo = this.accountSubject.value;
+  private injected: boolean;
 
   readonly keyringStateSubject = new BehaviorSubject<KeyringState>({
     isReady: false,
@@ -27,6 +28,7 @@ export class KeyringService {
   });
 
   constructor (private eventService: EventService) {
+    this.injected = false;
     this.currentAccountStore.get('CurrentAccountInfo', (rs) => {
       rs && this.currentAccountSubject.next(rs);
     });
@@ -134,6 +136,11 @@ export class KeyringService {
       this.currentAccountSubject.next({ address: Object.keys(afterAccounts)[0], currentGenesisHash: null });
     } else if (Object.keys(afterAccounts).indexOf(currentAddress) === -1) {
       this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
+    }
+
+    if (!this.injected) {
+      this.eventService.emit('inject.ready', true);
+      this.injected = true;
     }
   }
 

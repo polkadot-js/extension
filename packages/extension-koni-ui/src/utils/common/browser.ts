@@ -25,13 +25,3 @@ export const setSelectedAccountTypes = (keypairTypes: KeypairType[]) => {
 export const removeStorage = (key: string) => {
   localStorage.removeItem(key);
 };
-
-export const downloadFile = (blob: Blob, filename: string) => {
-  const elem = window.document.createElement('a');
-
-  elem.href = window.URL.createObjectURL(blob);
-  elem.download = filename;
-  document.body.appendChild(elem);
-  elem.click();
-  document.body.removeChild(elem);
-};

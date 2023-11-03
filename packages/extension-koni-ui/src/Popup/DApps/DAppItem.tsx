@@ -255,7 +255,8 @@ const DAppItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '.__item-title-wrapper': {
         display: 'flex',
-        alignItems: 'center'
+        alignItems: 'center',
+        gap: token.sizeXS
       },
 
       '.__item-tags-area': {

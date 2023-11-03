@@ -32,7 +32,7 @@ const handleCancel = async ({ id }: ConfirmationDefinitions['addTokenRequest'][0
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, request } = props;
-  const { payload: { contractAddress, contractError, decimals, originChain, slug, symbol, type, validated } } = request;
+  const { payload: { contractAddress, contractError, decimals, name, originChain, slug, symbol, type, validated } } = request;
 
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
@@ -144,6 +144,10 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </Col>
         </Row>
+        <Field
+          content={name}
+          tooltip={t<string>('Token name')}
+        />
       </div>
       <div className='confirmation-footer'>
         <Button
@@ -179,7 +183,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AddTokenConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--content-gap': `${token.size}px`,
+    '--content-gap': token.sizeSM,
 
     '.ant-field-container': {
       textAlign: 'left',

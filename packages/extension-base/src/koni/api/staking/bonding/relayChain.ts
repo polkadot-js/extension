@@ -657,7 +657,7 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
     chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
     chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra)),
     chainApi.api.query.staking.minNominatorBond(),
-    chainApi.api.query.stakingRewards && chainApi.api.query.stakingRewards.data()
+    chainApi.api.query.stakingRewards?.data && chainApi.api.query.stakingRewards.data()
   ]);
 
   const stakingRewards = _stakingRewards?.toPrimitive() as unknown as TernoaStakingRewardsStakingRewardsData;

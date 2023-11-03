@@ -24,7 +24,8 @@ export function convertFieldToError<T = Record<string, unknown>> (fields: FieldD
   }, {} as Record<keyof T, string[]>);
 }
 
-export const simpleCheckForm = (allFields: FormFieldData[], ignoreFields?: string[]) => {
+// RequiredFields: '*': check all | '--x': exclude x | 'x': include x
+export const simpleCheckForm = (allFields: FormFieldData[], requiredFields: string[] = ['*']) => {
   const error = allFields.map((data) => data.errors || [])
     .reduce((old, value) => [...old, ...value], [])
     .some((value) => !!value);
@@ -33,9 +34,29 @@ export const simpleCheckForm = (allFields: FormFieldData[], ignoreFields?: strin
     const value = data.value as unknown;
     const names = isArray(data.name) ? data.name : [data.name];
 
-    const isIgnore = ignoreFields?.some((name) => names.includes(name));
+    let checkAll = false;
 
-    return isIgnore ? false : typeof value === 'boolean' ? false : !value;
+    const required: string[] = [];
+    const ignored: string[] = [];
+
+    for (const requiredField of requiredFields) {
+      if (requiredField === '*') {
+        checkAll = true;
+      } else if (requiredField.startsWith('--')) {
+        const name = requiredField.slice(2);
+
+        ignored.push(name);
+      } else {
+        required.push(requiredField);
+      }
+    }
+
+    const ignorePass = ignored.length ? ignored.every((name) => !names.includes(name)) : true;
+    const requirePass = required.length ? required.some((name) => names.includes(name)) : true;
+
+    const needCheck = checkAll || (ignorePass && requirePass);
+
+    return !needCheck ? false : typeof value === 'boolean' ? false : !value;
   });
 
   return {

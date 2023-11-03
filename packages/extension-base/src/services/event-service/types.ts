@@ -5,31 +5,38 @@ import { CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTyp
 import { SWTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 
 export interface EventRegistry {
-  'general.sleep': [boolean],
-  'general.wakeup': [boolean],
-  'crypto.ready': [boolean],
-  'database.ready': [boolean],
-  'keyring.ready': [boolean],
-  'account.updateCurrent': [CurrentAccountInfo],
-  'account.ready': [boolean],
-  'account.add': [string], // address
-  'account.update': [string], // address
-  'account.remove': [string], // address
+  'general.sleep': [boolean];
+  'general.wakeup': [boolean];
+  'crypto.ready': [boolean];
+  'database.ready': [boolean];
+  'keyring.ready': [boolean];
+  'account.updateCurrent': [CurrentAccountInfo];
+  'account.ready': [boolean];
+  'account.add': [string]; // address
+  'account.update': [string]; // address
+  'account.remove': [string]; // address
 
-  'chain.ready': [boolean], // chain is ready and migration done
-  'chain.add': [string], // chain slug
-  'chain.updateState': [string], // chain slug
+  'chain.ready': [boolean]; // chain is ready and migration done
+  'chain.add': [string]; // chain slug
+  'chain.updateState': [string]; // chain slug
 
-  'asset.ready': [boolean],
-  'asset.updateState': [string], // token slug
+  'asset.ready': [boolean];
+  'asset.updateState': [string]; // token slug
 
-  'transaction.done': [SWTransaction],
-  'transaction.failed': [SWTransaction | undefined],
-  'transaction.submitStaking': [string],
-  'transaction.transferNft': [SWTransaction | undefined],
-  'mantaPay.initSync': [string | undefined], // zkAddress
-  'mantaPay.submitTransaction': [SWTransaction | undefined],
-  'mantaPay.enable': [string]
+  'transaction.done': [SWTransaction];
+  'transaction.failed': [SWTransaction | undefined];
+  'transaction.submitStaking': [string];
+  'transaction.transferNft': [SWTransaction | undefined];
+  'mantaPay.initSync': [string | undefined]; // zkAddress
+  'mantaPay.submitTransaction': [SWTransaction | undefined];
+  'mantaPay.enable': [string];
+
+  'migration.done': [boolean];
+  'campaign.ready': [boolean];
+
+  // Buy token
+  'buy.tokens.ready': [boolean];
+  'buy.services.ready': [boolean];
 }
 
 export type EventType = keyof EventRegistry;

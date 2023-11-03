@@ -3,11 +3,12 @@
 
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AddressBookState, AllLogoMap, AssetSetting, BalanceItem, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, MantaPayConfig, NftCollection, NftItem, NominationPoolInfo, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AddressBookState, AllLogoMap, AssetSetting, BalanceItem, CampaignBanner, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, MantaPayConfig, NftCollection, NftItem, NominationPoolInfo, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
 import { DAppCategory, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
 import { SessionTypes } from '@walletconnect/types';
@@ -123,6 +124,15 @@ export interface ChainStore extends BaseReduxStore {
 
 export interface BalanceStore extends BaseReduxStore {
   balanceMap: Record<string, BalanceItem>
+}
+
+export interface CampaignStore extends BaseReduxStore {
+  banners: CampaignBanner[]
+}
+
+export interface BuyServiceStore extends BaseReduxStore {
+  tokens: Record<string, BuyTokenInfo>;
+  services: Record<string, BuyServiceInfo>;
 }
 
 export type PriceStore = PriceJson

@@ -10,7 +10,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft } from '@subwallet/extension-base/types';
+import { BuyServiceInfo, BuyTokenInfo, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -1396,15 +1396,15 @@ export interface ResponseParseEvmContractInput {
 /// Ledger
 
 export interface LedgerNetwork {
-  genesisHash: string;
-  networkName: string;
-  accountName: string;
-  appName: string;
+  genesisHash: string; // GenesisHash for substrate app
+  networkName: string; // Display in selector
+  accountName: string; // Name for account(Ledger X Account)
+  appName: string; // Name in Ledger
   network: string; // network is predefined in ledger lib
   slug: string; // slug in chain list
-  icon: 'substrate' | 'ethereum';
-  isDevMode: boolean;
-  isEthereum: boolean;
+  icon: 'substrate' | 'ethereum'; // Deprecated
+  isDevMode: boolean; // Dev mode on Ledger
+  isEthereum: boolean; // Use for evm account
 }
 /// On-ramp
 
@@ -1957,6 +1957,11 @@ export enum NotificationType {
   WARNING = 'warning',
   ERROR = 'error',
 }
+
+export interface NotificationButton {
+  title: string;
+}
+
 export interface Notification {
   id: number;
   type: NotificationType;
@@ -1965,7 +1970,10 @@ export interface Notification {
   notifyViaBrowser?: boolean;
   action?: {
     url?: string; // Add more action in the future
-  }
+    buttonClick?: (btnIndex: number) => void;
+    click?: () => void;
+  };
+  buttons?: NotificationButton[];
 }
 
 export type NotificationParams = Omit<Notification, 'id'>;
@@ -2306,6 +2314,68 @@ export interface SubmitJoinNominationPool {
   nominatorMetadata?: NominatorMetadata
 }
 
+/* Campaign */
+
+export type CampaignAction = 'open_view' | 'open_url' | null;
+
+export interface CampaignButton {
+  id: number;
+  color: string;
+  icon: string | null;
+  name: string;
+  type: CampaignAction;
+  metadata: Record<string, any> | null;
+}
+
+export enum CampaignDataType {
+  NOTIFICATION = 'notification',
+  BANNER ='banner'
+}
+
+export interface BaseCampaignData {
+  slug: string;
+  campaignId: number;
+  isDone: boolean;
+  type: CampaignDataType;
+  data: Record<string, any>;
+  buttons: CampaignButton[];
+  startTime: number;
+  endTime: number;
+  condition: Record<string, any> | null;
+}
+
+export interface CampaignBanner extends BaseCampaignData {
+  type: CampaignDataType.BANNER;
+  data: {
+    media: string;
+    alt: string;
+    action: CampaignAction;
+    metadata: Record<string, any> | null;
+    environments: string[];
+    position: string[];
+  }
+}
+
+export interface CampaignNotification extends BaseCampaignData {
+  type: CampaignDataType.NOTIFICATION;
+  data: {
+    title: string;
+    message: string;
+    repeat: number;
+    repeatAfter: number;
+    action: CampaignAction;
+    metadata: Record<string, any> | null;
+  }
+}
+
+export type CampaignData = CampaignBanner | CampaignNotification;
+
+export interface RequestCampaignBannerComplete {
+  slug: string;
+}
+
+/* Campaign */
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -2385,7 +2455,7 @@ export interface KoniRequestSignatures {
 
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];
-  'pri(authorize.requestsV2)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
+  'pri(authorize.requestsV2)': [RequestAuthorizeSubscribe, AuthorizeRequest[], AuthorizeRequest[]];
   'pri(authorize.approveV2)': [RequestAuthorizeApproveV2, boolean];
   'pri(authorize.changeSiteAll)': [RequestAuthorizationAll, boolean, AuthUrls];
   'pri(authorize.changeSite)': [RequestAuthorization, boolean, AuthUrls];
@@ -2595,6 +2665,16 @@ export interface KoniRequestSignatures {
   'pri(campaign.unlockDot.subscribe)': [RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft, UnlockDotTransactionNft]
 
   /* Campaign */
+
+  /* Campaign */
+  'pri(campaign.banner.subscribe)': [null, CampaignBanner[], CampaignBanner[]];
+  'pri(campaign.banner.complete)': [RequestCampaignBannerComplete, boolean];
+  /* Campaign */
+
+  /* Buy Service */
+  'pri(buyService.tokens.subscribe)': [null, Record<string, BuyTokenInfo>, Record<string, BuyTokenInfo>];
+  'pri(buyService.services.subscribe)': [null, Record<string, BuyServiceInfo>, Record<string, BuyServiceInfo>];
+  /* Buy Service */
 }
 
 export interface ApplicationMetadataType {

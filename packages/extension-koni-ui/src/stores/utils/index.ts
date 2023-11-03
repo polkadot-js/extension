@@ -3,18 +3,18 @@
 
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, AddressBookInfo, AllLogoMap, AssetSetting, BalanceJson, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, MantaPayConfig, MantaPaySyncState, NftCollection, NftJson, NominatorMetadata, PriceJson, StakingJson, StakingRewardJson, TransactionHistoryItem, UiSettings, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, AddressBookInfo, AllLogoMap, AssetSetting, BalanceJson, CampaignBanner, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, MantaPayConfig, MantaPaySyncState, NftCollection, NftJson, NominatorMetadata, PriceJson, StakingJson, StakingRewardJson, TransactionHistoryItem, UiSettings, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
 import { addLazy, canDerive, isEmptyObject } from '@subwallet/extension-base/utils';
 import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { DAppCategory, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
-import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
 import { SessionTypes } from '@walletconnect/types';
 
@@ -84,7 +84,7 @@ export const updateAuthorizeRequests = (data: AuthorizeRequest[]) => {
   store.dispatch({ type: 'requestState/updateAuthorizeRequests', payload: requests });
 };
 
-export const subscribeAuthorizeRequests = lazySubscribeMessage('pri(authorize.requestsV2)', null, noop, updateAuthorizeRequests);
+export const subscribeAuthorizeRequests = lazySubscribeMessage('pri(authorize.requestsV2)', null, updateAuthorizeRequests, updateAuthorizeRequests);
 
 export const updateMetadataRequests = (data: MetadataRequest[]) => {
   // Convert data to object with key as id
@@ -93,7 +93,7 @@ export const updateMetadataRequests = (data: MetadataRequest[]) => {
   store.dispatch({ type: 'requestState/updateMetadataRequests', payload: requests });
 };
 
-export const subscribeMetadataRequests = lazySubscribeMessage('pri(metadata.requests)', null, noop, updateMetadataRequests);
+export const subscribeMetadataRequests = lazySubscribeMessage('pri(metadata.requests)', null, updateMetadataRequests, updateMetadataRequests);
 
 export const updateSigningRequests = (data: SigningRequest[]) => {
   // Convert data to object with key as id
@@ -102,7 +102,7 @@ export const updateSigningRequests = (data: SigningRequest[]) => {
   store.dispatch({ type: 'requestState/updateSigningRequests', payload: requests });
 };
 
-export const subscribeSigningRequests = lazySubscribeMessage('pri(signing.requests)', null, noopBoolean, updateSigningRequests);
+export const subscribeSigningRequests = lazySubscribeMessage('pri(signing.requests)', null, updateSigningRequests, updateSigningRequests);
 
 export const updateConfirmationRequests = (data: ConfirmationsQueue) => {
   store.dispatch({ type: 'requestState/updateConfirmationRequests', payload: data });
@@ -394,3 +394,27 @@ export const getMissionPoolData = (() => {
 
   return rs;
 })();
+
+/* Campaign */
+export const updateBanner = (data: CampaignBanner[]) => {
+  const filtered = data.filter((item) => !item.isDone);
+
+  store.dispatch({ type: 'campaign/updateBanner', payload: filtered });
+};
+
+export const subscribeProcessingCampaign = lazySubscribeMessage('pri(campaign.banner.subscribe)', null, updateBanner, updateBanner);
+/* Campaign */
+
+/* Buy service */
+export const updateBuyTokens = (data: Record<string, BuyTokenInfo>) => {
+  store.dispatch({ type: 'buyService/updateBuyTokens', payload: data });
+};
+
+export const subscribeBuyTokens = lazySubscribeMessage('pri(buyService.tokens.subscribe)', null, updateBuyTokens, updateBuyTokens);
+
+export const updateBuyServices = (data: Record<string, BuyServiceInfo>) => {
+  store.dispatch({ type: 'buyService/updateBuyServices', payload: data });
+};
+
+export const subscribeBuyServices = lazySubscribeMessage('pri(buyService.services.subscribe)', null, updateBuyServices, updateBuyServices);
+/* Buy service */

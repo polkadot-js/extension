@@ -11,6 +11,8 @@ import SettingsReducer from './base/Settings';
 import UIViewStateReducer from './base/UIViewState';
 import BalanceReducer from './feature/Balance';
 import BondingReducer from './feature/Bonding';
+import BuyServiceReducer from './feature/Buy';
+import CampaignReducer from './feature/Campaign';
 import AssetRegistryReducer from './feature/common/AssetRegistry';
 import ChainStoreReducer from './feature/common/ChainStore';
 import CrowdloanReducer from './feature/Crowdloan';
@@ -31,7 +33,9 @@ const persistConfig = {
   whitelist: [
     'settings',
     'uiViewState',
-    'staking'
+    'staking',
+    'campaign',
+    'buyService'
   ]
 };
 
@@ -45,6 +49,8 @@ const rootReducers = combineReducers({
   balance: BalanceReducer,
   bonding: BondingReducer,
   mantaPay: MantaPayReducer,
+  campaign: CampaignReducer,
+  buyService: BuyServiceReducer,
 
   // common
   chainStore: ChainStoreReducer,

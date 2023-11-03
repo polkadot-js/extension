@@ -42,8 +42,8 @@ const packages = [
 const _additionalEnv = {
   TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
   COINBASE_PAY_ID: JSON.stringify(process.env.COINBASE_PAY_ID),
-  TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
-  BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true)
+  TRANSAK_TEST_MODE: JSON.stringify(false),
+  BANXA_TEST_MODE: JSON.stringify(false)
 };
 
 const additionalEnvDict = {

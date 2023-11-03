@@ -7,7 +7,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AddressBookInfo, AmountData, AmountDataWithId, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BasicTxWarningCode, BondingOptionParams, BrowserConfirmationType, ChainStakingMetadata, ChainType, CreateDeriveAccountInfo, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, MantaPayEnableMessage, MantaPayEnableParams, MantaPayEnableResponse, MantaPaySyncState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptimalYieldPathParams, OptimalYieldPathRequest, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAddInjectedAccounts, RequestApproveConnectWalletSession, RequestApproveWalletConnectNotSupport, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeEnableChainPatrol, RequestChangeLanguage, RequestChangeMasterPassword, RequestChangeShowBalance, RequestChangeShowZeroBalance, RequestChangeTimeAutoLock, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestConnectWalletConnect, RequestCrossChainTransfer, RequestCrowdloanContributions, RequestDeleteContactAccount, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestDisconnectWalletConnectSession, RequestEditContactAccount, RequestFindRawMetadata, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestPassPhishingPage, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectConnectWalletSession, RequestRejectExternalRequest, RequestRejectWalletConnectNotSupport, RequestRemoveInjectedAccounts, RequestResetWallet, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestUnlockType, RequestYieldFastWithdrawal, RequestYieldStepSubmit, ResolveAddressToDomainRequest, ResolveDomainRequest, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseFindRawMetadata, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResetWallet, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidateYieldProcessParams, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AddressBookInfo, AmountData, AmountDataWithId, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BasicTxWarningCode, BondingOptionParams, BrowserConfirmationType, CampaignBanner, CampaignData, CampaignDataType, ChainStakingMetadata, ChainType, CreateDeriveAccountInfo, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, MantaPayEnableMessage, MantaPayEnableParams, MantaPayEnableResponse, MantaPaySyncState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptimalYieldPathParams, OptimalYieldPathRequest, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAddInjectedAccounts, RequestApproveConnectWalletSession, RequestApproveWalletConnectNotSupport, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestCampaignBannerComplete, RequestChangeEnableChainPatrol, RequestChangeLanguage, RequestChangeMasterPassword, RequestChangeShowBalance, RequestChangeShowZeroBalance, RequestChangeTimeAutoLock, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestConnectWalletConnect, RequestCrossChainTransfer, RequestCrowdloanContributions, RequestDeleteContactAccount, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestDisconnectWalletConnectSession, RequestEditContactAccount, RequestFindRawMetadata, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestPassPhishingPage, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectConnectWalletSession, RequestRejectExternalRequest, RequestRejectWalletConnectNotSupport, RequestRemoveInjectedAccounts, RequestResetWallet, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestUnlockType, RequestYieldFastWithdrawal, RequestYieldStepSubmit, ResolveAddressToDomainRequest, ResolveDomainRequest, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseFindRawMetadata, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResetWallet, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidateYieldProcessParams, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeCancel, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApproveSignature, RequestSigningCancel, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseType, SigningRequest, WindowOpenParams } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, XCM_MIN_AMOUNT_RATIO } from '@subwallet/extension-base/constants';
@@ -35,7 +35,7 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionE
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData } from '@subwallet/extension-base/types';
+import { BuyServiceInfo, BuyTokenInfo, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData } from '@subwallet/extension-base/types';
 import { isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
@@ -252,7 +252,7 @@ export default class KoniExtension {
     return true;
   }
 
-  private metadataSubscribe (id: string, port: chrome.runtime.Port): boolean {
+  private metadataSubscribe (id: string, port: chrome.runtime.Port): MetadataRequest[] {
     const cb = createSubscription<'pri(metadata.requests)'>(id, port);
     const subscription = this.#koniState.metaSubject.subscribe((requests: MetadataRequest[]): void =>
       cb(requests)
@@ -263,7 +263,7 @@ export default class KoniExtension {
       subscription.unsubscribe();
     });
 
-    return true;
+    return this.#koniState.metaSubject.value;
   }
 
   private jsonRestore ({ file, password }: RequestJsonRestore): void {
@@ -351,7 +351,7 @@ export default class KoniExtension {
   }
 
   // FIXME This looks very much like what we have in authorization
-  private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
+  private signingSubscribe (id: string, port: chrome.runtime.Port): SigningRequest[] {
     const cb = createSubscription<'pri(signing.requests)'>(id, port);
     const subscription = this.#koniState.signSubject.subscribe((requests: SigningRequest[]): void =>
       cb(requests)
@@ -362,7 +362,7 @@ export default class KoniExtension {
       subscription.unsubscribe();
     });
 
-    return true;
+    return this.#koniState.signSubject.value;
   }
 
   private windowOpen ({ allowedPath: path, params, subPath }: WindowOpenParams): boolean {
@@ -610,7 +610,7 @@ export default class KoniExtension {
     });
   }
 
-  private authorizeSubscribeV2 (id: string, port: chrome.runtime.Port): boolean {
+  private authorizeSubscribeV2 (id: string, port: chrome.runtime.Port): AuthorizeRequest[] {
     const cb = createSubscription<'pri(authorize.requestsV2)'>(id, port);
     const subscription = this.#koniState.authSubjectV2.subscribe((requests: AuthorizeRequest[]): void =>
       cb(requests)
@@ -622,7 +622,7 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return true;
+    return this.#koniState.authSubjectV2.value;
   }
 
   private async getAuthListV2 (): Promise<ResponseAuthorizeList> {
@@ -1719,7 +1719,7 @@ export default class KoniExtension {
 
         const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter);
 
-        inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}}{{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: tokenInfo.symbol } })));
+        inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}} {{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: tokenInfo.symbol } })));
       }
     };
 
@@ -1792,7 +1792,7 @@ export default class KoniExtension {
         if (new BigN(value).lt(atLeast)) {
           const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
 
-          inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}}{{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: originTokenInfo.symbol } })));
+          inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}} {{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: originTokenInfo.symbol } })));
         }
 
         const srcMinAmount = originTokenInfo.minAmount || '0';
@@ -4160,7 +4160,104 @@ export default class KoniExtension {
     return this.#koniState.mintCampaignService.unlockDotCampaign.getMintedNft(transactionId);
   }
 
+  private async subscribeProcessingBanner (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(campaign.banner.subscribe)'>(id, port);
+
+    const filterBanner = (data: CampaignData[]) => {
+      const result: CampaignBanner[] = [];
+
+      for (const item of data) {
+        if (item.type === CampaignDataType.BANNER) {
+          result.push(item);
+        }
+      }
+
+      return result;
+    };
+
+    const callback = (data: CampaignData[]) => {
+      cb(filterBanner(data));
+    };
+
+    const subscription = this.#koniState.campaignService.subscribeProcessingCampaign().subscribe({
+      next: callback
+    });
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return filterBanner(await this.#koniState.campaignService.getProcessingCampaign());
+  }
+
+  private async completeCampaignBanner ({ slug }: RequestCampaignBannerComplete) {
+    const campaign = await this.#koniState.dbService.getCampaign(slug);
+
+    if (campaign) {
+      await this.#koniState.dbService.upsertCampaign({
+        ...campaign,
+        isDone: true
+      });
+    }
+
+    return true;
+  }
+
   /* Campaign */
+
+  /* Buy service */
+
+  private async subscribeBuyTokens (id: string, port: chrome.runtime.Port): Promise<Record<string, BuyTokenInfo>> {
+    const cb = createSubscription<'pri(buyService.tokens.subscribe)'>(id, port);
+    let ready = false;
+
+    const callback = (rs: Record<string, BuyTokenInfo>) => {
+      if (ready) {
+        cb(rs);
+      }
+    };
+
+    const subscription = this.#koniState.buyService.subscribeBuyTokens(callback);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    await this.#koniState.eventService.waitBuyTokenReady;
+    ready = true;
+
+    return this.#koniState.buyService.getBuyTokens();
+  }
+
+  private async subscribeBuyServices (id: string, port: chrome.runtime.Port): Promise<Record<string, BuyServiceInfo>> {
+    const cb = createSubscription<'pri(buyService.services.subscribe)'>(id, port);
+    let ready = false;
+
+    const callback = (rs: Record<string, BuyServiceInfo>) => {
+      if (ready) {
+        cb(rs);
+      }
+    };
+
+    const subscription = this.#koniState.buyService.subscribeBuyServices(callback);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    await this.#koniState.eventService.waitBuyServiceReady;
+    ready = true;
+
+    return this.#koniState.buyService.getBuyServices();
+  }
+
+  /* Buy service */
 
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -4671,6 +4768,20 @@ export default class KoniExtension {
       // Metadata
       case 'pri(metadata.find)':
         return this.findRawMetadata(request as RequestFindRawMetadata);
+
+        /* Campaign */
+      case 'pri(campaign.banner.subscribe)':
+        return this.subscribeProcessingBanner(id, port);
+      case 'pri(campaign.banner.complete)':
+        return this.completeCampaignBanner(request as RequestCampaignBannerComplete);
+        /* Campaign */
+
+        /* Buy service */
+      case 'pri(buyService.tokens.subscribe)':
+        return this.subscribeBuyTokens(id, port);
+      case 'pri(buyService.services.subscribe)':
+        return this.subscribeBuyServices(id, port);
+        /* Buy service */
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

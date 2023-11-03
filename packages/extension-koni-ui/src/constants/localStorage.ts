@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 export const THEME_BACKGROUND_COLOR = 'theme-background-color';
@@ -39,6 +39,7 @@ export const TRANSACTION_STORAGES = [
 ];
 
 export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';
+export const SEED_PREVENT_MODAL = 'seed.prevent-modal';
 
 export const DAPPS_FAVORITE = 'dapps.favorite';
 

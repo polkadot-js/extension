@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import { getDAppsData, getLogoMaps, getMissionPoolData, subscribeAccountsData, subscribeAddressBook, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeConfirmationRequests, subscribeConnectWCRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMantaPayConfig, subscribeMantaPaySyncingState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStakingReward, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeWalletConnectSessions, subscribeWCNotSupportRequests, subscribeXcmRefMap, subscribeYieldPoolInfo, subscribeYieldPositionInfo } from '@subwallet/extension-koni-ui/stores/utils';
+import { getDAppsData, getLogoMaps, getMissionPoolData, subscribeAccountsData, subscribeAddressBook, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeBuyServices, subscribeBuyTokens, subscribeChainInfoMap, subscribeChainStateMap, subscribeConfirmationRequests, subscribeConnectWCRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMantaPayConfig, subscribeMantaPaySyncingState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeProcessingCampaign, subscribeSigningRequests, subscribeStakingReward, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeWalletConnectSessions, subscribeWCNotSupportRequests, subscribeXcmRefMap, subscribeYieldPoolInfo, subscribeYieldPositionInfo } from '@subwallet/extension-koni-ui/stores/utils';
 import Bowser from 'bowser';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -203,6 +203,11 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
   _DataContext.addHandler({ ...subscribeMantaPayConfig, name: 'subscribeMantaPayConfig', relatedStores: ['mantaPay'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeMantaPaySyncingState, name: 'subscribeMantaPaySyncingState', relatedStores: ['mantaPay'], isStartImmediately: true });
+
+  _DataContext.addHandler({ ...subscribeProcessingCampaign, name: 'subscribeProcessingCampaign', relatedStores: ['campaign'], isStartImmediately: true });
+
+  _DataContext.addHandler({ ...subscribeBuyTokens, name: 'subscribeBuyTokens', relatedStores: ['buyService'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeBuyServices, name: 'subscribeBuyServices', relatedStores: ['buyService'], isStartImmediately: true });
 
   // Settings
   _DataContext.addHandler({ ...subscribeUiSettings, name: 'subscribeUiSettings', relatedStores: ['settings'], isStartImmediately: true });

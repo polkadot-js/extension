@@ -13,7 +13,7 @@ type Props = ThemeProps & SelectModalProps<any> & {
   fullSize?: boolean;
 };
 
-function Component ({ children, className, fullSize, motion, ...props }: Props): React.ReactElement<Props> {
+function Component ({ children, className, fullSize = true, motion, ...props }: Props): React.ReactElement<Props> {
   const { isWebUI } = useContext(ScreenContext);
 
   const _motion = motion || (isWebUI ? 'move-right' : undefined);
@@ -64,13 +64,18 @@ export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemePro
     },
 
     '&.-mobile': {
-      justifyContent: 'flex-end'
+      justifyContent: 'flex-end',
+
+      '.ant-sw-modal-content': {
+        maxHeight: '95%'
+      }
     },
 
     '&.-full-Size': {
       '.ant-sw-modal-content': {
         height: '100%',
-        maxHeight: '100%'
+        maxHeight: '100%',
+        borderRadius: 0
       }
     }
   });

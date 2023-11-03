@@ -62,13 +62,18 @@ export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) 
     },
 
     '&.-mobile': {
-      justifyContent: 'flex-end'
+      justifyContent: 'flex-end',
+
+      '.ant-sw-modal-content': {
+        maxHeight: '95%'
+      }
     },
 
     '&.-full-Size': {
       '.ant-sw-modal-content': {
         height: '100%',
-        maxHeight: '100%'
+        maxHeight: '100%',
+        borderRadius: 0
       }
     }
   });

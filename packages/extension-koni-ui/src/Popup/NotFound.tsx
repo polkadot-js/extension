@@ -36,7 +36,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       rightFooterButton={footerBtn}
       showBackButton={false}
       subHeaderPaddingVertical={true}
-      title={t('Phishing detection')}
     >
       <div className='title'>
         <div className='title-text'>4</div>

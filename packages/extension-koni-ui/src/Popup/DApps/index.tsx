@@ -325,11 +325,25 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.__scroll-container': {
       flex: 1,
-      overflow: 'auto'
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      display: 'flex',
+      flexDirection: 'column'
     },
 
     '.__feature-area': {
-      overflow: 'hidden'
+      position: 'relative',
+
+      '&:after': {
+        position: 'absolute',
+        right: -16,
+        top: 0,
+        width: 16,
+        bottom: 0,
+        display: 'block',
+        content: '""',
+        backgroundColor: token.colorBgDefault
+      }
     },
 
     '.__feature-area-inner': {
@@ -380,6 +394,7 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__dapp-list-area': {
+      flex: 1,
       marginTop: 32,
       marginBottom: 40
     },

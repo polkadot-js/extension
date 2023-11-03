@@ -51,20 +51,30 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    overflow: 'hidden',
-    marginTop: 48,
-    marginBottom: 48,
-
+    overflow: 'auto',
+    marginTop: 32,
+    marginBottom: 32,
     position: 'relative',
     zIndex: 2,
+    display: 'flex',
+    flexDirection: 'column',
+
+    '&:before, &:after': {
+      content: '""',
+      display: 'block',
+      flex: '1 1 0'
+    },
 
     '.empty-list-inner': {
+      maxWidth: 358,
+      width: '100%',
       display: 'flex',
       gap: token.padding,
       flexDirection: 'column',
       alignContent: 'center',
-      overflow: 'auto',
-      height: '100%'
+      padding: token.padding,
+      marginLeft: 'auto',
+      marginRight: 'auto'
     },
 
     '.empty_text_container': {

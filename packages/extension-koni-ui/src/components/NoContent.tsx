@@ -128,17 +128,19 @@ const Component: React.FC<Props> = ({ className, pageType }: Props) => {
 const NoContent = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     height: '100%',
-    paddingTop: 48,
-    paddingBottom: 88,
     display: 'flex',
-    alignItems: 'center',
+    flexDirection: 'column',
+
+    '&:before, &:after': {
+      content: '""',
+      display: 'block',
+      flex: 1
+    },
 
     '.message-wrapper': {
       maxWidth: 358,
       width: '100%',
-      paddingLeft: token.padding,
-      paddingRight: token.padding,
-      paddingTop: token.padding,
+      padding: token.padding,
       marginLeft: 'auto',
       marginRight: 'auto'
     },
@@ -194,6 +196,11 @@ const NoContent = styled(Component)<Props>(({ theme: { token } }: Props) => {
         color: token.colorTextLight4,
         textAlign: 'center'
       }
+    },
+
+    '@media (min-width: 992px)': {
+      paddingTop: 32,
+      paddingBottom: 62
     }
   };
 });

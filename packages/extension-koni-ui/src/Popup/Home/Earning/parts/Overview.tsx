@@ -384,8 +384,6 @@ const EarningOverviewContent = styled(Component)<Props>(({ theme: { token } }: P
       },
 
       '.empty-list-inner': {
-        paddingTop: 64,
-        paddingBottom: 70,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center'

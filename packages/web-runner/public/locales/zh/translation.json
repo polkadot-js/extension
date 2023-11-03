@@ -849,5 +849,6 @@
   "You don't have any EVM account to connect. Please create one or skip this step by hitting Cancel.": "",
   "You don't have any account to connect. Please create one or skip this step by hitting Cancel.": "",
   "You must transfer at least {{amount}} {{symbol}} to keep the destination account alive": "",
-  "You don't have enough tokens to proceed": ""
+  "You don't have enough tokens to proceed": "",
+  "Token name is required": ""
 }

@@ -3,13 +3,15 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, TokenBalanceRaw, UnbondingSubmitParams, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, TokenBalanceRaw, UnbondingSubmitParams, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
+import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -40,6 +42,16 @@ export interface BifrostVtokenExchangeRate {
   timestamp: string,
   total_issuance: number,
   token_pool: number
+}
+
+interface BifrostUnlockLedger {
+  address: string,
+  ledgerId: number
+}
+
+interface BifrostUnlockInfo {
+  balance: string,
+  era: number
 }
 
 export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPoolInfo) => void) {
@@ -117,13 +129,103 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
   const derivativeTokenSlug = poolInfo.derivativeAssets[0];
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
 
-  return substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), (_balance) => {
+  const inputTokenSlug = poolInfo.inputAssets[0];
+  const inputTokenInfo = assetInfoMap[inputTokenSlug];
+
+  return substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), async (_balance) => {
     const balances = _balance as unknown as TokenBalanceRaw[];
+
+    const [_unlockLedgerList, _currentRelayEra] = await Promise.all([
+      substrateApi.api.query.vtokenMinting.userUnlockLedger.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(inputTokenInfo)])),
+      substrateApi.api.query.vtokenMinting.ongoingTimeUnit(_getTokenOnChainInfo(inputTokenInfo))
+    ]);
+
+    const currentRelayEraObj = _currentRelayEra.toPrimitive() as Record<string, number>;
+    const currentRelayEra = currentRelayEraObj.Era;
+
+    const unlockLedgerList: BifrostUnlockLedger[] = [];
+
+    const activeBalanceMap: Record<string, BN> = {};
 
     for (let i = 0; i < balances.length; i++) {
       const balanceItem = balances[i];
       const address = useAddresses[i];
-      const activeBalance = balanceItem.free || BN_ZERO;
+      const formattedAddress = reformatAddress(address);
+
+      activeBalanceMap[formattedAddress] = balanceItem.free || BN_ZERO;
+
+      const _unlockLedger = _unlockLedgerList[i];
+      console.log('_unlockLedger', _unlockLedger);
+      const unlockLedger = _unlockLedger.toPrimitive();
+
+      console.log('unlockLedger', unlockLedger);
+
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const unstakingLedgerIds = unlockLedger[1] as number[];
+
+      unstakingLedgerIds.forEach((ledgerId) => {
+        unlockLedgerList.push({
+          address: formattedAddress,
+          ledgerId
+        });
+      });
+
+      // const bnTotalBalance = bnActiveBalance.add(bnUnstakingBalance);
+    }
+
+    const unlockingMap: Record<string, BifrostUnlockInfo[]> = {};
+
+    const _unlockInfoList = await substrateApi.api.query.vtokenMinting.tokenUnlockLedger.multi(unlockLedgerList.map(({ ledgerId }) => [_getTokenOnChainInfo(inputTokenInfo), ledgerId]));
+
+    for (let i = 0; i < _unlockInfoList.length; i++) {
+      const unlockInfo = _unlockInfoList[i].toPrimitive() as unknown[];
+
+      const owner = reformatAddress(unlockInfo[0] as string);
+      const amount = (unlockInfo[1] as number).toString();
+      // @ts-ignore
+      const withdrawalEra = unlockInfo[2].era as number;
+
+      if (owner in unlockingMap) {
+        unlockingMap[owner].push({
+          balance: amount,
+          era: withdrawalEra
+        });
+      } else {
+        unlockingMap[owner] = [
+          {
+            balance: amount,
+            era: withdrawalEra
+          }
+        ];
+      }
+    }
+
+    const unstakingList: UnstakingInfo[] = [];
+
+    useAddresses.forEach((address) => {
+      const formattedAddress = reformatAddress(address);
+
+      const bnActiveBalance = activeBalanceMap[formattedAddress];
+
+      const unlockings = unlockingMap[formattedAddress];
+
+      if (unlockings) {
+        unlockings.forEach((unlocking) => {
+          const isClaimable = unlocking.era - currentRelayEra < 0;
+          const remainingEra = unlocking.era - currentRelayEra;
+          const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[poolInfo.chain];
+
+          unstakingList.push({
+            chain: poolInfo.chain,
+            status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+            claimable: unlocking.balance,
+            waitingTime: waitingTime
+          } as UnstakingInfo);
+        });
+      }
+
+      console.log('still callback');
 
       positionCallback({
         slug: poolInfo.slug,
@@ -132,8 +234,7 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
         balance: [
           {
             slug: derivativeTokenSlug, // token slug
-            totalBalance: activeBalance.toString(),
-            activeBalance: activeBalance.toString()
+            activeBalance: bnActiveBalance.toString()
           }
         ],
 
@@ -141,14 +242,14 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
           chain: chainInfo.slug,
           type: StakingType.LIQUID_STAKING,
 
-          status: StakingStatus.EARNING_REWARD,
+          status: bnActiveBalance.eq(BN_ZERO) ? StakingStatus.NOT_EARNING : StakingStatus.EARNING_REWARD,
           address,
-          activeStake: activeBalance.toString(),
+          activeStake: bnActiveBalance.toString(),
           nominations: [],
-          unstakings: []
+          unstakings: unstakingList
         } as NominatorMetadata
       } as YieldPositionInfo);
-    }
+    });
   });
 }
 

@@ -2139,13 +2139,13 @@ export interface YieldPoolInfo {
 
 export interface YieldAssetBalance {
   slug: string, // token slug
-  totalBalance: string,
   activeBalance: string,
   exchangeRate?: number
 }
 
 export interface YieldPositionInfo {
   slug: string,
+  type: YieldPoolType,
   chain: string,
   address: string,
   balance: YieldAssetBalance[],

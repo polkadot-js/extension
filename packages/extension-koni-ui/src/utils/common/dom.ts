@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import copy from 'copy-to-clipboard';
+
 export const waitForElement = (selector: string, callback: (element: Element) => any) => {
   let count = 0;
   const interval = setInterval(function () {
@@ -24,7 +26,7 @@ export const waitForElement = (selector: string, callback: (element: Element) =>
 };
 
 export const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text).then().catch(console.log);
+  copy(text);
 };
 
 export const clickOutside = (selector: string, callback: () => void, enable: boolean): ((event: MouseEvent) => void) => {

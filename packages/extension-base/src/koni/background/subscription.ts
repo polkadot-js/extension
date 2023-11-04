@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
-import { subscribeBalance } from '@subwallet/extension-base/services/balance-service/helpers/balance';
+import { subscribeBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
 import { subscribeEssentialChainStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
@@ -196,7 +196,7 @@ export class KoniSubscription {
     });
 
     const unsub = subscribeBalance(addresses, filteredChainInfoMap, substrateApiMap, evmApiMap, (result) => {
-      this.state.setBalanceItem(result.tokenSlug, result);
+      this.state.setBalanceItem(result);
     });
 
     const unsub2 = this.state.subscribeMantaPayBalance();

@@ -76,9 +76,17 @@ export default class DatabaseService {
     return this.stores.balance.table.toArray();
   }
 
-  async updateBalanceStore (address: string, item: BalanceItem) {
+  async updateBalanceStore (item: BalanceItem) {
     if (item.state === APIItemState.READY) {
-      return this.stores.balance.upsert({ address, ...item } as IBalance);
+      return this.stores.balance.upsert({ ...item } as IBalance);
+    }
+  }
+
+  async updateBulkBalanceStore (items: BalanceItem[]) {
+    const filtered = items.filter((item) => item.state === APIItemState.READY);
+
+    if (filtered.length) {
+      return this.stores.balance.bulkUpsert(filtered);
     }
   }
 

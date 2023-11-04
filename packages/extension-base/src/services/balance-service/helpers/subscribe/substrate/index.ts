@@ -8,11 +8,10 @@ import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
-import { subscribeERC20Interval } from '@subwallet/extension-base/services/balance-service/helpers/evm';
+import { subscribeERC20Interval } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/evm';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { sumBN } from '@subwallet/extension-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
@@ -21,7 +20,7 @@ import { BN, BN_ZERO } from '@polkadot/util';
 
 import { subscribeEqBalanceAccountPallet, subscribeEquilibriumTokenBalance } from './equilibrium';
 
-export async function subscribeSubstrateBalance (addresses: string[], chainInfo: _ChainInfo, chain: string, networkAPI: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, callBack: (rs: BalanceItem) => void) {
+export async function subscribeSubstrateBalance (addresses: string[], chainInfo: _ChainInfo, chain: string, networkAPI: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, callBack: (rs: BalanceItem[]) => void) {
   let unsubNativeToken: () => void;
 
   if (!_BALANCE_CHAIN_GROUP.kintsugi.includes(chain) && !_BALANCE_CHAIN_GROUP.genshiro.includes(chain) && !_BALANCE_CHAIN_GROUP.equilibrium_parachain.includes(chain)) {
@@ -65,13 +64,12 @@ export async function subscribeSubstrateBalance (addresses: string[], chainInfo:
 }
 
 // handler according to different logic
-async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo: _ChainInfo, networkAPI: ApiPromise, callBack: (rs: BalanceItem) => void) {
+async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo: _ChainInfo, networkAPI: ApiPromise, callBack: (rs: BalanceItem[]) => void) {
   const chainNativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
+  // TODO: Need handle case error
   const unsub = await networkAPI.query.system.account.multi(addresses, async (balances: AccountInfo[]) => {
-    let [total, reserved, miscFrozen, feeFrozen] = [new BN(0), new BN(0), new BN(0), new BN(0)];
-
-    let pooledStakingBalance = BN_ZERO;
+    const pooledStakingBalances: BN[] = [];
 
     if (_isSubstrateRelayChain(chainInfo) && networkAPI.query.nominationPools) {
       const poolMemberDatas = await networkAPI.query.nominationPools.poolMembers.multi(addresses);
@@ -81,49 +79,54 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
           const poolMemberData = _poolMemberData.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
 
           if (poolMemberData) {
-            const pooledBalance = new BN(poolMemberData.points.toString());
-
-            pooledStakingBalance = pooledStakingBalance.add(pooledBalance);
+            let pooled = new BN(poolMemberData.points.toString());
 
             Object.entries(poolMemberData.unbondingEras).forEach(([, amount]) => {
-              pooledStakingBalance = pooledStakingBalance.add(new BN(amount));
+              pooled = pooled.add(new BN(amount));
             });
+
+            pooledStakingBalances.push(pooled);
           }
         }
       }
     }
 
-    balances.forEach((balance: AccountInfo) => {
-      total = total.add(balance.data?.free?.toBn() || new BN(0)); // reserved is seperated
-      reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
+    const items: BalanceItem[] = balances.map((balance: AccountInfo, index) => {
+      let total = balance.data?.free?.toBn() || new BN(0);
+      const reserved = balance.data?.reserved?.toBn() || new BN(0);
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      miscFrozen = miscFrozen.add(balance.data?.miscFrozen?.toBn() || balance?.data?.frozen?.toBn() || new BN(0)); // TODO: update frozen
-      feeFrozen = feeFrozen.add(balance.data?.feeFrozen?.toBn() || new BN(0));
-    });
+      const miscFrozen = balance.data?.miscFrozen?.toBn() || balance?.data?.frozen?.toBn() || new BN(0);
+      const feeFrozen = balance.data?.feeFrozen?.toBn() || new BN(0);
 
-    let locked = reserved.add(miscFrozen);
+      let locked = reserved.add(miscFrozen);
 
-    total = total.add(reserved); // total = free + reserved
+      total = total.add(reserved);
 
-    if (pooledStakingBalance.gt(BN_ZERO)) {
-      total = total.add(pooledStakingBalance);
-      locked = locked.add(pooledStakingBalance);
-    }
+      const pooledStakingBalance = pooledStakingBalances[index] || BN_ZERO;
 
-    const free = total.sub(locked);
-
-    callBack({
-      tokenSlug: chainNativeTokenSlug,
-      free: free.gte(BN_ZERO) ? free.toString() : '0',
-      locked: locked.toString(),
-      state: APIItemState.READY,
-      substrateInfo: {
-        miscFrozen: miscFrozen.toString(),
-        reserved: reserved.toString(),
-        feeFrozen: feeFrozen.toString()
+      if (pooledStakingBalance.gt(BN_ZERO)) {
+        total = total.add(pooledStakingBalance);
+        locked = locked.add(pooledStakingBalance);
       }
+
+      const free = total.sub(locked);
+
+      return ({
+        address: addresses[index],
+        tokenSlug: chainNativeTokenSlug,
+        free: free.gte(BN_ZERO) ? free.toString() : '0',
+        locked: locked.toString(),
+        state: APIItemState.READY,
+        substrateInfo: {
+          miscFrozen: miscFrozen.toString(),
+          reserved: reserved.toString(),
+          feeFrozen: feeFrozen.toString()
+        }
+      });
     });
+
+    callBack(items);
   });
 
   return () => {
@@ -131,31 +134,40 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
   };
 }
 
-function subscribePSP22Balance (addresses: string[], chain: string, api: ApiPromise, callBack: (result: BalanceItem) => void) {
+function subscribePSP22Balance (addresses: string[], chain: string, api: ApiPromise, callBack: (result: BalanceItem[]) => void) {
   let tokenList = {} as Record<string, _ChainAsset>;
   const psp22ContractMap = {} as Record<string, ContractPromise>;
 
   const getTokenBalances = () => {
     Object.values(tokenList).map(async (tokenInfo) => {
-      let free = new BN(0);
-
       try {
         const contract = psp22ContractMap[tokenInfo.slug];
-        const balances = await Promise.all(addresses.map(async (address): Promise<string> => {
-          const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(api) }, address);
-          const balanceObj = _balanceOf?.output?.toPrimitive() as Record<string, any>;
+        const balances: BalanceItem[] = await Promise.all(addresses.map(async (address): Promise<BalanceItem> => {
+          try {
+            const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(api) }, address);
+            const balanceObj = _balanceOf?.output?.toPrimitive() as Record<string, any>;
 
-          return _balanceOf.output ? (balanceObj.ok as string || balanceObj.Ok as string) : '0';
+            return {
+              address: address,
+              tokenSlug: tokenInfo.slug,
+              free: _balanceOf.output ? (balanceObj.ok as string || balanceObj.Ok as string) : '0',
+              locked: '0',
+              state: APIItemState.READY
+            };
+          } catch (err) {
+            console.error(`Error on get balance of account ${address} for token ${tokenInfo.slug}`, err);
+
+            return {
+              address: address,
+              tokenSlug: tokenInfo.slug,
+              free: '0',
+              locked: '0',
+              state: APIItemState.READY
+            };
+          }
         }));
 
-        free = sumBN(balances.map((bal) => new BN(bal || 0)));
-
-        callBack({
-          tokenSlug: tokenInfo.slug,
-          free: free.toString(),
-          locked: '0',
-          state: APIItemState.READY
-        } as BalanceItem);
+        callBack(balances);
       } catch (err) {
         console.warn(tokenInfo.slug, err); // TODO: error createType
       }
@@ -176,7 +188,7 @@ function subscribePSP22Balance (addresses: string[], chain: string, api: ApiProm
   };
 }
 
-async function subscribeTokensAccountsPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem) => void, includeNativeToken?: boolean) {
+async function subscribeTokensAccountsPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem[]) => void, includeNativeToken?: boolean) {
   const tokenTypes = includeNativeToken ? [_AssetType.NATIVE, _AssetType.LOCAL] : [_AssetType.LOCAL];
   const tokenMap = state.getAssetByChainAndAsset(chain, tokenTypes);
 
@@ -188,27 +200,30 @@ async function subscribeTokensAccountsPallet (addresses: string[], chain: string
       // Get Token Balance
       // @ts-ignore
       return await api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo || assetId]), (balances: TokenBalanceRaw[]) => {
-        const tokenBalance = {
-          reserved: sumBN(balances.map((b) => (b.reserved || new BN(0)))),
-          frozen: sumBN(balances.map((b) => (b.frozen || new BN(0)))),
-          free: sumBN(balances.map((b) => (b.free || new BN(0)))) // free is actually total balance
-        };
+        const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
+          const tokenBalance = {
+            reserved: balance.reserved || new BN(0),
+            frozen: balance.frozen || new BN(0),
+            free: balance.free || new BN(0) // free is actually total balance
+          };
 
-        // free balance = total balance - frozen misc
-        // locked balance = reserved + frozen misc
-        const freeBalance = tokenBalance.free.sub(tokenBalance.frozen);
-        const lockedBalance = tokenBalance.frozen.add(tokenBalance.reserved);
+          const freeBalance = tokenBalance.free.sub(tokenBalance.frozen);
+          const lockedBalance = tokenBalance.frozen.add(tokenBalance.reserved);
 
-        callBack({
-          tokenSlug: tokenInfo.slug,
-          state: APIItemState.READY,
-          free: freeBalance.toString(),
-          locked: lockedBalance.toString(),
-          substrateInfo: {
-            reserved: tokenBalance.reserved.toString(),
-            miscFrozen: tokenBalance.frozen.toString()
-          }
-        } as BalanceItem);
+          return {
+            address: addresses[index],
+            tokenSlug: tokenInfo.slug,
+            state: APIItemState.READY,
+            free: freeBalance.toString(),
+            locked: lockedBalance.toString(),
+            substrateInfo: {
+              reserved: tokenBalance.reserved.toString(),
+              miscFrozen: tokenBalance.frozen.toString()
+            }
+          };
+        });
+
+        callBack(items);
       });
     } catch (err) {
       console.warn(err);
@@ -224,7 +239,7 @@ async function subscribeTokensAccountsPallet (addresses: string[], chain: string
   };
 }
 
-async function subscribeAssetsAccountPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem) => void) {
+async function subscribeAssetsAccountPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem[]) => void) {
   const tokenMap = state.getAssetByChainAndAsset(chain, [_AssetType.LOCAL]);
 
   Object.values(tokenMap).forEach((token) => {
@@ -239,13 +254,13 @@ async function subscribeAssetsAccountPallet (addresses: string[], chain: string,
 
       // Get Token Balance
       return await api.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
-        let total = new BN(0);
-        let frozen = new BN(0);
-
-        balances.forEach((b) => {
+        const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
           // @ts-ignore
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-          const bdata = b?.toHuman();
+          const bdata = balance?.toHuman();
+
+          let frozen = BN_ZERO;
+          let total = BN_ZERO;
 
           if (bdata) {
             // @ts-ignore
@@ -254,25 +269,28 @@ async function subscribeAssetsAccountPallet (addresses: string[], chain: string,
 
             // @ts-ignore
             if (bdata?.isFrozen) {
-              frozen = frozen.add(addressBalance);
+              frozen = addressBalance;
             } else {
-              total = total.add(addressBalance);
+              total = addressBalance;
             }
           }
+
+          const free = total.sub(frozen);
+
+          return {
+            address: addresses[index],
+            tokenSlug: tokenInfo.slug,
+            free: free.toString(),
+            locked: frozen.toString(),
+            state: APIItemState.READY,
+            substrateInfo: {
+              miscFrozen: frozen.toString(),
+              reserved: '0'
+            }
+          };
         });
 
-        const free = total.sub(frozen);
-
-        callBack({
-          tokenSlug: tokenInfo.slug,
-          free: free.toString(),
-          locked: frozen.toString(),
-          state: APIItemState.READY,
-          substrateInfo: {
-            miscFrozen: frozen.toString(),
-            reserved: '0'
-          }
-        });
+        callBack(items);
       });
     } catch (err) {
       console.warn(err);

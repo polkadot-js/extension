@@ -4,8 +4,9 @@
 import { BalanceError } from '@subwallet/extension-base/background/errors/BalanceError';
 import { AmountData, BalanceErrorType, BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { subscribeEVMBalance } from '@subwallet/extension-base/services/balance-service/helpers/evm';
-import { subscribeSubstrateBalance } from '@subwallet/extension-base/services/balance-service/helpers/substrate';
+import { groupBalance } from '@subwallet/extension-base/services/balance-service/helpers/group';
+import { subscribeEVMBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/evm';
+import { subscribeSubstrateBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/substrate';
 import { _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenSlug, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
@@ -98,7 +99,7 @@ export class BalanceService {
     return balance;
   }
 
-  public subscribeBalance (addresses: string[], chains: string[] | null, callback: (rs: BalanceItem) => void) {
+  public subscribeBalance (addresses: string[], chains: string[] | null, _callback: (rs: BalanceItem) => void) {
     const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
     const chainInfoMap = this.state.chainService.getChainInfoMap();
     const chainStateMap = this.state.chainService.getChainStateMap();
@@ -109,6 +110,12 @@ export class BalanceService {
     const chainList = chains || Object.keys(chainInfoMap);
     // Filter active chain only
     const useChainInfos = chainList.filter((c) => chainStateMap[c] && chainStateMap[c].active).map((c) => chainInfoMap[c]);
+
+    const callback = (items: BalanceItem[]) => {
+      if (items.length) {
+        _callback(groupBalance(items, 'GROUPED', items[0].tokenSlug));
+      }
+    };
 
     // Looping over each chain
     const unsubList = useChainInfos.map(async (chainInfo) => {

@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
-import { _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
@@ -13,7 +12,7 @@ import { subscribeEVMBalance } from './evm';
 import { subscribeSubstrateBalance } from './substrate';
 
 // main subscription
-export function subscribeBalance (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem) => void) {
+export function subscribeBalance (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem[]) => void) {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   // Looping over each chain
@@ -26,22 +25,22 @@ export function subscribeBalance (addresses: string[], chainInfoMap: Record<stri
       return subscribeEVMBalance(chainSlug, useAddresses, evmApiMap, callback, nativeTokenInfo);
     }
 
-    if (!useAddresses || useAddresses.length === 0 || _PURE_EVM_CHAINS.indexOf(chainSlug) > -1) {
-      const fungibleTokensByChain = state.chainService.getFungibleTokensByChain(chainSlug, true);
-      const now = new Date().getTime();
-
-      Object.values(fungibleTokensByChain).map((token) => {
-        return {
-          tokenSlug: token.slug,
-          free: '0',
-          locked: '0',
-          state: APIItemState.READY,
-          timestamp: now
-        } as BalanceItem;
-      }).forEach(callback);
-
-      return undefined;
-    }
+    // if (!useAddresses || useAddresses.length === 0 || _PURE_EVM_CHAINS.indexOf(chainSlug) > -1) {
+    //   const fungibleTokensByChain = state.chainService.getFungibleTokensByChain(chainSlug, true);
+    //   const now = new Date().getTime();
+    //
+    //   Object.values(fungibleTokensByChain).map((token) => {
+    //     return {
+    //       tokenSlug: token.slug,
+    //       free: '0',
+    //       locked: '0',
+    //       state: APIItemState.READY,
+    //       timestamp: now
+    //     } as BalanceItem;
+    //   }).forEach(callback);
+    //
+    //   return undefined;
+    // }
 
     const networkAPI = await substrateApiMap[chainSlug].isReady;
 

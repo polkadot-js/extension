@@ -87,6 +87,7 @@ function getDefaultTokenBalance (
 }
 
 function getAccountBalance (
+  address: string,
   tokenGroupMap: Record<string, string[]>,
   balanceMap: BalanceStore['balanceMap'],
   priceMap: PriceStore['priceMap'],
@@ -124,7 +125,7 @@ function getAccountBalance (
 
       const tokenBalance = getDefaultTokenBalance(tokenSlug, chainAsset);
       const originChain = _getAssetOriginChain(chainAsset);
-      const balanceItem = balanceMap[tokenSlug];
+      const balanceItem = balanceMap[address]?.[tokenSlug];
       const decimals = _getAssetDecimals(chainAsset);
 
       const isTokenBalanceReady = !!balanceItem && (balanceItem.state === APIItemState.READY);
@@ -267,8 +268,10 @@ export default function useAccountBalance (tokenGroupMap: Record<string, string[
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
+  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
 
   return getAccountBalance(
+    currentAccount?.address || '',
     tokenGroupMap,
     balanceMap,
     priceMap,

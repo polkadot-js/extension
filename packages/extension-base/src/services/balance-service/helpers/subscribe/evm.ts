@@ -9,34 +9,40 @@ import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/
 import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { sumBN } from '@subwallet/extension-base/utils';
 import { Contract } from 'web3-eth-contract';
 
 import { BN } from '@polkadot/util';
 
-export function subscribeERC20Interval (addresses: string[], chain: string, evmApiMap: Record<string, _EvmApi>, callBack: (result: BalanceItem) => void): () => void {
+export function subscribeERC20Interval (addresses: string[], chain: string, evmApiMap: Record<string, _EvmApi>, callBack: (result: BalanceItem[]) => void): () => void {
   let tokenList = {} as Record<string, _ChainAsset>;
   const erc20ContractMap = {} as Record<string, Contract>;
 
   const getTokenBalances = () => {
     Object.values(tokenList).map(async (tokenInfo) => {
-      let free = new BN(0);
-
       try {
         const contract = erc20ContractMap[tokenInfo.slug];
-        const balanceList = await Promise.all(addresses.map((address): Promise<string> => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-          return contract.methods.balanceOf(address).call();
+        const balances = await Promise.all(addresses.map(async (address): Promise<string> => {
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+            return await contract.methods.balanceOf(address).call();
+          } catch (e) {
+            console.error(`Error on get balance of account ${address} for token ${tokenInfo.slug}`, e);
+
+            return '0';
+          }
         }));
 
-        free = sumBN(balanceList.map((balance) => new BN(balance || 0)));
+        const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
+          return {
+            address: addresses[index],
+            tokenSlug: tokenInfo.slug,
+            free: new BN(balance || 0).toString(),
+            locked: '0',
+            state: APIItemState.READY
+          };
+        });
 
-        callBack({
-          tokenSlug: tokenInfo.slug,
-          free: free.toString(),
-          locked: '0',
-          state: APIItemState.READY
-        } as BalanceItem);
+        callBack(items);
       } catch (err) {
         console.log(tokenInfo.slug, err);
       }
@@ -58,22 +64,38 @@ export function subscribeERC20Interval (addresses: string[], chain: string, evmA
   };
 }
 
-export function subscribeEVMBalance (chain: string, addresses: string[], evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem) => void, tokenInfo: _ChainAsset) {
-  const balanceItem = {
-    tokenSlug: tokenInfo.slug,
-    state: APIItemState.PENDING,
-    free: '0',
-    locked: '0'
-  } as BalanceItem;
-
+export function subscribeEVMBalance (chain: string, addresses: string[], evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem[]) => void, tokenInfo: _ChainAsset) {
   function getBalance () {
     getEVMBalance(chain, addresses, evmApiMap)
       .then((balances) => {
-        balanceItem.free = sumBN(balances.map((b) => (new BN(b || '0')))).toString();
-        balanceItem.state = APIItemState.READY;
-        callback(balanceItem);
+        return balances.map((balance, index): BalanceItem => {
+          return {
+            address: addresses[index],
+            tokenSlug: tokenInfo.slug,
+            state: APIItemState.READY,
+            free: (new BN(balance || '0')).toString(),
+            locked: '0'
+          };
+        });
       })
-      .catch(console.warn);
+      .catch((e) => {
+        console.error(`Error on get native balance with token ${tokenInfo.slug}`, e);
+
+        return addresses.map((address): BalanceItem => {
+          return {
+            address: address,
+            tokenSlug: tokenInfo.slug,
+            state: APIItemState.READY,
+            free: '0',
+            locked: '0'
+          };
+        });
+      })
+      .then((items) => {
+        callback(items);
+      })
+      .catch(console.error)
+    ;
   }
 
   getBalance();

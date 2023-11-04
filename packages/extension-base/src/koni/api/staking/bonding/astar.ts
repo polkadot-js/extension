@@ -29,7 +29,7 @@ export function subscribeAstarStakingMetadata (chain: string, substrateApi: _Sub
       minStake: minDelegatorStake,
       maxValidatorPerNominator: 100, // temporary fix for Astar, there's no limit for now
       maxWithdrawalRequestPerValidator: 1, // by default
-      allowCancelUnstaking: true,
+      allowCancelUnstaking: false,
       unstakingPeriod
     });
   });
@@ -75,7 +75,7 @@ export async function getAstarStakingMetadata (chain: string, substrateApi: _Sub
     minStake: minDelegatorStake,
     maxValidatorPerNominator: 100, // temporary fix for Astar, there's no limit for now
     maxWithdrawalRequestPerValidator: 1, // by default
-    allowCancelUnstaking: true,
+    allowCancelUnstaking: false,
     unstakingPeriod
   } as ChainStakingMetadata;
 }
@@ -131,7 +131,7 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
         nominationList.push({
           status: dappStakingStatus,
           chain: chainInfo.slug,
-          validatorAddress: dappAddress.toLowerCase(),
+          validatorAddress: isEthereumAddress(dappAddress) ? dappAddress.toLowerCase() : dappAddress,
           activeStake: currentStake,
           validatorMinStake: '0',
           validatorIdentity: dappInfo?.name,

@@ -921,6 +921,9 @@ export class ChainService {
   private async initAssetRegistry (deprecatedCustomChainMap: Record<string, string>) {
     const storedAssetRegistry = await this.dbService.getAllAssetStore();
     const latestAssetRegistry = await this.fetchLatestData(_CHAIN_ASSET_SRC, ChainAssetMap) as Record<string, _ChainAsset>;
+    const availableChains = Object.values(this.dataMap.chainInfoMap)
+      .filter((info) => (info.chainStatus === _ChainStatus.ACTIVE))
+      .map((chainInfo) => chainInfo.slug);
 
     // Fill out zk assets from latestAssetRegistry if not supported
     if (!MODULE_SUPPORT.MANTA_ZK) {
@@ -958,6 +961,7 @@ export class ChainService {
 
       for (const storedAssetInfo of Object.values(parsedStoredAssetRegistry)) {
         let duplicated = false;
+        let deprecated = false;
 
         for (const defaultChainAsset of Object.values(latestAssetRegistry)) {
           // case merge custom asset with default asset
@@ -965,9 +969,14 @@ export class ChainService {
             duplicated = true;
             break;
           }
+
+          if (availableChains.indexOf(storedAssetInfo.originChain) === -1) {
+            deprecated = true;
+            break;
+          }
         }
 
-        if (!duplicated) {
+        if (!duplicated && !deprecated) {
           mergedAssetRegistry[storedAssetInfo.slug] = storedAssetInfo;
         } else {
           deprecatedAssets.push(storedAssetInfo.slug);

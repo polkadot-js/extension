@@ -792,8 +792,11 @@ export class ChainService {
       const mergedChainInfoMap: Record<string, _ChainInfo> = latestChainInfoMap;
 
       for (const [storedSlug, storedChainInfo] of Object.entries(storedChainSettingMap)) {
-        if (storedSlug in latestChainInfoMap) { // check predefined chains first, keep setting for providers and currentProvider
-          // TODO: review merging providers
+        const chainInfo = latestChainInfoMap[storedSlug];
+
+        // Network is existed on change list
+        // check predefined chains first, keep setting for providers and currentProvider
+        if (chainInfo) {
           // Keep customer provider only
           const providers: Record<string, string> = { ...mergedChainInfoMap[storedSlug].providers };
 
@@ -822,19 +825,23 @@ export class ChainService {
             }
           }
 
+          const hasProvider = Object.values(providers).length > 0;
+          const canActive = hasProvider && chainInfo.chainStatus === _ChainStatus.ACTIVE;
+
           this.dataMap.chainStateMap[storedSlug] = {
             currentProvider: currentProvider,
             slug: storedSlug,
             connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-            active: storedChainInfo.active
+            active: canActive && storedChainInfo.active
           };
 
           newStorageData.push({
             ...mergedChainInfoMap[storedSlug],
-            active: storedChainInfo.active,
+            active: canActive && storedChainInfo.active,
             currentProvider: currentProvider
           });
-        } else { // only custom chains are left
+        } else if (_isCustomChain(storedSlug)) {
+          // only custom chains are left
           // check custom chain duplicated with predefined chain => merge into predefined chain
           const duplicatedDefaultSlug = this.checkExistedPredefinedChain(latestChainInfoMap, storedChainInfo.substrateInfo?.genesisHash, storedChainInfo.evmInfo?.evmChainId);
 
@@ -880,6 +887,8 @@ export class ChainService {
               currentProvider: storedChainInfo.currentProvider
             });
           }
+        } else {
+          // Todo: Remove chain from storage
         }
       }
 

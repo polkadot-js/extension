@@ -465,6 +465,7 @@ export default class KoniExtension {
     const keyringService = this.#koniState.keyringService;
 
     await this.#koniState.eventService.waitAccountReady;
+    await this.#koniState.eventService.waitInjectReady;
 
     const currentAccount = keyringService.currentAccount;
     const transformedAccounts = transformAccounts(keyringService.accounts);

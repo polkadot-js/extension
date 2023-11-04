@@ -4,6 +4,7 @@
 import { AddressJson } from '@subwallet/extension-base/background/types';
 import { AccountItemBase, AccountItemWithName, AddContactModal, BackIcon, EditContactModal, FilterModal, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ADD_ADDRESS_BOOK_MODAL, EDIT_ADDRESS_BOOK_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { funcSortByName, reformatAddress } from '@subwallet/extension-koni-ui/utils';
@@ -61,6 +62,7 @@ const FILTER_MODAL_ID = 'manage-address-book-filter-modal';
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
+  const { isWebUI } = useContext(ScreenContext);
 
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -122,9 +124,9 @@ const Component: React.FC<Props> = (props: Props) => {
         />
       ),
       onClick: openAddContact,
-      tooltip: t('Add contact')
+      tooltip: isWebUI ? t('Add contact') : undefined
     }
-  ], [openAddContact, t]);
+  ], [isWebUI, openAddContact, t]);
 
   const openFilter = useCallback(() => {
     activeModal(FILTER_MODAL_ID);

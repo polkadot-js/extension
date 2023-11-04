@@ -7,6 +7,7 @@ import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-serv
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, HiddenInput } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetYieldMetadata, useGetYieldPositionByAddressAndSlug, useHandleSubmitTransaction, usePreCheckAction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitRedeem } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -16,7 +17,7 @@ import { Button, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { MinusCircle } from 'phosphor-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -41,6 +42,7 @@ const hideFields: Array<keyof YieldFastWithdrawParams> = ['chain', 'asset', 'met
 
 const Component: React.FC = () => {
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
   const { defaultData, onDone, persistData } = useTransactionContext<YieldFastWithdrawParams>();
 
   const [isBalanceReady, setIsBalanceReady] = useState(true);
@@ -179,7 +181,7 @@ const Component: React.FC = () => {
               { required: true, message: t('Amount is required') },
               validateYieldWithdrawPosition(minWithdraw, activeBalance, tokenDecimals || 0, t)
             ]}
-            statusHelpAsTooltip={true}
+            statusHelpAsTooltip={isWebUI}
           >
             <AmountInput
               decimals={tokenDecimals || 0}

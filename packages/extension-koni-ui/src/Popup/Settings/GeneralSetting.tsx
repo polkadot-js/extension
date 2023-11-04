@@ -90,6 +90,8 @@ type LoadingMap = {
   browserConfirmationType: boolean;
 };
 
+const showBrowserConfirmationType = false;
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
@@ -239,27 +241,31 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             title={t('Language')}
           />
 
-          <BaseSelectModal
-            background={'default'}
-            className={`__modal ${className}`}
-            customInput={renderModalTrigger({
-              key: 'browser-confirmation-type-trigger',
-              leftIcon: BellSimpleRinging,
-              leftIconBgColor: token['volcano-6'],
-              title: t('Browser notification type')
-            })}
-            disabled={loadingMap.browserConfirmationType}
-            id='browser-confirmation-type-select-modal'
-            inputWidth={'100%'}
-            itemKey='key'
-            items={browserConfirmationItems}
-            onSelect={onSelectBrowserConfirmationType}
-            renderItem={renderSelectionItem}
-            selected={_browserConfirmationType}
-            shape='round'
-            size='small'
-            title={t('Browser notification type')}
-          />
+          {
+            showBrowserConfirmationType && (
+              <BaseSelectModal
+                background={'default'}
+                className={`__modal ${className}`}
+                customInput={renderModalTrigger({
+                  key: 'browser-confirmation-type-trigger',
+                  leftIcon: BellSimpleRinging,
+                  leftIconBgColor: token['volcano-6'],
+                  title: t('Browser notification type')
+                })}
+                disabled={loadingMap.browserConfirmationType}
+                id='browser-confirmation-type-select-modal'
+                inputWidth={'100%'}
+                itemKey='key'
+                items={browserConfirmationItems}
+                onSelect={onSelectBrowserConfirmationType}
+                renderItem={renderSelectionItem}
+                selected={_browserConfirmationType}
+                shape='round'
+                size='small'
+                title={t('Browser notification type')}
+              />
+            )
+          }
         </div>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>

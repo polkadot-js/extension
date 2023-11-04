@@ -6,6 +6,7 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { usePreCheckAction, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -58,6 +59,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
+  const { isWebUI } = useContext(ScreenContext);
 
   const { addExclude, checkActive, inactiveModal, removeExclude } = useContext(ModalContext);
 
@@ -386,6 +388,15 @@ const Component: React.FC<Props> = (props: Props) => {
           <div className='token-item-container'>
             {
               requireTokenItems.map((value) => {
+                if (!isWebUI) {
+                  return (
+                    <EarningTokenItem
+                      key={value.token}
+                      {...value}
+                    />
+                  );
+                }
+
                 return (
                   <Tooltip
                     key={value.token}

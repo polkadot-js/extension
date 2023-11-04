@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MessageTypesWithSubscriptions } from '@subwallet/extension-base/background/types';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { subscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Form, Input, Select } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 interface ComponentProps extends ThemeProps{
@@ -214,6 +215,7 @@ interface ApiFormType {
 const Component = ({ className }: ComponentProps) => {
   const formRef = useRef<FormInstance<ApiFormType>>(null);
   const [response, setResponse] = useState<string>('');
+  const { isWebUI } = useContext(ScreenContext);
 
   // Submit form
   const submit = useCallback(() => {
@@ -259,7 +261,7 @@ const Component = ({ className }: ComponentProps) => {
       <Form.Item
         name='payload'
         rules={[{ validator: payloadValidator }]}
-        statusHelpAsTooltip={true}
+        statusHelpAsTooltip={isWebUI}
         validateTrigger={['onBlur']}
       >
         <Input.TextArea

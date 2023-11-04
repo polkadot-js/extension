@@ -74,6 +74,7 @@ function Component ({ className = '', id = AccountSelectorModalId, items, onSele
   return (
     <BaseModal
       className={`${className} account-selector-modal`}
+      fullSize
       id={id}
       onCancel={onCancel}
       title={t('Select account')}

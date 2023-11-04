@@ -4,6 +4,7 @@
 import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
 import SocialGroup from '@subwallet/extension-koni-ui/components/SocialGroup';
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
@@ -31,6 +32,7 @@ const passwordInputId = 'login-password';
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { activeModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const [form] = Form.useForm<LoginFormState>();
 
@@ -108,7 +110,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   required: true
                 }
               ]}
-              statusHelpAsTooltip={true}
+              statusHelpAsTooltip={isWebUI}
             >
               <Input.Password
                 containerClassName='password-input'

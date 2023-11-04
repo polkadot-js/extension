@@ -7,6 +7,7 @@ import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ProviderSelector } from '@subwallet/extension-koni-ui/components/Field/ProviderSelector';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
@@ -31,6 +32,7 @@ interface ChainDetailForm {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
@@ -157,7 +159,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         type='phosphor'
         weight={'light'}
       />,
-      tooltip: t('Delete network'),
+      tooltip: isWebUI ? t('Delete network') : undefined,
       onClick: handleDeleteCustomChain,
       disabled: !(_isCustomChain(chainInfo.slug) && !chainState.active)
     }
@@ -337,7 +339,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       type={'phosphor'}
                       weight={'bold'}
                     />}
-                    tooltip={t('Network name')}
+                    tooltip={isWebUI ? t('Network name') : undefined}
                     tooltipPlacement={'topLeft'}
                   />
                 </Col>
@@ -345,7 +347,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Field
                     content={symbol}
                     placeholder={t('Symbol')}
-                    tooltip={t('Symbol')}
+                    tooltip={isWebUI ? t('Symbol') : undefined}
                     tooltipPlacement={'topLeft'}
                   />
                 </Col>
@@ -356,7 +358,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Field
                     content={decimals}
                     placeholder={t('Decimals')}
-                    tooltip={t('Decimals')}
+                    tooltip={isWebUI ? t('Decimals') : undefined}
                     tooltipPlacement={'topLeft'}
                   />
                 </Col>
@@ -367,7 +369,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         <Field
                           content={paraId > -1 ? paraId : undefined}
                           placeholder={t('ParaId')}
-                          tooltip={t('ParaId')}
+                          tooltip={isWebUI ? t('ParaId') : undefined}
                           tooltipPlacement={'topLeft'}
                         />
                       )
@@ -375,7 +377,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         <Field
                           content={chainId > -1 ? chainId : 'None'}
                           placeholder={t('Chain ID')}
-                          tooltip={t('Chain ID')}
+                          tooltip={isWebUI ? t('Chain ID') : undefined}
                           tooltipPlacement={'topLeft'}
                         />
                       )
@@ -390,7 +392,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <Field
                       content={addressPrefix.toString()}
                       placeholder={t('Address prefix')}
-                      tooltip={t('Address prefix')}
+                      tooltip={isWebUI ? t('Address prefix') : undefined}
                       tooltipPlacement={'topLeft'}
                     />
                   </Col>
@@ -400,7 +402,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Field
                     content={chainTypeString()}
                     placeholder={t('Network type')}
-                    tooltip={t('Network type')}
+                    tooltip={isWebUI ? t('Network type') : undefined}
                     tooltipPlacement={'topLeft'}
                   />
                 </Col>
@@ -409,11 +411,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'blockExplorer'}
                 rules={[{ validator: blockExplorerValidator }]}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
               >
                 <Input
                   placeholder={t('Block explorer')}
-                  tooltip={t('Block explorer')}
+                  tooltip={isWebUI ? t('Block explorer') : undefined}
                   tooltipPlacement={'topLeft'}
                 />
               </Form.Item>
@@ -422,11 +424,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 !_isPureEvmChain(chainInfo) && <Form.Item
                   name={'crowdloanUrl'}
                   rules={[{ validator: crowdloanUrlValidator }]}
-                  statusHelpAsTooltip={true}
+                  statusHelpAsTooltip={isWebUI}
                 >
                   <Input
                     placeholder={t('Crowdloan URL')}
-                    tooltip={t('Crowdloan URL')}
+                    tooltip={isWebUI ? t('Crowdloan URL') : undefined}
                     tooltipPlacement={'topLeft'}
                   />
                 </Form.Item>

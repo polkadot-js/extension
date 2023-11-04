@@ -401,7 +401,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       required: true
                     }
                   ]}
-                  statusHelpAsTooltip={true}
+                  statusHelpAsTooltip={isWebUI}
                 >
                   <Input
                     label={t('Current password')}

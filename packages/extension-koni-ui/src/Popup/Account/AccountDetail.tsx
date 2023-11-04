@@ -289,7 +289,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     required: true
                   }
                 ]}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
               >
                 <Input
                   className='account-name-input'

@@ -7,6 +7,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, HiddenInput, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, SendNftParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -48,6 +49,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
   useSetCurrentPage('/transaction/send-nft');
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isWebUI } = useContext(ScreenContext);
 
   const { defaultData, onDone, persistData } = useTransactionContext<SendNftParams>();
 
@@ -247,7 +249,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
             rules={[
               recipientValidator
             ]}
-            statusHelpAsTooltip={true}
+            statusHelpAsTooltip={isWebUI}
           >
             <AddressInput
               addressPrefix={addressPrefix}

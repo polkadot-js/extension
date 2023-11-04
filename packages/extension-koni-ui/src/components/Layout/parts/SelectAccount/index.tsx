@@ -314,6 +314,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         background={'default'}
         className={className}
         footer={<SelectAccountFooter />}
+        fullSize
         id={modalId}
         ignoreScrollbarMethod='padding'
         inputWidth={'100%'}

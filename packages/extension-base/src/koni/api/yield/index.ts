@@ -14,10 +14,10 @@ import { getInterlayLendingExtrinsic, getInterlayLendingPosition, getInterlayLen
 import { subscribeMoonwellLendingStats } from '@subwallet/extension-base/koni/api/yield/moonwell-lending';
 import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/native-staking';
 import { getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallel-liquid-staking';
-import { subscribestDOTLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
+import { getStellaswapLiquidStakingPosition, subscribeStellaswapLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
-import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getTokenOnChainInfo, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 
@@ -67,7 +67,7 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
 
         unsubList.push(unsub);
       } else if (poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
-        const unsub = subscribestDOTLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
+        const unsub = subscribeStellaswapLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
 
         unsubList.push(unsub);
       }
@@ -81,18 +81,21 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
   };
 }
 
-export function subscribeYieldPosition (substrateApiMap: Record<string, SubstrateApi>, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPositionInfo) => void) {
+export function subscribeYieldPosition (substrateApiMap: Record<string, SubstrateApi>, evmApiMap: Record<string, _EvmApi>, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPositionInfo) => void) {
   const unsubList: VoidFunction[] = [];
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   Object.values(YIELD_POOLS_INFO).forEach(async (poolInfo) => {
-    if (!substrateApiMap[poolInfo.chain]) {
+    const chainInfo = chainInfoMap[poolInfo.chain];
+
+    if (_isChainEvmCompatible(chainInfo) && !evmApiMap[poolInfo.chain]) {
+      return;
+    } else if (!substrateApiMap[poolInfo.chain]) {
       return;
     }
 
     const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
-    const chainInfo = chainInfoMap[poolInfo.chain];
 
     const useAddresses = _isChainEvmCompatible(chainInfo) ? evmAddresses : substrateAddresses;
 
@@ -118,6 +121,10 @@ export function subscribeYieldPosition (substrateApiMap: Record<string, Substrat
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
       const unsub = await getParallelLiquidStakingPosition(substrateApi, useAddresses, chainInfo, poolInfo, assetInfoMap, callback);
+
+      unsubList.push(unsub);
+    } else if (poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+      const unsub = getStellaswapLiquidStakingPosition(evmApiMap, useAddresses, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     }

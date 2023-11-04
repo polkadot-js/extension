@@ -470,7 +470,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
                   validator: validateAddress
                 }
               ]}
-              statusHelpAsTooltip
+              statusHelpAsTooltip={isWebUI}
               validateTrigger='onChange'
             >
               <AddressInput

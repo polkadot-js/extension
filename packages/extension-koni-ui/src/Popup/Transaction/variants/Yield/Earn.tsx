@@ -693,7 +693,7 @@ const Component = () => {
                       rules={[
                         amountValidator
                       ]}
-                      statusHelpAsTooltip={true}
+                      statusHelpAsTooltip={isWebUI}
                     >
                       <AmountInput
                         decimals={assetDecimals}
@@ -707,7 +707,7 @@ const Component = () => {
                           />
                         )}
                         showMaxButton={false}
-                        tooltip={t('Amount')}
+                        tooltip={isWebUI ? t('Amount') : undefined}
                       />
                     </Form.Item>
 

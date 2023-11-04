@@ -232,6 +232,7 @@ function Component ({ className = '', collectionDetail }: Props): React.ReactEle
           )
           : (
             <SwList.Section
+              autoFocusSearch={false}
               className={CN('nft_item_list__container')}
               displayGrid={true}
               enableSearchInput={true}

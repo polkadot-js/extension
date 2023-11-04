@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -42,6 +43,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [form] = Form.useForm<LoginFormState>();
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
+  const { isWebUI } = useContext(ScreenContext);
 
   const closeModal = useCallback(
     () => {
@@ -114,7 +116,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 required: true
               }
             ]}
-            statusHelpAsTooltip={true}
+            statusHelpAsTooltip={isWebUI}
           >
             <Input.Password
               containerClassName='password-input'

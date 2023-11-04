@@ -11,7 +11,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowCircleRight, TwitterLogo } from 'phosphor-react';
+import { ArrowCircleRight, ClockClockwise, TwitterLogo } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -225,7 +225,6 @@ const Component: React.FC<Props> = (props: Props) => {
           return (
             <div className='footer-button-container'>
               <Button
-                block={true}
                 disabled={!enableShare}
                 icon={(
                   <Icon
@@ -233,12 +232,11 @@ const Component: React.FC<Props> = (props: Props) => {
                     weight='fill'
                   />
                 )}
+                shape='circle'
                 onClick={joinQuest}
-              >
-                {t('Join quest now')}
-              </Button>
+                tooltip={t('Join quest now')}
+              />
               <Button
-                block={true}
                 disabled={!enableShare}
                 icon={(
                   <Icon
@@ -248,16 +246,21 @@ const Component: React.FC<Props> = (props: Props) => {
                 )}
                 onClick={shareOnTwitter}
                 schema='secondary'
-              >
-                {t('Share to Twitter')}
-              </Button>
+                tooltip={t('Share to Twitter')}
+                shape='circle'
+              />
               <Button
-                block={true}
+                icon={(
+                  <Icon
+                    phosphorIcon={ClockClockwise}
+                    weight='fill'
+                  />
+                )}
                 onClick={viewInHistory}
                 schema='secondary'
-              >
-                {t('View transaction')}
-              </Button>
+                tooltip={t('View transaction')}
+                shape='circle'
+              />
             </div>
           );
         } else {
@@ -392,9 +395,12 @@ const EarningDoneContent = styled(Component)<Props>(({ theme: { extendToken, tok
 
     '.footer-button-container': {
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
       gap: token.size,
-      padding: `${token.padding}px 0`
+      paddingTop: token.padding,
+      paddingBottom: token.paddingXL
     },
 
     '.ant-sw-screen-layout-footer-button-container': {

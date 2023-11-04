@@ -205,6 +205,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     if (!isWebUI) {
       return (
         <SwList.Section
+          autoFocusSearch={false}
           className={CN('nft_collection_list__container')}
           displayGrid={true}
           enableSearchInput={true}
@@ -264,24 +265,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }}
       >
         {listSection}
-        <div className={'__import-collectible-button-wrapper'}>
-          <Button
-            block={!isWebUI}
-            className={'__import-collectible-button'}
-            icon={(
-              <Icon
-                phosphorIcon={PlusCircle}
-                size={isWebUI ? undefined : 'md'}
-                weight='fill'
-              />
-            )}
-            onClick={openImportModal}
-            size={isWebUI ? 'xs' : undefined}
-            type='ghost'
-          >
-            {t('Import collectible')}
-          </Button>
-        </div>
+        {
+          isWebUI && (
+            <div className={'__import-collectible-button-wrapper'}>
+              <Button
+                className={'__import-collectible-button'}
+                icon={(
+                  <Icon
+                    phosphorIcon={PlusCircle}
+                    weight='fill'
+                  />
+                )}
+                onClick={openImportModal}
+                size={'xs'}
+                type='ghost'
+              >
+                {t('Import collectible')}
+              </Button>
+            </div>
+          )
+        }
       </Layout.Base>
 
       <BaseModal

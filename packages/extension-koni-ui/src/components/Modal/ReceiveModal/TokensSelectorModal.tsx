@@ -89,6 +89,7 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
   return (
     <BaseModal
       className={`${className} chain-selector-modal`}
+      fullSize
       id={modalId}
       onCancel={onCancel}
       title={t('Select token')}

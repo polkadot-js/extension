@@ -6,6 +6,7 @@ import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmart
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, Layout, PageWrapper, TokenTypeSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useChainChecker, useDefaultNavigate, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormRule, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -60,6 +61,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
+  const { isWebUI } = useContext(ScreenContext);
 
   const chainInfoMap = useGetContractSupportedChains();
 
@@ -301,7 +303,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name={'contractAddress'}
               rules={contractRules}
-              statusHelpAsTooltip={true}
+              statusHelpAsTooltip={isWebUI}
             >
               <AddressInput
                 addressPrefix={chainNetworkPrefix}
@@ -323,7 +325,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     content={symbol}
                     placeholder={t<string>('Symbol')}
                     prefix={tokenDecimalsPrefix()}
-                    tooltip={t('Symbol')}
+                    tooltip={isWebUI ? t('Symbol') : undefined}
                     tooltipPlacement={'topLeft'}
                   />
                 </Form.Item>
@@ -335,7 +337,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Field
                     content={decimals === -1 ? '' : decimals}
                     placeholder={t<string>('Decimals')}
-                    tooltip={t('Decimals')}
+                    tooltip={isWebUI ? t('Decimals') : undefined}
                     tooltipPlacement={'topLeft'}
                   />
                 </Form.Item>
@@ -350,24 +352,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   message: t('Token name is required')
                 }
               ]}
-              statusHelpAsTooltip={true}
+              statusHelpAsTooltip={isWebUI}
             >
               <Field
                 content={tokenName}
                 placeholder={t<string>('Token name')}
-                tooltip={t('Token name')}
+                tooltip={isWebUI ? t('Token name') : undefined}
                 tooltipPlacement={'topLeft'}
               />
             </Form.Item>
 
             <Form.Item
               name={'priceId'}
-              statusHelpAsTooltip={true}
+              statusHelpAsTooltip={isWebUI}
             >
               <Input
                 disabled={fieldDisabled}
                 placeholder={t('Price ID')}
-                tooltip={t('Price ID')}
+                tooltip={isWebUI ? t('Price ID') : undefined}
               />
             </Form.Item>
           </Form>

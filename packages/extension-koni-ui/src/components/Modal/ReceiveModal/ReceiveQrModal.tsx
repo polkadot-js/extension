@@ -5,6 +5,7 @@ import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/servi
 import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
@@ -31,6 +32,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
   const { inactiveModal } = useContext(ModalContext);
   const notify = useNotification();
   const chainInfo = useFetchChainInfo(selectedNetwork || '');
+  const { isWebUI } = useContext(ScreenContext);
 
   const isEvmChain = useMemo(() => {
     if (chainInfo) {
@@ -127,7 +129,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
                   }
                   onClick={onClickCopyBtn}
                   size='xs'
-                  tooltip={t('Copy address')}
+                  tooltip={isWebUI ? t('Copy address') : undefined}
                   type='ghost'
                 />
               </CopyToClipboard>

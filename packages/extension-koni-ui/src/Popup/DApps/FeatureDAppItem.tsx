@@ -99,17 +99,25 @@ const FeatureDAppItem = styled(Component)<Props>(({ theme: { token } }: Props) =
 
     '.__item-preview-area': {
       backgroundSize: 'cover',
-      backgroundPosition: 'center'
+      backgroundPosition: 'center',
+      position: 'relative',
+
+      '&:before': {
+        content: '""',
+        display: 'block',
+        paddingTop: `${1 / 3 * 100}%`
+      }
     },
 
     '.__item-overlay': {
-      height: 148,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: 'rgba(0, 0, 0, 0.65)',
       opacity: 0,
-      transition: 'opacity 0.2s ease'
+      transition: 'opacity 0.2s ease',
+      inset: 0,
+      position: 'absolute'
     },
 
     '.__item-meta-area': {
@@ -169,18 +177,6 @@ const FeatureDAppItem = styled(Component)<Props>(({ theme: { token } }: Props) =
 
       '.__item-meta-area': {
         backgroundColor: token.colorBgInput
-      }
-    },
-
-    // compact
-
-    '&.-compact-mode': {
-      '.__item-preview-area': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          paddingTop: `${1 / 3 * 100}%`
-        }
       }
     }
   };

@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
 import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -22,6 +23,7 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { activeModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const onOpenCustomizeModal = useCallback(() => {
     activeModal(CUSTOMIZE_MODAL);
@@ -39,7 +41,7 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
           />
         ),
         onClick: onClickFilterIcon || onOpenCustomizeModal,
-        tooltip: t('Customize your asset display'),
+        tooltip: isWebUI ? t('Customize your asset display') : undefined,
         tooltipPlacement: 'bottomRight'
       });
     }
@@ -53,13 +55,13 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
           />
         ),
         onClick: onClickSearchIcon,
-        tooltip: t('Search a token'),
+        tooltip: isWebUI ? t('Search a token') : undefined,
         tooltipPlacement: 'bottomRight'
       });
     }
 
     return icons;
-  }, [onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon, t]);
+  }, [isWebUI, onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon, t]);
 
   const onClickListIcon = useCallback(() => {
     navigate('/settings/list');

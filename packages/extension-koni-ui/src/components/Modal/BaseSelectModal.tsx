@@ -9,9 +9,11 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Props = ThemeProps & SelectModalProps<any>;
+type Props = ThemeProps & SelectModalProps<any> & {
+  fullSize?: boolean;
+};
 
-function Component ({ children, className, motion, ...props }: Props): React.ReactElement<Props> {
+function Component ({ children, className, fullSize = true, motion, ...props }: Props): React.ReactElement<Props> {
   const { isWebUI } = useContext(ScreenContext);
 
   const _motion = motion || (isWebUI ? 'move-right' : undefined);
@@ -21,7 +23,9 @@ function Component ({ children, className, motion, ...props }: Props): React.Rea
       <SelectModal
         {...props}
         className={CN(className, {
-          '-web-ui': isWebUI
+          '-desktop': isWebUI,
+          '-mobile': !isWebUI,
+          '-full-Size': fullSize
         })}
         motion={_motion}
         width={'100%'}
@@ -35,17 +39,16 @@ function Component ({ children, className, motion, ...props }: Props): React.Rea
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemeProps) => {
   return ({
-    maxWidth: 404,
-
     '.ant-sw-modal-content.ant-sw-modal-content': {
       width: '100%'
     },
 
-    '&.-web-ui': {
+    '&.-desktop': {
       left: 'auto',
       right: token.paddingLG,
       bottom: token.paddingLG,
       top: token.paddingLG,
+      maxWidth: 404,
 
       '.ant-sw-modal-content': {
         width: '100%',
@@ -57,6 +60,22 @@ export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemePro
 
       '.ant-sw-list-section .ant-sw-list-wrapper': {
         flexBasis: 'auto'
+      }
+    },
+
+    '&.-mobile': {
+      justifyContent: 'flex-end',
+
+      '.ant-sw-modal-content': {
+        maxHeight: '95%'
+      }
+    },
+
+    '&.-full-Size': {
+      '.ant-sw-modal-content': {
+        height: '100%',
+        maxHeight: '100%',
+        borderRadius: 0
       }
     }
   });

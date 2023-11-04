@@ -164,7 +164,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             <Form.Item
               help={responseMessage}
               name={'address'}
-              statusHelpAsTooltip
+              statusHelpAsTooltip={isWebUI}
               validateStatus={responseStatus}
             >
               <AddressInput

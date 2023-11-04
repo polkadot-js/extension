@@ -8,6 +8,7 @@ import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseMod
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { ACCOUNT_EXPORT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
@@ -105,6 +106,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [publicKey, setPublicKey] = useState<string>('');
   const [jsonData, setJsonData] = useState<null | KeyringPair$Json>(null);
   const [seedPhrase, setSeedPhrase] = useState<string>('');
+  const { isWebUI } = useContext(ScreenContext);
 
   const titleMap = useMemo((): Record<ExportType, string> => ({
     [ExportType.JSON_FILE]: t('Successful'),
@@ -379,7 +381,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       required: true
                     }
                   ]}
-                  statusHelpAsTooltip={true}
+                  statusHelpAsTooltip={isWebUI}
                 >
                   <Input
                     disabled={loading}

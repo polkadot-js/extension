@@ -49,6 +49,7 @@
     "boring-avatars": "^1.7.0",
     "bowser": "^2.11.0",
     "classnames": "^2.3.2",
+    "copy-to-clipboard": "^3.3.3",
     "file-saver": "^2.0.5",
     "i18next": "^21.9.2",
     "mobile-detect": "^1.4.5",

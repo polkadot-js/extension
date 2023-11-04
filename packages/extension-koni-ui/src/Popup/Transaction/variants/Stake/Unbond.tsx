@@ -9,6 +9,7 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { AccountSelector, AmountInput, HiddenInput, NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams } from '@subwallet/extension-koni-ui/types';
@@ -44,6 +45,7 @@ const validateFields: Array<keyof UnStakeParams> = ['value'];
 
 const Component: React.FC = () => {
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
 
   const { defaultData, onDone, persistData } = useTransactionContext<UnStakeParams>();
   const { chain, type } = defaultData;
@@ -288,7 +290,7 @@ const Component: React.FC = () => {
               { required: true, message: t('Amount is required') },
               validateUnStakeValue(minValue, bondedValue, decimals, t)
             ]}
-            statusHelpAsTooltip={true}
+            statusHelpAsTooltip={isWebUI}
           >
             <AmountInput
               decimals={decimals}

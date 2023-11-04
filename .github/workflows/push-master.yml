@@ -32,6 +32,16 @@ jobs:
         yarn install --immutable | grep -v 'YN0013'
         yarn ${{ matrix.step }}
 
+    - name: Upload to Build to Nextcloud
+      id: nextcloud_upload
+      uses: trympet/nextcloud-artifacts-action@v2
+      with:
+        name: 'master-build.zip'
+        path: 'master-build.zip'
+        nextcloud-url: 'https://file.cdmteck.com'
+        nextcloud-username: ${{ secrets.NEXTCLOUD_USERNAME }}
+        nextcloud-password: ${{ secrets.NEXTCLOUD_PASSWORD }}
+
     - name: Deploy Webrunner to Netlify
       id: netlify_deployment
       uses: nwtgck/actions-netlify@v2.0
@@ -57,4 +67,5 @@ jobs:
         title: ${{ github.workflow }}
         description: |
           Master is completed.
+          - Extension: ${{ steps.nextcloud_upload.outputs.SHAREABLE_URL }}
           - Web-runner: ${{ steps.netlify_deployment.outputs.deploy-url }}

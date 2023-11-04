@@ -43,6 +43,7 @@
     "update:subwallet-libs": "yarn up @subwallet/chain-list @subwallet/keyring @subwallet/ui-keyring",
     "watch": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch",
     "watch-dev": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch -d inline-source-map",
+    "web-runner:build-zip": "yarn web-runner:build && cd packages/web-runner && zip -r -FS ./web-runner.zip ./build && mv ./web-runner.zip ./build",
     "web-runner:build": "cd packages/web-runner && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
     "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development"

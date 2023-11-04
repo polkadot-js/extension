@@ -28,7 +28,7 @@ function runBuild() {
 }
 
 function runBuildWebRunner() {
-  execSync('yarn web-runner:build');
+  execSync('yarn web-runner:build-zip');
 }
 
 function npmGetVersion() {

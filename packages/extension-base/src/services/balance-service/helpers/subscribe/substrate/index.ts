@@ -87,6 +87,8 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
             });
 
             pooledStakingBalances.push(pooled);
+          } else {
+            pooledStakingBalances.push(BN_ZERO);
           }
         }
       }

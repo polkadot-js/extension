@@ -94,7 +94,14 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__row.-type-total': {
-      paddingTop: 'var(--space-size)'
+      paddingTop: 'var(--space-size)',
+      borderTop: '2px solid',
+      borderTopColor: token.colorBgDivider,
+
+      '.__label, .__value': {
+        fontSize: token.fontSizeLG,
+        lineHeight: token.lineHeightLG
+      }
     },
 
     '&.-label-font-weight-semibold': {
@@ -203,16 +210,6 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
-    },
-
-    '.__row.-type-total': {
-      borderTop: '2px solid',
-      borderTopColor: token.colorBgDivider,
-
-      '.__label, .__value': {
-        fontSize: token.fontSizeLG,
-        lineHeight: token.lineHeightLG
-      }
     }
   });
 });

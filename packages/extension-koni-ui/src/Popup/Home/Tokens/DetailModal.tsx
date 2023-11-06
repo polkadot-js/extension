@@ -90,39 +90,12 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
       value: balanceInfo ? balanceInfo.free.value : new BigN(0)
     });
 
-    if (balanceInfo?.reserved) {
-      result.push({
-        key: 'reserved',
-        symbol,
-        label: t('Reserved'),
-        value: new BigN(balanceInfo.reserved)
-      });
-    }
-
     result.push({
       key: 'locked',
       symbol,
       label: t('Locked'),
       value: balanceInfo ? balanceInfo.locked.value : new BigN(0)
     });
-
-    if (balanceInfo?.miscFrozen) {
-      result.push({
-        key: 'miscFrozen',
-        symbol,
-        label: t('Misc fee'),
-        value: new BigN(balanceInfo.miscFrozen)
-      });
-    }
-
-    if (balanceInfo?.feeFrozen) {
-      result.push({
-        key: 'feeFrozen',
-        symbol,
-        label: t('Frozen fee'),
-        value: new BigN(balanceInfo.feeFrozen)
-      });
-    }
 
     return result;
   }, [currentTokenInfo, t, tokenBalanceMap]);

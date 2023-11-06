@@ -5863,14 +5863,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.20-beta.4":
-  version: 0.2.20-beta.4
-  resolution: "@subwallet/chain-list@npm:0.2.20-beta.4"
+"@subwallet/chain-list@file:C:\\Users\\99999\\Downloads\\builds\\build::locator=root-workspace-0b6124%40workspace%3A.":
+  version: 0.2.20-beta.5
+  resolution: "@subwallet/chain-list@file:/C%3A/Users/99999/Downloads/builds/build#/C%3A/Users/99999/Downloads/builds/build::hash=09b8c1&locator=root-workspace-0b6124%40workspace%3A."
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^12.5.1
     eventemitter3: ^5.0.1
-  checksum: 76e85806c0894eab562448f42d253a55f7ae448dc4f464437e4df2de97199f9e6d6ea1b2d8772d4cc59144094245ccbfcadd1a810c0f0a26de680095c768f0c1
+  checksum: f73f65914fc45c296c9fc390da7c6da620b84686b19cfbf70bd968bf8ff79cbc3ee265e412fc400d7065bac213353c7d2e46338b1b5a09dd0768fec7e2358bd2
   languageName: node
   linkType: hard
 
@@ -5905,7 +5905,7 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.2.20-beta.4
+    "@subwallet/chain-list": "C:\\Users\\99999\\Downloads\\builds\\build"
     "@subwallet/extension-base": ^1.1.19-0
     "@subwallet/extension-chains": ^1.1.19-0
     "@subwallet/extension-dapp": ^1.1.19-0

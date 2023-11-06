@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { YieldPoolInfo, YieldPositionInfo, YieldPositionStats } from '@subwallet/extension-base/background/KoniTypes';
+import { OptimalYieldPath, OptimalYieldPathParams, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
-import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { DEFAULT_YIELD_FIRST_STEP, getStellaswapLiquidStakingContract, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 
@@ -80,4 +80,80 @@ export function getStellaswapLiquidStakingPosition (evmApiMap: Record<string, _E
   return () => {
     clearInterval(interval);
   };
+}
+
+export async function generatePathForStellaswapLiquidStaking (params: OptimalYieldPathParams) {
+  const result: OptimalYieldPath = {
+    totalFee: [{ slug: '' }],
+    steps: [DEFAULT_YIELD_FIRST_STEP]
+  };
+
+  const derivativeTokenSlug = params.poolInfo.derivativeAssets?.[0] || '';
+  const derivativeTokenInfo = params.assetInfoMap[derivativeTokenSlug];
+
+  const inputTokenSlug = params.poolInfo.inputAssets[0];
+  const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
+
+  try {
+    const inputTokenContract = getERC20Contract(params.poolInfo.chain, _getContractAddressOfToken(inputTokenInfo), params.evmApiMap);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const allowanceCall = inputTokenContract.methods.allowance(params.address, _getContractAddressOfToken(derivativeTokenInfo));
+    const evmApi = params.evmApiMap[params.poolInfo.chain];
+
+    const [allowance, gasPrice] = await Promise.all([
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      (await allowanceCall.call()) as string,
+      evmApi.api.eth.getGasPrice()
+    ]);
+
+    if (!allowance || parseInt(allowance) <= 0) {
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Authorize token approval',
+        type: YieldStepType.TOKEN_APPROVAL
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const estimatedGas = (await allowanceCall.estimateGas()) as number;
+
+      result.totalFee.push({
+        slug: params.poolInfo.feeAssets[0],
+        amount: (estimatedGas * parseInt(gasPrice)).toString()
+      });
+    }
+
+    const stakingContract = getStellaswapLiquidStakingContract(params.poolInfo.chain, _getContractAddressOfToken(derivativeTokenInfo), params.evmApiMap);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const depositCall = stakingContract.methods.deposit(params.amount);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const estimatedDepositGas = (await depositCall.estimateGas()) as number;
+
+    result.steps.push({
+      id: result.steps.length,
+      name: 'Mint stDOT',
+      type: YieldStepType.MINT_STDOT
+    });
+
+    result.totalFee.push({
+      slug: params.poolInfo.feeAssets[0],
+      amount: (estimatedDepositGas * parseInt(gasPrice)).toString()
+    });
+
+    return result;
+  } catch (e) {
+    result.steps.push({
+      id: result.steps.length,
+      name: 'Mint stDOT',
+      type: YieldStepType.MINT_STDOT
+    });
+
+    result.totalFee.push({
+      slug: params.poolInfo.feeAssets[0],
+      amount: '0'
+    });
+
+    return result;
+  }
 }

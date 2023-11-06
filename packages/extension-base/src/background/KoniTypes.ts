@@ -2175,6 +2175,7 @@ export interface OptimalYieldPathParams {
   assetInfoMap: Record<string, _ChainAsset>,
   chainInfoMap: Record<string, _ChainInfo>
   substrateApiMap: Record<string, _SubstrateApi>,
+  evmApiMap: Record<string, _EvmApi>,
   balanceMap: Record<string, BalanceItem>,
 
   hasPosition?: boolean
@@ -2204,7 +2205,11 @@ export enum YieldStepType {
   // interlay
   MINT_QDOT = 'MINT_QDOT',
 
-  MINT_SDOT = 'MINT_SDOT'
+  MINT_SDOT = 'MINT_SDOT',
+
+  MINT_STDOT = 'MINT_STDOT',
+
+  TOKEN_APPROVAL = 'TOKEN_APPROVAL'
 }
 
 export interface YieldStepDetail {

@@ -3861,6 +3861,7 @@ export default class KoniExtension {
     const chainInfoMap = this.#koniState.getChainInfoMap();
     const balanceMap = this.#koniState.getBalance().details;
     const substrateApiMap = this.#koniState.getSubstrateApiMap();
+    const evmApiMap = this.#koniState.getEvmApiMap();
     const balanceService = this.#koniState.balanceService;
 
     return await generateNaiveOptimalPath({
@@ -3868,7 +3869,8 @@ export default class KoniExtension {
       assetInfoMap,
       balanceMap,
       chainInfoMap,
-      substrateApiMap
+      substrateApiMap,
+      evmApiMap
     }, balanceService);
   }
 
@@ -3890,7 +3892,8 @@ export default class KoniExtension {
       balanceMap: this.#koniState.getBalance().details,
       chainInfoMap: this.#koniState.getChainInfoMap(),
       poolInfo: yieldPoolInfo,
-      substrateApiMap: this.#koniState.getSubstrateApiMap()
+      substrateApiMap: this.#koniState.getSubstrateApiMap(),
+      evmApiMap: this.#koniState.getEvmApiMap()
     };
 
     const yieldValidation: TransactionError[] = await validateYieldProcess(
@@ -3917,7 +3920,8 @@ export default class KoniExtension {
         balanceMap: this.#koniState.getBalance().details,
         chainInfoMap: this.#koniState.getChainInfoMap(),
         poolInfo: yieldPoolInfo,
-        substrateApiMap: this.#koniState.getSubstrateApiMap()
+        substrateApiMap: this.#koniState.getSubstrateApiMap(),
+        evmApiMap: this.#koniState.getEvmApiMap()
       }, inputData, path, inputData.currentStep, this.#koniState.balanceService);
 
     const isMintingStep = YIELD_EXTRINSIC_TYPES.includes(extrinsicType);
@@ -3953,7 +3957,8 @@ export default class KoniExtension {
         balanceMap: this.#koniState.getBalance().details,
         chainInfoMap: this.#koniState.getChainInfoMap(),
         poolInfo: yieldPoolInfo,
-        substrateApiMap: this.#koniState.getSubstrateApiMap()
+        substrateApiMap: this.#koniState.getSubstrateApiMap(),
+        evmApiMap: this.#koniState.getEvmApiMap()
       }, address, amount, yieldPositionInfo);
 
     return await this.#koniState.transactionService.handleTransaction({
@@ -4008,7 +4013,8 @@ export default class KoniExtension {
       balanceMap: this.#koniState.getBalance().details,
       chainInfoMap: this.#koniState.getChainInfoMap(),
       poolInfo: inputData.yieldPoolInfo,
-      substrateApiMap: this.#koniState.getSubstrateApiMap()
+      substrateApiMap: this.#koniState.getSubstrateApiMap(),
+      evmApiMap: this.#koniState.getEvmApiMap()
     };
 
     return validateYieldProcess(

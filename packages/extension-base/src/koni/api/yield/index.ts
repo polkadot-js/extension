@@ -14,7 +14,7 @@ import { getInterlayLendingExtrinsic, getInterlayLendingPosition, getInterlayLen
 import { subscribeMoonwellLendingStats } from '@subwallet/extension-base/koni/api/yield/moonwell-lending';
 import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/native-staking';
 import { getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallel-liquid-staking';
-import { getStellaswapLiquidStakingPosition, subscribeStellaswapLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
+import { generatePathForStellaswapLiquidStaking, getStellaswapLiquidStakingPosition, subscribeStellaswapLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -178,6 +178,8 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams, 
     return generatePathForLiquidStaking(params, balanceService);
   } else if (params.poolInfo.slug === 'DOT___parallel_liquid_staking') {
     return generatePathForLiquidStaking(params, balanceService);
+  } else if (params.poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+    return await generatePathForStellaswapLiquidStaking(params);
   }
 
   return generatePathForNativeStaking(params);

@@ -53,7 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
               size={24}
               value={address}
             />
-            <div className='ml-xs'>
+            <div className='account-name-address ml-xs'>
               {
                 name
                   ? (
@@ -117,8 +117,17 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
 
+      '.account-name-address': {
+        overflow: 'hidden',
+        textWrap: 'nowrap',
+        display: 'flex',
+        flexDirection: 'row'
+      },
+
       '.account-name': {
-        color: token.colorText
+        color: token.colorText,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
       },
 
       '.account-address': {

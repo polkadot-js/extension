@@ -64,14 +64,14 @@ export default class SettingService {
   // Use for mobile only
   public get isAlwaysRequired (): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
-      this.settingsStore.get('Settings', (value) => {
+      this.getSettings((value) => {
         resolve(!value.timeAutoLock);
       });
     });
   }
 
   public resetWallet () {
-    this.settingsStore.set('Settings', DEFAULT_SETTING);
-    this.passPhishingStore.set('PassPhishing', {});
+    this.setSettings(DEFAULT_SETTING);
+    this.setPassPhishing({});
   }
 }

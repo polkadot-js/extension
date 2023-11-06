@@ -14,7 +14,7 @@ interface Props extends ThemeProps {
   labelColorScheme?: 'light' | 'gray';
   labelFontWeight?: 'regular' | 'semibold';
   valueColorScheme?: 'light' | 'gray';
-  spaceSize?: 'xs' | 'sm' | 'ms';
+  spaceSize?: 'xxs' | 'xs' | 'sm' | 'ms';
 }
 
 const Component: React.FC<Props> = ({ children, className = '',
@@ -73,34 +73,28 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flexDirection: 'column'
     },
 
-    '&.-space-size-xs': {
-      '.__row + .__row, .__row.-d-column .__col + .__col': {
-        marginTop: token.marginXS
-      },
+    '&.-space-size-xxs': {
+      '--space-size': token.sizeXXS
+    },
 
-      '.__row.-type-total': {
-        paddingTop: token.paddingXS
-      }
+    '&.-space-size-xs': {
+      '--space-size': token.sizeXS
     },
 
     '&.-space-size-sm': {
-      '.__row + .__row, .__row.-d-column .__col + .__col': {
-        marginTop: token.marginSM
-      },
-
-      '.__row.-type-total': {
-        paddingTop: token.paddingSM
-      }
+      '--space-size': token.sizeSM
     },
 
     '&.-space-size-ms': {
-      '.__row + .__row, .__row.-d-column .__col + .__col': {
-        marginTop: token.margin
-      },
+      '--space-size': token.size
+    },
 
-      '.__row.-type-total': {
-        paddingTop: token.padding
-      }
+    '.__row + .__row, .__row.-d-column .__col + .__col': {
+      marginTop: 'var(--space-size)'
+    },
+
+    '.__row.-type-total': {
+      paddingTop: 'var(--space-size)'
     },
 
     '&.-label-font-weight-semibold': {

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BalanceMap } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceMap } from '@subwallet/extension-base/types';
 
 import { IBalance } from '../databases';
 import BaseStoreWithAddress from '../db-stores/BaseStoreWithAddress';

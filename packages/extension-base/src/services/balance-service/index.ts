@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BalanceError } from '@subwallet/extension-base/background/errors/BalanceError';
-import { AmountData, BalanceErrorType, BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BalanceErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { groupBalance } from '@subwallet/extension-base/services/balance-service/helpers/group';
 import { subscribeEVMBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/evm';
 import { subscribeSubstrateBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/substrate';
 import { _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenSlug, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { BalanceItem } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
 

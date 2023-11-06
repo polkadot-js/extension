@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SubstrateBalance } from '@subwallet/extension-base/types';
 import BigN from 'bignumber.js';
 
 export type BalanceValueInfo = {
@@ -11,18 +12,18 @@ export type BalanceValueInfo = {
 
 export type PriceChangeStatus = 'increase' | 'decrease';
 
-export type TokenBalanceItemType = {
-  slug: string,
-  logoKey: string,
-  symbol: string,
-  chain?: string,
-  chainDisplayName?: string,
-  isTestnet: boolean,
-  priceValue: number,
-  price24hValue: number,
-  priceChangeStatus?: PriceChangeStatus,
-  free: BalanceValueInfo,
-  locked: BalanceValueInfo,
-  total: BalanceValueInfo,
-  isReady: boolean,
-};
+export interface TokenBalanceItemType extends SubstrateBalance {
+  slug: string;
+  logoKey: string;
+  symbol: string;
+  chain?: string;
+  chainDisplayName?: string;
+  isTestnet: boolean;
+  priceValue: number;
+  price24hValue: number;
+  priceChangeStatus?: PriceChangeStatus;
+  free: BalanceValueInfo;
+  locked: BalanceValueInfo;
+  total: BalanceValueInfo;
+  isReady: boolean;
+}

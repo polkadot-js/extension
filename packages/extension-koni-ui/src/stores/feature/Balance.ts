@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
-import { BalanceMap } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceMap } from '@subwallet/extension-base/types';
 import { BalanceStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: BalanceStore = {

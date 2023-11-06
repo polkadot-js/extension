@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { BalanceItem } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 import { subscribeEVMBalance } from './evm';

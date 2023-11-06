@@ -4,6 +4,7 @@
 import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetPriceId, _getAssetSymbol, _getChainName, _getMultiChainAssetPriceId, _getMultiChainAssetSymbol, _isAssetValuable } from '@subwallet/extension-base/services/chain-service/utils';
+import { SubstrateBalance } from '@subwallet/extension-base/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AssetRegistryStore, BalanceStore, ChainStore, PriceStore } from '@subwallet/extension-koni-ui/stores/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
@@ -149,6 +150,23 @@ function getAccountBalance (
         tokenGroupBalance.locked.value = tokenGroupBalance.locked.value.plus(tokenBalance.locked.value);
 
         tokenBalance.total.value = tokenBalance.free.value.plus(tokenBalance.locked.value);
+
+        if (balanceItem?.substrateInfo) {
+          const mergeData = (key: keyof SubstrateBalance) => {
+            const newValue = balanceItem?.substrateInfo?.[key];
+
+            if (newValue) {
+              const value = getBalanceValue(newValue, decimals);
+
+              tokenBalance[key] = new BigN(tokenBalance[key] || '0').plus(value).toString();
+              tokenGroupBalance[key] = new BigN(tokenGroupBalance[key] || '0').plus(value).toString();
+            }
+          };
+
+          mergeData('reserved');
+          mergeData('miscFrozen');
+          mergeData('feeFrozen');
+        }
 
         if (!isShowZeroBalance && tokenBalance.total.value.eq(BN_0)) {
           return;

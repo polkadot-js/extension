@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { getEVMBalance } from '@subwallet/extension-base/koni/api/tokens/evm/balance';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { BalanceItem } from '@subwallet/extension-base/types';
 import { Contract } from 'web3-eth-contract';
 
 import { BN } from '@polkadot/util';

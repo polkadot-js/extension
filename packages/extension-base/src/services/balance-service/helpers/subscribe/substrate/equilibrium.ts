@@ -3,9 +3,10 @@
 
 import { SignedBalance } from '@equilab/api/genshiro/interfaces';
 import { _AssetType } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
+import { BalanceItem } from '@subwallet/extension-base/types';
 import BigN from 'bignumber.js';
 
 import { ApiPromise } from '@polkadot/api';

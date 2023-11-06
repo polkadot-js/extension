@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem } from '@subwallet/extension-base/types';
 import { sumBN } from '@subwallet/extension-base/utils';
 import BN from 'bn.js';
 

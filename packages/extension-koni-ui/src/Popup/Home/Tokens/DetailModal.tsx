@@ -187,7 +187,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
             {accountItems.map((item) => (
               <AccountTokenBalanceItem
                 item={item}
-                key={item.locked}
+                key={item.address}
               />
             ))}
           </>

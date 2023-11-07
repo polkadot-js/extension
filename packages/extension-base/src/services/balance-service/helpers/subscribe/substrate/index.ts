@@ -153,7 +153,7 @@ function subscribePSP22Balance (addresses: string[], chain: string, api: ApiProm
             return {
               address: address,
               tokenSlug: tokenInfo.slug,
-              free: _balanceOf.output ? (balanceObj.ok as string || balanceObj.Ok as string) : '0',
+              free: _balanceOf.output ? (balanceObj.ok as string ?? balanceObj.Ok as string) : '0',
               locked: '0',
               state: APIItemState.READY
             };

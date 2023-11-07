@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import { isAccountAll } from '@subwallet/extension-base/utils';
-import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
+import { isAccountAll, quickFormatAddressToCompare } from '@subwallet/extension-base/utils';
 import { EmptyList, FilterModal, HistoryItem, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';

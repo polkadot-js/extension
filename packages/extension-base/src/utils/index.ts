@@ -356,6 +356,7 @@ export const stripUrl = (url: string): string => {
   return parts[2];
 };
 
+export * from './account';
 export * from './array';
 export * from './environment';
 export * from './lazy';

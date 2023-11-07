@@ -234,7 +234,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             )}
             onClickActionBtn={onClickActionBtn}
             onSearch={handleSearch}
-            placeholder={t('Dapp name')}
+            placeholder={t('DApp name')}
             searchValue={searchInput}
             showActionBtn
           />
@@ -325,11 +325,25 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.__scroll-container': {
       flex: 1,
-      overflow: 'auto'
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      display: 'flex',
+      flexDirection: 'column'
     },
 
     '.__feature-area': {
-      overflow: 'hidden'
+      position: 'relative',
+
+      '&:after': {
+        position: 'absolute',
+        right: -16,
+        top: 0,
+        width: 16,
+        bottom: 0,
+        display: 'block',
+        content: '""',
+        backgroundColor: token.colorBgDefault
+      }
     },
 
     '.__feature-area-inner': {
@@ -380,13 +394,14 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__dapp-list-area': {
+      flex: 1,
       marginTop: 32,
       marginBottom: 40
     },
 
     '.__dapp-list-container': {
       display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
       alignItems: 'stretch',
       gap: token.size
     },
@@ -425,28 +440,12 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
       }
     },
 
-    '@media (min-width: 1600px)': {
-      '.__dapp-list-container': {
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))'
-      }
-    },
-
-    '@media (max-width: 1400px)': {
-      '.__dapp-list-container': {
-        gridTemplateColumns: 'repeat(3, 1fr)'
-      }
-    },
-
     '@media (max-width: 991px)': {
       '.__scroll-container': {
         marginLeft: 0,
         marginRight: 0,
         paddingLeft: token.padding,
         paddingRight: token.padding
-      },
-
-      '.__dapp-list-container': {
-        gridTemplateColumns: 'repeat(2, 1fr)'
       }
     },
 
@@ -457,10 +456,6 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '.__dapp-list-area': {
         marginTop: 24
-      },
-
-      '.__dapp-list-container': {
-        gridTemplateColumns: 'repeat(1, 1fr)'
       },
 
       '.slick-arrow': {

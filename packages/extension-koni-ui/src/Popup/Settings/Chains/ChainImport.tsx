@@ -15,9 +15,10 @@ import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/
 import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 
@@ -42,6 +43,7 @@ interface ValidationInfo {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
@@ -313,7 +315,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'provider'}
                 rules={[{ validator: providerValidator }]}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
                 validateTrigger={['onBlur']}
               >
                 <Input
@@ -329,7 +331,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     />
                   )}
                   suffix={providerSuffix()}
-                  tooltip={t('Provider URL')}
+                  tooltip={isWebUI ? t('Provider URL') : undefined}
                   tooltipPlacement={'topLeft'}
                 />
               </Form.Item>
@@ -347,7 +349,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         type={'phosphor'}
                         weight={'bold'}
                       />}
-                      tooltip={t('Network name')}
+                      tooltip={isWebUI ? t('Network name') : undefined}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
@@ -357,7 +359,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <Input
                       disabled={true}
                       placeholder={t('Symbol')}
-                      tooltip={t('Symbol')}
+                      tooltip={isWebUI ? t('Symbol') : undefined}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
@@ -369,7 +371,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Form.Item name={'priceId'}>
                     <Input
                       placeholder={t('Price ID')}
-                      tooltip={t('Price ID')}
+                      tooltip={isWebUI ? t('Price ID') : undefined}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
@@ -380,7 +382,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <Input
                       disabled={true}
                       placeholder={t('Network type')}
-                      tooltip={t('Network type')}
+                      tooltip={isWebUI ? t('Network type') : undefined}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
@@ -390,11 +392,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'blockExplorer'}
                 rules={[{ validator: blockExplorerValidator }]}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
               >
                 <Input
                   placeholder={t('Block explorer')}
-                  tooltip={t('Block explorer')}
+                  tooltip={isWebUI ? t('Block explorer') : undefined}
                   tooltipPlacement={'topLeft'}
                 />
               </Form.Item>
@@ -402,11 +404,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'crowdloanUrl'}
                 rules={[{ validator: crowdloanUrlValidator }]}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
               >
                 <Input
                   placeholder={t('Crowdloan URL')}
-                  tooltip={t('Crowdloan URL')}
+                  tooltip={isWebUI ? t('Crowdloan URL') : undefined}
                   tooltipPlacement={'topLeft'}
                 />
               </Form.Item>

@@ -5,6 +5,7 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getContractAddressOfToken, _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
@@ -26,6 +27,7 @@ type Props = ThemeProps
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const goBack = useDefaultNavigate().goBack;
@@ -96,10 +98,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />,
         onClick: handleDeleteToken,
         disabled: !(_isCustomAsset(tokenInfo.slug) && _isSmartContractToken(tokenInfo)),
-        tooltip: t('Delete token')
+        tooltip: isWebUI ? t('Delete token') : undefined
       }
     ];
-  }, [handleDeleteToken, t, token.fontSizeHeading3, tokenInfo]);
+  }, [handleDeleteToken, isWebUI, t, token.fontSizeHeading3, tokenInfo]);
 
   const contractAddressIcon = useCallback(() => {
     const contractAddress = _getContractAddressOfToken(tokenInfo);
@@ -281,6 +283,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Row gutter={token.marginSM}>
               <Col span={12}>
                 <Tooltip
+                  open={isWebUI ? undefined : false}
                   placement={'topLeft'}
                   title={t('Symbol')}
                 >
@@ -300,6 +303,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               </Col>
               <Col span={12}>
                 <Tooltip
+                  open={isWebUI ? undefined : false}
                   placement={'topLeft'}
                   title={t('Token name')}
                 >
@@ -315,6 +319,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Row gutter={token.marginSM}>
               <Col span={12}>
                 <Tooltip
+                  open={isWebUI ? undefined : false}
                   placement={'topLeft'}
                   title={t('Price ID')}
                 >
@@ -330,6 +335,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               </Col>
               <Col span={12}>
                 <Tooltip
+                  open={isWebUI ? undefined : false}
                   placement={'topLeft'}
                   title={t('Decimals')}
                 >

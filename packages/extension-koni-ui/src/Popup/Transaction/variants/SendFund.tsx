@@ -13,6 +13,7 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
@@ -25,7 +26,7 @@ import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PaperPlaneRight, PaperPlaneTilt } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useIsFirstRender } from 'usehooks-ts';
@@ -221,6 +222,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const { defaultData, onDone, persistData } = useTransactionContext<TransferParams>();
   const { defaultSlug: sendFundSlug } = defaultData;
   const isFirstRender = useIsFirstRender();
+  const { isWebUI } = useContext(ScreenContext);
 
   const [form] = Form.useForm<TransferParams>();
 
@@ -653,7 +655,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
                 items={tokenItems}
                 placeholder={t('Select token')}
                 showChainInSelected
-                tooltip={t('Select token')}
+                tooltip={isWebUI ? t('Select token') : undefined}
               />
             </Form.Item>
 
@@ -668,7 +670,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
                 disabled={!destChainItems.length}
                 items={destChainItems}
                 title={t('Select destination chain')}
-                tooltip={t('Select destination chain')}
+                tooltip={isWebUI ? t('Select destination chain') : undefined}
               />
             </Form.Item>
           </div>
@@ -682,7 +684,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
                 validator: validateRecipientAddress
               }
             ]}
-            statusHelpAsTooltip={true}
+            statusHelpAsTooltip={isWebUI}
             validateTrigger='onBlur'
           >
             <AddressInput
@@ -705,7 +707,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
                 validator: validateAmount
               }
             ]}
-            statusHelpAsTooltip={true}
+            statusHelpAsTooltip={isWebUI}
             validateTrigger='onBlur'
           >
             <AmountInput
@@ -714,7 +716,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
               maxValue={maxTransfer}
               onSetMax={onSetMaxTransferable}
               showMaxButton={true}
-              tooltip={t('Amount')}
+              tooltip={isWebUI ? t('Amount') : undefined}
             />
           </Form.Item>
         </Form>

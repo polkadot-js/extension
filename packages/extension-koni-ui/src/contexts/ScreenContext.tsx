@@ -14,7 +14,7 @@ const ScreenBreakpoint: Record<Screens, [number, number?]> = {
   [Screens.DESKTOP]: [1025],
   [Screens.TABLET_HORIZONTAL]: [992, 1024],
   [Screens.TABLET_VERTICAL]: [768, 991],
-  [Screens.MOBILE]: [0, 768]
+  [Screens.MOBILE]: [0, 767]
 };
 
 interface ScreenContextProviderProps {

@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 1.1.20
+Build date: Oct 26, 2023.
+- Features & Update:
+- Update online token list in fiat-onramp feature (#2031)
+- Sorting the token list to buy (#2025)
+- Add “Token Name” to the token screens (#1946)
+- Hide the AutoSelect validator/collator/dApp button if this method is not supported (#2020)
+- Update chain list (#2105)
+  - Update RPC for some chains
+  - Update USDC token and add USDC.e token on Arbitrum One
+  - Add support XCM transfer DOT tokens:
+  - Polkadot —> Parallel
+  - Polkadot —> Interlay
+  - Polkadot —> Bifrost Polkadot
+
+Bugs fixed:
+- Fixed UI bug when scrolling on the Token detail screen (#2104)
+- Fixed bug XCM transfer USDT (Parallel —> Statemint) (#2091)
+- Fixed bug decoding dApp staking when unstake (#2129)
+- Fixed bug in case save file when create new account, export account (#2100)
+
 ## 1.1.19
 Build date: Oct 26, 2023.
 

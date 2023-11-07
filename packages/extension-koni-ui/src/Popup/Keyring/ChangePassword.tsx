@@ -176,7 +176,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                     required: true
                   }
                 ]}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
               >
                 <Input
                   disabled={loading}
@@ -187,7 +187,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               <Form.Item
                 name={FormFieldName.PASSWORD}
                 rules={newPasswordRules}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
               >
                 <Input
                   disabled={loading}
@@ -199,7 +199,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               <Form.Item
                 name={FormFieldName.CONFIRM_PASSWORD}
                 rules={confirmPasswordRules}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
               >
                 <Input
                   disabled={loading}

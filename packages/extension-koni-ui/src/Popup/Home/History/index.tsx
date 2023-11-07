@@ -522,6 +522,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return (
       <SwList.Section
         actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+        autoFocusSearch={false}
         enableSearchInput
         filterBy={filterFunction}
         groupBy={groupBy}
@@ -602,6 +603,11 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
         marginTop: 24,
         flex: 1
       }
+    },
+
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
     },
 
     '.history-header.ant-sw-sub-header-container': {

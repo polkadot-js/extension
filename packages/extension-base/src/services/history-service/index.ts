@@ -13,8 +13,6 @@ import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { keyring } from '@subwallet/ui-keyring';
 import { BehaviorSubject } from 'rxjs';
 
-import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
-
 export class HistoryService implements StoppableServiceInterface, PersistDataServiceInterface, CronServiceInterface {
   private historySubject: BehaviorSubject<TransactionHistoryItem[]> = new BehaviorSubject([] as TransactionHistoryItem[]);
   #needRecoveryHistories: Record<string, TransactionHistoryItem> = {};
@@ -32,10 +30,11 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       return [];
     }
 
-    const chainMap = this.chainService.getChainInfoMap();
-
     // Query data from subscan or any indexer
-    const historyRecords = await fetchMultiChainHistories(addresses, chainMap);
+    // const chainMap = this.chainService.getChainInfoMap();
+    // const historyRecords = await fetchMultiChainHistories(addresses, chainMap);
+    // Pause deprecated until have new update
+    const historyRecords = [] as TransactionHistoryItem[];
 
     // Fill additional info
     const accountMap = Object.entries(this.keyringService.accounts).reduce((map, [address, account]) => {

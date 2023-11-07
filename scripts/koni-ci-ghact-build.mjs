@@ -49,6 +49,10 @@ function runBuild () {
   execSync('yarn build');
 }
 
+function runBuildWebRunner() {
+  execSync('yarn web-runner:build-zip');
+}
+
 function npmGetVersion () {
   return JSON.parse(
     fs.readFileSync(path.resolve(process.cwd(), 'package.json'), 'utf8')
@@ -199,6 +203,11 @@ runClean();
 runCheck();
 // runTest();
 runBuild();
+runBuildWebRunner();
 
 gitPush();
-loopFunc(npmPublish);
+try {
+  loopFunc(npmPublish);
+} catch (e) {
+  console.error(e);
+}

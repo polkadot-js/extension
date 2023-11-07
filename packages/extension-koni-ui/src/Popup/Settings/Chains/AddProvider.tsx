@@ -8,6 +8,7 @@ import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
@@ -56,6 +57,7 @@ function parseProviders (newProvider: string, existingProviders: Record<string, 
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
@@ -284,7 +286,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'provider'}
                 rules={[{ validator: providerValidator }]}
-                statusHelpAsTooltip={true}
+                statusHelpAsTooltip={isWebUI}
                 validateTrigger={['onBlur']}
               >
                 <Input
@@ -316,7 +318,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                           weight={'bold'}
                         />
                       )}
-                      tooltip={t('Network name')}
+                      tooltip={isWebUI ? t('Network name') : undefined}
                       tooltipPlacement='topLeft'
                       value={chainInfo.name}
                     />
@@ -330,7 +332,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <Input
                       disabled={true}
                       placeholder={t('Symbol')}
-                      tooltip={t('Symbol')}
+                      tooltip={isWebUI ? t('Symbol') : undefined}
                       tooltipPlacement='topLeft'
                       value={chainInfo.slug}
                     />
@@ -342,7 +344,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <Input
                   disabled={true}
                   placeholder={t('Network type')}
-                  tooltip={t('Network type')}
+                  tooltip={isWebUI ? t('Network type') : undefined}
                   tooltipPlacement='topLeft'
                   value={chainInfo.slug}
                 />

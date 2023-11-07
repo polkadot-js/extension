@@ -5,6 +5,7 @@ import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo } from
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { BN_TEN, CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, STAKING_CALCULATOR_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { usePreCheckAction } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -55,6 +56,7 @@ const Component = (props: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
+  const { isWebUI } = useContext(ScreenContext);
 
   const { addExclude, checkActive, inactiveModal, removeExclude } = useContext(ModalContext);
 
@@ -249,7 +251,7 @@ const Component = (props: Props) => {
                 }
               })
             ]}
-            statusHelpAsTooltip={true}
+            statusHelpAsTooltip={isWebUI}
           >
             <AmountInput
               decimals={currentDecimal}
@@ -323,12 +325,6 @@ const EarningCalculatorModal = styled(Component)<Props>(({ theme: { token } }: P
         color: token.colorTextLight4
       },
 
-      '.ant-form-item-control': {
-        '& > div:nth-child(2)': {
-          display: 'none !important'
-        }
-      },
-
       '.ant-form-item-margin-offset': {
         marginBottom: '0 !important'
       }
@@ -336,6 +332,32 @@ const EarningCalculatorModal = styled(Component)<Props>(({ theme: { token } }: P
 
     '.submit-button': {
       marginTop: token.paddingXL
+    },
+
+    '@media (min-width: 992px)': {
+      '.earning-calculator-form-container': {
+        '.ant-form-item-control': {
+          '& > div:nth-child(2)': {
+            display: 'none !important'
+          }
+        }
+      }
+    },
+
+    '@media (max-width: 991px)': {
+      '.earning-calculator-form-container': {
+        '.ant-form-item-label, .ant-form-item-control': {
+          flexBasis: '100%'
+        },
+
+        '.ant-form-item-label': {
+          paddingBottom: token.paddingXS
+        },
+
+        '.ant-form-item-explain': {
+          paddingBottom: 0
+        }
+      }
     }
   };
 });

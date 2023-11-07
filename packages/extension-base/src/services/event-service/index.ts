@@ -15,6 +15,7 @@ export class EventService extends EventEmitter<EventRegistry> {
   public readonly waitDatabaseReady: Promise<boolean>;
   public readonly waitKeyringReady: Promise<boolean>;
   public readonly waitAccountReady: Promise<boolean>;
+  public readonly waitInjectReady: Promise<boolean>;
   public readonly waitChainReady: Promise<boolean>;
   public readonly waitAssetReady: Promise<boolean>;
   public readonly waitMigrateReady: Promise<boolean>;
@@ -30,6 +31,7 @@ export class EventService extends EventEmitter<EventRegistry> {
     this.waitDatabaseReady = this.generateWaitPromise('database.ready');
     this.waitKeyringReady = this.generateWaitPromise('keyring.ready');
     this.waitAccountReady = this.generateWaitPromise('account.ready');
+    this.waitInjectReady = this.generateWaitPromise('inject.ready');
     this.waitChainReady = this.generateWaitPromise('chain.ready');
     this.waitAssetReady = this.generateWaitPromise('asset.ready');
     this.waitMigrateReady = this.generateWaitPromise('migration.done');

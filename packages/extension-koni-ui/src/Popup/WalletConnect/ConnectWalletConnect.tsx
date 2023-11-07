@@ -178,7 +178,7 @@ const Component: React.FC<Props> = (props: Props) => {
               validator: uriValidator
             }
           ]}
-          statusHelpAsTooltip={true}
+          statusHelpAsTooltip={isWebUI}
         >
           <Input
             disabled={loading}

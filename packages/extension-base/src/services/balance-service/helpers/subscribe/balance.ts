@@ -2,22 +2,58 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getSubstrateGenesisHash, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
+import keyring from '@subwallet/ui-keyring';
 
 import { subscribeEVMBalance } from './evm';
 import { subscribeSubstrateBalance } from './substrate';
 
-// main subscription
-export function subscribeBalance (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem[]) => void) {
+const filterAddress = (addresses: string[], chainInfo: _ChainInfo): string[] => {
+  const isEvmChain = _isChainEvmCompatible(chainInfo);
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
+  if (isEvmChain) {
+    return evmAddresses;
+  } else {
+    return substrateAddresses.filter((address) => {
+      try {
+        const pair = keyring.getPair(address);
+
+        if (pair) {
+          const account: AccountJson = {
+            address: pair.address,
+            type: pair.type,
+            ...pair.meta
+          };
+
+          if (account.isHardware) {
+            const availGen = account.availableGenesisHashes || [];
+            const gen = _getSubstrateGenesisHash(chainInfo);
+
+            return availGen.includes(gen);
+          } else {
+            return true;
+          }
+        } else {
+          return false;
+        }
+      } catch (e) {
+        return false;
+      }
+    });
+  }
+};
+
+// main subscription
+export function subscribeBalance (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem[]) => void) {
   // Looping over each chain
   const unsubList = Object.entries(chainInfoMap).map(async ([chainSlug, chainInfo]) => {
-    const useAddresses = _isChainEvmCompatible(chainInfo) ? evmAddresses : substrateAddresses;
+    const useAddresses = filterAddress(addresses, chainInfo);
 
     if (_isPureEvmChain(chainInfo)) {
       const nativeTokenInfo = state.getNativeTokenInfo(chainSlug);

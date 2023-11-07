@@ -97,7 +97,15 @@ const Component = () => {
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
   const preCheckAction = usePreCheckAction(currentFrom);
 
-  const hasXcm = !['westend', 'polkadot'].includes(currentPoolInfo.chain);
+  const hasXcm = useMemo(() => {
+    const chainInfo = chainInfoMap[currentPoolInfo.chain];
+
+    if (_isChainEvmCompatible(chainInfo)) {
+      return false;
+    } else {
+      return !['westend', 'polkadot'].includes(currentPoolInfo.chain);
+    }
+  }, [currentPoolInfo.chain, chainInfoMap]);
 
   const extrinsicType = useMemo(() => getEarnExtrinsicType(methodSlug), [methodSlug]);
 

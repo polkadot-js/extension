@@ -18,7 +18,7 @@ const balanceSlice = createSlice({
       const payload = action.payload;
 
       return {
-        balanceMap: payload,
+        balanceMap: { ...payload },
         reduxStatus: ReduxStatus.READY
       };
     }

@@ -4,9 +4,9 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { BalanceItem } from '@subwallet/extension-base/types';
 import { Avatar } from '@subwallet/extension-koni-ui/components';
-import { useGetAccountByAddress, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useGetAccountByAddress, useGetChainPrefixBySlug, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/utils';
+import { reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
@@ -30,6 +30,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const tokenInfo = useMemo((): _ChainAsset|undefined => assetRegistry[tokenSlug], [assetRegistry, tokenSlug]);
   const total = useMemo(() => new BigN(free).plus(locked).toString(), [free, locked]);
+  const addressPrefix = useGetChainPrefixBySlug(tokenInfo?.originChain);
+
+  const reformatedAddress = useMemo(() => reformatAddress(address, addressPrefix), [address, addressPrefix]);
 
   const name = useMemo(() => {
     return account?.name;
@@ -59,11 +62,11 @@ const Component: React.FC<Props> = (props: Props) => {
                   ? (
                     <>
                       <span className='account-name'>{name}</span>
-                      <span className='account-address'>&nbsp;({toShort(address, 4, 4)})</span>
+                      <span className='account-address'>&nbsp;({toShort(reformatedAddress, 4, 4)})</span>
                     </>
                   )
                   : (
-                    <span className='account-name'>({toShort(address)})</span>
+                    <span className='account-name'>({toShort(reformatedAddress)})</span>
                   )
               }
             </div>
@@ -96,7 +99,11 @@ const Component: React.FC<Props> = (props: Props) => {
 const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '&.meta-info-block': {
-      marginTop: token.marginXS
+      marginTop: token.marginXS,
+
+      '&:first-child': {
+        marginTop: 0
+      }
     },
 
     '&.account-token-detail': {

@@ -156,49 +156,63 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
           />
         </Form.Item>
       </Form>
-      {
-        view === ViewValue.OVERVIEW && (
-          <div className={'__container'}>
-            {items.map((item) => (
-              <div
-                className={'__row'}
-                key={item.key}
-              >
-                <div className={'__label'}>{item.label}</div>
+      <div className='content-container'>
+        {
+          view === ViewValue.OVERVIEW && (
+            <div className={'__container'}>
+              {items.map((item) => (
+                <div
+                  className={'__row'}
+                  key={item.key}
+                >
+                  <div className={'__label'}>{item.label}</div>
 
-                <Number
-                  className={'__value'}
-                  decimal={0}
-                  decimalOpacity={0.45}
-                  intOpacity={0.85}
-                  size={14}
-                  suffix={item.symbol}
-                  unitOpacity={0.85}
-                  value={item.value}
+                  <Number
+                    className={'__value'}
+                    decimal={0}
+                    decimalOpacity={0.45}
+                    intOpacity={0.85}
+                    size={14}
+                    suffix={item.symbol}
+                    unitOpacity={0.85}
+                    value={item.value}
+                  />
+                </div>
+              ))}
+            </div>
+          )
+        }
+        {
+          view === ViewValue.DETAIL && (
+            <>
+              {accountItems.map((item) => (
+                <AccountTokenBalanceItem
+                  item={item}
+                  key={item.address}
                 />
-              </div>
-            ))}
-          </div>
-        )
-      }
-      {
-        view === ViewValue.DETAIL && (
-          <>
-            {accountItems.map((item) => (
-              <AccountTokenBalanceItem
-                item={item}
-                key={item.address}
-              />
-            ))}
-          </>
-        )
-      }
+              ))}
+            </>
+          )
+        }
+      </div>
     </SwModal>
   );
 }
 
 export const DetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '.ant-sw-modal-body': {
+      height: 470,
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
+    '.content-container': {
+      overflow: 'auto',
+      flex: 1
+    },
+
     '.__container': {
       borderRadius: token.borderRadiusLG,
       backgroundColor: token.colorBgSecondary,

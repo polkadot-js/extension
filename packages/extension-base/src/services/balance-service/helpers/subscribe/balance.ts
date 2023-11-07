@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { AccountJson } from '@subwallet/extension-base/background/types';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
-import keyring from '@subwallet/ui-keyring';
+import { getAccountJsonByAddress } from '@subwallet/extension-base/utils/account';
 
 import { subscribeEVMBalance } from './evm';
 import { subscribeSubstrateBalance } from './substrate';
@@ -22,15 +21,9 @@ const filterAddress = (addresses: string[], chainInfo: _ChainInfo): string[] => 
   } else {
     return substrateAddresses.filter((address) => {
       try {
-        const pair = keyring.getPair(address);
+        const account = getAccountJsonByAddress(address);
 
-        if (pair) {
-          const account: AccountJson = {
-            address: pair.address,
-            type: pair.type,
-            ...pair.meta
-          };
-
+        if (account) {
           if (account.isHardware) {
             const availGen = account.availableGenesisHashes || [];
             const gen = _getSubstrateGenesisHash(chainInfo);

@@ -14,7 +14,12 @@ import { getInterlayLendingExtrinsic, getInterlayLendingPosition, getInterlayLen
 import { subscribeMoonwellLendingStats } from '@subwallet/extension-base/koni/api/yield/moonwell-lending';
 import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/native-staking';
 import { getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallel-liquid-staking';
-import { generatePathForStellaswapLiquidStaking, getStellaswapLiquidStakingPosition, subscribeStellaswapLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
+import {
+  generatePathForStellaswapLiquidStaking,
+  getStellaswapLiquidStakingExtrinsic,
+  getStellaswapLiquidStakingPosition,
+  subscribeStellaswapLiquidStakingStats
+} from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -23,6 +28,7 @@ import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
+import { TransactionConfig } from 'web3-core';
 
 // only apply for DOT right now, will need to scale up
 
@@ -462,7 +468,7 @@ export async function validateYieldProcess (address: string, params: OptimalYiel
 export interface HandleYieldStepData {
   txChain: string,
   extrinsicType: ExtrinsicType,
-  extrinsic: SubmittableExtrinsic<'promise'>,
+  extrinsic: SubmittableExtrinsic<'promise'> | TransactionConfig,
   txData: any,
   transferNativeAmount: string
 }
@@ -496,6 +502,8 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
     return getParallelLiquidStakingExtrinsic(address, params, path, currentStep, requestData, balanceService);
   } else if (yieldPoolInfo.slug === 'DOT___interlay_lending') {
     return getInterlayLendingExtrinsic(address, params, path, currentStep, requestData, balanceService);
+  } else if (yieldPoolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+    return getStellaswapLiquidStakingExtrinsic(address, params, path, currentStep, requestData, balanceService);
   }
 
   const _data = requestData.data as SubmitJoinNominationPool;

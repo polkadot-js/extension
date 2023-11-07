@@ -512,6 +512,8 @@ export enum ExtrinsicType {
   REDEEM_LDOT = 'earn.redeem_ldot',
   REDEEM_SDOT = 'earn.redeem_sdot',
 
+  APPROVE_CONTRACT = 'approve_contract',
+
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }

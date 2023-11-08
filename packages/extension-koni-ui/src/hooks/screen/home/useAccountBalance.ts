@@ -47,6 +47,7 @@ function getDefaultBalanceItem (
     },
     isReady: false,
     isTestnet: false,
+    isNotSupport: true,
     price24hValue: 0,
     priceValue: 0,
     logoKey,
@@ -110,7 +111,8 @@ function getAccountBalance (
   const tokenGroupBalanceMap: Record<string, TokenBalanceItemType> = {};
 
   Object.keys(tokenGroupMap).forEach((tokenGroupKey) => {
-    let isTokenGroupBalanceReady = false;
+    const tokenGroupBalanceReady: boolean[] = [];
+    const tokenGroupNotSupport: boolean[] = [];
     // note: multiChainAsset may be undefined due to tokenGroupKey may be a tokenSlug
     const multiChainAsset: _MultiChainAsset | undefined = multiChainAssetMap[tokenGroupKey];
     const tokenGroupBalance = getDefaultTokenGroupBalance(tokenGroupKey, assetRegistryMap, multiChainAsset);
@@ -129,14 +131,18 @@ function getAccountBalance (
       const balanceItem = balanceMap[address]?.[tokenSlug];
       const decimals = _getAssetDecimals(chainAsset);
 
-      const isTokenBalanceReady = !!balanceItem && (balanceItem.state === APIItemState.READY);
+      const isTokenBalanceReady = !!balanceItem && (balanceItem.state !== APIItemState.PENDING);
+      const isTokenNotSupport = !!balanceItem && (balanceItem.state === APIItemState.NOT_SUPPORT);
+
+      tokenGroupNotSupport.push(isTokenNotSupport);
+      tokenGroupBalanceReady.push(isTokenBalanceReady);
 
       if (!isShowZeroBalance && !isTokenBalanceReady) {
         return;
       }
 
       tokenBalance.isReady = isTokenBalanceReady;
-      isTokenGroupBalanceReady = isTokenBalanceReady;
+      tokenBalance.isNotSupport = isTokenNotSupport;
 
       tokenBalance.chain = originChain;
       tokenBalance.chainDisplayName = _getChainName(chainInfoMap[originChain]);
@@ -222,10 +228,15 @@ function getAccountBalance (
         }
       }
 
-      tokenBalanceMap[tokenSlug] = tokenBalance;
+      if (!tokenBalance.isNotSupport) {
+        tokenBalanceMap[tokenSlug] = tokenBalance;
+      }
     });
 
+    const isTokenGroupBalanceReady = tokenGroupBalanceReady.every((e) => e);
+
     tokenGroupBalance.isReady = isTokenGroupBalanceReady;
+    tokenGroupBalance.isNotSupport = tokenGroupNotSupport.every((e) => e);
 
     if (!isShowZeroBalance && (!isTokenGroupBalanceReady || tokenGroupBalance.total.value.eq(BN_0))) {
       return;
@@ -236,7 +247,9 @@ function getAccountBalance (
     // make sure priceId exists and token group has monetary value
     // todo: check if multiChainAsset has monetary value too (after Nampc updates the background)
     if (!tokenGroupPriceId || (assetRegistryMap[tokenGroupKey] && !_isAssetValuable(assetRegistryMap[tokenGroupKey]))) {
-      tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;
+      if (!tokenGroupBalance.isNotSupport) {
+        tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;
+      }
 
       return;
     }
@@ -253,9 +266,11 @@ function getAccountBalance (
       tokenGroupBalance.priceChangeStatus = 'decrease';
     }
 
-    tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;
-    totalBalanceInfo.convertedValue = totalBalanceInfo.convertedValue.plus(tokenGroupBalance.total.convertedValue);
-    totalBalanceInfo.converted24hValue = totalBalanceInfo.converted24hValue.plus(tokenGroupBalance.total.pastConvertedValue);
+    if (!tokenGroupBalance.isNotSupport) {
+      tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;
+      totalBalanceInfo.convertedValue = totalBalanceInfo.convertedValue.plus(tokenGroupBalance.total.convertedValue);
+      totalBalanceInfo.converted24hValue = totalBalanceInfo.converted24hValue.plus(tokenGroupBalance.total.pastConvertedValue);
+    }
   });
 
   // Compute total balance change

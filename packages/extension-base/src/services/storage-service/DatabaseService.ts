@@ -84,7 +84,7 @@ export default class DatabaseService {
   }
 
   async updateBulkBalanceStore (items: BalanceItem[]) {
-    const filtered = items.filter((item) => item.state === APIItemState.READY);
+    const filtered = items.filter((item) => item.state !== APIItemState.PENDING);
 
     if (filtered.length) {
       return this.stores.balance.bulkUpsert(filtered);

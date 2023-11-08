@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
+import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
@@ -12,33 +13,38 @@ import { getAccountJsonByAddress } from '@subwallet/extension-base/utils/account
 import { subscribeEVMBalance } from './evm';
 import { subscribeSubstrateBalance } from './substrate';
 
-const filterAddress = (addresses: string[], chainInfo: _ChainInfo): string[] => {
+const filterAddress = (addresses: string[], chainInfo: _ChainInfo): [string[], string[]] => {
   const isEvmChain = _isChainEvmCompatible(chainInfo);
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   if (isEvmChain) {
-    return evmAddresses;
+    return [evmAddresses, []];
   } else {
-    return substrateAddresses.filter((address) => {
-      try {
-        const account = getAccountJsonByAddress(address);
+    const fetchList: string[] = [];
+    const unfetchList: string[] = [];
 
-        if (account) {
-          if (account.isHardware) {
-            const availGen = account.availableGenesisHashes || [];
-            const gen = _getSubstrateGenesisHash(chainInfo);
+    substrateAddresses.forEach((address) => {
+      const account = getAccountJsonByAddress(address);
 
-            return availGen.includes(gen);
+      if (account) {
+        if (account.isHardware) {
+          const availGen = account.availableGenesisHashes || [];
+          const gen = _getSubstrateGenesisHash(chainInfo);
+
+          if (availGen.includes(gen)) {
+            fetchList.push(address);
           } else {
-            return true;
+            unfetchList.push(address);
           }
         } else {
-          return false;
+          fetchList.push(address);
         }
-      } catch (e) {
-        return false;
+      } else {
+        fetchList.push(address);
       }
     });
+
+    return [fetchList, [...unfetchList, ...evmAddresses]];
   }
 };
 
@@ -46,7 +52,32 @@ const filterAddress = (addresses: string[], chainInfo: _ChainInfo): string[] => 
 export function subscribeBalance (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem[]) => void) {
   // Looping over each chain
   const unsubList = Object.entries(chainInfoMap).map(async ([chainSlug, chainInfo]) => {
-    const useAddresses = filterAddress(addresses, chainInfo);
+    const [useAddresses, notSupportAddresses] = filterAddress(addresses, chainInfo);
+
+    if (notSupportAddresses.length) {
+      const tokens = state.chainService.getAssetByChainAndType(chainSlug, [_AssetType.NATIVE, _AssetType.ERC20, _AssetType.PSP22, _AssetType.LOCAL]);
+      const assetSetting = await state.chainService.getAssetSettings();
+      const filtered = Object.values(tokens).filter(({ slug }) => {
+        return assetSetting[slug]?.visible;
+      });
+
+      const now = new Date().getTime();
+
+      notSupportAddresses.forEach((address) => {
+        const items: BalanceItem[] = filtered.map((token): BalanceItem => {
+          return {
+            address,
+            tokenSlug: token.slug,
+            free: '0',
+            locked: '0',
+            state: APIItemState.NOT_SUPPORT,
+            timestamp: now
+          };
+        });
+
+        callback(items);
+      });
+    }
 
     if (_isPureEvmChain(chainInfo)) {
       const nativeTokenInfo = state.getNativeTokenInfo(chainSlug);

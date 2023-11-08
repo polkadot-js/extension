@@ -19,6 +19,7 @@ export interface TokenBalanceItemType extends SubstrateBalance {
   chain?: string;
   chainDisplayName?: string;
   isTestnet: boolean;
+  isNotSupport: boolean;
   priceValue: number;
   price24hValue: number;
   priceChangeStatus?: PriceChangeStatus;

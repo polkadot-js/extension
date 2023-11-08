@@ -6,7 +6,7 @@ import { _getNftTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartCo
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, Layout, PageWrapper, TokenTypeSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useChainChecker, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useChainChecker, useChainInfoData, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToError, convertFieldToObject, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -66,7 +66,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const selectedNftType = Form.useWatch('type', form);
   const collectionName = Form.useWatch('collectionName', form);
 
-  const chains = useMemo(() => Object.values(chainInfoMap), [chainInfoMap]);
+  const chains = useChainInfoData().chainInfoList;
   const chainNetworkPrefix = useGetChainPrefixBySlug(selectedChain);
 
   const [loading, setLoading] = useState(false);

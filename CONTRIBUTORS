@@ -1,5 +1,5 @@
     1864	Nam Phạm                      	[Issue 2079] remove logs and adjust wording
-    1683	AnhMTV                        	Update @subwallet/chain-list 0.2.24
+    1684	AnhMTV                        	Update logic filter unavailable network from chain selector
     1389	S2kael                        	[Issue-2152] Support nomination pool for Vara network
      465	Jaco                          	0.42.5 (#969)
      286	lw-cdm                        	[Issue-2104] Fix UI bug on token detail screen

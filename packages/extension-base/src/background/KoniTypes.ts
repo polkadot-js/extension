@@ -619,7 +619,8 @@ export type TransactionAdditionalInfo = {
   [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_QDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
-  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>
+  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
+  [ExtrinsicType.MINT_STDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
 }
 
 // export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM

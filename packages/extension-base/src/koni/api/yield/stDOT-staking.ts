@@ -160,16 +160,12 @@ export async function generatePathForStellaswapLiquidStaking (params: OptimalYie
   }
 }
 
-export async function getStellaswapLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): Promise<HandleYieldStepData> {
-  const evmApi = params.evmApiMap[params.poolInfo.chain];
-
+export function getStellaswapLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): HandleYieldStepData {
   const derivativeTokenSlug = params.poolInfo.derivativeAssets?.[0] || '';
   const derivativeTokenInfo = params.assetInfoMap[derivativeTokenSlug];
 
   const inputTokenSlug = params.poolInfo.inputAssets[0];
   const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
-
-  const gasPrice = await evmApi.api.eth.getGasPrice();
 
   if (path.steps[currentStep].type === YieldStepType.TOKEN_APPROVAL) {
     const inputTokenContract = getERC20Contract(params.poolInfo.chain, _getContractAddressOfToken(inputTokenInfo), params.evmApiMap);
@@ -179,12 +175,7 @@ export async function getStellaswapLiquidStakingExtrinsic (address: string, para
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const approveEncodedCall = approveCall.encodeABI() as string;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    const estimatedGas = (await approveCall.estimateGas()) as number;
-
     const transactionObject = {
-      gasPrice: gasPrice,
-      gas: estimatedGas,
       from: address,
       to: _getContractAddressOfToken(inputTokenInfo),
       data: approveEncodedCall
@@ -206,14 +197,10 @@ export async function getStellaswapLiquidStakingExtrinsic (address: string, para
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
   const depositEncodedCall = depositCall.encodeABI() as string;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-  const estimatedDepositGas = (await depositCall.estimateGas()) as number;
 
   const transactionObject = {
-    gasPrice: gasPrice,
-    gas: estimatedDepositGas,
     from: address,
-    to: _getContractAddressOfToken(inputTokenInfo),
+    to: _getContractAddressOfToken(derivativeTokenInfo),
     data: depositEncodedCall
   } as TransactionConfig;
 

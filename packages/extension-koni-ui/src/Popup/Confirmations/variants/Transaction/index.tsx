@@ -44,11 +44,13 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
     case ExtrinsicType.MINT_QDOT:
     case ExtrinsicType.MINT_LDOT:
     case ExtrinsicType.MINT_SDOT:
+    case ExtrinsicType.MINT_STDOT:
     case ExtrinsicType.MINT_VDOT:
       return JoinYieldPoolConfirmation;
     case ExtrinsicType.REDEEM_QDOT:
     case ExtrinsicType.REDEEM_LDOT:
     case ExtrinsicType.REDEEM_SDOT:
+    case ExtrinsicType.REDEEM_STDOT:
     case ExtrinsicType.REDEEM_VDOT:
       return FastWithdrawTransactionConfirmation;
     default:

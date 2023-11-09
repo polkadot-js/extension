@@ -251,10 +251,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.MINT_SDOT]: t('Mint sDOT'),
     [ExtrinsicType.MINT_LDOT]: t('Mint LDOT'),
     [ExtrinsicType.MINT_VDOT]: t('Mint vDOT'),
+    [ExtrinsicType.MINT_STDOT]: t('Mint stDOT'),
     [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT'),
     [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT'),
     [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT'),
     [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT'),
+    [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT'),
     [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
 
@@ -283,10 +285,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.MINT_SDOT]: t('Mint sDOT transaction'),
     [ExtrinsicType.MINT_LDOT]: t('Mint LDOT transaction'),
     [ExtrinsicType.MINT_VDOT]: t('Mint vDOT transaction'),
+    [ExtrinsicType.MINT_STDOT]: t('Mint stDOT transaction'),
     [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT transaction'),
     [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT transaction'),
     [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT transaction'),
     [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT transaction'),
+    [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT transaction'),
     [ExtrinsicType.UNKNOWN]: t('Unknown transaction')
   }), [t]);
 

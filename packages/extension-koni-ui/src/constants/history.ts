@@ -28,10 +28,12 @@ export const TxTypeNameMap: Record<ExtrinsicType, string> = {
   [ExtrinsicType.MINT_LDOT]: detectTranslate('Mint LDOT'),
   [ExtrinsicType.MINT_SDOT]: detectTranslate('Mint sDOT'),
   [ExtrinsicType.MINT_QDOT]: detectTranslate('Mint qDOT'),
+  [ExtrinsicType.MINT_STDOT]: detectTranslate('Mint stDOT'),
   [ExtrinsicType.REDEEM_VDOT]: detectTranslate('Redeem vDOT'),
   [ExtrinsicType.REDEEM_LDOT]: detectTranslate('Redeem LDOT'),
   [ExtrinsicType.REDEEM_SDOT]: detectTranslate('Redeem sDOT'),
   [ExtrinsicType.REDEEM_QDOT]: detectTranslate('Redeem qDOT'),
+  [ExtrinsicType.REDEEM_STDOT]: detectTranslate('Redeem stDOT'),
   [ExtrinsicType.UNKNOWN]: detectTranslate('Unknown')
 };
 

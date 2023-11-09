@@ -175,6 +175,26 @@ const Component = function ({ className }: Props) {
           return t('Reward claiming confirmation');
         case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
           return t('Cancel unstake confirm');
+        case ExtrinsicType.MINT_QDOT:
+          return t('Mint qDOT confirmation');
+        case ExtrinsicType.MINT_SDOT:
+          return t('Mint sDOT confirmation');
+        case ExtrinsicType.MINT_LDOT:
+          return t('Mint LDOT confirmation');
+        case ExtrinsicType.MINT_VDOT:
+          return t('Mint vDOT confirmation');
+        case ExtrinsicType.MINT_STDOT:
+          return t('Mint stDOT confirmation');
+        case ExtrinsicType.REDEEM_QDOT:
+          return t('Redeem qDOT confirmation');
+        case ExtrinsicType.REDEEM_SDOT:
+          return t('Redeem sDOT confirmation');
+        case ExtrinsicType.REDEEM_LDOT:
+          return t('Redeem LDOT confirmation');
+        case ExtrinsicType.REDEEM_VDOT:
+          return t('Redeem vDOT confirmation');
+        case ExtrinsicType.REDEEM_STDOT:
+          return t('Redeem stDOT confirmation');
         default:
           return t('Transaction confirmation');
       }

@@ -10,7 +10,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import MintCampaignService from '@subwallet/extension-base/services/mint-campaign-service';
@@ -535,6 +535,7 @@ export default class TransactionService {
         break;
       }
 
+      case ExtrinsicType.MINT_STDOT:
       case ExtrinsicType.MINT_QDOT:
       case ExtrinsicType.MINT_LDOT:
       case ExtrinsicType.MINT_SDOT:
@@ -551,7 +552,7 @@ export default class TransactionService {
           derivativeTokenSlug: params.derivativeTokenSlug,
           exchangeRate: params.exchangeRate
         } as TransactionAdditionalInfo[ExtrinsicType.MINT_VDOT];
-        eventLogs && parseLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
+        eventLogs && !_isChainEvmCompatible(chainInfo) && parseLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
 
         break;
       }
@@ -570,6 +571,7 @@ export default class TransactionService {
         break;
       }
 
+      case ExtrinsicType.REDEEM_STDOT:
       case ExtrinsicType.REDEEM_LDOT:
       case ExtrinsicType.REDEEM_SDOT:
 
@@ -580,9 +582,10 @@ export default class TransactionService {
         if (data.yieldPoolInfo.derivativeAssets) {
           const derivativeTokenSlug = data.yieldPoolInfo.derivativeAssets[0];
           const derivativeTokenInfo = this.chainService.getAssetBySlug(derivativeTokenSlug);
+          const chainInfo = this.chainService.getChainInfoByKey(data.yieldPoolInfo.chain);
 
           historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(derivativeTokenInfo), decimals: _getAssetDecimals(derivativeTokenInfo) };
-          eventLogs && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
+          eventLogs && !_isChainEvmCompatible(chainInfo) && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
         }
 
         break;

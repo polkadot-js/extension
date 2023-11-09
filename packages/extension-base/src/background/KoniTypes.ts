@@ -506,13 +506,13 @@ export enum ExtrinsicType {
   MINT_LDOT = 'earn.mint_ldot',
   MINT_SDOT = 'earn.mint_sdot',
   MINT_QDOT = 'earn.mint_qdot',
+  MINT_STDOT = 'earn.mint_stdot',
 
   REDEEM_QDOT = 'earn.redeem_qdot',
   REDEEM_VDOT = 'earn.redeem_vdot',
   REDEEM_LDOT = 'earn.redeem_ldot',
   REDEEM_SDOT = 'earn.redeem_sdot',
-
-  APPROVE_CONTRACT = 'approve_contract',
+  REDEEM_STDOT = 'earn.redeem_stdot',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -545,11 +545,14 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.MINT_LDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_SDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_QDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_STDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_STDOT]: RequestYieldStepSubmit,
 
   [ExtrinsicType.REDEEM_VDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.REDEEM_QDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.REDEEM_LDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.REDEEM_SDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.REDEEM_STDOT]: RequestYieldFastWithdrawal,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,

@@ -2,22 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  ExtrinsicType,
-  OptimalYieldPath,
-  OptimalYieldPathParams,
-  RequestYieldStepSubmit, SubmitYieldStepData,
-  YieldPoolInfo,
-  YieldPositionInfo,
-  YieldPositionStats,
-  YieldStepType
-} from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestYieldStepSubmit, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import { DEFAULT_YIELD_FIRST_STEP, getStellaswapLiquidStakingContract, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { BalanceService } from '@subwallet/extension-base/services/balance-service';
-import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { TransactionConfig } from 'web3-core';
 
 export function subscribeStellaswapLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
@@ -109,7 +99,7 @@ export async function generatePathForStellaswapLiquidStaking (params: OptimalYie
   try {
     const inputTokenContract = getERC20Contract(params.poolInfo.chain, _getContractAddressOfToken(inputTokenInfo), params.evmApiMap);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const allowanceCall = inputTokenContract.methods.allowance(params.address, _getContractAddressOfToken(derivativeTokenInfo));
+    const allowanceCall = inputTokenContract.methods.allowance(params.address, _getContractAddressOfToken(derivativeTokenInfo)); // TODO
     const evmApi = params.evmApiMap[params.poolInfo.chain];
 
     const [allowance, gasPrice] = await Promise.all([
@@ -170,8 +160,7 @@ export async function generatePathForStellaswapLiquidStaking (params: OptimalYie
   }
 }
 
-export async function getStellaswapLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit, balanceService: BalanceService): Promise<HandleYieldStepData> {
-  const inputData = requestData.data as SubmitYieldStepData;
+export async function getStellaswapLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): Promise<HandleYieldStepData> {
   const evmApi = params.evmApiMap[params.poolInfo.slug];
 
   const derivativeTokenSlug = params.poolInfo.derivativeAssets?.[0] || '';
@@ -203,9 +192,9 @@ export async function getStellaswapLiquidStakingExtrinsic (address: string, para
 
     return {
       txChain: params.poolInfo.chain,
-      extrinsicType: ExtrinsicType.APPROVE_CONTRACT,
+      extrinsicType: ExtrinsicType.EVM_EXECUTE,
       extrinsic: transactionObject,
-      txData: requestData,
+      txData: transactionObject,
       transferNativeAmount: '0'
     };
   }
@@ -213,10 +202,30 @@ export async function getStellaswapLiquidStakingExtrinsic (address: string, para
   const stakingContract = getStellaswapLiquidStakingContract(params.poolInfo.chain, _getContractAddressOfToken(derivativeTokenInfo), params.evmApiMap);
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-  const depositCall = stakingContract.methods.deposit(params.amount);
+  const depositCall = stakingContract.methods.deposit(params.amount); // TODO: referral
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+  const depositEncodedCall = depositCall.encodeABI() as string;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
   const estimatedDepositGas = (await depositCall.estimateGas()) as number;
 
+  const transactionObject = {
+    gasPrice: gasPrice,
+    gas: estimatedDepositGas,
+    from: address,
+    to: _getContractAddressOfToken(inputTokenInfo),
+    data: depositEncodedCall
+  } as TransactionConfig;
+
+  return {
+    txChain: params.poolInfo.chain,
+    extrinsicType: ExtrinsicType.MINT_STDOT,
+    extrinsic: transactionObject,
+    txData: requestData,
+    transferNativeAmount: '0'
+  };
+}
+
+export async function getStellaswapLiquidStakingRedeem () {
 
 }

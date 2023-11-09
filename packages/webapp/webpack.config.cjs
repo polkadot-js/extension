@@ -57,7 +57,6 @@ const _additionalEnv = {
   BANXA_TEST_MODE: JSON.stringify(false)
 };
 
-
 const createConfig = (entry, alias = {}, useSplitChunk = false) => {
   const result = {
     context: __dirname,

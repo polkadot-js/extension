@@ -3927,6 +3927,7 @@ export default class KoniExtension {
 
     const isMintingStep = YIELD_EXTRINSIC_TYPES.includes(extrinsicType);
     const isPoolSupportAlternativeFee = yieldPoolInfo.feeAssets.length > 1;
+    const chainInfo = this.#koniState.getChainInfo(yieldPoolInfo.chain);
 
     return await this.#koniState.transactionService.handleTransaction({
       address,
@@ -3935,7 +3936,7 @@ export default class KoniExtension {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: txData,
       extrinsicType, // change this depends on step
-      chainType: ChainType.SUBSTRATE,
+      chainType: _isChainEvmCompatible(chainInfo) ? ChainType.EVM : ChainType.SUBSTRATE,
       resolveOnDone: !isLastStep,
       transferNativeAmount,
       skipFeeValidation: isMintingStep && isPoolSupportAlternativeFee

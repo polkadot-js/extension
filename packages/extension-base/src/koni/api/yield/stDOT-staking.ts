@@ -161,7 +161,7 @@ export async function generatePathForStellaswapLiquidStaking (params: OptimalYie
 }
 
 export async function getStellaswapLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): Promise<HandleYieldStepData> {
-  const evmApi = params.evmApiMap[params.poolInfo.slug];
+  const evmApi = params.evmApiMap[params.poolInfo.chain];
 
   const derivativeTokenSlug = params.poolInfo.derivativeAssets?.[0] || '';
   const derivativeTokenInfo = params.assetInfoMap[derivativeTokenSlug];

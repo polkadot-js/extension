@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, SocialGroup } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useDefaultNavigate, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
@@ -35,9 +35,11 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   return (
     <Layout.Base
       className={CN(className)}
+      onBack={goHome}
       rightFooterButton={!isWebUI ? footerBtn : undefined}
-      showBackButton={false}
+      showBackButton={isWebUI}
       subHeaderPaddingVertical={true}
+      title={isWebUI ? t('Page not found') : undefined}
     >
       <div className='title'>
         <div className='title-text'>4</div>
@@ -52,12 +54,15 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       {
         isWebUI &&
           (
-            <div className='button-container'>
-              <Button
-                block={true}
-                {...footerBtn}
-              />
-            </div>
+            <>
+              <div className='button-container'>
+                <Button
+                  block={true}
+                  {...footerBtn}
+                />
+              </div>
+              <SocialGroup className={'social-group'} />
+            </>
           )
       }
     </Layout.Base>
@@ -73,6 +78,12 @@ const NotFoundContent = styled(Component)<Props>(({ theme }) => {
       flexDirection: 'column',
       alignItems: 'center',
       paddingTop: 128
+    },
+
+    '.web-ui-enable &': {
+      '.ant-sw-screen-layout-body': {
+        paddingTop: 112
+      }
     },
 
     '.ant-sw-sub-header-title-content': {
@@ -109,8 +120,8 @@ const NotFoundContent = styled(Component)<Props>(({ theme }) => {
     },
 
     '.button-container': {
-      marginTop: token.margin,
-      width: 400
+      marginTop: 44,
+      width: 358
     }
   });
 });

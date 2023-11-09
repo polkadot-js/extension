@@ -12,7 +12,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useFilterModal, usePreCheckAction, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getEarnExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { getEarnExtrinsicType, getEvmLedgerCanYield, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -223,7 +223,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
         if (currentAccount?.isHardware) {
           if (isEvmAddress) {
-            return false;
+            return getEvmLedgerCanYield(value.slug);
           } else {
             if (chain && !availableGen.includes(_getSubstrateGenesisHash(chain))) {
               return false;

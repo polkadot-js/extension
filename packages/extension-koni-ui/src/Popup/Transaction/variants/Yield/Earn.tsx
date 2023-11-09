@@ -17,7 +17,7 @@ import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/ca
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, findNetworkJsonByGenesisHash, getEarnExtrinsicType, isAccountAll, parseNominations, simpleCheckForm, transactionDefaultFilterAccount } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, findNetworkJsonByGenesisHash, getEarnExtrinsicType, getEvmLedgerCanYield, isAccountAll, parseNominations, simpleCheckForm, transactionDefaultFilterAccount } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -240,7 +240,7 @@ const Component = () => {
 
     if (isLedger) {
       if (isEvmAddress) {
-        return false;
+        return getEvmLedgerCanYield(currentPoolInfo?.slug);
       } else {
         return validLedgerNetwork.includes(currentPoolInfo?.chain);
       }

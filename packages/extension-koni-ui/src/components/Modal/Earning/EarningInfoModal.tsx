@@ -11,7 +11,7 @@ import { usePreCheckAction, useTranslation } from '@subwallet/extension-koni-ui/
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findNetworkJsonByGenesisHash, getEarnExtrinsicType, isAccountAll, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { findNetworkJsonByGenesisHash, getEarnExtrinsicType, getEvmLedgerCanYield, isAccountAll, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon, ModalContext, Number, Tooltip } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -144,16 +144,16 @@ const Component: React.FC<Props> = (props: Props) => {
       }
 
       const isLedger = !!currentAccount.isHardware;
+      const isEvmAddress = isEthereumAddress(currentAccount.address);
       const validGen: string[] = currentAccount.availableGenesisHashes || [];
       const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
 
       if (isLedger) {
-        return validLedgerNetwork.includes(pool.chain);
+        return isEvmAddress ? getEvmLedgerCanYield(pool.slug) : validLedgerNetwork.includes(pool.chain);
       }
 
       const chain = chainInfoMap[pool.chain];
       const isEvmChain = _isChainEvmCompatible(chain);
-      const isEvmAddress = isEthereumAddress(currentAccount.address);
 
       return isEvmChain === isEvmAddress;
     });

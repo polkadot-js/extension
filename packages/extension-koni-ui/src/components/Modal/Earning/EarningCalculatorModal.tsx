@@ -9,7 +9,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { usePreCheckAction } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findNetworkJsonByGenesisHash, getEarnExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { findNetworkJsonByGenesisHash, getEarnExtrinsicType, getEvmLedgerCanYield, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon, ModalContext, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
@@ -132,16 +132,16 @@ const Component = (props: Props) => {
       }
 
       const isLedger = !!currentAccount.isHardware;
+      const isEvmAddress = isEthereumAddress(currentAccount.address);
       const validGen: string[] = currentAccount.availableGenesisHashes || [];
       const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
 
       if (isLedger) {
-        return validLedgerNetwork.includes(pool.chain);
+        return isEvmAddress ? getEvmLedgerCanYield(pool.slug) : validLedgerNetwork.includes(pool.chain);
       }
 
       const chain = chainInfoMap[pool.chain];
       const isEvmChain = _isChainEvmCompatible(chain);
-      const isEvmAddress = isEthereumAddress(currentAccount.address);
 
       return isEvmChain === isEvmAddress;
     });

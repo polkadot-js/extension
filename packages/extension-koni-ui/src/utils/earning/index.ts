@@ -57,6 +57,8 @@ export const getEarnExtrinsicType = (methodSlug?: string): ExtrinsicType => {
       return ExtrinsicType.MINT_SDOT;
     case 'DOT___interlay_lending':
       return ExtrinsicType.MINT_QDOT;
+    case 'xcDOT___stellaswap_liquid_staking':
+      return ExtrinsicType.MINT_STDOT;
     case 'WND___nomination_pool':
     case 'DOT___nomination_pool':
       return ExtrinsicType.JOIN_YIELD_POOL;
@@ -75,10 +77,32 @@ export const getWithdrawExtrinsicType = (methodSlug?: string): ExtrinsicType => 
       return ExtrinsicType.REDEEM_SDOT;
     case 'DOT___interlay_lending':
       return ExtrinsicType.REDEEM_QDOT;
+    case 'xcDOT___stellaswap_liquid_staking':
+      return ExtrinsicType.REDEEM_STDOT;
     case 'WND___nomination_pool':
     case 'DOT___nomination_pool':
       return ExtrinsicType.STAKING_POOL_WITHDRAW;
     default:
       return ExtrinsicType.UNKNOWN;
+  }
+};
+
+export const getEvmLedgerCanYield = (methodSlug?: string): boolean => {
+  switch (methodSlug) {
+    case 'xcDOT___stellaswap_liquid_staking':
+    case 'xcDOT___moonwell_lending':
+      return true;
+    default:
+      return false;
+  }
+};
+
+export const getEvmLedgerCanWithdraw = (methodSlug?: string): boolean => {
+  switch (methodSlug) {
+    case 'xcDOT___stellaswap_liquid_staking':
+    case 'xcDOT___moonwell_lending':
+      return true;
+    default:
+      return false;
   }
 };

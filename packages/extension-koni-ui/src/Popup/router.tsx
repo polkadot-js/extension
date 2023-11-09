@@ -125,8 +125,6 @@ const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import
 const ConnectionList = new LazyLoader('ConnectionList', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
 const ConnectionDetail = new LazyLoader('ConnectionDetail', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
-const NotFound = new LazyLoader('NotFound', () => import('@subwallet/extension-koni-ui/Popup/NotFound'));
-
 // DApps
 
 const DApps = new LazyLoader('DApps', () => import('@subwallet/extension-koni-ui/Popup/DApps'));
@@ -306,7 +304,6 @@ export const router = createBrowserRouter([
           ConnectionDetail.generateRouterObject('detail/:topic')
         ]
       },
-      NotFound.generateRouterObject('*'),
       {
         ...EarningOutlet.generateRouterObject('earning-demo'),
         children: [

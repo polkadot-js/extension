@@ -129,7 +129,7 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
     let pooledStakingBalance = BN_ZERO;
 
     if (_isSubstrateRelayChain(chainInfo) && networkAPI.query.nominationPools) {
-      const poolMemberDatas = await networkAPI.query.nominationPools.poolMembers.multi(addresses);
+      const poolMemberDatas = await networkAPI.query.nominationPools.poolMembers?.multi(addresses);
 
       if (poolMemberDatas) {
         for (const _poolMemberData of poolMemberDatas) {

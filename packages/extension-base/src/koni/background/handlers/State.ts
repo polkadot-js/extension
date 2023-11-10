@@ -1781,10 +1781,12 @@ export default class KoniState {
 
         const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
 
-        if (assetMap[tokenKey] && !currentAssetSettings[tokenKey]?.visible) {
+        const existedKey = Object.keys(assetMap).find((v) => v.toLowerCase() === tokenKey.toLowerCase());
+
+        if (existedKey && !currentAssetSettings[existedKey]?.visible) {
           needEnableChains.push(chain);
-          needActiveTokens.push(tokenKey);
-          currentAssetSettings[tokenKey] = { visible: true };
+          needActiveTokens.push(existedKey);
+          currentAssetSettings[existedKey] = { visible: true };
         }
       });
     });

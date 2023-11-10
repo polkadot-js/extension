@@ -23,5 +23,6 @@ export const isTypeMint = (txType: ExtrinsicType) => [
   ExtrinsicType.MINT_LDOT,
   ExtrinsicType.MINT_QDOT,
   ExtrinsicType.MINT_SDOT,
-  ExtrinsicType.MINT_VDOT
+  ExtrinsicType.MINT_VDOT,
+  ExtrinsicType.MINT_STDOT
 ].includes(txType);

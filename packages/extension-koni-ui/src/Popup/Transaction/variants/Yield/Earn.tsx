@@ -247,7 +247,7 @@ const Component = () => {
     }
 
     return isEvmChain === isEvmAddress;
-  }, [chainInfoMap, currentPoolInfo.chain]);
+  }, [chainInfoMap, currentPoolInfo.chain, currentPoolInfo?.slug]);
 
   const onFieldsChange: FormCallbacks<YieldParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);

@@ -188,13 +188,13 @@ export const BLOCK_MINT_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_SDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_VDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_MINT_STDOT_LEDGER_NETWORKS: string[] = [''];
+export const BLOCK_MINT_STDOT_LEDGER_NETWORKS: string[] = ['*'];
 
 export const BLOCK_REDEEM_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_SDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_VDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_REDEEM_STDOT_LEDGER_NETWORKS: string[] = [''];
+export const BLOCK_REDEEM_STDOT_LEDGER_NETWORKS: string[] = ['*'];
 /* EARNING */
 
 /// OTHER

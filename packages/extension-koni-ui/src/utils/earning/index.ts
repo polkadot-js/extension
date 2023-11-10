@@ -91,7 +91,8 @@ export const getEvmLedgerCanYield = (methodSlug?: string): boolean => {
   switch (methodSlug) {
     case 'xcDOT___stellaswap_liquid_staking':
     case 'xcDOT___moonwell_lending':
-      return true;
+      // return true;
+    // eslint-disable-next-line no-fallthrough
     default:
       return false;
   }
@@ -101,7 +102,8 @@ export const getEvmLedgerCanWithdraw = (methodSlug?: string): boolean => {
   switch (methodSlug) {
     case 'xcDOT___stellaswap_liquid_staking':
     case 'xcDOT___moonwell_lending':
-      return true;
+      // return true;
+    // eslint-disable-next-line no-fallthrough
     default:
       return false;
   }

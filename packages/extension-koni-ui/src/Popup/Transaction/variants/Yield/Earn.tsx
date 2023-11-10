@@ -47,8 +47,6 @@ interface _YieldAssetExpectedEarning extends YieldAssetExpectedEarning {
   symbol: string;
 }
 
-const dotPolkadotSlug = 'polkadot-NATIVE-DOT';
-
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
@@ -96,16 +94,6 @@ const Component = () => {
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
   const preCheckAction = usePreCheckAction(currentFrom);
-
-  const hasXcm = useMemo(() => {
-    const chainInfo = chainInfoMap[currentPoolInfo.chain];
-
-    if (_isChainEvmCompatible(chainInfo)) {
-      return false;
-    } else {
-      return !['westend', 'polkadot'].includes(currentPoolInfo.chain);
-    }
-  }, [currentPoolInfo.chain, chainInfoMap]);
 
   const extrinsicType = useMemo(() => getEarnExtrinsicType(methodSlug), [methodSlug]);
 
@@ -401,6 +389,7 @@ const Component = () => {
     const result: Array<{ chain: string, token: string }> = [];
 
     const chain = currentPoolInfo.chain;
+    const altInputAssets = currentPoolInfo.altInputAssets || [];
 
     for (const inputAsset of currentPoolInfo.inputAssets) {
       result.push({
@@ -409,15 +398,19 @@ const Component = () => {
       });
     }
 
-    if (hasXcm) {
-      result.push({
-        token: dotPolkadotSlug,
-        chain: 'polkadot'
-      });
+    if (altInputAssets) {
+      for (const altInputAsset of altInputAssets) {
+        if (chainAsset[altInputAsset]) {
+          result.push({
+            token: altInputAsset,
+            chain: chainAsset[altInputAsset].originChain
+          });
+        }
+      }
     }
 
     return result;
-  }, [currentPoolInfo.chain, currentPoolInfo.inputAssets, hasXcm]);
+  }, [chainAsset, currentPoolInfo.altInputAssets, currentPoolInfo.chain, currentPoolInfo.inputAssets]);
 
   const onClick = useCallback(() => {
     setSubmitLoading(true);

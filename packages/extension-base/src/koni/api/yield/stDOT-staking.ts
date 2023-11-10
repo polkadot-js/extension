@@ -6,12 +6,52 @@ import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestYieldSt
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import { DEFAULT_YIELD_FIRST_STEP, getStellaswapLiquidStakingContract, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
-import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
+import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
 
-export function subscribeStellaswapLiquidStakingStats (chainApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
-  function getPoolStat () {
+const APR_STATS_URL = 'https://apr-api.stellaswap.com/api/v1/stdot';
+
+interface StellaswapApr {
+  code: number,
+  result: number,
+  isSuccess: boolean
+}
+
+export function subscribeStellaswapLiquidStakingStats (chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, evmApiMap: Record<string, _EvmApi>, poolInfo: YieldPoolInfo, callback: (rs: YieldPoolInfo) => void) {
+  const derivativeTokenSlug = poolInfo.derivativeAssets?.[0] || '';
+  const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
+
+  const stakingContract = getStellaswapLiquidStakingContract(poolInfo.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApiMap);
+
+  async function getPoolStat () {
+    const aprPromise = new Promise(function (resolve) {
+      fetch(APR_STATS_URL, {
+        method: 'GET'
+      }).then((res) => {
+        resolve(res.json());
+      }).catch(console.error);
+    });
+
+    const sampleTokenShare = 10 ** _getAssetDecimals(derivativeTokenInfo);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const tvlCall = stakingContract.methods.fundRaisedBalance();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const exchangeRateCall = stakingContract.methods.getPooledTokenByShares(sampleTokenShare);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const [aprObject, tvl, equivalentTokenShare] = await Promise.all([
+      aprPromise,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      tvlCall.call(),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      exchangeRateCall.call()
+    ]);
+
+    const exchangeRate = (equivalentTokenShare as number) / (10 ** _getAssetDecimals(derivativeTokenInfo));
+
     // eslint-disable-next-line node/no-callback-literal
     callback({
       ...poolInfo,
@@ -19,22 +59,22 @@ export function subscribeStellaswapLiquidStakingStats (chainApi: _SubstrateApi, 
         assetEarning: [
           {
             slug: poolInfo.rewardAssets[0],
-            apr: 18.4,
-            exchangeRate: 1 / 0.997
+            apr: (aprObject as StellaswapApr).result,
+            exchangeRate: exchangeRate
           }
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '10000000000',
+        minJoinPool: '0',
         minWithdrawal: '0',
-        totalApr: 18.4,
-        tvl: '0'
+        totalApr: (aprObject as StellaswapApr).result,
+        tvl: (tvl as number).toString()
       }
     });
   }
 
   function getStatInterval () {
-    getPoolStat();
+    getPoolStat().catch(console.error);
   }
 
   getStatInterval();
@@ -211,8 +251,4 @@ export function getStellaswapLiquidStakingExtrinsic (address: string, params: Op
     txData: requestData,
     transferNativeAmount: '0'
   };
-}
-
-export async function getStellaswapLiquidStakingRedeem () {
-
 }

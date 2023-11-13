@@ -168,16 +168,15 @@ export function getNativeStakingPosition (substrateApi: _SubstrateApi, useAddres
         const ledger = _ledger.toPrimitive() as unknown as PalletStakingStakingLedger;
 
         if (ledger) {
-          const _totalBalance = ledger.total.toString();
           const _activeBalance = ledger.active.toString();
 
           const nominatorMetadata = await subscribeRelayChainNominatorMetadata(chainInfo, owner, substrateApi, ledger);
 
           positionCallback({
+            type: YieldPoolType.NATIVE_STAKING,
             balance: [
               {
                 slug: nativeTokenSlug,
-                totalBalance: _totalBalance,
                 activeBalance: _activeBalance
               }
             ],
@@ -214,14 +213,14 @@ export function getNominationPoolPosition (substrateApi: _SubstrateApi, useAddre
             unlockingBalance = unlockingBalance.add(bnUnbondedBalance);
           });
 
-          const totalBalance = bnBondedBalance.add(unlockingBalance);
+          // const totalBalance = bnBondedBalance.add(unlockingBalance);
           const nominatorMetadata = await subscribeRelayChainPoolMemberMetadata(chainInfo, owner, substrateApi, poolMemberInfo);
 
           positionCallback({
+            type: YieldPoolType.NOMINATION_POOL,
             balance: [
               {
                 slug: nativeTokenSlug,
-                totalBalance: totalBalance.toString(),
                 activeBalance: bnBondedBalance.toString()
               }
             ],
@@ -232,10 +231,10 @@ export function getNominationPoolPosition (substrateApi: _SubstrateApi, useAddre
           });
         } else {
           positionCallback({
+            type: YieldPoolType.NOMINATION_POOL,
             balance: [
               {
                 slug: nativeTokenSlug,
-                totalBalance: '0',
                 activeBalance: '0'
               }
             ],

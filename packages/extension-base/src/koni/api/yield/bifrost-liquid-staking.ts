@@ -155,10 +155,7 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
       activeBalanceMap[formattedAddress] = balanceItem.free || BN_ZERO;
 
       const _unlockLedger = _unlockLedgerList[i];
-      console.log('_unlockLedger', _unlockLedger);
       const unlockLedger = _unlockLedger.toPrimitive();
-
-      console.log('unlockLedger', unlockLedger);
 
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -224,8 +221,6 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
           } as UnstakingInfo);
         });
       }
-
-      console.log('still callback');
 
       positionCallback({
         slug: poolInfo.slug,

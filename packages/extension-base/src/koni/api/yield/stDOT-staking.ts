@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestYieldStepSubmit, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestYieldStepSubmit, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import { DEFAULT_YIELD_FIRST_STEP, getStellaswapLiquidStakingContract, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
@@ -99,11 +99,11 @@ export function getStellaswapLiquidStakingPosition (evmApiMap: Record<string, _E
       positionCallback({
         slug: poolInfo.slug,
         chain: poolInfo.chain,
+        type: YieldPoolType.LIQUID_STAKING,
         address,
         balance: [
           {
             slug: derivativeTokenSlug, // token slug
-            totalBalance: balance,
             activeBalance: balance
           }
         ],

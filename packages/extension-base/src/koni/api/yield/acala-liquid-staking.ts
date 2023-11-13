@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, TokenBalanceRaw, UnbondingSubmitParams, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, TokenBalanceRaw, UnbondingSubmitParams, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
@@ -157,11 +157,11 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
       positionCallback({
         slug: poolInfo.slug,
         chain: chainInfo.slug,
+        type: YieldPoolType.LIQUID_STAKING,
         address,
         balance: [
           {
             slug: derivativeTokenSlug, // token slug
-            totalBalance: activeBalance.toString(),
             activeBalance: activeBalance.toString()
           }
         ],

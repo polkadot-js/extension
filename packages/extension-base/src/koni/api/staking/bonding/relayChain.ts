@@ -120,7 +120,7 @@ export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: st
 export function subscribeRelayChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
   return substrateApi.api.query.staking.currentEra(async (_currentEra: Codec) => {
     const currentEra = _currentEra.toString();
-    const maxNominations = substrateApi.api.consts.staking.maxNominations.toString();
+    const maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16'; // TODO
     const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
     const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 

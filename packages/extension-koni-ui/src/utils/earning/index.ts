@@ -108,3 +108,21 @@ export const getEvmLedgerCanWithdraw = (methodSlug?: string): boolean => {
       return false;
   }
 };
+
+export const getUnstakeExtrinsicType = (methodSlug?: string): ExtrinsicType => {
+  switch (methodSlug) {
+    case 'DOT___acala_liquid_staking':
+      return ExtrinsicType.UNSTAKE_LDOT;
+    case 'DOT___bifrost_liquid_staking':
+      return ExtrinsicType.UNSTAKE_VDOT;
+    case 'DOT___parallel_liquid_staking':
+      return ExtrinsicType.UNSTAKE_SDOT;
+    case 'DOT___interlay_lending':
+      return ExtrinsicType.UNSTAKE_QDOT;
+    case 'WND___nomination_pool':
+    case 'DOT___nomination_pool':
+      return ExtrinsicType.STAKING_LEAVE_POOL;
+    default:
+      return ExtrinsicType.UNKNOWN;
+  }
+};

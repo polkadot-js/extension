@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, TokenBalanceRaw, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, TokenBalanceRaw, UnbondingSubmitParams, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
@@ -152,7 +152,7 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
     for (let i = 0; i < balances.length; i++) {
       const balanceItem = balances[i];
       const address = useAddresses[i];
-      const totalBalance = balanceItem.free || BN_ZERO;
+      const activeBalance = balanceItem.free || BN_ZERO;
 
       positionCallback({
         slug: poolInfo.slug,
@@ -161,14 +161,21 @@ export function getAcalaLiquidStakingPosition (substrateApi: _SubstrateApi, useA
         balance: [
           {
             slug: derivativeTokenSlug, // token slug
-            totalBalance: totalBalance.toString(),
-            activeBalance: totalBalance.toString()
+            totalBalance: activeBalance.toString(),
+            activeBalance: activeBalance.toString()
           }
         ],
 
         metadata: {
-          rewards: []
-        } as YieldPositionStats
+          chain: chainInfo.slug,
+          type: StakingType.LIQUID_STAKING,
+
+          status: StakingStatus.EARNING_REWARD,
+          address,
+          activeStake: activeBalance.toString(),
+          nominations: [],
+          unstakings: []
+        } as NominatorMetadata
       } as YieldPositionInfo);
     }
   });
@@ -263,4 +270,10 @@ export async function getAcalaLiquidStakingRedeem (params: OptimalYieldPathParam
   );
 
   return [ExtrinsicType.REDEEM_LDOT, extrinsic];
+}
+
+export async function getAcalaLiquidStakingDefaultUnstake (params: UnbondingSubmitParams, substrateApi: _SubstrateApi): Promise<SubmittableExtrinsic<'promise'>> {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.homa.requestRedeem(params.amount, false);
 }

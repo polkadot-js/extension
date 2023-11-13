@@ -3,7 +3,21 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  ExtrinsicType,
+  NominatorMetadata,
+  OptimalYieldPath,
+  OptimalYieldPathParams,
+  RequestCrossChainTransfer,
+  RequestYieldStepSubmit,
+  StakingStatus,
+  StakingType,
+  SubmitYieldStepData,
+  UnbondingSubmitParams,
+  YieldPoolInfo,
+  YieldPositionInfo,
+  YieldStepType
+} from '@subwallet/extension-base/background/KoniTypes';
 import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
@@ -121,8 +135,15 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
         ],
 
         metadata: {
-          rewards: []
-        } as YieldPositionStats
+          chain: chainInfo.slug,
+          type: StakingType.LIQUID_STAKING,
+
+          status: StakingStatus.EARNING_REWARD,
+          address,
+          activeStake: addressBalance.toString(),
+          nominations: [],
+          unstakings: []
+        } as NominatorMetadata
       } as YieldPositionInfo);
     }
   });
@@ -202,4 +223,10 @@ export async function getParallelLiquidStakingRedeem (params: OptimalYieldPathPa
   const extrinsic = substrateApi.api.tx.ammRoute.swapExactTokensForTokens(['1001', '101'], amount, formattedMinAmount);
 
   return [ExtrinsicType.REDEEM_SDOT, extrinsic];
+}
+
+export async function getParallelLiquidStakingDefaultUnstake (params: UnbondingSubmitParams, substrateApi: _SubstrateApi): Promise<SubmittableExtrinsic<'promise'>> {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.liquidStaking.unstake(params.amount, 'RelayChain');
 }

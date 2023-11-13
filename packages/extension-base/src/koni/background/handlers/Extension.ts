@@ -22,7 +22,7 @@ import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, getRelayPools
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { generateNaiveOptimalPath, handleYieldRedeem, handleYieldStep, validateYieldProcess } from '@subwallet/extension-base/koni/api/yield';
+import { generateNaiveOptimalPath, handleLiquidStakingDefaultUnstake, handleYieldRedeem, handleYieldStep, validateYieldProcess } from '@subwallet/extension-base/koni/api/yield';
 import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
@@ -4060,12 +4060,12 @@ export default class KoniExtension {
   }
 
   private async yieldSubmitUnstaking (inputData: RequestUnbondingSubmit): Promise<SWTransactionResponse> {
-    const { amount, chain, nominatorMetadata, validatorAddress } = inputData;
+    const { amount, chain, isLiquidStaking, nominatorMetadata, validatorAddress } = inputData;
 
-    const yieldPoolInfo = await this.#koniState.getYieldPoolStakingInfo(chain, YieldPoolType.NATIVE_STAKING);
+    const yieldPoolInfo = await this.#koniState.getYieldPoolStakingInfo(chain, isLiquidStaking ? YieldPoolType.LIQUID_STAKING : YieldPoolType.NATIVE_STAKING);
     const chainStakingMetadata = yieldPoolInfo?.metadata as ChainStakingMetadata;
 
-    if (!chainStakingMetadata || !nominatorMetadata) {
+    if (!isLiquidStaking && (!chainStakingMetadata || !nominatorMetadata)) {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
 
@@ -4076,7 +4076,15 @@ export default class KoniExtension {
     }
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
-    const extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
+    let extrinsic;
+
+    if (isLiquidStaking && yieldPoolInfo) {
+      extrinsic = await handleLiquidStakingDefaultUnstake(inputData, this.#koniState.getSubstrateApiMap(), yieldPoolInfo, this.#koniState.getAssetRegistry());
+    } else {
+      extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
+    }
+
+    console.log('extrinsic', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,

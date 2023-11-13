@@ -20,13 +20,15 @@ const combineYieldPositionStats = (array: YieldPositionStats[]): YieldPositionSt
   };
 
   for (const info of array) {
-    for (const reward of info.rewards) {
-      const slug = reward.slug;
+    if (info.rewards) {
+      for (const reward of info.rewards) {
+        const slug = reward.slug;
 
-      if (rewardMap[slug]) {
-        rewardMap[slug].push(reward);
-      } else {
-        rewardMap[slug] = [reward];
+        if (rewardMap[slug]) {
+          rewardMap[slug].push(reward);
+        } else {
+          rewardMap[slug] = [reward];
+        }
       }
     }
   }

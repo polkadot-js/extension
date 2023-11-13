@@ -9,7 +9,7 @@ import { EXCLUSIVE_REWARD_SLUGS, ExclusiveRewardContentMap } from '@subwallet/ex
 import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getEarnExtrinsicType, getWithdrawExtrinsicType, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { getEarnExtrinsicType, getUnstakeExtrinsicType, getWithdrawExtrinsicType, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Logo, Number, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { DotsThree, MinusCircle, PlusCircle, PlusMinus, Question, StopCircle, Wallet } from 'phosphor-react';
@@ -84,7 +84,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return yieldPositionInfo.balance[0];
     }
 
-    const derivativeTokenBalance = yieldPositionInfo.balance[0].totalBalance;
+    const derivativeTokenBalance = yieldPositionInfo.balance[0].activeBalance;
     const inputTokenSlug = yieldPoolInfo.inputAssets[0];
     // @ts-ignore
     const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 1;
@@ -92,8 +92,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return {
       activeBalance: inputTokenBalance.toString(),
-      slug: inputTokenSlug,
-      totalBalance: inputTokenBalance.toString()
+      slug: inputTokenSlug
     };
   }, [yieldPoolInfo.derivativeAssets, yieldPoolInfo.inputAssets, yieldPoolInfo?.stats?.assetEarning, yieldPositionInfo.balance]);
 
@@ -233,7 +232,7 @@ const Component: React.FC<Props> = (props: Props) => {
           break;
         case YieldAction.UNSTAKE:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickUnStakeBtn, ExtrinsicType.STAKING_LEAVE_POOL);
+          temp.onClick = onClickButton(onClickUnStakeBtn, getUnstakeExtrinsicType(slug));
           temp.label = !compact ? t('Unstake') : undefined;
           temp.tooltip = compact ? t('Unstake') : undefined;
           temp.schema = 'secondary';
@@ -265,7 +264,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return {
       symbol: _getAssetSymbol(derivativeTokenInfo),
       decimals: _getAssetDecimals(derivativeTokenInfo),
-      amount: yieldPositionInfo.balance[0].totalBalance
+      amount: yieldPositionInfo.balance[0].activeBalance
     };
   }, [assetRegistry, yieldPoolInfo.derivativeAssets, yieldPositionInfo.balance]);
 
@@ -321,7 +320,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   decimalOpacity={0.4}
                   suffix={inputTokenInfo ? inputTokenInfo.symbol : ''}
                   unitOpacity={0.4}
-                  value={yieldPositionInfoBalance.totalBalance}
+                  value={yieldPositionInfoBalance.activeBalance}
                 />
               </div>
             </div>
@@ -515,7 +514,7 @@ const Component: React.FC<Props> = (props: Props) => {
               size={30}
               suffix={inputTokenInfo ? inputTokenInfo.symbol : ''}
               unitOpacity={0.4}
-              value={yieldPositionInfoBalance.totalBalance} // TODO
+              value={yieldPositionInfoBalance.activeBalance} // TODO
             />
           </div>
         </div>

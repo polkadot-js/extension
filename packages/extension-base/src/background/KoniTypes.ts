@@ -135,6 +135,7 @@ export interface RejectResolver {
 export enum StakingType {
   NOMINATED = 'nominated',
   POOLED = 'pooled',
+  LIQUID_STAKING = 'liquid_staking'
 }
 
 export interface StakingRewardItem {
@@ -513,6 +514,11 @@ export enum ExtrinsicType {
   REDEEM_LDOT = 'earn.redeem_ldot',
   REDEEM_SDOT = 'earn.redeem_sdot',
   REDEEM_STDOT = 'earn.redeem_stdot',
+
+  UNSTAKE_QDOT = 'earn.unstake_qdot',
+  UNSTAKE_VDOT = 'earn.unstake_vdot',
+  UNSTAKE_LDOT = 'earn.unstake_ldot',
+  UNSTAKE_SDOT = 'earn.unstake_sdot',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -1658,9 +1664,12 @@ export type RequestBondingSubmit = InternalRequestSign<BondingSubmitParams>;
 export interface UnbondingSubmitParams extends BaseRequestSign {
   amount: string,
   chain: string,
+
   nominatorMetadata: NominatorMetadata,
   // for some chains
   validatorAddress?: string
+
+  isLiquidStaking?: boolean
 }
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
@@ -2144,13 +2153,13 @@ export interface YieldPoolInfo {
 
 export interface YieldAssetBalance {
   slug: string, // token slug
-  totalBalance: string,
   activeBalance: string,
   exchangeRate?: number
 }
 
 export interface YieldPositionInfo {
   slug: string,
+  type: YieldPoolType,
   chain: string,
   address: string,
   balance: YieldAssetBalance[],
@@ -2163,8 +2172,7 @@ export type YieldPoolMetadata = ChainStakingMetadata;
 export type YieldPositionMetadata = NominatorMetadata | YieldPositionStats;
 
 export interface YieldPositionStats {
-  rewards: YieldTokenBaseInfo[],
-  initialExchangeRate?: number
+  rewards: YieldTokenBaseInfo[]
 }
 
 export interface OptimalYieldPathRequest {

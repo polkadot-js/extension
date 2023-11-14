@@ -25,7 +25,7 @@ import { Registry } from '@polkadot/types/types';
 import { BN, formatBalance } from '@polkadot/util';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
 
-import { default as goldbergSpec } from './chain-spec/goldberg';
+import goldbergSpec from './chain-spec/goldberg';
 
 export class SubstrateApi implements _SubstrateApi {
   chainSlug: string;

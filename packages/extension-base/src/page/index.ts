@@ -84,5 +84,16 @@ export function handleResponse<TMessageType extends MessageTypes> (data: Transpo
 }
 
 export function initEvmProvider (version: string): EvmProvider {
-  return new SubWalletEvmProvider(sendMessage, version);
+  const provider = new SubWalletEvmProvider(sendMessage, version);
+
+  return new Proxy(provider, {
+    // TODO: Please review the security of this
+    get (target, key) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+      return Reflect.get(target, key).bind(target);
+    },
+    deleteProperty () {
+      return true;
+    }
+  });
 }

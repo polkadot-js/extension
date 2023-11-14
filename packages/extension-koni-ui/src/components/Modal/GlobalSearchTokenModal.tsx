@@ -3,6 +3,7 @@
 
 import { BaseModal, TokenBalanceSelectionItem, TokenEmptyList } from '@subwallet/extension-koni-ui/components';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useChainAssets } from '@subwallet/extension-koni-ui/hooks/assets';
 import { AccountBalanceHookType, ThemeProps, TokenBalanceItemType, TokenGroupHookType } from '@subwallet/extension-koni-ui/types';
 import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { SwList } from '@subwallet/react-ui';
@@ -36,7 +37,8 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
   const navigate = useNavigate();
 
   const { chainInfoMap } = useSelector((state) => state.chainStore);
-  const { assetRegistry, multiChainAssetMap } = useSelector((state) => state.assetRegistry);
+  const { multiChainAssetMap } = useSelector((state) => state.assetRegistry);
+  const assetRegistry = useChainAssets({ isActive: true }).chainAssetRegistry;
 
   const tokenBalances = useMemo<TokenBalanceItemType[]>(() => {
     return getTokenBalances(tokenBalanceMap, sortedTokenSlugs).sort(sortTokenByValue);

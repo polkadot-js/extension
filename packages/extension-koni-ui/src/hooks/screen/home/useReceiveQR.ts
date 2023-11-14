@@ -8,6 +8,7 @@ import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-ba
 import { _getMultiChainAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelectorModalId } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { useChainAssets } from '@subwallet/extension-koni-ui/hooks/assets';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { findAccountByAddress, isAccountAll as checkIsAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
@@ -64,7 +65,7 @@ function isMantaPayEnabled (account: AccountJson | null, configs: MantaPayConfig
 export default function useReceiveQR (tokenGroupSlug?: string) {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
-  const { assetRegistry: assetRegistryMap } = useSelector((root: RootState) => root.assetRegistry);
+  const assetRegistryMap = useChainAssets().chainAssetRegistry;
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const [tokenSelectorItems, setTokenSelectorItems] = useState<_ChainAsset[]>([]);
   const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(

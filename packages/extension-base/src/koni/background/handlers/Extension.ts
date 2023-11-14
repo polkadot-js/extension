@@ -3072,7 +3072,7 @@ export default class KoniExtension {
 
       const [, chainInfo] = this.#koniState.findNetworkKeyByGenesisHash(payload.genesisHash);
 
-      if (chainInfo && _API_OPTIONS_CHAIN_GROUP.avail.includes(chainInfo.slug)) {
+      if (chainInfo && (_API_OPTIONS_CHAIN_GROUP.avail.includes(chainInfo.slug) || _API_OPTIONS_CHAIN_GROUP.goldberg.includes(chainInfo.slug))) {
         const isChainActive = this.#koniState.getChainStateByKey(chainInfo.slug).active;
 
         if (!isChainActive) {

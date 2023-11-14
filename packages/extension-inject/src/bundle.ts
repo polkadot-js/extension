@@ -57,6 +57,7 @@ export function injectEvmExtension (evmProvider: EvmProvider): void {
 }
 
 export const inject6963EIP = (provider: EvmProvider) => {
+  // TODO: Need to confirm that infomation
   const info: EIP6963ProviderInfo = {
     uuid: '10c67337-9211-48d9-aab0-cecdc4224acc',
     name: 'SubWallet',
@@ -66,9 +67,20 @@ export const inject6963EIP = (provider: EvmProvider) => {
 
   let injected = false;
 
+  const _provider = new Proxy(provider, {
+    // TODO: Please review the security of this
+    get (target, key) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+      return Reflect.get(target, key).bind(target);
+    },
+    deleteProperty () {
+      return true;
+    }
+  });
+
   const announceProvider = () => {
     if (!injected) {
-      const detail: EIP6963ProviderDetail = Object.freeze({ info: info, provider: provider });
+      const detail: EIP6963ProviderDetail = Object.freeze({ info: info, provider: _provider });
       const event = new CustomEvent('eip6963:announceProvider', { detail });
 
       window.dispatchEvent(event);

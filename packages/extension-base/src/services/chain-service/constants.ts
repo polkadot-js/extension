@@ -12,7 +12,8 @@ export const API_MAX_RETRY = 2;
 export const _API_OPTIONS_CHAIN_GROUP = {
   acala: ['acala', 'karura', 'origintrail', 'kintsugi'],
   turing: ['turingStaging', 'turing'],
-  avail: ['kate', 'goldberg_testnet']
+  avail: ['kate'],
+  goldberg: ['goldberg_testnet'],
 };
 
 export const _PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {

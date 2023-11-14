@@ -627,6 +627,7 @@ export type TransactionAdditionalInfo = {
   [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_STDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
+  [ExtrinsicType.STAKING_UNBOND]: Pick<SubmitYieldStepData, 'inputTokenSlug' | 'exchangeRate'>
 }
 
 // export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
@@ -1669,7 +1670,10 @@ export interface UnbondingSubmitParams extends BaseRequestSign {
   // for some chains
   validatorAddress?: string
 
-  isLiquidStaking?: boolean
+  isLiquidStaking?: boolean,
+  derivativeTokenInfo?: _ChainAsset,
+  exchangeRate?: number,
+  inputTokenInfo?: _ChainAsset
 }
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;

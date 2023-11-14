@@ -34,8 +34,7 @@ export default class YieldPositionStore extends BaseStore<YieldPositionInfo> {
       if (item.type === YieldPoolType.LIQUID_STAKING) {
         const nominatorMetadata = item.metadata as NominatorMetadata;
 
-        if (nominatorMetadata.unstakings.length > 0) {
-          console.log('true', item);
+        if (nominatorMetadata && nominatorMetadata?.unstakings?.length > 0) {
           isValidLiquidStaking = true;
         }
       }

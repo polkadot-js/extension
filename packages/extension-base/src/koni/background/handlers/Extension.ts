@@ -3987,8 +3987,6 @@ export default class KoniExtension {
     return getRelayPoolsInfo(yieldPoolInfo.chain, substrateApi);
   }
 
-  // TODO: subscribe YieldPosition
-
   private async subscribeYieldPosition (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(yield.subscribeYieldPosition)'>(id, port);
 
@@ -4064,11 +4062,13 @@ export default class KoniExtension {
 
     const yieldPoolInfo = await this.#koniState.getYieldPoolStakingInfo(chain, isLiquidStaking ? YieldPoolType.LIQUID_STAKING : YieldPoolType.NATIVE_STAKING);
     const chainStakingMetadata = yieldPoolInfo?.metadata as ChainStakingMetadata;
+    const chainInfo = this.#koniState.getChainInfo(chain);
 
     if (!isLiquidStaking && (!chainStakingMetadata || !nominatorMetadata)) {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
 
+    // TODO
     const unbondingValidation = validateUnbondingCondition(nominatorMetadata, amount, chain, chainStakingMetadata, validatorAddress);
 
     if (!amount || unbondingValidation.length > 0) {
@@ -4079,12 +4079,10 @@ export default class KoniExtension {
     let extrinsic;
 
     if (isLiquidStaking && yieldPoolInfo) {
-      extrinsic = await handleLiquidStakingDefaultUnstake(inputData, this.#koniState.getSubstrateApiMap(), yieldPoolInfo, this.#koniState.getAssetRegistry());
+      extrinsic = await handleLiquidStakingDefaultUnstake(inputData, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), yieldPoolInfo, this.#koniState.getAssetRegistry());
     } else {
       extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
     }
-
-    console.log('extrinsic', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
@@ -4092,7 +4090,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_UNBOND,
-      chainType: ChainType.SUBSTRATE
+      chainType: _isChainEvmCompatible(chainInfo) ? ChainType.EVM : ChainType.SUBSTRATE
     });
   }
 

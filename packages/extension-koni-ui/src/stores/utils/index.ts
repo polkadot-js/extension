@@ -311,7 +311,6 @@ export const updateYieldPoolInfo = (data: YieldPoolInfo[]) => {
 export const subscribeYieldPoolInfo = lazySubscribeMessage('pri(yield.subscribePoolInfo)', null, updateYieldPoolInfo, updateYieldPoolInfo);
 
 export const updateYieldPositionInfo = (data: YieldPositionInfo[]) => {
-  console.log('data', data);
   store.dispatch({ type: 'yieldPoolInfo/updateYieldPositionInfo', payload: data });
 };
 

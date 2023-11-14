@@ -489,8 +489,21 @@ export default class TransactionService {
         {
           const data = parseTransactionData<ExtrinsicType.STAKING_UNBOND>(transaction.data);
 
-          historyItem.to = data.validatorAddress || '';
-          historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
+          if (data.isLiquidStaking && data.derivativeTokenInfo && data.exchangeRate && data.inputTokenInfo) {
+            historyItem.amount = {
+              decimals: _getAssetDecimals(data.derivativeTokenInfo),
+              symbol: _getAssetSymbol(data.derivativeTokenInfo),
+              value: data.amount
+            };
+
+            historyItem.additionalInfo = {
+              inputTokenSlug: data.inputTokenInfo.slug,
+              exchangeRate: data.exchangeRate
+            } as TransactionAdditionalInfo[ExtrinsicType.STAKING_UNBOND];
+          } else {
+            historyItem.to = data.validatorAddress || '';
+            historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
+          }
         }
 
         break;

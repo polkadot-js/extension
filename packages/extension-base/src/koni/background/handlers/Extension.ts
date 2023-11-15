@@ -4101,8 +4101,8 @@ export default class KoniExtension {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
-    const dotSamaApi = this.#koniState.getSubstrateApi(chain);
-    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, chain, nominatorMetadata, validatorAddress);
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getWithdrawalExtrinsic(substrateApi, chain, nominatorMetadata, validatorAddress);
 
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,

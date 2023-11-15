@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestYieldStepSubmit, StakingStatus, StakingType, UnbondingSubmitParams, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestYieldStepSubmit, StakingStatus, StakingType, UnbondingSubmitParams, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import { DEFAULT_YIELD_FIRST_STEP, getStellaswapLiquidStakingContract, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
-import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
-import { SubmittableExtrinsic } from '@polkadot/api/types';
 
 const APR_STATS_URL = 'https://apr-api.stellaswap.com/api/v1/stdot';
 
@@ -18,6 +17,11 @@ interface StellaswapApr {
   code: number,
   result: number,
   isSuccess: boolean
+}
+
+interface StellaswapUnbonding {
+  unbonded: string,
+  waiting: string
 }
 
 const MAX_INT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
@@ -92,12 +96,31 @@ export function subscribeStellaswapLiquidStakingStats (chainInfoMap: Record<stri
 export function getStellaswapLiquidStakingPosition (evmApiMap: Record<string, _EvmApi>, useAddresses: string[], poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, positionCallback: (rs: YieldPositionInfo) => void) {
   const derivativeTokenSlug = poolInfo.derivativeAssets?.[0] || '';
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
-  const contract = getERC20Contract(poolInfo.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApiMap);
+  const contract = getStellaswapLiquidStakingContract(poolInfo.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApiMap);
 
   function getTokenBalance () {
     useAddresses.map(async (address) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const balance = (await contract.methods.balanceOf(address).call()) as string;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const unbondedObject = (await contract.methods.getUnbonded(address).call()) as StellaswapUnbonding;
+      const unstakings: UnstakingInfo[] = [];
+
+      if (parseInt(unbondedObject.unbonded) > 0) {
+        unstakings.push({
+          chain: poolInfo.chain,
+          claimable: unbondedObject.unbonded,
+          status: UnstakingStatus.CLAIMABLE
+        });
+      }
+
+      if (parseInt(unbondedObject.waiting) > 0) {
+        unstakings.push({
+          chain: poolInfo.chain,
+          claimable: unbondedObject.waiting,
+          status: UnstakingStatus.UNLOCKING
+        });
+      }
 
       positionCallback({
         slug: poolInfo.slug,
@@ -119,7 +142,7 @@ export function getStellaswapLiquidStakingPosition (evmApiMap: Record<string, _E
           address,
           activeStake: balance,
           nominations: [],
-          unstakings: []
+          unstakings
         } as NominatorMetadata
       } as YieldPositionInfo);
     });
@@ -279,5 +302,24 @@ export function getStellaswapLiquidStakingDefaultUnstake (params: UnbondingSubmi
     from: params.nominatorMetadata.address,
     to: _getContractAddressOfToken(derivativeTokenInfo),
     data: redeemEncodedCall
+  } as TransactionConfig;
+}
+
+export function getStellaswapLiquidStakingDefaultWithdraw (poolInfo: YieldPoolInfo, evmApiMap: Record<string, _EvmApi>, nominatorMetadata: NominatorMetadata, assetInfoMap: Record<string, _ChainAsset>) {
+  const derivativeTokenSlug = poolInfo.derivativeAssets?.[0] || '';
+  const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
+
+  const stakingContract = getStellaswapLiquidStakingContract(poolInfo.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApiMap);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+  const claimUnbondedCall = stakingContract.methods.claimUnbonded();
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+  const claimUnbondedEncodedCall = claimUnbondedCall.encodeABI() as string;
+
+  return {
+    from: nominatorMetadata.address,
+    to: _getContractAddressOfToken(derivativeTokenInfo),
+    data: claimUnbondedEncodedCall
   } as TransactionConfig;
 }

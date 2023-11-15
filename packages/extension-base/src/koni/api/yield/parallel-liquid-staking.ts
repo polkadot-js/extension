@@ -216,3 +216,9 @@ export async function getParallelLiquidStakingDefaultUnstake (params: UnbondingS
 
   return chainApi.api.tx.liquidStaking.unstake(params.amount, 'RelayChain');
 }
+
+export async function getParallelLiquidStakingDefaultWithdraw (nominatorMetadata: NominatorMetadata, substrateApi: _SubstrateApi): Promise<SubmittableExtrinsic<'promise'>> {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.liquidStaking.unstake({ Id: nominatorMetadata.address });
+}

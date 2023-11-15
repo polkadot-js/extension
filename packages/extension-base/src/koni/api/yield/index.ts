@@ -3,24 +3,18 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnbondingSubmitParams, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnbondingSubmitParams, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { validatePoolBondingCondition, validateRelayBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { getAcalaLiquidStakingDefaultUnstake, getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLcDOTLiquidStakingStats, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acala-liquid-staking';
+import { getAcalaLiquidStakingDefaultUnstake, getAcalaLiquidStakingDefaultWithdraw, getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLcDOTLiquidStakingStats, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acala-liquid-staking';
 import { getBifrostLiquidStakingDefaultUnstake, getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingPosition, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrost-liquid-staking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { getInterlayLendingExtrinsic, getInterlayLendingPosition, getInterlayLendingRedeem, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlay-lending';
 import { subscribeMoonwellLendingStats } from '@subwallet/extension-base/koni/api/yield/moonwell-lending';
 import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/native-staking';
-import { getParallelLiquidStakingDefaultUnstake, getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallel-liquid-staking';
-import {
-  generatePathForStellaswapLiquidStaking,
-  getStellaswapLiquidStakingDefaultUnstake,
-  getStellaswapLiquidStakingExtrinsic,
-  getStellaswapLiquidStakingPosition,
-  subscribeStellaswapLiquidStakingStats
-} from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
+import { getParallelLiquidStakingDefaultUnstake, getParallelLiquidStakingDefaultWithdraw, getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallel-liquid-staking';
+import { generatePathForStellaswapLiquidStaking, getStellaswapLiquidStakingDefaultUnstake, getStellaswapLiquidStakingDefaultWithdraw, getStellaswapLiquidStakingExtrinsic, getStellaswapLiquidStakingPosition, subscribeStellaswapLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -559,4 +553,14 @@ export async function handleLiquidStakingDefaultUnstake (params: UnbondingSubmit
   }
 
   return getBifrostLiquidStakingDefaultUnstake(params, substrateApiMap[params.chain], poolInfo, assetInfoMap);
+}
+
+export async function handleLiquidStakingDefaultWithdraw (poolInfo: YieldPoolInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, nominatorMetadata: NominatorMetadata, assetInfoMap: Record<string, _ChainAsset>): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
+  if (poolInfo.chain === 'parallel') {
+    return getParallelLiquidStakingDefaultWithdraw(nominatorMetadata, substrateApiMap[poolInfo.chain]);
+  } else if (poolInfo.chain === 'moonbeam' && poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+    return getStellaswapLiquidStakingDefaultWithdraw(poolInfo, evmApiMap, nominatorMetadata, assetInfoMap);
+  }
+
+  return getAcalaLiquidStakingDefaultWithdraw(nominatorMetadata, substrateApiMap[poolInfo.chain]);
 }

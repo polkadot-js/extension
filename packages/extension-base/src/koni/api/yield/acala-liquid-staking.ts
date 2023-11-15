@@ -277,3 +277,9 @@ export async function getAcalaLiquidStakingDefaultUnstake (params: UnbondingSubm
 
   return chainApi.api.tx.homa.requestRedeem(params.amount, false);
 }
+
+export async function getAcalaLiquidStakingDefaultWithdraw (nominatorMetadata: NominatorMetadata, substrateApi: _SubstrateApi): Promise<SubmittableExtrinsic<'promise'>> {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.homa.claimRedemption(nominatorMetadata.address);
+}

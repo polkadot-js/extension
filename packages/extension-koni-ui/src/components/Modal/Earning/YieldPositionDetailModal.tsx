@@ -1,24 +1,27 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldCompoundingPeriod, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, YieldCompoundingPeriod, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { getYieldAvailableActionsByPosition, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, FAST_WITHDRAW_YIELD_TRANSACTION, StakingStatusUi, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, StakingStatusUi, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetAccountsByYield, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTagTypes, getEarnExtrinsicType, getWithdrawExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Button, ModalContext } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import React, { useCallback, useContext, useMemo } from 'react';
+import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
@@ -33,9 +36,20 @@ interface YieldAssetExpectedEarning {
   symbol: string;
 }
 
+interface YieldBalanceInfo {
+  // token slug
+  slug: string;
+  activeBalance: string;
+  totalBalance: string;
+  unstakeBalance: string;
+}
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className, positionInfo, yieldPoolInfo } = props;
   const { slug } = yieldPoolInfo;
+  const { unstakings } = positionInfo.metadata as NominatorMetadata;
+
+  const { token } = useTheme() as Theme;
 
   const { isWebUI } = useContext(ScreenContext);
 
@@ -54,23 +68,59 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const account = isAllAccount ? null : currentAccount;
 
-  const yieldPositionInfoBalance = useMemo(() => {
+  const exchangeRate = useMemo(() => {
+    return yieldPoolInfo?.stats?.assetEarning?.[0]?.exchangeRate || 1;
+  }, [yieldPoolInfo?.stats?.assetEarning]);
+
+  const yieldPositionInfoBalance: YieldBalanceInfo = useMemo((): YieldBalanceInfo => {
+    const metadata = positionInfo.metadata as NominatorMetadata;
+
     if (!yieldPoolInfo.derivativeAssets) {
-      return positionInfo.balance[0];
+      const { activeBalance, slug } = positionInfo.balance[0];
+
+      let totalBalance = new BigN(activeBalance);
+      let unstakeBalance = new BigN(0);
+
+      if (metadata.unstakings) {
+        for (const unstaking of metadata.unstakings) {
+          totalBalance = totalBalance.plus(unstaking.claimable);
+          unstakeBalance = unstakeBalance.plus(unstaking.claimable);
+        }
+      }
+
+      return {
+        activeBalance: activeBalance.toString(),
+        slug: slug,
+        totalBalance: totalBalance.toString(),
+        unstakeBalance: unstakeBalance.toString()
+      };
     }
 
-    const derivativeTokenBalance = positionInfo.balance[0].totalBalance;
+    const derivativeTokenBalance = positionInfo.balance[0].activeBalance;
     const inputTokenSlug = yieldPoolInfo.inputAssets[0];
     // @ts-ignore
     const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 1;
-    const inputTokenBalance = Math.floor(parseInt(derivativeTokenBalance) * exchangeRate);
+    const activeBalance = Math.floor(parseInt(derivativeTokenBalance) * exchangeRate);
+    let totalBalance = new BigN(derivativeTokenBalance);
+    let unstakeBalance = new BigN(0);
+
+    if (metadata.unstakings) {
+      for (const unstaking of metadata.unstakings) {
+        totalBalance = totalBalance.plus(unstaking.claimable);
+        unstakeBalance = unstakeBalance.plus(unstaking.claimable);
+      }
+    }
+
+    totalBalance = totalBalance.multipliedBy(exchangeRate).integerValue();
+    unstakeBalance = unstakeBalance.multipliedBy(exchangeRate).integerValue();
 
     return {
-      activeBalance: inputTokenBalance.toString(),
+      activeBalance: activeBalance.toString(),
       slug: inputTokenSlug,
-      totalBalance: inputTokenBalance.toString()
+      totalBalance: totalBalance.toString(),
+      unstakeBalance: unstakeBalance.toString()
     };
-  }, [positionInfo.balance, yieldPoolInfo.derivativeAssets, yieldPoolInfo.inputAssets, yieldPoolInfo?.stats?.assetEarning]);
+  }, [positionInfo, yieldPoolInfo]);
 
   const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
   const derivativeTokenInfo = useMemo(() => {
@@ -87,7 +137,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return {
       symbol: _getAssetSymbol(derivativeTokenInfo),
       decimals: _getAssetDecimals(derivativeTokenInfo),
-      amount: positionInfo.balance[0].totalBalance
+      amount: positionInfo.balance[0].activeBalance
     };
   }, [derivativeTokenInfo, positionInfo.balance]);
 
@@ -122,6 +172,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
 
   const tagTypes = useMemo(() => createEarningTagTypes(t), [t]);
+
+  const [seeMore, setSeeMore] = useState(false);
 
   const onClickStakeMoreBtn = useCallback(() => {
     inactiveModal(modalId);
@@ -158,10 +210,10 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [activeModal, currentAccount, inactiveModal, isWebUI, navigate, setFastWithdrawStorage, yieldPoolInfo]);
 
-  // const onClickMoreAction = useCallback(() => {
-  //   inactiveModal(modalId);
-  //   activeModal(EARNING_MORE_ACTION_MODAL);
-  // }, [activeModal, inactiveModal]);
+  const onClickMoreAction = useCallback(() => {
+    inactiveModal(modalId);
+    activeModal(EARNING_MORE_ACTION_MODAL);
+  }, [activeModal, inactiveModal]);
 
   const footer = useCallback(() => {
     const isAvailable = yieldPoolInfo.stats?.isAvailable ?? true;
@@ -169,11 +221,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return (
       <div className='staking-detail-modal-footer'>
-        {/* <Button */}
-        {/*   icon={<Icon phosphorIcon={DotsThree} />} */}
-        {/*   onClick={onClickMoreAction} */}
-        {/*   schema='secondary' */}
-        {/* /> */}
+        <Button
+          icon={<Icon phosphorIcon={DotsThree} />}
+          onClick={onClickMoreAction}
+          schema='secondary'
+        />
         <Button
           className='__action-btn'
           disabled={!availableActions.includes(YieldAction.WITHDRAW_EARNING) || isPoolUnavailable}
@@ -193,10 +245,15 @@ const Component: React.FC<Props> = (props: Props) => {
         >{t(yieldPoolInfo.slug === 'DOT___interlay_lending' ? t('Supply now') : t('Stake now'))}</Button>
       </div>
     );
-  }, [availableActions, onClickFooterButton, onClickStakeMoreBtn, onClickWithdrawBtn, slug, t, yieldPoolInfo.slug, yieldPoolInfo.stats?.isAvailable]);
+  }, [availableActions, onClickFooterButton, onClickMoreAction, onClickStakeMoreBtn, onClickWithdrawBtn, slug, t, yieldPoolInfo.slug, yieldPoolInfo.stats?.isAvailable]);
+
+  const onClickSeeMoreBtn = useCallback(() => {
+    setSeeMore(true);
+  }, []);
 
   const onCloseModal = useCallback(() => {
     inactiveModal(modalId);
+    setSeeMore(false);
   }, [inactiveModal]);
 
   return (
@@ -233,10 +290,23 @@ const Component: React.FC<Props> = (props: Props) => {
 
         <MetaInfo.Number
           decimals={_getAssetDecimals(inputTokenInfo)}
-
           label={t('Total balance')}
           suffix={_getAssetSymbol(inputTokenInfo)}
           value={yieldPositionInfoBalance.totalBalance}
+        />
+
+        <MetaInfo.Number
+          decimals={_getAssetDecimals(inputTokenInfo)}
+          label={t('Active balance')}
+          suffix={_getAssetSymbol(inputTokenInfo)}
+          value={yieldPositionInfoBalance.activeBalance}
+        />
+
+        <MetaInfo.Number
+          decimals={_getAssetDecimals(inputTokenInfo)}
+          label={t('Unstake balance')}
+          suffix={_getAssetSymbol(inputTokenInfo)}
+          value={yieldPositionInfoBalance.unstakeBalance}
         />
 
         {
@@ -256,52 +326,113 @@ const Component: React.FC<Props> = (props: Props) => {
         />
       </MetaInfo>
 
-      <>
-        <MetaInfo
-          hasBackgroundWrapper
-          spaceSize={'xs'}
-          valueColorScheme={'light'}
+      {!seeMore && (
+        <Button
+          block
+          className={'see-more-btn'}
+          icon={(
+            <Icon
+              iconColor={token.colorTextLight4}
+              phosphorIcon={ArrowCircleUpRight}
+              size={'sm'}
+            />
+          )}
+          onClick={onClickSeeMoreBtn}
+          size={'xs'}
+          type={'ghost'}
         >
-          <MetaInfo.Default
-            label={t('Yearly rewards')}
-            valueColorSchema={'gray'}
-          >
-            <div>
-              {
-                Object.values(_assetEarnings).map((value) => {
-                  const amount = (value.apy || 0);
+          {t('See more')}
+        </Button>
+      )}
 
-                  return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)}% ${value.symbol}`;
-                }).join(' - ')
-              }
-            </div>
-          </MetaInfo.Default>
-          <MetaInfo.Number
-            decimals={_getAssetDecimals(inputTokenInfo)}
-            label={t('Minimum active')}
-            suffix={_getAssetSymbol(inputTokenInfo)}
-            value={yieldPoolInfo.stats?.minJoinPool || '0'}
-            valueColorSchema={'gray'}
-          />
-          {
-            derivativeTokenInfo && (
-              <MetaInfo.Number
-                decimals={_getAssetDecimals(derivativeTokenInfo)}
-                label={t('Minimum redeem')}
-                suffix={_getAssetSymbol(derivativeTokenInfo)}
-                value={yieldPoolInfo.stats?.minWithdrawal || '0'}
-                valueColorSchema={'gray'}
-              />
-            )
-          }
-          <MetaInfo.Default
-            label={t('Reward distribution')}
-            valueColorSchema={'gray'}
+      {seeMore && (
+        <>
+          <MetaInfo
+            hasBackgroundWrapper
+            spaceSize={'xs'}
+            valueColorScheme={'light'}
           >
-            {t('Every {{number}} hours', { replace: { number: 24 } })}
-          </MetaInfo.Default>
-        </MetaInfo>
-      </>
+            <MetaInfo.Default
+              label={t('Yearly rewards')}
+              valueColorSchema={'gray'}
+            >
+              <div>
+                {
+                  Object.values(_assetEarnings).map((value) => {
+                    const amount = (value.apy || 0);
+
+                    return `${formatNumber(new BigN(amount).toString(), 0, balanceFormatter)}% ${value.symbol}`;
+                  }).join(' - ')
+                }
+              </div>
+            </MetaInfo.Default>
+            <MetaInfo.Number
+              decimals={_getAssetDecimals(inputTokenInfo)}
+              label={t('Minimum active')}
+              suffix={_getAssetSymbol(inputTokenInfo)}
+              value={yieldPoolInfo.stats?.minJoinPool || '0'}
+              valueColorSchema={'gray'}
+            />
+            {
+              derivativeTokenInfo && (
+                <MetaInfo.Number
+                  decimals={_getAssetDecimals(derivativeTokenInfo)}
+                  label={t('Minimum redeem')}
+                  suffix={_getAssetSymbol(derivativeTokenInfo)}
+                  value={yieldPoolInfo.stats?.minWithdrawal || '0'}
+                  valueColorSchema={'gray'}
+                />
+              )
+            }
+            <MetaInfo.Default
+              label={t('Reward distribution')}
+              valueColorSchema={'gray'}
+            >
+              {t('Every {{number}} hours', { replace: { number: 24 } })}
+            </MetaInfo.Default>
+          </MetaInfo>
+          {(unstakings && unstakings.length > 0) && currentAccount?.address !== ALL_ACCOUNT_KEY && (
+            <>
+              <MetaInfo valueColorScheme={'light'}>
+                <MetaInfo.Number
+                  decimals={_getAssetDecimals(inputTokenInfo)}
+                  label={t('Unstaked')}
+                  suffix={_getAssetSymbol(inputTokenInfo)}
+                  value={yieldPositionInfoBalance.unstakeBalance}
+                />
+              </MetaInfo>
+              <MetaInfo
+                hasBackgroundWrapper
+                spaceSize={'xs'}
+                valueColorScheme={'light'}
+              >
+                <>
+                  {unstakings.map((item) => {
+                    const waitingLabel = item.waitingTime !== undefined
+                      ? getWaitingTime(item.waitingTime, item.status, t)
+                        ? getWaitingTime(item.waitingTime, item.status, t)
+                        : t('Withdraw')
+                      : t('Withdraw');
+
+                    const claimable = new BigN(item.claimable).multipliedBy(exchangeRate).integerValue();
+
+                    return (
+                      <MetaInfo.Number
+                        decimals={_getAssetDecimals(inputTokenInfo)}
+                        key={`${item.chain}-${item.status}-${item.claimable}`}
+                        label={waitingLabel}
+                        suffix={_getAssetSymbol(inputTokenInfo)}
+                        value={claimable}
+                        valueColorSchema={'gray'}
+                      />
+                    );
+                  })}
+                </>
+              </MetaInfo>
+            </>
+          )}
+        </>
+      )}
     </BaseModal>
   );
 };

@@ -434,6 +434,15 @@ const YieldUnstake = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.mt': {
       marginTop: token.marginSM
+    },
+
+    '.ant-checkbox-wrapper': {
+      display: 'flex',
+      alignItems: 'center',
+
+      '.ant-checkbox': {
+        top: 0
+      }
     }
   };
 });

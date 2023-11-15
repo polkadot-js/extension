@@ -489,7 +489,7 @@ export function getStakingAvailableActionsByNominator (nominatorMetadata: Nomina
 }
 
 export function isActionFromValidator (stakingType: StakingType, chain: string) {
-  if (stakingType === StakingType.POOLED) {
+  if (stakingType === StakingType.POOLED || stakingType === StakingType.LIQUID_STAKING) {
     return false;
   }
 

@@ -3494,7 +3494,7 @@ export default class KoniExtension {
     const wcId = request.request.id;
     const params = request.request.params;
 
-    const requiredNamespaces: ProposalTypes.RequiredNamespaces = params.requiredNamespaces;
+    const requiredNamespaces: ProposalTypes.RequiredNamespaces = params.requiredNamespaces || {};
     const optionalNamespaces: ProposalTypes.OptionalNamespaces = params.optionalNamespaces || {};
 
     const availableNamespaces: ProposalTypes.RequiredNamespaces = {};

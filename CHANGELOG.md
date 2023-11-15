@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 1.1.21
+Build date: Nov 08, 2023.
+- Support nomination pool for Vara network (#2152)
+- Update chain list (#2145)
+  - Add support Subspace Gemini 3g
+  - Update logo and price of the PHA token
+
+
+Bugs fixed:
+- Fixed bug undefined is not an object when perform transaction (#2146)
+- Fixed bug show error page when opening the app with an invalid URL (#2072)
+- Fixed bug still show token of the inactive network (#2158)
+
 ## 1.1.20
 Build date: Oct 26, 2023.
 - Features & Update:

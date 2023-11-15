@@ -60,7 +60,15 @@ function getCrowdloanContributeList (
     });
   });
 
-  return result;
+  return result.sort((a, b) => {
+    if (a.unlockTime < b.unlockTime) {
+      return -1;
+    } else if (a.unlockTime > b.unlockTime) {
+      return 1;
+    } else {
+      return a.chainName.localeCompare(b.chainName);
+    }
+  });
 }
 
 export default function useGetCrowdloanList () {

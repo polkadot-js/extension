@@ -144,6 +144,13 @@ const CrowdloanContributionsResult = new LazyLoader('CrowdloanContributionsResul
 
 const MissionPool = new LazyLoader('MissionPool', () => import('@subwallet/extension-koni-ui/Popup/MissionPool'));
 
+/* 404 */
+
+const NotFoundContent = new LazyLoader('NotFoundContent', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Content'));
+const NotFoundRedirect = new LazyLoader('NotFoundRedirect', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Redirect'));
+
+/* 404 */
+
 // A Placeholder page
 export function Example () {
   const location = useLocation();
@@ -309,7 +316,9 @@ export const router = createBrowserRouter([
           CheckCrowdloanContributions.generateRouterObject('check-contributions'),
           CrowdloanContributionsResult.generateRouterObject('contributions-result')
         ]
-      }
+      },
+      NotFoundContent.generateRouterObject('not-found'),
+      NotFoundRedirect.generateRouterObject('*')
     ]
   },
   PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)

@@ -1684,7 +1684,8 @@ export interface StakeWithdrawalParams extends BaseRequestSign {
   nominatorMetadata: NominatorMetadata,
   unstakingInfo: UnstakingInfo,
   chain: string,
-  validatorAddress?: string
+  validatorAddress?: string,
+  isLiquidStaking?: boolean
 }
 
 export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;

@@ -22,7 +22,7 @@ import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, getRelayPools
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { generateNaiveOptimalPath, handleLiquidStakingDefaultUnstake, handleYieldRedeem, handleYieldStep, validateYieldProcess } from '@subwallet/extension-base/koni/api/yield';
+import { generateNaiveOptimalPath, handleLiquidStakingDefaultUnstake, handleLiquidStakingDefaultWithdraw, handleYieldRedeem, handleYieldStep, validateYieldProcess } from '@subwallet/extension-base/koni/api/yield';
 import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
@@ -4095,14 +4095,22 @@ export default class KoniExtension {
   }
 
   private async yieldSubmitWithdrawal (inputData: RequestStakeWithdrawal): Promise<SWTransactionResponse> {
-    const { chain, nominatorMetadata, validatorAddress } = inputData;
+    const { chain, isLiquidStaking, nominatorMetadata, validatorAddress } = inputData;
+    const yieldPoolInfo = await this.#koniState.getYieldPoolStakingInfo(chain, isLiquidStaking ? YieldPoolType.LIQUID_STAKING : YieldPoolType.NATIVE_STAKING);
+    const chainInfo = this.#koniState.getChainInfo(chain);
 
-    if (!nominatorMetadata) {
+    if (!nominatorMetadata || !yieldPoolInfo) {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
-    const extrinsic = await getWithdrawalExtrinsic(substrateApi, chain, nominatorMetadata, validatorAddress);
+    let extrinsic;
+
+    if (isLiquidStaking) {
+      extrinsic = await handleLiquidStakingDefaultWithdraw(yieldPoolInfo, substrateApi, this.#koniState.getEvmApiMap(), nominatorMetadata, this.#koniState.getAssetRegistry());
+    } else {
+      extrinsic = await getWithdrawalExtrinsic(substrateApi, chain, nominatorMetadata, validatorAddress);
+    }
 
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
@@ -4110,7 +4118,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_WITHDRAW,
-      chainType: ChainType.SUBSTRATE
+      chainType: _isChainEvmCompatible(chainInfo) ? ChainType.EVM : ChainType.SUBSTRATE
     });
   }
 

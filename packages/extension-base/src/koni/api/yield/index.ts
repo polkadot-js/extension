@@ -555,12 +555,12 @@ export async function handleLiquidStakingDefaultUnstake (params: UnbondingSubmit
   return getBifrostLiquidStakingDefaultUnstake(params, substrateApiMap[params.chain], poolInfo, assetInfoMap);
 }
 
-export async function handleLiquidStakingDefaultWithdraw (poolInfo: YieldPoolInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, nominatorMetadata: NominatorMetadata, assetInfoMap: Record<string, _ChainAsset>): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
+export async function handleLiquidStakingDefaultWithdraw (poolInfo: YieldPoolInfo, substrateApi: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, nominatorMetadata: NominatorMetadata, assetInfoMap: Record<string, _ChainAsset>): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
   if (poolInfo.chain === 'parallel') {
-    return getParallelLiquidStakingDefaultWithdraw(nominatorMetadata, substrateApiMap[poolInfo.chain]);
+    return getParallelLiquidStakingDefaultWithdraw(nominatorMetadata, substrateApi);
   } else if (poolInfo.chain === 'moonbeam' && poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
     return getStellaswapLiquidStakingDefaultWithdraw(poolInfo, evmApiMap, nominatorMetadata, assetInfoMap);
   }
 
-  return getAcalaLiquidStakingDefaultWithdraw(nominatorMetadata, substrateApiMap[poolInfo.chain]);
+  return getAcalaLiquidStakingDefaultWithdraw(nominatorMetadata, substrateApi);
 }

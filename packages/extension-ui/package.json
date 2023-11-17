@@ -15,7 +15,7 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "0.46.6-7-x",
+  "version": "0.46.6-8-x",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-brands-svg-icons": "^6.4.2",
@@ -23,10 +23,10 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@polkadot/api": "^10.10.1",
-    "@polkadot/extension-base": "0.46.6-7-x",
-    "@polkadot/extension-chains": "0.46.6-7-x",
-    "@polkadot/extension-dapp": "0.46.6-7-x",
-    "@polkadot/extension-inject": "0.46.6-7-x",
+    "@polkadot/extension-base": "0.46.6-8-x",
+    "@polkadot/extension-chains": "0.46.6-8-x",
+    "@polkadot/extension-dapp": "0.46.6-8-x",
+    "@polkadot/extension-inject": "0.46.6-8-x",
     "@polkadot/hw-ledger": "^12.5.1",
     "@polkadot/keyring": "^12.5.1",
     "@polkadot/networks": "^12.5.1",
@@ -51,7 +51,7 @@
     "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@polkadot/extension-mocks": "0.46.6-7-x",
+    "@polkadot/extension-mocks": "0.46.6-8-x",
     "@types/enzyme": "^3.10.14",
     "@types/enzyme-adapter-react-16": "^1.0.7",
     "@types/file-saver": "^2.0.5",

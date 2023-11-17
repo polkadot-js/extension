@@ -34,10 +34,8 @@
     "clean": "polkadot-dev-clean-build",
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
-    "start": "yarn watch",
     "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --loader ./packages/extension-mocks/src/loader-empty.js --env browser ^:.spec.tsx",
-    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env browser",
-    "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
+    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env browser"
   },
   "devDependencies": {
     "@polkadot/dev": "^0.76.29",

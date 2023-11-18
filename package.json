@@ -14,7 +14,7 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.46.6-8-x",
+  "version": "0.46.6",
   "versions": {
     "git": "0.46.6-8-x",
     "npm": "0.46.5"
@@ -38,19 +38,19 @@
     "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env browser"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.76.29",
-    "@types/node": "^20.8.6",
+    "@polkadot/dev": "^0.77.1",
+    "@types/node": "^20.9.1",
     "i18next-scanner": "^4.4.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^10.10.1",
-    "@polkadot/keyring": "^12.5.1",
-    "@polkadot/networks": "^12.5.1",
-    "@polkadot/types": "^10.10.1",
-    "@polkadot/util": "^12.5.1",
-    "@polkadot/util-crypto": "^12.5.1",
-    "@polkadot/x-fetch": "^12.5.1",
+    "@polkadot/api": "^10.11.1",
+    "@polkadot/keyring": "^12.6.1",
+    "@polkadot/networks": "^12.6.1",
+    "@polkadot/types": "^10.11.1",
+    "@polkadot/util": "^12.6.1",
+    "@polkadot/util-crypto": "^12.6.1",
+    "@polkadot/x-fetch": "^12.6.1",
     "safe-buffer": "^5.2.1",
     "typescript": "^5.2.2"
   }

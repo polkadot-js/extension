@@ -25,9 +25,6 @@ export type CrowdloanFundInfo = _CrowdloanFund & {
   chain: string;
 }
 
-const getOnlineFundList = fetchStaticData<CrowdloanFundInfo[]>('crowdloan-funds');
-const getOnlineChainInfoList = fetchStaticData<_ChainInfo[]>('chains');
-
 function getChainInfoMap (chainInfoList: _ChainInfo[]): Record<string, _ChainInfo> {
   const result: Record<string, _ChainInfo> = {};
 
@@ -39,6 +36,13 @@ function getChainInfoMap (chainInfoList: _ChainInfo[]): Record<string, _ChainInf
 
   return result;
 }
+
+const getOnlineFundList = fetchStaticData<CrowdloanFundInfo[]>('crowdloan-funds');
+const getOnlineChainInfoMap = (async () => {
+  const chainInfoList = await fetchStaticData<_ChainInfo[]>('chains');
+
+  return getChainInfoMap(chainInfoList);
+})();
 
 function getRPCCrowdloan (parentAPI: _SubstrateApi, fundInfo: _CrowdloanFund, hexAddresses: string[], callback: (rs: CrowdloanItem) => void) {
   const { auctionIndex, endTime, firstPeriod, fundId, lastPeriod, paraId, startTime, status } = fundInfo;
@@ -161,8 +165,7 @@ export async function subscribeCrowdloan (addresses: string[], substrateApiMap: 
   const unsubMap: Record<string, any> = {};
   const latestMap: Record<string, CrowdloanFundInfo> = {};
   const rawFundList = await getOnlineFundList;
-  const chainInfoList = await getOnlineChainInfoList;
-  const chainInfoMap = getChainInfoMap(chainInfoList);
+  const chainInfoMap = await getOnlineChainInfoMap;
 
   rawFundList.forEach((fundInfo) => {
     const chainSlug = fundInfo.chain;

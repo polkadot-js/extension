@@ -1,5 +1,15 @@
 # CHANGELOG
 
+- **Important** Not published to the stores, aligns with latest released packages.
+
+## 0.46.6 Nov 18, 2023
+
+Changes:
+
+- Upgrade to `@polkadot/util` 12.6.1
+- Upgrade to `@polkadot/api` 10.11.1
+
+
 ## 0.46.5 Jun 12, 2023
 
 - **Important** Not published to the stores, aligns with latest released packages.
@@ -8,7 +18,7 @@ Changes:
 
 - Adjust object index access for stricter tsconfig settings
 - Upgrade to `@polkadot/api` 10.9.1
-- Bump to `@polkadot/util` 12.3.2
+- Upgrade to `@polkadot/util` 12.3.2
 
 
 ## 0.46.4 Jun 5, 2023
@@ -18,7 +28,7 @@ Changes:
 Changes:
 
 - Upgrade to `@polkadot/api` 10.8.1
-- Bump to `@polkadot/util` 12.2.2
+- Upgrade to `@polkadot/util` 12.2.2
 
 
 ## 0.46.3 May 13, 2023
@@ -29,7 +39,7 @@ Changes:
 
 - Add `module` to `package.json` export map (ESM-only)
 - Upgrade to `@polkadot/api` 10.6.1
-- Bump to `@polkadot/util` 12.1.1
+- Upgrade to `@polkadot/util` 12.1.1
 
 
 ## 0.46.2 Apr 30, 2023
@@ -40,7 +50,7 @@ Changes:
 
 - Adjust compilation output for `__internal__` class fields
 - Upgrade to `@polkadot/api` 10.5.1
-- Bump to `@polkadot/util` 12.1.1
+- Upgrade to `@polkadot/util` 12.1.1
 
 
 ## 0.46.1 Apr 22, 2023

@@ -8,13 +8,13 @@ export enum ExclusiveRewardSlug {
 }
 
 export const EXCLUSIVE_REWARD_SLUGS: string[] = [
-  ExclusiveRewardSlug.PARALLEL,
-  ExclusiveRewardSlug.BIFROST,
-  ExclusiveRewardSlug.ACALA
+  // ExclusiveRewardSlug.PARALLEL,
+  // ExclusiveRewardSlug.BIFROST,
+  // ExclusiveRewardSlug.ACALA
 ];
 
 export const ExclusiveRewardContentMap: Record<string, string> = {
-  [ExclusiveRewardSlug.PARALLEL]: '1M PARA reward pool available from Oct 24 to Nov 7!',
-  [ExclusiveRewardSlug.BIFROST]: '5K BNC reward pool available from Oct 24 to Nov 7!',
-  [ExclusiveRewardSlug.ACALA]: '80K ACA reward pool available from Oct 24 to Nov 7!'
+  // [ExclusiveRewardSlug.PARALLEL]: '1M PARA reward pool available from Oct 24 to Nov 7!',
+  // [ExclusiveRewardSlug.BIFROST]: '5K BNC reward pool available from Oct 24 to Nov 7!',
+  // [ExclusiveRewardSlug.ACALA]: '80K ACA reward pool available from Oct 24 to Nov 7!'
 };

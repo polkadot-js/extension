@@ -7,6 +7,7 @@ import { _generateCustomProviderKey } from '@subwallet/extension-base/services/c
 import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
@@ -18,7 +19,6 @@ import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 

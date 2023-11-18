@@ -232,8 +232,8 @@ const Component: React.FC<Props> = (props: Props) => {
                     weight='fill'
                   />
                 )}
-                shape='circle'
                 onClick={joinQuest}
+                shape='circle'
                 tooltip={t('Join quest now')}
               />
               <Button
@@ -246,8 +246,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 )}
                 onClick={shareOnTwitter}
                 schema='secondary'
-                tooltip={t('Share to Twitter')}
                 shape='circle'
+                tooltip={t('Share to Twitter')}
               />
               <Button
                 icon={(
@@ -258,8 +258,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 )}
                 onClick={viewInHistory}
                 schema='secondary'
-                tooltip={t('View transaction')}
                 shape='circle'
+                tooltip={t('View transaction')}
               />
             </div>
           );

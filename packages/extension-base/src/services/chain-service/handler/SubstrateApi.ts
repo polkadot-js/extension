@@ -25,6 +25,8 @@ import { Registry } from '@polkadot/types/types';
 import { BN, formatBalance } from '@polkadot/util';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
 
+import goldbergSpec from './chain-spec/goldberg';
+
 export class SubstrateApi implements _SubstrateApi {
   chainSlug: string;
   api: ApiPromise;
@@ -120,6 +122,13 @@ export class SubstrateApi implements _SubstrateApi {
         rpc: availSpec.rpc,
         types: availSpec.types,
         signedExtensions: availSpec.signedExtensions
+      });
+    } else if (_API_OPTIONS_CHAIN_GROUP.goldberg.includes(this.chainSlug)) {
+      api = new ApiPromise({
+        provider,
+        rpc: goldbergSpec.rpc,
+        types: goldbergSpec.types,
+        signedExtensions: goldbergSpec.signedExtensions
       });
     } else {
       api = new ApiPromise(apiOption);

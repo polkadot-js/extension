@@ -873,7 +873,7 @@ export class ChainService {
               isTestnet: storedChainInfo.isTestnet,
               chainStatus: storedChainInfo.chainStatus,
               icon: storedChainInfo.icon,
-              extraInfo: null
+              extraInfo: storedChainInfo.extraInfo
             };
             this.dataMap.chainStateMap[storedSlug] = {
               currentProvider: storedChainInfo.currentProvider,

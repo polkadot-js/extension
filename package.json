@@ -10,7 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "1.1.20",
+  "version": "1.1.22",
   "workspaces": [
     "packages/*"
   ],
@@ -76,7 +76,7 @@
     "@polkadot/types": "^10.9.1",
     "@polkadot/util": "^12.3.2",
     "@polkadot/util-crypto": "^12.3.2",
-    "@subwallet/chain-list": "0.2.23",
+    "@subwallet/chain-list": "0.2.25",
     "@subwallet/keyring": "^0.1.1",
     "@subwallet/ui-keyring": "^0.1.1",
     "babel-core": "^7.0.0-bridge.0",

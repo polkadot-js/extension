@@ -21,7 +21,7 @@ const SUBSCAN_CHAIN_MAP: Record<string, string> = {
   clover: 'clover',
   hydradx_main: 'hydradx',
   edgeware: 'edgeware',
-  centrifuge: 'centrifuge',
+  centrifuge: 'centrifuge-parachain',
   interlay: 'interlay',
   nodle: 'nodle',
   darwinia: 'darwinia',
@@ -57,7 +57,12 @@ const SUBSCAN_CHAIN_MAP: Record<string, string> = {
   bajun: 'bajun',
   snow: 'snow',
   kilt_peregrine: 'kilt-testnet',
-  polymesh: 'polymesh'
+  polymesh: 'polymesh',
+  bifrost_dot: 'bifrost-p',
+  vara_network: 'vara',
+  bifrost: 'bifrost',
+  creditcoin: 'creditcoin',
+  joystream: 'joystream'
 };
 
 export const SUBSCAN_CHAIN_MAP_REVERSE = Object.fromEntries(Object.entries(SUBSCAN_CHAIN_MAP).map(([k, v]) => [v, k]));

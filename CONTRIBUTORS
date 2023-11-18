@@ -1,4 +1,4 @@
-     630	Jaco                          	Remove old/deprecated watch (only use build) (#1295)
+     631	Jaco                          	0.46.6 (#1296)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

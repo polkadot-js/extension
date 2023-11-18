@@ -3,7 +3,7 @@
   "bugs": "https://github.com/polkadot-js/extension/issues",
   "description": "Definitions for all known chains as exposed by the extension.",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-mocks#readme",
   "license": "Apache-2.0",

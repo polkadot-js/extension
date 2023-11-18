@@ -3,7 +3,7 @@
   "bugs": "https://github.com/polkadot-js/extension/issues",
   "description": "Metamask compatibility layer",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-compat-metamask#readme",
   "license": "Apache-2.0",

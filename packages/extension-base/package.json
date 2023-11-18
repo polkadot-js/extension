@@ -3,7 +3,7 @@
   "bugs": "https://github.com/polkadot-js/extension/issues",
   "description": "Functions, classes and other utilities used in @polkadot/extension",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-base#readme",
   "license": "Apache-2.0",

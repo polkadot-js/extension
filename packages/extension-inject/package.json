@@ -3,7 +3,7 @@
   "bugs": "https://github.com/polkadot-js/extension/issues",
   "description": "A generic injector (usable to any extension), that populates the base exposed interfaces to be used by dapps.",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-inject#readme",
   "license": "Apache-2.0",

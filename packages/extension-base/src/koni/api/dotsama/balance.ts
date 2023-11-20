@@ -98,6 +98,8 @@ export async function subscribeSubstrateBalance (addresses: string[], chainInfo:
       unsubLocalToken = await subscribeEqBalanceAccountPallet(addresses, chain, networkAPI.api, callBack, true);
     } else if (_BALANCE_CHAIN_GROUP.equilibrium_parachain.includes(chain)) {
       unsubLocalToken = await subscribeEquilibriumTokenBalance(addresses, chain, networkAPI.api, callBack, true);
+    } else if (_BALANCE_CHAIN_GROUP.centrifuge.includes(chain)) {
+      unsubLocalToken = await subscribeOrmlTokensPallet(addresses, chain, networkAPI.api, callBack);
     }
 
     if (_isChainEvmCompatible(chainInfo)) {
@@ -329,6 +331,58 @@ async function subscribeEqBalanceAccountPallet (addresses: string[], chain: stri
         };
 
         callBack(tokenBalance);
+      });
+
+      return unsub;
+    } catch (err) {
+      console.warn(err);
+
+      return undefined;
+    }
+  });
+
+  return () => {
+    unsubList.forEach((subProm) => {
+      subProm.then((unsub) => {
+        unsub && unsub();
+      }).catch(console.error);
+    });
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/require-await
+async function subscribeOrmlTokensPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem) => void): Promise<() => void> {
+  const tokenTypes = [_AssetType.LOCAL];
+  const tokenMap = state.getAssetByChainAndAsset(chain, tokenTypes);
+
+  const unsubList = Object.values(tokenMap).map(async (tokenInfo) => {
+    try {
+      const onChainInfo = _getTokenOnChainInfo(tokenInfo);
+
+      // Get Token Balance
+      // @ts-ignore
+      const unsub = await api.query.ormlTokens.accounts.multi(addresses.map((address) => [address, onChainInfo]), (balances: TokenBalanceRaw[]) => {
+        const tokenBalance = {
+          reserved: sumBN(balances.map((b) => (b.reserved || new BN(0)))),
+          frozen: sumBN(balances.map((b) => (b.frozen || new BN(0)))),
+          free: sumBN(balances.map((b) => (b.free || new BN(0)))) // free is actually total balance
+        };
+
+        // free balance = total balance - frozen misc
+        // locked balance = reserved + frozen misc
+        const freeBalance = tokenBalance.free.sub(tokenBalance.frozen);
+        const lockedBalance = tokenBalance.frozen.add(tokenBalance.reserved);
+
+        callBack({
+          tokenSlug: tokenInfo.slug,
+          state: APIItemState.READY,
+          free: freeBalance.toString(),
+          locked: lockedBalance.toString(),
+          substrateInfo: {
+            reserved: tokenBalance.reserved.toString(),
+            miscFrozen: tokenBalance.frozen.toString()
+          }
+        } as BalanceItem);
       });
 
       return unsub;

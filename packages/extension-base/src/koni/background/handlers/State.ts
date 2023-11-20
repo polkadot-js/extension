@@ -15,7 +15,7 @@ import CampaignService from '@subwallet/extension-base/services/campaign-service
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug, _getEvmChainId, _getSubstrateGenesisHash, _getSubstrateParaId, _getSubstrateRelayParent, _getTokenOnChainAssetId, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getEvmChainId, _getSubstrateGenesisHash, _getSubstrateParaId, _getSubstrateRelayParent, _getTokenOnChainAssetId, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
@@ -1810,9 +1810,7 @@ export default class KoniState {
           return;
         }
 
-        const isNative = category === 'native';
-
-        const tokenKey = `${chain}-${isNative ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
+        const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
 
         const existedKey = Object.keys(assetMap).find((v) => v.toLowerCase() === tokenKey.toLowerCase());
 
@@ -1820,15 +1818,6 @@ export default class KoniState {
           needEnableChains.push(chain);
           needActiveTokens.push(existedKey);
           currentAssetSettings[existedKey] = { visible: true };
-
-          if (!isNative) {
-            const nativeToken = _getChainNativeTokenSlug(chainInfo);
-
-            if (!currentAssetSettings[nativeToken]?.visible) {
-              needActiveTokens.push(nativeToken);
-              currentAssetSettings[nativeToken] = { visible: true };
-            }
-          }
         }
       });
     });

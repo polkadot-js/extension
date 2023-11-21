@@ -157,7 +157,7 @@ export const router = createHashRouter([
           Crowdloans.generateRouterObject('crowdloans'),
           Staking.generateRouterObject('staking'),
           History.generateRouterObject('history'),
-          History.generateRouterObject('history/:chain/:extrinsicHashOrId')
+          History.generateRouterObject('history/:address/:chain/:extrinsicHashOrId')
         ]
       },
       {
@@ -177,7 +177,7 @@ export const router = createHashRouter([
         ]
       },
       {
-        ...TransactionDone.generateRouterObject('transaction-done/:chainType/:chain/:transactionId')
+        ...TransactionDone.generateRouterObject('transaction-done/:address/:chain/:transactionId')
       },
       {
         path: '/keyring',

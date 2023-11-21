@@ -16,3 +16,4 @@ export * from './qr';
 export * from './router';
 export * from './screen';
 export * from './wallet-connect';
+export * from './history';

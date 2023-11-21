@@ -577,7 +577,7 @@ export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends Extri
     ? NFTTransactionAdditionalInfo
     : undefined;
 export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType.TRANSFER_BALANCE> {
-  origin?: 'app' | 'migration' | 'subsquid', // 'app' or history source
+  origin?: 'app' | 'migration' | 'subsquid' | 'subscan', // 'app' or history source
   callhash?: string,
   signature?: string,
   chain: string,
@@ -2110,6 +2110,16 @@ export interface RequestCampaignBannerComplete {
   slug: string;
 }
 
+export interface RequestSubscribeHistory {
+  address: string;
+  chain: string;
+}
+
+export interface ResponseSubscribeHistory {
+  id: string;
+  items: TransactionHistoryItem[]
+}
+
 /* Campaign */
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value
@@ -2269,6 +2279,7 @@ export interface KoniRequestSignatures {
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];
+  'pri(transaction.history.subscribe)': [RequestSubscribeHistory, ResponseSubscribeHistory, TransactionHistoryItem[]];
   // 'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItem[]];
   'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
   'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];

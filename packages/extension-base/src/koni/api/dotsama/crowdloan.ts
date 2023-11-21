@@ -25,7 +25,24 @@ export type CrowdloanFundInfo = _CrowdloanFund & {
   chain: string;
 }
 
+function getChainInfoMap (chainInfoList: _ChainInfo[]): Record<string, _ChainInfo> {
+  const result: Record<string, _ChainInfo> = {};
+
+  chainInfoList.forEach((ci) => {
+    if (ci.slug) {
+      result[ci.slug] = ci;
+    }
+  });
+
+  return result;
+}
+
 const getOnlineFundList = fetchStaticData<CrowdloanFundInfo[]>('crowdloan-funds');
+const getOnlineChainInfoMap = (async () => {
+  const chainInfoList = await fetchStaticData<_ChainInfo[]>('chains');
+
+  return getChainInfoMap(chainInfoList);
+})();
 
 function getRPCCrowdloan (parentAPI: _SubstrateApi, fundInfo: _CrowdloanFund, hexAddresses: string[], callback: (rs: CrowdloanItem) => void) {
   const { auctionIndex, endTime, firstPeriod, fundId, lastPeriod, paraId, startTime, status } = fundInfo;
@@ -127,16 +144,33 @@ export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], fu
 //   }, {} as Record<string, CrowdloanParaState>);
 // }
 
+function isNeedToUpdateLatestFundInfoMap (latestMap: Record<string, CrowdloanFundInfo>, chainSlug: string, fundInfo: CrowdloanFundInfo) {
+  if (!latestMap[chainSlug]) {
+    return true;
+  }
+
+  if (!fundInfo.auctionIndex && fundInfo.status === _FundStatus.IN_AUCTION) {
+    return true;
+  }
+
+  if (fundInfo.auctionIndex > latestMap[chainSlug].auctionIndex) {
+    return true;
+  }
+
+  return false;
+}
+
 // Get All crowdloan
-export async function subscribeCrowdloan (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, callback: (networkKey: string, rs: CrowdloanItem) => void, chainInfoMap: Record<string, _ChainInfo>) {
+export async function subscribeCrowdloan (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, callback: (networkKey: string, rs: CrowdloanItem) => void) {
   const unsubMap: Record<string, any> = {};
   const latestMap: Record<string, CrowdloanFundInfo> = {};
   const rawFundList = await getOnlineFundList;
+  const chainInfoMap = await getOnlineChainInfoMap;
 
   rawFundList.forEach((fundInfo) => {
     const chainSlug = fundInfo.chain;
 
-    if (!latestMap[chainSlug] || fundInfo.auctionIndex > latestMap[chainSlug].auctionIndex) {
+    if (isNeedToUpdateLatestFundInfoMap(latestMap, chainSlug, fundInfo)) {
       latestMap[chainSlug] = fundInfo;
     }
   });

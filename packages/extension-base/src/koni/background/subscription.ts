@@ -278,7 +278,7 @@ export class KoniSubscription {
   initCrowdloanSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
     const subscriptionPromise = subscribeCrowdloan(addresses, substrateApiMap, (networkKey, rs) => {
       this.state.setCrowdloanItem(networkKey, rs);
-    }, this.state.getChainInfoMap());
+    });
 
     if (onlyRunOnFirstTime) {
       subscriptionPromise.then((unsub) => unsub?.()).catch(this.logger.warn);

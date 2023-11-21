@@ -3,44 +3,23 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, CrowdloanItem } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainNativeTokenBasicInfo, _getSubstrateParaId, _getSubstrateRelayParent } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getSubstrateRelayParent } from '@subwallet/extension-base/services/chain-service/utils';
+import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { _CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-function getCrowdloanChains (chainInfoMap: Record<string, _ChainInfo>) {
-  const result: string[] = [];
-
-  for (const chainKey in chainInfoMap) {
-    // eslint-disable-next-line no-prototype-builtins
-    if (!chainInfoMap.hasOwnProperty(chainKey)) {
-      continue;
-    }
-
-    const chainInfo = chainInfoMap[chainKey];
-
-    if (_getSubstrateParaId(chainInfo) === -1) {
-      continue;
-    }
-
-    result.push(chainKey);
-  }
-
-  return result;
-}
-
 function getCrowdloanContributeList (
-  crowdloanChains: string[],
-  chainInfoMap: Record<string, _ChainInfo>,
   crowdloanMap: Record<string, CrowdloanItem>,
+  chainInfoMap: Record<string, _ChainInfo>,
   priceMap: Record<string, number>
 ): _CrowdloanItemType[] {
   const result: _CrowdloanItemType[] = [];
 
-  crowdloanChains.forEach((chain) => {
+  Object.keys(crowdloanMap).forEach((chain) => {
     const chainInfo = chainInfoMap[chain];
     const crowdloanItem = crowdloanMap[chain];
 
@@ -50,6 +29,11 @@ function getCrowdloanContributeList (
 
     const relayParentKey = _getSubstrateRelayParent(chainInfo);
     const relayChainInfo = chainInfoMap[relayParentKey];
+
+    if (!relayChainInfo) {
+      return;
+    }
+
     const { decimals, symbol } = _getChainNativeTokenBasicInfo(relayChainInfo);
     const price = priceMap[relayParentKey] || 0;
     const contributeValue = getBalanceValue(crowdloanItem.contribute, decimals);
@@ -76,21 +60,44 @@ function getCrowdloanContributeList (
     });
   });
 
-  return result;
+  return result.sort((a, b) => {
+    if (a.unlockTime < b.unlockTime) {
+      return -1;
+    } else if (a.unlockTime > b.unlockTime) {
+      return 1;
+    } else {
+      return a.chainName.localeCompare(b.chainName);
+    }
+  });
 }
 
 export default function useGetCrowdloanList () {
   const crowdloanMap = useSelector((state: RootState) => state.crowdloan.crowdloanMap);
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+  // chainInfoMap needs to be fetched from online for dynamic usage
+  const [chainInfoMap, setChainInfoMap] = useState<Record<string, _ChainInfo>>({});
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
-  const crowdloanChains = useMemo<string[]>(() => getCrowdloanChains(chainInfoMap), [chainInfoMap]);
+
+  useEffect(() => {
+    fetchStaticData<_ChainInfo[]>('chains').then((rs) => {
+      const result: Record<string, _ChainInfo> = {};
+
+      rs.forEach((ci) => {
+        if (ci.slug) {
+          result[ci.slug] = ci;
+        }
+      });
+
+      setChainInfoMap(result);
+    }).catch((e) => {
+      console.log('fetch _ChainInfo error:', e);
+    });
+  }, []);
 
   return useMemo<_CrowdloanItemType[]>(() => {
     return getCrowdloanContributeList(
-      crowdloanChains,
-      chainInfoMap,
       crowdloanMap,
+      chainInfoMap,
       priceMap
     );
-  }, [crowdloanMap, crowdloanChains, chainInfoMap, priceMap]);
+  }, [crowdloanMap, chainInfoMap, priceMap]);
 }

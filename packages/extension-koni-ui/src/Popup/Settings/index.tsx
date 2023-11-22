@@ -2,7 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
-import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+import {
+  DISCORD_URL,
+  EXTENSION_BUILD_NUMBER,
+  EXTENSION_VERSION,
+  PRIVACY_AND_POLICY_URL,
+  TELEGRAM_URL,
+  TERMS_OF_SERVICE_URL,
+  TWITTER_URL,
+  WEBSITE_URL,
+  WIKI_URL
+} from '@subwallet/extension-koni-ui/constants/common';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -345,7 +355,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           </Button>
 
           <div className={'__version'}>
-          SubWallet v {EXTENSION_VERSION}
+          SubWallet v {EXTENSION_VERSION} - {EXTENSION_BUILD_NUMBER}
           </div>
         </div>
 

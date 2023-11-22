@@ -19,7 +19,8 @@
     "koni-ci-build-i18n": "./scripts/koni-ci-build-i18n.mjs",
     "koni-ci-build-webapp": "./scripts/koni-ci-build-webapp.mjs",
     "koni-ci-ghact-build": "./scripts/koni-ci-ghact-build.mjs",
-    "koni-dev-build-ts": "./scripts/koni-dev-build-ts.mjs"
+    "koni-dev-build-ts": "./scripts/koni-dev-build-ts.mjs",
+    "change-build-number-webapp": "./scripts/change-build-number-webapp.cjs"
   },
   "scripts": {
     "build": "koni-dev-build-ts && yarn build:zip && yarn build:rollup",
@@ -50,11 +51,12 @@
     "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "web-runner:publish": "gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'",
     "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
-    "webapp:build": "cd packages/webapp && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
+    "webapp:build": "yarn run webapp:change-build-number-webapp && cd packages/webapp && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
     "webapp:deploy": "yarn webapp:build && gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
     "webapp:dev": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "webapp:publish": "gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
-    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development"
+    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development",
+    "webapp:change-build-number-webapp": "node scripts/change-build-number-webapp.cjs"
   },
   "dependencies": {
     "@types/node": "^17.0.10",

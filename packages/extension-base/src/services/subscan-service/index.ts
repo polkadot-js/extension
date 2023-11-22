@@ -31,7 +31,7 @@ export class SubscanService {
       throw new SWError('NOT_SUPPORTED', 'Chain is not supported');
     }
 
-    return `https://${chain}.api.subscan.io/${path}`;
+    return `https://${subscanChain}.api.subscan.io/${path}`;
   }
 
   private postRequest (url: string, body: any) {

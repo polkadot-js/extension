@@ -3,7 +3,7 @@
 
 import type { WindowOpenParams } from '@subwallet/extension-base/background/types';
 
-import { CronReloadRequest, Notification, RequestGetTransaction, RequestParseEvmContractInput, ResponseParseEvmContractInput } from '@subwallet/extension-base/background/KoniTypes';
+import { CronReloadRequest, Notification, RequestGetTransaction, RequestParseEvmContractInput, ResponseParseEvmContractInput, ResponseSubscribeHistory, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
 
@@ -30,6 +30,14 @@ export async function reloadCron (request: CronReloadRequest): Promise<boolean> 
 // Phishing page
 export async function passPhishingPage (url: string): Promise<boolean> {
   return sendMessage('pri(phishing.pass)', { url });
+}
+
+export async function cancelSubscription (request: string): Promise<boolean> {
+  return sendMessage('pri(subscription.cancel)', request);
+}
+
+export async function subscribeTransactionHistory (chain: string, address: string, callback: (items: TransactionHistoryItem[]) => void): Promise<ResponseSubscribeHistory> {
+  return sendMessage('pri(transaction.history.subscribe)', { address, chain }, callback);
 }
 
 export * from './accounts';

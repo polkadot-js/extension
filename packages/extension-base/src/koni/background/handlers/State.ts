@@ -27,7 +27,7 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
-import { SUBSCAN_CHAIN_MAP_REVERSE } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+import { SUBSCAN_API_CHAIN_MAP, SUBSCAN_BALANCE_CHAIN_MAP_REVERSE } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
@@ -140,15 +140,15 @@ export default class KoniState {
     this.eventService = new EventService();
     this.dbService = new DatabaseService(this.eventService);
     this.keyringService = new KeyringService(this.eventService);
-    this.subscanService = new SubscanService();
 
     this.notificationService = new NotificationService();
     this.chainService = new ChainService(this.dbService, this.eventService);
+    this.subscanService = new SubscanService(SUBSCAN_API_CHAIN_MAP);
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService, this.settingService, this.keyringService);
     this.priceService = new PriceService(this.dbService, this.eventService, this.chainService);
     this.balanceService = new BalanceService(this.chainService);
-    this.historyService = new HistoryService(this.dbService, this.chainService, this.eventService, this.keyringService);
+    this.historyService = new HistoryService(this.dbService, this.chainService, this.eventService, this.keyringService, this.subscanService);
     this.transactionService = new TransactionService(this.chainService, this.eventService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
     this.walletConnectService = new WalletConnectService(this, this.requestService);
     this.migrationService = new MigrationService(this, this.eventService);
@@ -283,9 +283,14 @@ export default class KoniState {
     return balanceMap;
   }
 
+  private afterChainServiceInit () {
+    this.subscanService.setSubscanChainMap(this.chainService.getSubscanChainMap());
+  }
+
   public async init () {
     await this.eventService.waitCryptoReady;
     await this.chainService.init();
+    this.afterChainServiceInit();
     await this.migrationService.run();
     this.eventService.emit('chain.ready', true);
 
@@ -1770,7 +1775,7 @@ export default class KoniState {
 
     balanceDataList.forEach((balanceData) => {
       balanceData && balanceData.forEach(({ balance, bonded, category, locked, network, symbol }) => {
-        const chain = SUBSCAN_CHAIN_MAP_REVERSE[network];
+        const chain = SUBSCAN_BALANCE_CHAIN_MAP_REVERSE[network];
         const chainInfo = chain ? chainMap[chain] : null;
         const balanceIsEmpty = (!balance || balance === '0') && (!locked || locked === '0') && (!bonded || bonded === '0');
 
@@ -1781,10 +1786,12 @@ export default class KoniState {
 
         const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
 
-        if (assetMap[tokenKey] && !currentAssetSettings[tokenKey]?.visible) {
+        const existedKey = Object.keys(assetMap).find((v) => v.toLowerCase() === tokenKey.toLowerCase());
+
+        if (existedKey && !currentAssetSettings[existedKey]?.visible) {
           needEnableChains.push(chain);
-          needActiveTokens.push(tokenKey);
-          currentAssetSettings[tokenKey] = { visible: true };
+          needActiveTokens.push(existedKey);
+          currentAssetSettings[existedKey] = { visible: true };
         }
       });
     });
@@ -1863,6 +1870,7 @@ export default class KoniState {
     await this.walletConnectService.resetWallet(resetAll);
 
     await this.chainService.init();
+    this.afterChainServiceInit();
   }
 
   public async enableMantaPay (updateStore: boolean, address: string, password: string, seedPhrase?: string) {

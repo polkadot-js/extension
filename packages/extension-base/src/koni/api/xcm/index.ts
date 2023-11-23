@@ -7,6 +7,7 @@ import { getExtrinsicByXcmPalletPallet } from '@subwallet/extension-base/koni/ap
 import { getExtrinsicByXtokensPallet } from '@subwallet/extension-base/koni/api/xcm/xTokens';
 import { _XCM_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 
@@ -35,7 +36,11 @@ export const createXcmExtrinsic = async ({ chainInfoMap,
   let extrinsic;
 
   if (_XCM_CHAIN_GROUP.polkadotXcm.includes(originTokenInfo.originChain)) {
-    extrinsic = getExtrinsicByPolkadotXcmPallet(originTokenInfo, originChainInfo, destinationChainInfo, recipient, sendingValue, api);
+    if (['astar', 'shiden'].includes(originChainInfo.slug) && !_isNativeToken(originTokenInfo)) {
+      extrinsic = getExtrinsicByXtokensPallet(originTokenInfo, originChainInfo, destinationChainInfo, recipient, sendingValue, api);
+    } else {
+      extrinsic = getExtrinsicByPolkadotXcmPallet(originTokenInfo, originChainInfo, destinationChainInfo, recipient, sendingValue, api);
+    }
   } else if (_XCM_CHAIN_GROUP.xcmPallet.includes(originTokenInfo.originChain)) {
     extrinsic = getExtrinsicByXcmPalletPallet(originTokenInfo, originChainInfo, destinationChainInfo, recipient, sendingValue, api);
   } else {

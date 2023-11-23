@@ -55,6 +55,7 @@ function Component ({ className, request }: Props) {
     isUnSupportCase,
     missingType,
     namespaceAccounts,
+    noNetwork,
     onApplyAccounts,
     onCancelSelectAccounts,
     onSelectAccount,
@@ -117,7 +118,7 @@ function Component ({ className, request }: Props) {
     };
   }, [onCancelSelectAccounts]);
 
-  const isSupportCase = !isUnSupportCase && !isExpired;
+  const isSupportCase = !isUnSupportCase && !isExpired && !noNetwork;
 
   return (
     <>
@@ -139,7 +140,18 @@ function Component ({ className, request }: Props) {
           )
         }
         {
-          !isUnSupportCase && isExpired && (
+          noNetwork && (
+            (
+              <AlertBox
+                description={t('We are unable to detect any network from the dApp through WalletConnect')}
+                title={t('Network undetected')}
+                type='warning'
+              />
+            )
+          )
+        }
+        {
+          !isUnSupportCase && !noNetwork && isExpired && (
             <>
               <AlertBox
                 description={t('Connection expired. Please create a new connection from dApp')}

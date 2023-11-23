@@ -2038,7 +2038,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@equilab/api@npm:^1.14.25":
+"@equilab/api@npm:~1.14.25":
   version: 1.14.25
   resolution: "@equilab/api@npm:1.14.25"
   dependencies:
@@ -2651,6 +2651,15 @@ __metadata:
   version: 1.1.3
   resolution: "@gar/promisify@npm:1.1.3"
   checksum: 4059f790e2d07bf3c3ff3e0fec0daa8144fe35c1f6e0111c9921bd32106adaa97a4ab096ad7dab1e28ee6a9060083c4d1a4ada42a7f5f3f7a96b8812e2b757c1
+  languageName: node
+  linkType: hard
+
+"@garvae/react-pie-donut-chart@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@garvae/react-pie-donut-chart@npm:1.0.0"
+  peerDependencies:
+    react: ">=16"
+  checksum: d806accc7b71fd9a4b2bace6f65e442337aab66f4844d8d8b6467ea33b1e69775577b025e3d178bd4b26c12a677661ae0dcd3779f20fca1bb84f3da041a44ac1
   languageName: node
   linkType: hard
 
@@ -3566,7 +3575,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-app-eth@npm:^6.33.4":
+"@ledgerhq/hw-app-eth@npm:6.33.4":
   version: 6.33.4
   resolution: "@ledgerhq/hw-app-eth@npm:6.33.4"
   dependencies:
@@ -5872,7 +5881,7 @@ __metadata:
     "@acala-network/api": ^5.0.2
     "@apollo/client": ^3.7.14
     "@azns/resolver-core": ^1.4.0
-    "@equilab/api": ^1.14.25
+    "@equilab/api": ~1.14.25
     "@ethereumjs/common": ^2.6.5
     "@ethereumjs/tx": ^4.0.2
     "@ethersproject/abi": ^5.7.0
@@ -6015,6 +6024,7 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^6.2.1
     "@fortawesome/free-solid-svg-icons": ^6.2.1
     "@fortawesome/react-fontawesome": ^0.2.0
+    "@garvae/react-pie-donut-chart": 1.0.0
     "@ledgerhq/hw-app-eth": ^6.33.4
     "@polkadot/api-contract": ^10.9.1
     "@polkadot/hw-ledger": ^12.3.2
@@ -6033,7 +6043,7 @@ __metadata:
     "@subwallet/extension-inject": ^1.1.22-0
     "@subwallet/extension-mocks": ^1.1.22-0
     "@subwallet/keyring": ^0.1.1
-    "@subwallet/react-ui": 5.1.2-b72
+    "@subwallet/react-ui": 5.1.2-b73
     "@subwallet/ui-keyring": ^0.1.1
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6042,12 +6052,14 @@ __metadata:
     "@types/react-copy-to-clipboard": ^5.0.4
     "@types/react-dom": ^18.0.9
     "@types/react-lazy-load-image-component": ^1.5.3
+    "@types/react-slick": ^0.23.11
     "@types/redux-persist": ^4.3.1
     "@types/sinon-chrome": ^2.2.11
     "@types/store": ^2.0.2
     "@types/styled-components": ^5.1.26
     "@walletconnect/types": ^2.8.4
     "@wojtekmaj/enzyme-adapter-react-17": ^0.8.0
+    axios: ^1.2.1
     bip39: ^3.1.0
     boring-avatars: ^1.7.0
     bowser: ^2.11.0
@@ -6057,6 +6069,7 @@ __metadata:
     enzyme-adapter-react-16: ^1.15.7
     file-saver: ^2.0.5
     i18next: ^21.9.2
+    mobile-detect: ^1.4.5
     moment: ^2.29.4
     phosphor-react: ^1.4.1
     querystring: ^0.2.1
@@ -6074,15 +6087,16 @@ __metadata:
     react-qr-code: ^2.0.11
     react-qr-reader: ^3.0.0-beta-1
     react-redux: ^8.0.5
-    react-router: ^6.8.2
-    react-router-dom: ^6.8.2
+    react-router-dom: ~6.9.0
     react-select: ^5.7.0
+    react-share: ^4.4.1
+    react-slick: ^0.29.0
     react-tabs: ^6.0.0
     react-tooltip: 4.5.1
     react-transition-group: ^4.4.5
     redux: ^4.2.0
     redux-persist: ^6.0.0
-    redux-toolkit: ^1.1.2
+    redux-toolkit: ^1.1.2-1
     semantic-ui-react: ^2.1.4
     sinon-chrome: ^3.0.1
     styled-components: ^5.3.6
@@ -6148,9 +6162,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b72":
-  version: 5.1.2-b72
-  resolution: "@subwallet/react-ui@npm:5.1.2-b72"
+"@subwallet/react-ui@npm:5.1.2-b73":
+  version: 5.1.2-b73
+  resolution: "@subwallet/react-ui@npm:5.1.2-b73"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6222,7 +6236,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: cd4f0d66071ed9298dcbbad6800112215f910901d455a5a53dc693703b0357008e5c5486c26eed8eb3cecc5eb408faf398254a2dcd792ef38aa5f13ca1af71f8
+  checksum: f2738774f479fc245aeae3cb8286c32b4c7b811063a46572613fa2537c4bb55bbb35e7cddd322db206d4eee52357f80ff64990825dac9600ecbf3541997a237c
   languageName: node
   linkType: hard
 
@@ -6265,6 +6279,42 @@ __metadata:
     os-browserify: ^0.3.0
     path-browserify: ^1.0.1
     process: ^0.11.10
+    stream-browserify: ^3.0.0
+    stream-http: ^3.2.0
+    thread-loader: ^3.0.4
+    url-loader: ^4.1.1
+    webpack: ^5.74.0
+    webpack-cli: ^4.10.0
+    webpack-dev-server: ^4.11.1
+  languageName: unknown
+  linkType: soft
+
+"@subwallet/webapp@workspace:packages/webapp":
+  version: 0.0.0-use.local
+  resolution: "@subwallet/webapp@workspace:packages/webapp"
+  dependencies:
+    "@babel/runtime": ^7.20.6
+    "@polkadot/dev": ^0.65.23
+    "@subwallet/extension-base": ^1.1.22-0
+    "@subwallet/extension-inject": ^1.1.22-0
+    "@subwallet/extension-koni-ui": ^1.1.22-0
+    assert: ^2.0.0
+    babel-loader: ^8.2.5
+    browser-resolve: ^2.0.0
+    buffer: ^6.0.3
+    copy-webpack-plugin: ^11.0.0
+    crypto-browserify: ^3.12.0
+    dotenv: ^16.3.1
+    extract-loader: ^5.1.0
+    file-loader: ^6.2.0
+    html-loader: ^4.2.0
+    html-webpack-plugin: ^5.5.0
+    https-browserify: ^1.0.0
+    os-browserify: ^0.3.0
+    path-browserify: ^1.0.1
+    process: ^0.11.10
+    sass: ^1.62.0
+    sass-loader: ^13.2.2
     stream-browserify: ^3.0.0
     stream-http: ^3.2.0
     thread-loader: ^3.0.4
@@ -6799,6 +6849,15 @@ __metadata:
     "@types/react": "*"
     csstype: ^3.0.2
   checksum: 4e164a897fa750bbb216b97a9fe5b01e98e9620c68a98269d2e73f1416b9dd93277a5ab4052253ab74d0ad058462577f2eae35f94027ff9b4740242e20b185c7
+  languageName: node
+  linkType: hard
+
+"@types/react-slick@npm:^0.23.11":
+  version: 0.23.12
+  resolution: "@types/react-slick@npm:0.23.12"
+  dependencies:
+    "@types/react": "*"
+  checksum: 5f9934e174046e0a556153b5f68acc12176c8cb8ce7049e407d7d68bf7fed1b45f371b35d13d740fec3158407d2feb38412ab4b925335f34183822660b6e40a3
   languageName: node
   linkType: hard
 
@@ -10375,7 +10434,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:^3.4.0, chokidar@npm:^3.5.3":
+"chokidar@npm:>=3.0.0 <4.0.0, chokidar@npm:^3.4.0, chokidar@npm:^3.5.3":
   version: 3.5.3
   resolution: "chokidar@npm:3.5.3"
   dependencies:
@@ -11257,7 +11316,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:2.6.9, debug@npm:^2.2.0, debug@npm:^2.6.8, debug@npm:^2.6.9":
+"debug@npm:2.6.9, debug@npm:^2.1.3, debug@npm:^2.2.0, debug@npm:^2.6.8, debug@npm:^2.6.9":
   version: 2.6.9
   resolution: "debug@npm:2.6.9"
   dependencies:
@@ -12009,6 +12068,13 @@ __metadata:
     graceful-fs: ^4.2.4
     tapable: ^2.2.0
   checksum: 0bb9830704db271610f900e8d79d70a740ea16f251263362b0c91af545576d09fe50103496606c1300a05e588372d6f9780a9bc2e30ce8ef9b827ec8f44687ff
+  languageName: node
+  linkType: hard
+
+"enquire.js@npm:^2.1.6":
+  version: 2.1.6
+  resolution: "enquire.js@npm:2.1.6"
+  checksum: bb094054ee2768edafc3b80fb2b65b79d63160d625085162e9c9016843b6eaa13d7430201bf593c2e31e1725b3208f47f57aa27e03b19729e7590d1ca2241451
   languageName: node
   linkType: hard
 
@@ -14998,6 +15064,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"immutable@npm:^4.0.0":
+  version: 4.3.4
+  resolution: "immutable@npm:4.3.4"
+  checksum: de3edd964c394bab83432429d3fb0b4816b42f56050f2ca913ba520bd3068ec3e504230d0800332d3abc478616e8f55d3787424a90d0952e6aba864524f1afc3
+  languageName: node
+  linkType: hard
+
 "import-fresh@npm:^3.0.0, import-fresh@npm:^3.2.1":
   version: 3.3.0
   resolution: "import-fresh@npm:3.3.0"
@@ -17511,6 +17584,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsonp@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "jsonp@npm:0.2.1"
+  dependencies:
+    debug: ^2.1.3
+  checksum: 90aabd9deb3a9ba83aedf8d40e1aaff1fc29f3f3fe42985a661782498dde526a7cd9b7bec4b8721f7d0beafab9e5ccfdafd46640f7dd6c58d529a6bb5238e2b8
+  languageName: node
+  linkType: hard
+
 "jsprim@npm:^1.2.2":
   version: 1.4.2
   resolution: "jsprim@npm:1.4.2"
@@ -18531,6 +18613,13 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: 0c91b721bb12c3f9af4b77ebf73604baf350e64d80df91754dc509491ae93bf238581e59c7188360cec7cb62fc4100959245a42cfe01834efedc5e9d068376c2
+  languageName: node
+  linkType: hard
+
+"mobile-detect@npm:^1.4.5":
+  version: 1.4.5
+  resolution: "mobile-detect@npm:1.4.5"
+  checksum: 317d170f3bc27c3e36c3f4ab7809c33d20e81914147cdc74a8551f0ecad2c5ec067bd59dd1a240caf66c1df7fd793021a36677c3a6ed8bdf027d4715dc3f0973
   languageName: node
   linkType: hard
 
@@ -21292,7 +21381,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^6.8.2":
+"react-router-dom@npm:~6.9.0":
   version: 6.9.0
   resolution: "react-router-dom@npm:6.9.0"
   dependencies:
@@ -21305,7 +21394,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:6.9.0, react-router@npm:^6.8.2":
+"react-router@npm:6.9.0":
   version: 6.9.0
   resolution: "react-router@npm:6.9.0"
   dependencies:
@@ -21345,6 +21434,34 @@ __metadata:
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: 6052c7e3e9627485120ebd8257f128aad8f56386fe8d42374b7743eac1be457c33506d153c7886b4e32923c0c352d402ab805ef9ca02dbcd8393b2bdeb6e5af8
+  languageName: node
+  linkType: hard
+
+"react-share@npm:^4.4.1":
+  version: 4.4.1
+  resolution: "react-share@npm:4.4.1"
+  dependencies:
+    classnames: ^2.3.2
+    jsonp: ^0.2.1
+  peerDependencies:
+    react: ^16.3.0 || ^17 || ^18
+  checksum: f86bf7415f9fe98243b1ea58bf9df53503de7fb2235b1e633dd25c8cef68e59070b3cd20fab6ec5286eccbd30d27ce6c458ac532c4fdf7b6f12f4048bbea24d3
+  languageName: node
+  linkType: hard
+
+"react-slick@npm:^0.29.0":
+  version: 0.29.0
+  resolution: "react-slick@npm:0.29.0"
+  dependencies:
+    classnames: ^2.2.5
+    enquire.js: ^2.1.6
+    json2mq: ^0.2.0
+    lodash.debounce: ^4.0.8
+    resize-observer-polyfill: ^1.5.0
+  peerDependencies:
+    react: ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 67ce4981914da8a76c6efb4bc8ee7ab69e04c33bd4b3517419ab2165679a3c701dae781556149713fe2c542f84188b7ca101ea58883537be5c05756408f48c8b
   languageName: node
   linkType: hard
 
@@ -21569,7 +21686,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"redux-toolkit@npm:^1.1.2":
+"redux-toolkit@npm:^1.1.2-1":
   version: 1.1.2
   resolution: "redux-toolkit@npm:1.1.2"
   dependencies:
@@ -21898,7 +22015,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resize-observer-polyfill@npm:^1.5.1":
+"resize-observer-polyfill@npm:^1.5.0, resize-observer-polyfill@npm:^1.5.1":
   version: 1.5.1
   resolution: "resize-observer-polyfill@npm:1.5.1"
   checksum: 57e7f79489867b00ba43c9c051524a5c8f162a61d5547e99333549afc23e15c44fd43f2f318ea0261ea98c0eb3158cca261e6f48d66e1ed1cd1f340a43977094
@@ -22195,6 +22312,7 @@ __metadata:
   bin:
     koni-ci-build-dev: ./scripts/koni-ci-build-dev.mjs
     koni-ci-build-i18n: ./scripts/koni-ci-build-i18n.mjs
+    koni-ci-build-webapp: ./scripts/koni-ci-build-webapp.mjs
     koni-ci-ghact-build: ./scripts/koni-ci-ghact-build.mjs
     koni-dev-build-ts: ./scripts/koni-dev-build-ts.mjs
   languageName: unknown
@@ -22274,6 +22392,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sass-loader@npm:^13.2.2":
+  version: 13.3.2
+  resolution: "sass-loader@npm:13.3.2"
+  dependencies:
+    neo-async: ^2.6.2
+  peerDependencies:
+    fibers: ">= 3.1.0"
+    node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
+    sass: ^1.3.0
+    sass-embedded: "*"
+    webpack: ^5.0.0
+  peerDependenciesMeta:
+    fibers:
+      optional: true
+    node-sass:
+      optional: true
+    sass:
+      optional: true
+    sass-embedded:
+      optional: true
+  checksum: 7394a8d1b818a289b9caabd979543c907b83e28ae08bc80ccb836e0ccabc4ae574c077ab2fa520ba5fb8abb2ec3e7c9822a1cbd8c58a28ff30018be9d1dc6c27
+  languageName: node
+  linkType: hard
+
 "sass-lookup@npm:^3.0.0":
   version: 3.0.0
   resolution: "sass-lookup@npm:3.0.0"
@@ -22282,6 +22424,19 @@ __metadata:
   bin:
     sass-lookup: bin/cli.js
   checksum: fd4bf1ad9c54111617dec30dd90aff083e87c96aef50aff6cec443ad2fbbfa65da09f6e67a7e5ef99fa39dff65c937dc7358f18d319e083c6031f21def85ce6d
+  languageName: node
+  linkType: hard
+
+"sass@npm:^1.62.0":
+  version: 1.69.5
+  resolution: "sass@npm:1.69.5"
+  dependencies:
+    chokidar: ">=3.0.0 <4.0.0"
+    immutable: ^4.0.0
+    source-map-js: ">=0.6.2 <2.0.0"
+  bin:
+    sass: sass.js
+  checksum: c66f4f02882e7aa7aa49703824dadbb5a174dcd05e3cd96f17f73687889aab6027d078b518e2c04b594dfd89b2f574824bf935c7aee46c770aa6be9aafcc49f2
   languageName: node
   linkType: hard
 
@@ -22834,7 +22989,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-js@npm:^1.0.2":
+"source-map-js@npm:>=0.6.2 <2.0.0, source-map-js@npm:^1.0.2":
   version: 1.0.2
   resolution: "source-map-js@npm:1.0.2"
   checksum: c049a7fc4deb9a7e9b481ae3d424cc793cb4845daa690bc5a05d428bf41bf231ced49b4cf0c9e77f9d42fdb3d20d6187619fc586605f5eabe995a316da8d377c

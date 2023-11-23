@@ -3,7 +3,6 @@
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { AccountSelector, BasicInputEvent, ChainSelector, EmptyList, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
@@ -245,17 +244,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   // Fill display data to history list
   const historyMap = useMemo(() => {
-    const currentAddress = currentAccount?.address || '';
-    const currentAddressLowerCase = currentAddress.toLowerCase();
-    const isFilterByAddress = currentAccount?.address && !isAccountAll(currentAddress);
     const finalHistoryMap: Record<string, TransactionHistoryDisplayItem> = {};
 
     rawHistoryList.forEach((item: TransactionHistoryItem) => {
-      // Filter account by current account
-      if (isFilterByAddress && currentAddressLowerCase !== quickFormatAddressToCompare(item.address)) {
-        return;
-      }
-
       // Format display name for account by address
       const fromName = accountMap[quickFormatAddressToCompare(item.from) || ''];
       const toName = accountMap[quickFormatAddressToCompare(item.to) || ''];
@@ -265,7 +256,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     });
 
     return finalHistoryMap;
-  }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
+  }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap]);
 
   const [currentItemDisplayCount, setCurrentItemDisplayCount] = useState<number>(DEFAULT_ITEMS_COUNT);
 
@@ -393,33 +384,42 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setSelectedChain(event.target.value);
   }, [setSelectedChain]);
 
-  const historySelectorsNode = useMemo(() => {
-    return (
-      <>
-        {
-          isAllAccount && (
-            <AccountSelector
-              className={'__history-address-selector'}
-              onChange={onSelectAccount}
-              value={selectedAddress}
-            />
-          )
-        }
+  const historySelectorsNode = (
+    <>
+      {
+        isAllAccount && (
+          <AccountSelector
+            className={'__history-address-selector'}
+            onChange={onSelectAccount}
+            value={selectedAddress}
+          />
+        )
+      }
 
-        <ChainSelector
-          className={'__history-chain-selector'}
-          items={chainItems}
-          onChange={onSelectChain}
-          title={t('Select chain')}
-          value={selectedChain}
-        />
-      </>
-    );
-  }, [chainItems, onSelectAccount, onSelectChain, selectedAddress, selectedChain, t, isAllAccount]);
+      <ChainSelector
+        className={'__history-chain-selector'}
+        items={chainItems}
+        onChange={onSelectChain}
+        title={t('Select chain')}
+        value={selectedChain}
+      />
+    </>
+  );
+
+  const _onApplyFilter = useCallback(() => {
+    onApplyFilter();
+    setCurrentItemDisplayCount(DEFAULT_ITEMS_COUNT);
+  }, [onApplyFilter]);
 
   const onLoadMoreItems = useCallback(() => {
-    setCurrentItemDisplayCount((prev) => prev + NEXT_ITEMS_COUNT);
-  }, []);
+    setCurrentItemDisplayCount((prev) => {
+      if (prev + NEXT_ITEMS_COUNT > rawHistoryList.length) {
+        return rawHistoryList.length;
+      } else {
+        return prev + NEXT_ITEMS_COUNT;
+      }
+    });
+  }, [rawHistoryList.length]);
 
   const listSection = (
     <>
@@ -432,7 +432,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           filterBy={filterFunction}
           groupBy={groupBy}
           groupSeparator={groupSeparator}
-          hasMoreItems={Object.values(historyMap).length > historyItems.length}
+          hasMoreItems={rawHistoryList.length > historyItems.length}
           list={historyItems}
           loadMoreItems={onLoadMoreItems}
           renderItem={renderItem}
@@ -540,7 +540,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       <FilterModal
         id={FILTER_MODAL_ID}
-        onApplyFilter={onApplyFilter}
+        onApplyFilter={_onApplyFilter}
         onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
@@ -574,6 +574,7 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.__page-tool-area': {
       display: 'flex',
       padding: token.padding,
+      paddingTop: 0,
       borderBottomLeftRadius: token.size,
       borderBottomRightRadius: token.size,
       backgroundColor: token.colorBgDefault,
@@ -612,7 +613,11 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
       overflow: 'auto',
       paddingBottom: token.padding,
       paddingLeft: token.padding,
-      paddingRight: token.padding
+      paddingRight: token.padding,
+
+      '.__infinite-loader': {
+        opacity: 0
+      }
     },
 
     '.ant-sw-screen-layout-body': {

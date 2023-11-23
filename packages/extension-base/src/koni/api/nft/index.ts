@@ -11,7 +11,8 @@ import { BaseNftApi } from '@subwallet/extension-base/koni/api/nft/nft';
 import OrdinalNftApi from '@subwallet/extension-base/koni/api/nft/ordinal_nft';
 import { RmrkNftApi } from '@subwallet/extension-base/koni/api/nft/rmrk_nft';
 import StatemineNftApi from '@subwallet/extension-base/koni/api/nft/statemine_nft';
-import UniqueNftApi from '@subwallet/extension-base/koni/api/nft/unique_nft';
+import { UniqueNftApi } from '@subwallet/extension-base/koni/api/nft/unique_network_nft';
+// import UniqueNftApi from '@subwallet/extension-base/koni/api/nft/unique_nft';
 import { VaraNftApi } from '@subwallet/extension-base/koni/api/nft/vara_nft';
 import { WasmNftApi } from '@subwallet/extension-base/koni/api/nft/wasm_nft';
 import { _NFT_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
@@ -35,7 +36,7 @@ function createSubstrateNftApi (chain: string, substrateApi: _SubstrateApi | nul
   } else if (_NFT_CHAIN_GROUP.statemint.includes(chain)) {
     return new StatemintNftApi(substrateApi, substrateAddresses, chain);
   } else if (_NFT_CHAIN_GROUP.unique_network.includes(chain)) {
-    return new UniqueNftApi(substrateApi, substrateAddresses, chain);
+    return new UniqueNftApi(chain, substrateAddresses);
   } else if (_NFT_CHAIN_GROUP.bitcountry.includes(chain)) {
     return new BitCountryNftApi(substrateApi, substrateAddresses, chain);
   } else if (_NFT_CHAIN_GROUP.vara.includes(chain)) {

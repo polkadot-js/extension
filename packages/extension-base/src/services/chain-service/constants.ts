@@ -49,7 +49,7 @@ export const _NFT_CHAIN_GROUP = {
   rmrk: ['kusama'],
   statemine: ['statemine'],
   statemint: ['statemint'],
-  unique_network: ['unique_network'],
+  unique_network: ['unique_network', 'quartz', 'opal'],
   bitcountry: ['bitcountry', 'pioneer'],
   vara: ['vara_network']
 };

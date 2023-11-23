@@ -45,12 +45,13 @@ jobs:
         branch: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.ref_name }}
         directory: './packages/webapp/build'
         wranglerVersion: '3'
-    - name: Commit changes
+    - if: "github.ref_name == 'webapp-dev' && github.event_name == 'push'"
+      name: Automation Bot
       uses: EndBug/add-and-commit@v9
       with:
         author_name: Scheduler
-        author_email: scheduler@github.io
-        message: 'Update build number in package.json webapp'
+        author_email: bot@subwallet.app
+        message: 'Auto increase webapp build number'
     - name: Notify to Discord
       uses: sarisia/actions-status-discord@v1
       if: always()

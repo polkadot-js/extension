@@ -3,6 +3,7 @@
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { CrowdloanContributionsResponse, ExtrinsicItem, ExtrinsicsListResponse, IMultiChainBalance, SubscanRequest, SubscanResponse, TransferItem, TransfersListResponse } from '@subwallet/extension-base/services/subscan-service/types';
+import { wait } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
 const QUERY_ROW = 100;
@@ -161,39 +162,60 @@ export class SubscanService {
     });
   }
 
-  public async getAllExtrinsicItems (chain: string, address: string): Promise<ExtrinsicItem[]> {
-    let currentPage = 0;
-    const result: ExtrinsicItem[] = [];
+  public async fetchAllPossibleExtrinsicItems (
+    chain: string,
+    address: string,
+    cbAfterEachRequest?: (items: ExtrinsicItem[]) => void
+  ): Promise<ExtrinsicItem[]> {
+    let count = 0;
+    const resultMap: Record<string, ExtrinsicItem> = {};
 
-    while (true) {
-      try {
-        const res = await this.getExtrinsicsList(chain, address, currentPage);
+    const _getExtrinsicItems = async (page: number) => {
+      const res = await this.getExtrinsicsList(chain, address, page);
 
-        if (res.extrinsics) {
-          result.push(...res.extrinsics);
-          ++currentPage;
-
-          if (result.length >= res.count) {
-            break;
-          }
-        } else {
-          break;
-        }
-      } catch (e) {
-        break;
+      if (!res || !res.count || !res.extrinsics || !res.extrinsics.length) {
+        return;
       }
-    }
 
-    return result;
+      if (res.count > count) {
+        count = res.count;
+      }
+
+      cbAfterEachRequest?.(res.extrinsics);
+      res.extrinsics.forEach((item) => {
+        resultMap[item.extrinsic_hash] = item;
+      });
+
+      if (Object.values(resultMap).length < count) {
+        await wait(100);
+
+        await _getExtrinsicItems(++page);
+      }
+    };
+
+    await _getExtrinsicItems(0);
+
+    return Object.values(resultMap);
   }
 
-  public getTransfersList (chain: string, address: string, page = 0): Promise<TransfersListResponse> {
+  public getTransfersList (chain: string, address: string, page = 0, direction?: 'sent' | 'received'): Promise<TransfersListResponse> {
+    const requestBody: {
+      page: number,
+      row: number,
+      address: string,
+      direction?: 'sent' | 'received'
+    } = {
+      page,
+      row: QUERY_ROW,
+      address
+    };
+
+    if (direction) {
+      requestBody.direction = direction;
+    }
+
     return this.addRequest<TransfersListResponse>(async () => {
-      const rs = await this.postRequest(this.getApiUrl(chain, 'api/v2/scan/transfers'), {
-        page,
-        row: QUERY_ROW,
-        address
-      });
+      const rs = await this.postRequest(this.getApiUrl(chain, 'api/v2/scan/transfers'), requestBody);
 
       if (rs.status !== 200) {
         throw new SWError('SubscanService.getTransfersList', await rs.text());
@@ -205,29 +227,40 @@ export class SubscanService {
     });
   }
 
-  public async getAllTransferItems (chain: string, address: string): Promise<TransferItem[]> {
-    let currentPage = 0;
-    const result: TransferItem[] = [];
+  public async fetchAllPossibleTransferItems (
+    chain: string,
+    address: string,
+    direction?: 'sent' | 'received',
+    cbAfterEachRequest?: (items: TransferItem[]) => void
+  ): Promise<TransferItem[]> {
+    let count = 0;
+    const resultMap: Record<string, TransferItem> = {};
 
-    while (true) {
-      try {
-        const res = await this.getTransfersList(chain, address, currentPage);
+    const _getTransferItems = async (page: number) => {
+      const res = await this.getTransfersList(chain, address, page, direction);
 
-        if (res.transfers) {
-          result.push(...res.transfers);
-          ++currentPage;
-
-          if (result.length >= res.count) {
-            break;
-          }
-        } else {
-          break;
-        }
-      } catch (e) {
-        break;
+      if (!res || !res.count || !res.transfers || !res.transfers.length) {
+        return;
       }
-    }
 
-    return result;
+      if (res.count > count) {
+        count = res.count;
+      }
+
+      cbAfterEachRequest?.(res.transfers);
+      res.transfers.forEach((item) => {
+        resultMap[item.hash] = item;
+      });
+
+      if (Object.values(resultMap).length < count) {
+        await wait(100);
+
+        await _getTransferItems(++page);
+      }
+    };
+
+    await _getTransferItems(0);
+
+    return Object.values(resultMap);
   }
 }

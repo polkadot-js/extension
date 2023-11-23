@@ -11,7 +11,7 @@ import { useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } f
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-koni-ui/messaging';
 import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
+import { ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -126,6 +126,8 @@ function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'addres
 }
 
 const modalId = HISTORY_DETAIL_MODAL;
+const DEFAULT_ITEMS_COUNT = 20;
+const NEXT_ITEMS_COUNT = 10;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useSetCurrentPage('/home/history');
@@ -134,7 +136,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { accounts, currentAccount, isAllAccount } = useSelector((root) => root.accountState);
   const { chainInfoMap } = useSelector((root) => root.chainStore);
   const { language } = useSelector((root) => root.settings);
-  const [loading, setLoading] = useState<boolean>(true);
   const [rawHistoryList, setRawHistoryList] = useState<TransactionHistoryItem[]>([]);
 
   const isActive = checkActive(modalId);
@@ -266,9 +267,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return finalHistoryMap;
   }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
 
-  const historyList = useMemo(() => {
-    return Object.values(historyMap).sort((a, b) => (b.time - a.time));
+  const [currentItemDisplayCount, setCurrentItemDisplayCount] = useState<number>(DEFAULT_ITEMS_COUNT);
+
+  const getHistoryItems = useCallback((count: number) => {
+    return Object.values(historyMap).sort((a, b) => (b.time - a.time)).slice(0, count);
   }, [historyMap]);
+
+  const [historyItems, setHistoryItems] = useState<TransactionHistoryDisplayItem[]>(getHistoryItems(DEFAULT_ITEMS_COUNT));
 
   const [curAdr] = useState(currentAccount?.address);
 
@@ -296,14 +301,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     if (extrinsicHashOrId && chain && openDetailLink) {
-      const existed = historyList.find((item) => item.chain === chain && (item.transactionId === extrinsicHashOrId || item.extrinsicHash === extrinsicHashOrId));
+      const existed = Object.values(historyMap).find((item) => item.chain === chain && (item.transactionId === extrinsicHashOrId || item.extrinsicHash === extrinsicHashOrId));
 
       if (existed) {
         setSelectedItem(existed);
         activeModal(modalId);
       }
     }
-  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyList]);
+  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyMap]);
 
   useEffect(() => {
     if (isActive) {
@@ -412,38 +417,31 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [chainItems, onSelectAccount, onSelectChain, selectedAddress, selectedChain, t, isAllAccount]);
 
-  const listSection = useMemo(() => {
-    return (
-      <>
-        <div className={'__page-tool-area'}>
-          {historySelectorsNode}
-        </div>
+  const onLoadMoreItems = useCallback(() => {
+    setCurrentItemDisplayCount((prev) => prev + NEXT_ITEMS_COUNT);
+  }, []);
 
-        <div className={'__page-list-area'}>
-          {loading && (
-            <div className={'__loading-area'}>
-              <ActivityIndicator
-                loading={true}
-                size={32}
-              />
-            </div>
-          )}
+  const listSection = (
+    <>
+      <div className={'__page-tool-area'}>
+        {historySelectorsNode}
+      </div>
 
-          {!loading && (
-            <SwList
-              filterBy={filterFunction}
-              groupBy={groupBy}
-              groupSeparator={groupSeparator}
-              list={historyList}
-              renderItem={renderItem}
-              renderOnScroll={true}
-              renderWhenEmpty={emptyList}
-            />
-          )}
-        </div>
-      </>
-    );
-  }, [filterFunction, groupBy, groupSeparator, historyList, renderItem, emptyList, historySelectorsNode, loading]);
+      <div className={'__page-list-area'}>
+        <SwList
+          filterBy={filterFunction}
+          groupBy={groupBy}
+          groupSeparator={groupSeparator}
+          hasMoreItems={Object.values(historyMap).length > historyItems.length}
+          list={historyItems}
+          loadMoreItems={onLoadMoreItems}
+          renderItem={renderItem}
+          renderOnScroll={false}
+          renderWhenEmpty={emptyList}
+        />
+      </div>
+    </>
+  );
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
     return [
@@ -464,7 +462,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     let id: string;
     let isSubscribed = true;
 
-    setLoading(true);
+    setCurrentItemDisplayCount(DEFAULT_ITEMS_COUNT);
 
     subscribeTransactionHistory(
       selectedChain,
@@ -484,8 +482,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     }).catch((e) => {
       console.log('subscribeTransactionHistory error:', e);
-    }).finally(() => {
-      setLoading(false);
     });
 
     return () => {
@@ -510,6 +506,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       });
     }
   }, [chainInfoMap, chainItems, selectedAddress, setSelectedChain]);
+
+  useEffect(() => {
+    setHistoryItems(getHistoryItems(currentItemDisplayCount));
+  }, [currentItemDisplayCount, getHistoryItems]);
 
   return (
     <>

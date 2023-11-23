@@ -33,7 +33,7 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
     const availableNamespaces: Record<string, string[]> = {};
     const result: Record<string, WalletConnectChainInfo[]> = {};
 
-    Object.entries(params.requiredNamespaces)
+    params.requiredNamespaces && Object.entries(params.requiredNamespaces)
       .forEach(([key, namespace]) => {
         if (isSupportWalletConnectNamespace(key)) {
           if (namespace.chains) {
@@ -70,9 +70,11 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
   const supportedChains = useMemo(() => {
     const chains: string[] = [];
 
-    for (const [key, namespace] of Object.entries(params.requiredNamespaces)) {
-      if (isSupportWalletConnectNamespace(key)) {
-        chains.push(...(namespace.chains || []));
+    if (params.requiredNamespaces) {
+      for (const [key, namespace] of Object.entries(params.requiredNamespaces)) {
+        if (isSupportWalletConnectNamespace(key)) {
+          chains.push(...(namespace.chains || []));
+        }
       }
     }
 
@@ -91,7 +93,7 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
   const missingType = useMemo((): AccountAuthType[] => {
     const result: AccountAuthType[] = [];
 
-    Object.keys(params.requiredNamespaces).forEach((namespace) => {
+    Object.keys(params.requiredNamespaces || {}).forEach((namespace) => {
       if (WALLET_CONNECT_SUPPORT_NAMESPACES.includes(namespace)) {
         const available = noAllAccount.some((acc) => (WALLET_CONNECT_EIP155_NAMESPACE === namespace) === isEthereumAddress(acc.address));
 
@@ -105,7 +107,7 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
   }, [noAllAccount, params.requiredNamespaces]);
 
   const isUnSupportCase = useMemo(() =>
-    Object.values(params.requiredNamespaces)
+    Object.values(params.requiredNamespaces || {})
       .map((namespace) => namespace.chains || [])
       .flat()
       .some((chain) => !isSupportWalletConnectChain(chain, chainInfoMap))
@@ -114,6 +116,9 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
 
   const supportOneChain = useMemo(() => supportedChains.length === 1, [supportedChains]);
   const supportOneNamespace = useMemo(() => Object.keys(namespaces).length === 1, [namespaces]);
+  const noNetwork = useMemo((): boolean => {
+    return (!params.requiredNamespaces || !Object.keys(params.requiredNamespaces).length) && (!params.optionalNamespaces || !Object.keys(params.optionalNamespaces).length);
+  }, [params.optionalNamespaces, params.requiredNamespaces]);
 
   const [isExpiredState, setIsExpiredState] = useState(isProposalExpired(params));
   const isExpired = useMemo(
@@ -230,6 +235,7 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
     isUnSupportCase,
     missingType,
     namespaceAccounts: result,
+    noNetwork,
     onApplyAccounts,
     onCancelSelectAccounts,
     onSelectAccount,

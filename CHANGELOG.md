@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 1.1.22
+Build date: Nov 15, 2023.
+- Update chain-list (#2178)
+  - Add support for Enjin Relaychain and Enjin Matrixchain
+  - Add support for Vara testnet
+  - Add support for Goldberg testnet
+- Update WalletConnect namespace (#2119)
+
+Bugs fixed:
+- Fixed bug chainStaking Metadata on Kusama (#2162)
+- Fixed bug Can’t get balance of the ENJ token (#2154)
+
 ## 1.1.21
 Build date: Nov 08, 2023.
 - Support nomination pool for Vara network (#2152)

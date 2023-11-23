@@ -12,7 +12,8 @@ export const API_MAX_RETRY = 2;
 export const _API_OPTIONS_CHAIN_GROUP = {
   acala: ['acala', 'karura', 'origintrail', 'kintsugi'],
   turing: ['turingStaging', 'turing'],
-  avail: ['kate']
+  avail: ['kate'],
+  goldberg: ['goldberg_testnet']
 };
 
 export const _PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {
@@ -192,7 +193,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel'],
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
-  avail: ['kate'],
+  avail: ['kate', 'goldberg_testnet'],
   pendulum: ['pendulum', 'amplitude', 'amplitude_test']
 };
 

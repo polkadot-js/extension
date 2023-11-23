@@ -49,7 +49,7 @@ jobs:
       name: Automation Bot
       uses: EndBug/add-and-commit@v9
       with:
-        author_name: Scheduler
+        author_name: Automation Bot
         author_email: bot@subwallet.app
         message: 'Auto increase webapp build number'
     - name: Notify to Discord

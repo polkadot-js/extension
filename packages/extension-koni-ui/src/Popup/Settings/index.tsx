@@ -8,7 +8,8 @@ import {
   PRIVACY_AND_POLICY_URL,
   TELEGRAM_URL,
   TERMS_OF_SERVICE_URL,
-  TWITTER_URL, WEB_BUILD_NUMBER,
+  TWITTER_URL,
+  WEB_BUILD_NUMBER,
   WEBSITE_URL,
   WIKI_URL
 } from '@subwallet/extension-koni-ui/constants/common';

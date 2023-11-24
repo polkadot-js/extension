@@ -13,7 +13,7 @@ import { t } from 'i18next';
 
 import { Bytes } from '@polkadot/types';
 import { Codec } from '@polkadot/types/types';
-import { BN, BN_ZERO } from '@polkadot/util';
+import { BN, BN_ZERO, hexToString, isHex } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export interface PalletStakingNominations {
@@ -790,10 +790,12 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
     const minimumActiveStake = _minimumActiveStake.toPrimitive() as number;
     const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
 
-    const poolMetadata = _metadata.toPrimitive() as unknown as Bytes;
+    const poolMetadata = _metadata.toPrimitive() as unknown as string;
     const bondedPool = _bondedPool.toPrimitive() as unknown as PalletNominationPoolsBondedPoolInner;
 
-    const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
+    // const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
+
+    const poolName = isHex(poolMetadata) ? hexToString(poolMetadata) : poolMetadata;
 
     const isPoolOpen = bondedPool.state === 'Open';
     const isPoolNominating = !!nominations && nominations.targets.length > 0;

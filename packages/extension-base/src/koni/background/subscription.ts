@@ -5,7 +5,7 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
-import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
+import { getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
 import { subscribeEssentialChainStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
 import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-base/koni/api/staking/paraChain';
 import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
@@ -257,6 +257,7 @@ export class KoniSubscription {
     ).catch(this.logger.log);
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async subscribeStakingReward (address: string) {
     const addresses = this.state.getDecodedAddresses(address);
 
@@ -275,9 +276,9 @@ export class KoniSubscription {
       }
     });
 
-    await getNominationStakingRewardData(addresses, targetNetworkMap, (rewardItem: StakingRewardItem) => {
-      this.state.updateStakingReward(rewardItem);
-    });
+    // await getNominationStakingRewardData(addresses, targetNetworkMap, (rewardItem: StakingRewardItem) => {
+    //   this.state.updateStakingReward(rewardItem);
+    // });
   }
 
   async subscribeStakingRewardFastInterval (address: string) {

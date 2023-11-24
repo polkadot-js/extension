@@ -771,45 +771,32 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
 
   const nominationPools: NominationPoolInfo[] = [];
 
-  const poolsPalletId = substrateApi.api.consts.nominationPools.palletId.toString();
   const _allPoolsInfo = await chainApi.api.query.nominationPools.reversePoolIdLookup.entries();
 
   await Promise.all(_allPoolsInfo.map(async (_poolInfo) => {
     const poolAddressList = _poolInfo[0].toHuman() as string[];
     const poolAddress = poolAddressList[0];
     const poolId = _poolInfo[1].toPrimitive() as number;
-    const poolStashAccount = parsePoolStashAddress(substrateApi.api, 0, poolId, poolsPalletId);
 
-    const [_nominations, _bondedPool, _metadata, _minimumActiveStake] = await Promise.all([
-      chainApi.api.query.staking.nominators(poolStashAccount),
+    const [_bondedPool, _metadata] = await Promise.all([
       chainApi.api.query.nominationPools.bondedPools(poolId),
-      chainApi.api.query.nominationPools.metadata(poolId),
-      chainApi.api.query.staking.minimumActiveStake()
+      chainApi.api.query.nominationPools.metadata(poolId)
     ]);
-
-    const minimumActiveStake = _minimumActiveStake.toPrimitive() as number;
-    const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
 
     const poolMetadata = _metadata.toPrimitive() as unknown as Bytes;
     const bondedPool = _bondedPool.toPrimitive() as unknown as PalletNominationPoolsBondedPoolInner;
 
     const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
 
-    const isPoolOpen = bondedPool.state === 'Open';
-    const isPoolNominating = !!nominations && nominations.targets.length > 0;
-    const isPoolEarningReward = bondedPool.points > minimumActiveStake;
-
-    if (isPoolOpen && isPoolNominating && isPoolEarningReward) {
-      nominationPools.push({
-        id: poolId,
-        address: poolAddress,
-        name: poolName,
-        bondedAmount: bondedPool.points?.toString() || '0',
-        roles: bondedPool.roles,
-        memberCounter: bondedPool.memberCounter,
-        state: bondedPool.state
-      });
-    }
+    nominationPools.push({
+      id: poolId,
+      address: poolAddress,
+      name: poolName,
+      bondedAmount: bondedPool.points?.toString() || '0',
+      roles: bondedPool.roles,
+      memberCounter: bondedPool.memberCounter,
+      state: bondedPool.state
+    });
   }));
 
   return nominationPools;

@@ -54,7 +54,7 @@ jobs:
       with:
         author_name: Automation Bot
         author_email: bot@subwallet.app
-        message: 'Auto increase webapp build number'
+        message: '[CI Skip] Auto increase webapp build number'
     - name: Notify to Discord
       uses: sarisia/actions-status-discord@v1
       if: always()

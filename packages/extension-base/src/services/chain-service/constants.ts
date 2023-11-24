@@ -34,7 +34,8 @@ export const _BALANCE_CHAIN_GROUP = {
   equilibrium_parachain: ['equilibrium_parachain'],
   bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude'],
   statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari'],
-  kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'] // perhaps there are some runtime updates
+  kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'], // perhaps there are some runtime updates
+  centrifuge: ['centrifuge']
 };
 
 export const _BALANCE_TOKEN_GROUP = {
@@ -194,7 +195,8 @@ export const _TRANSFER_CHAIN_GROUP = {
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
   avail: ['kate', 'goldberg_testnet'],
-  pendulum: ['pendulum', 'amplitude', 'amplitude_test']
+  pendulum: ['pendulum', 'amplitude', 'amplitude_test'],
+  centrifuge: ['centrifuge']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {

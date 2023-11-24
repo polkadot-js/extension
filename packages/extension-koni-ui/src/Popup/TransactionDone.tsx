@@ -16,7 +16,7 @@ type Props = ThemeProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
-  const { address, chain, transactionId } = useParams<{address: string, chain: string, transactionId: string}>();
+  const { chain, transactionId } = useParams<{chain: string, transactionId: string}>();
 
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -24,13 +24,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const viewInHistory = useCallback(
     () => {
-      if (address && chain && transactionId) {
-        navigate(`/home/history/${address}/${chain}/${transactionId}`);
+      if (chain && transactionId) {
+        navigate(`/home/history/${chain}/${transactionId}`);
       } else {
         navigate('/home/history');
       }
     },
-    [chain, transactionId, navigate, address]
+    [chain, transactionId, navigate]
   );
 
   return (

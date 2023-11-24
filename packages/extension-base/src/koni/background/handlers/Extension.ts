@@ -1586,10 +1586,10 @@ export default class KoniExtension {
     return historySubject.getValue().filter((item) => addresses.some((address) => isSameAddress(item.address, address)));
   }
 
-  private async subscribeHistoryByChainAndAddress ({ address, chain }: RequestSubscribeHistory, id: string, port: chrome.runtime.Port): Promise<ResponseSubscribeHistory> {
+  private subscribeHistoryByChainAndAddress ({ address, chain }: RequestSubscribeHistory, id: string, port: chrome.runtime.Port): ResponseSubscribeHistory {
     const cb = createSubscription<'pri(transaction.history.subscribe)'>(id, port);
 
-    const subscribeHistoriesResponse = await this.#koniState.historyService.subscribeHistories(chain, address, cb);
+    const subscribeHistoriesResponse = this.#koniState.historyService.subscribeHistories(chain, address, cb);
 
     this.createUnsubscriptionHandle(id, subscribeHistoriesResponse.unsubscribe);
 
@@ -4118,7 +4118,7 @@ export default class KoniExtension {
       case 'pri(transaction.history.getSubscription)':
         return await this.subscribeHistory(id, port);
       case 'pri(transaction.history.subscribe)':
-        return await this.subscribeHistoryByChainAndAddress(request as RequestSubscribeHistory, id, port);
+        return this.subscribeHistoryByChainAndAddress(request as RequestSubscribeHistory, id, port);
 
       /* Account management */
       // Add account

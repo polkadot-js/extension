@@ -89,59 +89,86 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     return this.historySubject;
   }
 
-  private async fetchSubscanTransactionHistory (chain: string, address: string) {
-    const result: TransactionHistoryItem[] = [];
-
+  private fetchSubscanTransactionHistory (chain: string, address: string) {
     if (!this.subscanService.checkSupportedSubscanChain(chain)) {
-      return result;
+      return;
     }
 
-    // todo: optimise this: reduce unnessary query
-    const extrinsicItems = await this.subscanService.getAllExtrinsicItems(chain, address);
-    const transferItems = await this.subscanService.getAllTransferItems(chain, address);
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
-    const excludeTransferExtrinsicHash: string[] = [];
     const excludeExtrinsicParserKeys: string[] = [
       'balances.transfer_all'
     ];
 
-    extrinsicItems.forEach((x) => {
-      if (!excludeExtrinsicParserKeys.includes(getExtrinsicParserKey(x))) {
-        excludeTransferExtrinsicHash.push(x.extrinsic_hash);
-      }
+    // Note: fetchAllPossibleExtrinsicItems and fetchAllPossibleTransferItems-receive can run parallelly
+    // Hover, fetchAllPossibleTransferItems-sent must run after fetchAllPossibleExtrinsicItems,
+    // to avoid "duplicate Extrinsic Hash between items" problem
 
-      const item = parseSubscanExtrinsicData(address, x, chainInfo);
+    this.subscanService.fetchAllPossibleExtrinsicItems(chain, address, (extrinsicItems) => {
+      const result: TransactionHistoryItem[] = [];
 
-      if (item) {
-        result.push(item);
-      }
+      extrinsicItems.forEach((x) => {
+        const item = parseSubscanExtrinsicData(address, x, chainInfo);
+
+        if (item) {
+          result.push(item);
+        }
+      });
+
+      this.addHistoryItems(result).catch((e) => {
+        console.log('addHistoryItems in fetchAllPossibleExtrinsicItems error', e);
+      });
+    }).then((extrinsicItems) => {
+      const excludeTransferExtrinsicHash: string[] = [];
+
+      extrinsicItems.forEach((x) => {
+        if (!excludeExtrinsicParserKeys.includes(getExtrinsicParserKey(x))) {
+          excludeTransferExtrinsicHash.push(x.extrinsic_hash);
+        }
+      });
+
+      this.subscanService.fetchAllPossibleTransferItems(chain, address, 'sent', (transferItems) => {
+        const result: TransactionHistoryItem[] = [];
+
+        transferItems.forEach((t) => {
+          if (!excludeTransferExtrinsicHash.includes(t.hash)) {
+            result.push(parseSubscanTransferData(address, t, chainInfo));
+          }
+        });
+
+        this.addHistoryItems(result).catch((e) => {
+          console.log('addHistoryItems in fetchAllPossibleTransferItems-sent error', e);
+        });
+      }).catch((e) => {
+        console.log('fetchAllPossibleTransferItems-sent error', e);
+      });
+    }).catch((e) => {
+      console.log('fetchAllPossibleExtrinsicItems error', e);
     });
 
-    transferItems.forEach((t) => {
-      if (!excludeTransferExtrinsicHash.includes(t.hash)) {
+    this.subscanService.fetchAllPossibleTransferItems(chain, address, 'received', (transferItems) => {
+      const result: TransactionHistoryItem[] = [];
+
+      transferItems.forEach((t) => {
         result.push(parseSubscanTransferData(address, t, chainInfo));
-      }
+      });
+
+      this.addHistoryItems(result).catch((e) => {
+        console.log('addHistoryItems in fetchAllPossibleTransferItems-receive error', e);
+      });
+    }).catch((e) => {
+      console.log('fetchAllPossibleTransferItems-receive error', e);
     });
-
-    await this.addHistoryItems(result);
-
-    return result;
   }
 
-  async subscribeHistories (chain: string, address: string, cb: (items: TransactionHistoryItem[]) => void) {
+  subscribeHistories (chain: string, address: string, cb: (items: TransactionHistoryItem[]) => void) {
     const _address = reformatAddress(address);
-    const historySubject = new BehaviorSubject(this.historySubject.getValue().filter(filterHistoryItemByAddressAndChain(chain, _address)));
 
-    this.historySubject.subscribe((items) => {
-      historySubject.next(items.filter(filterHistoryItemByAddressAndChain(chain, _address)));
+    const subscription = this.historySubject.subscribe((items) => {
+      cb(items.filter(filterHistoryItemByAddressAndChain(chain, _address)));
     });
 
-    await this.fetchSubscanTransactionHistory(chain, _address);
-
-    const subscription = historySubject.subscribe((items) => {
-      cb(items);
-    });
+    this.fetchSubscanTransactionHistory(chain, _address);
 
     return {
       unsubscribe: subscription.unsubscribe,

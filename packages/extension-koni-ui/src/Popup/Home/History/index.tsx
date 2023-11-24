@@ -3,7 +3,6 @@
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { AccountSelector, BasicInputEvent, ChainSelector, EmptyList, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
@@ -11,7 +10,7 @@ import { useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } f
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-koni-ui/messaging';
 import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
+import { ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -126,6 +125,8 @@ function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'addres
 }
 
 const modalId = HISTORY_DETAIL_MODAL;
+const DEFAULT_ITEMS_COUNT = 20;
+const NEXT_ITEMS_COUNT = 10;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useSetCurrentPage('/home/history');
@@ -134,7 +135,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { accounts, currentAccount, isAllAccount } = useSelector((root) => root.accountState);
   const { chainInfoMap } = useSelector((root) => root.chainStore);
   const { language } = useSelector((root) => root.settings);
-  const [loading, setLoading] = useState<boolean>(true);
   const [rawHistoryList, setRawHistoryList] = useState<TransactionHistoryItem[]>([]);
 
   const isActive = checkActive(modalId);
@@ -244,17 +244,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   // Fill display data to history list
   const historyMap = useMemo(() => {
-    const currentAddress = currentAccount?.address || '';
-    const currentAddressLowerCase = currentAddress.toLowerCase();
-    const isFilterByAddress = currentAccount?.address && !isAccountAll(currentAddress);
     const finalHistoryMap: Record<string, TransactionHistoryDisplayItem> = {};
 
     rawHistoryList.forEach((item: TransactionHistoryItem) => {
-      // Filter account by current account
-      if (isFilterByAddress && currentAddressLowerCase !== quickFormatAddressToCompare(item.address)) {
-        return;
-      }
-
       // Format display name for account by address
       const fromName = accountMap[quickFormatAddressToCompare(item.from) || ''];
       const toName = accountMap[quickFormatAddressToCompare(item.to) || ''];
@@ -264,11 +256,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     });
 
     return finalHistoryMap;
-  }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
+  }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap]);
 
-  const historyList = useMemo(() => {
-    return Object.values(historyMap).sort((a, b) => (b.time - a.time));
+  const [currentItemDisplayCount, setCurrentItemDisplayCount] = useState<number>(DEFAULT_ITEMS_COUNT);
+
+  const getHistoryItems = useCallback((count: number) => {
+    return Object.values(historyMap).sort((a, b) => (b.time - a.time)).slice(0, count);
   }, [historyMap]);
+
+  const [historyItems, setHistoryItems] = useState<TransactionHistoryDisplayItem[]>(getHistoryItems(DEFAULT_ITEMS_COUNT));
 
   const [curAdr] = useState(currentAccount?.address);
 
@@ -296,14 +292,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     if (extrinsicHashOrId && chain && openDetailLink) {
-      const existed = historyList.find((item) => item.chain === chain && (item.transactionId === extrinsicHashOrId || item.extrinsicHash === extrinsicHashOrId));
+      const existed = Object.values(historyMap).find((item) => item.chain === chain && (item.transactionId === extrinsicHashOrId || item.extrinsicHash === extrinsicHashOrId));
 
       if (existed) {
         setSelectedItem(existed);
         activeModal(modalId);
       }
     }
-  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyList]);
+  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyMap]);
 
   useEffect(() => {
     if (isActive) {
@@ -388,62 +384,64 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setSelectedChain(event.target.value);
   }, [setSelectedChain]);
 
-  const historySelectorsNode = useMemo(() => {
-    return (
-      <>
-        {
-          isAllAccount && (
-            <AccountSelector
-              className={'__history-address-selector'}
-              onChange={onSelectAccount}
-              value={selectedAddress}
-            />
-          )
-        }
+  const historySelectorsNode = (
+    <>
+      {
+        isAllAccount && (
+          <AccountSelector
+            className={'__history-address-selector'}
+            onChange={onSelectAccount}
+            value={selectedAddress}
+          />
+        )
+      }
 
-        <ChainSelector
-          className={'__history-chain-selector'}
-          items={chainItems}
-          onChange={onSelectChain}
-          title={t('Select chain')}
-          value={selectedChain}
+      <ChainSelector
+        className={'__history-chain-selector'}
+        items={chainItems}
+        onChange={onSelectChain}
+        title={t('Select chain')}
+        value={selectedChain}
+      />
+    </>
+  );
+
+  const _onApplyFilter = useCallback(() => {
+    onApplyFilter();
+    setCurrentItemDisplayCount(DEFAULT_ITEMS_COUNT);
+  }, [onApplyFilter]);
+
+  const onLoadMoreItems = useCallback(() => {
+    setCurrentItemDisplayCount((prev) => {
+      if (prev + NEXT_ITEMS_COUNT > rawHistoryList.length) {
+        return rawHistoryList.length;
+      } else {
+        return prev + NEXT_ITEMS_COUNT;
+      }
+    });
+  }, [rawHistoryList.length]);
+
+  const listSection = (
+    <>
+      <div className={'__page-tool-area'}>
+        {historySelectorsNode}
+      </div>
+
+      <div className={'__page-list-area'}>
+        <SwList
+          filterBy={filterFunction}
+          groupBy={groupBy}
+          groupSeparator={groupSeparator}
+          hasMoreItems={rawHistoryList.length > historyItems.length}
+          list={historyItems}
+          loadMoreItems={onLoadMoreItems}
+          renderItem={renderItem}
+          renderOnScroll={false}
+          renderWhenEmpty={emptyList}
         />
-      </>
-    );
-  }, [chainItems, onSelectAccount, onSelectChain, selectedAddress, selectedChain, t, isAllAccount]);
-
-  const listSection = useMemo(() => {
-    return (
-      <>
-        <div className={'__page-tool-area'}>
-          {historySelectorsNode}
-        </div>
-
-        <div className={'__page-list-area'}>
-          {loading && (
-            <div className={'__loading-area'}>
-              <ActivityIndicator
-                loading={true}
-                size={32}
-              />
-            </div>
-          )}
-
-          {!loading && (
-            <SwList
-              filterBy={filterFunction}
-              groupBy={groupBy}
-              groupSeparator={groupSeparator}
-              list={historyList}
-              renderItem={renderItem}
-              renderOnScroll={true}
-              renderWhenEmpty={emptyList}
-            />
-          )}
-        </div>
-      </>
-    );
-  }, [filterFunction, groupBy, groupSeparator, historyList, renderItem, emptyList, historySelectorsNode, loading]);
+      </div>
+    </>
+  );
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
     return [
@@ -464,7 +462,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     let id: string;
     let isSubscribed = true;
 
-    setLoading(true);
+    setCurrentItemDisplayCount(DEFAULT_ITEMS_COUNT);
 
     subscribeTransactionHistory(
       selectedChain,
@@ -484,8 +482,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     }).catch((e) => {
       console.log('subscribeTransactionHistory error:', e);
-    }).finally(() => {
-      setLoading(false);
     });
 
     return () => {
@@ -510,6 +506,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       });
     }
   }, [chainInfoMap, chainItems, selectedAddress, setSelectedChain]);
+
+  useEffect(() => {
+    setHistoryItems(getHistoryItems(currentItemDisplayCount));
+  }, [currentItemDisplayCount, getHistoryItems]);
 
   return (
     <>
@@ -540,7 +540,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       <FilterModal
         id={FILTER_MODAL_ID}
-        onApplyFilter={onApplyFilter}
+        onApplyFilter={_onApplyFilter}
         onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
@@ -574,6 +574,7 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.__page-tool-area': {
       display: 'flex',
       padding: token.padding,
+      paddingTop: 0,
       borderBottomLeftRadius: token.size,
       borderBottomRightRadius: token.size,
       backgroundColor: token.colorBgDefault,
@@ -612,7 +613,11 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
       overflow: 'auto',
       paddingBottom: token.padding,
       paddingLeft: token.padding,
-      paddingRight: token.padding
+      paddingRight: token.padding,
+
+      '.__infinite-loader': {
+        opacity: 0
+      }
     },
 
     '.ant-sw-screen-layout-body': {

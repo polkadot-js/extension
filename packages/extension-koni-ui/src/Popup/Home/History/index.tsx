@@ -615,6 +615,7 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
       paddingBottom: token.padding,
       paddingLeft: token.padding,
       paddingRight: token.padding,
+      paddingTop: token.paddingSM,
 
       '.__infinite-loader': {
         opacity: 0

@@ -963,7 +963,7 @@ export default class TransactionService {
           // TODO: push block hash and block number into eventData
           txState.events
             .filter(({ event: { section } }) => section === 'system')
-            .forEach(({ event: { method, data: [error] } }): void => {
+            .forEach(({ event: { data: [error], method } }): void => {
               if (method === 'ExtrinsicFailed') {
                 eventData.errors.push(new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, error.toString()));
                 emitter.emit('error', eventData);

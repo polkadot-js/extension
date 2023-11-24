@@ -20,6 +20,14 @@ function paramJsonParse (item: TransactionHistoryItem): ExtrinsicParam[] {
   }
 }
 
+function autoAddPublicKeyPrefix (publicKey: string): string {
+  if (!publicKey.startsWith('0x')) {
+    return `0x${publicKey}`;
+  }
+
+  return publicKey;
+}
+
 function balanceTransferParserFunction (item: TransactionHistoryItem): TransactionHistoryItem | null {
   const params: ExtrinsicParam[] = paramJsonParse(item);
 
@@ -29,7 +37,7 @@ function balanceTransferParserFunction (item: TransactionHistoryItem): Transacti
       const toPublicKey = (p.value.id || p.value.Id) as string;
 
       if (toPublicKey) {
-        item.to = encodeAddress(toPublicKey, 42);
+        item.to = encodeAddress(autoAddPublicKeyPrefix(toPublicKey), 42);
       }
     } else if (p.name === 'value') {
       if (item.amount) {

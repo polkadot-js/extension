@@ -186,3 +186,8 @@ export interface TransfersListResponse {
   count: number,
   transfers: null | TransferItem[]
 }
+
+export type RequestBlockRange = {
+  from: number | null,
+  to: number | null
+}

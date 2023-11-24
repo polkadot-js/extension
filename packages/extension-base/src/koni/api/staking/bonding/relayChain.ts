@@ -780,12 +780,14 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
     const poolId = _poolInfo[1].toPrimitive() as number;
     const poolStashAccount = parsePoolStashAddress(substrateApi.api, 0, poolId, poolsPalletId);
 
-    const [_nominations, _bondedPool, _metadata] = await Promise.all([
-      substrateApi.api.query.staking.nominators(poolStashAccount),
+    const [_nominations, _bondedPool, _metadata, _minimumActiveStake] = await Promise.all([
+      chainApi.api.query.staking.nominators(poolStashAccount),
       chainApi.api.query.nominationPools.bondedPools(poolId),
-      chainApi.api.query.nominationPools.metadata(poolId)
+      chainApi.api.query.nominationPools.metadata(poolId),
+      chainApi.api.query.staking.minimumActiveStake()
     ]);
 
+    const minimumActiveStake = _minimumActiveStake.toPrimitive() as number;
     const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
 
     const poolMetadata = _metadata.toPrimitive() as unknown as Bytes;
@@ -793,7 +795,11 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
 
     const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
 
-    if (nominations && nominations.targets.length > 0) {
+    const isPoolOpen = bondedPool.state === 'Open';
+    const isPoolNominating = !!nominations && nominations.targets.length > 0;
+    const isPoolEarningReward = bondedPool.points > minimumActiveStake;
+
+    if (isPoolOpen && isPoolNominating && isPoolEarningReward) {
       nominationPools.push({
         id: poolId,
         address: poolAddress,

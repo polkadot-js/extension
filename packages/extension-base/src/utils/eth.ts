@@ -95,4 +95,4 @@ export const signatureToHex = (sig: SignedTransaction): string => {
 
 export const recalculateGasPrice = (_price: string, chain: string) => {
   return NETWORK_MULTI_GAS_FEE.includes(chain) ? new BigN(_price).multipliedBy(GAS_PRICE_RATIO).toFixed(0) : _price;
-}
+};

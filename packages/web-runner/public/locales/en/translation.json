@@ -375,8 +375,6 @@
   "Please try again later.": "",
   "Polkadot parachain": "",
   "Kusama parachain": "",
-  "Win": "",
-  "Fail": "",
   "Search project": "",
   "View on explorer": "",
   "Staking value": "",
@@ -854,5 +852,11 @@
   "Page not found": "",
   "Your website URL is invalid": "",
   "We are unable to detect any network from the dApp through WalletConnect": "",
-  "Network undetected": ""
+  "Network undetected": "",
+  "Dissolved on": "",
+  "Locked until": "",
+  "Crowdloan ends on": "",
+  "Refunded on": "",
+  "Won": "",
+  "In auction": ""
 }

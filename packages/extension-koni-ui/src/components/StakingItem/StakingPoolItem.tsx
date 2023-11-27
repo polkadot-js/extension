@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import { DotsThree, Medal } from 'phosphor-react';
+import { DotsThree } from 'phosphor-react';
 import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -20,7 +20,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { address, bondedAmount, className, decimals, id, isProfitable, name, onClickMoreBtn, symbol } = props;
 
   const { t } = useTranslation();
-  const { token } = useTheme() as Theme;
 
   return (
     <Web3Block
@@ -52,12 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
               value={bondedAmount}
             />
 
-            {isProfitable && <Icon
-              iconColor={token.colorSuccess}
-              phosphorIcon={Medal}
-              size={'xs'}
-              weight={'fill'}
-            />}
+            <span className={'middle-item__bond-amount-label'}>&nbsp;-&nbsp;{isProfitable ? t('Earning') : t('Not earning')}</span>
           </div>
         </div>
       }

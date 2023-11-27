@@ -801,17 +801,16 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
     const isPoolNominating = !!nominations && nominations.targets.length > 0;
     const isPoolEarningReward = bondedPool.points > minimumActiveStake;
 
-    if (isPoolOpen && isPoolNominating && isPoolEarningReward) {
-      nominationPools.push({
-        id: poolId,
-        address: poolAddress,
-        name: poolName,
-        bondedAmount: bondedPool.points?.toString() || '0',
-        roles: bondedPool.roles,
-        memberCounter: bondedPool.memberCounter,
-        state: bondedPool.state
-      });
-    }
+    nominationPools.push({
+      id: poolId,
+      address: poolAddress,
+      name: poolName,
+      bondedAmount: bondedPool.points?.toString() || '0',
+      roles: bondedPool.roles,
+      memberCounter: bondedPool.memberCounter,
+      state: bondedPool.state,
+      isProfitable: isPoolOpen && isPoolNominating && isPoolEarningReward
+    });
   }));
 
   return nominationPools;

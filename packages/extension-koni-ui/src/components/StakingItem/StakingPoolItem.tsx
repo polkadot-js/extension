@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import { DotsThree } from 'phosphor-react';
+import { DotsThree, Medal } from 'phosphor-react';
 import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -17,9 +17,10 @@ type Props = NominationPoolDataType & ThemeProps & {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { address, bondedAmount, className, decimals, id, name, onClickMoreBtn, symbol } = props;
+  const { address, bondedAmount, className, decimals, id, isProfitable, name, onClickMoreBtn, symbol } = props;
 
   const { t } = useTranslation();
+  const { token } = useTheme() as Theme;
 
   return (
     <Web3Block
@@ -34,9 +35,12 @@ const Component: React.FC<Props> = (props: Props) => {
       }
       middleItem={
         <div className={'middle-item'}>
-          <div className={'middle-item__name'}>{name || `Pool #${id}`}</div>
+          <div className={'middle-item__name'}>
+            <span>{name || `Pool #${id}`}</span>
+          </div>
           <div className={'middle-item__bond-amount'}>
             <span className={'middle-item__bond-amount-label'}>{t('Bonded:')}&nbsp;</span>
+
             <Number
               className={'middle-item__bond-amount-number'}
               decimal={decimals}
@@ -47,6 +51,13 @@ const Component: React.FC<Props> = (props: Props) => {
               unitOpacity={0.45}
               value={bondedAmount}
             />
+
+            {isProfitable && <Icon
+              iconColor={token.colorSuccess}
+              phosphorIcon={Medal}
+              size={'xs'}
+              weight={'fill'}
+            />}
           </div>
         </div>
       }

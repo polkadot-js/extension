@@ -97,7 +97,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const filterOptions: FilterOption[] = useMemo(() => ([
     {
-      label: t('Active'),
+      label: t('Open'),
       value: 'Open'
     },
     {
@@ -342,7 +342,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         decimals={viewDetailItem?.decimals || 0}
         onCancel={onCloseDetail}
         selectedNominationPool={viewDetailItem}
-        status={'active'}
       />
     </>
   );

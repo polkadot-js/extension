@@ -5,6 +5,7 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _isAssetFungibleToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useChainAssets } from '@subwallet/extension-koni-ui/hooks/assets';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -39,7 +40,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
-  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+  const assetRegistry = useChainAssets({}).chainAssetRegistry;
   const { chainInfoMap, chainStateMap } = useSelector((state) => state.chainStore);
 
   const { onSelect } = useSelectModalInputHelper(props, ref);

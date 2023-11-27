@@ -56,20 +56,24 @@ export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: Them
   }
 }));
 
-function removeLoadingPlaceholder (): void {
+function removeLoadingPlaceholder (animation: boolean): void {
   const element = document.getElementById('loading-placeholder');
 
   if (element) {
-    // Add transition effect
-    element.style.transition = 'opacity 0.3s ease-in-out';
-    // Set opacity to 0
-    element.style.opacity = '0';
+    if (animation) {
+      // Add transition effect
+      element.style.transition = 'opacity 0.1s ease-in-out';
+      // Set opacity to 0
+      element.style.opacity = '0';
 
-    // Callback after 1 second
-    setTimeout(() => {
+      // Callback after 1 second
+      setTimeout(() => {
       // Remove element
+        element.parentNode?.removeChild(element);
+      }, 150);
+    } else {
       element.parentNode?.removeChild(element);
-    }, 300);
+    }
   }
 }
 
@@ -80,7 +84,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   const notify = useNotification();
   const [rootLoading, setRootLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
-  const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay', 'campaign', 'buyService']));
+  const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay']));
   const currentPage = useGetCurrentPage();
   const firstRender = useRef(true);
 
@@ -200,7 +204,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
     // Remove loading on finished first compute
     firstRender.current && setRootLoading((val) => {
       if (val) {
-        removeLoadingPlaceholder();
+        removeLoadingPlaceholder(!needUnlock);
         firstRender.current = false;
       }
 

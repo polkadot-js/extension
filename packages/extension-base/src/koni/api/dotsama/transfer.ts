@@ -119,8 +119,11 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
   //   result.supportTransfer = true;
   //   result.supportTransferAll = true;
   } else if (_TRANSFER_CHAIN_GROUP.avail.includes(networkKey)) {
-    result.supportTransfer = false;
-    result.supportTransferAll = false;
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
+  } else if (_TRANSFER_CHAIN_GROUP.centrifuge.includes(networkKey)) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
   }
 
   return result;
@@ -206,7 +209,11 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     if (transferAll) {
       transfer = api.tx.balances.transferAll(to, false);
     } else if (value) {
-      transfer = api.tx.balances.transferKeepAlive(to, new BN(value));
+      if (api.tx.balances.transferKeepAlive) {
+        transfer = api.tx.balances.transferKeepAlive(to, new BN(value));
+      } else {
+        transfer = api.tx.balances.transfer(to, new BN(value));
+      }
     }
   }
 

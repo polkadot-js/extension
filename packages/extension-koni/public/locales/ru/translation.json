@@ -375,8 +375,6 @@
   "Please try again later.": "Пожалуйста, повторите попытку позже.",
   "Polkadot parachain": "Polkadot парачейн",
   "Kusama parachain": "Kusama парачейн",
-  "Win": "Победа",
-  "Fail": "Провал",
   "Search project": "Поиск проекта",
   "View on explorer": "Посмотреть в проводнике",
   "Staking value": "Сумма стейкинга",
@@ -850,5 +848,15 @@
   "You don't have any account to connect. Please create one or skip this step by hitting Cancel.": "",
   "You must transfer at least {{amount}} {{symbol}} to keep the destination account alive": "",
   "You don't have enough tokens to proceed": "",
-  "Token name is required": ""
+  "Token name is required": "",
+  "Page not found": "",
+  "Your website URL is invalid": "",
+  "We are unable to detect any network from the dApp through WalletConnect": "",
+  "Network undetected": "",
+  "Dissolved on": "",
+  "Locked until": "",
+  "Crowdloan ends on": "",
+  "Refunded on": "",
+  "Won": "",
+  "In auction": ""
 }

@@ -872,7 +872,8 @@ export class ChainService {
               substrateInfo: storedChainInfo.substrateInfo,
               isTestnet: storedChainInfo.isTestnet,
               chainStatus: storedChainInfo.chainStatus,
-              icon: storedChainInfo.icon
+              icon: storedChainInfo.icon,
+              extraInfo: storedChainInfo.extraInfo
             };
             this.dataMap.chainStateMap[storedSlug] = {
               currentProvider: storedChainInfo.currentProvider,
@@ -1100,7 +1101,8 @@ export class ChainService {
       evmInfo,
       isTestnet: false,
       chainStatus: _ChainStatus.ACTIVE,
-      icon: '' // Todo: Allow update with custom chain
+      icon: '', // Todo: Allow update with custom chain,
+      extraInfo: null
     };
 
     // insert new chainInfo
@@ -1645,5 +1647,24 @@ export class ChainService {
 
   getMetadataByHash (hash: string) {
     return this.dbService.stores.metadata.getMetadataByGenesisHash(hash);
+  }
+
+  getSubscanChainMap (reverse?: boolean): Record<string, string> {
+    const result: Record<string, string> = {};
+    const chainInfoMap = this.getChainInfoMap();
+
+    Object.values(chainInfoMap).forEach((i) => {
+      if (!i.extraInfo?.subscanSlug) {
+        return;
+      }
+
+      if (!reverse) {
+        result[i.slug] = i.extraInfo?.subscanSlug;
+      } else {
+        result[i.extraInfo?.subscanSlug] = i.slug;
+      }
+    });
+
+    return result;
   }
 }

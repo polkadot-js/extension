@@ -3,9 +3,8 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _isChainSupportEvmNft, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { useChainInfoData } from '@subwallet/extension-koni-ui/hooks';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
 function filterContractTypes (chainInfoMap: Record<string, _ChainInfo>) {
   const filteredChainInfoMap: Record<string, _ChainInfo> = {};
@@ -20,7 +19,7 @@ function filterContractTypes (chainInfoMap: Record<string, _ChainInfo>) {
 }
 
 export default function useGetContractSupportedChains (): Record<string, _ChainInfo> {
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+  const chainInfoMap = useChainInfoData().chainInfoMap;
 
   return useMemo(() => {
     return filterContractTypes(chainInfoMap);

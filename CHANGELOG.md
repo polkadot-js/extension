@@ -1,8 +1,52 @@
 # CHANGELOG
 
+## 1.1.23
+Build date: Nov 24, 2023.
+Features & Update:
+- Support staking AZERO with Ledger (#2219)
+- Update chain-list (#2198)
+  - Add logo for custom network GOS
+  - Add price id for KREST
+- Update XCM for Astar network (#2196)
+
+Bugs fixed:
+- Fixed bug decode dApp address (#2139)
+- Fixed bug automatically activate tokens based on account balance (#1500)
+- Fixed bug missing crowdloan (#2199)
+- Fixed bug browser waste time when load extension (#2207) and add the loading effect when open app (#2228)
+
+## 1.1.22
+Build date: Nov 15, 2023.
+
+Features & Update:
+- Update chain-list (#2178)
+  - Add support for Enjin Relaychain and Enjin Matrixchain
+  - Add support for Vara testnet
+  - Add support for Goldberg testnet
+- Update WalletConnect namespace (#2119)
+
+Bugs fixed:
+- Fixed bug chainStaking Metadata on Kusama (#2162)
+- Fixed bug Can’t get balance of the ENJ token (#2154)
+
+## 1.1.21
+Build date: Nov 08, 2023.
+
+Features & Update:
+- Support nomination pool for Vara network (#2152)
+- Update chain list (#2145)
+  - Add support Subspace Gemini 3g
+  - Update logo and price of the PHA token
+
+Bugs fixed:
+- Fixed bug undefined is not an object when perform transaction (#2146)
+- Fixed bug show error page when opening the app with an invalid URL (#2072)
+- Fixed bug still show token of the inactive network (#2158)
+
 ## 1.1.20
 Build date: Oct 26, 2023.
-- Features & Update:
+
+Features & Update:
 - Update online token list in fiat-onramp feature (#2031)
 - Sorting the token list to buy (#2025)
 - Add “Token Name” to the token screens (#1946)

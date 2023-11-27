@@ -16,9 +16,7 @@ export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originC
 
   let method = 'limitedReserveTransferAssets';
 
-  if (['astar', 'shiden'].includes(originChainInfo.slug) && !_isNativeToken(tokenInfo)) {
-    method = 'limitedReserveWithdrawAssets';
-  } else if (['statemint', 'statemine'].includes(originChainInfo.slug) && _isSubstrateRelayChain(destinationChainInfo)) {
+  if (['statemint', 'statemine'].includes(originChainInfo.slug) && _isSubstrateRelayChain(destinationChainInfo)) {
     assetLocation = {
       [version]: [
         {

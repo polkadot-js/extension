@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
-import SUBSCAN_CHAIN_MAP from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
-import { IMultiChainBalance, SubscanRequest, SubscanResponse } from '@subwallet/extension-base/services/subscan-service/types';
+import { CrowdloanContributionsResponse, ExtrinsicItem, ExtrinsicsListResponse, IMultiChainBalance, SubscanRequest, SubscanResponse, TransferItem, TransfersListResponse } from '@subwallet/extension-base/services/subscan-service/types';
+import { wait } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
+
+const QUERY_ROW = 100;
 
 export class SubscanService {
   private limitRate = 2; // limit per interval check
@@ -17,20 +19,20 @@ export class SubscanService {
     return this.nextId++;
   }
 
-  constructor (options?: {limitRate?: number, intervalCheck?: number, maxRetry?: number}) {
+  constructor (private subscanChainMap: Record<string, string>, options?: {limitRate?: number, intervalCheck?: number, maxRetry?: number}) {
     this.limitRate = options?.limitRate || this.limitRate;
     this.intervalCheck = options?.intervalCheck || this.intervalCheck;
     this.maxRetry = options?.maxRetry || this.maxRetry;
   }
 
   private getApiUrl (chain: string, path: string) {
-    const subscanChain = SUBSCAN_CHAIN_MAP[chain];
+    const subscanChain = this.subscanChainMap[chain];
 
     if (!subscanChain) {
       throw new SWError('NOT_SUPPORTED', 'Chain is not supported');
     }
 
-    return `https://${chain}.api.subscan.io/${path}`;
+    return `https://${subscanChain}.api.subscan.io/${path}`;
   }
 
   private postRequest (url: string, body: any) {
@@ -100,6 +102,14 @@ export class SubscanService {
     }, this.intervalCheck);
   }
 
+  public checkSupportedSubscanChain (chain: string): boolean {
+    return !!this.subscanChainMap[chain];
+  }
+
+  public setSubscanChainMap (subscanChainMap: Record<string, string>) {
+    this.subscanChainMap = subscanChainMap;
+  }
+
   // Implement Subscan API
   public getMultiChainBalance (address: string): Promise<IMultiChainBalance[]> {
     return this.addRequest(async () => {
@@ -113,5 +123,144 @@ export class SubscanService {
 
       return jsonData.data;
     });
+  }
+
+  public getCrowdloanContributions (relayChain: string, address: string, page = 0): Promise<CrowdloanContributionsResponse> {
+    return this.addRequest<CrowdloanContributionsResponse>(async () => {
+      const rs = await this.postRequest(this.getApiUrl(relayChain, 'api/scan/account/contributions'), {
+        include_total: true,
+        page,
+        row: QUERY_ROW,
+        who: address
+      });
+
+      if (rs.status !== 200) {
+        throw new SWError('SubscanService.getCrowdloanContributions', await rs.text());
+      }
+
+      const jsonData = (await rs.json()) as SubscanResponse<CrowdloanContributionsResponse>;
+
+      return jsonData.data;
+    });
+  }
+
+  public getExtrinsicsList (chain: string, address: string, page = 0): Promise<ExtrinsicsListResponse> {
+    return this.addRequest<ExtrinsicsListResponse>(async () => {
+      const rs = await this.postRequest(this.getApiUrl(chain, 'api/scan/extrinsics'), {
+        page,
+        row: QUERY_ROW,
+        address
+      });
+
+      if (rs.status !== 200) {
+        throw new SWError('SubscanService.getExtrinsicsList', await rs.text());
+      }
+
+      const jsonData = (await rs.json()) as SubscanResponse<ExtrinsicsListResponse>;
+
+      return jsonData.data;
+    });
+  }
+
+  public async fetchAllPossibleExtrinsicItems (
+    chain: string,
+    address: string,
+    cbAfterEachRequest?: (items: ExtrinsicItem[]) => void
+  ): Promise<ExtrinsicItem[]> {
+    let count = 0;
+    const resultMap: Record<string, ExtrinsicItem> = {};
+
+    const _getExtrinsicItems = async (page: number) => {
+      const res = await this.getExtrinsicsList(chain, address, page);
+
+      if (!res || !res.count || !res.extrinsics || !res.extrinsics.length) {
+        return;
+      }
+
+      if (res.count > count) {
+        count = res.count;
+      }
+
+      cbAfterEachRequest?.(res.extrinsics);
+      res.extrinsics.forEach((item) => {
+        resultMap[item.extrinsic_hash] = item;
+      });
+
+      if (Object.values(resultMap).length < count) {
+        await wait(100);
+
+        await _getExtrinsicItems(++page);
+      }
+    };
+
+    await _getExtrinsicItems(0);
+
+    return Object.values(resultMap);
+  }
+
+  public getTransfersList (chain: string, address: string, page = 0, direction?: 'sent' | 'received'): Promise<TransfersListResponse> {
+    const requestBody: {
+      page: number,
+      row: number,
+      address: string,
+      direction?: 'sent' | 'received'
+    } = {
+      page,
+      row: QUERY_ROW,
+      address
+    };
+
+    if (direction) {
+      requestBody.direction = direction;
+    }
+
+    return this.addRequest<TransfersListResponse>(async () => {
+      const rs = await this.postRequest(this.getApiUrl(chain, 'api/v2/scan/transfers'), requestBody);
+
+      if (rs.status !== 200) {
+        throw new SWError('SubscanService.getTransfersList', await rs.text());
+      }
+
+      const jsonData = (await rs.json()) as SubscanResponse<TransfersListResponse>;
+
+      return jsonData.data;
+    });
+  }
+
+  public async fetchAllPossibleTransferItems (
+    chain: string,
+    address: string,
+    direction?: 'sent' | 'received',
+    cbAfterEachRequest?: (items: TransferItem[]) => void
+  ): Promise<TransferItem[]> {
+    let count = 0;
+    const resultMap: Record<string, TransferItem> = {};
+
+    const _getTransferItems = async (page: number) => {
+      const res = await this.getTransfersList(chain, address, page, direction);
+
+      if (!res || !res.count || !res.transfers || !res.transfers.length) {
+        return;
+      }
+
+      if (res.count > count) {
+        count = res.count;
+      }
+
+      cbAfterEachRequest?.(res.transfers);
+      res.transfers.forEach((item) => {
+        resultMap[item.hash] = item;
+      });
+
+      if (Object.values(resultMap).length < count) {
+        await wait(100);
+
+        await _getTransferItems(++page);
+      }
+    };
+
+    await _getTransferItems(0);
+
+    return Object.values(resultMap);
   }
 }

@@ -157,12 +157,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     const aKey = getValidatorKey(a.address, a.identity);
     const bKey = getValidatorKey(b.address, b.identity);
 
-    if (changeValidators.includes(aKey) && !changeValidators.includes(bKey)) {
+    if (nominatorValueList.includes(aKey) && !nominatorValueList.includes(bKey)) {
       return -1;
     }
 
     return 1;
-  }, [changeValidators]);
+  }, [nominatorValueList]);
 
   const resultList = useMemo((): ValidatorDataType[] => {
     return [...items].sort((a: ValidatorDataType, b: ValidatorDataType) => {
@@ -249,7 +249,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         className={'pool-item'}
         isNominated={nominated}
         isSelected={selected}
-        key={item.address}
+        key={key}
         onClick={onClickItem}
         onClickMoreBtn={onClickMore(item)}
         validatorInfo={item}

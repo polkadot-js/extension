@@ -44,7 +44,7 @@ export function validateParaChainUnbondingCondition (amount: string, nominatorMe
   const bnChainMinStake = new BN(chainStakingMetadata.minStake || '0');
   const bnCollatorMinStake = new BN(targetNomination.validatorMinStake || '0');
   const bnMinStake = BN.max(bnCollatorMinStake, bnChainMinStake);
-  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainStakingMetadata.chain);
+  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainStakingMetadata.chain, nominatorMetadata?.type);
 
   if (targetNomination.hasUnstaking) {
     errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST, existUnstakeErrorMessage));
@@ -66,7 +66,7 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
   const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
   const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
   const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, chainStakingMetadata.maxValidatorPerNominator);
-  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, true);
+  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, nominatorMetadata?.type, true);
 
   if (!nominatorMetadata || nominatorMetadata.status === StakingStatus.NOT_STAKING) {
     if (!bnTotalStake.gte(bnMinStake)) {

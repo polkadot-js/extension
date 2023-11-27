@@ -508,7 +508,7 @@ export const getMaxValidatorErrorMessage = (chainInfo: _ChainInfo, max: number):
   return t(message, { replace: { number: max } });
 };
 
-export const getExistUnstakeErrorMessage = (chain: string, isStakeMore?: boolean): string => {
+export const getExistUnstakeErrorMessage = (chain: string, type?: StakingType, isStakeMore?: boolean): string => {
   const label = getValidatorLabel(chain);
 
   if (!isStakeMore) {
@@ -517,8 +517,14 @@ export const getExistUnstakeErrorMessage = (chain: string, isStakeMore?: boolean
         return t('You can unstake from a dApp once');
       case 'Collator':
         return t('You can unstake from a collator once');
-      case 'Validator':
+
+      case 'Validator': {
+        if (type === StakingType.POOLED) {
+          return t('You can unstake from a pool once');
+        }
+
         return t('You can unstake from a validator once');
+      }
     }
   } else {
     switch (label) {
@@ -526,8 +532,14 @@ export const getExistUnstakeErrorMessage = (chain: string, isStakeMore?: boolean
         return t('You cannot stake more for a dApp you are unstaking from');
       case 'Collator':
         return t('You cannot stake more for a collator you are unstaking from');
-      case 'Validator':
+
+      case 'Validator': {
+        if (type === StakingType.POOLED) {
+          return t('You cannot stake more for a pool you are unstaking from');
+        }
+
         return t('You cannot stake more for a validator you are unstaking from');
+      }
     }
   }
 };

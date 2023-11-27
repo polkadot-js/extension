@@ -10,7 +10,8 @@ import { useChainInfoWithState, useFilterModal, useHistorySelection, useSelector
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-koni-ui/messaging';
 import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
-import { ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
+import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -136,6 +137,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { chainInfoMap } = useSelector((root) => root.chainStore);
   const chainInfoList = useChainInfoWithState();
   const { language } = useSelector((root) => root.settings);
+  const [loading, setLoading] = useState<boolean>(true);
   const [rawHistoryList, setRawHistoryList] = useState<TransactionHistoryItem[]>([]);
 
   const isActive = checkActive(modalId);
@@ -397,13 +399,25 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         )
       }
 
-      <ChainSelector
-        className={'__history-chain-selector'}
-        items={chainItems}
-        onChange={onSelectChain}
-        title={t('Select chain')}
-        value={selectedChain}
-      />
+      <div className={CN('__history-chain-selector-wrapper', {
+        '-loading': loading
+      })}
+      >
+        <ChainSelector
+          className={'__history-chain-selector'}
+          items={chainItems}
+          onChange={onSelectChain}
+          title={t('Select chain')}
+          value={selectedChain}
+        />
+
+        <div className={'__loading-icon'}>
+          <ActivityIndicator
+            loading={true}
+            size={24}
+          />
+        </div>
+      </div>
     </>
   );
 
@@ -422,18 +436,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     });
   }, [rawHistoryList.length]);
 
-  const listSection = (
-    <>
-      <div className={'__page-tool-area'}>
-        {historySelectorsNode}
-      </div>
+  const hasMoreItems = rawHistoryList.length > historyItems.length;
 
+  const listSection = useMemo(() => (
+    <>
       <div className={'__page-list-area'}>
         <SwList
           filterBy={filterFunction}
           groupBy={groupBy}
           groupSeparator={groupSeparator}
-          hasMoreItems={rawHistoryList.length > historyItems.length}
+          hasMoreItems={hasMoreItems}
           list={historyItems}
           loadMoreItems={onLoadMoreItems}
           renderItem={renderItem}
@@ -442,7 +454,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
       </div>
     </>
-  );
+  ), [emptyList, filterFunction, groupBy, groupSeparator, hasMoreItems, historyItems, onLoadMoreItems, renderItem]);
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
     return [
@@ -463,6 +475,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     let id: string;
     let isSubscribed = true;
 
+    setLoading(true);
+
     setCurrentItemDisplayCount(DEFAULT_ITEMS_COUNT);
 
     subscribeTransactionHistory(
@@ -472,6 +486,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         if (isSubscribed) {
           setRawHistoryList(items);
         }
+
+        setLoading(false);
       }
     ).then((res) => {
       id = res.id;
@@ -530,6 +546,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
           <div className={'__page-background'}></div>
 
+          <div className={'__page-tool-area'}>
+            {historySelectorsNode}
+          </div>
+
           {listSection}
         </Layout.Base>
       </PageWrapper>
@@ -583,9 +603,16 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
       position: 'relative',
       zIndex: 2,
 
+      '.__history-address-selector, .__history-chain-selector-wrapper': {
+        flex: 1,
+        flexBasis: '50%',
+        overflow: 'hidden'
+      },
+
       '.__history-address-selector, .__history-chain-selector': {
         height: 40,
         flex: 1,
+        flexBasis: '50%',
         borderRadius: 32,
         overflow: 'hidden',
 
@@ -596,6 +623,40 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
         '.ant-select-modal-input-wrapper': {
           paddingLeft: token.padding,
           paddingRight: token.padding
+        }
+      },
+
+      '.__history-address-selector': {
+        '.__selected-item-address': {
+          display: 'none'
+        }
+      },
+
+      '.__history-chain-selector-wrapper': {
+        overflow: 'hidden',
+        position: 'relative',
+
+        '.__loading-icon': {
+          position: 'absolute',
+          display: 'flex',
+          top: 0,
+          bottom: 0,
+          right: 6,
+          width: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: 0,
+          pointerEvents: 'none'
+        },
+
+        '&.-loading': {
+          '.ant-select-modal-input-suffix': {
+            opacity: 0
+          },
+
+          '.__loading-icon': {
+            opacity: 1
+          }
         }
       }
     },

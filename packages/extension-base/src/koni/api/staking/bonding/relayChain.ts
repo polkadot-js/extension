@@ -777,6 +777,8 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
     const poolAddressList = _poolInfo[0].toHuman() as string[];
     const poolAddress = poolAddressList[0];
     const poolId = _poolInfo[1].toPrimitive() as number;
+    const poolsPalletId = substrateApi.api.consts.nominationPools.palletId.toString();
+    const poolStashAccount = parsePoolStashAddress(substrateApi.api, 0, poolId, poolsPalletId);
 
     const [_nominations, _bondedPool, _metadata, _minimumActiveStake] = await Promise.all([
       chainApi.api.query.staking.nominators(poolStashAccount),

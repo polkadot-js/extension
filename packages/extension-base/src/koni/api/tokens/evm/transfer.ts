@@ -7,6 +7,7 @@ import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/
 import { _BALANCE_PARSING_CHAIN_GROUP, EVM_REFORMAT_DECIMALS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
+import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { BN, hexToBn } from '@polkadot/util';
@@ -55,7 +56,8 @@ export async function getEVMTransactionObject (
 ): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
   const web3Api = evmApiMap[networkKey];
-  const gasPrice = await web3Api.api.eth.getGasPrice();
+  const _price = await web3Api.api.eth.getGasPrice();
+  const gasPrice = recalculateGasPrice(_price, chainInfo.slug);
   const transactionObject = {
     gasPrice: gasPrice,
     to: to,
@@ -109,11 +111,13 @@ export async function getERC20TransactionObject (
   }
 
   const transferData = generateTransferData(to, transferValue);
-  const [gasLimit, gasPrice] = await Promise.all([
+  const [gasLimit, _price] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     erc20Contract.methods.transfer(to, transferValue).estimateGas({ from }) as number,
     evmApi.api.eth.getGasPrice()
   ]);
+
+  const gasPrice = recalculateGasPrice(_price, chainInfo.slug);
 
   const transactionObject = {
     gasPrice: gasPrice,
@@ -133,6 +137,7 @@ export async function getERC20TransactionObject (
 
 export async function getERC721Transaction (
   web3Api: _EvmApi,
+  chain: string,
   contractAddress: string,
   senderAddress: string,
   recipientAddress: string,
@@ -140,11 +145,13 @@ export async function getERC721Transaction (
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const contract = new web3Api.api.eth.Contract(_ERC721_ABI, contractAddress);
 
-  const [gasLimit, gasPrice] = await Promise.all([
+  const [gasLimit, _price] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).estimateGas({ from: senderAddress }) as number,
     web3Api.api.eth.getGasPrice()
   ]);
+
+  const gasPrice = recalculateGasPrice(_price, chain);
 
   return {
     from: senderAddress,

@@ -33,6 +33,7 @@ import { TransactionEventResponse } from '@subwallet/extension-base/services/tra
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { stripUrl } from '@subwallet/extension-base/utils';
+import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
@@ -1501,7 +1502,8 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
     }
 
-    const gasPrice = await web3.eth.getGasPrice();
+    const _price = await web3.eth.getGasPrice();
+    const gasPrice = recalculateGasPrice(_price, networkKey);
 
     transaction.gasPrice = gasPrice;
 

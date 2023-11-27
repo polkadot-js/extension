@@ -356,6 +356,14 @@ export const stripUrl = (url: string): string => {
   return parts[2];
 };
 
+export function wait (milliseconds: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, milliseconds);
+  });
+}
+
 export * from './array';
 export * from './environment';
 export * from './lazy';

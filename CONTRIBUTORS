@@ -1,8 +1,8 @@
-    1865	Nam Phạm                      	[Issue 2162] update max nomination
-    1693	AnhMTV                        	Release version 1.1.22
-    1398	S2kael                        	[Issue-2178] Update chain-list
+    1867	Nam Phạm                      	[Issue 2246] filter out inactive pools
+    1710	AnhMTV                        	Release version 1.1.23
+    1416	S2kael                        	
      465	Jaco                          	0.42.5 (#969)
-     286	lw-cdm                        	[Issue-2104] Fix UI bug on token detail screen
+     292	lw-cdm                        	[Revert] Revert history UI code temporarily
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       98	lw-cdm                        	

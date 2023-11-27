@@ -375,8 +375,6 @@
   "Please try again later.": "请稍后重试。",
   "Polkadot parachain": "Polkadot平行链",
   "Kusama parachain": "KSM平行链",
-  "Win": "赢",
-  "Fail": "输",
   "Search project": "搜索项目",
   "View on explorer": "在浏览器上查看",
   "Staking value": "质押价值",
@@ -854,5 +852,11 @@
   "Page not found": "",
   "Your website URL is invalid": "",
   "We are unable to detect any network from the dApp through WalletConnect": "",
-  "Network undetected": ""
+  "Network undetected": "",
+  "Dissolved on": "",
+  "Locked until": "",
+  "Crowdloan ends on": "",
+  "Refunded on": "",
+  "Won": "",
+  "In auction": ""
 }

@@ -12,12 +12,13 @@ export interface PageWrapperProps extends ThemeProps{
   resolve?: Promise<any>;
   children?: React.ReactNode;
   animateOnce?: boolean;
+  hideLoading?: boolean;
   loadingClass?: string;
 }
 
 const defaultResolver = Promise.resolve(true);
 
-function Component ({ animateOnce, children, className, loadingClass, resolve }: PageWrapperProps) {
+function Component ({ animateOnce, children, className, hideLoading, loadingClass, resolve }: PageWrapperProps) {
   const nodeRef = React.useRef(null);
   const location = useLocation();
   const [pathName, setPathName] = useState<string | undefined>();
@@ -32,7 +33,7 @@ function Component ({ animateOnce, children, className, loadingClass, resolve }:
     });
   }, [animateOnce, location.pathname]);
 
-  return <React.Suspense fallback={<LoadingScreen className={loadingClass} />}>
+  return <React.Suspense fallback={!hideLoading && <LoadingScreen className={loadingClass} />}>
     <Await resolve={resolve || defaultResolver}>
       <CSSTransition
         classNames={'page'}

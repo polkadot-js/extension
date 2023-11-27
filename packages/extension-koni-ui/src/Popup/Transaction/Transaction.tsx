@@ -17,6 +17,8 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 interface Props extends ThemeProps {
   title: string,
 
@@ -117,7 +119,9 @@ function Component ({ className }: Props) {
   // Navigate to finish page
   const onDone = useCallback(
     (extrinsicHash: string) => {
-      navigate(`/transaction-done/${from}/${chain}/${extrinsicHash}`, { replace: true });
+      const chainType = isEthereumAddress(from) ? 'ethereum' : 'substrate';
+
+      navigate(`/transaction-done/${chainType}/${chain}/${extrinsicHash}`, { replace: true });
     },
     [from, chain, navigate]
   );

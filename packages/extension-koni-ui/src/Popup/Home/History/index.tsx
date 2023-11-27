@@ -2,23 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
-import { AccountSelector, BasicInputEvent, ChainSelector, EmptyList, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, FilterModal, HistoryItem, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
-import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-koni-ui/messaging';
-import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useFilterModal, useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
+import { ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
+import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-
-import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { HistoryDetailModal } from './Detail';
 
@@ -130,12 +127,12 @@ const modalId = HISTORY_DETAIL_MODAL;
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useSetCurrentPage('/home/history');
   const { t } = useTranslation();
+  const dataContext = useContext(DataContext);
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
-  const { accounts, currentAccount, isAllAccount } = useSelector((root) => root.accountState);
+  const { accounts, currentAccount } = useSelector((root) => root.accountState);
+  const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
   const { chainInfoMap } = useSelector((root) => root.chainStore);
   const { language } = useSelector((root) => root.settings);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [rawHistoryList, setRawHistoryList] = useState<TransactionHistoryItem[]>([]);
 
   const isActive = checkActive(modalId);
 
@@ -290,7 +287,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setOpenDetailLink(false);
   }, [inactiveModal]);
 
-  const onClickFilter = useCallback(() => {
+  const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
 
@@ -326,8 +323,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [curAdr, currentAccount?.address, inactiveModal]);
 
-  const { selectedAddress, selectedChain, setSelectedAddress, setSelectedChain } = useHistorySelection();
-
   const emptyList = useCallback(() => {
     return (
       <EmptyList
@@ -351,6 +346,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [onOpenDetail]
   );
 
+  const searchFunc = useCallback((item: TransactionHistoryItem, searchText: string) => {
+    const searchTextLowerCase = searchText.toLowerCase();
+    const fromName = item.fromName?.toLowerCase();
+    const toName = item.toName?.toLowerCase();
+    const symbol = (item.amount?.symbol || item.fee?.symbol || item.tip?.symbol)?.toLowerCase();
+    const network = chainInfoMap[item.chain]?.name?.toLowerCase();
+
+    return (
+      fromName?.includes(searchTextLowerCase) ||
+      toName?.includes(searchTextLowerCase) ||
+      symbol?.includes(searchTextLowerCase) ||
+      network?.includes(searchTextLowerCase)
+    );
+  }, [chainInfoMap]);
+
   const groupBy = useCallback((item: TransactionHistoryItem) => {
     return formatHistoryDate(item.time, language, 'list');
   }, [language]);
@@ -361,176 +371,48 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
-  const chainItems = useMemo<ChainItemType[]>(() => {
-    if (!selectedAddress) {
-      return [];
-    }
-
-    const result: ChainItemType[] = [];
-
-    Object.values(chainInfoMap).forEach((c) => {
-      if (_isChainEvmCompatible(c) === isEthereumAddress(selectedAddress)) {
-        result.push({
-          name: c.name,
-          slug: c.slug
-        });
-      }
-    });
-
-    return result;
-  }, [chainInfoMap, selectedAddress]);
-
-  const onSelectAccount = useCallback((event: BasicInputEvent) => {
-    setSelectedAddress(event.target.value);
-  }, [setSelectedAddress]);
-
-  const onSelectChain = useCallback((event: BasicInputEvent) => {
-    setSelectedChain(event.target.value);
-  }, [setSelectedChain]);
-
-  const historySelectorsNode = useMemo(() => {
-    return (
-      <>
-        {
-          isAllAccount && (
-            <AccountSelector
-              className={'__history-address-selector'}
-              onChange={onSelectAccount}
-              value={selectedAddress}
-            />
-          )
-        }
-
-        <ChainSelector
-          className={'__history-chain-selector'}
-          items={chainItems}
-          onChange={onSelectChain}
-          title={t('Select chain')}
-          value={selectedChain}
-        />
-      </>
-    );
-  }, [chainItems, onSelectAccount, onSelectChain, selectedAddress, selectedChain, t, isAllAccount]);
-
-  const listSection = useMemo(() => {
-    return (
-      <>
-        <div className={'__page-tool-area'}>
-          {historySelectorsNode}
-        </div>
-
-        <div className={'__page-list-area'}>
-          {loading && (
-            <div className={'__loading-area'}>
-              <ActivityIndicator
-                loading={true}
-                size={32}
-              />
-            </div>
-          )}
-
-          {!loading && (
-            <SwList
-              filterBy={filterFunction}
-              groupBy={groupBy}
-              groupSeparator={groupSeparator}
-              list={historyList}
-              renderItem={renderItem}
-              renderOnScroll={true}
-              renderWhenEmpty={emptyList}
-            />
-          )}
-        </div>
-      </>
-    );
-  }, [filterFunction, groupBy, groupSeparator, historyList, renderItem, emptyList, historySelectorsNode, loading]);
-
-  const headerIcons = useMemo<ButtonProps[]>(() => {
-    return [
-      {
-        icon: (
-          <Icon
-            customSize={'24px'}
-            phosphorIcon={FadersHorizontal}
-            type='phosphor'
-          />
-        ),
-        onClick: onClickFilter
-      }
-    ];
-  }, [onClickFilter]);
-
-  useEffect(() => {
-    let id: string;
-    let isSubscribed = true;
-
-    setLoading(true);
-
-    subscribeTransactionHistory(
-      selectedChain,
-      selectedAddress,
-      (items: TransactionHistoryItem[]) => {
-        if (isSubscribed) {
-          setRawHistoryList(items);
-        }
-      }
-    ).then((res) => {
-      id = res.id;
-
-      if (isSubscribed) {
-        setRawHistoryList(res.items);
-      } else {
-        cancelSubscription(id).catch(console.log);
-      }
-    }).catch((e) => {
-      console.log('subscribeTransactionHistory error:', e);
-    }).finally(() => {
-      setLoading(false);
-    });
-
-    return () => {
-      isSubscribed = false;
-
-      if (id) {
-        cancelSubscription(id).catch(console.log);
-      }
-    };
-  }, [selectedAddress, selectedChain]);
-
-  useEffect(() => {
-    if (chainItems.length) {
-      setSelectedChain((prevChain) => {
-        if (prevChain && chainInfoMap[prevChain]) {
-          if (_isChainEvmCompatible(chainInfoMap[prevChain]) === isEthereumAddress(selectedAddress)) {
-            return prevChain;
-          }
-        }
-
-        return chainItems[0].slug;
-      });
-    }
-  }, [chainInfoMap, chainItems, selectedAddress, setSelectedChain]);
-
   return (
     <>
       <PageWrapper
         className={`history ${className}`}
+        resolve={dataContext.awaitStores(['transactionHistory'])}
       >
-        <Layout.Base>
-          <SwSubHeader
-            background={'transparent'}
-            center={false}
-            className={'history-header'}
-            paddingVertical
-            rightButtons={headerIcons}
-            showBackButton={false}
-            title={t('History')}
-          />
+        <SwSubHeader
+          background={'transparent'}
+          center={false}
+          className={'history-header'}
+          paddingVertical
+          // todo: enable this code if support download feature
+          // rightButtons={[
+          //   {
+          //     icon: (
+          //       <Icon
+          //         phosphorIcon={DownloadSimple}
+          //         size={'md'}
+          //         type='phosphor'
+          //       />
+          //     )
+          //   }
+          // ]}
+          showBackButton={false}
+          title={t('History')}
+        />
 
-          <div className={'__page-background'}></div>
-
-          {listSection}
-        </Layout.Base>
+        <SwList.Section
+          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+          enableSearchInput
+          filterBy={filterFunction}
+          groupBy={groupBy}
+          groupSeparator={groupSeparator}
+          list={historyList}
+          onClickActionBtn={onClickActionBtn}
+          renderItem={renderItem}
+          renderWhenEmpty={emptyList}
+          searchFunction={searchFunc}
+          searchMinCharactersCount={2}
+          searchPlaceholder={t<string>('Search history')}
+          showActionBtn
+        />
       </PageWrapper>
 
       <HistoryDetailModal
@@ -554,72 +436,6 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     flexDirection: 'column',
-
-    '.__page-background': {
-      position: 'relative',
-      zIndex: 1,
-
-      '&:before': {
-        content: '""',
-        display: 'block',
-        height: 190,
-        top: 0,
-        left: 0,
-        right: 0,
-        position: 'absolute',
-        background: 'linear-gradient(180deg, rgba(76, 234, 172, 0.10) 0%, rgba(76, 234, 172, 0.00) 94.17%)'
-      }
-    },
-
-    '.__page-tool-area': {
-      display: 'flex',
-      padding: token.padding,
-      borderBottomLeftRadius: token.size,
-      borderBottomRightRadius: token.size,
-      backgroundColor: token.colorBgDefault,
-      gap: token.sizeSM,
-      position: 'relative',
-      zIndex: 2,
-
-      '.__history-address-selector, .__history-chain-selector': {
-        height: 40,
-        flex: 1,
-        borderRadius: 32,
-        overflow: 'hidden',
-
-        '&:before': {
-          display: 'none'
-        },
-
-        '.ant-select-modal-input-wrapper': {
-          paddingLeft: token.padding,
-          paddingRight: token.padding
-        }
-      }
-    },
-
-    '.__loading-area': { display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center', height: '100%' },
-
-    '.__page-list-area': {
-      flex: 1,
-      overflow: 'auto',
-      position: 'relative',
-      zIndex: 2
-    },
-
-    '.ant-sw-list': {
-      height: '100%',
-      overflow: 'auto',
-      paddingBottom: token.padding,
-      paddingLeft: token.padding,
-      paddingRight: token.padding
-    },
-
-    '.ant-sw-screen-layout-body': {
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
-    },
 
     '.history-header.ant-sw-sub-header-container': {
       marginBottom: 0

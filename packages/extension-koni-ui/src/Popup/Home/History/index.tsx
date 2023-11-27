@@ -10,8 +10,7 @@ import { useChainInfoWithState, useFilterModal, useHistorySelection, useSelector
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-koni-ui/messaging';
 import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
-import CN from 'classnames';
+import { ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -399,25 +398,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         )
       }
 
-      <div className={CN('__history-chain-selector-wrapper', {
-        '-loading': loading
-      })}
-      >
-        <ChainSelector
-          className={'__history-chain-selector'}
-          items={chainItems}
-          onChange={onSelectChain}
-          title={t('Select chain')}
-          value={selectedChain}
-        />
-
-        <div className={'__loading-icon'}>
-          <ActivityIndicator
-            loading={true}
-            size={24}
-          />
-        </div>
-      </div>
+      <ChainSelector
+        className={'__history-chain-selector'}
+        items={chainItems}
+        loading={loading}
+        onChange={onSelectChain}
+        title={t('Select chain')}
+        value={selectedChain}
+      />
     </>
   );
 
@@ -603,12 +591,6 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
       position: 'relative',
       zIndex: 2,
 
-      '.__history-address-selector, .__history-chain-selector-wrapper': {
-        flex: 1,
-        flexBasis: '50%',
-        overflow: 'hidden'
-      },
-
       '.__history-address-selector, .__history-chain-selector': {
         height: 40,
         flex: 1,
@@ -629,34 +611,6 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '.__history-address-selector': {
         '.__selected-item-address': {
           display: 'none'
-        }
-      },
-
-      '.__history-chain-selector-wrapper': {
-        overflow: 'hidden',
-        position: 'relative',
-
-        '.__loading-icon': {
-          position: 'absolute',
-          display: 'flex',
-          top: 0,
-          bottom: 0,
-          right: 6,
-          width: 40,
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: 0,
-          pointerEvents: 'none'
-        },
-
-        '&.-loading': {
-          '.ant-select-modal-input-suffix': {
-            opacity: 0
-          },
-
-          '.__loading-icon': {
-            opacity: 1
-          }
         }
       }
     },

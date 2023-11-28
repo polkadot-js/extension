@@ -5917,6 +5917,7 @@ __metadata:
     buffer: ^6.0.3
     cross-fetch: ^3.1.5
     dexie: ^3.2.2
+    dexie-export-import: ^4.0.7
     eth-simple-keyring: ^4.2.0
     ethereumjs-tx: ^2.1.2
     ethereumjs-util: ^7.1.5
@@ -6053,6 +6054,7 @@ __metadata:
     bowser: ^2.11.0
     classnames: ^2.3.2
     copy-to-clipboard: ^3.3.3
+    dexie-export-import: ^4.0.7
     enzyme: ^3.11.0
     enzyme-adapter-react-16: ^1.15.7
     file-saver: ^2.0.5
@@ -11608,6 +11610,15 @@ __metadata:
     node-source-walk: ^4.2.0
     typescript: ^3.9.10
   checksum: 77703410baa242029dc5e7d02cca7a26278dea498ec1c3320f92efa08a85263affc3b102fc2b09952ece1d2c851a3808733d7bfa9ed11944a7c0f39920e33ec9
+  languageName: node
+  linkType: hard
+
+"dexie-export-import@npm:^4.0.7":
+  version: 4.0.7
+  resolution: "dexie-export-import@npm:4.0.7"
+  peerDependencies:
+    dexie: ^2.0.4 || ^3.0.0 || ^4.0.1-alpha.5
+  checksum: e0a80b09b5805da5d3daa90e5d8de397e4f3f16650b84e2aea46af4f44f1e2259babb094fca4c2944345696068ca593197781a5627569e875b60ab8d32b31db3
   languageName: node
   linkType: hard
 

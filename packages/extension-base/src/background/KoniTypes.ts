@@ -15,6 +15,7 @@ import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
 import { KeyringAddress, KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/session';
+import { DexieExportJsonMeta } from 'dexie-export-import';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
@@ -2397,6 +2398,12 @@ export interface KoniRequestSignatures {
   'pri(buyService.tokens.subscribe)': [null, Record<string, BuyTokenInfo>, Record<string, BuyTokenInfo>];
   'pri(buyService.services.subscribe)': [null, Record<string, BuyServiceInfo>, Record<string, BuyServiceInfo>];
   /* Buy Service */
+
+  /* Database Service */
+  'pri(database.export)': [null, string];
+  'pri(database.import)': [string, boolean];
+  'pri(database.checkMetadata)': [string, DexieExportJsonMeta];
+  /* Database Service */
 }
 
 export interface ApplicationMetadataType {

@@ -14,9 +14,12 @@ import NominatorMetadataStore from '@subwallet/extension-base/services/storage-s
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { Subscription } from 'dexie';
+import { exportDB, peakImportFile } from 'dexie-export-import';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
+
+const EXPORT_EXCLUDE_TABLES = ['metadata'];
 
 export default class DatabaseService {
   private _db: KoniDatabase;
@@ -342,5 +345,49 @@ export default class DatabaseService {
 
   public upsertCampaign (campaign: ICampaign) {
     return this.stores.campaign.upsertCampaign(campaign);
+  }
+
+  async exportDB () {
+    const blob = await exportDB(this._db, {
+      filter: (table, value, key) => {
+        if (EXPORT_EXCLUDE_TABLES.indexOf(table) >= 0) {
+          return false;
+        }
+
+        return true;
+      }
+    });
+
+    return await blob.text();
+  }
+
+  async importDB (data: string) {
+    try {
+      const blob = new Blob([data], { type: 'application/json' });
+
+      await this._db.import(blob, {
+        overwriteValues: true,
+        acceptMissingTables: true,
+        acceptVersionDiff: true
+      });
+
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+
+      return false;
+    }
+  }
+
+  async checkImportMetadata (data: string) {
+    try {
+      const blob = new Blob([data], { type: 'application/json' });
+
+      return await peakImportFile(blob);
+    } catch (e) {
+      this.logger.error(e);
+
+      return null;
+    }
   }
 }

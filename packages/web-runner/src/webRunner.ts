@@ -7,7 +7,7 @@ import { state as koniState } from '@subwallet/extension-base/koni/background/ha
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import KeyringStore from '@subwallet/extension-base/stores/Keyring';
 import keyring from '@subwallet/ui-keyring';
-import { checkRestore } from '@subwallet/web-runner/checkRestore';
+import { checkRestore } from './checkRestore';
 
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 

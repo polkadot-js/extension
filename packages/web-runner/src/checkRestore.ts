@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { mobile } from '@subwallet/extension-base/koni/background/handlers';
-import { PageStatus, responseMessage } from '@subwallet/web-runner/messageHandle';
+import { PageStatus, responseMessage } from './messageHandle';
 
 export async function checkRestore (): Promise<void> {
   return new Promise((resolve) => {

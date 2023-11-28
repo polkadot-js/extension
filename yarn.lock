@@ -6054,7 +6054,6 @@ __metadata:
     bowser: ^2.11.0
     classnames: ^2.3.2
     copy-to-clipboard: ^3.3.3
-    dexie-export-import: ^4.0.7
     enzyme: ^3.11.0
     enzyme-adapter-react-16: ^1.15.7
     file-saver: ^2.0.5

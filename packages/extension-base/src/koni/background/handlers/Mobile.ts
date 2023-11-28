@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ActiveCronAndSubscriptionMap, CronServiceType, RequestCronAndSubscriptionAction, RequestInitCronAndSubscription, SubscriptionServiceType } from '@subwallet/extension-base/background/KoniTypes';
+import { ActiveCronAndSubscriptionMap, CronServiceType, MobileData, RequestCronAndSubscriptionAction, RequestInitCronAndSubscription, SubscriptionServiceType } from '@subwallet/extension-base/background/KoniTypes';
 import { MessageTypes, RequestTypes, ResponseType } from '@subwallet/extension-base/background/types';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 
 const DEFAULT_SERVICE_MAP = {
   subscription: {
@@ -25,6 +26,7 @@ const DEFAULT_SERVICE_MAP = {
 export default class Mobile {
   // @ts-ignore
   private state: KoniState;
+  private restoreHandler = createPromiseHandler<void>();
 
   constructor (state: KoniState) {
     this.state = state;
@@ -97,6 +99,35 @@ export default class Mobile {
     console.log('restartSubscriptionServices');
   }
 
+  public async mobileBackup (): Promise<MobileData> {
+    const indexedDB = await this.state.dbService.exportDB();
+
+    return {
+      storage: JSON.stringify(localStorage),
+      indexedDB
+    };
+  }
+
+  public async mobileRestore ({ indexedDB, storage }: Partial<MobileData>): Promise<void> {
+    if (storage) {
+      const storageData = JSON.parse(storage) as Record<string, any>;
+
+      for (const key in storageData) {
+        localStorage.setItem(key, JSON.stringify(storageData[key]));
+      }
+    }
+
+    if (indexedDB) {
+      await this.state.dbService.importDB(indexedDB);
+    }
+
+    this.restoreHandler.resolve();
+  }
+
+  public waitRestore (): Promise<void> {
+    return this.restoreHandler.promise;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (
     id: string,
@@ -128,6 +159,10 @@ export default class Mobile {
         return this.stopSubscriptionServices(request as SubscriptionServiceType[]);
       case 'mobile(subscription.restart)':
         return this.restartSubscriptionServices(request as SubscriptionServiceType[]);
+      case 'mobile(storage.restore)':
+        return this.mobileRestore(request as MobileData);
+      case 'mobile(storage.backup)':
+        return this.mobileBackup();
       default:
         throw new Error(`Unable to handle message of type ${type}`);
     }

@@ -32,7 +32,7 @@ import TransactionService from '@subwallet/extension-base/services/transaction-s
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import { stripUrl } from '@subwallet/extension-base/utils';
+import { stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
@@ -160,8 +160,9 @@ export default class KoniState {
     this.logger = createLogger('State');
 
     // Init state
-    this.init()
-      .catch(console.error);
+    if (TARGET_ENV !== 'mobile') {
+      this.init().catch(console.error);
+    }
   }
 
   // Clone from polkadot.js

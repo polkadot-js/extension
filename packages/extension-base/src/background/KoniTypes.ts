@@ -44,7 +44,7 @@ export interface RuntimeEnvironmentInfo {
   protocol?: string;
 }
 
-export type TargetEnvironment = 'extension' | 'webapp' | 'web-runner';
+export type TargetEnvironment = 'extension' | 'webapp' | 'mobile';
 
 export interface EnvironmentSupport {
   MANTA_ZK: boolean;
@@ -1867,7 +1867,14 @@ export interface RequestGetTransaction {
 
 // Mobile update
 export type SubscriptionServiceType = 'chainRegistry' | 'balance' | 'crowdloan' | 'staking';
+
+export interface MobileData {
+  storage: string
+  indexedDB: string
+}
+
 export type CronServiceType = 'price' | 'nft' | 'staking' | 'history' | 'recoverApi' | 'checkApiStatus';
+
 export type CronType =
   'recoverApiMap' |
   'checkApiMapStatus' |
@@ -2370,6 +2377,8 @@ export interface KoniRequestSignatures {
   'mobile(subscription.start)': [SubscriptionServiceType[], void];
   'mobile(subscription.stop)': [SubscriptionServiceType[], void];
   'mobile(subscription.restart)': [SubscriptionServiceType[], void];
+  'mobile(storage.backup)': [null, MobileData];
+  'mobile(storage.restore)': [Partial<MobileData>, null];
 
   // Psp token
   'pub(token.add)': [RequestAddPspToken, boolean];

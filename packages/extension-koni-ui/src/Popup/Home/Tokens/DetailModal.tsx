@@ -9,9 +9,10 @@ import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Form, ModalContext, Number, SwModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
+import CN from 'classnames';
 import React, { useContext, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -53,7 +54,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
 
   const isActive = checkActive(id);
 
-  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
+  const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const { balanceMap } = useSelector((state) => state.balance);
 
   const [form] = Form.useForm<FormState>();
@@ -125,8 +126,21 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
       }
     }
 
-    return result;
-  }, [balanceMap, currentAccount?.address, currentTokenInfo?.slug, isAllAccount]);
+    return result.sort((a, b) => {
+      const aAccount = findAccountByAddress(accounts, a.address);
+      const bAccount = findAccountByAddress(accounts, b.address);
+
+      if (!aAccount) {
+        return bAccount ? -1 : 0;
+      }
+
+      if (!bAccount) {
+        return aAccount ? 1 : 0;
+      }
+
+      return ((aAccount?.name || '').toLowerCase() > (bAccount?.name || '').toLowerCase()) ? 1 : -1;
+    });
+  }, [balanceMap, currentAccount?.address, currentTokenInfo?.slug, isAllAccount, accounts]);
 
   useEffect(() => {
     if (!isActive) {
@@ -136,7 +150,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
 
   return (
     <SwModal
-      className={className}
+      className={CN(className, { 'fix-height': isAllAccount })}
       id={id}
       onCancel={onCancel}
       title={t('Token details')}
@@ -201,8 +215,13 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
 
 export const DetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '&.fix-height': {
+      '.ant-sw-modal-body': {
+        height: 470
+      }
+    },
+
     '.ant-sw-modal-body': {
-      height: 470,
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column'

@@ -5,13 +5,14 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import { detectTranslate, isSameAddress, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { t } from 'i18next';
 
 import { ApiPromise } from '@polkadot/api';
-import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
+import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, hexToString, isHex, stringToU8a, u8aConcat } from '@polkadot/util';
 
 export interface PalletNominationPoolsPoolMember {
   poolId: number,
@@ -116,6 +117,8 @@ export interface PalletIdentityRegistration {
   }
 }
 
+export type PalletIdentitySuper = [string, { Raw: string }]
+
 export interface ValidatorExtraInfo {
   commission: string,
   blocked: false,
@@ -156,24 +159,73 @@ export function transformPoolName (input: string): string {
   return input.replace(/[^\x20-\x7E]/g, '');
 }
 
-export function parseIdentity (identityInfo: PalletIdentityRegistration | null): string | undefined {
-  let identity;
+/**
+  * @returns
+  * <p>
+  * [0] - identity
+  * </p>
+  * <p>
+  * [1] - isReasonable (isVerified)
+  * </p>
+  *  */
+export async function parseIdentity (substrateApi: _SubstrateApi, address: string, children?: string): Promise<[string | undefined, boolean]> {
+  const compactResult = (rs?: string) => {
+    const result: string[] = [];
 
-  if (identityInfo) {
-    const displayName = identityInfo?.info?.display?.Raw;
-    const web = identityInfo?.info?.web?.Raw;
-    const riot = identityInfo?.info?.riot?.Raw;
-    const twitter = identityInfo?.info?.twitter?.Raw;
+    if (rs) {
+      result.push(rs);
+    }
 
-    if (displayName && !displayName.startsWith('0x')) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      identity = displayName;
+    if (children) {
+      result.push(children);
+    }
+
+    if (result.length > 0) {
+      return result.join('/');
     } else {
-      identity = twitter || web || riot;
+      return undefined;
+    }
+  };
+
+  if (substrateApi.api.query.identity) {
+    let identity;
+
+    const _parent = await substrateApi.api.query.identity.superOf(address);
+
+    const parentInfo = _parent.toHuman() as unknown as PalletIdentitySuper;
+
+    if (parentInfo) {
+      const [parentAddress, { Raw: data }] = parentInfo;
+      const child = isHex(data) ? hexToString(data) : data;
+
+      if (isSameAddress(address, parentAddress)) {
+        const [rs, isReasonable] = await parseIdentity(substrateApi, parentAddress, child);
+
+        return [compactResult(rs), isReasonable];
+      }
+    }
+
+    const _identity = await substrateApi.api.query.identity.identityOf(address);
+    const identityInfo = _identity.toHuman() as unknown as PalletIdentityRegistration;
+
+    if (identityInfo) {
+      const displayName = identityInfo.info?.display?.Raw;
+      const web = identityInfo.info?.web?.Raw;
+      const riot = identityInfo.info?.riot?.Raw;
+      const twitter = identityInfo.info?.twitter?.Raw;
+      const isReasonable = identityInfo.judgements.length > 0;
+
+      if (displayName && !displayName.startsWith('0x')) {
+        identity = displayName;
+      } else {
+        identity = twitter || web || riot;
+      }
+
+      return [compactResult(identity), isReasonable];
     }
   }
 
-  return identity;
+  return [undefined, false];
 }
 
 export function getInflationParams (networkKey: string): _SubstrateInflationParams {

@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, PalletIdentityRegistration, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
@@ -277,13 +277,11 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
 
     await Promise.all(validatorList.map(async (validatorAddress) => {
       let nominationStatus = StakingStatus.NOT_EARNING;
-      const [_identityInfo, _eraStaker] = await Promise.all([
-        chainApi.api.query.identity?.identityOf(validatorAddress),
+      const [[identity], _eraStaker] = await Promise.all([
+        parseIdentity(chainApi, validatorAddress),
         chainApi.api.query.staking.erasStakers(currentEra, validatorAddress)
       ]);
       const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-      const identityInfo = _identityInfo?.toHuman() as unknown as PalletIdentityRegistration;
-      const identity = parseIdentity(identityInfo);
       const topNominators = eraStaker.others.map((nominator) => {
         return nominator.who;
       });
@@ -402,13 +400,11 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
 
     await Promise.all(validatorList.map(async (validatorAddress) => {
       let nominationStatus = StakingStatus.NOT_EARNING;
-      const [_identityInfo, _eraStaker] = await Promise.all([
-        chainApi.api.query.identity.identityOf(validatorAddress),
+      const [[identity], _eraStaker] = await Promise.all([
+        parseIdentity(chainApi, validatorAddress),
         chainApi.api.query.staking.erasStakers(currentEra, validatorAddress)
       ]);
       const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-      const identityInfo = _identityInfo.toHuman() as unknown as PalletIdentityRegistration;
-      const identity = parseIdentity(identityInfo);
       const topNominators = eraStaker.others.map((nominator) => {
         return nominator.who;
       });
@@ -718,24 +714,18 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
 
   await Promise.all(allValidators.map(async (address) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const [_commissionInfo, _identityInfo] = await Promise.all([
+    const [_commissionInfo, [identity, isVerified]] = await Promise.all([
       chainApi.api.query.staking.validators(address),
-      chainApi.api.query?.identity?.identityOf(address)
+      parseIdentity(chainApi, address)
     ]);
 
     const commissionInfo = _commissionInfo.toHuman() as Record<string, any>;
-    const identityInfo = _identityInfo ? (_identityInfo.toHuman() as unknown as PalletIdentityRegistration) : null;
-    let identity;
-
-    if (identityInfo !== null) {
-      identity = parseIdentity(identityInfo);
-    }
 
     extraInfoMap[address] = {
       commission: commissionInfo.commission as string,
       blocked: commissionInfo.blocked as boolean,
       identity,
-      isVerified: identityInfo && identityInfo?.judgements?.length > 0
+      isVerified: isVerified
     } as ValidatorExtraInfo;
   }));
 

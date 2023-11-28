@@ -101,7 +101,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     ];
 
     // Note: fetchAllPossibleExtrinsicItems and fetchAllPossibleTransferItems-receive can run parallelly
-    // Hover, fetchAllPossibleTransferItems-sent must run after fetchAllPossibleExtrinsicItems,
+    // However, fetchAllPossibleTransferItems-sent must run after fetchAllPossibleExtrinsicItems,
     // to avoid "duplicate Extrinsic Hash between items" problem
 
     this.subscanService.fetchAllPossibleExtrinsicItems(chain, address, (extrinsicItems) => {
@@ -127,12 +127,13 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
         }
       });
 
-      this.subscanService.fetchAllPossibleTransferItems(chain, address, 'sent', (transferItems) => {
+      this.subscanService.fetchAllPossibleTransferItems(chain, address, 'sent').then((rsMap) => {
         const result: TransactionHistoryItem[] = [];
 
-        transferItems.forEach((t) => {
-          if (!excludeTransferExtrinsicHash.includes(t.hash)) {
-            result.push(parseSubscanTransferData(address, t, chainInfo));
+        Object.keys(rsMap).forEach((hash) => {
+          // only push item that does not have same hash with another item
+          if (!excludeTransferExtrinsicHash.includes(hash) && rsMap[hash].length === 1) {
+            result.push(parseSubscanTransferData(address, rsMap[hash][0], chainInfo));
           }
         });
 
@@ -146,11 +147,14 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       console.log('fetchAllPossibleExtrinsicItems error', e);
     });
 
-    this.subscanService.fetchAllPossibleTransferItems(chain, address, 'received', (transferItems) => {
+    this.subscanService.fetchAllPossibleTransferItems(chain, address, 'received').then((rsMap) => {
       const result: TransactionHistoryItem[] = [];
 
-      transferItems.forEach((t) => {
-        result.push(parseSubscanTransferData(address, t, chainInfo));
+      Object.keys(rsMap).forEach((hash) => {
+        // only push item that does not have same hash with another item
+        if (rsMap[hash].length === 1) {
+          result.push(parseSubscanTransferData(address, rsMap[hash][0], chainInfo));
+        }
       });
 
       this.addHistoryItems(result).catch((e) => {

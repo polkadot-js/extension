@@ -423,6 +423,13 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
       result.push(YieldAction.UNSTAKE);
     }
 
+    const metadata = yieldPosition.metadata as NominatorMetadata;
+    const hasWithdrawal = metadata.unstakings.some((unstakingInfo) => unstakingInfo.status === UnstakingStatus.CLAIMABLE);
+
+    if (hasWithdrawal) {
+      result.push(YieldAction.WITHDRAW);
+    }
+
     // TODO: check has unstakings to withdraw
   } else {
     result.push(YieldAction.START_EARNING);

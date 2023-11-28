@@ -34,7 +34,7 @@ const _accountFilterFunc = (
       return isSameAddress(item.address, account.address) && item.slug === selectedPoolSlug;
     });
 
-    return new BigN(yieldPositionInfo?.balance[0].totalBalance || BN_ZERO).gt(BN_ZERO);
+    return new BigN(yieldPositionInfo?.balance[0].activeBalance || BN_ZERO).gt(BN_ZERO);
   };
 };
 

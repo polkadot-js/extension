@@ -9,7 +9,7 @@ import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chai
 import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -20,7 +20,6 @@ import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { SignerResult } from '@polkadot/types/types/extrinsic';
-import { BN } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -257,37 +256,6 @@ export interface MetadataItem {
   genesisHash: string;
   specVersion: string;
   hexValue: HexString;
-}
-
-export interface TokenBalanceRaw {
-  reserved: BN,
-  frozen: BN,
-  free: BN
-}
-
-export interface SubstrateBalance {
-  reserved?: string,
-  miscFrozen?: string,
-  feeFrozen?: string
-}
-
-export interface BalanceItem {
-  // metadata
-  tokenSlug: string,
-  state: APIItemState,
-  timestamp?: number
-
-  // must-have, total = free + locked
-  free: string,
-  locked: string,
-
-  // substrate fields
-  substrateInfo?: SubstrateBalance
-}
-
-export interface BalanceJson {
-  reset?: boolean,
-  details: Record<string, BalanceItem>
 }
 
 export interface CrowdloanItem {

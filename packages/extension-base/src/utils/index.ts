@@ -364,6 +364,7 @@ export function wait (milliseconds: number) {
   });
 }
 
+export * from './account';
 export * from './array';
 export * from './environment';
 export * from './lazy';

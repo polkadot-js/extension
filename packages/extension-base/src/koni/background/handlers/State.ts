@@ -5,10 +5,11 @@ import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
+import { groupBalance } from '@subwallet/extension-base/services/balance-service/helpers/group';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import BuyService from '@subwallet/extension-base/services/buy-service';
 import CampaignService from '@subwallet/extension-base/services/campaign-service';
@@ -32,7 +33,8 @@ import TransactionService from '@subwallet/extension-base/services/transaction-s
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import { stripUrl } from '@subwallet/extension-base/utils';
+import { BalanceInfo, BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
+import { isAccountAll, isSameAddress, stripUrl } from '@subwallet/extension-base/utils';
 import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
@@ -87,7 +89,7 @@ export default class KoniState {
   private readonly unsubscriptionMap: Record<string, () => void> = {};
   private readonly accountRefStore = new AccountRefStore();
   private externalRequest: Record<string, ExternalRequestPromise> = {};
-  private balanceMap: Record<string, BalanceItem> = {};
+  private balanceMap: BalanceMap = {};
   private balanceSubject = new Subject<BalanceJson>();
 
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
@@ -148,7 +150,7 @@ export default class KoniState {
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService, this.settingService, this.keyringService);
     this.priceService = new PriceService(this.dbService, this.eventService, this.chainService);
-    this.balanceService = new BalanceService(this.chainService);
+    this.balanceService = new BalanceService(this);
     this.historyService = new HistoryService(this.dbService, this.chainService, this.eventService, this.keyringService, this.subscanService);
     this.transactionService = new TransactionService(this.chainService, this.eventService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
     this.walletConnectService = new WalletConnectService(this, this.requestService);
@@ -264,21 +266,31 @@ export default class KoniState {
     return this.requestService.authSubjectV2;
   }
 
-  public generateDefaultBalanceMap () {
-    const balanceMap: Record<string, BalanceItem> = {};
+  public generateDefaultBalanceMap (): BalanceMap {
+    const balanceMap: BalanceMap = {};
     const activeChains = this.chainService.getActiveChainInfoMap();
+    const isAllAccount = isAccountAll(this.keyringService.currentAccount.address);
 
-    Object.values(activeChains).forEach((chainInfo) => {
-      const chainAssetMap = this.chainService.getFungibleTokensByChain(chainInfo.slug);
+    const addresses = isAllAccount ? Object.keys(this.keyringService.accounts) : [this.keyringService.currentAccount.address];
 
-      Object.keys(chainAssetMap).forEach((assetSlug) => {
-        balanceMap[assetSlug] = {
-          tokenSlug: assetSlug,
-          free: '',
-          locked: '',
-          state: APIItemState.PENDING
-        };
+    addresses.forEach((address) => {
+      const temp: Record<string, BalanceItem> = {};
+
+      Object.values(activeChains).forEach((chainInfo) => {
+        const chainAssetMap = this.chainService.getFungibleTokensByChain(chainInfo.slug);
+
+        Object.keys(chainAssetMap).forEach((assetSlug) => {
+          temp[assetSlug] = {
+            address,
+            tokenSlug: assetSlug,
+            free: '',
+            locked: '',
+            state: APIItemState.PENDING
+          };
+        });
       });
+
+      balanceMap[address] = temp;
     });
 
     return balanceMap;
@@ -843,19 +855,23 @@ export default class KoniState {
     return keyring.getAccounts().map((account) => account.address);
   }
 
-  private removeInactiveChainBalances (balanceMap: Record<string, BalanceItem>) {
-    const activeBalanceMap: Record<string, BalanceItem> = {};
+  private removeInactiveChainBalances (balanceMap: Record<string, BalanceInfo>): BalanceMap {
+    const activeBalanceMap: BalanceMap = {};
 
-    Object.entries(balanceMap).forEach(([tokenSlug, balanceItem]) => {
-      const tokenInfo = this.chainService.getAssetBySlug(tokenSlug);
+    Object.entries(balanceMap).forEach(([address, balances]) => {
+      activeBalanceMap[address] = {};
 
-      if (tokenInfo) {
-        const chainInfo = this.chainService.getChainInfoByKey(tokenInfo.originChain);
+      Object.entries(balances).forEach(([tokenSlug, item]) => {
+        const tokenInfo = this.chainService.getAssetBySlug(tokenSlug);
 
-        if (chainInfo && this.getChainStateByKey(chainInfo.slug).active) {
-          activeBalanceMap[tokenSlug] = balanceItem;
+        if (tokenInfo) {
+          const chainInfo = this.chainService.getChainInfoByKey(tokenInfo.originChain);
+
+          if (chainInfo && this.getChainStateByKey(chainInfo.slug).active) {
+            activeBalanceMap[address][tokenSlug] = item;
+          }
         }
-      }
+      });
     });
 
     return activeBalanceMap;
@@ -867,8 +883,8 @@ export default class KoniState {
     return { details: activeData, reset } as BalanceJson;
   }
 
-  public async getStoredBalance (address: string): Promise<Record<string, BalanceItem>> {
-    const items = await this.dbService.stores.balance.getBalanceMapByAddress(address);
+  public async getStoredBalance (address: string): Promise<BalanceMap> {
+    const items = await this.dbService.stores.balance.getBalanceMapByAddresses(address);
 
     return items || {};
   }
@@ -886,7 +902,27 @@ export default class KoniState {
 
     storedData = this.removeInactiveChainBalances(storedData);
 
-    this.balanceMap = { ...defaultData, ...storedData } as Record<string, BalanceItem>;
+    const result: BalanceMap = {};
+
+    for (const [address, balanceInfo] of Object.entries(defaultData)) {
+      result[address] = { ...balanceInfo };
+    }
+
+    for (const [address, balanceInfo] of Object.entries(storedData)) {
+      if (!result[address]) {
+        result[address] = { ...balanceInfo };
+      } else {
+        const temp: BalanceInfo = { ...result[address] };
+
+        for (const [slug, item] of Object.entries(balanceInfo)) {
+          temp[slug] = { ...item };
+        }
+
+        result[address] = { ...temp };
+      }
+    }
+
+    this.balanceMap = { ...defaultData, ...storedData };
     this.publishBalance(true);
   }
 
@@ -915,19 +951,69 @@ export default class KoniState {
     });
   }
 
-  public setBalanceItem (tokenSlug: string, item: BalanceItem) {
-    this.balanceMap[tokenSlug] = { timestamp: +new Date(), ...item };
-    this.updateBalanceStore(item);
+  /** Note: items must be same tokenSlug */
+  public setBalanceItem (items: BalanceItem[]) {
+    if (items.length) {
+      const tokens: string[] = [];
+      const updates: BalanceItem[] = [];
 
-    this.lazyNext('setBalanceItem', () => {
-      this.publishBalance();
-    });
+      for (const item of items) {
+        const address = item.address;
+        const tokenSlug = item.tokenSlug;
+
+        if (!tokens.includes(tokenSlug)) {
+          tokens.push(tokenSlug);
+        }
+
+        if (!this.balanceMap[address]) {
+          this.balanceMap[address] = {};
+        }
+
+        const data: BalanceItem = { timestamp: +new Date(), ...item };
+
+        this.balanceMap[address][tokenSlug] = data;
+
+        updates.push(data);
+      }
+
+      const isAllAccount = isAccountAll(this.keyringService.currentAccount.address);
+
+      if (isAllAccount) {
+        const address = ALL_ACCOUNT_KEY;
+
+        for (const token of tokens) {
+          const items: BalanceItem[] = [];
+
+          for (const [_adr, balanceInfo] of Object.entries(this.balanceMap)) {
+            if (!isSameAddress(_adr, address)) {
+              const item = balanceInfo[token];
+
+              item && items.push(item);
+            }
+          }
+
+          const _balance = groupBalance(items, address, token);
+          const balance = { timestamp: +new Date(), ..._balance };
+
+          if (!this.balanceMap[address]) {
+            this.balanceMap[address] = {};
+          }
+
+          this.balanceMap[address][token] = balance;
+          updates.push(balance);
+        }
+      }
+
+      this.updateBalanceStore(updates);
+
+      this.lazyNext('setBalanceItem', () => {
+        this.publishBalance();
+      });
+    }
   }
 
-  private updateBalanceStore (item: BalanceItem) {
-    const currentAccountInfo = this.keyringService.currentAccount;
-
-    this.dbService.updateBalanceStore(currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
+  private updateBalanceStore (items: BalanceItem[]) {
+    this.dbService.updateBulkBalanceStore(items).catch((e) => this.logger.warn(e));
   }
 
   public subscribeBalance () {
@@ -1996,7 +2082,7 @@ export default class KoniState {
 
           balanceItem.free = zkBalances[i]?.toString() || '0';
           balanceItem.state = APIItemState.READY;
-          this.setBalanceItem(balanceItem.tokenSlug, balanceItem);
+          this.setBalanceItem([balanceItem]);
         }
       })
       .catch(console.warn);

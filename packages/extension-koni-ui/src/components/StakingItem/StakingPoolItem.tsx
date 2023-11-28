@@ -5,6 +5,7 @@ import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/scree
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
+import CN from 'classnames';
 import { DotsThree } from 'phosphor-react';
 import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,8 +39,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <span>{name || `Pool #${id}`}</span>
           </div>
           <div className={'middle-item__bond-amount'}>
-            <span className={'middle-item__bond-amount-label'}>{t('Bonded:')}&nbsp;</span>
-
+            <span className={'middle-item__bond-amount-label'}>{t('Bonded:')}</span>
             <Number
               className={'middle-item__bond-amount-number'}
               decimal={decimals}
@@ -50,8 +50,14 @@ const Component: React.FC<Props> = (props: Props) => {
               unitOpacity={0.45}
               value={bondedAmount}
             />
-
-            <span className={'middle-item__bond-amount-label'}>&nbsp;-&nbsp;{isProfitable ? t('Earning') : t('Not earning')}</span>
+            <span className={CN('middle-item__pool-earning-status', { not: !isProfitable })}>
+              <span className='separator'>
+                &nbsp;-&nbsp;
+              </span>
+              <span>
+                {isProfitable ? t('Earning') : t('Not earning')}
+              </span>
+            </span>
           </div>
         </div>
       }
@@ -77,7 +83,7 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
     background: token.colorBgSecondary,
 
     '.ant-web3-block-middle-item': {
-      paddingRight: token.padding
+      paddingRight: token.paddingXXS
     },
 
     '.middle-item__name': {
@@ -88,10 +94,28 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       whiteSpace: 'nowrap'
     },
 
-    '.middle-item__bond-amount-label, .middle-item__bond-amount-number': {
+    '.middle-item__bond-amount-label, .middle-item__bond-amount-number, .middle-item__pool-earning-status': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
       color: token.colorTextLight4
+    },
+
+    '.middle-item__bond-amount-number, .middle-item__pool-earning-status': {
+      textWrap: 'nowrap'
+    },
+
+    '.middle-item__pool-earning-status': {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      color: token.colorSuccess,
+
+      '&.not': {
+        color: token.colorError
+      },
+
+      '.separator': {
+        color: token.colorTextLight4
+      }
     },
 
     '.middle-item__bond-amount-label': {

@@ -14,7 +14,6 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { Badge, Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { Book, CaretLeft, FadersHorizontal, Lightning, SortAscending } from 'phosphor-react';
@@ -194,7 +193,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return (
       <div className={'__selected-item'}>
         <div className={'__selected-item-name common-text'}>
-          {item.name || toShort(item.address)}
+          {item.name || `Pool #${item.id}`}
         </div>
       </div>
     );

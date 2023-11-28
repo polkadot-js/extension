@@ -139,12 +139,21 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
 
       '.account-address': {
         color: token.colorTextTertiary
+      },
+
+      '.__value-col': {
+        flex: '0 1 auto'
+      },
+
+      '.__label': {
+        flex: '1'
       }
     },
 
     '.balance-info': {
+      paddingLeft: token.paddingXL,
+
       '.__label': {
-        marginLeft: token.marginXL,
         fontSize: token.fontSizeSM,
         lineHeight: token.lineHeightSM,
         color: token.colorTextTertiary
@@ -153,6 +162,9 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
       '.__value': {
         fontSize: token.fontSizeSM,
         lineHeight: token.lineHeightSM
+      },
+      '.__value-col': {
+        flex: '0 1 auto'
       }
     }
   };

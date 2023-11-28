@@ -35,7 +35,7 @@ import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectN
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
-import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
+import { createTransactionFromRLP, recalculateGasPrice, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { MetadataDef } from '@subwallet/extension-inject/types';
@@ -1860,7 +1860,7 @@ export default class KoniExtension {
     const contractAddress = params.contractAddress as string;
     const tokenId = params.tokenId as string;
 
-    const transaction = await getERC721Transaction(this.#koniState.getEvmApi(networkKey), contractAddress, senderAddress, recipientAddress, tokenId);
+    const transaction = await getERC721Transaction(this.#koniState.getEvmApi(networkKey), networkKey, contractAddress, senderAddress, recipientAddress, tokenId);
 
     // this.addContact(recipientAddress);
 
@@ -2020,7 +2020,8 @@ export default class KoniExtension {
               from: address
             };
 
-            const gasPrice = await web3.api.eth.getGasPrice();
+            const _price = await web3.api.eth.getGasPrice();
+            const gasPrice = recalculateGasPrice(_price, networkKey);
             const gasLimit = await web3.api.eth.estimateGas(transaction);
 
             estimatedFee = (gasLimit * parseInt(gasPrice)).toString();

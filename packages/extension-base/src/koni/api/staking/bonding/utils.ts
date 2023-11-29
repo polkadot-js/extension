@@ -198,7 +198,7 @@ export async function parseIdentity (substrateApi: _SubstrateApi, address: strin
       const [parentAddress, { Raw: data }] = parentInfo;
       const child = isHex(data) ? hexToString(data) : data;
 
-      if (isSameAddress(address, parentAddress)) {
+      if (!isSameAddress(address, parentAddress)) {
         const [rs, isReasonable] = await parseIdentity(substrateApi, parentAddress, child);
 
         return [compactResult(rs), isReasonable];

@@ -375,8 +375,6 @@
   "Please try again later.": "请稍后重试。",
   "Polkadot parachain": "Polkadot平行链",
   "Kusama parachain": "KSM平行链",
-  "Win": "赢",
-  "Fail": "输",
   "Search project": "搜索项目",
   "View on explorer": "在浏览器上查看",
   "Staking value": "质押价值",
@@ -850,5 +848,17 @@
   "You don't have any account to connect. Please create one or skip this step by hitting Cancel.": "",
   "You must transfer at least {{amount}} {{symbol}} to keep the destination account alive": "",
   "You don't have enough tokens to proceed": "",
-  "Token name is required": ""
+  "Token name is required": "",
+  "Page not found": "",
+  "Your website URL is invalid": "",
+  "We are unable to detect any network from the dApp through WalletConnect": "",
+  "Network undetected": "",
+  "Dissolved on": "",
+  "Locked until": "",
+  "Crowdloan ends on": "",
+  "Refunded on": "",
+  "Won": "",
+  "In auction": "",
+  "Token Details": "",
+  "Account Details": ""
 }

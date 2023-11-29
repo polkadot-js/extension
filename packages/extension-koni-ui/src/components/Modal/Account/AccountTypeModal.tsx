@@ -26,7 +26,7 @@ interface Props extends ThemeProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, id, previousId, url, label, icon = CheckCircle } = props;
+  const { className, icon = CheckCircle, id, label, previousId, url } = props;
   const { t } = useTranslation();
   const { checkActive, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();

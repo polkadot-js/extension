@@ -58,17 +58,6 @@ export const WalletModalContext = ({ children }: Props) => {
 
   useExcludeModal('confirmations');
 
-  useEffect(() => {
-    const confirmID = searchParams.get('popup');
-
-    // Auto open confirm modal with method modalContext.activeModal else auto close all modal
-    if (confirmID) {
-      PREDEFINED_MODAL_NAMES.includes(confirmID) && activeModal(confirmID);
-    } else {
-      inactiveModals(PREDEFINED_MODAL_NAMES);
-    }
-  }, [activeModal, inactiveModals, searchParams]);
-
   const onCloseModal = useCallback(() => {
     setSearchParams((prev) => {
       prev.delete('popup');
@@ -82,6 +71,17 @@ export const WalletModalContext = ({ children }: Props) => {
       inactiveAll();
     }
   }, [hasMasterPassword, inactiveAll, isLocked]);
+
+  useEffect(() => {
+    const confirmID = searchParams.get('popup');
+
+    // Auto open confirm modal with method modalContext.activeModal else auto close all modal
+    if (confirmID) {
+      PREDEFINED_MODAL_NAMES.includes(confirmID) && activeModal(confirmID);
+    } else {
+      inactiveModals(PREDEFINED_MODAL_NAMES);
+    }
+  }, [activeModal, inactiveModals, searchParams]);
 
   return <>
     <div

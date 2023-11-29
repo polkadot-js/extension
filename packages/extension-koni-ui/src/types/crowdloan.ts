@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _FundStatus } from '@subwallet/chain-list/types';
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import BigN from 'bignumber.js';
 
@@ -20,8 +21,24 @@ export type CrowdloanItemType = {
   contribute: string | BigN,
   convertedContribute: string | BigN,
   chainDisplayName: string,
+  relayParent: string,
   relayParentDisplayName: string,
   symbol: string,
   paraState?: CrowdloanParaState;
   crowdloanUrl?: string | null;
+}
+
+export type _CrowdloanItemType = {
+  fundId: string;
+  chainSlug: string;
+  chainName: string;
+  relayChainSlug: string;
+  relayChainName: string;
+  contribution: {
+    symbol: string;
+    value: BigN;
+    convertedValue: BigN;
+  };
+  fundStatus: _FundStatus,
+  unlockTime: number
 }

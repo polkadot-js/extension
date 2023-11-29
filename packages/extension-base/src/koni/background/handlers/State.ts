@@ -34,7 +34,7 @@ import { TransactionEventResponse } from '@subwallet/extension-base/services/tra
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceInfo, BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
-import { isAccountAll, isSameAddress, stripUrl } from '@subwallet/extension-base/utils';
+import { isAccountAll, isSameAddress, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
 import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
@@ -163,8 +163,9 @@ export default class KoniState {
     this.logger = createLogger('State');
 
     // Init state
-    this.init()
-      .catch(console.error);
+    if (TARGET_ENV !== 'mobile') {
+      this.init().catch(console.error);
+    }
   }
 
   // Clone from polkadot.js

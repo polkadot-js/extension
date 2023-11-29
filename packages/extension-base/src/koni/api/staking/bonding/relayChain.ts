@@ -9,6 +9,7 @@ import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extens
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { reformatAddress } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 import { t } from 'i18next';
 
 import { Bytes } from '@polkadot/types';
@@ -284,9 +285,17 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
       const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
       const identityInfo = _identityInfo?.toHuman() as unknown as PalletIdentityRegistration;
       const identity = parseIdentity(identityInfo);
-      const topNominators = eraStaker.others.map((nominator) => {
-        return nominator.who;
-      });
+      const sortedNominators = eraStaker.others
+        .sort((a, b) => {
+          return new BigN(b.value).minus(a.value).toNumber();
+        })
+      ;
+
+      const topNominators = sortedNominators
+        .map((nominator) => {
+          return nominator.who;
+        })
+      ;
 
       if (!topNominators.includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if nominator has target but not in nominator list
         nominationStatus = StakingStatus.WAITING;
@@ -348,6 +357,9 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
   } as NominatorMetadata;
 }
 
+/**
+ * Deprecated
+ * */
 export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (isEthereumAddress(address)) {
     return;
@@ -409,9 +421,17 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
       const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
       const identityInfo = _identityInfo.toHuman() as unknown as PalletIdentityRegistration;
       const identity = parseIdentity(identityInfo);
-      const topNominators = eraStaker.others.map((nominator) => {
-        return nominator.who;
-      });
+      const sortedNominators = eraStaker.others
+        .sort((a, b) => {
+          return new BigN(b.value).minus(a.value).toNumber();
+        })
+      ;
+
+      const topNominators = sortedNominators
+        .map((nominator) => {
+          return nominator.who;
+        })
+      ;
 
       if (!topNominators.includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if nominator has target but not in nominator list
         nominationStatus = StakingStatus.WAITING;
@@ -499,9 +519,19 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
     await Promise.all(validatorList.map(async (validatorAddress) => {
       const _eraStaker = await substrateApi.api.query.staking.erasStakers(currentEra, validatorAddress);
       const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-      const topNominators = eraStaker.others.map((nominator) => {
-        return nominator.who;
-      }).slice(0, maxNominatorRewardedPerValidator);
+
+      const sortedNominators = eraStaker.others
+        .sort((a, b) => {
+          return new BigN(b.value).minus(a.value).toNumber();
+        })
+      ;
+
+      const topNominators = sortedNominators
+        .map((nominator) => {
+          return nominator.who;
+        })
+        .slice(0, maxNominatorRewardedPerValidator)
+      ;
 
       if (topNominators.includes(reformatAddress(poolStashAccount, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
         stakingStatus = StakingStatus.EARNING_REWARD;
@@ -593,9 +623,19 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
     await Promise.all(validatorList.map(async (validatorAddress) => {
       const _eraStaker = await chainApi.api.query.staking.erasStakers(currentEra, validatorAddress);
       const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-      const topNominators = eraStaker.others.map((nominator) => {
-        return nominator.who;
-      }).slice(0, maxNominatorRewardedPerValidator);
+
+      const sortedNominators = eraStaker.others
+        .sort((a, b) => {
+          return new BigN(b.value).minus(a.value).toNumber();
+        })
+      ;
+
+      const topNominators = sortedNominators
+        .map((nominator) => {
+          return nominator.who;
+        })
+        .slice(0, maxNominatorRewardedPerValidator)
+      ;
 
       if (topNominators.includes(reformatAddress(poolStashAccount, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
         stakingStatus = StakingStatus.EARNING_REWARD;

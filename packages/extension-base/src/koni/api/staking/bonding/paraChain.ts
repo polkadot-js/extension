@@ -281,6 +281,9 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
   } as NominatorMetadata;
 }
 
+/**
+ * Deprecated
+ * */
 export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (_isChainEvmCompatible(chainInfo) && !isEthereumAddress(address)) {
     return;

@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, PalletIdentityRegistration, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
@@ -13,7 +13,7 @@ import { t } from 'i18next';
 
 import { Bytes } from '@polkadot/types';
 import { Codec } from '@polkadot/types/types';
-import { BN, BN_ZERO } from '@polkadot/util';
+import { BN, BN_ZERO, hexToString, isHex } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export interface PalletStakingNominations {
@@ -60,7 +60,7 @@ export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: str
   let bnTotalStake = new BN(amount);
   const bnMinStake = new BN(chainStakingMetadata.minJoinNominationPool || '0');
   const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
-  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, true);
+  const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, nominatorMetadata?.type, true);
 
   if (selectedPool.state !== 'Open') {
     errors.push(new TransactionError(StakingTxErrorType.INACTIVE_NOMINATION_POOL));
@@ -277,13 +277,11 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
 
     await Promise.all(validatorList.map(async (validatorAddress) => {
       let nominationStatus = StakingStatus.NOT_EARNING;
-      const [_identityInfo, _eraStaker] = await Promise.all([
-        chainApi.api.query.identity?.identityOf(validatorAddress),
+      const [[identity], _eraStaker] = await Promise.all([
+        parseIdentity(chainApi, validatorAddress),
         chainApi.api.query.staking.erasStakers(currentEra, validatorAddress)
       ]);
       const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-      const identityInfo = _identityInfo?.toHuman() as unknown as PalletIdentityRegistration;
-      const identity = parseIdentity(identityInfo);
       const topNominators = eraStaker.others.map((nominator) => {
         return nominator.who;
       });
@@ -402,13 +400,11 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
 
     await Promise.all(validatorList.map(async (validatorAddress) => {
       let nominationStatus = StakingStatus.NOT_EARNING;
-      const [_identityInfo, _eraStaker] = await Promise.all([
-        chainApi.api.query.identity.identityOf(validatorAddress),
+      const [[identity], _eraStaker] = await Promise.all([
+        parseIdentity(chainApi, validatorAddress),
         chainApi.api.query.staking.erasStakers(currentEra, validatorAddress)
       ]);
       const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-      const identityInfo = _identityInfo.toHuman() as unknown as PalletIdentityRegistration;
-      const identity = parseIdentity(identityInfo);
       const topNominators = eraStaker.others.map((nominator) => {
         return nominator.who;
       });
@@ -718,24 +714,18 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
 
   await Promise.all(allValidators.map(async (address) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const [_commissionInfo, _identityInfo] = await Promise.all([
+    const [_commissionInfo, [identity, isVerified]] = await Promise.all([
       chainApi.api.query.staking.validators(address),
-      chainApi.api.query?.identity?.identityOf(address)
+      parseIdentity(chainApi, address)
     ]);
 
     const commissionInfo = _commissionInfo.toHuman() as Record<string, any>;
-    const identityInfo = _identityInfo ? (_identityInfo.toHuman() as unknown as PalletIdentityRegistration) : null;
-    let identity;
-
-    if (identityInfo !== null) {
-      identity = parseIdentity(identityInfo);
-    }
 
     extraInfoMap[address] = {
       commission: commissionInfo.commission as string,
       blocked: commissionInfo.blocked as boolean,
       identity,
-      isVerified: identityInfo && identityInfo?.judgements?.length > 0
+      isVerified: isVerified
     } as ValidatorExtraInfo;
   }));
 
@@ -777,16 +767,29 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
     const poolAddressList = _poolInfo[0].toHuman() as string[];
     const poolAddress = poolAddressList[0];
     const poolId = _poolInfo[1].toPrimitive() as number;
+    const poolsPalletId = substrateApi.api.consts.nominationPools.palletId.toString();
+    const poolStashAccount = parsePoolStashAddress(substrateApi.api, 0, poolId, poolsPalletId);
 
-    const [_bondedPool, _metadata] = await Promise.all([
+    const [_nominations, _bondedPool, _metadata, _minimumActiveStake] = await Promise.all([
+      chainApi.api.query.staking.nominators(poolStashAccount),
       chainApi.api.query.nominationPools.bondedPools(poolId),
-      chainApi.api.query.nominationPools.metadata(poolId)
+      chainApi.api.query.nominationPools.metadata(poolId),
+      chainApi.api.query.staking.minimumActiveStake()
     ]);
 
-    const poolMetadata = _metadata.toPrimitive() as unknown as Bytes;
+    const minimumActiveStake = _minimumActiveStake.toPrimitive() as number;
+    const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
+
+    const poolMetadata = _metadata.toPrimitive() as unknown as string;
     const bondedPool = _bondedPool.toPrimitive() as unknown as PalletNominationPoolsBondedPoolInner;
 
-    const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
+    // const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
+
+    const poolName = isHex(poolMetadata) ? hexToString(poolMetadata) : poolMetadata;
+
+    const isPoolOpen = bondedPool.state === 'Open';
+    const isPoolNominating = !!nominations && nominations.targets.length > 0;
+    const isPoolEarningReward = bondedPool.points > minimumActiveStake;
 
     nominationPools.push({
       id: poolId,
@@ -795,7 +798,8 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
       bondedAmount: bondedPool.points?.toString() || '0',
       roles: bondedPool.roles,
       memberCounter: bondedPool.memberCounter,
-      state: bondedPool.state
+      state: bondedPool.state,
+      isProfitable: isPoolOpen && isPoolNominating && isPoolEarningReward
     });
   }));
 

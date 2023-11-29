@@ -98,13 +98,13 @@ const Component: React.FC<TransferInfoItem> = (props: TransferInfoItem) => {
 
   return (
     <div className={CN(className, '__row -type-transfer')}>
-      <div className={'__col'}>
+      <div className={'__col __label-col'}>
         <div className={'__label'}>{senderLabel || t('Sender')}</div>
 
         {genAccountBlock(senderAddress, senderName)}
         {!!originChain && genChainBlock(originChain)}
       </div>
-      <div className={'__col'}>
+      <div className={'__col __value-col'}>
         <div className={'__label'}>{recipientLabel || t('Recipient')}</div>
 
         {genAccountBlock(recipientAddress, recipientName)}

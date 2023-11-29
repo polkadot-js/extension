@@ -2,21 +2,30 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BalanceError } from '@subwallet/extension-base/background/errors/BalanceError';
-import { AmountData, BalanceErrorType, BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
-import { subscribeEVMBalance, subscribeSubstrateBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
-import { state } from '@subwallet/extension-base/koni/background/handlers';
-import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { AmountData, BalanceErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { groupBalance } from '@subwallet/extension-base/services/balance-service/helpers/group';
+import { subscribeEVMBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/evm';
+import { subscribeSubstrateBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/substrate';
 import { _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenSlug, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { BalanceItem } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
 
+/**
+ * Balance service
+ * @class
+*/
 export class BalanceService {
-  private chainService: ChainService;
+  private state: KoniState;
 
-  constructor (chainService: ChainService) {
-    this.chainService = chainService;
-
+  /**
+   * @constructor
+   * @param {KoniState} state - The state of extension.
+   */
+  constructor (state: KoniState) {
+    this.state = state;
     // Todo: Load data from db to balanceSubject
     // Todo: Start  subscribe balance and data
     // Todo: Listen change and apply to balanceSubject
@@ -27,16 +36,17 @@ export class BalanceService {
     // Todo: Move everything of fetching balance to this service
   }
 
+  /* Subscribe token free balance on chain */
   public async subscribeTokenFreeBalance (address: string, chain: string, tokenSlug: string | undefined, callback?: (rs: AmountData) => void): Promise<[() => void, AmountData]> {
-    const chainInfo = this.chainService.getChainInfoByKey(chain);
-    const chainState = this.chainService.getChainStateByKey(chain);
+    const chainInfo = this.state.chainService.getChainInfoByKey(chain);
+    const chainState = this.state.chainService.getChainStateByKey(chain);
 
     if (!chainInfo || !chainState || !chainState.active) {
       return Promise.reject(new BalanceError(BalanceErrorType.NETWORK_ERROR, t('{{chain}} is inactive. Please enable network', { replace: { chain } })));
     }
 
     const tSlug = tokenSlug || _getChainNativeTokenSlug(chainInfo);
-    const tokenInfo = this.chainService.getAssetBySlug(tSlug);
+    const tokenInfo = this.state.chainService.getAssetBySlug(tSlug);
 
     if (!tokenInfo) {
       return Promise.reject(new BalanceError(BalanceErrorType.TOKEN_ERROR, t('Transfer is currently not available for this token: {{tSlug}}', { replace: { slug: tSlug } })));
@@ -74,23 +84,39 @@ export class BalanceService {
     });
   }
 
-  public async getTokenFreeBalance (address: string, chain: string, tokenSlug?: string) {
+  /**
+   * @public
+   * @async
+   * @function getTokenFreeBalance
+   * @desc Fetch free balance on chain
+   * @param {string} address - Address
+   * @param {string} chain - Slug of chain
+   * @param {string} [tokenSlug] - Slug of token
+   * @return {Promise<AmountData>} - Free token balance of address on chain
+  */
+  public async getTokenFreeBalance (address: string, chain: string, tokenSlug?: string): Promise<AmountData> {
     const [, balance] = await this.subscribeTokenFreeBalance(address, chain, tokenSlug);
 
     return balance;
   }
 
-  public subscribeBalance (addresses: string[], chains: string[] | null, callback: (rs: BalanceItem) => void) {
+  public subscribeBalance (addresses: string[], chains: string[] | null, _callback: (rs: BalanceItem) => void) {
     const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
-    const chainInfoMap = this.chainService.getChainInfoMap();
-    const chainStateMap = this.chainService.getChainStateMap();
-    const substrateApiMap = this.chainService.getSubstrateApiMap();
-    const evmApiMap = this.chainService.getEvmApiMap();
+    const chainInfoMap = this.state.chainService.getChainInfoMap();
+    const chainStateMap = this.state.chainService.getChainStateMap();
+    const substrateApiMap = this.state.chainService.getSubstrateApiMap();
+    const evmApiMap = this.state.chainService.getEvmApiMap();
 
     // Get data from chain or all chains
     const chainList = chains || Object.keys(chainInfoMap);
     // Filter active chain only
     const useChainInfos = chainList.filter((c) => chainStateMap[c] && chainStateMap[c].active).map((c) => chainInfoMap[c]);
+
+    const callback = (items: BalanceItem[]) => {
+      if (items.length) {
+        _callback(groupBalance(items, 'GROUPED', items[0].tokenSlug));
+      }
+    };
 
     // Looping over each chain
     const unsubList = useChainInfos.map(async (chainInfo) => {
@@ -98,7 +124,7 @@ export class BalanceService {
       const useAddresses = _isChainEvmCompatible(chainInfo) ? evmAddresses : substrateAddresses;
 
       if (_isPureEvmChain(chainInfo)) {
-        const nativeTokenInfo = state.getNativeTokenInfo(chainSlug);
+        const nativeTokenInfo = this.state.getNativeTokenInfo(chainSlug);
 
         return subscribeEVMBalance(chainSlug, useAddresses, evmApiMap, callback, nativeTokenInfo);
       }

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceItem, CampaignData, ChainStakingMetadata, CrowdloanItem, MetadataItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { CampaignData, ChainStakingMetadata, CrowdloanItem, MetadataItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem } from '@subwallet/extension-base/types';
 import Dexie, { Table, Transaction } from 'dexie';
 
 const DEFAULT_DATABASE = 'SubWalletDB_v2';

@@ -24,7 +24,7 @@ import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEm
 import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
-import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
+import { anyNumberToBN, recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import keyring from '@subwallet/ui-keyring';
@@ -147,7 +147,8 @@ export default class TransactionService {
             if (!web3) {
               validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED, undefined));
             } else {
-              const gasPrice = await web3.api.eth.getGasPrice();
+              const _price = await web3.api.eth.getGasPrice();
+              const gasPrice = recalculateGasPrice(_price, chainInfo.slug);
               const gasLimit = await web3.api.eth.estimateGas(transaction);
 
               estimateFee.value = (gasLimit * parseInt(gasPrice)).toString();
@@ -963,7 +964,7 @@ export default class TransactionService {
           // TODO: push block hash and block number into eventData
           txState.events
             .filter(({ event: { section } }) => section === 'system')
-            .forEach(({ event: { method, data: [error] } }): void => {
+            .forEach(({ event: { data: [error], method } }): void => {
               if (method === 'ExtrinsicFailed') {
                 eventData.errors.push(new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, error.toString()));
                 emitter.emit('error', eventData);

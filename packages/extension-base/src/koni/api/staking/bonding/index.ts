@@ -130,6 +130,7 @@ export async function getCancelWithdrawalExtrinsic (substrateApi: _SubstrateApi,
 export function subscribeEssentialChainStakingMetadata (substrateApiMap: Record<string, _SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, callback: (chain: string, rs: ChainStakingMetadata) => void) {
   const unsubList: VoidFunction[] = [];
 
+  // TODO: replace with for of to improve performance
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   Object.values(chainInfoMap).forEach(async (chainInfo: _ChainInfo) => {
     if (!substrateApiMap[chainInfo.slug]) {

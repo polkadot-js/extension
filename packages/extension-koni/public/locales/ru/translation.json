@@ -375,8 +375,6 @@
   "Please try again later.": "Пожалуйста, повторите попытку позже.",
   "Polkadot parachain": "Polkadot парачейн",
   "Kusama parachain": "Kusama парачейн",
-  "Win": "Победа",
-  "Fail": "Провал",
   "Search project": "Поиск проекта",
   "View on explorer": "Посмотреть в проводнике",
   "Staking value": "Сумма стейкинга",
@@ -854,5 +852,13 @@
   "Page not found": "",
   "Your website URL is invalid": "",
   "We are unable to detect any network from the dApp through WalletConnect": "",
-  "Network undetected": ""
+  "Network undetected": "",
+  "Dissolved on": "",
+  "Locked until": "",
+  "Crowdloan ends on": "",
+  "Refunded on": "",
+  "Won": "",
+  "In auction": "",
+  "Token Details": "",
+  "Account Details": ""
 }

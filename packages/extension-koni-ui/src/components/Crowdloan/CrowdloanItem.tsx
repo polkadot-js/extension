@@ -4,8 +4,7 @@
 import { _FundStatus } from '@subwallet/chain-list/types';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { _CrowdloanItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate } from '@subwallet/extension-koni-ui/utils';
-import { getCrowdloanTagColor, getCrowdloanTagName } from '@subwallet/extension-koni-ui/utils/crowdloan';
+import { customFormatDate, getCrowdloanTagColor, getCrowdloanTagName } from '@subwallet/extension-koni-ui/utils';
 import { Logo, Number, Tag } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useMemo } from 'react';

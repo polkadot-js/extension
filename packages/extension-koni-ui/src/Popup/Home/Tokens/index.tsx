@@ -451,6 +451,7 @@ const WrapperComponent = ({ className = '' }: WrapperProps): React.ReactElement<
   return (
     <PageWrapper
       className={`tokens ${className}`}
+      hideLoading={true}
       resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance'])}
     >
       <Component />

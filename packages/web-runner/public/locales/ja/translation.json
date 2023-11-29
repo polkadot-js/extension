@@ -375,8 +375,6 @@
   "Please try again later.": "後でもう一度やり直してください。",
   "Polkadot parachain": "Polkadot パラチェーン",
   "Kusama parachain": "Kusama パラチェーン",
-  "Win": "勝つ",
-  "Fail": "失敗",
   "Search project": "検索をプロジェクト",
   "View on explorer": "エクスプローラーの表示",
   "Staking value": "ステーキング額",
@@ -854,5 +852,13 @@
   "Page not found": "",
   "Your website URL is invalid": "",
   "We are unable to detect any network from the dApp through WalletConnect": "",
-  "Network undetected": ""
+  "Network undetected": "",
+  "Dissolved on": "",
+  "Locked until": "",
+  "Crowdloan ends on": "",
+  "Refunded on": "",
+  "Won": "",
+  "In auction": "",
+  "Token Details": "",
+  "Account Details": ""
 }

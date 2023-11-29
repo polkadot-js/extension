@@ -157,25 +157,25 @@ export const BLOCK_DEFAULT_LEDGER_NETWORKS: string[] = ['*'];
 
 /* TRANSFER */
 export const BLOCK_TRANSFER_NATIVE_LEDGER_NETWORKS: string[] = [];
-export const BLOCK_TRANSFER_TOKEN_LEDGER_NETWORKS: string[] = ['aleph'];
+export const BLOCK_TRANSFER_TOKEN_LEDGER_NETWORKS: string[] = [];
 export const BLOCK_TRANSFER_XCM_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['aleph', 'astar'];
+export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['astar'];
 /* TRANSFER */
 
 /* STAKING */
 // NOMINATE
-export const BLOCK_STAKING_BONDING_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
-export const BLOCK_STAKING_UN_BONDING_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
-export const BLOCK_STAKING_WITHDRAW_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_BONDING_LEDGER_NETWORKS: string[] = ['evm'];
+export const BLOCK_STAKING_UN_BONDING_LEDGER_NETWORKS: string[] = ['evm'];
+export const BLOCK_STAKING_WITHDRAW_LEDGER_NETWORKS: string[] = ['evm'];
 
 // POOL
-export const BLOCK_STAKING_JOIN_POOL_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
-export const BLOCK_STAKING_LEAVE_POOL_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
-export const BLOCK_STAKING_POOL_WITHDRAW_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_JOIN_POOL_LEDGER_NETWORKS: string[] = ['evm'];
+export const BLOCK_STAKING_LEAVE_POOL_LEDGER_NETWORKS: string[] = ['evm'];
+export const BLOCK_STAKING_POOL_WITHDRAW_LEDGER_NETWORKS: string[] = ['evm'];
 
 // COMMON
-export const BLOCK_STAKING_CANCEL_UNSTAKE_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
-export const BLOCK_STAKING_CLAIM_REWARD_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_CANCEL_UNSTAKE_LEDGER_NETWORKS: string[] = ['evm'];
+export const BLOCK_STAKING_CLAIM_REWARD_LEDGER_NETWORKS: string[] = ['evm'];
 
 // OTHER
 export const BLOCK_STAKING_COMPOUNDING_LEDGER_NETWORKS: string[] = ['*'];

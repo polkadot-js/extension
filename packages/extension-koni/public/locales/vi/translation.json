@@ -375,8 +375,6 @@
   "Please try again later.": "Vui lòng thử lại sau.",
   "Polkadot parachain": "Polkadot Parachain",
   "Kusama parachain": "Kusama Parachain",
-  "Win": "Thành công",
-  "Fail": "Thất bại",
   "Search project": "Tìm kiếm dự án",
   "View on explorer": "Xem trên explorer",
   "Staking value": "Giá trị đang stake",
@@ -854,5 +852,13 @@
   "Page not found": "",
   "Your website URL is invalid": "",
   "We are unable to detect any network from the dApp through WalletConnect": "",
-  "Network undetected": ""
+  "Network undetected": "",
+  "Dissolved on": "",
+  "Locked until": "",
+  "Crowdloan ends on": "",
+  "Refunded on": "",
+  "Won": "",
+  "In auction": "",
+  "Token Details": "",
+  "Account Details": ""
 }

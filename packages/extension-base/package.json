@@ -17,7 +17,7 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "1.1.22-0",
+  "version": "1.1.24-0",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "^5.0.2",
@@ -47,11 +47,11 @@
     "@reduxjs/toolkit": "^1.9.1",
     "@sora-substrate/type-definitions": "^1.17.7",
     "@substrate/connect": "^0.7.26",
-    "@subwallet/chain-list": "0.2.25",
-    "@subwallet/extension-base": "^1.1.22-0",
-    "@subwallet/extension-chains": "^1.1.22-0",
-    "@subwallet/extension-dapp": "^1.1.22-0",
-    "@subwallet/extension-inject": "^1.1.22-0",
+    "@subwallet/chain-list": "0.2.26",
+    "@subwallet/extension-base": "^1.1.24-0",
+    "@subwallet/extension-chains": "^1.1.24-0",
+    "@subwallet/extension-dapp": "^1.1.24-0",
+    "@subwallet/extension-inject": "^1.1.24-0",
     "@subwallet/keyring": "^0.1.1",
     "@subwallet/ui-keyring": "^0.1.1",
     "@walletconnect/sign-client": "^2.8.4",
@@ -66,6 +66,7 @@
     "buffer": "^6.0.3",
     "cross-fetch": "^3.1.5",
     "dexie": "^3.2.2",
+    "dexie-export-import": "^4.0.7",
     "eth-simple-keyring": "^4.2.0",
     "ethereumjs-tx": "^2.1.2",
     "ethereumjs-util": "^7.1.5",
@@ -89,7 +90,7 @@
     "web3-utils": "^1.10.0"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^1.1.22-0",
+    "@subwallet/extension-mocks": "^1.1.24-0",
     "@types/uuid": "^9.0.1"
   }
 }

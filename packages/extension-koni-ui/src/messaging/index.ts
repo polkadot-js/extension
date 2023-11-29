@@ -4,10 +4,11 @@
 import type { WindowOpenParams } from '@subwallet/extension-base/background/types';
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { BalanceJson, ConfirmationsQueue, CronReloadRequest, CrowdloanJson, Notification, PriceJson, RequestGetTransaction, RequestParseEvmContractInput, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribePrice, ResponseParseEvmContractInput, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ConfirmationsQueue, CronReloadRequest, CrowdloanJson, Notification, PriceJson, RequestGetTransaction, RequestParseEvmContractInput, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribePrice, ResponseParseEvmContractInput, ResponseSubscribeHistory, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
+import { BalanceJson } from '@subwallet/extension-base/types';
 
 export async function windowOpen (params: WindowOpenParams): Promise<boolean> {
   return sendMessage('pri(window.open)', params);
@@ -50,10 +51,6 @@ export async function subscribeHistory (callback: (historyMap: TransactionHistor
   return sendMessage('pri(transaction.history.getSubscription)', null, callback);
 }
 
-export async function cancelSubscription (request: string): Promise<boolean> {
-  return sendMessage('pri(subscription.cancel)', request);
-}
-
 export async function recoverDotSamaApi (request: string): Promise<boolean> {
   return sendMessage('pri(chainService.recoverSubstrateApi)', request);
 }
@@ -89,6 +86,14 @@ export async function getCrowdloanContributions (relayChain: string, address: st
     page });
 }
 
+export async function cancelSubscription (request: string): Promise<boolean> {
+  return sendMessage('pri(subscription.cancel)', request);
+}
+
+export async function subscribeTransactionHistory (chain: string, address: string, callback: (items: TransactionHistoryItem[]) => void): Promise<ResponseSubscribeHistory> {
+  return sendMessage('pri(transaction.history.subscribe)', { address, chain }, callback);
+}
+
 export * from './accounts';
 export * from './base';
 export * from './confirmation';
@@ -99,3 +104,4 @@ export * from './qr-signer';
 export * from './settings';
 export * from './transaction';
 export * from './WalletConnect';
+export * from './database';

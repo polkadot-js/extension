@@ -272,10 +272,14 @@ function Component (): React.ReactElement {
   }, []);
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
-    setCurrentTokenInfo({
-      slug: item.slug,
-      symbol: item.symbol
-    });
+    return () => {
+      if (item.isReady) {
+        setCurrentTokenInfo({
+          slug: item.slug,
+          symbol: item.symbol
+        });
+      }
+    };
   }, []);
 
   const onOpenSendFund = useCallback(() => {
@@ -353,9 +357,7 @@ function Component (): React.ReactElement {
   }, [detailTitle, setDetailTitle]);
 
   const itemClickAction = useCallback((item: TokenBalanceItemType) => {
-    return () => {
-      onClickItem(item);
-    };
+    return onClickItem(item);
   }, [onClickItem]);
 
   return (

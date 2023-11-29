@@ -96,7 +96,7 @@ describe('test token transfer', () => {
       const destAddress = isDestChainEvm ? destAddress2 : destAddress1;
 
       try {
-        await createXcmExtrinsic({
+        const extrinsic = await createXcmExtrinsic({
           destinationTokenInfo,
           originTokenInfo,
           sendingValue: '0',
@@ -104,6 +104,8 @@ describe('test token transfer', () => {
           chainInfoMap: ChainInfoMap,
           substrateApi
         });
+
+        console.log(assetRef, extrinsic.toHex());
       } catch (e) {
         console.log('error', e);
         errorList.push(assetRef);

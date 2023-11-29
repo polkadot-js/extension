@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ChainStakingMetadata, CrowdloanItem, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import KoniDatabase, { IBalance, ICampaign, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MetadataStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
@@ -12,11 +12,15 @@ import ChainStakingMetadataStore from '@subwallet/extension-base/services/storag
 import MantaPayStore from '@subwallet/extension-base/services/storage-service/db-stores/MantaPay';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
+import { BalanceItem } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { Subscription } from 'dexie';
+import { exportDB, peakImportFile } from 'dexie-export-import';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
+
+const EXPORT_EXCLUDE_TABLES = ['metadata'];
 
 export default class DatabaseService {
   private _db: KoniDatabase;
@@ -76,9 +80,17 @@ export default class DatabaseService {
     return this.stores.balance.table.toArray();
   }
 
-  async updateBalanceStore (address: string, item: BalanceItem) {
+  async updateBalanceStore (item: BalanceItem) {
     if (item.state === APIItemState.READY) {
-      return this.stores.balance.upsert({ address, ...item } as IBalance);
+      return this.stores.balance.upsert({ ...item } as IBalance);
+    }
+  }
+
+  async updateBulkBalanceStore (items: BalanceItem[]) {
+    const filtered = items.filter((item) => item.state !== APIItemState.PENDING);
+
+    if (filtered.length) {
+      return this.stores.balance.bulkUpsert(filtered);
     }
   }
 
@@ -342,5 +354,49 @@ export default class DatabaseService {
 
   public upsertCampaign (campaign: ICampaign) {
     return this.stores.campaign.upsertCampaign(campaign);
+  }
+
+  async exportDB () {
+    const blob = await exportDB(this._db, {
+      filter: (table, value, key) => {
+        if (EXPORT_EXCLUDE_TABLES.indexOf(table) >= 0) {
+          return false;
+        }
+
+        return true;
+      }
+    });
+
+    return await blob.text();
+  }
+
+  async importDB (data: string) {
+    try {
+      const blob = new Blob([data], { type: 'application/json' });
+
+      await this._db.import(blob, {
+        overwriteValues: true,
+        acceptMissingTables: true,
+        acceptVersionDiff: true
+      });
+
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+
+      return false;
+    }
+  }
+
+  async checkImportMetadata (data: string) {
+    try {
+      const blob = new Blob([data], { type: 'application/json' });
+
+      return await peakImportFile(blob);
+    } catch (e) {
+      this.logger.error(e);
+
+      return null;
+    }
   }
 }

@@ -12,26 +12,46 @@ import { InfoItemBase } from './types';
 export interface NumberInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
   value: string | number | BigN,
   suffix?: string,
+  prefix?: string,
   decimals?: number,
-  valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd'
+  valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd',
+  decimalOpacity?: number,
+  size?: number,
+  subFloatNumber?: boolean
 }
 
 const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
-  const { className, decimals = 0, label, suffix, value, valueColorSchema = 'default' } = props;
+  const { className,
+    decimalOpacity = 1,
+    decimals = 0,
+    label,
+    prefix,
+    size,
+    subFloatNumber,
+    suffix,
+    value,
+    valueColorSchema = 'default' } = props;
 
   return (
     <div className={CN(className, '__row -type-number')}>
-      <div className={'__col'}>
-        <div className={'__label'}>
-          {label}
-        </div>
-      </div>
-      <div className={'__col -to-right'}>
+      {
+        !!label && (
+          <div className={'__col __label-col'}>
+            <div className={'__label'}>
+              {label}
+            </div>
+          </div>
+        )
+      }
+      <div className={'__col __value-col -to-right'}>
         <Number
           className={`__number-item __value -schema-${valueColorSchema}`}
           decimal={decimals}
-          decimalOpacity={1}
+          decimalOpacity={decimalOpacity}
           intOpacity={1}
+          prefix={prefix}
+          size={size}
+          subFloatNumber={subFloatNumber}
           suffix={suffix}
           unitOpacity={1}
           value={value}

@@ -61,10 +61,10 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 
   const onDoneTransaction = useCallback((extrinsicHash: string) => {
-    if (chainStakingMetadata) {
-      navigate(`/transaction-done/substrate/${chainStakingMetadata.chain}/${extrinsicHash}`);
+    if (nominatorMetadata) {
+      navigate(`/transaction-done/${nominatorMetadata.address}/${nominatorMetadata.chain}/${extrinsicHash}`);
     }
-  }, [chainStakingMetadata, navigate]);
+  }, [navigate, nominatorMetadata]);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDoneTransaction);
 
@@ -247,7 +247,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const onPreCheck = usePreCheckAction(currentAccount?.address, false);
 
   const convertStakingActionToExtrinsicType = useCallback((action: StakingAction): ExtrinsicType => {
-    const isPool = nominatorMetadata.type === StakingType.POOLED;
+    const isPool = nominatorMetadata?.type === StakingType.POOLED;
 
     switch (action) {
       case StakingAction.STAKE:
@@ -263,7 +263,7 @@ const Component: React.FC<Props> = (props: Props) => {
       default:
         return ExtrinsicType.UNKNOWN;
     }
-  }, [nominatorMetadata.type]);
+  }, [nominatorMetadata?.type]);
 
   const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
     const _onClick = () => {

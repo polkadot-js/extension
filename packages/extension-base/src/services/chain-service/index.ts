@@ -873,7 +873,7 @@ export class ChainService {
               isTestnet: storedChainInfo.isTestnet,
               chainStatus: storedChainInfo.chainStatus,
               icon: storedChainInfo.icon,
-              extraInfo: null
+              extraInfo: storedChainInfo.extraInfo
             };
             this.dataMap.chainStateMap[storedSlug] = {
               currentProvider: storedChainInfo.currentProvider,
@@ -1647,5 +1647,24 @@ export class ChainService {
 
   getMetadataByHash (hash: string) {
     return this.dbService.stores.metadata.getMetadataByGenesisHash(hash);
+  }
+
+  getSubscanChainMap (reverse?: boolean): Record<string, string> {
+    const result: Record<string, string> = {};
+    const chainInfoMap = this.getChainInfoMap();
+
+    Object.values(chainInfoMap).forEach((i) => {
+      if (!i.extraInfo?.subscanSlug) {
+        return;
+      }
+
+      if (!reverse) {
+        result[i.slug] = i.extraInfo?.subscanSlug;
+      } else {
+        result[i.extraInfo?.subscanSlug] = i.slug;
+      }
+    });
+
+    return result;
   }
 }

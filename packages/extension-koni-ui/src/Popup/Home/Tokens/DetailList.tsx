@@ -233,10 +233,12 @@ function Component (): React.ReactElement {
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
     return () => {
-      setCurrentTokenInfo({
-        slug: item.slug,
-        symbol: item.symbol
-      });
+      if (item.isReady) {
+        setCurrentTokenInfo({
+          slug: item.slug,
+          symbol: item.symbol
+        });
+      }
     };
   }, []);
 

@@ -65,8 +65,6 @@ export const inject6963EIP = (provider: EvmProvider) => {
     rdns: 'extension.subwallet.app'
   };
 
-  // let injected = false;
-
   const _provider = new Proxy(provider, {
     // TODO: Please review the security of this
     get (target, key) {
@@ -79,14 +77,10 @@ export const inject6963EIP = (provider: EvmProvider) => {
   });
 
   const announceProvider = () => {
-    // if (!injected) {
     const detail: EIP6963ProviderDetail = Object.freeze({ info: info, provider: _provider });
     const event = new CustomEvent('eip6963:announceProvider', { detail });
 
     window.dispatchEvent(event);
-    //
-    //   injected = true;
-    // }
   };
 
   window.addEventListener('eip6963:requestProvider', announceProvider);

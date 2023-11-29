@@ -113,7 +113,7 @@ export default class Mobile {
       const storageData = JSON.parse(storage) as Record<string, any>;
 
       for (const key in storageData) {
-        localStorage.setItem(key, JSON.stringify(storageData[key]));
+        localStorage.setItem(key, storageData[key] as string);
       }
     }
 

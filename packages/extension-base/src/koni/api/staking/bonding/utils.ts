@@ -215,8 +215,8 @@ export async function parseIdentity (substrateApi: _SubstrateApi, address: strin
       const twitter = identityInfo.info?.twitter?.Raw;
       const isReasonable = identityInfo.judgements.length > 0;
 
-      if (displayName && !displayName.startsWith('0x')) {
-        identity = displayName;
+      if (displayName) {
+        identity = isHex(displayName) ? hexToString(displayName) : displayName;
       } else {
         identity = twitter || web || riot;
       }

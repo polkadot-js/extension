@@ -97,7 +97,8 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   edgeware: 6,
   kate: 6,
   creditcoin: 24,
-  vara_network: 12
+  vara_network: 12,
+  goldberg_testnet: 24
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {

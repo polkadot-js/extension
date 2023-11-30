@@ -386,6 +386,8 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                     );
                   }
 
+                  const name = item.validatorIdentity || (type === StakingType.NOMINATED ? '' : `Pool #${item.validatorAddress}`);
+
                   return (
                     <MetaInfo.Number
                       className={'__nomination-field'}
@@ -394,7 +396,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                       label={<AccountItem
                         address={item.validatorAddress}
                         className={'__nomination-label'}
-                        name={item.validatorIdentity}
+                        name={name}
                       />}
                       suffix={staking.nativeToken}
                       value={item.activeStake || ''}

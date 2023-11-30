@@ -872,7 +872,8 @@ export class ChainService {
               substrateInfo: storedChainInfo.substrateInfo,
               isTestnet: storedChainInfo.isTestnet,
               chainStatus: storedChainInfo.chainStatus,
-              icon: storedChainInfo.icon
+              icon: storedChainInfo.icon,
+              extraInfo: storedChainInfo.extraInfo
             };
             this.dataMap.chainStateMap[storedSlug] = {
               currentProvider: storedChainInfo.currentProvider,
@@ -1100,7 +1101,8 @@ export class ChainService {
       evmInfo,
       isTestnet: false,
       chainStatus: _ChainStatus.ACTIVE,
-      icon: '' // Todo: Allow update with custom chain
+      icon: '', // Todo: Allow update with custom chain,
+      extraInfo: null
     };
 
     // insert new chainInfo

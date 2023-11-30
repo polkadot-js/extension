@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RequestYieldFastWithdrawal } from '@subwallet/extension-base/background/KoniTypes';
-import { convertDerivativeToOriginToken } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { convertDerivativeToOriginToken, YIELD_POOL_MIN_AMOUNT_PERCENT } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';
@@ -72,6 +72,15 @@ const Component: React.FC<Props> = (props: Props) => {
             label={t('Estimated receivables')}
             suffix={receivedAssetInfo.symbol}
             value={estimatedReceivables}
+          />
+        }
+
+        {
+          !isInterlayPool && <MetaInfo.Number
+            decimals={receivedAssetInfo.decimals || 0}
+            label={t('Minimum receivables')}
+            suffix={receivedAssetInfo.symbol}
+            value={Math.floor(estimatedReceivables * YIELD_POOL_MIN_AMOUNT_PERCENT[yieldPoolInfo.slug])}
           />
         }
 

@@ -5,7 +5,7 @@ import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, TokenBalanceRaw, UnbondingSubmitParams, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { convertDerivativeToOriginToken, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { convertDerivativeToOriginToken, YIELD_POOL_MIN_AMOUNT_PERCENT, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -251,6 +251,7 @@ export async function getAcalaLiquidStakingRedeem (params: OptimalYieldPathParam
   const originTokenInfo = params.assetInfoMap[originTokenSlug];
 
   const formattedMinAmount = convertDerivativeToOriginToken(amount, params.poolInfo, derivativeTokenInfo, originTokenInfo);
+  const weightedMinAmount = Math.floor(YIELD_POOL_MIN_AMOUNT_PERCENT[params.poolInfo.slug] * formattedMinAmount);
 
   const extrinsic = substrateApi.api.tx.aggregatedDex.swapWithExactSupply(
     // Swap path
@@ -266,7 +267,7 @@ export async function getAcalaLiquidStakingRedeem (params: OptimalYieldPathParam
     // Supply amount
     amount,
     // Min target amount
-    formattedMinAmount // should always set a min target to prevent unexpected result
+    weightedMinAmount // should always set a min target to prevent unexpected result
   );
 
   return [ExtrinsicType.REDEEM_LDOT, extrinsic];

@@ -66,7 +66,7 @@ export const YIELD_EXTRINSIC_TYPES = [
 
 export const YIELD_POOL_STAT_REFRESH_INTERVAL = 90000;
 
-const YIELD_POOL_MIN_AMOUNT_PERCENT: Record<string, number> = {
+export const YIELD_POOL_MIN_AMOUNT_PERCENT: Record<string, number> = {
   DOT___acala_liquid_staking: 0.98,
   DOT___bifrost_liquid_staking: 0.99,
   DOT___parallel_liquid_staking: 0.97,
@@ -79,8 +79,7 @@ export function convertDerivativeToOriginToken (amount: string, poolInfo: YieldP
 
   const exchangeRate = poolInfo.stats?.assetEarning?.[0].exchangeRate || 1;
   const formattedAmount = parseInt(amount) / (10 ** derivativeDecimals); // TODO: decimals
-  const minAmountPercent = YIELD_POOL_MIN_AMOUNT_PERCENT[poolInfo.slug] || YIELD_POOL_MIN_AMOUNT_PERCENT.default;
-  const minAmount = formattedAmount * exchangeRate * minAmountPercent;
+  const minAmount = formattedAmount * exchangeRate;
 
   return Math.floor(minAmount * (10 ** originDecimals));
 }

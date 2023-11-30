@@ -19,7 +19,11 @@ const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
     display: 'flex',
     justifyContent: 'center',
     position: 'relative',
-    transition: `width ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1), padding ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1)`
+    transition: `width ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1), padding ${token.motionDurationSlow} cubic-bezier(0.645, 0.045, 0.355, 1)`,
+
+    '.ant-image-img': {
+      width: 'auto'
+    }
   },
 
   '.__sidebar-collapse-trigger': {

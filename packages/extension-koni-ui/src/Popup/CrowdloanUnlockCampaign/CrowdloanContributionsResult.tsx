@@ -197,7 +197,6 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
 
   const goEarningDemo = useCallback(() => {
     openInNewTab(`${window.location.origin}/earning-demo`)();
-    // todo: ...
   }, []);
 
   const onBack = useCallback(() => {
@@ -211,18 +210,32 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
 
     const results: _CrowdloanItemType[] = [];
 
+    let polkadotCrowdloanItems = getTableItems('polkadot', contributionsMap, crowdloanFundInfoMap, chainInfoMap, priceMap);
+
     if (acalaValue) {
+      polkadotCrowdloanItems = polkadotCrowdloanItems.filter((i) => {
+        return i.fundId !== ACALA_FUND_ID;
+      });
+
       const acalaValueInfo = getAcalaTableItem(acalaValue, crowdloanFundInfoMap[ACALA_FUND_ID], chainInfoMap.acala, priceMap);
 
       !!acalaValueInfo && results.push(acalaValueInfo);
     }
 
     results.push(
-      ...getTableItems('polkadot', contributionsMap, crowdloanFundInfoMap, chainInfoMap, priceMap),
+      ...polkadotCrowdloanItems,
       ...getTableItems('kusama', contributionsMap, crowdloanFundInfoMap, chainInfoMap, priceMap)
     );
 
-    return results.sort((a, b) => a.unlockTime - b.unlockTime);
+    return results.sort((a, b) => {
+      if (a.unlockTime < b.unlockTime) {
+        return -1;
+      } else if (a.unlockTime > b.unlockTime) {
+        return 1;
+      } else {
+        return a.chainName.localeCompare(b.chainName);
+      }
+    });
   }, [acalaValue, chainInfoMap, contributionsMap, crowdloanFundInfoMap, priceMap]);
 
   const filteredTableItems = useMemo(() => {

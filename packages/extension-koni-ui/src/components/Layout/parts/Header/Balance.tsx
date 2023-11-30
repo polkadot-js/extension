@@ -310,7 +310,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       </div>
 
       <div
-        className='__block-divider'
+        className='__block-divider __divider-special'
       />
 
       <div className={CN('__block-item', '__action-block')}>
@@ -400,6 +400,7 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   justifyContent: 'space-between',
   alignItems: 'stretch',
   marginBottom: 56,
+  flexWrap: 'wrap',
 
   '.ant-number .ant-typography': {
     fontSize: 'inherit !important',
@@ -414,7 +415,6 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
 
   '.__balance-value': {
     fontWeight: token.headingFontWeight,
-
     '.ant-number-decimal': {
       fontSize: '24px !important',
       lineHeight: '32px !important'
@@ -426,6 +426,10 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
     width: 1,
     backgroundColor: token.colorBgDivider,
     marginTop: token.marginSM
+  },
+
+  '.__divider-special': {
+    display: 'block'
   },
 
   '.__balance-change-container': {
@@ -459,7 +463,7 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   '.__block-item': {
     display: 'flex',
     flexDirection: 'column',
-    flex: 1
+    flex: '1 1 200px'
   },
 
   '.__block-title-wrapper': {
@@ -505,7 +509,43 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       marginLeft: 6,
       marginRight: 6
     }
+  },
+
+  '@media screen and (min-width: 990px) and (max-width: 1200px)': {
+    '.__divider-special': {
+      display: 'none'
+    }
+  },
+
+  '@media screen and (min-width: 1480px) and (max-width: 1600px)': {
+    '.__balance-value': {
+      fontSize: '28px !important',
+      '.ant-number-decimal': {
+        fontSize: '22px !important'
+      }
+    },
+    '.__total-balance-block': {
+      '.__balance-value': {
+        fontSize: '35px !important'
+      }
+    }
+  },
+
+  '@media screen and (max-width: 1480px)': {
+    '.__balance-value': {
+      fontSize: '25px !important',
+      '.ant-number-decimal': {
+        fontSize: '20px !important'
+      }
+    }
+  },
+
+  '@media screen and (max-width: 1200px)': {
+    '.__action-block': {
+      flexBasis: '100% !important'
+    }
   }
+
 }));
 
 export default Balance;

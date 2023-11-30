@@ -11,7 +11,7 @@ import { customFormatDate } from '@subwallet/extension-koni-ui/utils';
 import { getCrowdloanTagColor, getCrowdloanTagName } from '@subwallet/extension-koni-ui/utils/crowdloan';
 import { Logo, Table, Tag } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -112,6 +112,10 @@ const Component: React.FC<Props> = (props: Props) => {
     ];
   }, [hideBalance, t]);
 
+  const getRowKey = useCallback((item: _CrowdloanItemType) => {
+    return `${item.fundId}-${item.relayChainSlug}`;
+  }, []);
+
   if (isWebUI) {
     return (
       <div className={CN(className)}>
@@ -119,7 +123,7 @@ const Component: React.FC<Props> = (props: Props) => {
           columns={columns}
           dataSource={items}
           pagination={false}
-          rowKey={'id'}
+          rowKey={getRowKey}
         />
       </div>
     );

@@ -1494,7 +1494,8 @@ export interface NominationPoolInfo extends Pick<PalletNominationPoolsBondedPool
   id: number,
   address: string,
   name?: string,
-  bondedAmount: string
+  bondedAmount: string,
+  isProfitable: boolean
 }
 
 export enum UnstakingStatus {

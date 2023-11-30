@@ -41,6 +41,9 @@ export async function getChainStakingMetadata (chainInfo: _ChainInfo, substrateA
   return getRelayChainStakingMetadata(chainInfo, substrateApi);
 }
 
+/**
+ * Deprecated
+ * */
 export async function getNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
     return getAstarNominatorMetadata(chainInfo, address, substrateApi);

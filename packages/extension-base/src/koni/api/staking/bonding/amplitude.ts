@@ -158,6 +158,9 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
   } as NominatorMetadata;
 }
 
+/**
+ * Deprecated
+ * */
 export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (isEthereumAddress(address)) {
     return;

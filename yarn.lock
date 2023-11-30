@@ -6296,9 +6296,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.22-0
-    "@subwallet/extension-inject": ^1.1.22-0
-    "@subwallet/extension-koni-ui": ^1.1.22-0
+    "@subwallet/extension-base": ^1.1.24-0
+    "@subwallet/extension-inject": ^1.1.24-0
+    "@subwallet/extension-koni-ui": ^1.1.24-0
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0

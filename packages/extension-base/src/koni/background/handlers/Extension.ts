@@ -4405,6 +4405,15 @@ export default class KoniExtension {
       case 'pri(buyService.services.subscribe)':
         return this.subscribeBuyServices(id, port);
         /* Buy service */
+
+        /* Database */
+      case 'pri(database.export)':
+        return this.#koniState.dbService.exportDB();
+      case 'pri(database.import)':
+        return this.#koniState.dbService.importDB(request as string);
+      case 'pri(database.checkMetadata)':
+        return this.#koniState.dbService.checkImportMetadata(request as string);
+        /* Database */
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

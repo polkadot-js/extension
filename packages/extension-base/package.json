@@ -66,6 +66,7 @@
     "buffer": "^6.0.3",
     "cross-fetch": "^3.1.5",
     "dexie": "^3.2.2",
+    "dexie-export-import": "^4.0.7",
     "eth-simple-keyring": "^4.2.0",
     "ethereumjs-tx": "^2.1.2",
     "ethereumjs-util": "^7.1.5",

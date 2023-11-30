@@ -81,6 +81,8 @@ export class KoniCron {
       return;
     }
 
+    await this.state.eventService.waitChainReady;
+
     await Promise.all([this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
 
     const currentAccountInfo = this.state.keyringService.currentAccount;

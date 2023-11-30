@@ -15,6 +15,7 @@ import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
 import { KeyringAddress, KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/session';
+import { DexieExportJsonMeta } from 'dexie-export-import';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
@@ -43,7 +44,7 @@ export interface RuntimeEnvironmentInfo {
   protocol?: string;
 }
 
-export type TargetEnvironment = 'extension' | 'webapp' | 'web-runner';
+export type TargetEnvironment = 'extension' | 'webapp' | 'mobile';
 
 export interface EnvironmentSupport {
   MANTA_ZK: boolean;
@@ -1866,7 +1867,14 @@ export interface RequestGetTransaction {
 
 // Mobile update
 export type SubscriptionServiceType = 'chainRegistry' | 'balance' | 'crowdloan' | 'staking';
+
+export interface MobileData {
+  storage: string
+  indexedDB: string
+}
+
 export type CronServiceType = 'price' | 'nft' | 'staking' | 'history' | 'recoverApi' | 'checkApiStatus';
+
 export type CronType =
   'recoverApiMap' |
   'checkApiMapStatus' |
@@ -2358,6 +2366,8 @@ export interface KoniRequestSignatures {
   'mobile(subscription.start)': [SubscriptionServiceType[], void];
   'mobile(subscription.stop)': [SubscriptionServiceType[], void];
   'mobile(subscription.restart)': [SubscriptionServiceType[], void];
+  'mobile(storage.backup)': [null, MobileData];
+  'mobile(storage.restore)': [Partial<MobileData>, null];
 
   // Psp token
   'pub(token.add)': [RequestAddPspToken, boolean];
@@ -2386,6 +2396,12 @@ export interface KoniRequestSignatures {
   'pri(buyService.tokens.subscribe)': [null, Record<string, BuyTokenInfo>, Record<string, BuyTokenInfo>];
   'pri(buyService.services.subscribe)': [null, Record<string, BuyServiceInfo>, Record<string, BuyServiceInfo>];
   /* Buy Service */
+
+  /* Database Service */
+  'pri(database.export)': [null, string];
+  'pri(database.import)': [string, boolean];
+  'pri(database.checkMetadata)': [string, DexieExportJsonMeta];
+  /* Database Service */
 }
 
 export interface ApplicationMetadataType {

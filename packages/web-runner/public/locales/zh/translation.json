@@ -409,7 +409,6 @@
   "Claim Reward transaction": "领取奖励交易",
   "Withdraw transaction": "提款交易",
   "Cancel unstake transaction": "取消解除质押交易",
-  "Search history": "搜索记录",
   "Your NFT collectible will appear here!": "你可合集的NFT将在此处出现！",
   "No NFT collectible": "无NFT可合集",
   "Deleted NFT collection successfully": "NFT收藏集删除成功",
@@ -860,5 +859,6 @@
   "Won": "",
   "In auction": "",
   "Token Details": "",
-  "Account Details": ""
+  "Account Details": "",
+  "Loading ...": ""
 }

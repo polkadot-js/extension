@@ -409,7 +409,6 @@
   "Claim Reward transaction": "Tранзакция требования награды",
   "Withdraw transaction": "Транзакция вывода",
   "Cancel unstake transaction": "Отменить транзакцию анстейк",
-  "Search history": "История поиска",
   "Your NFT collectible will appear here!": "Ваш предмет коллекционирования NFT появится здесь!",
   "No NFT collectible": "Нет предмета коллекционирования NFT",
   "Deleted NFT collection successfully": "Коллекция NFT успешно удалена",
@@ -860,5 +859,6 @@
   "Won": "",
   "In auction": "",
   "Token Details": "",
-  "Account Details": ""
+  "Account Details": "",
+  "Loading ...": ""
 }

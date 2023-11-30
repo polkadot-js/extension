@@ -409,7 +409,6 @@
   "Claim Reward transaction": "報酬の請求トランザクション",
   "Withdraw transaction": "引き出しトランザクション",
   "Cancel unstake transaction": "アンステークランザクションのキャンセル",
-  "Search history": "検索履歴",
   "Your NFT collectible will appear here!": "あなたのNFTコレクションはここに表示されます！",
   "No NFT collectible": "NFTコレクションはありません",
   "Deleted NFT collection successfully": "NFTコレクションを正常に削除しました",
@@ -860,5 +859,6 @@
   "Won": "",
   "In auction": "",
   "Token Details": "",
-  "Account Details": ""
+  "Account Details": "",
+  "Loading ...": ""
 }

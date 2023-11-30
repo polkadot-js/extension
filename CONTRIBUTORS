@@ -1,8 +1,8 @@
     1867	Nam Phạm                      	[Issue 2246] filter out inactive pools
-    1714	AnhMTV                        	[Issue-2276] Fix eslint problems
-    1416	S2kael                        	
+    1722	AnhMTV                        	
+    1443	S2kael                        	
      465	Jaco                          	0.42.5 (#969)
-     292	lw-cdm                        	[Revert] Revert history UI code temporarily
+     299	lw-cdm                        	[MetaInfo] Update class name, condition to show label for MetaInfo component
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       98	lw-cdm                        	
@@ -44,6 +44,7 @@
        1	Michael Healy                 	Small typo (#932)
        1	Minh Ha                       	✨ allows background handler to handle custom extention port name (#685)
        1	murat onur                    	tr language support added (#681)
+       1	nguyentiendung                	[Issue-2201] Handle the case of displaying a large balance on the (Token detail) screen
        1	Nikos Kontakis                	Fix issue that was breaking extension ui (height collapsed and non-visible); Fixes #720 (#731)
        1	Stéphane P                    	README Fix typo (#700)
        1	Tore19                        	Add Stafi network (#454)

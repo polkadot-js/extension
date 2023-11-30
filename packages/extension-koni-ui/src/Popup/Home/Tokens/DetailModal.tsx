@@ -6,6 +6,7 @@ import { BalanceItem } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountTokenBalanceItem, RadioGroup } from '@subwallet/extension-koni-ui/components';
 import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,6 +14,7 @@ import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Form, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
+import CN from 'classnames';
 import React, { useContext, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -53,6 +55,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
   const { checkActive } = useContext(ModalContext);
 
   const isActive = checkActive(id);
+  const { isWebUI } = useContext(ScreenContext);
 
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const { balanceMap } = useSelector((state) => state.balance);
@@ -142,7 +145,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
 
   return (
     <BaseModal
-      className={className}
+      className={CN(className, { 'fix-height': isAllAccount && !isWebUI })}
       id={id}
       onCancel={onCancel}
       title={t('Token details')}

@@ -36,7 +36,7 @@ interface TwitterData {
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
-  const { chain, transactionId } = useParams<{chain: string, transactionId: string}>();
+  const { address, chain, transactionId } = useParams<{address: string, chain: string, transactionId: string}>();
   const { isWebUI } = useContext(ScreenContext);
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -120,13 +120,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const viewInHistory = useCallback(
     () => {
-      if (chain && transactionId) {
-        navigate(`/home/history/${chain}/${transactionId}`);
+      if (address && chain && transactionId) {
+        navigate(`/home/history/${address}/${chain}/${transactionId}`);
       } else {
         navigate('/home/history');
       }
     },
-    [chain, transactionId, navigate]
+    [chain, transactionId, navigate, address]
   );
 
   const backToEarning = useCallback(() => {

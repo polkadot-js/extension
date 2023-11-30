@@ -233,7 +233,7 @@ export const router = createBrowserRouter([
       {
         ...EarningDoneOutlet.generateRouterObject('earning-done'),
         children: [
-          EarningDoneContent.generateRouterObject(':chainType/:chain/:transactionId')
+          EarningDoneContent.generateRouterObject(':address/:chain/:transactionId')
         ]
       },
       {

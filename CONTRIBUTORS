@@ -1,8 +1,8 @@
     1874	Nam Phạm                      	[Issue 2246] minor fix
-    1728	AnhMTV                        	Resolve conflict after merge
-    1462	S2kael                        	[Issue-2287] Update chain-list stable
+    1731	AnhMTV                        	
+    1463	S2kael                        	[Issue-2291] [Staking] Add pool default for Vara
      465	Jaco                          	0.42.5 (#969)
-     299	lw-cdm                        	[MetaInfo] Update class name, condition to show label for MetaInfo component
+     300	lw-cdm                        	[Issue-2179] Update logic related to ledge
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       98	lw-cdm                        	

@@ -5,6 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainType, ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { getExtrinsicParserKey, subscanExtrinsicParserMap, supportedExtrinsicParser } from '@subwallet/extension-base/services/history-service/helpers/subscan-extrinsic-parser-helper';
 import { ExtrinsicItem, TransferItem } from '@subwallet/extension-base/services/subscan-service/types';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 
 import { decodeAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -87,7 +88,7 @@ export function parseSubscanTransferData (address: string, transferItem: Transfe
     chainType,
     from,
     fromName: transferItem.from_account_display.display,
-    direction: address === from ? TransactionDirection.SEND : TransactionDirection.RECEIVED,
+    direction: isSameAddress(address, from) ? TransactionDirection.SEND : TransactionDirection.RECEIVED,
     blockNumber: transferItem.block_num,
     blockHash: '',
     chain: chainInfo.slug,

@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils';
@@ -13,7 +15,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { useChainInfoWithState, useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-koni-ui/messaging';
 import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
+import { customFormatDate, findAccountByAddress, findNetworkJsonByGenesisHash, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
@@ -130,6 +132,37 @@ enum FilterValue {
 
 function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'address' | 'extrinsicHash' | 'transactionId'>) {
   return `${item.chain}-${item.address}-${item.transactionId || item.extrinsicHash}`;
+}
+
+function findLedgerChainOfSelectedAccount (
+  address: string,
+  accounts: AccountJson[],
+  chainInfoMap: Record<string, _ChainInfo>
+): string | undefined {
+  if (!address) {
+    return undefined;
+  }
+
+  const isAccountEthereum = isEthereumAddress(address);
+
+  const account = findAccountByAddress(accounts, address);
+
+  if (isAccountEthereum && account?.isHardware) {
+    return 'ethereum';
+  }
+
+  if (!account || !account.isHardware) {
+    return undefined;
+  }
+
+  const validGen: string[] = account.availableGenesisHashes || [];
+  const validLedgerNetworks = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug).filter((i) => !!i);
+
+  if (validLedgerNetworks.length) {
+    return validLedgerNetworks[0];
+  }
+
+  return undefined;
 }
 
 const modalId = HISTORY_DETAIL_MODAL;
@@ -487,6 +520,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setSelectedChain(event.target.value);
   }, [setSelectedChain]);
 
+  const currentLedgerChainOfSelectedAccount = useMemo(() => {
+    return findLedgerChainOfSelectedAccount(selectedAddress,
+      accounts,
+      chainInfoMap);
+  }, [accounts, chainInfoMap, selectedAddress]);
+
+  const isChainSelectorEmpty = !chainItems.length;
+
+  const chainSelectorDisabled = useMemo(() => {
+    if (!selectedAddress || isChainSelectorEmpty) {
+      return true;
+    }
+
+    if (!isEthereumAddress(selectedAddress)) {
+      return !!currentLedgerChainOfSelectedAccount;
+    }
+
+    return false;
+  }, [isChainSelectorEmpty, currentLedgerChainOfSelectedAccount, selectedAddress]);
+
   const historySelectorsNode = (
     <>
       {
@@ -501,6 +554,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       <ChainSelector
         className={'__history-chain-selector'}
+        disabled={chainSelectorDisabled}
         items={chainItems}
         loading={loading}
         onChange={onSelectChain}
@@ -604,8 +658,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useEffect(() => {
     if (chainItems.length) {
       setSelectedChain((prevChain) => {
+        const _isEthereumAddress = isEthereumAddress(selectedAddress);
+
+        if (currentLedgerChainOfSelectedAccount) {
+          if (!_isEthereumAddress) {
+            return currentLedgerChainOfSelectedAccount;
+          }
+        }
+
         if (prevChain && chainInfoMap[prevChain]) {
-          if (_isChainEvmCompatible(chainInfoMap[prevChain]) === isEthereumAddress(selectedAddress)) {
+          const _isPrevChainEvm = _isChainEvmCompatible(chainInfoMap[prevChain]);
+
+          if (_isEthereumAddress && !_isPrevChainEvm && currentLedgerChainOfSelectedAccount) {
+            return currentLedgerChainOfSelectedAccount;
+          }
+
+          if (_isPrevChainEvm === _isEthereumAddress) {
             return prevChain;
           }
         }
@@ -613,7 +681,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         return chainItems[0].slug;
       });
     }
-  }, [chainInfoMap, chainItems, selectedAddress, setSelectedChain]);
+  }, [chainInfoMap, chainItems, currentLedgerChainOfSelectedAccount, selectedAddress, setSelectedChain]);
 
   useEffect(() => {
     setHistoryItems(getHistoryItems(currentItemDisplayCount));

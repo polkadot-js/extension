@@ -409,7 +409,6 @@
   "Claim Reward transaction": "",
   "Withdraw transaction": "",
   "Cancel unstake transaction": "",
-  "Search history": "",
   "Your NFT collectible will appear here!": "",
   "No NFT collectible": "",
   "Deleted NFT collection successfully": "",
@@ -860,5 +859,6 @@
   "Won": "",
   "In auction": "",
   "Token Details": "",
-  "Account Details": ""
+  "Account Details": "",
+  "Loading ...": ""
 }

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MigrateProviderTarget } from './MigrateGeneralProvider';
-import MigrateProviders from './MigrateProviders';
+import MigrateMultiProviders from './MigrateMultiProviders';
 
-export default class MigrateProvidersV1M1P24 extends MigrateProviders {
+export default class MigrateProvidersV1M1P24 extends MigrateMultiProviders {
   targets: MigrateProviderTarget[] = [
     {
       slug: 'polkadot',

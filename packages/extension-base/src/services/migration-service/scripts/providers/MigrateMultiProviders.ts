@@ -5,14 +5,14 @@ import BaseMigrationJob from '@subwallet/extension-base/services/migration-servi
 
 import MigrateGeneralProvider, { MigrateProviderTarget } from './MigrateGeneralProvider';
 
-export default abstract class MigrateProviders extends BaseMigrationJob {
+export default abstract class MigrateMultiProviders extends BaseMigrationJob {
   abstract targets: MigrateProviderTarget[];
 
   public override async run (): Promise<void> {
-    const scripts = this.targets.map((target) => {
-      return new MigrateGeneralProvider(this.state, target).run();
-    });
+    for (const target of this.targets) {
+      const migration = new MigrateGeneralProvider(this.state, target);
 
-    await Promise.all(scripts);
+      await migration.run();
+    }
   }
 }

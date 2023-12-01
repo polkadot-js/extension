@@ -14,7 +14,12 @@ export default abstract class MigrateProvider extends BaseMigrationJob {
     const chainState = state.getChainStateByKey(this.slug);
     const chainInfo = state.getChainInfo(this.slug);
 
-    if (chainState && chainState.active && chainState.currentProvider === this.oldProvider) {
+    if (
+      chainState &&
+      chainState.active &&
+      chainInfo.providers[this.newProvider] &&
+      chainState.currentProvider === this.oldProvider
+    ) {
       await state.upsertChainInfo({
         mode: 'update',
         chainEditInfo: {

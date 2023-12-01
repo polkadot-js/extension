@@ -30,7 +30,6 @@
   "Select validator": "",
   "Lowest total member": "",
   "Highest total bonded": "",
-  "Active": "",
   "Locked": "",
   "Destroying": "",
   "Select pool": "",
@@ -860,5 +859,12 @@
   "In auction": "",
   "Token Details": "",
   "Account Details": "",
-  "Loading ...": ""
+  "Loading ...": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Earning status": "",
+  "Earning": ""
 }

@@ -188,6 +188,9 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
   } as NominatorMetadata;
 }
 
+/**
+ * Deprecated
+ * */
 export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (isEthereumAddress(address)) {
     return;

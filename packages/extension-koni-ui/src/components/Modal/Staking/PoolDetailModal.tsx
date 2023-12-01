@@ -2,26 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
-import { StakingStatusType, StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
+import { NominationPoolsEarningStatusUi, StakingStatusType, StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwModal } from '@subwallet/react-ui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
   decimals: number,
   onCancel: () => void,
-  status: StakingStatusType,
   selectedNominationPool?: NominationPoolDataType
 };
 
 export const PoolDetailModalId = 'poolDetailModalId';
 
-function Component ({ className, decimals, onCancel, selectedNominationPool, status }: Props): React.ReactElement<Props> {
+function Component ({ className, decimals, onCancel, selectedNominationPool }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { address = '', bondedAmount, memberCounter = 0, name, state, symbol } = selectedNominationPool || {};
+  const { address = '', bondedAmount, isProfitable, memberCounter = 0, name, state, symbol } = selectedNominationPool || {};
+
+  const earningStatus: StakingStatusType = useMemo(() => {
+    return isProfitable ? 'active' : 'inactive';
+  }, [isProfitable]);
 
   return (
     <SwModal
@@ -41,11 +44,20 @@ function Component ({ className, decimals, onCancel, selectedNominationPool, sta
           name={name}
         />
 
+        {
+          state && <MetaInfo.Status
+            label={t('State')}
+            statusIcon={NominationPoolsEarningStatusUi[state].icon} // TODO: update icon
+            statusName={state || ''}
+            valueColorSchema={NominationPoolsEarningStatusUi[state].schema}
+          />
+        }
+
         <MetaInfo.Status
-          label={t('Status')}
-          statusIcon={StakingStatusUi[status].icon} // TODO: update icon
-          statusName={state || ''}
-          valueColorSchema={StakingStatusUi[status].schema}
+          label={t('Earning status')}
+          statusIcon={StakingStatusUi[earningStatus].icon} // TODO: update icon
+          statusName={StakingStatusUi[earningStatus].name}
+          valueColorSchema={StakingStatusUi[earningStatus].schema}
         />
 
         {/* <MetaInfo.Number */}

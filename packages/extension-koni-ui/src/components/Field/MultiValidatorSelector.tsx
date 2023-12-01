@@ -42,6 +42,7 @@ enum SortKey {
   COMMISSION = 'commission',
   RETURN = 'return',
   MIN_STAKE = 'min-stake',
+  NOMINATING = 'nominating',
   DEFAULT = 'default'
 }
 
@@ -113,6 +114,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       });
     }
 
+    if (nominations && nominations.length > 0) {
+      result.push({
+        desc: true,
+        label: t('Nomination'),
+        value: SortKey.NOMINATING
+      });
+    }
+
     result.push({
       desc: false,
       label: t('Lowest min active stake'),
@@ -120,7 +129,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     });
 
     return result;
-  }, [t, hasReturn]);
+  }, [t, hasReturn, nominations]);
 
   const nominatorValueList = useMemo(() => {
     return nominations && nominations.length ? nominations.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)) : [];
@@ -129,22 +138,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.DEFAULT);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
-
-  const resultList = useMemo((): ValidatorDataType[] => {
-    return [...items].sort((a: ValidatorDataType, b: ValidatorDataType) => {
-      switch (sortSelection) {
-        case SortKey.COMMISSION:
-          return a.commission - b.commission;
-        case SortKey.RETURN:
-          return (b.expectedReturn || 0) - (a.expectedReturn || 0);
-        case SortKey.MIN_STAKE:
-          return new BigN(a.minBond).minus(b.minBond).toNumber();
-        case SortKey.DEFAULT:
-        default:
-          return 0;
-      }
-    });
-  }, [items, sortSelection]);
 
   const filterFunction = useMemo<(item: ValidatorDataType) => boolean>(() => {
     return (item) => {
@@ -159,6 +152,35 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [selectedFilters]);
 
   const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator, onInitValidators } = useSelectValidators(id, chain, maxCount, onChange, isSingleSelect);
+
+  const sortValidator = useCallback((a: ValidatorDataType, b: ValidatorDataType) => {
+    const aKey = getValidatorKey(a.address, a.identity);
+    const bKey = getValidatorKey(b.address, b.identity);
+
+    if (nominatorValueList.includes(aKey) && !nominatorValueList.includes(bKey)) {
+      return -1;
+    }
+
+    return 1;
+  }, [nominatorValueList]);
+
+  const resultList = useMemo((): ValidatorDataType[] => {
+    return [...items].sort((a: ValidatorDataType, b: ValidatorDataType) => {
+      switch (sortSelection) {
+        case SortKey.COMMISSION:
+          return a.commission - b.commission;
+        case SortKey.RETURN:
+          return (b.expectedReturn || 0) - (a.expectedReturn || 0);
+        case SortKey.MIN_STAKE:
+          return new BigN(a.minBond).minus(b.minBond).toNumber();
+        case SortKey.NOMINATING:
+          return sortValidator(a, b);
+        case SortKey.DEFAULT:
+        default:
+          return 0;
+      }
+    });
+  }, [items, sortSelection, sortValidator]);
 
   const fewValidators = changeValidators.length > 1;
 
@@ -227,7 +249,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         className={'pool-item'}
         isNominated={nominated}
         isSelected={selected}
-        key={item.address}
+        key={key}
         onClick={onClickItem}
         onClickMoreBtn={onClickMore(item)}
         validatorInfo={item}

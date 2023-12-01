@@ -30,7 +30,6 @@
   "Select validator": "バリデーターを選択",
   "Lowest total member": "最小総メンバー数",
   "Highest total bonded": "最大総ボンド数",
-  "Active": "アクティブ",
   "Locked": "ロックされています",
   "Destroying": "破壊しています",
   "Select pool": "プールを選択",
@@ -860,5 +859,12 @@
   "In auction": "",
   "Token Details": "",
   "Account Details": "",
-  "Loading ...": ""
+  "Loading ...": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Earning status": "",
+  "Earning": ""
 }

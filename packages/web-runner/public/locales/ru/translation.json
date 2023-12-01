@@ -30,7 +30,6 @@
   "Select validator": "Выбрать валидатора",
   "Lowest total member": "Самый низкий общий член",
   "Highest total bonded": "Наивысший общий залог",
-  "Active": "Актив",
   "Locked": "Заблокировано",
   "Destroying": "Разрушение",
   "Select pool": "Выбрать пул",
@@ -860,5 +859,12 @@
   "In auction": "",
   "Token Details": "",
   "Account Details": "",
-  "Loading ...": ""
+  "Loading ...": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Earning status": "",
+  "Earning": ""
 }

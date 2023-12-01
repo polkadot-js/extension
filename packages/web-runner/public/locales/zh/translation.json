@@ -30,7 +30,6 @@
   "Select validator": "选择验证者",
   "Lowest total member": "最低成员总数",
   "Highest total bonded": "最高成员总数",
-  "Active": "活跃",
   "Locked": "已锁",
   "Destroying": "销毁",
   "Select pool": "选择矿池",
@@ -860,5 +859,12 @@
   "In auction": "",
   "Token Details": "",
   "Account Details": "",
-  "Loading ...": ""
+  "Loading ...": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Earning status": "",
+  "Earning": ""
 }

@@ -1,6 +1,6 @@
-    1867	Nam Phạm                      	[Issue 2246] filter out inactive pools
-    1722	AnhMTV                        	
-    1443	S2kael                        	
+    1874	Nam Phạm                      	[Issue 2246] minor fix
+    1728	AnhMTV                        	Resolve conflict after merge
+    1462	S2kael                        	[Issue-2287] Update chain-list stable
      465	Jaco                          	0.42.5 (#969)
      299	lw-cdm                        	[MetaInfo] Update class name, condition to show label for MetaInfo component
      185	quangdo                       	
@@ -27,6 +27,7 @@
        2	carumusan                     	Support ipfs and ipns urls (#667)
        2	ccris02                       	Adding Polish Language Option to the Extension (#761)
        2	joe petrowski                 	add plasm (#462)
+       2	nguyentiendung                	[Issue-1791] Extension - Update the default logo
        2	Remon Nashid                  	Prevent unauthorized apps from abusing pub(authorize.tab) request (#686)
        2	Shawn Tabrizi                 	Add configurable notifications (#767)
        2	WoeOm                         	add darwinia network (#493)
@@ -44,7 +45,6 @@
        1	Michael Healy                 	Small typo (#932)
        1	Minh Ha                       	✨ allows background handler to handle custom extention port name (#685)
        1	murat onur                    	tr language support added (#681)
-       1	nguyentiendung                	[Issue-2201] Handle the case of displaying a large balance on the (Token detail) screen
        1	Nikos Kontakis                	Fix issue that was breaking extension ui (height collapsed and non-visible); Fixes #720 (#731)
        1	Stéphane P                    	README Fix typo (#700)
        1	Tore19                        	Add Stafi network (#454)

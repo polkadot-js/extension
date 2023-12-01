@@ -30,7 +30,6 @@
   "Select validator": "选择验证者",
   "Lowest total member": "最低成员总数",
   "Highest total bonded": "最高成员总数",
-  "Active": "活跃",
   "Locked": "已锁",
   "Destroying": "销毁",
   "Select pool": "选择矿池",
@@ -409,7 +408,6 @@
   "Claim Reward transaction": "领取奖励交易",
   "Withdraw transaction": "提款交易",
   "Cancel unstake transaction": "取消解除质押交易",
-  "Search history": "搜索记录",
   "Your NFT collectible will appear here!": "你可合集的NFT将在此处出现！",
   "No NFT collectible": "无NFT可合集",
   "Deleted NFT collection successfully": "NFT收藏集删除成功",
@@ -860,5 +858,13 @@
   "Won": "",
   "In auction": "",
   "Token Details": "",
-  "Account Details": ""
+  "Account Details": "",
+  "Loading ...": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Earning status": "",
+  "Earning": ""
 }

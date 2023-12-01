@@ -74,19 +74,19 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '&.-space-size-xxs': {
-      '--space-size': token.sizeXXS
+      '--space-size': `${token.sizeXXS}px`
     },
 
     '&.-space-size-xs': {
-      '--space-size': token.sizeXS
+      '--space-size': `${token.sizeXS}px`
     },
 
     '&.-space-size-sm': {
-      '--space-size': token.sizeSM
+      '--space-size': `${token.sizeSM}px`
     },
 
     '&.-space-size-ms': {
-      '--space-size': token.size
+      '--space-size': `${token.size}px`
     },
 
     '.__row + .__row, .__row.-d-column .__col + .__col': {

@@ -30,7 +30,6 @@
   "Select validator": "",
   "Lowest total member": "",
   "Highest total bonded": "",
-  "Active": "",
   "Locked": "",
   "Destroying": "",
   "Select pool": "",
@@ -409,7 +408,6 @@
   "Claim Reward transaction": "",
   "Withdraw transaction": "",
   "Cancel unstake transaction": "",
-  "Search history": "",
   "Your NFT collectible will appear here!": "",
   "No NFT collectible": "",
   "Deleted NFT collection successfully": "",
@@ -860,5 +858,13 @@
   "Won": "",
   "In auction": "",
   "Token Details": "",
-  "Account Details": ""
+  "Account Details": "",
+  "Loading ...": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Earning status": "",
+  "Earning": ""
 }

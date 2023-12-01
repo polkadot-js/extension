@@ -1,7 +1,27 @@
 # CHANGELOG
 
+## 1.1.24
+Build date: Dec 1, 2023.
+
+Features & Update:
+- Support show balance detail by account on All accounts mode (#1997)
+- Support staking for Goldberg (#2181)
+- Add block explorer for Creditcoin (#2287)
+- Update neway to fetch transaction history (#2223)
+- Update the default logo (#1791)
+- Update RPC for some chains (#2293)
+- The default pool setting for Vara is SubWallet Official (#2291)
+- Improve validator/pool selection UX (#2246)
+
+Bugs fixed:
+- Fixed bug error submitting transaction on Astar EVM (#2255)
+- Fixed bug show staking earning status on Creditcoin (#2277)
+- Fixed bug showing staking rewards on Moonbeam (#2213)
+
+
 ## 1.1.23
 Build date: Nov 24, 2023.
+
 Features & Update:
 - Support staking AZERO with Ledger (#2219)
 - Update chain-list (#2198)

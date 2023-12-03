@@ -288,6 +288,7 @@ export default class KoniState {
     await this.eventService.waitCryptoReady;
     await this.chainService.init();
     await this.migrationService.run();
+    this.campaignService.init();
     this.eventService.emit('chain.ready', true);
 
     this.onReady();

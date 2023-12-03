@@ -14,7 +14,9 @@ export default class CampaignService {
 
   constructor (state: KoniState) {
     this.#state = state;
+  }
 
+  public init () {
     this.fetchCampaign()
       .catch((e) => {
         console.error('Error on fetch campaigns', e);

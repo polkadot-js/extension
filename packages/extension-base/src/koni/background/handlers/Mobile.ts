@@ -4,7 +4,19 @@
 import { ActiveCronAndSubscriptionMap, CronServiceType, MobileData, RequestCronAndSubscriptionAction, RequestInitCronAndSubscription, SubscriptionServiceType } from '@subwallet/extension-base/background/KoniTypes';
 import { MessageTypes, RequestTypes, ResponseType } from '@subwallet/extension-base/background/types';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { listMerge } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
+import axios from 'axios';
+import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
+
+// Detect problems on the web-runner
+export function isWebRunnerDataReset (): boolean {
+  if (window?.localStorage) {
+    return !window.localStorage.getItem('keyring:subwallet');
+  } else {
+    return false;
+  }
+}
 
 const DEFAULT_SERVICE_MAP = {
   subscription: {
@@ -27,6 +39,7 @@ export default class Mobile {
   // @ts-ignore
   private state: KoniState;
   private restoreHandler = createPromiseHandler<void>();
+  private lastRestoreData: {storage?: Record<string, string>, indexedDB?: DexieExportJsonStructure} = {};
 
   constructor (state: KoniState) {
     this.state = state;
@@ -99,27 +112,102 @@ export default class Mobile {
     console.log('restartSubscriptionServices');
   }
 
-  public async mobileBackup (): Promise<MobileData> {
+  private async _getLocalStorageExportData (): Promise<string> {
+    // Todo: Use virtual database for local storage
+    if (isWebRunnerDataReset() && this.lastRestoreData.storage) {
+      // Todo: Merge with latest restore LocalStorageData
+      const storageData = JSON.parse(JSON.stringify(window?.localStorage)) as Record<string, string>;
+      const existedData = this.lastRestoreData.storage;
+
+      await axios.post('http://192.168.10.220:3003/storageChanges', { storageData, existedData });
+
+      // Overwrite account data only
+      for (const key in storageData) {
+        // Replace with latest
+        // Todo: check case remove account and remove key
+        if (key === 'CurrentAccountInfo' || key.startsWith('account:')) {
+          existedData[key] = storageData[key];
+        }
+
+        // Todo: asset setting
+      }
+
+      // Merge with latest
+      existedData.__storage_keys__ = JSON.stringify([...Object.keys(storageData), ...Object.keys(existedData)]);
+
+      return Promise.resolve(JSON.stringify(existedData));
+    } else {
+      return Promise.resolve(JSON.stringify(window?.localStorage));
+    }
+  }
+
+  private async _getDexieExportData (): Promise<string> {
     const indexedDB = await this.state.dbService.exportDB();
 
+    if (isWebRunnerDataReset() && this.lastRestoreData.indexedDB) {
+      // Merge with latest restore DexieData
+      const exportData = await this.state.dbService.getExportJson();
+      const exportTables = exportData?.data.data;
+      const existedData = this.lastRestoreData.indexedDB;
+      const existedTableMap = Object.fromEntries(existedData.data.data.map((table) => [table.tableName, table]));
+
+      await axios.post('http://192.168.10.220:3003/indexedDBChanges', { existedData, exportData });
+
+      if (exportTables?.length > 0) {
+        exportTables.forEach(({ inbound, rows, tableName }) => {
+          const latestTable = existedTableMap[tableName];
+
+          // chain & asset & campaign
+          if (tableName === 'chain' || tableName === 'asset' || tableName === 'campaign') {
+            latestTable.rows = listMerge('slug', latestTable.rows, rows);
+
+            // Todo: Campaign still doesn't work
+          } else if (tableName === 'migrations') {
+            latestTable.rows = listMerge('key', latestTable.rows, rows);
+          } else if (tableName === 'transactions') {
+            latestTable.rows = listMerge(['address', 'extrinsicHash'], latestTable.rows, rows);
+          }
+        });
+      }
+
+      return JSON.stringify(existedData);
+    }
+
+    return indexedDB;
+  }
+
+  public async mobileBackup (): Promise<MobileData> {
+    const storage = await this._getLocalStorageExportData();
+    const indexedDB = await this._getDexieExportData();
+
+    await axios.post('http://192.168.10.220:3003/exports', { storage: storage?.length, indexedDB: indexedDB?.length });
+
     return {
-      storage: JSON.stringify(localStorage),
+      storage,
       indexedDB
     };
   }
 
   public async mobileRestore ({ indexedDB, storage }: Partial<MobileData>): Promise<void> {
     if (storage) {
-      const storageData = JSON.parse(storage) as Record<string, any>;
+      const storageData = JSON.parse(storage) as Record<string, string>;
+
+      // Backup the last restore data to memory
+      this.lastRestoreData.storage = storageData;
 
       for (const key in storageData) {
-        localStorage.setItem(key, storageData[key] as string);
+        localStorage.setItem(key, storageData[key]);
       }
     }
 
     if (indexedDB) {
+      // Backup the last restore data to memory
+      this.lastRestoreData.indexedDB = JSON.parse(indexedDB) as DexieExportJsonStructure;
+      // Backup the last restore data to memory
       await this.state.dbService.importDB(indexedDB);
     }
+
+    await axios.post('http://192.168.10.220:3003/imports', { storage: storage?.length, indexedDB: indexedDB?.length });
 
     this.restoreHandler.resolve();
   }

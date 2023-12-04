@@ -10,24 +10,26 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & SwModalProps & {
-  fullSize?: boolean;
+  fullSizeOnMobile?: boolean;
+  center?: boolean;
 };
 
-function Component ({ children, className, fullSize, motion, ...props }: Props): React.ReactElement<Props> {
+function Component ({ center, children, className, fullSizeOnMobile, motion, ...props }: Props): React.ReactElement<Props> {
   const { isWebUI } = useContext(ScreenContext);
 
-  const _motion = motion || (isWebUI ? 'move-right' : undefined);
+  const _motion = motion || (isWebUI && !center ? 'move-right' : undefined);
+  const _width = center ? (!isWebUI ? '100%' : undefined) : '100%';
 
   return (
     <SwModal
       {...props}
       className={CN(className, {
-        '-desktop': isWebUI,
+        '-desktop': isWebUI && !center,
         '-mobile': !isWebUI,
-        '-full-Size': fullSize
+        '-full-size-on-mobile': fullSizeOnMobile
       })}
       motion={_motion}
-      width={'100%'}
+      width={_width}
     >
       {children}
     </SwModal>
@@ -53,7 +55,8 @@ export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) 
         height: '100%',
         maxHeight: '100%',
         paddingLeft: token.paddingLG,
-        paddingRight: token.paddingLG
+        paddingRight: token.paddingLG,
+        borderRadius: '8px 0 0 8px'
       },
 
       '.ant-sw-list-section .ant-sw-list-wrapper': {
@@ -69,7 +72,7 @@ export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) 
       }
     },
 
-    '&.-full-Size': {
+    '&.-mobile.-full-size-on-mobile': {
       '.ant-sw-modal-content': {
         height: '100%',
         maxHeight: '100%',

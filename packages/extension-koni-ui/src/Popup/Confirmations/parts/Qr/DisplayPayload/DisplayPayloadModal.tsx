@@ -7,7 +7,7 @@ import { CONFIRMATION_QR_MODAL, CONFIRMATION_SCAN_MODAL } from '@subwallet/exten
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, ModalContext, SwModal, SwSubHeader } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { QrCode, X } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
@@ -42,6 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
   if (isWebUI) {
     return (
       <BaseModal
+        center={true}
         className={CN(className, '-web-ui')}
         closable={false}
         destroyOnClose={true}
@@ -85,7 +86,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <SwModal
+    <BaseModal
       className={CN(className, 'modal-full')}
       closable={false}
       destroyOnClose={true}
@@ -111,7 +112,7 @@ const Component: React.FC<Props> = (props: Props) => {
           {children}
         </div>
       </Layout.WithSubHeaderOnly>
-    </SwModal>
+    </BaseModal>
   );
 };
 

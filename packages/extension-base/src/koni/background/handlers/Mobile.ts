@@ -10,22 +10,28 @@ import { listMerge } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
 
-// Detect problems on the web-runner
-export async function isWebRunnerDataReset (): Promise<boolean> {
+export function isLocalStorageReset (): boolean {
   if (window?.localStorage) {
-    const lostLocalStorage = !window.localStorage.getItem('keyring:subwallet');
-
-    if (lostLocalStorage) {
-      return true;
-    } else {
-      try {
-        return (await state.dbService.stores.migration.table.count()) < 1;
-      } catch (e) {
-        return true;
-      }
-    }
+    return !window.localStorage.getItem('keyring:subwallet');
   } else {
     return false;
+  }
+}
+
+export async function isIndexedDBReset (): Promise<boolean> {
+  try {
+    return (await state.dbService.stores.migration.table.count()) < 1;
+  } catch (e) {
+    return true;
+  }
+}
+
+// Detect problems on the web-runner
+export async function isWebRunnerDataReset (): Promise<boolean> {
+  if (isLocalStorageReset()) {
+    return true;
+  } else {
+    return await isIndexedDBReset();
   }
 }
 
@@ -56,6 +62,16 @@ export default class Mobile {
 
   constructor (state: KoniState) {
     this.state = state;
+
+    if (!isLocalStorageReset()) {
+      this.lastRestoreData.storage = swStorage.copy();
+    }
+
+    (async () => {
+      if (!(await isIndexedDBReset())) {
+        this.lastRestoreData.indexedDB = await state.dbService.getExportJson();
+      }
+    })().catch(console.error);
   }
 
   public ping (): string {
@@ -132,7 +148,7 @@ export default class Mobile {
   private async _getDexieExportData (): Promise<string> {
     const indexedDB = await this.state.dbService.exportDB();
 
-    if (await isWebRunnerDataReset() && this.lastRestoreData.indexedDB) {
+    if (await isIndexedDBReset() && this.lastRestoreData.indexedDB) {
       // Merge with latest restore DexieData
       const exportData = await this.state.dbService.getExportJson();
       const exportTables = exportData?.data.data;

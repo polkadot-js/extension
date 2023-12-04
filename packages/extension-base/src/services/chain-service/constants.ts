@@ -233,8 +233,8 @@ export const _DEFAULT_ACTIVE_CHAINS = [
   'interlay'
 ];
 
-export const EVM_PASS_CONNECT_STATUS = {
-  acala: ['acala_evm', 'karura_evm']
+export const EVM_PASS_CONNECT_STATUS: Record<string, string[]> = {
+  arbitrum_one: ['*']
 };
 
 export const EVM_REFORMAT_DECIMALS = {

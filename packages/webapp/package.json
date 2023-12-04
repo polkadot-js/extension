@@ -18,9 +18,9 @@
   "buildNumber": "1122004",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
-    "@subwallet/extension-base": "^1.1.24-1",
-    "@subwallet/extension-inject": "^1.1.24-1",
-    "@subwallet/extension-koni-ui": "^1.1.24-1"
+    "@subwallet/extension-base": "^1.1.24-4",
+    "@subwallet/extension-inject": "^1.1.24-4",
+    "@subwallet/extension-koni-ui": "^1.1.24-4"
   },
   "devDependencies": {
     "@polkadot/dev": "^0.65.23",

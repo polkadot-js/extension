@@ -3,6 +3,7 @@
 
 import { ActiveCronAndSubscriptionMap, CronServiceType, MobileData, RequestCronAndSubscriptionAction, RequestInitCronAndSubscription, SubscriptionServiceType } from '@subwallet/extension-base/background/KoniTypes';
 import { MessageTypes, RequestTypes, ResponseType } from '@subwallet/extension-base/background/types';
+import { state } from '@subwallet/extension-base/koni/background/handlers/index';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { SWStorage } from '@subwallet/extension-base/storage';
 import { listMerge } from '@subwallet/extension-base/utils';
@@ -10,9 +11,19 @@ import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
 
 // Detect problems on the web-runner
-export function isWebRunnerDataReset (): boolean {
+export async function isWebRunnerDataReset (): Promise<boolean> {
   if (window?.localStorage) {
-    return !window.localStorage.getItem('keyring:subwallet');
+    const lostLocalStorage = !window.localStorage.getItem('keyring:subwallet');
+
+    if (lostLocalStorage) {
+      return true;
+    } else {
+      try {
+        return (await state.dbService.stores.migration.table.count()) < 1;
+      } catch (e) {
+        return true;
+      }
+    }
   } else {
     return false;
   }
@@ -121,7 +132,7 @@ export default class Mobile {
   private async _getDexieExportData (): Promise<string> {
     const indexedDB = await this.state.dbService.exportDB();
 
-    if (isWebRunnerDataReset() && this.lastRestoreData.indexedDB) {
+    if (await isWebRunnerDataReset() && this.lastRestoreData.indexedDB) {
       // Merge with latest restore DexieData
       const exportData = await this.state.dbService.getExportJson();
       const exportTables = exportData?.data.data;

@@ -7,9 +7,9 @@ import { isWebRunnerDataReset } from '@subwallet/extension-base/koni/background/
 import { PageStatus, responseMessage } from './messageHandle';
 
 export async function checkRestore (): Promise<void> {
-  return new Promise((resolve) => {
-    const needRestore = isWebRunnerDataReset();
+  const needRestore = await isWebRunnerDataReset();
 
+  return new Promise((resolve) => {
     if (needRestore) {
       responseMessage({ id: '0', response: { status: 'require_restore' } } as PageStatus);
       mobile.waitRestore()

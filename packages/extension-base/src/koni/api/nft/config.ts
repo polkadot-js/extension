@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SWStorage } from '@subwallet/extension-base/storage';
 import { RuntimeInfo } from '@subwallet/extension-base/utils';
 import Bowser from 'bowser';
 
@@ -60,7 +61,7 @@ export const IPFS_ETH_ARAGON = 'https://ipfs.eth.aragon.network/ipfs/'; // 400
 export const SUBWALLET_IPFS = 'https://ipfs.subwallet.app/ipfs/'; // ???
 
 const detectFirefox = (): boolean => {
-  return (localStorage.getItem('browserInfo') || Bowser.getParser(window.navigator.userAgent).getBrowserName()).toLowerCase() === 'firefox';
+  return (SWStorage.instance.getItem('browserInfo') || Bowser.getParser(window.navigator.userAgent).getBrowserName()).toLowerCase() === 'firefox';
 };
 
 const isFirefox = detectFirefox();

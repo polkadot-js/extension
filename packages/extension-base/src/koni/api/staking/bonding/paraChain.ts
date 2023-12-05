@@ -3,11 +3,12 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingTxErrorType, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getBondedValidators, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getParaCurrentInflation, getStakingStatusByNominations, InflationConfig, isUnstakeAll, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { EarningStatus, UnstakingStatus } from '@subwallet/extension-base/types';
 import { isSameAddress, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Codec } from '@polkadot/types/types';
@@ -68,7 +69,7 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
   const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, chainStakingMetadata.maxValidatorPerNominator);
   const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, true);
 
-  if (!nominatorMetadata || nominatorMetadata.status === StakingStatus.NOT_STAKING) {
+  if (!nominatorMetadata || nominatorMetadata.status === EarningStatus.NOT_STAKING) {
     if (!bnTotalStake.gte(bnMinStake)) {
       errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
     }
@@ -213,7 +214,7 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
 
     const identity = parseIdentity(identityInfo);
     let hasUnstaking = false;
-    let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
+    let delegationStatus: EarningStatus = EarningStatus.NOT_EARNING;
 
     // parse unstaking info
     if (delegationScheduledRequests) {
@@ -244,7 +245,7 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
     const bnActiveStake = bnStake.sub(bnUnstakeBalance);
 
     if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegation))) {
-      delegationStatus = StakingStatus.EARNING_REWARD;
+      delegationStatus = EarningStatus.EARNING_REWARD;
     }
 
     bnTotalActiveStake = bnTotalActiveStake.add(bnActiveStake);
@@ -300,7 +301,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
       chain: chainInfo.slug,
       type: StakingType.NOMINATED,
       address,
-      status: StakingStatus.NOT_STAKING,
+      status: EarningStatus.NOT_STAKING,
       activeStake: '0',
       nominations: [],
       unstakings: []
@@ -326,7 +327,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
     const currentRound = roundInfo.current;
     const identity = parseIdentity(identityInfo);
     let hasUnstaking = false;
-    let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
+    let delegationStatus: EarningStatus = EarningStatus.NOT_EARNING;
 
     // parse unstaking info
     if (delegationScheduledRequests) {
@@ -357,7 +358,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
     const bnActiveStake = bnStake.sub(bnUnstakeBalance);
 
     if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegation))) {
-      delegationStatus = StakingStatus.EARNING_REWARD;
+      delegationStatus = EarningStatus.EARNING_REWARD;
     }
 
     bnTotalActiveStake = bnTotalActiveStake.add(bnActiveStake);

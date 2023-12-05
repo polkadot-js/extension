@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, NominatorMetadata, StakingRewardItem, StakingStatus, YieldAssetBalance, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, StakingRewardItem, YieldAssetBalance, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { EarningStatus, YieldPoolType } from '@subwallet/extension-base/types';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
 import { EXCLUSIVE_REWARD_SLUGS, ExclusiveRewardContentMap } from '@subwallet/extension-koni-ui/constants/earning';
 import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -104,15 +105,15 @@ const Component: React.FC<Props> = (props: Props) => {
       return StakingStatusUi.active;
     }
 
-    if (nominatorMetadata.status === StakingStatus.EARNING_REWARD) {
+    if (nominatorMetadata.status === EarningStatus.EARNING_REWARD) {
       return StakingStatusUi.active;
     }
 
-    if (nominatorMetadata.status === StakingStatus.PARTIALLY_EARNING) {
+    if (nominatorMetadata.status === EarningStatus.PARTIALLY_EARNING) {
       return StakingStatusUi.partialEarning;
     }
 
-    if (nominatorMetadata.status === StakingStatus.WAITING) {
+    if (nominatorMetadata.status === EarningStatus.WAITING) {
       return StakingStatusUi.waiting;
     }
 

@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, ExtrinsicType, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, ExtrinsicType, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { getValidatorLabel, isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { EarningStatus, UnstakingStatus } from '@subwallet/extension-base/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
@@ -146,16 +147,16 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     inactiveModal(STAKING_DETAIL_MODAL_ID);
   }, [inactiveModal]);
 
-  const getStakingStatus = useCallback((status: StakingStatus) => {
-    if (status === StakingStatus.EARNING_REWARD) {
+  const getStakingStatus = useCallback((status: EarningStatus) => {
+    if (status === EarningStatus.EARNING_REWARD) {
       return StakingStatusUi.active;
     }
 
-    if (status === StakingStatus.PARTIALLY_EARNING) {
+    if (status === EarningStatus.PARTIALLY_EARNING) {
       return StakingStatusUi.partialEarning;
     }
 
-    if (status === StakingStatus.WAITING) {
+    if (status === EarningStatus.WAITING) {
       return StakingStatusUi.waiting;
     }
 

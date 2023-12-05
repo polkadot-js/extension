@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import BaseStore from '@subwallet/extension-base/services/storage-service/db-stores/BaseStore';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { liveQuery } from 'dexie';
 
 export default class YieldPoolStore extends BaseStore<YieldPoolInfo> {

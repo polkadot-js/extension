@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingStatusByNominations, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { EarningStatus, UnstakingStatus } from '@subwallet/extension-base/types';
 import { isUrl, parseRawNumber } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -123,7 +124,7 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
       const bnCurrentStake = new BN(currentStake);
 
       if (bnCurrentStake.gt(BN_ZERO)) {
-        const dappStakingStatus = bnCurrentStake.gt(BN_ZERO) && bnCurrentStake.gte(new BN(minDelegatorStake)) ? StakingStatus.EARNING_REWARD : StakingStatus.NOT_EARNING;
+        const dappStakingStatus = bnCurrentStake.gt(BN_ZERO) && bnCurrentStake.gte(new BN(minDelegatorStake)) ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING;
 
         bnTotalActiveStake = bnTotalActiveStake.add(bnCurrentStake);
         const dappInfo = dAppInfoMap[dappAddress];
@@ -163,7 +164,7 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
       chain: chainInfo.slug,
       type: StakingType.NOMINATED,
       address,
-      status: StakingStatus.NOT_STAKING,
+      status: EarningStatus.NOT_STAKING,
       activeStake: '0',
       nominations: [],
       unstakings: []
@@ -236,7 +237,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
       const bnCurrentStake = new BN(currentStake);
 
       if (bnCurrentStake.gt(BN_ZERO)) {
-        const dappStakingStatus = bnCurrentStake.gt(BN_ZERO) && bnCurrentStake.gte(new BN(minDelegatorStake)) ? StakingStatus.EARNING_REWARD : StakingStatus.NOT_EARNING;
+        const dappStakingStatus = bnCurrentStake.gt(BN_ZERO) && bnCurrentStake.gte(new BN(minDelegatorStake)) ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING;
 
         bnTotalActiveStake = bnTotalActiveStake.add(bnCurrentStake);
         const dappInfo = dAppInfoMap[dappAddress];
@@ -276,7 +277,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
       chain: chainInfo.slug,
       type: StakingType.NOMINATED,
       address,
-      status: StakingStatus.NOT_STAKING,
+      status: EarningStatus.NOT_STAKING,
       activeStake: '0',
       nominations: [],
       unstakings: []

@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningTagType } from '@subwallet/extension-koni-ui/types';
 import { Database, HandsClapping, Leaf, User, Users } from 'phosphor-react';
 import { TFunction } from 'react-i18next';

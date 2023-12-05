@@ -10,7 +10,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BuyServiceInfo, BuyTokenInfo, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft } from '@subwallet/extension-base/types';
+import { BuyServiceInfo, BuyTokenInfo, EarningStatus, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft, UnstakingStatus, YieldPoolType } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -1545,7 +1545,6 @@ export type RequestCrossChainTransfer = InternalRequestSign<RequestCheckCrossCha
 
 /// Stake
 
-// Staking & Bonding
 export interface ChainStakingMetadata {
   chain: string;
   type: StakingType;
@@ -1563,7 +1562,7 @@ export interface ChainStakingMetadata {
   expectedReturn?: number; // in %, annually
   inflation?: number; // in %, annually
   nominatorCount?: number;
-}
+}// Staking & Bonding
 
 export interface NominationInfo {
   chain: string;
@@ -1573,7 +1572,7 @@ export interface NominationInfo {
 
   hasUnstaking?: boolean;
   validatorMinStake?: string;
-  status: StakingStatus;
+  status: EarningStatus;
 }
 
 export interface PalletNominationPoolsBondedPoolInner {
@@ -1595,11 +1594,6 @@ export interface NominationPoolInfo extends Pick<PalletNominationPoolsBondedPool
   bondedAmount: string
 }
 
-export enum UnstakingStatus {
-  CLAIMABLE = 'CLAIMABLE',
-  UNLOCKING = 'UNLOCKING'
-}
-
 export interface UnstakingInfo {
   chain: string;
   status: UnstakingStatus;
@@ -1608,19 +1602,11 @@ export interface UnstakingInfo {
   validatorAddress?: string; // might unstake from a validator or not
 }
 
-export enum StakingStatus {
-  EARNING_REWARD = 'EARNING_REWARD',
-  PARTIALLY_EARNING = 'PARTIALLY_EARNING',
-  NOT_EARNING = 'NOT_EARNING',
-  WAITING = 'WAITING',
-  NOT_STAKING = 'NOT_STAKING'
-}
-
 export interface NominatorMetadata {
   chain: string,
   type: StakingType,
 
-  status: StakingStatus,
+  status: EarningStatus,
   address: string,
   activeStake: string,
   nominations: NominationInfo[],
@@ -1663,17 +1649,18 @@ export type RequestBondingSubmit = InternalRequestSign<BondingSubmitParams>;
 // UnBonding
 
 export interface UnbondingSubmitParams extends BaseRequestSign {
-  amount: string,
-  chain: string,
+  amount: string;
+  chain: string;
 
-  nominatorMetadata: NominatorMetadata,
+  nominatorMetadata: NominatorMetadata;
   // for some chains
-  validatorAddress?: string
+  validatorAddress?: string;
 
-  isLiquidStaking?: boolean,
-  derivativeTokenInfo?: _ChainAsset,
-  exchangeRate?: number,
-  inputTokenInfo?: _ChainAsset
+  isLiquidStaking?: boolean;
+  derivativeTokenInfo?: _ChainAsset;
+  exchangeRate?: number;
+  inputTokenInfo?: _ChainAsset;
+  isFastUnbond: boolean;
 }
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
@@ -2122,15 +2109,6 @@ export interface ResolveDomainRequest {
 export interface ResolveAddressToDomainRequest {
   chain: string,
   address: string
-}
-
-export enum YieldPoolType {
-  LIQUID_STAKING = 'LIQUID_STAKING',
-  LENDING = 'LENDING',
-  SINGLE_FARMING = 'SINGLE_FARMING',
-  NOMINATION_POOL = 'NOMINATION_POOL',
-  NATIVE_STAKING = 'NATIVE_STAKING',
-  PARACHAIN_STAKING = 'PARACHAIN_STAKING'
 }
 
 export interface YieldWithdrawalMethod {

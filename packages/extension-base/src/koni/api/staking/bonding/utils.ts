@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
-import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
+import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { EarningStatus, UnstakingStatus, YieldPoolType } from '@subwallet/extension-base/types';
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { t } from 'i18next';
@@ -530,24 +532,24 @@ export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
   return result;
 }
 
-export function getStakingStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): StakingStatus {
-  let stakingStatus: StakingStatus = StakingStatus.EARNING_REWARD;
+export function getStakingStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): EarningStatus {
+  let stakingStatus: EarningStatus = EarningStatus.EARNING_REWARD;
 
   if (bnTotalActiveStake.isZero()) {
-    stakingStatus = StakingStatus.NOT_EARNING;
+    stakingStatus = EarningStatus.NOT_EARNING;
   } else {
     let invalidDelegationCount = 0;
 
     for (const nomination of nominationList) {
-      if (nomination.status === StakingStatus.NOT_EARNING) {
+      if (nomination.status === EarningStatus.NOT_EARNING) {
         invalidDelegationCount += 1;
       }
     }
 
     if (invalidDelegationCount > 0 && invalidDelegationCount < nominationList.length) {
-      stakingStatus = StakingStatus.PARTIALLY_EARNING;
+      stakingStatus = EarningStatus.PARTIALLY_EARNING;
     } else if (invalidDelegationCount === nominationList.length) {
-      stakingStatus = StakingStatus.NOT_EARNING;
+      stakingStatus = EarningStatus.NOT_EARNING;
     }
   }
 

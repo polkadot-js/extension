@@ -2,14 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, StakingStatus, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getPoolingBondingExtrinsic, getRelayBondingExtrinsic, PalletStakingStakingLedger, subscribeRelayChainNominatorMetadata, subscribeRelayChainPoolMemberMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { calculateChainStakedReturn, calculateInflation, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/helper/utils';
-import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { EarningStatus, YieldPoolType } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Codec } from '@polkadot/types/types';
@@ -244,7 +246,7 @@ export function getNominationPoolPosition (substrateApi: _SubstrateApi, useAddre
               chain: poolInfo.chain,
               type: StakingType.POOLED,
               address: owner,
-              status: StakingStatus.NOT_STAKING,
+              status: EarningStatus.NOT_STAKING,
               activeStake: '0',
               nominations: [], // can only join 1 pool at a time
               unstakings: []

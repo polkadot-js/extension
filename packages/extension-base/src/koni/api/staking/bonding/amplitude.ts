@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BlockHeader, getBondedValidators, getStakingStatusByNominations, isUnstakeAll, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { EarningStatus, UnstakingStatus } from '@subwallet/extension-base/types';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Codec } from '@polkadot/types/types';
@@ -102,10 +103,10 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
 
     activeStake = delegatorState.amount.toString();
     const bnActiveStake = new BN(activeStake);
-    let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
+    let delegationStatus: EarningStatus = EarningStatus.NOT_EARNING;
 
     if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
-      delegationStatus = StakingStatus.EARNING_REWARD;
+      delegationStatus = EarningStatus.EARNING_REWARD;
     }
 
     nominationList.push({
@@ -184,7 +185,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
       chain: chainInfo.slug,
       type: StakingType.NOMINATED,
       address,
-      status: StakingStatus.NOT_STAKING,
+      status: EarningStatus.NOT_STAKING,
       activeStake: '0',
       nominations: [],
       unstakings: []
@@ -199,10 +200,10 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
 
     activeStake = delegatorState.amount.toString();
     const bnActiveStake = new BN(activeStake);
-    let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
+    let delegationStatus: EarningStatus = EarningStatus.NOT_EARNING;
 
     if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
-      delegationStatus = StakingStatus.EARNING_REWARD;
+      delegationStatus = EarningStatus.EARNING_REWARD;
     }
 
     nominationList.push({

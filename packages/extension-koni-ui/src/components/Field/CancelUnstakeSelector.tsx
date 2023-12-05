@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { UnstakingStatus } from '@subwallet/extension-base/types';
 import { GeneralEmptyList, StakingUnstakeItem } from '@subwallet/extension-koni-ui/components';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';

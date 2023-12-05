@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 
 export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
   WND___nomination_pool: {

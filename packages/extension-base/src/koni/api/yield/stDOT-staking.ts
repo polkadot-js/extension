@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestYieldStepSubmit, StakingStatus, StakingType, UnbondingSubmitParams, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestYieldStepSubmit, StakingType, UnbondingSubmitParams, UnstakingInfo, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import { DEFAULT_YIELD_FIRST_STEP, getStellaswapLiquidStakingContract, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
-import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { EarningStatus, HandleYieldStepData, UnstakingStatus, YieldPoolType } from '@subwallet/extension-base/types';
 import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
 
@@ -138,7 +138,7 @@ export function getStellaswapLiquidStakingPosition (evmApiMap: Record<string, _E
           chain: poolInfo.chain,
           type: StakingType.LIQUID_STAKING,
 
-          status: StakingStatus.EARNING_REWARD,
+          status: EarningStatus.EARNING_REWARD,
           address,
           activeStake: balance,
           nominations: [],

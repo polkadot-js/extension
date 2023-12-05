@@ -3,13 +3,14 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, UnbondingSubmitParams, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingType, SubmitYieldStepData, UnbondingSubmitParams, YieldPoolInfo, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_MIN_AMOUNT_PERCENT, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
+import { EarningStatus, YieldPoolType } from '@subwallet/extension-base/types';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -124,7 +125,7 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
           chain: chainInfo.slug,
           type: StakingType.LIQUID_STAKING,
 
-          status: StakingStatus.EARNING_REWARD,
+          status: EarningStatus.EARNING_REWARD,
           address,
           activeStake: addressBalance.toString(),
           nominations: [],

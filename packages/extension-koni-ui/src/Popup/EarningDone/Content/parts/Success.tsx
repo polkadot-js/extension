@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 import { detectTranslate, swParseIPFSUrl } from '@subwallet/extension-base/utils';
 import { ImageSlash } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';

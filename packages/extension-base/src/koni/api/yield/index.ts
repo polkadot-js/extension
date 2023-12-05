@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnbondingSubmitParams, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnbondingSubmitParams, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPositionInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { validatePoolBondingCondition, validateRelayBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { getAcalaLiquidStakingDefaultUnstake, getAcalaLiquidStakingDefaultWithdraw, getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLcDOTLiquidStakingStats, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acala-liquid-staking';
@@ -19,6 +19,7 @@ import { BalanceService } from '@subwallet/extension-base/services/balance-servi
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getTokenOnChainInfo, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { HandleYieldStepData, YieldPoolType } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 import { TransactionConfig } from 'web3-core';
 
@@ -467,14 +468,6 @@ export async function validateYieldProcess (address: string, params: OptimalYiel
   }
 
   return await validateEarningProcess(address, params, path, balanceService);
-}
-
-export interface HandleYieldStepData {
-  txChain: string,
-  extrinsicType: ExtrinsicType,
-  extrinsic: SubmittableExtrinsic<'promise'> | TransactionConfig,
-  txData: any,
-  transferNativeAmount: string
 }
 
 export async function handleYieldStep (address: string, yieldPoolInfo: YieldPoolInfo, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number, balanceService: BalanceService): Promise<HandleYieldStepData> {

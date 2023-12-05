@@ -4,7 +4,7 @@
 import MigrateProvider from './MigrateProvider';
 
 export default class MigrateEthProvider extends MigrateProvider {
-  newProvider = 'ethereum';
+  slug = 'ethereum';
   oldProvider = 'Cloudflare';
-  slug = 'Llamarpc';
+  newProvider = 'Llamarpc';
 }

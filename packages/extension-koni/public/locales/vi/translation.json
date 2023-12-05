@@ -30,7 +30,6 @@
   "Select validator": "Chọn validator",
   "Lowest total member": "Tổng số thành viên thấp nhất",
   "Highest total bonded": "Tổng lượng stake cao nhất",
-  "Active": "Đang hoạt động",
   "Locked": "Khóa",
   "Destroying": "Pool đang hủy",
   "Select pool": "Chọn pool",
@@ -409,7 +408,6 @@
   "Claim Reward transaction": "Giao dịch nhận phần thưởng",
   "Withdraw transaction": "Giao dịch rút stake",
   "Cancel unstake transaction": "Giao dịch huỷ unstake",
-  "Search history": "Lịch sử tìm kiếm",
   "Your NFT collectible will appear here!": "Bộ sưu tập NFT của bạn sẽ hiển thị tại đây",
   "No NFT collectible": "Không có NFT được sưu tập",
   "Deleted NFT collection successfully": "Đã xóa bộ sưu tập NFT thành công",
@@ -858,5 +856,15 @@
   "Crowdloan ends on": "",
   "Refunded on": "",
   "Won": "",
-  "In auction": ""
+  "In auction": "",
+  "Token Details": "",
+  "Account Details": "",
+  "Loading ...": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Earning status": "",
+  "Earning": ""
 }

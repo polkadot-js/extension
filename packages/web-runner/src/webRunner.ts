@@ -10,14 +10,15 @@ import keyring from '@subwallet/ui-keyring';
 
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
+import { checkRestore } from './checkRestore';
 import { PageStatus, responseMessage, setupHandlers } from './messageHandle';
 
 responseMessage({ id: '0', response: { status: 'load' } } as PageStatus);
 
 setupHandlers();
 
-// initial setup
-cryptoWaitReady()
+// Initial setup
+Promise.all([cryptoWaitReady(), checkRestore()])
   .then((): void => {
     console.log('[Mobile] crypto initialized');
 
@@ -27,12 +28,16 @@ cryptoWaitReady()
     keyring.restoreKeyringPassword().finally(() => {
       koniState.updateKeyringState();
     });
+
     koniState.eventService.emit('crypto.ready', true);
 
-    responseMessage({ id: '0', response: { status: 'crypto_ready' } } as PageStatus);
+    // Manual Init koniState
+    koniState.init().catch((err) => console.warn(err));
 
-    // wake web-runner up
+    // Wake web-runner up
     koniState.wakeup().catch((err) => console.warn(err));
+
+    responseMessage({ id: '0', response: { status: 'crypto_ready' } } as PageStatus);
 
     console.log('[Mobile] initialization completed');
   })

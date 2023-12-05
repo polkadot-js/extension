@@ -50,3 +50,4 @@ export * from './qr-signer';
 export * from './settings';
 export * from './transaction';
 export * from './WalletConnect';
+export * from './database';

@@ -30,7 +30,6 @@
   "Select validator": "Выбрать валидатора",
   "Lowest total member": "Самый низкий общий член",
   "Highest total bonded": "Наивысший общий залог",
-  "Active": "Актив",
   "Locked": "Заблокировано",
   "Destroying": "Разрушение",
   "Select pool": "Выбрать пул",
@@ -409,7 +408,6 @@
   "Claim Reward transaction": "Tранзакция требования награды",
   "Withdraw transaction": "Транзакция вывода",
   "Cancel unstake transaction": "Отменить транзакцию анстейк",
-  "Search history": "История поиска",
   "Your NFT collectible will appear here!": "Ваш предмет коллекционирования NFT появится здесь!",
   "No NFT collectible": "Нет предмета коллекционирования NFT",
   "Deleted NFT collection successfully": "Коллекция NFT успешно удалена",
@@ -858,5 +856,15 @@
   "Crowdloan ends on": "",
   "Refunded on": "",
   "Won": "",
-  "In auction": ""
+  "In auction": "",
+  "Token Details": "",
+  "Account Details": "",
+  "Loading ...": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Earning status": "",
+  "Earning": ""
 }

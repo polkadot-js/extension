@@ -28,11 +28,7 @@ export async function isIndexedDBReset (): Promise<boolean> {
 
 // Detect problems on the web-runner
 export async function isWebRunnerDataReset (): Promise<boolean> {
-  if (isLocalStorageReset()) {
-    return true;
-  } else {
-    return await isIndexedDBReset();
-  }
+  return isLocalStorageReset() || await isIndexedDBReset();
 }
 
 const swStorage = SWStorage.instance;
@@ -167,7 +163,7 @@ export default class Mobile {
           } else if (tableName === 'migrations') {
             latestTable.rows = listMerge('key', latestTable.rows, rows);
           } else if (tableName === 'transactions') {
-            latestTable.rows = listMerge(['address', 'extrinsicHash'], latestTable.rows, rows);
+            latestTable.rows = listMerge(['chain', 'address', 'extrinsicHash'], latestTable.rows, rows);
           }
         });
       }

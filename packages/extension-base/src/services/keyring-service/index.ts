@@ -74,8 +74,10 @@ export class KeyringService {
 
   updateKeyringState (isReady = true) {
     if (!this.keyringState.isReady && isReady) {
-      this.eventService.emit('keyring.ready', true);
-      this.eventService.emit('account.ready', true);
+      this.eventService.waitCryptoReady.then(() => {
+        this.eventService.emit('keyring.ready', true);
+        this.eventService.emit('account.ready', true);
+      }).catch(console.error);
     }
 
     this.keyringStateSubject.next({

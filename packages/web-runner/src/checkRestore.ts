@@ -9,16 +9,13 @@ import { PageStatus, responseMessage } from './messageHandle';
 export async function checkRestore (): Promise<void> {
   const needRestore = await isWebRunnerDataReset();
 
-  return new Promise((resolve) => {
-    if (needRestore) {
-      responseMessage({ id: '0', response: { status: 'require_restore' } } as PageStatus);
-      mobile.waitRestore()
-        .catch((err) => console.warn(err))
-        .finally(() => {
-          resolve();
-        });
-    } else {
-      resolve();
+  if (needRestore) {
+    responseMessage({ id: '0', response: { status: 'require_restore' } } as PageStatus);
+
+    try {
+      await mobile.waitRestore();
+    } catch (e) {
+      console.error(e);
     }
-  });
+  }
 }

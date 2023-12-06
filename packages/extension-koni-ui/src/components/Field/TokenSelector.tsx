@@ -36,7 +36,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 const convertChainActivePriority = (active?: boolean) => active ? 1 : 0;
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { className = '', disabled, id = 'token-select', items, label, placeholder, showChainInSelected = false, statusHelp, value, filterFunction = _isAssetFungibleToken, tooltip } = props;
+  const { className = '', disabled, filterFunction = _isAssetFungibleToken, id = 'token-select', items, label, placeholder, showChainInSelected = false, statusHelp, tooltip, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 

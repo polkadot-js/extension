@@ -2,27 +2,42 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicStatus, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_RECOVER_HISTORY_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL } from '@subwallet/extension-base/constants';
-import { CronServiceInterface, PersistDataServiceInterface, ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
+import { CRON_RECOVER_HISTORY_INTERVAL } from '@subwallet/extension-base/constants';
+import { PersistDataServiceInterface, ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { historyRecover, HistoryRecoverStatus } from '@subwallet/extension-base/services/history-service/helpers/recoverHistoryStatus';
+import { getExtrinsicParserKey } from '@subwallet/extension-base/services/history-service/helpers/subscan-extrinsic-parser-helper';
+import { parseSubscanExtrinsicData, parseSubscanTransferData } from '@subwallet/extension-base/services/history-service/subscan-history';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { keyring } from '@subwallet/ui-keyring';
 import { BehaviorSubject } from 'rxjs';
 
-export class HistoryService implements StoppableServiceInterface, PersistDataServiceInterface, CronServiceInterface {
+function filterHistoryItemByAddressAndChain (chain: string, address: string) {
+  return (item: TransactionHistoryItem) => {
+    return item.chain === chain && item.address === address;
+  };
+}
+
+export class HistoryService implements StoppableServiceInterface, PersistDataServiceInterface {
   private historySubject: BehaviorSubject<TransactionHistoryItem[]> = new BehaviorSubject([] as TransactionHistoryItem[]);
   #needRecoveryHistories: Record<string, TransactionHistoryItem> = {};
 
-  constructor (private dbService: DatabaseService, private chainService: ChainService, private eventService: EventService, private keyringService: KeyringService) {
+  constructor (
+    private dbService: DatabaseService,
+    private chainService: ChainService,
+    private eventService: EventService,
+    private keyringService: KeyringService,
+    private subscanService: SubscanService
+  ) {
     this.init().catch(console.error);
   }
 
   private fetchPromise: Promise<void> | null = null;
-  private interval: NodeJS.Timer | undefined = undefined;
   private recoverInterval: NodeJS.Timer | undefined = undefined;
 
   private async fetchAndLoadHistories (addresses: string[]): Promise<TransactionHistoryItem[]> {
@@ -72,6 +87,97 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     await this.getHistories();
 
     return this.historySubject;
+  }
+
+  private fetchSubscanTransactionHistory (chain: string, address: string) {
+    if (!this.subscanService.checkSupportedSubscanChain(chain)) {
+      return;
+    }
+
+    const chainInfo = this.chainService.getChainInfoByKey(chain);
+
+    const excludeExtrinsicParserKeys: string[] = [
+      'balances.transfer_all'
+    ];
+
+    // Note: fetchAllPossibleExtrinsicItems and fetchAllPossibleTransferItems-receive can run parallelly
+    // However, fetchAllPossibleTransferItems-sent must run after fetchAllPossibleExtrinsicItems,
+    // to avoid "duplicate Extrinsic Hash between items" problem
+
+    this.subscanService.fetchAllPossibleExtrinsicItems(chain, address, (extrinsicItems) => {
+      const result: TransactionHistoryItem[] = [];
+
+      extrinsicItems.forEach((x) => {
+        const item = parseSubscanExtrinsicData(address, x, chainInfo);
+
+        if (item) {
+          result.push(item);
+        }
+      });
+
+      this.addHistoryItems(result).catch((e) => {
+        console.log('addHistoryItems in fetchAllPossibleExtrinsicItems error', e);
+      });
+    }).then((extrinsicItems) => {
+      const excludeTransferExtrinsicHash: string[] = [];
+
+      extrinsicItems.forEach((x) => {
+        if (!excludeExtrinsicParserKeys.includes(getExtrinsicParserKey(x))) {
+          excludeTransferExtrinsicHash.push(x.extrinsic_hash);
+        }
+      });
+
+      this.subscanService.fetchAllPossibleTransferItems(chain, address, 'sent').then((rsMap) => {
+        const result: TransactionHistoryItem[] = [];
+
+        Object.keys(rsMap).forEach((hash) => {
+          // only push item that does not have same hash with another item
+          if (!excludeTransferExtrinsicHash.includes(hash) && rsMap[hash].length === 1) {
+            result.push(parseSubscanTransferData(address, rsMap[hash][0], chainInfo));
+          }
+        });
+
+        this.addHistoryItems(result).catch((e) => {
+          console.log('addHistoryItems in fetchAllPossibleTransferItems-sent error', e);
+        });
+      }).catch((e) => {
+        console.log('fetchAllPossibleTransferItems-sent error', e);
+      });
+    }).catch((e) => {
+      console.log('fetchAllPossibleExtrinsicItems error', e);
+    });
+
+    this.subscanService.fetchAllPossibleTransferItems(chain, address, 'received').then((rsMap) => {
+      const result: TransactionHistoryItem[] = [];
+
+      Object.keys(rsMap).forEach((hash) => {
+        // only push item that does not have same hash with another item
+        if (rsMap[hash].length === 1) {
+          result.push(parseSubscanTransferData(address, rsMap[hash][0], chainInfo));
+        }
+      });
+
+      this.addHistoryItems(result).catch((e) => {
+        console.log('addHistoryItems in fetchAllPossibleTransferItems-receive error', e);
+      });
+    }).catch((e) => {
+      console.log('fetchAllPossibleTransferItems-receive error', e);
+    });
+  }
+
+  subscribeHistories (chain: string, address: string, cb: (items: TransactionHistoryItem[]) => void) {
+    const _address = reformatAddress(address);
+
+    const subscription = this.historySubject.subscribe((items) => {
+      cb(items.filter(filterHistoryItemByAddressAndChain(chain, _address)));
+    });
+
+    this.fetchSubscanTransactionHistory(chain, _address);
+
+    return {
+      unsubscribe: subscription.unsubscribe,
+      value: this.historySubject.getValue().filter(filterHistoryItemByAddressAndChain(chain, _address))
+    };
   }
 
   async updateHistories (chain: string, extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
@@ -127,21 +233,6 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
 
   async persistData (): Promise<void> {
     await this.dbService.upsertHistory(this.historySubject.value);
-  }
-
-  async startCron (): Promise<void> {
-    await this.getHistories();
-
-    this.interval = setInterval(() => {
-      this.getHistories().catch(console.error);
-    }, CRON_REFRESH_HISTORY_INTERVAL);
-  }
-
-  stopCron (): Promise<void> {
-    clearTimeout(this.interval);
-    this.fetchPromise = null;
-
-    return Promise.resolve();
   }
 
   async startRecoverHistories (): Promise<void> {
@@ -215,12 +306,6 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       this.getHistories().catch(console.log);
       this.recoverProcessingHistory().catch(console.error);
 
-      this.eventService.on('account.add', () => {
-        (async () => {
-          await this.stopCron();
-          await this.startCron();
-        })().catch(console.error);
-      });
       this.eventService.on('account.remove', (address) => {
         this.removeHistoryByAddress(address).catch(console.error);
       });
@@ -257,7 +342,6 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       await Promise.all([this.eventService.waitKeyringReady, this.eventService.waitChainReady]);
       this.startPromiseHandler = createPromiseHandler<void>();
       this.status = ServiceStatus.STARTING;
-      await this.startCron();
       this.status = ServiceStatus.STARTED;
       this.startPromiseHandler.resolve();
     } catch (e) {
@@ -276,7 +360,6 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       this.stopPromiseHandler = createPromiseHandler<void>();
       this.status = ServiceStatus.STOPPING;
       await this.persistData();
-      await this.stopCron();
       await this.stopRecoverHistories();
       this.stopPromiseHandler.resolve();
       this.status = ServiceStatus.STOPPED;

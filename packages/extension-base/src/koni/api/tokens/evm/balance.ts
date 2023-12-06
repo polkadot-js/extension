@@ -7,6 +7,10 @@ export async function getEVMBalance (networkKey: string, addresses: string[], ev
   const web3Api = evmApiMap[networkKey];
 
   return await Promise.all(addresses.map(async (address) => {
-    return await web3Api.api.eth.getBalance(address);
+    try {
+      return await web3Api.api.eth.getBalance(address);
+    } catch (e) {
+      return '0';
+    }
   }));
 }

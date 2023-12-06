@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
@@ -507,7 +507,17 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
 
   let stakingStatus = StakingStatus.NOT_EARNING;
 
-  const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
+  const getPoolName = () => {
+    if (poolMetadata.isUtf8) {
+      return poolMetadata.toUtf8();
+    } else {
+      const str = poolMetadata.toString();
+
+      return isHex(str) ? hexToString(str) : str;
+    }
+  };
+
+  const poolName = getPoolName();
 
   if (nominations) {
     const validatorList = nominations.targets;
@@ -576,6 +586,9 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
   } as NominatorMetadata;
 }
 
+/**
+ * Deprecated
+ *  */
 export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   const chainApi = await substrateApi.isReady;
 
@@ -607,7 +620,17 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
   const _poolMetadata = (await chainApi.api.query.nominationPools.metadata(poolMemberInfo.poolId));
   const poolMetadata = _poolMetadata.toPrimitive() as unknown as Bytes;
 
-  const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
+  const getPoolName = () => {
+    if (poolMetadata.isUtf8) {
+      return poolMetadata.toUtf8();
+    } else {
+      const str = poolMetadata.toString();
+
+      return isHex(str) ? hexToString(str) : str;
+    }
+  };
+
+  const poolName = getPoolName();
   const poolStashAccount = parsePoolStashAddress(chainApi.api, 0, poolMemberInfo.poolId, poolsPalletId);
 
   const _nominations = await chainApi.api.query.staking.nominators(poolStashAccount);

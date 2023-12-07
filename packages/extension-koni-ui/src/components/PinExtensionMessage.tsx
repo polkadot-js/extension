@@ -84,7 +84,7 @@ const PinExtensionMessage = styled(Component)<Props>(({ theme: { token } }: Prop
     },
 
     '.message-image': {
-      '--img-height': `${token.sizeXL}px`
+      '--img-height': token.sizeXL
     },
 
     '.message-content': {

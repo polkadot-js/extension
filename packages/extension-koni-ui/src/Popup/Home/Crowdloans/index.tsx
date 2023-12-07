@@ -144,7 +144,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t<string>('Crowdloans')}
       >
         <div className='content-container'>
-          <div className='banner-container'>
+          <div className='banner-container hidden'>
             {banners.map((item) => {
               return (
                 <div
@@ -204,6 +204,11 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-sw-screen-layout-body': {
       overflow: 'hidden'
+    },
+
+    '.ant-sw-header-container-padding-vertical': {
+      paddingBottom: token.padding,
+      paddingTop: token.paddingXS
     },
 
     '.empty-list': {

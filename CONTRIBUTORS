@@ -1,6 +1,6 @@
     1874	Nam Phạm                      	[Issue 2246] minor fix
-    1735	AnhMTV                        	Release version 1.1.24
-    1471	S2kael                        	[Issue-2258] Update chain-list
+    1738	AnhMTV                        	Hot-fix - move keyring use to balance service
+    1485	S2kael                        	[Issue-2021] [DApp] Update logic return list evm accounts
      465	Jaco                          	0.42.5 (#969)
      300	lw-cdm                        	[Issue-2179] Update logic related to ledge
      185	quangdo                       	

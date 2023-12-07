@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { NominationPoolInfo, OptimalYieldPath, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, ValidatorInfo, YieldPoolInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { OptimalYieldPath, ValidatorInfo, YieldPoolInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { YieldPoolType } from '@subwallet/extension-base/types';
+import { NominationPoolInfo, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldPoolType } from '@subwallet/extension-base/types';
 import { getYieldNativeStakingValidators, getYieldNominationPools, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 

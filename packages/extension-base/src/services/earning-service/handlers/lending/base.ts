@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
-import { EarningRewardItem, LiquidYieldPoolInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType } from '@subwallet/extension-base/types';
+import { EarningRewardItem, LendingYieldPoolInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType } from '@subwallet/extension-base/types';
 
 import { noop } from '@polkadot/util';
 
@@ -12,8 +12,8 @@ import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { TransactionConfig } from 'web3-core';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 
-export default abstract class BaseLiquidStakingPoolHandler extends BasePoolHandler {
-  protected readonly type = YieldPoolType.LIQUID_STAKING;
+export default abstract class BaseLendingPoolHandler extends BasePoolHandler {
+  protected readonly type = YieldPoolType.LENDING;
   protected abstract altInputAssets: string[];
   protected abstract derivativeAssets: string[];
   protected abstract inputAssets: string[];
@@ -21,7 +21,7 @@ export default abstract class BaseLiquidStakingPoolHandler extends BasePoolHandl
   protected abstract feeAssets: string[];
 
   protected override get defaultInfo (): Omit<
-  LiquidYieldPoolInfo,
+  LendingYieldPoolInfo,
   'metadata'
   > {
     return {
@@ -45,7 +45,7 @@ export default abstract class BaseLiquidStakingPoolHandler extends BasePoolHandl
 
   /* Subscribe pool info */
 
-  abstract getPoolStat (): Promise<LiquidYieldPoolInfo>;
+  abstract getPoolStat (): Promise<LendingYieldPoolInfo>;
 
   async subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;

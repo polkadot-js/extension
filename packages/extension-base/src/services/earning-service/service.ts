@@ -5,11 +5,12 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import BasePoolHandler from '@subwallet/extension-base/services/earning-service/handlers/base';
+import InterlayLendingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/lending/interlay';
 import AcalaLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/acala';
 import BifrostLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/bifrost';
 import ParallelLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/parallel';
 import NominationPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/nomination-pool';
-import { YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { YieldPoolTarget, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 export default class EarningService {
@@ -52,8 +53,24 @@ export default class EarningService {
             this.handlers[handler.slug] = handler;
           }
         }
+
+        if (_STAKING_CHAIN_GROUP.lending.includes(chain)) {
+          let handler: BasePoolHandler | undefined;
+
+          if (chain === 'interlay') {
+            handler = new InterlayLendingPoolHandler(this.state, chain);
+          }
+
+          if (handler) {
+            this.handlers[handler.slug] = handler;
+          }
+        }
       }
     }
+  }
+
+  protected async getPoolHandler (slug: string): Promise<BasePoolHandler | null> {
+
   }
 
   /* Subscribe pools' info */
@@ -168,4 +185,27 @@ export default class EarningService {
   }
 
   /* Get pools' reward */
+
+  /* Get pool's targets */
+
+  /**
+   * @async
+   * @function getPoolTargets
+   * @param {string} slug - Pool's slug
+   * @return {Promise<YieldPoolTarget[]>} List of pool's target
+   * */
+  public async getPoolTargets (slug: string): Promise<YieldPoolTarget[]> {
+    await this.state.eventService.waitChainReady;
+    this.initHandlers();
+
+    const handler = this.handlers[slug];
+
+    if (handler) {
+      return await handler.getPoolTargets();
+    } else {
+      return [];
+    }
+  }
+
+  /* Get pool's targets */
 }

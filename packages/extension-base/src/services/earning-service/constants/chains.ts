@@ -11,5 +11,6 @@ export const _STAKING_CHAIN_GROUP = {
   bifrost: ['bifrost', 'bifrost_testnet'],
   aleph: ['aleph', 'alephTest'], // A0 has distinct tokenomics
   ternoa: ['ternoa', 'ternoa_alphanet'],
-  liquidStaking: ['bifrost_dot', 'acala', 'parallel']
+  liquidStaking: ['bifrost_dot', 'acala', 'parallel'],
+  lending: ['interlay']
 };

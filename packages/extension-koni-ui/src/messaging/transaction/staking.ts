@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, NominationPoolInfo, NominatorMetadata, RequestBondingSubmit, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, StakingJson, StakingRewardJson, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, RequestBondingSubmit, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, StakingJson, StakingRewardJson, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 
 import { sendMessage } from '../base';
+import { NominationPoolInfo } from '@subwallet/extension-base/types';
 
 export async function submitPoolBonding (request: RequestStakePoolingBonding): Promise<SWTransactionResponse> {
   return sendMessage('pri(bonding.nominationPool.submitBonding)', request);

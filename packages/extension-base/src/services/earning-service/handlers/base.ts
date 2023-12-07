@@ -3,10 +3,10 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ChainStakingMetadata, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestYieldStepSubmit, StakeCancelWithdrawalParams, StakeClaimRewardParams, StakeWithdrawalParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnbondingSubmitParams, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, OptimalYieldPath, RequestYieldStepSubmit, StakeCancelWithdrawalParams, StakeClaimRewardParams, StakeWithdrawalParams, UnbondingSubmitParams, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { EarningRewardItem, HandleYieldStepData, YieldPoolGroup, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, HandleYieldStepData, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldPoolTarget, YieldPoolGroup, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -77,6 +77,8 @@ export default abstract class BasePoolHandler {
   abstract subscribePoolPosition (useAddresses: string[], callback: (rs: YieldPositionInfo) => void): Promise<VoidFunction>;
   /** Get pool reward */
   abstract getPoolReward (useAddresses: string[], callback: (rs: EarningRewardItem) => void): Promise<VoidFunction>; // TODO: Change callback
+  /** Get pool target */
+  abstract getPoolTargets (): Promise<YieldPoolTarget[]>;
 
   /* Subscribe data */
 
@@ -88,13 +90,12 @@ export default abstract class BasePoolHandler {
   abstract validateYieldJoin (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data?: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool): Promise<TransactionError[]>
   /** Create `transaction` to join the pool step-by-step */
   abstract handleYieldJoin (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData>;
-
   /* Join action */
 
   /* Join action */
 
   /** Validate param to leave the pool */
-  abstract validateYieldLeave (chainInfo: _ChainInfo, amount: string, selectedValidators: ValidatorInfo[], address: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): Promise<TransactionError[]>
+  abstract validateYieldLeave (amount: string, address: string, selectedValidators: ValidatorInfo[], chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): Promise<TransactionError[]>
   /** Create `transaction` to leave the pool */
   abstract handleYieldLeave (params: UnbondingSubmitParams): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig>;
 

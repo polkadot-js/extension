@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { NominationPoolInfo, OptimalYieldPathRequest, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestUnbondingSubmit, RequestYieldFastWithdrawal, RequestYieldStepSubmit, ValidateYieldProcessParams, ValidatorInfo, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestUnbondingSubmit, RequestYieldFastWithdrawal, RequestYieldStepSubmit, ValidateYieldProcessParams, ValidatorInfo, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 
 import { sendMessage } from '../base';
+import { NominationPoolInfo } from '@subwallet/extension-base/types';
+import { OptimalYieldPathRequest } from '@subwallet/extension-base/types/yield/actions/join';
 
 export async function subscribeYieldPoolInfo (callback: (data: YieldPoolInfo[]) => void): Promise<YieldPoolInfo[]> {
   return sendMessage('pri(yield.subscribePoolInfo)', null, callback);

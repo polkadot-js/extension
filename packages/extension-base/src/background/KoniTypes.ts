@@ -10,7 +10,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BuyServiceInfo, BuyTokenInfo, EarningStatus, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft, UnstakingStatus, YieldPoolType } from '@subwallet/extension-base/types';
+import { BuyServiceInfo, BuyTokenInfo, EarningStatus, NominationPoolInfo, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, YieldPoolType } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -26,6 +26,7 @@ import { HexString } from '@polkadot/util/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
+import { OptimalYieldPathRequest } from '@subwallet/extension-base/types/yield/actions/join';
 
 export enum RuntimeEnvironment {
   Web = 'Web',
@@ -1575,25 +1576,6 @@ export interface NominationInfo {
   status: EarningStatus;
 }
 
-export interface PalletNominationPoolsBondedPoolInner {
-  points: number,
-  state: 'Open' | 'Destroying' | 'Locked',
-  memberCounter: number,
-  roles: {
-    depositor: string,
-    root: string,
-    nominator: string,
-    bouncer: string
-  }
-}
-
-export interface NominationPoolInfo extends Pick<PalletNominationPoolsBondedPoolInner, 'roles' | 'memberCounter' | 'state'> {
-  id: number,
-  address: string,
-  name?: string,
-  bondedAmount: string
-}
-
 export interface UnstakingInfo {
   chain: string;
   status: UnstakingStatus;
@@ -1602,6 +1584,7 @@ export interface UnstakingInfo {
   validatorAddress?: string; // might unstake from a validator or not
 }
 
+// Migrated
 export interface NominatorMetadata {
   chain: string,
   type: StakingType,
@@ -1614,6 +1597,7 @@ export interface NominatorMetadata {
   isBondedBefore?: boolean
 }
 
+// Migrated
 export interface ValidatorInfo {
   address: string;
   chain: string;
@@ -2158,12 +2142,7 @@ export interface YieldPositionStats {
   rewards: YieldTokenBaseInfo[]
 }
 
-export interface OptimalYieldPathRequest {
-  address: string,
-  amount: string,
-  poolInfo: YieldPoolInfo
-}
-
+// Migrated
 export interface OptimalYieldPathParams {
   address: string,
   amount: string,
@@ -2183,6 +2162,7 @@ export interface YieldTokenBaseInfo {
   amount?: string,
 }
 
+// Migrated
 export enum YieldStepType {
   DEFAULT = 'DEFAULT',
   XCM = 'XCM',
@@ -2255,6 +2235,7 @@ export interface YieldAssetEarningStats {
   exchangeRate?: number // input token amount = reward token amount * exchange rate
 }
 
+// Migrated
 export interface YieldPoolStats {
   minJoinPool: string,
   minWithdrawal: string,
@@ -2269,6 +2250,7 @@ export interface YieldPoolStats {
   tvl?: string // in token
 }
 
+// Migrated
 export interface HandleYieldStepParams extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
@@ -2292,28 +2274,6 @@ export interface RequestYieldFastWithdrawal extends BaseRequestSign {
   yieldPoolInfo: YieldPoolInfo;
   yieldPositionInfo: YieldPositionInfo;
   amount: string;
-}
-
-export type SubmitYieldStepData = { // TODO
-  slug: string,
-  exchangeRate: number, // reward token amount = input token amount * exchange rate
-  inputTokenSlug: string,
-  derivativeTokenSlug?: string,
-  rewardTokenSlug: string,
-  amount: string,
-  feeTokenSlug: string
-};
-
-export interface SubmitJoinNativeStaking {
-  amount: string,
-  selectedValidators: ValidatorInfo[],
-  nominatorMetadata?: NominatorMetadata
-}
-
-export interface SubmitJoinNominationPool {
-  amount: string,
-  selectedPool: NominationPoolInfo,
-  nominatorMetadata?: NominatorMetadata
 }
 
 /* Campaign */

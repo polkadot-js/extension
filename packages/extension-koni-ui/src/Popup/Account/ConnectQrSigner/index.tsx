@@ -41,11 +41,6 @@ interface Props extends ThemeProps {
   logoUrl: string;
 }
 
-interface LinkUrlProps {
-  url: string;
-  content: string;
-}
-
 const modalId = 'attach-qr-signer-scanner-modal';
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -106,21 +101,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { onClose, onError, onSuccess, openCamera } = useScanAccountQr(modalId, qrSignerScan, setValidateState, onSubmit);
 
-  const LinkUrl: React.FC<LinkUrlProps> = (props: LinkUrlProps) => {
-    if (props.url) {
-      return (
-        <a
-          href={props.url}
-          target='__blank'
-        >
-          {props.content}
-        </a>
-      );
-    } else {
-      return <span>{props.content}</span>;
-    }
-  };
-
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
@@ -167,9 +147,9 @@ const Component: React.FC<Props> = (props: Props) => {
             <Trans
               components={{
                 highlight: (
-                  <LinkUrl
-                    content={t('this instruction')}
-                    url={instructionUrl}
+                  <a
+                    className='link'
+                    href={instructionUrl}
                   />
                 )
               }}

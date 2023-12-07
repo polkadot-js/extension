@@ -294,7 +294,7 @@ function Component ({ className, request }: Props) {
 }
 
 const ConnectWalletConnectConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({
-  '--content-gap': token.size,
+  '--content-gap': `${token.size}px`,
 
   '.account-list-title': {
     fontSize: token.fontSizeHeading6,

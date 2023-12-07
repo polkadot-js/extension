@@ -344,7 +344,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--list-gap': token.sizeXS,
+    '--list-gap': `${token.sizeXS}px`,
 
     '.ant-sw-screen-layout-body': {
       overflow: 'hidden'

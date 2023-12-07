@@ -93,7 +93,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const TransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--content-gap': 0,
+    '--content-gap': '0px',
     marginTop: token.marginXS,
 
     '.-to-right': {

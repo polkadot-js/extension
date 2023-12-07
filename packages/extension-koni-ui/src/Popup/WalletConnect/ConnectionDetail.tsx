@@ -290,7 +290,7 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
     '.body-container': {
       padding: token.padding
     },
-    '--row-gap': token.sizeXS,
+    '--row-gap': `${token.sizeXS}px`,
 
     '.dapp-info-container': {
       '.__col.-to-right': {
@@ -309,8 +309,8 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
         alignItems: 'center',
 
         '.dapp-info-img': {
-          '--img-height': token.sizeLG,
-          '--img-width': token.sizeLG
+          '--img-height': `${token.sizeLG}px`,
+          '--img-width': `${token.sizeLG}px`
         },
 
         '.dapp-info-domain': {

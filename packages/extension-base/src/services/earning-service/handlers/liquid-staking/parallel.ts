@@ -1,11 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { OptimalYieldPath, OptimalYieldPathParams } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { BasicTxErrorType, ExtrinsicType, RequestYieldStepSubmit } from '@subwallet/extension-base/background/KoniTypes';
 import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
+import { convertDerivativeToOriginToken } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
-import { EarningStatus, LiquidYieldPoolInfo, YieldPoolGroup, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldStepData, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -19,11 +22,12 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
   protected readonly description: string;
   protected readonly group: YieldPoolGroup;
   protected readonly name: string;
-  protected readonly altInputAssets: string[] = ['polkadot-NATIVE-DOT'];
+  protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['parallel-LOCAL-sDOT'];
-  protected readonly inputAssets: string[] = ['parallel-LOCAL-DOT'];
+  protected readonly inputAsset: string = 'parallel-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['parallel-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['parallel-NATIVE-PARA'];
+  protected override readonly minAmountPercent = 0.97;
   public slug: string;
 
   constructor (state: KoniState, chain: string) {
@@ -78,8 +82,8 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
     const apy = (exchangeRate / beginExchangeRate) ** (365 * 24 * 60 * 60000 / (currentTimestamp - beginTimestamp)) - 1;
 
     return {
-      ...this.defaultInfo,
-
+      ...this.extraInfo,
+      type: this.type,
       metadata: {
         isAvailable: true,
         allowCancelUnstaking: false,
@@ -133,7 +137,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
         const addressBalance = bdata && bdata.balance ? new BN(String(bdata?.balance).replaceAll(',', '') || '0') : BN_ZERO;
 
         const result: YieldPositionInfo = {
-          ...super.defaultInfo,
+          ...this.defaultInfo,
           type: YieldPoolType.LIQUID_STAKING,
           address,
           balance: [
@@ -160,7 +164,67 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
 
   /* Subscribe pool position */
 
-  generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
-    throw new Error('Need handle');
+  /* Join pool action */
+
+  get submitJoinStepInfo (): BaseYieldStepDetail {
+    return {
+      name: 'Mint sDOT',
+      type: YieldStepType.MINT_SDOT
+    };
   }
+
+  async getSubmitStepFee (params: OptimalYieldPathParams): Promise<YieldTokenBaseInfo> {
+    const poolOriginSubstrateApi = await this.substrateApi.isReady;
+    const defaultFeeTokenSlug = this.feeAssets[0];
+
+    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.liquidStaking.stake(params.amount).paymentInfo(fakeAddress);
+    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+    return {
+      amount: mintFeeInfo.partialFee.toString(),
+      slug: defaultFeeTokenSlug
+    };
+  }
+
+  async handleSubmitStep (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
+    const inputData = requestData.data as SubmitYieldStepData;
+    const substrateApi = await this.substrateApi.isReady;
+    const extrinsic = substrateApi.api.tx.liquidStaking.stake(inputData.amount);
+
+    return {
+      txChain: this.chain,
+      extrinsicType: ExtrinsicType.MINT_SDOT,
+      extrinsic,
+      txData: requestData,
+      transferNativeAmount: '0'
+    };
+  }
+
+  /* Join pool action */
+
+  /* Leave pool action */
+
+  async handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+    const substrateApi = await this.substrateApi.isReady;
+    // @ts-ignore
+    const yieldPositionInfo = await this.getPoolPosition(address);
+    const poolInfo = await this.getPoolInfo();
+    const originTokenSlug = this.inputAsset;
+    const derivativeTokenSlug = this.derivativeAssets[0];
+    const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
+    const originTokenInfo = this.state.getAssetBySlug(originTokenSlug);
+
+    if (!yieldPositionInfo || !poolInfo) {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INVALID_PARAMS));
+    }
+
+    const formattedMinAmount = convertDerivativeToOriginToken(amount, poolInfo, derivativeTokenInfo, originTokenInfo);
+    const weightedMinAmount = Math.floor(this.minAmountPercent * formattedMinAmount);
+
+    const extrinsic = substrateApi.api.tx.ammRoute.swapExactTokensForTokens(['1001', '101'], amount, weightedMinAmount);
+
+    return [ExtrinsicType.REDEEM_SDOT, extrinsic];
+  }
+
+  /* Leave pool action */
 }

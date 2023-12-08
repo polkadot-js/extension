@@ -336,6 +336,8 @@ export default class DatabaseService {
     return this.stores.mantaPay.getFirstConfig(chain);
   }
 
+  /* Earning */
+
   async updateYieldPoolStore (data: YieldPoolInfo) {
     await this.stores.yieldPoolInfo.upsert(data);
   }
@@ -350,6 +352,14 @@ export default class DatabaseService {
 
   async getYieldPoolStakingInfo (chain: string, poolType: YieldPoolType) {
     return this.stores.yieldPoolInfo.getByChainAndType(chain, poolType);
+  }
+
+  async getYieldPool (slug: string) {
+    return this.stores.yieldPoolInfo.getBySlug(slug);
+  }
+
+  async getYieldPositionByAddressAndSlug (address: string, slug: string) {
+    return this.stores.yieldPosition.getByAddressAndSlug(address, slug);
   }
 
   subscribeYieldPoolInfo (chains: string[], callback: (data: YieldPoolInfo[]) => void) {

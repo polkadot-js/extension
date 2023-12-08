@@ -1,10 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { OptimalYieldPath, OptimalYieldPathParams, TokenBalanceRaw } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { BasicTxErrorType, ExtrinsicType, RequestYieldStepSubmit, TokenBalanceRaw } from '@subwallet/extension-base/background/KoniTypes';
+import { convertDerivativeToOriginToken } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { EarningStatus, LiquidYieldPoolInfo, YieldPoolGroup, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldStepData, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import fetch from 'cross-fetch';
 
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -31,11 +34,12 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
   protected readonly description: string;
   protected readonly group: YieldPoolGroup;
   protected readonly name: string;
-  protected readonly altInputAssets: string[] = ['polkadot-NATIVE-DOT'];
+  protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['acala-LOCAL-LDOT'];
-  protected readonly inputAssets: string[] = ['acala-LOCAL-DOT'];
+  protected readonly inputAsset: string = 'acala-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['acala-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['acala-NATIVE-ACA', 'acala-LOCAL-DOT'];
+  protected override readonly minAmountPercent = 0.98;
   public slug: string;
 
   constructor (state: KoniState, chain: string) {
@@ -89,8 +93,8 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     const totalStakingBonded = new BN(_totalStakingBonded.toString());
 
     return {
-      ...this.defaultInfo,
-
+      ...this.extraInfo,
+      type: this.type,
       metadata: {
         isAvailable: true,
         allowCancelUnstaking: false,
@@ -140,7 +144,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
         const activeBalance = balanceItem.free || BN_ZERO;
 
         const result: YieldPositionInfo = {
-          ...this.defaultBaseInfo,
+          ...this.defaultInfo,
           type: YieldPoolType.LIQUID_STAKING,
           address,
           balance: [
@@ -167,7 +171,82 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
 
   /* Subscribe pool position */
 
-  generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
-    throw new Error('Need handle');
+  /* Join pool action */
+
+  get submitJoinStepInfo (): BaseYieldStepDetail {
+    return {
+      name: 'Mint LDOT',
+      type: YieldStepType.MINT_LDOT
+    };
   }
+
+  async getSubmitStepFee (params: OptimalYieldPathParams): Promise<YieldTokenBaseInfo> {
+    const poolOriginSubstrateApi = await this.substrateApi.isReady;
+    const defaultFeeTokenSlug = this.feeAssets[0];
+
+    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.homa.mint(params.amount).paymentInfo(fakeAddress);
+    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+    return {
+      amount: mintFeeInfo.partialFee.toString(),
+      slug: defaultFeeTokenSlug
+    };
+  }
+
+  async handleSubmitStep (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
+    const inputData = requestData.data as SubmitYieldStepData;
+    const substrateApi = await this.substrateApi.isReady;
+    const extrinsic = substrateApi.api.tx.homa.mint(inputData.amount);
+
+    return {
+      txChain: this.chain,
+      extrinsicType: ExtrinsicType.MINT_LDOT,
+      extrinsic,
+      txData: requestData,
+      transferNativeAmount: '0'
+    };
+  }
+
+  /* Join pool action */
+
+  /* Leave pool action */
+
+  async handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+    const substrateApi = await this.substrateApi.isReady;
+    // @ts-ignore
+    const yieldPositionInfo = await this.getPoolPosition(address);
+    const poolInfo = await this.getPoolInfo();
+    const originTokenSlug = this.inputAsset;
+    const derivativeTokenSlug = this.derivativeAssets[0];
+    const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
+    const originTokenInfo = this.state.getAssetBySlug(originTokenSlug);
+
+    if (!yieldPositionInfo || !poolInfo) {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INVALID_PARAMS));
+    }
+
+    const formattedMinAmount = convertDerivativeToOriginToken(amount, poolInfo, derivativeTokenInfo, originTokenInfo);
+    const weightedMinAmount = Math.floor(this.minAmountPercent * formattedMinAmount);
+
+    const extrinsic = substrateApi.api.tx.aggregatedDex.swapWithExactSupply(
+      // Swap path
+      [
+        {
+          Taiga: [
+            0, /* pool id */
+            1, /* supply asset */
+            0 /* target asset */
+          ]
+        }
+      ],
+      // Supply amount
+      amount,
+      // Min target amount
+      weightedMinAmount // should always set a min target to prevent unexpected result
+    );
+
+    return [ExtrinsicType.REDEEM_QDOT, extrinsic];
+  }
+
+  /* Leave pool action */
 }

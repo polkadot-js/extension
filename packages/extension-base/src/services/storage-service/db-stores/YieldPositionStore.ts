@@ -51,6 +51,10 @@ export default class YieldPositionStore extends BaseStore<YieldPositionInfo> {
     return this.table.where('address').anyOfIgnoreCase(addresses).filter((item) => chains.includes(item.chain)).toArray();
   }
 
+  getByAddressAndSlug (address: string, slug: string) {
+    return this.table.get({ address, slug });
+  }
+
   subscribeYieldPositions (addresses: string[]) {
     return liveQuery(
       () => this.getByAddress(addresses)

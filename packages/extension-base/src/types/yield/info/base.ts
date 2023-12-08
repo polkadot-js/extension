@@ -40,3 +40,14 @@ export enum YieldPoolGroup {
   OTHER = 'OTHER'
 }
 
+/**
+ * @enum {number}
+ * @description Time to calculate profit
+ * */
+export enum YieldCompoundingPeriod {
+  DAILY = 1,
+  WEEKLY = 7,
+  MONTHLY = 30,
+  YEARLY = 365
+}
+

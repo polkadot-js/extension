@@ -6,12 +6,18 @@ import { ChainStakingMetadata, NominatorMetadata, OptimalYieldPath, OptimalYield
 import { getPoolingBondingExtrinsic, getRelayBondingExtrinsic, PalletStakingStakingLedger, subscribeRelayChainNominatorMetadata, subscribeRelayChainPoolMemberMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { calculateChainStakedReturn, calculateInflation, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
-import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { DEFAULT_YIELD_FIRST_STEP, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningStatus, SubmitJoinNativeStaking, SubmitJoinNominationPool, YieldPoolType } from '@subwallet/extension-base/types';
+import { _STAKING_CHAIN_GROUP, fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
+import {
+  EarningStatus,
+  RuntimeDispatchInfo,
+  SubmitJoinNativeStaking,
+  SubmitJoinNominationPool,
+  YieldPoolType
+} from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Codec } from '@polkadot/types/types';

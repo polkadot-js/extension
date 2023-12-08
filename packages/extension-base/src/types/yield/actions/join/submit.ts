@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BaseRequestSign, ExtrinsicType, InternalRequestSign } from '@subwallet/extension-base/background/KoniTypes';
-import { TransactionConfig } from 'web3-core';
 
-import { SubmittableExtrinsic } from '@polkadot/api/types';
-
+import { TransactionData } from '../../../transaction';
 import { NominationPoolInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo } from '../../info';
 import { OptimalYieldPath } from './step';
 
@@ -13,7 +11,7 @@ import { OptimalYieldPath } from './step';
 export interface HandleYieldStepData {
   txChain: string,
   extrinsicType: ExtrinsicType,
-  extrinsic: SubmittableExtrinsic<'promise'> | TransactionConfig,
+  extrinsic: TransactionData,
   txData: any,
   transferNativeAmount: string
 }
@@ -36,8 +34,7 @@ export interface SubmitJoinNativeStaking {
 
 export interface SubmitJoinNominationPool {
   amount: string,
-  selectedPool: NominationPoolInfo,
-  nominatorMetadata?: YieldPositionInfo
+  selectedPool: NominationPoolInfo
 }
 
 export type SubmitYieldJoinData = SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool;
@@ -50,8 +47,10 @@ export interface HandleYieldStepParams extends BaseRequestSign {
   currentStep: number;
 }
 
+export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
+
 export interface StakePoolingBondingParams extends BaseRequestSign {
-  nominatorMetadata?: YieldPositionInfo,
+  poolPosition?: YieldPositionInfo,
   chain: string,
   selectedPool: NominationPoolInfo,
   amount: string,

@@ -2,18 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { APIItemState, BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, NominationInfo, NominatorMetadata, RequestYieldStepSubmit, StakeCancelWithdrawalParams, StakeClaimRewardParams, StakeWithdrawalParams, StakingTxErrorType, UnbondingSubmitParams, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BasicTxErrorType, ExtrinsicType, NominationInfo, RequestYieldStepSubmit, StakeCancelWithdrawalParams, StakingTxErrorType, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, getExistUnstakeErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parsePoolStashAddress, transformPoolName } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, RequestStakePoolingBonding, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnstakingStatus, ValidatorInfo, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
+import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, RequestStakePoolingBonding, RuntimeDispatchInfo, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
-import { TransactionConfig } from 'web3-core';
+import { t } from 'i18next';
 
-import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { UnsubscribePromise } from '@polkadot/api-base/types/base';
 import { Bytes } from '@polkadot/types';
 import { Codec } from '@polkadot/types/types';
@@ -421,10 +421,18 @@ export default class NominationPoolHandler extends BasePoolHandler {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
 
+    const _poolInfo = await this.getPoolInfo();
+
+    if (!_poolInfo) {
+      return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const poolInfo = _poolInfo as NormalYieldPoolInfo;
     const chainInfo = this.chainInfo;
     const inputData = data as SubmitJoinNominationPool;
-    const poolInfo = params.poolInfo as NormalYieldPoolInfo;
-    const { amount, nominatorMetadata, selectedPool } = inputData;
+    const { amount, selectedPool } = inputData;
+
+    const positionInfo = await this.getPoolPosition(address);
 
     // cannot stake when unstake all
     // amount >= min stake
@@ -438,12 +446,12 @@ export default class NominationPoolHandler extends BasePoolHandler {
       errors.push(new TransactionError(StakingTxErrorType.INACTIVE_NOMINATION_POOL));
     }
 
-    if (nominatorMetadata) {
-      const bnCurrentActiveStake = new BN(nominatorMetadata.activeStake);
+    if (positionInfo) {
+      const bnCurrentActiveStake = new BN(positionInfo.activeStake);
 
       bnTotalStake = bnTotalStake.add(bnCurrentActiveStake);
 
-      if (nominatorMetadata.unstakings.length > 0 && bnCurrentActiveStake.isZero()) {
+      if (positionInfo.unstakings.length > 0 && bnCurrentActiveStake.isZero()) {
         errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST, existUnstakeErrorMessage));
       }
     }
@@ -455,11 +463,11 @@ export default class NominationPoolHandler extends BasePoolHandler {
     return errors;
   }
 
-  async createJoinExtrinsic (data: SubmitJoinNominationPool): Promise<SubmittableExtrinsic<'promise'>> {
+  async createJoinExtrinsic (data: SubmitJoinNominationPool, positionInfo?: YieldPositionInfo): Promise<TransactionData> {
+    const { amount, selectedPool: { id: selectedPoolId } } = data;
+
     const chainApi = await this.substrateApi.isReady;
-    const bnActiveStake = new BN(data.nominatorMetadata?.activeStake || '0');
-    const amount = data.amount;
-    const selectedPoolId = data.selectedPool.id;
+    const bnActiveStake = new BN(positionInfo?.activeStake || '0');
 
     if (bnActiveStake.gt(BN_ZERO)) { // already joined a pool
       return chainApi.api.tx.nominationPools.bondExtra({ FreeBalance: amount });
@@ -470,10 +478,11 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
   async handleYieldJoin (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
     const data = requestData.data as SubmitJoinNominationPool;
+    const positionInfo = await this.getPoolPosition(address);
     const extrinsic = await this.createJoinExtrinsic(data);
 
     const joinPoolData: RequestStakePoolingBonding = {
-      nominatorMetadata: data.nominatorMetadata,
+      poolPosition: positionInfo,
       chain: this.chain,
       selectedPool: data.selectedPool,
       amount: data.amount,
@@ -493,28 +502,74 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
   /* Leave pool action */
 
-  validateYieldLeave (amount: string, address: string, selectedValidators: ValidatorInfo[], chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): Promise<TransactionError[]> {
-    return Promise.resolve([]);
+  async validateYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<TransactionError[]> {
+    const errors: TransactionError[] = [];
+
+    const poolInfo = await this.getPoolInfo();
+    const poolPosition = await this.getPoolPosition(address);
+
+    if (!poolInfo || !poolPosition) {
+      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+    }
+
+    const bnActiveStake = new BN(poolPosition.activeStake);
+    const bnRemainingStake = bnActiveStake.sub(new BN(amount));
+    const minStake = new BN(poolInfo.metadata.minJoinPool || '0');
+    const maxUnstake = poolInfo.metadata.maxWithdrawalRequestPerFarmer;
+
+    if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
+      errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE));
+    }
+
+    if (poolPosition.unstakings.length > maxUnstake) {
+      errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_UNSTAKING, t('You cannot unstake more than {{number}} times', { replace: { number: maxUnstake } })));
+    }
+
+    return Promise.resolve(errors);
   }
 
-  handleYieldLeave (params: UnbondingSubmitParams): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
-    return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+  async handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+    const chainApi = await this.substrateApi.isReady;
+    const poolPosition = await this.getPoolPosition(address);
+
+    if (!poolPosition) {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+    }
+
+    const extrinsic = chainApi.api.tx.nominationPools.unbond({ Id: poolPosition.address }, amount);
+
+    return [ExtrinsicType.STAKING_LEAVE_POOL, extrinsic];
   }
 
   /* Leave pool action */
 
   /* Other action */
 
-  handleYieldCancelUnstake (params: StakeCancelWithdrawalParams): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
+  handleYieldCancelUnstake (params: StakeCancelWithdrawalParams): Promise<TransactionData> {
     return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
   }
 
-  handleYieldClaimReward (params: StakeClaimRewardParams): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
-    return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+  async handleYieldClaimReward (address: string, bondReward?: boolean): Promise<TransactionData> {
+    const chainApi = await this.substrateApi.isReady;
+
+    if (bondReward) {
+      return chainApi.api.tx.nominationPools.bondExtra('Rewards');
+    }
+
+    return chainApi.api.tx.nominationPools.claimPayout();
   }
 
-  handleYieldWithdraw (params: StakeWithdrawalParams): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
-    return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+  async handleYieldWithdraw (address: string, selectedTarget?: string): Promise<TransactionData> {
+    const chainApi = await this.substrateApi.isReady;
+
+    if (chainApi.api.tx.nominationPools.withdrawUnbonded.meta.args.length === 2) {
+      const _slashingSpans = (await chainApi.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
+      const slashingSpanCount = _slashingSpans !== null ? _slashingSpans.spanIndex as string : '0';
+
+      return chainApi.api.tx.nominationPools.withdrawUnbonded({ Id: address }, slashingSpanCount);
+    } else {
+      return chainApi.api.tx.nominationPools.withdrawUnbonded({ Id: address });
+    }
   }
 
   /* Other actions */

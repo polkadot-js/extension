@@ -3,13 +3,10 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ChainStakingMetadata, NominatorMetadata, OptimalYieldPath, RequestYieldStepSubmit, StakeCancelWithdrawalParams, StakeClaimRewardParams, StakeWithdrawalParams, UnbondingSubmitParams, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, OptimalYieldPath, RequestYieldStepSubmit, StakeCancelWithdrawalParams } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { EarningRewardItem, HandleYieldStepData, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldPoolTarget, YieldPoolGroup, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { TransactionConfig } from 'web3-core';
-
-import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { EarningRewardItem, HandleYieldStepData, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, TransactionData, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 
 /**
  * @class BasePoolHandler
@@ -69,6 +66,14 @@ export default abstract class BasePoolHandler {
     };
   }
 
+  public async getPoolInfo (): Promise<YieldPoolInfo | undefined> {
+    return this.state.dbService.getYieldPool(this.slug);
+  }
+
+  public async getPoolPosition (address: string): Promise<YieldPositionInfo | undefined> {
+    return this.state.dbService.getYieldPositionByAddressAndSlug(address, this.slug);
+  }
+
   /* Subscribe data */
 
   /** Subscribe pool info */
@@ -95,20 +100,20 @@ export default abstract class BasePoolHandler {
   /* Join action */
 
   /** Validate param to leave the pool */
-  abstract validateYieldLeave (amount: string, address: string, selectedValidators: ValidatorInfo[], chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): Promise<TransactionError[]>
+  abstract validateYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<TransactionError[]>
   /** Create `transaction` to leave the pool */
-  abstract handleYieldLeave (params: UnbondingSubmitParams): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig>;
+  abstract handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]>;
 
   /* Join action */
 
   /* Other actions */
 
   /** Create `transaction` to withdraw unstaked amount */
-  abstract handleYieldWithdraw (params: StakeWithdrawalParams): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig>;
+  abstract handleYieldWithdraw (address: string, selectedTarget?: string): Promise<TransactionData>;
   /** Create `transaction` to cancel unstake */
-  abstract handleYieldCancelUnstake (params: StakeCancelWithdrawalParams): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig>;
+  abstract handleYieldCancelUnstake (params: StakeCancelWithdrawalParams): Promise<TransactionData>;
   /** Create `transaction` to claim reward */
-  abstract handleYieldClaimReward (params: StakeClaimRewardParams): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig>;
+  abstract handleYieldClaimReward (address: string, bondReward?: boolean): Promise<TransactionData>;
 
   /* Other actions */
 }

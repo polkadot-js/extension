@@ -9,7 +9,7 @@ import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { getAcalaLiquidStakingDefaultUnstake, getAcalaLiquidStakingDefaultWithdraw, getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLcDOTLiquidStakingStats, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acala-liquid-staking';
 import { getBifrostLiquidStakingDefaultUnstake, getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingPosition, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrost-liquid-staking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
-import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { getInterlayLendingExtrinsic, getInterlayLendingPosition, getInterlayLendingRedeem, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlay-lending';
 import { subscribeMoonwellLendingStats } from '@subwallet/extension-base/koni/api/yield/moonwell-lending';
 import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/native-staking';
@@ -19,11 +19,10 @@ import { BalanceService } from '@subwallet/extension-base/services/balance-servi
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getTokenOnChainInfo, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { HandleYieldStepData, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldPoolType } from '@subwallet/extension-base/types';
+import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
+import { HandleYieldStepData, RuntimeDispatchInfo, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, TransactionData, YieldPoolType } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
-import { TransactionConfig } from 'web3-core';
 
-import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
 // only apply for DOT right now, will need to scale up
@@ -524,7 +523,7 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
   };
 }
 
-export async function handleYieldRedeem (params: OptimalYieldPathParams, address: string, amount: string, yieldPositionInfo: YieldPositionInfo): Promise<[ExtrinsicType, SubmittableExtrinsic<'promise'>]> {
+export async function handleYieldRedeem (params: OptimalYieldPathParams, address: string, amount: string, yieldPositionInfo: YieldPositionInfo): Promise<[ExtrinsicType, TransactionData]> {
   if (params.poolInfo.slug === 'DOT___acala_liquid_staking') {
     return getAcalaLiquidStakingRedeem(params, amount);
   } else if (params.poolInfo.slug === 'DOT___parallel_liquid_staking') {
@@ -536,7 +535,7 @@ export async function handleYieldRedeem (params: OptimalYieldPathParams, address
   return getBifrostLiquidStakingRedeem(params, amount);
 }
 
-export async function handleLiquidStakingDefaultUnstake (params: UnbondingSubmitParams, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
+export async function handleLiquidStakingDefaultUnstake (params: UnbondingSubmitParams, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>): Promise<TransactionData> {
   if (params.chain === 'acala') {
     return getAcalaLiquidStakingDefaultUnstake(params, substrateApiMap[params.chain]);
   } else if (params.chain === 'parallel') {
@@ -548,7 +547,7 @@ export async function handleLiquidStakingDefaultUnstake (params: UnbondingSubmit
   return getBifrostLiquidStakingDefaultUnstake(params, substrateApiMap[params.chain], poolInfo, assetInfoMap);
 }
 
-export async function handleLiquidStakingDefaultWithdraw (poolInfo: YieldPoolInfo, substrateApi: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, nominatorMetadata: NominatorMetadata, assetInfoMap: Record<string, _ChainAsset>): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
+export async function handleLiquidStakingDefaultWithdraw (poolInfo: YieldPoolInfo, substrateApi: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, nominatorMetadata: NominatorMetadata, assetInfoMap: Record<string, _ChainAsset>): Promise<TransactionData> {
   if (poolInfo.chain === 'parallel') {
     return getParallelLiquidStakingDefaultWithdraw(nominatorMetadata, substrateApi);
   } else if (poolInfo.chain === 'moonbeam' && poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {

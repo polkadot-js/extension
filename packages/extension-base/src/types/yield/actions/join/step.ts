@@ -3,6 +3,15 @@
 
 import { YieldPoolInfo } from '../../info';
 
+export interface RuntimeDispatchInfo {
+  weight: {
+    refTime: number,
+    proofSize: number
+  },
+  class: string,
+  partialFee: number
+}
+
 /**
  * @interface OptimalYieldPathRequest
  * @description Request to generate steps
@@ -18,10 +27,8 @@ export interface OptimalYieldPathRequest {
  * @description Params use on function to generate steps
  * */
 export interface OptimalYieldPathParams {
-  poolInfo: YieldPoolInfo,
   address: string,
-  amount: string,
-  hasPosition?: boolean
+  amount: string
 }
 
 /**
@@ -56,14 +63,22 @@ export enum YieldStepType {
 }
 
 /**
- * @interface YieldStepDetail
- * @description Detail of a step
+ * @interface BaseYieldStepDetail
+ * @description Base info of a step
  * */
-export interface YieldStepDetail {
-  id: number,
+export interface BaseYieldStepDetail {
   name: string,
   type: YieldStepType,
   metadata?: Record<string, unknown>; // for generating extrinsic
+}
+
+/**
+ * @interface YieldStepDetail
+ * @extends BaseYieldStepDetail
+ * @description Detail of a step
+ * */
+export interface YieldStepDetail extends BaseYieldStepDetail {
+  id: number,
 }
 
 /**

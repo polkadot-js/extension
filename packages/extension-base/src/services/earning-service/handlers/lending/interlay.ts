@@ -1,22 +1,25 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { OptimalYieldPath, OptimalYieldPathParams, TokenBalanceRaw } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { BasicTxErrorType, ExtrinsicType, RequestYieldStepSubmit, TokenBalanceRaw } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { EarningStatus, LendingYieldPoolInfo, YieldPoolGroup, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldStepData, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import BN from 'bn.js';
 
 import { BN_ZERO } from '@polkadot/util';
 
+import { fakeAddress } from '../../constants';
 import BaseLendingPoolHandler from './base';
 
 export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
   protected readonly description: string;
   protected readonly group: YieldPoolGroup;
   protected readonly name: string;
-  protected readonly altInputAssets: string[] = ['polkadot-NATIVE-DOT'];
+  protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['interlay-LOCAL-qDOT'];
-  protected readonly inputAssets: string[] = ['interlay-LOCAL-DOT'];
+  protected readonly inputAsset: string = 'interlay-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['interlay-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['interlay-NATIVE-INTR', 'interlay-LOCAL-DOT'];
   public slug: string;
@@ -37,7 +40,7 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
   async getPoolStat (): Promise<LendingYieldPoolInfo> {
     const substrateApi = await this.substrateApi.isReady;
 
-    const inputTokenSlug = this.inputAssets[0];
+    const inputTokenSlug = this.inputAsset[0];
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
 
     const _exchangeRate = await substrateApi.api.query.loans.exchangeRate(_getTokenOnChainInfo(inputTokenInfo));
@@ -46,7 +49,8 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     const decimals = 10 ** 18;
 
     return {
-      ...this.defaultInfo,
+      ...this.extraInfo,
+      type: this.type,
       metadata: {
         isAvailable: true,
         allowCancelUnstaking: false,
@@ -96,7 +100,7 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
         const totalBalance = balanceItem.free || BN_ZERO;
 
         const result: YieldPositionInfo = {
-          ...this.defaultBaseInfo,
+          ...this.defaultInfo,
           type: YieldPoolType.LENDING,
           address,
           balance: [
@@ -123,7 +127,72 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
 
   /* Subscribe pool position */
 
-  generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
-    throw new Error('Need handle');
+  /* Join pool action */
+
+  get submitJoinStepInfo (): BaseYieldStepDetail {
+    return {
+      name: 'Mint qDOT',
+      type: YieldStepType.MINT_QDOT
+    };
   }
+
+  async getSubmitStepFee (params: OptimalYieldPathParams): Promise<YieldTokenBaseInfo> {
+    const poolOriginSubstrateApi = await this.substrateApi.isReady;
+    const inputTokenSlug = this.inputAsset;
+    const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
+    const defaultFeeTokenSlug = this.feeAssets[0];
+
+    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.loans.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount).paymentInfo(fakeAddress);
+    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+    return {
+      amount: mintFeeInfo.partialFee.toString(),
+      slug: defaultFeeTokenSlug
+    };
+  }
+
+  async handleSubmitStep (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
+    const inputData = requestData.data as SubmitYieldStepData;
+    const substrateApi = await this.substrateApi.isReady;
+    const inputTokenSlug = this.inputAsset;
+    const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
+    const extrinsic = substrateApi.api.tx.loans.mint(_getTokenOnChainInfo(inputTokenInfo), inputData.amount);
+
+    return {
+      txChain: this.chain,
+      extrinsicType: ExtrinsicType.MINT_QDOT,
+      extrinsic,
+      txData: requestData,
+      transferNativeAmount: '0'
+    };
+  }
+
+  /* Join pool action */
+
+  /* Leave pool action */
+
+  async handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+    const substrateApi = await this.substrateApi.isReady;
+    // @ts-ignore
+    const inputTokenSlug = this.inputAsset;
+    const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
+    const yieldPositionInfo = await this.getPoolPosition(address);
+
+    if (!yieldPositionInfo) {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INVALID_PARAMS));
+    }
+
+    const bnAmount = new BN(amount);
+    const bnActiveBalance = new BN(yieldPositionInfo.balance[0].activeBalance);
+
+    const redeemAll = bnAmount.eq(bnActiveBalance);
+
+    const extrinsic = !redeemAll
+      ? substrateApi.api.tx.loans.redeem(_getTokenOnChainInfo(inputTokenInfo), amount)
+      : substrateApi.api.tx.loans.redeemAll(_getTokenOnChainInfo(inputTokenInfo));
+
+    return [ExtrinsicType.REDEEM_QDOT, extrinsic];
+  }
+
+  /* Leave pool action */
 }

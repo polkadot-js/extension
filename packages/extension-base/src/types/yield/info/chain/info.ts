@@ -142,31 +142,28 @@ export interface AbstractYieldPoolInfo {
 }
 
 /**
- * @interface LiquidYieldPoolInfo
+ * @interface SpecialYieldPoolInfo
  * @extends AbstractYieldPoolInfo
- * @prop {YieldPoolType.LIQUID_STAKING} type - Pool's type
  * @prop {string[]} derivativeAssets - Array of derivative tokens (slug)
- * @prop {string[]} inputAssets - Array of input tokens (slug)
+ * @prop {string} inputAsset - Input token (slug)
  * @prop {string[]} rewardAssets - Array of reward tokens (slug)
  * @prop {string[]} feeAssets - Array of fee tokens (slug)
- * @prop {string[]} [altInputAssets] - Array of alt input tokens (slug)
+ * @prop {string} [altInputAssets] - Alt input token (slug) - optional
  * */
-export interface LiquidYieldPoolInfo extends AbstractYieldPoolInfo {
-  type: YieldPoolType.LIQUID_STAKING
-
+export interface SpecialYieldPoolInfo extends AbstractYieldPoolInfo {
   /* Special info */
 
   /** Array of derivative tokens (slug) */
   derivativeAssets?: string[];
 
-  /** Array of input tokens (slug) */
-  inputAssets: string[]; // slug
+  /** Input token (slug) */
+  inputAsset: string; // slug
 
   /** Array of reward tokens (slug) */
   rewardAssets: string[]; // slug
 
-  /** Array of alt input tokens (slug) - optional */
-  altInputAssets?: string[]; // TODO
+  /** Alt input token (slug) - optional */
+  altInputAssets?: string; // TODO
 
   /** Array of fee tokens (slug) */
   feeAssets: string[],
@@ -175,45 +172,30 @@ export interface LiquidYieldPoolInfo extends AbstractYieldPoolInfo {
 }
 
 /**
- * @interface LendingYieldPoolInfo
- * @extends AbstractYieldPoolInfo
- * @prop {YieldPoolType.LENDING} type - Pool's type
- * @prop {string[]} derivativeAssets - Array of derivative tokens (slug)
- * @prop {string[]} inputAssets - Array of input tokens (slug)
- * @prop {string[]} rewardAssets - Array of reward tokens (slug)
- * @prop {string[]} feeAssets - Array of fee tokens (slug)
- * @prop {string[]} [altInputAssets] - Array of alt input tokens (slug)
+ * @interface LiquidYieldPoolInfo
+ * @extends SpecialYieldPoolInfo
+ * @prop {YieldPoolType.LIQUID_STAKING} type - Pool's type
  * */
-export interface LendingYieldPoolInfo extends AbstractYieldPoolInfo {
-  type: YieldPoolType.LENDING
+export interface LiquidYieldPoolInfo extends SpecialYieldPoolInfo {
+  type: YieldPoolType.LIQUID_STAKING;
+}
 
-  /* Special info */
-
-  /** Array of derivative tokens (slug) */
-  derivativeAssets?: string[];
-
-  /** Array of input tokens (slug) */
-  inputAssets: string[]; // slug
-
-  /** Array of reward tokens (slug) */
-  rewardAssets: string[]; // slug
-
-  /** Array of alt input tokens (slug) - optional */
-  altInputAssets?: string[]; // TODO
-
-  /** Array of fee tokens (slug) */
-  feeAssets: string[],
-
-  /* Special info */
+/**
+ * @interface LendingYieldPoolInfo
+ * @extends SpecialYieldPoolInfo
+ * @prop {YieldPoolType.LENDING} type - Pool's type
+ * */
+export interface LendingYieldPoolInfo extends SpecialYieldPoolInfo {
+  type: YieldPoolType.LENDING;
 }
 
 /**
  * @interface NormalYieldPoolInfo
  * @extends AbstractYieldPoolInfo
- * @prop {Exclude<YieldPoolType,YieldPoolType.LIQUID_STAKING>} type - Pool's type
+ * @prop {Exclude<YieldPoolType,YieldPoolType.LIQUID_STAKING|YieldPoolType.LENDING>} type - Pool's type
  * */
 export interface NormalYieldPoolInfo extends AbstractYieldPoolInfo {
-  type: Exclude<YieldPoolType, YieldPoolType.LIQUID_STAKING>;
+  type: Exclude<YieldPoolType, YieldPoolType.LIQUID_STAKING | YieldPoolType.LENDING>;
 }
 
 /**

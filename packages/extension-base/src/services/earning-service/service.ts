@@ -10,7 +10,7 @@ import AcalaLiquidStakingPoolHandler from '@subwallet/extension-base/services/ea
 import BifrostLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/bifrost';
 import ParallelLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/parallel';
 import NominationPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/nomination-pool';
-import { YieldPoolTarget, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 export default class EarningService {
@@ -69,8 +69,10 @@ export default class EarningService {
     }
   }
 
-  protected async getPoolHandler (slug: string): Promise<BasePoolHandler | null> {
+  protected getPoolHandler (slug: string): BasePoolHandler | undefined {
+    this.initHandlers();
 
+    return this.handlers[slug];
   }
 
   /* Subscribe pools' info */

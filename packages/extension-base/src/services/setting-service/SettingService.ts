@@ -3,6 +3,7 @@
 
 import { LanguageType, PassPhishing, RequestSettingsType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { LANGUAGE } from '@subwallet/extension-base/constants';
+import { SWStorage } from '@subwallet/extension-base/storage';
 import PassPhishingStore from '@subwallet/extension-base/stores/PassPhishingStore';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { Subject } from 'rxjs';
@@ -15,7 +16,7 @@ export default class SettingService {
   private readonly passPhishingStore = new PassPhishingStore();
 
   constructor () {
-    let old: LanguageType = localStorage.getItem(LANGUAGE) as LanguageType || 'en';
+    let old: LanguageType = SWStorage.instance.getItem(LANGUAGE) as LanguageType || 'en';
 
     const updateLanguage = ({ language }: UiSettings) => {
       if (language !== old) {

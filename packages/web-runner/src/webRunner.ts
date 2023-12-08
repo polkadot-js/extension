@@ -34,9 +34,6 @@ Promise.all([cryptoWaitReady(), checkRestore()])
     // Manual Init koniState
     koniState.init().catch((err) => console.warn(err));
 
-    // Wake web-runner up
-    koniState.wakeup().catch((err) => console.warn(err));
-
     responseMessage({ id: '0', response: { status: 'crypto_ready' } } as PageStatus);
 
     console.log('[Mobile] initialization completed');

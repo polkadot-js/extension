@@ -11,6 +11,6 @@ export async function importIndexedDB (request: string): Promise<boolean> {
   return sendMessage('pri(database.import)', request);
 }
 
-export async function checkIndexedMetadata (request: string): Promise<object> {
-  return sendMessage('pri(database.checkMetadata)', request);
+export async function getIndexedDBJson (): Promise<object> {
+  return sendMessage('pri(database.checkMetadata)', null);
 }

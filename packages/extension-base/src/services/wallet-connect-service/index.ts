@@ -5,6 +5,7 @@ import { formatJsonRpcError } from '@json-rpc-tools/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import Eip155RequestHandler from '@subwallet/extension-base/services/wallet-connect-service/handler/Eip155RequestHandler';
+import { SWStorage } from '@subwallet/extension-base/storage';
 import SignClient from '@walletconnect/sign-client';
 import { EngineTypes, SessionTypes, SignClientTypes } from '@walletconnect/types';
 import { getInternalError, getSdkError } from '@walletconnect/utils';
@@ -14,6 +15,8 @@ import PolkadotRequestHandler from './handler/PolkadotRequestHandler';
 import { ALL_WALLET_CONNECT_EVENT, DEFAULT_WALLET_CONNECT_OPTIONS, WALLET_CONNECT_SUPPORTED_METHODS } from './constants';
 import { convertConnectRequest, convertNotSupportRequest, isSupportWalletConnectChain } from './helpers';
 import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, ResultApproveWalletConnectSession, WalletConnectSigningMethod } from './types';
+
+const storage = SWStorage.instance;
 
 export default class WalletConnectService {
   readonly #requestService: RequestService;
@@ -37,9 +40,9 @@ export default class WalletConnectService {
   }
 
   get #haveData (): boolean {
-    const sessionStorage = localStorage.getItem('wc@2:client:0.3//session');
-    const pairingStorage = localStorage.getItem('wc@2:core:0.3//pairing');
-    const subscriptionStorage = localStorage.getItem('wc@2:core:0.3//subscription');
+    const sessionStorage = storage.getItem('wc@2:client:0.3//session');
+    const pairingStorage = storage.getItem('wc@2:core:0.3//pairing');
+    const subscriptionStorage = storage.getItem('wc@2:core:0.3//subscription');
 
     const sessions: Array<unknown> = sessionStorage ? JSON.parse(sessionStorage) as Array<unknown> : [];
     const pairings: Array<unknown> = pairingStorage ? JSON.parse(pairingStorage) as Array<unknown> : [];

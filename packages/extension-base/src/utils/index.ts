@@ -413,6 +413,15 @@ export const swParseIPFSUrl = (input: string): string | undefined => {
   return SUBWALLET_IPFS + input.split('ipfs://ipfs/')[1]; // starts with ipfs://ipfs/
 };
 
+export function wait (milliseconds: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, milliseconds);
+  });
+}
+
+export * from './account';
 export * from './array';
 export * from './environment';
 export * from './number';

@@ -17,8 +17,6 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
 interface Props extends ThemeProps {
   title?: string;
   children?: React.ReactElement;
@@ -153,9 +151,7 @@ function Component ({ children, className, modalContent, modalId }: Props) {
   // Navigate to finish page
   const onDone = useCallback(
     (extrinsicHash: string) => {
-      const chainType = isEthereumAddress(from) ? 'ethereum' : 'substrate';
-
-      navigate(`/transaction-done/${chainType}/${chain}/${extrinsicHash}`, { replace: true });
+      navigate(`/transaction-done/${from}/${chain}/${extrinsicHash}`, { replace: true });
     },
     [from, chain, navigate]
   );

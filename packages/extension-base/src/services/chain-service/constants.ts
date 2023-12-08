@@ -34,7 +34,8 @@ export const _BALANCE_CHAIN_GROUP = {
   equilibrium_parachain: ['equilibrium_parachain'],
   bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude'],
   statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari'],
-  kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'] // perhaps there are some runtime updates
+  kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'], // perhaps there are some runtime updates
+  centrifuge: ['centrifuge']
 };
 
 export const _BALANCE_TOKEN_GROUP = {
@@ -56,12 +57,12 @@ export const _NFT_CHAIN_GROUP = {
 // Staking--------------------------------------------------------------------------------------------------------------
 
 export const _STAKING_CHAIN_GROUP = {
-  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend', 'kate', 'edgeware', 'creditcoin', 'vara_network'],
+  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend', 'kate', 'edgeware', 'creditcoin', 'vara_network', 'goldberg_testnet'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
   astar: ['astar', 'shiden', 'shibuya'],
   amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine', 'pendulum'], // amplitude and kilt only share some common logic
   kilt: ['kilt', 'kilt_peregrine'],
-  nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph', 'kate', 'vara_network'],
+  nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph', 'kate', 'vara_network', 'goldberg_testnet'],
   bifrost: ['bifrost', 'bifrost_testnet'],
   aleph: ['aleph', 'alephTest'], // A0 has distinct tokenomics
   ternoa: ['ternoa', 'ternoa_alphanet']
@@ -96,7 +97,8 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   edgeware: 6,
   kate: 6,
   creditcoin: 24,
-  vara_network: 12
+  vara_network: 12,
+  goldberg_testnet: 24
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
@@ -194,7 +196,8 @@ export const _TRANSFER_CHAIN_GROUP = {
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
   avail: ['kate', 'goldberg_testnet'],
-  pendulum: ['pendulum', 'amplitude', 'amplitude_test']
+  pendulum: ['pendulum', 'amplitude', 'amplitude_test'],
+  centrifuge: ['centrifuge']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {
@@ -230,8 +233,8 @@ export const _DEFAULT_ACTIVE_CHAINS = [
   'interlay'
 ];
 
-export const EVM_PASS_CONNECT_STATUS = {
-  acala: ['acala_evm', 'karura_evm']
+export const EVM_PASS_CONNECT_STATUS: Record<string, string[]> = {
+  arbitrum_one: ['*']
 };
 
 export const EVM_REFORMAT_DECIMALS = {

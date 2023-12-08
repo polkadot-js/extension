@@ -63,10 +63,10 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 
   const onDoneTransaction = useCallback((extrinsicHash: string) => {
-    if (chainStakingMetadata) {
-      navigate(`/transaction-done/substrate/${chainStakingMetadata.chain}/${extrinsicHash}`);
+    if (nominatorMetadata) {
+      navigate(`/transaction-done/${nominatorMetadata.address}/${nominatorMetadata.chain}/${extrinsicHash}`);
     }
-  }, [chainStakingMetadata, navigate]);
+  }, [navigate, nominatorMetadata]);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDoneTransaction);
 

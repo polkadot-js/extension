@@ -379,6 +379,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                             address={item.validatorAddress}
                             className={'__nomination-label'}
                             name={item.validatorIdentity}
+                            networkPrefix={networkPrefix}
                           />
                         )}
                       >
@@ -393,11 +394,14 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                       className={'__nomination-field'}
                       decimals={decimals}
                       key={`${item.validatorAddress}-${item.activeStake}-${item.validatorIdentity || item.validatorMinStake || item.chain}`}
-                      label={<AccountItem
-                        address={item.validatorAddress}
-                        className={'__nomination-label'}
-                        name={name}
-                      />}
+                      label={(
+                        <AccountItem
+                          address={item.validatorAddress}
+                          className={'__nomination-label'}
+                          name={name}
+                          networkPrefix={networkPrefix}
+                        />
+                      )}
                       suffix={staking.nativeToken}
                       value={item.activeStake || ''}
                       valueColorSchema={'gray'}

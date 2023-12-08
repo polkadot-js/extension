@@ -174,7 +174,7 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
   const chainApi = await substrateApi.isReady;
   const _era = await chainApi.api.query.staking.currentEra();
   const currentEra = _era.toString();
-  const maxNominations = chainApi.api.consts.staking.maxNominations.toString();
+  const maxNominations = chainApi.api.consts.staking?.maxNominations?.toString() || '16'; // TODO
   const maxUnlockingChunks = chainApi.api.consts.staking.maxUnlockingChunks.toString();
   const unlockingEras = chainApi.api.consts.staking.bondingDuration.toString();
 

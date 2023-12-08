@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CampaignBanner, CampaignButton } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseModal } from '@subwallet/extension-koni-ui/components';
 import { HOME_CAMPAIGN_BANNER_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { completeBannerCampaign } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getBannerButtonIcon, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, Image, ModalContext } from '@subwallet/react-ui';
 import { ButtonSchema } from '@subwallet/react-ui/lib/button/button';
 import CN from 'classnames';
 import React, { useCallback, useContext } from 'react';
@@ -49,7 +50,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [onCloseBanner]);
 
   return (
-    <SwModal
+    <BaseModal
+      center={true}
       className={CN(className)}
       closable={false}
       id={modalId}
@@ -82,7 +84,7 @@ const Component: React.FC<Props> = (props: Props) => {
           );
         })}
       </div>
-    </SwModal>
+    </BaseModal>
   );
 };
 

@@ -218,7 +218,7 @@ const Component: React.FC<Props> = (props: Props) => {
     <>
       <BaseModal
         className={CN(className)}
-        fullSize
+        fullSizeOnMobile
         id={id}
         onCancel={onClose}
         title={t('Address book')}

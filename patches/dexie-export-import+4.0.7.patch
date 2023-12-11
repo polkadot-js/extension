@@ -1,0 +1,15 @@
+diff --git a/node_modules/dexie-export-import/dist/dexie-export-import.d.ts b/node_modules/dexie-export-import/dist/dexie-export-import.d.ts
+index f909a10..e023531 100644
+--- a/node_modules/dexie-export-import/dist/dexie-export-import.d.ts
++++ b/node_modules/dexie-export-import/dist/dexie-export-import.d.ts
+@@ -1,8 +1,8 @@
+ import { ExportOptions, exportDB } from './export';
+ import { importDB, peakImportFile, ImportOptions, importInto, StaticImportOptions } from './import';
+-import { DexieExportJsonMeta } from './json-structure';
++import { DexieExportJsonMeta, DexieExportJsonStructure } from './json-structure';
+ export { exportDB, ExportOptions };
+-export { importDB, importInto, peakImportFile, ImportOptions, DexieExportJsonMeta };
++export { importDB, importInto, peakImportFile, ImportOptions, DexieExportJsonMeta, DexieExportJsonStructure };
+ declare module 'dexie' {
+     interface Dexie {
+         export(options?: ExportOptions): Promise<Blob>;

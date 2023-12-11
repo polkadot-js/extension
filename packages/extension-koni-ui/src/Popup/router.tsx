@@ -201,7 +201,7 @@ export const router = createBrowserRouter([
           },
           MissionPool.generateRouterObject('mission-pools'),
           History.generateRouterObject('history'),
-          History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
+          History.generateRouterObject('history/:address/:chain/:extrinsicHashOrId'),
           DApps.generateRouterObject('dapps')
         ]
       },
@@ -228,12 +228,12 @@ export const router = createBrowserRouter([
         ]
       },
       {
-        ...TransactionDone.generateRouterObject('transaction-done/:chainType/:chain/:transactionId')
+        ...TransactionDone.generateRouterObject('transaction-done/:address/:chain/:transactionId')
       },
       {
         ...EarningDoneOutlet.generateRouterObject('earning-done'),
         children: [
-          EarningDoneContent.generateRouterObject(':chainType/:chain/:transactionId')
+          EarningDoneContent.generateRouterObject(':address/:chain/:transactionId')
         ]
       },
       {

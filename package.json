@@ -10,7 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "1.1.22",
+  "version": "1.1.24",
   "workspaces": [
     "packages/*"
   ],
@@ -54,7 +54,8 @@
     "webapp:deploy": "yarn webapp:build && gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
     "webapp:dev": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "webapp:publish": "gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
-    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development"
+    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development",
+    "webapp:change-build-number-webapp": "node scripts/change-build-number-webapp.cjs"
   },
   "dependencies": {
     "@types/node": "^17.0.10",
@@ -86,7 +87,7 @@
     "@polkadot/types": "^10.9.1",
     "@polkadot/util": "^12.3.2",
     "@polkadot/util-crypto": "^12.3.2",
-    "@subwallet/chain-list": "0.2.25",
+    "@subwallet/chain-list": "0.2.28",
     "@subwallet/keyring": "^0.1.1",
     "@subwallet/ui-keyring": "^0.1.1",
     "babel-core": "^7.0.0-bridge.0",

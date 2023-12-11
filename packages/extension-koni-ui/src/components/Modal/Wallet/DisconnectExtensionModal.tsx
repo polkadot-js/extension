@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BaseModal } from '@subwallet/extension-koni-ui/components';
 import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ModalContext, SwModal } from '@subwallet/react-ui';
+import { Button, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,7 +35,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [disableInject, inactiveModal]);
 
   return (
-    <SwModal
+    <BaseModal
+      center={true}
       id={modalId}
       onCancel={closeModal}
       title={t('Disconnect wallet')}
@@ -66,7 +68,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </Button>
         </div>
       </div>
-    </SwModal>
+    </BaseModal>
   );
 };
 

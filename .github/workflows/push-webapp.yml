@@ -33,6 +33,9 @@ jobs:
         BRANCH_NAME: ${{ github.ref_name }}
       run: |
         yarn install --immutable | grep -v 'YN0013'
+        if [ ${{ github.ref_name }} == 'webapp-dev' ]; then
+            yarn run webapp:change-build-number-webapp
+        fi
         yarn webapp:build
     - name: Publish to Cloudflare Pages
       id: cloudflare_deployment
@@ -45,6 +48,13 @@ jobs:
         branch: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.ref_name }}
         directory: './packages/webapp/build'
         wranglerVersion: '3'
+    - if: "github.ref_name == 'webapp-dev' && github.event_name == 'push'"
+      name: Automation Bot
+      uses: EndBug/add-and-commit@v9
+      with:
+        author_name: Automation Bot
+        author_email: bot@subwallet.app
+        message: '[CI Skip] Auto increase webapp build number'
     - name: Notify to Discord
       uses: sarisia/actions-status-discord@v1
       if: always()

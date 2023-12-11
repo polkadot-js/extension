@@ -86,7 +86,13 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         }
       }
     },
-
+    '.general-modal.-mobile': {
+      justifyContent: 'flex-end',
+      '.ant-sw-modal-content': {
+        maxHeight: '95%',
+        width: '100%'
+      }
+    },
     '.text-secondary': {
       color: token.colorTextSecondary
     },

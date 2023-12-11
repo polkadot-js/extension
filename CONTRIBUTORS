@@ -1,8 +1,8 @@
-    1865	Nam Phạm                      	[Issue 2162] update max nomination
-    1693	AnhMTV                        	Release version 1.1.22
-    1398	S2kael                        	[Issue-2178] Update chain-list
+    1874	Nam Phạm                      	[Issue 2246] minor fix
+    1735	AnhMTV                        	Release version 1.1.24
+    1471	S2kael                        	[Issue-2258] Update chain-list
      465	Jaco                          	0.42.5 (#969)
-     286	lw-cdm                        	[Issue-2104] Fix UI bug on token detail screen
+     300	lw-cdm                        	[Issue-2179] Update logic related to ledge
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       98	lw-cdm                        	
@@ -27,6 +27,7 @@
        2	carumusan                     	Support ipfs and ipns urls (#667)
        2	ccris02                       	Adding Polish Language Option to the Extension (#761)
        2	joe petrowski                 	add plasm (#462)
+       2	nguyentiendung                	[Issue-1791] Extension - Update the default logo
        2	Remon Nashid                  	Prevent unauthorized apps from abusing pub(authorize.tab) request (#686)
        2	Shawn Tabrizi                 	Add configurable notifications (#767)
        2	WoeOm                         	add darwinia network (#493)

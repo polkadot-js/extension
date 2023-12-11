@@ -18,7 +18,7 @@ import { BN } from '@polkadot/util';
 export function subscribeNativeStakingYieldStats (poolInfo: YieldPoolInfo, substrateApi: _SubstrateApi, chainInfo: _ChainInfo, callback: (rs: YieldPoolInfo) => void) {
   return substrateApi.api.query.staking.currentEra(async (_currentEra: Codec) => {
     const currentEra = _currentEra.toString();
-    const maxNominations = substrateApi.api.consts.staking.maxNominations.toString();
+    const maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16'; // TODO
     const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
     const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 

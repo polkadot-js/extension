@@ -1,21 +1,22 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import DeleteChain from '@subwallet/extension-base/services/migration-service/scripts/DeleteChain';
 import DeleteEarningData from '@subwallet/extension-base/services/migration-service/scripts/DeleteEarningData';
 import EnableEarningChains from '@subwallet/extension-base/services/migration-service/scripts/EnableEarningChains';
 
 import BaseMigrationJob from '../Base';
+import MigrateEthProvider from './providers/MigrateEthProvider';
+import MigratePioneerProvider from './providers/MigratePioneerProvider';
+import MigrateProvidersV1M1P24 from './providers/MigrateProvidersV1M1P24';
 import AutoEnableChainsTokens from './AutoEnableChainsTokens';
+import DeleteChain from './DeleteChain';
 import EnableVaraChain from './EnableVaraChain';
 import MigrateAuthUrls from './MigrateAuthUrls';
 import MigrateAutoLock from './MigrateAutoLock';
 import MigrateChainPatrol from './MigrateChainPatrol';
-import MigrateEthProvider from './MigrateEthProvider';
 import MigrateImportedToken from './MigrateImportedToken';
 import MigrateLedgerAccount from './MigrateLedgerAccount';
 import MigrateNetworkSettings from './MigrateNetworkSettings';
-import MigratePioneerProvider from './MigratePioneerProvider';
 import MigrateSettings from './MigrateSettings';
 import MigrateTokenDecimals from './MigrateTokenDecimals';
 import MigrateTransactionHistory from './MigrateTransactionHistory';
@@ -40,6 +41,7 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.1.13-02': EnableEarningChains,
   '1.1.13-03': DeleteEarningData,
   '1.1.17-01': MigratePioneerProvider,
-  '1.1.17-03': EnableVaraChain
+  '1.1.17-03': EnableVaraChain,
+  '1.1.24-01': MigrateProvidersV1M1P24
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

@@ -125,6 +125,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           NODE_ENV: JSON.stringify(mode),
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
+          PKG_BUILD_NUMBER: JSON.stringify(pkgJson.buildNumber),
           TARGET_ENV: JSON.stringify('webapp'),
           BRANCH_NAME: JSON.stringify(process.env.BRANCH_NAME),
           ID_PREFIX: JSON.stringify('sw-app-'),

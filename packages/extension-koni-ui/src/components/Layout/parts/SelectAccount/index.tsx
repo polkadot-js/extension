@@ -23,7 +23,7 @@ import { AccountBriefInfo, AccountCardSelection, AccountItemWithName } from '../
 import { GeneralEmptyList } from '../../../EmptyList';
 import { BaseSelectModal } from '../../../Modal';
 import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
-import SelectAccountFooter from '../SelectAccount/Footer';
+import SelectAccountFooter from './Footer';
 
 type Props = ThemeProps
 
@@ -314,7 +314,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         background={'default'}
         className={className}
         footer={<SelectAccountFooter />}
-        fullSize
+        fullSizeOnMobile
         id={modalId}
         ignoreScrollbarMethod='padding'
         inputWidth={'100%'}

@@ -228,6 +228,15 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       }
     },
 
+    '.ant-select-modal-input-content': {
+      '.ant-select-modal-input-placeholder': {
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        display: 'block',
+        'white-space': 'nowrap'
+      }
+    },
+
     '.ant-sw-header-left-part + .ant-sw-header-center-part .ant-sw-sub-header-title': {
       display: 'block',
       textAlign: 'center'

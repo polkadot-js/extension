@@ -8,7 +8,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { SWStorage } from '@subwallet/extension-base/storage';
 import { listMerge } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
-import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
+import { DexieExportJsonStructure } from 'dexie-export-import';
 
 export function isLocalStorageReset (): boolean {
   if (window?.localStorage) {

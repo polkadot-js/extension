@@ -3,11 +3,11 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, StakingTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, TransactionData, YieldPoolInfo, YieldPoolTarget, YieldProcessValidation, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, YieldPoolInfo, YieldPoolTarget, YieldProcessValidation, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import BN from 'bn.js';
 import { t } from 'i18next';
 
@@ -40,6 +40,10 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       rewardAssets: this.rewardAssets,
       feeAssets: this.feeAssets
     };
+  }
+
+  override get isPoolSupportAlternativeFee () {
+    return this.feeAssets.length > 1;
   }
 
   /* Subscribe pool info */
@@ -327,7 +331,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     return [];
   }
 
-  override async validateYieldJoin (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data?: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool): Promise<TransactionError[]> {
+  override async validateYieldJoin (params: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]> {
     const inputTokenSlug = this.inputAsset;
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
     const balanceService = this.state.balanceService;
@@ -366,12 +370,12 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
   /* Submit join action */
 
-  protected async handleTokenApproveStep (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
+  protected async handleTokenApproveStep (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<HandleYieldStepData> {
     return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
   }
 
-  async handleXcmStep (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
-    const inputData = requestData.data as SubmitYieldStepData;
+  async handleXcmStep (data: SubmitYieldJoinData, path: OptimalYieldPath, xcmFee: string): Promise<HandleYieldStepData> {
+    const { address, amount } = data as SubmitYieldStepData;
 
     const destinationTokenSlug = this.inputAsset[0];
     const originChainInfo = this.state.getChainInfo(COMMON_CHAIN_SLUGS.POLKADOT);
@@ -380,12 +384,11 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const destinationTokenInfo = this.state.getAssetBySlug(destinationTokenSlug);
     const substrateApi = this.state.getSubstrateApi(originChainInfo.slug);
 
-    const inputTokenBalance = await this.state.balanceService.getTokenFreeBalance(params.address, destinationTokenInfo.originChain, destinationTokenSlug);
+    const inputTokenBalance = await this.state.balanceService.getTokenFreeBalance(address, destinationTokenInfo.originChain, destinationTokenSlug);
     const bnInputTokenBalance = new BN(inputTokenBalance.value);
 
-    const xcmFee = path.totalFee[currentStep].amount || '0';
     const bnXcmFee = new BN(xcmFee);
-    const bnAmount = new BN(inputData.amount);
+    const bnAmount = new BN(amount);
 
     const bnTotalAmount = bnAmount.sub(bnInputTokenBalance).add(bnXcmFee);
 
@@ -417,20 +420,25 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     };
   }
 
-  abstract handleSubmitStep (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData>;
+  abstract handleSubmitStep (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<HandleYieldStepData>;
 
-  override handleYieldJoin (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
+  override handleYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
     const type = path.steps[currentStep].type;
 
     switch (type) {
       case YieldStepType.DEFAULT:
         return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
       case YieldStepType.TOKEN_APPROVAL:
-        return this.handleTokenApproveStep(address, params, requestData, path, currentStep);
-      case YieldStepType.XCM:
-        return this.handleXcmStep(address, params, requestData, path, currentStep);
+        return this.handleTokenApproveStep(data, path);
+
+      case YieldStepType.XCM: {
+        const xcmFee = path.totalFee[currentStep].amount || '0';
+
+        return this.handleXcmStep(data, path, xcmFee);
+      }
+
       default:
-        return this.handleSubmitStep(address, params, requestData, path, currentStep);
+        return this.handleSubmitStep(data, path);
     }
   }
 

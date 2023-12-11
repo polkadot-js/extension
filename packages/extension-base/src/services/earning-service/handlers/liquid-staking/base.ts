@@ -1,7 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { LiquidYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { convertDerivativeToOriginToken } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 
 import BaseSpecialStakingPoolHandler from '../special';
 
@@ -9,9 +12,24 @@ export default abstract class BaseLiquidStakingPoolHandler extends BaseSpecialSt
   protected readonly type = YieldPoolType.LIQUID_STAKING;
   protected readonly minAmountPercent: number = 0.98;
 
-  /* Subscribe pool info */
+  /* Leave pool action */
 
-  abstract override getPoolStat (): Promise<LiquidYieldPoolInfo>;
+  async createParamToLeave (amount: string, address: string): Promise<number> {
+    const yieldPositionInfo = await this.getPoolPosition(address);
+    const poolInfo = await this.getPoolInfo();
+    const originTokenSlug = this.inputAsset;
+    const derivativeTokenSlug = this.derivativeAssets[0];
+    const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
+    const originTokenInfo = this.state.getAssetBySlug(originTokenSlug);
 
-  /* Subscribe pool info */
+    if (!yieldPositionInfo || !poolInfo) {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INVALID_PARAMS));
+    }
+
+    const formattedMinAmount = convertDerivativeToOriginToken(amount, poolInfo, derivativeTokenInfo, originTokenInfo);
+
+    return Math.floor(this.minAmountPercent * formattedMinAmount);
+  }
+
+  /* Leave pool action */
 }

@@ -27,8 +27,9 @@ export interface OptimalYieldPathRequest {
  * @description Params use on function to generate steps
  * */
 export interface OptimalYieldPathParams {
-  address: string,
-  amount: string
+  slug: string;
+  address: string;
+  amount: string;
 }
 
 /**

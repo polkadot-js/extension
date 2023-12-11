@@ -3,10 +3,10 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ExtrinsicType, OptimalYieldPath, RequestYieldStepSubmit, StakeCancelWithdrawalParams } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakeCancelWithdrawalParams } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { EarningRewardItem, HandleYieldStepData, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, TransactionData, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 
 /**
  * @class BasePoolHandler
@@ -66,6 +66,11 @@ export default abstract class BasePoolHandler {
     };
   }
 
+  /** Can mint when haven't enough native token (use input token for fee) */
+  public get isPoolSupportAlternativeFee (): boolean {
+    return false;
+  }
+
   public async getPoolInfo (): Promise<YieldPoolInfo | undefined> {
     return this.state.dbService.getYieldPool(this.slug);
   }
@@ -92,9 +97,9 @@ export default abstract class BasePoolHandler {
   /** Generate the optimal steps to join pool */
   abstract generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath>;
   /** Validate param to join the pool */
-  abstract validateYieldJoin (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, data?: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool): Promise<TransactionError[]>
+  abstract validateYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]>
   /** Create `transaction` to join the pool step-by-step */
-  abstract handleYieldJoin (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData>;
+  abstract handleYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData>;
   /* Join action */
 
   /* Join action */

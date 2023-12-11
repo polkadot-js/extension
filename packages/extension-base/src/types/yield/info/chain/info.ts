@@ -165,7 +165,12 @@ export interface SpecialYieldPoolInfo extends AbstractYieldPoolInfo {
   /** Alt input token (slug) - optional */
   altInputAssets?: string; // TODO
 
-  /** Array of fee tokens (slug) */
+  /**
+   * Array of fee tokens (slug)
+   * <p>
+   * If the pool has more than one token, the mint step can use input token for fee instead native token
+   * </p>
+   *  */
   feeAssets: string[],
 
   /* Special info */

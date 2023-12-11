@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, RequestYieldStepSubmit, TokenBalanceRaw } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ExtrinsicType, TokenBalanceRaw } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldStepData, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import BN from 'bn.js';
 
 import { BN_ZERO } from '@polkadot/util';
@@ -151,18 +151,17 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     };
   }
 
-  async handleSubmitStep (address: string, params: OptimalYieldPathParams, requestData: RequestYieldStepSubmit, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
-    const inputData = requestData.data as SubmitYieldStepData;
+  async handleSubmitStep (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<HandleYieldStepData> {
     const substrateApi = await this.substrateApi.isReady;
     const inputTokenSlug = this.inputAsset;
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
-    const extrinsic = substrateApi.api.tx.loans.mint(_getTokenOnChainInfo(inputTokenInfo), inputData.amount);
+    const extrinsic = substrateApi.api.tx.loans.mint(_getTokenOnChainInfo(inputTokenInfo), data.amount);
 
     return {
       txChain: this.chain,
       extrinsicType: ExtrinsicType.MINT_QDOT,
       extrinsic,
-      txData: requestData,
+      txData: data,
       transferNativeAmount: '0'
     };
   }

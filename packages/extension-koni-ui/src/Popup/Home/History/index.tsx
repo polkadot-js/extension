@@ -176,7 +176,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
-  const filterFunction = useMemo<(item: TransactionHistoryDisplayItem) => boolean>(() => {
+  const filterFunction = useMemo<(item: TransactionHistoryItem) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
         return true;
@@ -296,8 +296,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [currentItemDisplayCount, setCurrentItemDisplayCount] = useState<number>(DEFAULT_ITEMS_COUNT);
 
   const getHistoryItems = useCallback((count: number) => {
-    return Object.values(historyMap).sort((a, b) => (b.time - a.time)).slice(0, count);
-  }, [historyMap]);
+    return Object.values(historyMap).filter(filterFunction).sort((a, b) => (b.time - a.time)).slice(0, count);
+  }, [filterFunction, historyMap]);
 
   const [historyItems, setHistoryItems] = useState<TransactionHistoryDisplayItem[]>(getHistoryItems(DEFAULT_ITEMS_COUNT));
 
@@ -470,21 +470,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const onLoadMoreItems = useCallback(() => {
     setCurrentItemDisplayCount((prev) => {
-      if (prev + NEXT_ITEMS_COUNT > rawHistoryList.length) {
-        return rawHistoryList.length;
+      const rawItemsLength = rawHistoryList.filter(filterFunction).length;
+
+      if (prev + NEXT_ITEMS_COUNT > rawItemsLength) {
+        return rawItemsLength;
       } else {
         return prev + NEXT_ITEMS_COUNT;
       }
     });
-  }, [rawHistoryList.length]);
+  }, [filterFunction, rawHistoryList]);
 
-  const hasMoreItems = rawHistoryList.length > historyItems.length;
+  const hasMoreItems = useMemo(() => {
+    return rawHistoryList.filter(filterFunction).length > historyItems.length;
+  }, [filterFunction, historyItems.length, rawHistoryList]);
 
   const listSection = useMemo(() => (
     <>
       <div className={'__page-list-area'}>
         <SwList
-          filterBy={filterFunction}
           groupBy={groupBy}
           groupSeparator={groupSeparator}
           hasMoreItems={hasMoreItems}
@@ -496,7 +499,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
       </div>
     </>
-  ), [emptyList, filterFunction, groupBy, groupSeparator, hasMoreItems, historyItems, onLoadMoreItems, renderItem]);
+  ), [emptyList, groupBy, groupSeparator, hasMoreItems, historyItems, onLoadMoreItems, renderItem]);
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
     return [

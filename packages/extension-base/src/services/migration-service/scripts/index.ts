@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import MigratePolygonUSDCProvider from './tokens/MigratePolygonUSDCProvider';
 import BaseMigrationJob from '../Base';
 import MigrateEthProvider from './providers/MigrateEthProvider';
 import MigratePioneerProvider from './providers/MigratePioneerProvider';
 import MigrateProvidersV1M1P24 from './providers/MigrateProvidersV1M1P24';
+import MigratePolygonUSDCProvider from './tokens/MigratePolygonUSDCProvider';
 import AutoEnableChainsTokens from './AutoEnableChainsTokens';
 import DeleteChain from './DeleteChain';
 import EnableVaraChain from './EnableVaraChain';

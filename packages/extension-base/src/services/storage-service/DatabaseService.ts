@@ -16,7 +16,7 @@ import { BalanceItem } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { Subscription } from 'dexie';
 import { exportDB } from 'dexie-export-import';
-import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
+import { DexieExportJsonStructure } from 'dexie-export-import';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';

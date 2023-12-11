@@ -205,8 +205,8 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       '.ant-select-modal-input-placeholder': {
         textOverflow: 'ellipsis',
         overflow: 'hidden',
-        textWrap: 'nowrap',
-        display: 'block'
+        display: 'block',
+        'white-space': 'nowrap'
       }
     }
   });

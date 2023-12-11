@@ -17,12 +17,12 @@ import YieldPositionStore from '@subwallet/extension-base/services/storage-servi
 import { BalanceItem } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { Subscription } from 'dexie';
-import { exportDB, peakImportFile } from 'dexie-export-import';
+import { DexieExportJsonStructure, exportDB } from 'dexie-export-import';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
-const EXPORT_EXCLUDE_TABLES = ['metadata'];
+export const DEXIE_BACKUP_TABLES = ['chain', 'asset', 'migrations', 'transactions', 'campaign'];
 
 export default class DatabaseService {
   private _db: KoniDatabase;
@@ -412,11 +412,7 @@ export default class DatabaseService {
   async exportDB () {
     const blob = await exportDB(this._db, {
       filter: (table, value, key) => {
-        if (EXPORT_EXCLUDE_TABLES.indexOf(table) >= 0) {
-          return false;
-        }
-
-        return true;
+        return DEXIE_BACKUP_TABLES.indexOf(table) >= 0;
       }
     });
 
@@ -428,9 +424,8 @@ export default class DatabaseService {
       const blob = new Blob([data], { type: 'application/json' });
 
       await this._db.import(blob, {
-        overwriteValues: true,
-        acceptMissingTables: true,
-        acceptVersionDiff: true
+        clearTablesBeforeImport: true,
+        acceptMissingTables: true
       });
 
       return true;
@@ -441,15 +436,7 @@ export default class DatabaseService {
     }
   }
 
-  async checkImportMetadata (data: string) {
-    try {
-      const blob = new Blob([data], { type: 'application/json' });
-
-      return await peakImportFile(blob);
-    } catch (e) {
-      this.logger.error(e);
-
-      return null;
-    }
+  async getExportJson () {
+    return JSON.parse(await this.exportDB()) as DexieExportJsonStructure;
   }
 }

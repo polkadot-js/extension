@@ -29,10 +29,12 @@ export class KeyringService {
 
   constructor (private eventService: EventService) {
     this.injected = false;
-    this.currentAccountStore.get('CurrentAccountInfo', (rs) => {
-      rs && this.currentAccountSubject.next(rs);
-    });
-    this.subscribeAccounts().catch(console.error);
+    this.eventService.waitCryptoReady.then(() => {
+      this.currentAccountStore.get('CurrentAccountInfo', (rs) => {
+        rs && this.currentAccountSubject.next(rs);
+      });
+      this.subscribeAccounts().catch(console.error);
+    }).catch(console.error);
   }
 
   private async subscribeAccounts () {
@@ -74,8 +76,10 @@ export class KeyringService {
 
   updateKeyringState (isReady = true) {
     if (!this.keyringState.isReady && isReady) {
-      this.eventService.emit('keyring.ready', true);
-      this.eventService.emit('account.ready', true);
+      this.eventService.waitCryptoReady.then(() => {
+        this.eventService.emit('keyring.ready', true);
+        this.eventService.emit('account.ready', true);
+      }).catch(console.error);
     }
 
     this.keyringStateSubject.next({
@@ -101,6 +105,11 @@ export class KeyringService {
     this.currentAccountSubject.next(currentAccountData);
     this.eventService.emit('account.updateCurrent', currentAccountData);
     this.currentAccountStore.set('CurrentAccountInfo', currentAccountData);
+  }
+
+  public lock () {
+    keyring.lockAll();
+    this.updateKeyringState();
   }
 
   /* Inject */
@@ -165,11 +174,6 @@ export class KeyringService {
   }
 
   /* Inject */
-
-  public lock () {
-    keyring.lockAll();
-    this.updateKeyringState();
-  }
 
   /* Reset */
   async resetWallet (resetAll: boolean) {

@@ -27,7 +27,7 @@ export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t:
   if (status === UnstakingStatus.CLAIMABLE) {
     return t('Available for withdrawal');
   } else {
-    if (waitingTime >= 1) {
+    if (waitingTime > 24) {
       const days = moment.duration(waitingTime, 'hours').humanize();
 
       return t('Withdraw in {{time}}', { replace: { time: days } });

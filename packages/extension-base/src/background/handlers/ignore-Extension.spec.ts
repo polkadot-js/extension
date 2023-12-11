@@ -10,6 +10,7 @@ import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import { SWStorage } from '@subwallet/extension-base/storage';
 import keyring from '@subwallet/ui-keyring';
 
 import { TypeRegistry } from '@polkadot/types';
@@ -41,7 +42,7 @@ describe('Extension', () => {
       origin: 'example.com',
       url: 'http://localhost:3000'
     };
-    localStorage.setItem('authUrls', JSON.stringify(authUrls));
+    SWStorage.instance.setItem('authUrls', JSON.stringify(authUrls));
     state = new State();
     tabs = new Tabs(state);
 

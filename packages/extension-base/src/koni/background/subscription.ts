@@ -78,7 +78,7 @@ export class KoniSubscription {
   }
 
   async start () {
-    await Promise.all([this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
+    await Promise.all([this.state.eventService.waitCryptoReady, this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
     const currentAddress = this.state.keyringService.currentAccount?.address;
 
     this.subscribeYieldPools(this.state.getChainInfoMap(), this.state.getAssetRegistry(), this.state.getSubstrateApiMap(), currentAddress);

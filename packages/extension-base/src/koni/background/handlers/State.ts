@@ -313,6 +313,7 @@ export default class KoniState {
     await this.chainService.init();
     this.afterChainServiceInit();
     await this.migrationService.run();
+    this.campaignService.init();
     this.eventService.emit('chain.ready', true);
 
     this.onReady();

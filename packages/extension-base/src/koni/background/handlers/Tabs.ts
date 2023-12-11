@@ -345,7 +345,7 @@ export default class KoniTabs {
     }
   }
 
-  private async getEvmCurrentAccount (url: string, getAll = false): Promise<string[]> {
+  private async getEvmCurrentAccount (url: string): Promise<string[]> {
     return await new Promise((resolve) => {
       this.getAuthInfo(url).then((authInfo) => {
         const allAccounts = this.#koniState.keyringService.accounts;
@@ -354,10 +354,17 @@ export default class KoniTabs {
 
         const address = this.#koniState.keyringService.currentAccount.address;
 
-        if (address === ALL_ACCOUNT_KEY || !accountList.includes(address) || getAll) {
+        if (address === ALL_ACCOUNT_KEY || !address) {
           accounts = accountList;
-        } else if (address && accountList.includes(address)) {
-          accounts = ([address]);
+        } else {
+          if (accountList.includes(address)) {
+            const result = accountList.filter((adr) => adr !== address);
+
+            result.unshift(address);
+            accounts = result;
+          } else {
+            accounts = accountList;
+          }
         }
 
         resolve(accounts);
@@ -432,7 +439,7 @@ export default class KoniTabs {
   }
 
   private async getEvmPermission (url: string, id: string) {
-    const accounts = await this.getEvmCurrentAccount(url, true);
+    const accounts = await this.getEvmCurrentAccount(url);
 
     return [{
       id: id,
@@ -844,13 +851,13 @@ export default class KoniTabs {
   }
 
   public async canUseAccount (address: string, url: string) {
-    const allowedAccounts = await this.getEvmCurrentAccount(url, true);
+    const allowedAccounts = await this.getEvmCurrentAccount(url);
 
     return !!allowedAccounts.find((acc) => (acc.toLowerCase() === address.toLowerCase()));
   }
 
   private async evmSign (id: string, url: string, { method, params }: RequestArguments) {
-    const allowedAccounts = (await this.getEvmCurrentAccount(url, true));
+    const allowedAccounts = (await this.getEvmCurrentAccount(url));
     const signResult = await this.#koniState.evmSign(id, url, method, params, allowedAccounts);
 
     if (signResult) {
@@ -874,7 +881,7 @@ export default class KoniTabs {
       throw new Error('Network unavailable. Please switch network or manually add network to wallet');
     }
 
-    const allowedAccounts = await this.getEvmCurrentAccount(url, true);
+    const allowedAccounts = await this.getEvmCurrentAccount(url);
     const transactionHash = await this.#koniState.evmSendTransaction(id, url, networkKey, allowedAccounts, transactionParams);
 
     if (!transactionHash) {

@@ -16,7 +16,9 @@ export default class CampaignService {
 
   constructor (state: KoniState) {
     this.#state = state;
+  }
 
+  public init () {
     if (targetEnvs.includes(TARGET_ENV)) {
       this.fetchCampaign()
         .catch((e) => {

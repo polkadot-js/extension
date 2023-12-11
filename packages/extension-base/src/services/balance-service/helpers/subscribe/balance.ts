@@ -3,15 +3,45 @@
 
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
-import { getAccountJsonByAddress } from '@subwallet/extension-base/utils/account';
+import keyring from '@subwallet/ui-keyring';
 
 import { subscribeEVMBalance } from './evm';
 import { subscribeSubstrateBalance } from './substrate';
+
+/**
+ * @function getAccountJsonByAddress
+ * @desc Get account info by address
+ * <p>
+ *   Note: Use on the background only
+ * </p>
+ * @param {string} address - Address
+ * @returns {AccountJson|null}  - Account info or null if not found
+ */
+export const getAccountJsonByAddress = (address: string): AccountJson | null => {
+  try {
+    const pair = keyring.getPair(address);
+
+    if (pair) {
+      return {
+        address: pair.address,
+        type: pair.type,
+        ...pair.meta
+      };
+    } else {
+      return null;
+    }
+  } catch (e) {
+    console.warn(e);
+
+    return null;
+  }
+};
 
 const filterAddress = (addresses: string[], chainInfo: _ChainInfo): [string[], string[]] => {
   const isEvmChain = _isChainEvmCompatible(chainInfo);

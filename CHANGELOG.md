@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 1.1.25
+Build date: Dec 7, 2023.
+
+Features & Update:
+- Support EIP-6963 (Multi eth provider) (#2021)
+- Update showing estimated withdrawal time on staking (#2304)
+- Update APY for Vara network (#2301)
+- Update chain list (#2302)
+  - Integrate EWX Staging Parachain (testnet)
+  - Integrate EWC EVM chain
+  - Update Avail testate
+
+
+Bugs fixed:
+- Fixed bug display dApp/pool/validator/collator name (#2130)
+
 ## 1.1.24
 Build date: Dec 1, 2023.
 
@@ -7,7 +23,7 @@ Features & Update:
 - Support show balance detail by account on All accounts mode (#1997)
 - Support staking for Goldberg (#2181)
 - Add block explorer for Creditcoin (#2287)
-- Update neway to fetch transaction history (#2223)
+- Update new way to fetch transaction history (#2223)
 - Update the default logo (#1791)
 - Update RPC for some chains (#2293)
 - The default pool setting for Vara is SubWallet Official (#2291)

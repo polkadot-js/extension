@@ -300,6 +300,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
 
   async init (): Promise<void> {
     this.status = ServiceStatus.INITIALIZING;
+    await this.eventService.waitCryptoReady;
     await this.loadData();
     Promise.all([this.eventService.waitKeyringReady, this.eventService.waitChainReady]).then(() => {
       this.getHistories().catch(console.log);

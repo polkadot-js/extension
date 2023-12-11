@@ -5,8 +5,14 @@
 import { EventItem, EventRegistry, EventType } from '@subwallet/extension-base/services/event-service/types';
 import EventEmitter from 'eventemitter3';
 
+const DEFAULT_LAZY_TIME = 300;
+const LONG_LAZY_TIME = 900;
+const LONG_LAZY_EVENTS: EventType[] = [
+  'account.add',
+  'chain.add'
+];
+
 export class EventService extends EventEmitter<EventRegistry> {
-  private lazyTime: number;
   private timeoutId: NodeJS.Timeout | null;
   private pendingEvents: EventItem<EventType>[] = [];
   private lazyEmitter = new EventEmitter<{lazy: [EventItem<EventType>[], EventType[]]}>();
@@ -22,9 +28,8 @@ export class EventService extends EventEmitter<EventRegistry> {
   public readonly waitBuyTokenReady: Promise<boolean>;
   public readonly waitBuyServiceReady: Promise<boolean>;
 
-  constructor (options: { lazyTime: number } = { lazyTime: 300 }) {
+  constructor () {
     super();
-    this.lazyTime = options.lazyTime;
     this.timeoutId = null;
     this.waitCryptoReady = this.generateWaitPromise('crypto.ready');
     this.waitDatabaseReady = this.generateWaitPromise('database.ready');
@@ -46,14 +51,16 @@ export class EventService extends EventEmitter<EventRegistry> {
     });
   }
 
-  private setLazyTimeout (): void {
+  private setLazyTimeout (eventType: EventType): void {
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
     }
 
+    const timeout = LONG_LAZY_EVENTS.includes(eventType) ? LONG_LAZY_TIME : DEFAULT_LAZY_TIME;
+
     this.timeoutId = setTimeout(() => {
       this.emitLazy();
-    }, this.lazyTime);
+    }, timeout);
   }
 
   private emitLazy (): void {
@@ -82,7 +89,7 @@ export class EventService extends EventEmitter<EventRegistry> {
   public override emit<T extends EventType> (eventType: T, ...args: EventEmitter.EventArgs<EventRegistry, T>): boolean {
     console.debug('Emit event: ', eventType, ...args);
     this.pendingEvents.push({ type: eventType, data: args as EventRegistry[T] });
-    this.setLazyTimeout();
+    this.setLazyTimeout(eventType);
 
     return super.emit(eventType, ...args);
   }

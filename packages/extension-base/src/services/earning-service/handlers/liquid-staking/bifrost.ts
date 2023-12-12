@@ -109,7 +109,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const exchangeRate = _exchangeRate as BifrostVtokenExchangeRateResp;
 
     const vDOTStats = stakingMeta.vDOT;
-    const assetInfo = this.state.getAssetBySlug(this.inputAsset[0]);
+    const assetInfo = this.state.getAssetBySlug(this.inputAsset);
     const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
 
     return {
@@ -150,7 +150,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const derivativeTokenSlug = this.derivativeAssets[0];
     const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
 
-    const inputTokenSlug = this.inputAsset[0];
+    const inputTokenSlug = this.inputAsset;
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
 
     const unsub = await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), async (_balance) => {

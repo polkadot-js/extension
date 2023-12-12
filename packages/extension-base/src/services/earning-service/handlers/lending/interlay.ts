@@ -40,7 +40,7 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
   async getPoolStat (): Promise<LendingYieldPoolInfo> {
     const substrateApi = await this.substrateApi.isReady;
 
-    const inputTokenSlug = this.inputAsset[0];
+    const inputTokenSlug = this.inputAsset;
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
 
     const _exchangeRate = await substrateApi.api.query.loans.exchangeRate(_getTokenOnChainInfo(inputTokenInfo));

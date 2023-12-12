@@ -11,6 +11,9 @@ export const _STAKING_CHAIN_GROUP = {
   bifrost: ['bifrost', 'bifrost_testnet'],
   aleph: ['aleph', 'alephTest'], // A0 has distinct tokenomics
   ternoa: ['ternoa', 'ternoa_alphanet'],
-  liquidStaking: ['bifrost_dot', 'acala', 'parallel'],
+  liquidStaking: ['bifrost_dot', 'acala', 'parallel', 'moonbeam'],
   lending: ['interlay']
 };
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
+export const ST_LIQUID_TOKEN_ABI: Record<string, any> = require('./abis/st_liquid_token_abi.json');

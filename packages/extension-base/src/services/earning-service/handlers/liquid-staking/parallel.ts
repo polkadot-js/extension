@@ -28,7 +28,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
   /** @inner */
   protected override readonly minAmountPercent = 0.97;
   /** @inner */
-  protected override readonly allowUnstake = true;
+  protected override readonly allowDefaultUnstake = true;
   public slug: string;
 
   constructor (state: KoniState, chain: string) {

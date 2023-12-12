@@ -405,7 +405,8 @@ export class KoniSubscription {
     await Promise.all([
       getPoolingStakingRewardData(pooledAddresses, targetChainMap, this.state.getSubstrateApiMap(), updateState),
       getAmplitudeUnclaimedStakingReward(this.state.getSubstrateApiMap(), addresses, chainInfoMap, activeNetworks, updateState),
-      this.state.earningService.getPoolReward(addresses)
+      // @ts-ignore
+      this.state.earningService.getPoolReward(addresses, updateState) // TODO
     ]);
   }
 

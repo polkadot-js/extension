@@ -22,8 +22,10 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   protected abstract inputAsset: string;
   protected abstract rewardAssets: string[];
   protected abstract feeAssets: string[];
-  /** Allow to create unstake transaction */
-  protected readonly allowUnstake: boolean = false;
+  /** Allow to create default unstake transaction */
+  protected readonly allowDefaultUnstake: boolean = false;
+  /** Allow to create fast unstake transaction */
+  protected readonly allowFastUnstake: boolean = true;
 
   protected get extraInfo (): Omit<
   SpecialYieldPoolInfo,
@@ -128,7 +130,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
    * */
   async getXcmStep (params: OptimalYieldPathParams): Promise<[BaseYieldStepDetail, YieldTokenBaseInfo] | undefined> {
     const bnAmount = new BN(params.amount);
-    const inputTokenSlug = this.inputAsset[0]; // assume that the pool only has 1 input token, will update later
+    const inputTokenSlug = this.inputAsset; // assume that the pool only has 1 input token, will update later
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
 
     const inputTokenBalance = await this.state.balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug);
@@ -379,7 +381,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   async handleXcmStep (data: SubmitYieldJoinData, path: OptimalYieldPath, xcmFee: string): Promise<HandleYieldStepData> {
     const { address, amount } = data as SubmitYieldStepData;
 
-    const destinationTokenSlug = this.inputAsset[0];
+    const destinationTokenSlug = this.inputAsset;
     const originChainInfo = this.state.getChainInfo(COMMON_CHAIN_SLUGS.POLKADOT);
     const originTokenSlug = _getChainNativeTokenSlug(originChainInfo);
     const originTokenInfo = this.state.getAssetBySlug(originTokenSlug);
@@ -458,7 +460,11 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 
-    if (!this.allowUnstake && !fastLeave) {
+    if (!this.allowDefaultUnstake && !fastLeave) {
+      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+    }
+
+    if (!this.allowFastUnstake && fastLeave) {
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 

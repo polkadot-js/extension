@@ -11,8 +11,9 @@ import InterlayLendingPoolHandler from '@subwallet/extension-base/services/earni
 import AcalaLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/acala';
 import BifrostLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/bifrost';
 import ParallelLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/parallel';
+import StellaSwapLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/stella-swap';
 import NominationPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/nomination-pool';
-import { HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestYieldLeave, RequestYieldWithdrawal, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestYieldLeave, RequestYieldWithdrawal, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 export default class EarningService {
@@ -29,44 +30,38 @@ export default class EarningService {
     const chains = this.state.activeChainSlugs;
 
     for (const chain of chains) {
-      if (!this.handlers[chain]) {
-        if (_STAKING_CHAIN_GROUP.nominationPool.includes(chain)) {
-          const handler = new NominationPoolHandler(this.state, chain);
+      const handlers: BasePoolHandler[] = [];
 
-          this.handlers[handler.slug] = handler;
+      if (_STAKING_CHAIN_GROUP.nominationPool.includes(chain)) {
+        handlers.push(new NominationPoolHandler(this.state, chain));
+      }
+
+      if (_STAKING_CHAIN_GROUP.liquidStaking.includes(chain)) {
+        if (chain === 'bifrost_dot') {
+          handlers.push(new BifrostLiquidStakingPoolHandler(this.state, chain));
         }
 
-        if (_STAKING_CHAIN_GROUP.liquidStaking.includes(chain)) {
-          let handler: BasePoolHandler | undefined;
-
-          if (chain === 'bifrost_dot') {
-            handler = new BifrostLiquidStakingPoolHandler(this.state, chain);
-          }
-
-          if (chain === 'acala') {
-            handler = new AcalaLiquidStakingPoolHandler(this.state, chain);
-          }
-
-          if (chain === 'parallel') {
-            handler = new ParallelLiquidStakingPoolHandler(this.state, chain);
-          }
-
-          if (handler) {
-            this.handlers[handler.slug] = handler;
-          }
+        if (chain === 'acala') {
+          handlers.push(new AcalaLiquidStakingPoolHandler(this.state, chain));
         }
 
-        if (_STAKING_CHAIN_GROUP.lending.includes(chain)) {
-          let handler: BasePoolHandler | undefined;
-
-          if (chain === 'interlay') {
-            handler = new InterlayLendingPoolHandler(this.state, chain);
-          }
-
-          if (handler) {
-            this.handlers[handler.slug] = handler;
-          }
+        if (chain === 'parallel') {
+          handlers.push(new ParallelLiquidStakingPoolHandler(this.state, chain));
         }
+
+        if (chain === 'moonbeam') {
+          handlers.push(new StellaSwapLiquidStakingPoolHandler(this.state, chain));
+        }
+      }
+
+      if (_STAKING_CHAIN_GROUP.lending.includes(chain)) {
+        if (chain === 'interlay') {
+          handlers.push(new InterlayLendingPoolHandler(this.state, chain));
+        }
+      }
+
+      for (const handler of handlers) {
+        this.handlers[handler.slug] = handler;
       }
     }
   }
@@ -163,7 +158,7 @@ export default class EarningService {
 
   /* Get pools' reward */
 
-  public async getPoolReward (addresses: string[]): Promise<VoidFunction> {
+  public async getPoolReward (addresses: string[], callback: (result: EarningRewardItem) => void): Promise<VoidFunction> {
     let cancel = false;
 
     await this.state.eventService.waitChainReady;
@@ -178,7 +173,7 @@ export default class EarningService {
         const chainInfo = handler.chainInfo;
         const useAddresses = _isChainEvmCompatible(chainInfo) ? evmAddresses : substrateAddresses;
 
-        handler.getPoolReward(useAddresses, console.debug)
+        handler.getPoolReward(useAddresses, callback)
           .then((unsub) => {
             if (cancel) {
               unsub();

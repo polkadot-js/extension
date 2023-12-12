@@ -40,7 +40,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
   /** @inner */
   protected override readonly minAmountPercent = 0.98;
   /** @inner */
-  protected override readonly allowUnstake = true;
+  protected override readonly allowDefaultUnstake = true;
   public slug: string;
 
   constructor (state: KoniState, chain: string) {

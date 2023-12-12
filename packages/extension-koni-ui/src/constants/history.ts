@@ -34,6 +34,10 @@ export const TxTypeNameMap: Record<ExtrinsicType, string> = {
   [ExtrinsicType.REDEEM_SDOT]: detectTranslate('Redeem sDOT'),
   [ExtrinsicType.REDEEM_QDOT]: detectTranslate('Redeem qDOT'),
   [ExtrinsicType.REDEEM_STDOT]: detectTranslate('Redeem stDOT'),
+  [ExtrinsicType.UNSTAKE_QDOT]: detectTranslate('Unstake qDOT'),
+  [ExtrinsicType.UNSTAKE_VDOT]: detectTranslate('Unstake vDOT'),
+  [ExtrinsicType.UNSTAKE_LDOT]: detectTranslate('Unstake LDOT'),
+  [ExtrinsicType.UNSTAKE_SDOT]: detectTranslate('Unstake sDOT'),
   [ExtrinsicType.UNKNOWN]: detectTranslate('Unknown')
 };
 

@@ -1070,5 +1070,13 @@
   "Watch any wallet": "",
   "Enter address": "",
   "Add watch-only wallet": "",
-  "{{name}} must be equal or greater than {{minString}}": ""
+  "{{name}} must be equal or greater than {{minString}}": "",
+  "Unstake qDOT": "",
+  "Unstake vDOT": "",
+  "Unstake LDOT": "",
+  "Unstake sDOT": "",
+  "Unstake qDOT tranasction": "",
+  "Unstake vDOT tranasction": "",
+  "Unstake LDOT tranasction": "",
+  "Unstake sDOT tranasction": ""
 }

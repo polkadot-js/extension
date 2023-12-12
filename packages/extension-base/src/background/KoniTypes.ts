@@ -1605,7 +1605,7 @@ export interface UnstakingInfo {
   chain: string;
   status: UnstakingStatus;
   claimable: string; // amount to be withdrawn
-  waitingTime?: number; // in hours
+  waitingTime: number; // in hours
   validatorAddress?: string; // might unstake from a validator or not
 }
 

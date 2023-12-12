@@ -257,6 +257,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT'),
     [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT'),
     [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT'),
+    [ExtrinsicType.UNSTAKE_QDOT]: t('Unstake qDOT'),
+    [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT'),
+    [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT'),
+    [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT'),
     [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
 
@@ -291,6 +295,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT transaction'),
     [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT transaction'),
     [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT transaction'),
+    [ExtrinsicType.UNSTAKE_QDOT]: t('Unstake qDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT tranasction'),
     [ExtrinsicType.UNKNOWN]: t('Unknown transaction')
   }), [t]);
 

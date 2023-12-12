@@ -35,7 +35,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     <BaseModal
       className={className}
       destroyOnClose={true}
-      fullSize
+      fullSizeOnMobile
       id={CUSTOMIZE_MODAL}
       onCancel={onCancel}
       title={t('Customize asset display')}

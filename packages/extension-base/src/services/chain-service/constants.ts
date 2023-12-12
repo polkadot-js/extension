@@ -34,7 +34,8 @@ export const _BALANCE_CHAIN_GROUP = {
   equilibrium_parachain: ['equilibrium_parachain'],
   bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude'],
   statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari'],
-  kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'] // perhaps there are some runtime updates
+  kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'], // perhaps there are some runtime updates
+  centrifuge: ['centrifuge']
 };
 
 export const _BALANCE_TOKEN_GROUP = {
@@ -84,7 +85,8 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   edgeware: 6,
   kate: 6,
   creditcoin: 24,
-  vara_network: 12
+  vara_network: 12,
+  goldberg_testnet: 24
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
@@ -165,7 +167,8 @@ export const _KNOWN_CHAIN_INFLATION_PARAMS: Record<string, _SubstrateInflationPa
   kusama: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, auctionAdjust: (0.3 / 60), auctionMax: 60, stakeTarget: 0.75 },
   neatcoin: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 },
   nft_mart: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, falloff: 0.04, stakeTarget: 0.60 },
-  polkadot: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 }
+  polkadot: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 },
+  vara_network: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 }
 };
 
 // Send fund------------------------------------------------------------------------------------------------------------
@@ -182,7 +185,8 @@ export const _TRANSFER_CHAIN_GROUP = {
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
   avail: ['kate', 'goldberg_testnet'],
-  pendulum: ['pendulum', 'amplitude', 'amplitude_test']
+  pendulum: ['pendulum', 'amplitude', 'amplitude_test'],
+  centrifuge: ['centrifuge']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {
@@ -218,8 +222,8 @@ export const _DEFAULT_ACTIVE_CHAINS = [
   'interlay'
 ];
 
-export const EVM_PASS_CONNECT_STATUS = {
-  acala: ['acala_evm', 'karura_evm']
+export const EVM_PASS_CONNECT_STATUS: Record<string, string[]> = {
+  arbitrum_one: ['*']
 };
 
 export const EVM_REFORMAT_DECIMALS = {

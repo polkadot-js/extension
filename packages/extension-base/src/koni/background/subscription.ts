@@ -3,12 +3,12 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
-import { subscribeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
 import { subscribeEssentialChainStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
 import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-base/koni/api/staking/paraChain';
 import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
+import { subscribeBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/balance';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
@@ -78,7 +78,7 @@ export class KoniSubscription {
   }
 
   async start () {
-    await Promise.all([this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
+    await Promise.all([this.state.eventService.waitCryptoReady, this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
     const currentAddress = this.state.keyringService.currentAccount?.address;
 
     this.subscribeYieldPools(this.state.getChainInfoMap(), this.state.getAssetRegistry(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap(), currentAddress);
@@ -284,7 +284,7 @@ export class KoniSubscription {
     });
 
     const unsub = subscribeBalance(addresses, filteredChainInfoMap, substrateApiMap, evmApiMap, (result) => {
-      this.state.setBalanceItem(result.tokenSlug, result);
+      this.state.setBalanceItem(result);
     });
 
     const unsub2 = this.state.subscribeMantaPayBalance();

@@ -11,8 +11,6 @@ import { BehaviorSubject } from 'rxjs';
 import Web3 from 'web3';
 import { HttpProvider, WebsocketProvider } from 'web3-core';
 
-const acalaEvmNetworks: string[] = EVM_PASS_CONNECT_STATUS.acala;
-
 export class EvmApi implements _EvmApi {
   chainSlug: string;
   api: Web3;
@@ -92,11 +90,19 @@ export class EvmApi implements _EvmApi {
     this.connect();
   }
 
+  get ignoreNetListen (): boolean {
+    const ignoreRpc: string[] | undefined = EVM_PASS_CONNECT_STATUS[this.chainSlug];
+
+    return ignoreRpc
+      ? ignoreRpc.includes('*') || ignoreRpc.includes(this.apiUrl)
+      : false;
+  }
+
   createIntervalCheckApi (): NodeJS.Timer {
     this.clearIntervalCheckApi();
 
     return setInterval(() => {
-      if (!acalaEvmNetworks.includes(this.chainSlug)) {
+      if (!this.ignoreNetListen) {
         this.api.eth.net.isListening()
           .then(() => {
             this.onConnect();
@@ -121,7 +127,7 @@ export class EvmApi implements _EvmApi {
     this.updateConnectionStatus(_ChainConnectionStatus.CONNECTING);
 
     // Check if api is ready
-    if (!acalaEvmNetworks.includes(this.chainSlug)) {
+    if (!this.ignoreNetListen) {
       this.api.eth.net.isListening()
         .then(() => {
           this.isApiReadyOnce = true;

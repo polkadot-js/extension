@@ -1,7 +1,60 @@
 # CHANGELOG
 
+## 1.1.25
+Build date: Dec 7, 2023.
+
+Features & Update:
+- Support EIP-6963 (Multi eth provider) (#2021)
+- Update showing estimated withdrawal time on staking (#2304)
+- Update APY for Vara network (#2301)
+- Update chain list (#2302)
+  - Integrate EWX Staging Parachain (testnet)
+  - Integrate EWC EVM chain
+  - Update Avail testate
+
+
+Bugs fixed:
+- Fixed bug display dApp/pool/validator/collator name (#2130)
+
+## 1.1.24
+Build date: Dec 1, 2023.
+
+Features & Update:
+- Support show balance detail by account on All accounts mode (#1997)
+- Support staking for Goldberg (#2181)
+- Add block explorer for Creditcoin (#2287)
+- Update new way to fetch transaction history (#2223)
+- Update the default logo (#1791)
+- Update RPC for some chains (#2293)
+- The default pool setting for Vara is SubWallet Official (#2291)
+- Improve validator/pool selection UX (#2246)
+
+Bugs fixed:
+- Fixed bug error submitting transaction on Astar EVM (#2255)
+- Fixed bug show staking earning status on Creditcoin (#2277)
+- Fixed bug showing staking rewards on Moonbeam (#2213)
+
+
+## 1.1.23
+Build date: Nov 24, 2023.
+
+Features & Update:
+- Support staking AZERO with Ledger (#2219)
+- Update chain-list (#2198)
+  - Add logo for custom network GOS
+  - Add price id for KREST
+- Update XCM for Astar network (#2196)
+
+Bugs fixed:
+- Fixed bug decode dApp address (#2139)
+- Fixed bug automatically activate tokens based on account balance (#1500)
+- Fixed bug missing crowdloan (#2199)
+- Fixed bug browser waste time when load extension (#2207) and add the loading effect when open app (#2228)
+
 ## 1.1.22
 Build date: Nov 15, 2023.
+
+Features & Update:
 - Update chain-list (#2178)
   - Add support for Enjin Relaychain and Enjin Matrixchain
   - Add support for Vara testnet
@@ -14,11 +67,12 @@ Bugs fixed:
 
 ## 1.1.21
 Build date: Nov 08, 2023.
+
+Features & Update:
 - Support nomination pool for Vara network (#2152)
 - Update chain list (#2145)
   - Add support Subspace Gemini 3g
   - Update logo and price of the PHA token
-
 
 Bugs fixed:
 - Fixed bug undefined is not an object when perform transaction (#2146)
@@ -27,7 +81,8 @@ Bugs fixed:
 
 ## 1.1.20
 Build date: Oct 26, 2023.
-- Features & Update:
+
+Features & Update:
 - Update online token list in fiat-onramp feature (#2031)
 - Sorting the token list to buy (#2025)
 - Add “Token Name” to the token screens (#1946)

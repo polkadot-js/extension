@@ -10,10 +10,10 @@ import styled from 'styled-components';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Props = ThemeProps & SelectModalProps<any> & {
-  fullSize?: boolean;
+  fullSizeOnMobile?: boolean;
 };
 
-function Component ({ children, className, fullSize = true, motion, ...props }: Props): React.ReactElement<Props> {
+function Component ({ children, className, fullSizeOnMobile = true, motion, ...props }: Props): React.ReactElement<Props> {
   const { isWebUI } = useContext(ScreenContext);
 
   const _motion = motion || (isWebUI ? 'move-right' : undefined);
@@ -25,7 +25,7 @@ function Component ({ children, className, fullSize = true, motion, ...props }: 
         className={CN(className, {
           '-desktop': isWebUI,
           '-mobile': !isWebUI,
-          '-full-Size': fullSize
+          '-full-size-on-mobile': fullSizeOnMobile
         })}
         motion={_motion}
         width={'100%'}
@@ -55,7 +55,8 @@ export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemePro
         height: '100%',
         maxHeight: '100%',
         paddingLeft: token.paddingLG,
-        paddingRight: token.paddingLG
+        paddingRight: token.paddingLG,
+        borderRadius: '8px 0 0 8px'
       },
 
       '.ant-sw-list-section .ant-sw-list-wrapper': {
@@ -71,7 +72,7 @@ export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemePro
       }
     },
 
-    '&.-full-Size': {
+    '&.-mobile.-full-size-on-mobile': {
       '.ant-sw-modal-content': {
         height: '100%',
         maxHeight: '100%',

@@ -102,15 +102,13 @@ const Component = () => {
   const currentYieldPosition = useGetYieldPositionByAddressAndSlug(currentFrom, currentPoolInfo.slug);
 
   const onDone = useCallback((extrinsicHash: string) => {
-    const chainType = isEthereumAddress(currentFrom) ? 'ethereum' : 'substrate';
-
     let donePath = 'transaction-done';
 
     if (canMint) {
       donePath = 'earning-done';
     }
 
-    navigate(`/${donePath}/${chainType}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
+    navigate(`/${donePath}/${currentFrom}/${currentPoolInfo.chain}/${extrinsicHash}`, { replace: true });
   }, [currentFrom, currentPoolInfo.chain, canMint, navigate]);
 
   const onError = useCallback((error: Error) => {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { AlertBox, InfoIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AlertBox, BaseModal, InfoIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { CREATE_RETURN, REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -11,7 +11,7 @@ import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messag
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon, Input, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
+import { Button, Form, Icon, Input, ModalContext, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CaretLeft, CheckCircle, ShieldPlus } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
@@ -254,7 +254,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 <InstructionContainer contents={instructionContents} />
               )
               : (
-                <SwModal
+                <BaseModal
+                  center={true}
                   closeIcon={(
                     <Icon
                       phosphorIcon={CaretLeft}
@@ -270,7 +271,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   wrapClassName={className}
                 >
                   <InstructionContainer contents={instructionContents} />
-                </SwModal>
+                </BaseModal>
               )}
           </div>
         </div>

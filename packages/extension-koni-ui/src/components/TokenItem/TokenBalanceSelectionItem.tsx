@@ -146,6 +146,7 @@ export const TokenBalanceSelectionItem = styled(Component)<Props>(({ theme: { to
       display: 'flex',
       flexDirection: 'row',
       overflow: 'hidden',
+      paddingRight: token.paddingXS,
 
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,

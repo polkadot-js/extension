@@ -110,7 +110,8 @@ export function getStellaswapLiquidStakingPosition (evmApiMap: Record<string, _E
         unstakings.push({
           chain: poolInfo.chain,
           claimable: unbondedObject.unbonded,
-          status: UnstakingStatus.CLAIMABLE
+          status: UnstakingStatus.CLAIMABLE,
+          waitingTime: 0
         });
       }
 
@@ -118,7 +119,8 @@ export function getStellaswapLiquidStakingPosition (evmApiMap: Record<string, _E
         unstakings.push({
           chain: poolInfo.chain,
           claimable: unbondedObject.waiting,
-          status: UnstakingStatus.UNLOCKING
+          status: UnstakingStatus.UNLOCKING,
+          waitingTime: 20 // TODO: Recheck
         });
       }
 

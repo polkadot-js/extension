@@ -31,11 +31,18 @@ export const TRANSACTION_TITLE_MAP: Record<ExtrinsicType, string> = {
   [ExtrinsicType.MINT_QDOT]: detectTranslate('Mint qDOT'), // TODO: Change this
   [ExtrinsicType.MINT_SDOT]: detectTranslate('Mint sDOT'), // TODO: Change this
   [ExtrinsicType.MINT_VDOT]: detectTranslate('Mint vDOT'), // TODO: Change this
+  [ExtrinsicType.MINT_STDOT]: detectTranslate('Mint stDOT'), // TODO: Change this
 
   [ExtrinsicType.REDEEM_LDOT]: detectTranslate('Redeem lDOT'), // TODO: Change this
   [ExtrinsicType.REDEEM_QDOT]: detectTranslate('Redeem qDOT'), // TODO: Change this
   [ExtrinsicType.REDEEM_SDOT]: detectTranslate('Redeem sDOT'), // TODO: Change this
-  [ExtrinsicType.REDEEM_VDOT]: detectTranslate('Redeem vDOT') // TODO: Change this
+  [ExtrinsicType.REDEEM_VDOT]: detectTranslate('Redeem vDOT'), // TODO: Change this
+  [ExtrinsicType.REDEEM_STDOT]: detectTranslate('Redeem stDOT'), // TODO: Change this
+
+  [ExtrinsicType.UNSTAKE_QDOT]: detectTranslate('Unstake qDOT'),
+  [ExtrinsicType.UNSTAKE_VDOT]: detectTranslate('Unstake vDOT'),
+  [ExtrinsicType.UNSTAKE_LDOT]: detectTranslate('Unstake LDOT'),
+  [ExtrinsicType.UNSTAKE_SDOT]: detectTranslate('Unstake sDOT')
 };
 
 export const ALL_STAKING_ACTIONS: ExtrinsicType[] = [

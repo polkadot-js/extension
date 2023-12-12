@@ -560,6 +560,11 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.REDEEM_SDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.REDEEM_STDOT]: RequestYieldFastWithdrawal,
 
+  [ExtrinsicType.UNSTAKE_QDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_VDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldFastWithdrawal,
+
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
   [ExtrinsicType.UNKNOWN]: any
@@ -1604,7 +1609,7 @@ export interface UnstakingInfo {
   chain: string;
   status: UnstakingStatus;
   claimable: string; // amount to be withdrawn
-  waitingTime?: number; // in hours
+  waitingTime: number; // in hours
   validatorAddress?: string; // might unstake from a validator or not
 }
 

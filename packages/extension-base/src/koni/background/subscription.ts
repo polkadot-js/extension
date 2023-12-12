@@ -115,7 +115,9 @@ export class KoniSubscription {
   }
 
   subscribeBalancesAndCrowdloans (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, web3ApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
-    this.state.handleSwitchAccount(address).then(() => {
+    const handleSwitchAccount = this.state.handleSwitchAccount(address);
+
+    handleSwitchAccount.then(() => {
       const addresses = this.state.getDecodedAddresses(address);
 
       if (!addresses.length) {

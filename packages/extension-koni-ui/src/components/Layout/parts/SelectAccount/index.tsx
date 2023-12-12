@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
-import { SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
+import { BaseSelectModal, SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
@@ -10,9 +10,9 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, ModalContext, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Plug, Plugs, PlugsConnected } from 'phosphor-react';
+import { CaretDown, Plug, Plugs, PlugsConnected, SignOut } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -173,6 +173,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         className={className}
         genesisHash={item.genesisHash}
         isSelected={_selected}
+        moreIcon={!isInjected ? undefined : SignOut}
         onClickQrButton={onClickItemQrButton}
         onPressMoreButton={isInjected ? openDisconnectExtensionModal : onClickDetailAccount(item.address)}
         source={item.source}
@@ -311,10 +312,11 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </Tooltip>
       )}
 
-      <SelectModal
+      <BaseSelectModal
         background={'default'}
         className={className}
         footer={<SelectAccountFooter />}
+        fullSizeOnMobile
         id={modalId}
         ignoreScrollbarMethod='padding'
         inputWidth={'100%'}
@@ -330,6 +332,12 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         selected={currentAccount?.address || ''}
         shape='round'
         size='small'
+        suffix={
+          <Icon
+            phosphorIcon={CaretDown}
+            weight={'bold'}
+          />
+        }
         title={t('Select account')}
       />
 
@@ -375,7 +383,7 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
 
     '&.ant-sw-modal': {
       '.ant-sw-modal-body': {
-        height: 370,
+        minHeight: 370,
         marginBottom: 0
       },
 
@@ -384,7 +392,8 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       },
 
       '.ant-sw-modal-footer': {
-        marginTop: 0
+        marginTop: 0,
+        borderTopColor: 'rgba(33, 33, 33, 0.80)'
       },
 
       '.ant-account-card': {

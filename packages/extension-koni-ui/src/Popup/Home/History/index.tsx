@@ -167,8 +167,6 @@ function findLedgerChainOfSelectedAccount (
 }
 
 const modalId = HISTORY_DETAIL_MODAL;
-
-const LIST_KEY = 'history-list';
 const DEFAULT_ITEMS_COUNT = 20;
 const NEXT_ITEMS_COUNT = 10;
 
@@ -183,7 +181,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const chainInfoList = useChainInfoWithState();
   const { language } = useSelector((root) => root.settings);
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
-  const [listKey, setListKey] = useState<string>(LIST_KEY);
   const [loading, setLoading] = useState<boolean>(true);
   const [rawHistoryList, setRawHistoryList] = useState<TransactionHistoryItem[]>([]);
 
@@ -191,7 +188,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
-  const filterFunction = useMemo<(item: TransactionHistoryDisplayItem) => boolean>(() => {
+  const _filterFunction = useMemo<(item: TransactionHistoryItem) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
         return true;
@@ -240,6 +237,34 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return false;
     };
   }, [selectedFilters]);
+
+  const filterFunction = useCallback((item: TransactionHistoryItem) => {
+    if (!isWebUI) {
+      return _filterFunction(item);
+    }
+
+    const filterTabFunction = (_item: TransactionHistoryItem) => {
+      if (selectedFilterTab === FilterValue.ALL) {
+        return true;
+      }
+
+      if (selectedFilterTab === FilterValue.TOKENS) {
+        return isTypeTransfer(_item.type);
+      }
+
+      if (selectedFilterTab === FilterValue.NFT) {
+        return _item.type === ExtrinsicType.SEND_NFT;
+      }
+
+      if (selectedFilterTab === FilterValue.EARN) {
+        return YIELD_EXTRINSIC_TYPES.includes(_item.type);
+      }
+
+      return false;
+    };
+
+    return filterTabFunction(item) && _filterFunction(item);
+  }, [_filterFunction, isWebUI, selectedFilterTab]);
 
   const filterOptions = useMemo(() => {
     return [
@@ -348,8 +373,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [currentItemDisplayCount, setCurrentItemDisplayCount] = useState<number>(DEFAULT_ITEMS_COUNT);
 
   const getHistoryItems = useCallback((count: number) => {
-    return Object.values(historyMap).sort((a, b) => (b.time - a.time)).slice(0, count);
-  }, [historyMap]);
+    return Object.values(historyMap).filter(filterFunction).sort((a, b) => (b.time - a.time)).slice(0, count);
+  }, [filterFunction, historyMap]);
 
   const [historyItems, setHistoryItems] = useState<TransactionHistoryDisplayItem[]>(getHistoryItems(DEFAULT_ITEMS_COUNT));
 
@@ -440,7 +465,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const onSelectFilterTab = useCallback((value: string) => {
     setSelectedFilterTab(value);
-    setListKey(`${LIST_KEY}-${Date.now()}`);
+    setCurrentItemDisplayCount(DEFAULT_ITEMS_COUNT);
   }, []);
 
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {
@@ -463,30 +488,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     ];
   }, [t]);
-
-  const webUiFilterFunction = useCallback((item: TransactionHistoryDisplayItem) => {
-    const filterTabFunction = (_item: TransactionHistoryDisplayItem) => {
-      if (selectedFilterTab === FilterValue.ALL) {
-        return true;
-      }
-
-      if (selectedFilterTab === FilterValue.TOKENS) {
-        return isTypeTransfer(_item.type);
-      }
-
-      if (selectedFilterTab === FilterValue.NFT) {
-        return _item.type === ExtrinsicType.SEND_NFT;
-      }
-
-      if (selectedFilterTab === FilterValue.EARN) {
-        return YIELD_EXTRINSIC_TYPES.includes(_item.type);
-      }
-
-      return false;
-    };
-
-    return filterTabFunction(item) && filterFunction(item);
-  }, [filterFunction, selectedFilterTab]);
 
   const chainItems = useMemo<ChainItemType[]>(() => {
     if (!selectedAddress) {
@@ -562,30 +563,31 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const _onApplyFilter = useCallback(() => {
     onApplyFilter();
     setCurrentItemDisplayCount(DEFAULT_ITEMS_COUNT);
-    setListKey(`${LIST_KEY}-${Date.now()}`);
   }, [onApplyFilter]);
 
   const onLoadMoreItems = useCallback(() => {
     setCurrentItemDisplayCount((prev) => {
-      if (prev + NEXT_ITEMS_COUNT > rawHistoryList.length) {
-        return rawHistoryList.length;
+      const rawItemsLength = rawHistoryList.filter(filterFunction).length;
+
+      if (prev + NEXT_ITEMS_COUNT > rawItemsLength) {
+        return rawItemsLength;
       } else {
         return prev + NEXT_ITEMS_COUNT;
       }
     });
-  }, [rawHistoryList.length]);
+  }, [filterFunction, rawHistoryList]);
 
-  const hasMoreItems = rawHistoryList.length > historyItems.length;
+  const hasMoreItems = useMemo(() => {
+    return rawHistoryList.filter(filterFunction).length > historyItems.length;
+  }, [filterFunction, historyItems.length, rawHistoryList]);
 
   const listSection = useMemo(() => (
     <>
       <div className={'__page-list-area'}>
         <SwList
-          filterBy={isWebUI ? webUiFilterFunction : filterFunction}
           groupBy={groupBy}
           groupSeparator={groupSeparator}
           hasMoreItems={hasMoreItems}
-          key={listKey}
           list={historyItems}
           loadMoreItems={onLoadMoreItems}
           renderItem={renderItem}
@@ -594,7 +596,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
       </div>
     </>
-  ), [emptyList, filterFunction, groupBy, groupSeparator, hasMoreItems, historyItems, isWebUI, listKey, onLoadMoreItems, renderItem, webUiFilterFunction]);
+  ), [emptyList, groupBy, groupSeparator, hasMoreItems, historyItems, onLoadMoreItems, renderItem]);
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
     return [

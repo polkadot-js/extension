@@ -4808,8 +4808,8 @@ export default class KoniExtension {
         return this.#koniState.dbService.exportDB();
       case 'pri(database.import)':
         return this.#koniState.dbService.importDB(request as string);
-      case 'pri(database.checkMetadata)':
-        return this.#koniState.dbService.checkImportMetadata(request as string);
+      case 'pri(database.exportJson)':
+        return this.#koniState.dbService.getExportJson();
         /* Database */
       // Default
       default:

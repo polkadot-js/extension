@@ -238,7 +238,9 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
       onCancel={onCloseModal}
       title={t(modalTitle)}
     >
-      <MetaInfo>
+      <MetaInfo
+        className='base-info'
+      >
         <MetaInfo.Account
           accounts={isAccountAll(address) ? stakingAccounts : undefined}
           address={address}
@@ -460,6 +462,12 @@ const StakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props
   return {
     '.expected-return div:first-child': {
       flex: 2
+    },
+
+    '.base-info': {
+      '.__value-col': {
+        flex: 2
+      }
     },
 
     '.staking-detail-modal-footer': {

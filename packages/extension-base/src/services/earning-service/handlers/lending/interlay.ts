@@ -170,7 +170,7 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
 
   /* Leave pool action */
 
-  async handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+  async handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const substrateApi = await this.substrateApi.isReady;
     // @ts-ignore
     const inputTokenSlug = this.inputAsset;

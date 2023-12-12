@@ -7,7 +7,7 @@ import { BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, StakingTxEr
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, YieldPoolInfo, YieldPoolTarget, YieldProcessValidation, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldProcessValidation, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import BN from 'bn.js';
 import { t } from 'i18next';
 
@@ -22,6 +22,8 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   protected abstract inputAsset: string;
   protected abstract rewardAssets: string[];
   protected abstract feeAssets: string[];
+  /** Allow to create unstake transaction */
+  protected readonly allowUnstake: boolean = false;
 
   protected get extraInfo (): Omit<
   SpecialYieldPoolInfo,
@@ -448,11 +450,15 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
   /* Leave pool action */
 
-  async validateYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<TransactionError[]> {
+  async validateYieldLeave (amount: string, address: string, fastLeave: boolean, selectedTarget?: string): Promise<TransactionError[]> {
     const poolInfo = await this.getPoolInfo();
     const poolPosition = await this.getPoolPosition(address);
 
     if (!poolInfo || !poolPosition) {
+      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+    }
+
+    if (!this.allowUnstake && !fastLeave) {
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 
@@ -473,6 +479,10 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     return Promise.resolve(errors);
   }
 
+  handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+    return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+  }
+
   /* Leave pool action */
 
   /* Other action */
@@ -485,7 +495,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
   }
 
-  handleYieldWithdraw (address: string, selectedTarget?: string): Promise<TransactionData> {
+  handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData> {
     return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
   }
 

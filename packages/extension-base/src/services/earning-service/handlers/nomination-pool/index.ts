@@ -1,10 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnsubscribePromise } from '@polkadot/api-base/types/base';
-import { Bytes } from '@polkadot/types';
-import { Codec } from '@polkadot/types/types';
-import { BN, BN_ZERO, hexToString, isHex } from '@polkadot/util';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { APIItemState, BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, StakingTxErrorType, StakingType, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, getExistUnstakeErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parsePoolStashAddress, transformPoolName } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
@@ -17,6 +13,11 @@ import { fakeAddress } from '@subwallet/extension-base/services/earning-service/
 import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, RequestStakePoolingBonding, RuntimeDispatchInfo, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
+
+import { UnsubscribePromise } from '@polkadot/api-base/types/base';
+import { Bytes } from '@polkadot/types';
+import { Codec } from '@polkadot/types/types';
+import { BN, BN_ZERO, hexToString, isHex } from '@polkadot/util';
 
 import BasePoolHandler from '../base';
 
@@ -484,13 +485,13 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
   /* Leave pool action */
 
-  async validateYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<TransactionError[]> {
+  async validateYieldLeave (amount: string, address: string, fastLeave: boolean, selectedTarget?: string): Promise<TransactionError[]> {
     const errors: TransactionError[] = [];
 
     const poolInfo = await this.getPoolInfo();
     const poolPosition = await this.getPoolPosition(address);
 
-    if (!poolInfo || !poolPosition) {
+    if (!poolInfo || !poolPosition || fastLeave) {
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 
@@ -510,7 +511,11 @@ export default class NominationPoolHandler extends BasePoolHandler {
     return Promise.resolve(errors);
   }
 
-  async handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+  async handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+    return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+  }
+
+  async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const chainApi = await this.substrateApi.isReady;
     const poolPosition = await this.getPoolPosition(address);
 
@@ -541,7 +546,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
     return chainApi.api.tx.nominationPools.claimPayout();
   }
 
-  async handleYieldWithdraw (address: string, selectedTarget?: string): Promise<TransactionData> {
+  async handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData> {
     const chainApi = await this.substrateApi.isReady;
 
     if (chainApi.api.tx.nominationPools.withdrawUnbonded.meta.args.length === 2) {

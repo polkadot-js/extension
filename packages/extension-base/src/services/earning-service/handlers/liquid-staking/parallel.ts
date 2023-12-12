@@ -25,7 +25,10 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
   protected readonly inputAsset: string = 'parallel-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['parallel-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['parallel-NATIVE-PARA'];
+  /** @inner */
   protected override readonly minAmountPercent = 0.97;
+  /** @inner */
+  protected override readonly allowUnstake = true;
   public slug: string;
 
   constructor (state: KoniState, chain: string) {
@@ -201,13 +204,21 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
 
   /* Leave pool action */
 
-  async handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+  async handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const substrateApi = await this.substrateApi.isReady;
-    const weightedMinAmount = await this.createParamToLeave(amount, address);
+    const weightedMinAmount = await this.createParamToRedeem(amount, address);
 
     const extrinsic = substrateApi.api.tx.ammRoute.swapExactTokensForTokens(['1001', '101'], amount, weightedMinAmount);
 
     return [ExtrinsicType.REDEEM_SDOT, extrinsic];
+  }
+
+  override async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+    const chainApi = await this.substrateApi.isReady;
+
+    const extrinsic = chainApi.api.tx.liquidStaking.unstake(amount, 'RelayChain');
+
+    return [ExtrinsicType.UNSTAKE_SDOT, extrinsic];
   }
 
   /* Leave pool action */

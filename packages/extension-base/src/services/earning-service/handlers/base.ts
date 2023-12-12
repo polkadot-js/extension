@@ -6,7 +6,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { ExtrinsicType, StakeCancelWithdrawalParams } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 
 /**
  * @class BasePoolHandler
@@ -108,16 +108,26 @@ export default abstract class BasePoolHandler {
   /* Join action */
 
   /** Validate param to leave the pool */
-  abstract validateYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<TransactionError[]>
+  abstract validateYieldLeave (amount: string, address: string, fastLeave: boolean, selectedTarget?: string): Promise<TransactionError[]>
+  /** Create `transaction` to leave the pool normal (default unstake) */
+  abstract handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]>;
+  /** Create `transaction` to leave the pool fast (swap token) */
+  abstract handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]>;
   /** Create `transaction` to leave the pool */
-  abstract handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]>;
+  async handleYieldLeave (fastLeave: boolean, amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+    if (fastLeave) {
+      return this.handleYieldRedeem(amount, address, selectedTarget);
+    } else {
+      return this.handleYieldUnstake(amount, address, selectedTarget);
+    }
+  }
 
   /* Join action */
 
   /* Other actions */
 
   /** Create `transaction` to withdraw unstaked amount */
-  abstract handleYieldWithdraw (address: string, selectedTarget?: string): Promise<TransactionData>;
+  abstract handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData>;
   /** Create `transaction` to cancel unstake */
   abstract handleYieldCancelUnstake (params: StakeCancelWithdrawalParams): Promise<TransactionData>;
   /** Create `transaction` to claim reward */

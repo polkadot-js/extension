@@ -60,6 +60,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
   protected readonly inputAsset: string = 'bifrost_dot-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['bifrost_dot-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['bifrost_dot-NATIVE-BNC', 'bifrost_dot-LOCAL-DOT'];
+  /** @inner */
   protected override readonly minAmountPercent = 0.99;
   public slug: string;
 
@@ -321,9 +322,9 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
 
   /* Leave pool action */
 
-  async handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+  async handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const substrateApi = await this.substrateApi.isReady;
-    const weightedMinAmount = await this.createParamToLeave(amount, address);
+    const weightedMinAmount = await this.createParamToRedeem(amount, address);
 
     const extrinsic = substrateApi.api.tx.stablePool.swap(0, 1, 0, amount, weightedMinAmount);
 

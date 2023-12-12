@@ -14,11 +14,11 @@ export async function subscribeYieldPoolInfo (callback: (data: YieldPoolInfo[]) 
 }
 
 export async function getOptimalYieldPath (data: OptimalYieldPathParams) {
-  return sendMessage('pri(yield.getOptimalPath)', data);
+  return sendMessage('pri(yield.join.getOptimalPath)', data);
 }
 
 export async function submitJoinYieldPool (data: RequestYieldStepSubmit): Promise<SWTransactionResponse> {
-  return sendMessage('pri(yield.handleStep)', data);
+  return sendMessage('pri(yield.join.handleStep)', data);
 }
 
 export async function getYieldNativeStakingValidators (poolInfo: YieldPoolInfo): Promise<ValidatorInfo[]> {
@@ -30,7 +30,7 @@ export async function getYieldNominationPools (poolInfo: YieldPoolInfo): Promise
 }
 
 export async function validateYieldProcess (data: ValidateYieldProcessParams): Promise<TransactionError[]> {
-  return sendMessage('pri(yield.validateProcess)', data);
+  return sendMessage('pri(yield.join.validateProcess)', data);
 }
 
 export async function yieldSubmitUnstaking (data: RequestUnbondingSubmit) {
@@ -38,15 +38,15 @@ export async function yieldSubmitUnstaking (data: RequestUnbondingSubmit) {
 }
 
 export async function yieldSubmitStakingWithdrawal (data: RequestStakeWithdrawal) {
-  return sendMessage('pri(yield.staking.submitWithdraw)', data);
+  return sendMessage('pri(yield.withdraw.submit)', data);
 }
 
 export async function yieldSubmitStakingCancelWithdrawal (data: RequestStakeCancelWithdrawal) {
-  return sendMessage('pri(yield.staking.submitCancelWithdrawal)', data);
+  return sendMessage('pri(yield.cancelWithdrawal.submit)', data);
 }
 
 export async function yieldSubmitStakingClaimReward (data: RequestStakeClaimReward) {
-  return sendMessage('pri(yield.staking.submitClaimReward)', data);
+  return sendMessage('pri(yield.claimReward.submit)', data);
 }
 
 export async function yieldSubmitNominationPoolUnstaking (data: RequestStakePoolingUnbonding) {

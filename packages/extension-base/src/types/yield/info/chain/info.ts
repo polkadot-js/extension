@@ -207,3 +207,12 @@ export interface NormalYieldPoolInfo extends AbstractYieldPoolInfo {
  * Info of yield pool
  * */
 export type YieldPoolInfo = NormalYieldPoolInfo | LiquidYieldPoolInfo | LendingYieldPoolInfo;
+
+/**
+ * @interface YieldAssetExpectedEarning
+ * Pool expected return
+ * */
+export interface YieldAssetExpectedEarning {
+  apy?: number,
+  rewardInToken?: number
+}

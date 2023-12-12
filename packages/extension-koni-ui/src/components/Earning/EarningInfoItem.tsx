@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldAssetExpectedEarning } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldAssetExpectedEarning } from '@subwallet/extension-base/types';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Logo, Number } from '@subwallet/react-ui';
 import React from 'react';

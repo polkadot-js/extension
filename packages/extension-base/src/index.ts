@@ -5,3 +5,4 @@
 // import './detectPackage';
 
 export * from './bundle';
+export { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';

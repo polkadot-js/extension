@@ -46,3 +46,7 @@ export interface ValidatorInfo {
 }
 
 export type YieldPoolTarget = NominationPoolInfo | ValidatorInfo;
+
+export interface RequestGetYieldPoolTargets {
+  slug: string;
+}

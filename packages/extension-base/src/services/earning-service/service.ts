@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
@@ -12,7 +12,7 @@ import AcalaLiquidStakingPoolHandler from '@subwallet/extension-base/services/ea
 import BifrostLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/bifrost';
 import ParallelLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/parallel';
 import NominationPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/nomination-pool';
-import { HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestYieldLeave, RequestYieldWithdrawal, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 export default class EarningService {
@@ -266,6 +266,53 @@ export default class EarningService {
   }
 
   /* Join */
+
+  /* Leave */
+
+  public async validateYieldLeave (params: RequestYieldLeave): Promise<TransactionError[]> {
+    await this.state.eventService.waitChainReady;
+
+    const { slug } = params;
+    const handler = this.getPoolHandler(slug);
+
+    if (handler) {
+      return handler.validateYieldLeave(params.amount, params.address, params.fastLeave, params.selectedTarget);
+    } else {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+    }
+  }
+
+  public async handleYieldLeave (params: RequestYieldLeave): Promise<[ExtrinsicType, TransactionData]> {
+    await this.state.eventService.waitChainReady;
+
+    const { slug } = params;
+    const handler = this.getPoolHandler(slug);
+
+    if (handler) {
+      return handler.handleYieldLeave(params.fastLeave, params.amount, params.address, params.selectedTarget);
+    } else {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+    }
+  }
+
+  /* Leave */
+
+  /* Other */
+
+  public async handleYieldWithdraw (params: RequestYieldWithdrawal): Promise<TransactionData> {
+    await this.state.eventService.waitChainReady;
+
+    const { slug } = params;
+    const handler = this.getPoolHandler(slug);
+
+    if (handler) {
+      return handler.handleYieldWithdraw(params.address, params.unstakingInfo);
+    } else {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+    }
+  }
+
+  /* Other */
 
   /* Handle actions */
 }

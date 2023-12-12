@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, TokenBalanceRaw } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import fetch from 'cross-fetch';
 
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -37,7 +37,10 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
   protected readonly inputAsset: string = 'acala-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['acala-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['acala-NATIVE-ACA', 'acala-LOCAL-DOT'];
+  /** @inner */
   protected override readonly minAmountPercent = 0.98;
+  /** @inner */
+  protected override readonly allowUnstake = true;
   public slug: string;
 
   constructor (state: KoniState, chain: string) {
@@ -208,9 +211,9 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
 
   /* Leave pool action */
 
-  async handleYieldLeave (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+  async handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const substrateApi = await this.substrateApi.isReady;
-    const weightedMinAmount = await this.createParamToLeave(amount, address);
+    const weightedMinAmount = await this.createParamToRedeem(amount, address);
     const extrinsic = substrateApi.api.tx.aggregatedDex.swapWithExactSupply(
       // Swap path
       [
@@ -229,6 +232,13 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     );
 
     return [ExtrinsicType.REDEEM_QDOT, extrinsic];
+  }
+
+  override async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+    const chainApi = await this.substrateApi.isReady;
+    const extrinsic = chainApi.api.tx.homa.requestRedeem(amount, false);
+
+    return [ExtrinsicType.UNSTAKE_QDOT, extrinsic];
   }
 
   /* Leave pool action */

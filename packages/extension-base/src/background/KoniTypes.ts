@@ -1,6 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SignerResult } from '@polkadot/types/types/extrinsic';
+import { KeypairType } from '@polkadot/util-crypto/types';
+import { HexString } from '@polkadot/util/types';
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _FundStatus, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
@@ -10,7 +13,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BalanceMap, BuyServiceInfo, BuyTokenInfo, EarningStatus, NominationPoolInfo, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldStepSubmit, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { BalanceJson, BalanceMap, BuyServiceInfo, BuyTokenInfo, EarningStatus, NominationPoolInfo, RequestGetYieldPoolTargets, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -20,10 +23,6 @@ import { DexieExportJsonStructure } from 'dexie-export-import';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
-
-import { SignerResult } from '@polkadot/types/types/extrinsic';
-import { HexString } from '@polkadot/util/types';
-import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
 
@@ -2217,11 +2216,6 @@ export interface YieldProcessValidation {
   message?: string
 }
 
-export interface YieldAssetExpectedEarning {
-  apy?: number,
-  rewardInToken?: number
-}
-
 export enum YieldCompoundingPeriod {
   DAILY = 1,
   WEEKLY = 7,
@@ -2503,22 +2497,52 @@ export interface KoniRequestSignatures {
   'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
   'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
 
-  // yield
-  'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
-  'pri(yield.getOptimalPath)': [OptimalYieldPathParams, OptimalYieldPath];
-  'pri(yield.handleStep)': [HandleYieldStepParams, SWTransactionResponse];
-  'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
-  'pri(yield.submitRedeem)': [RequestYieldFastWithdrawal, SWTransactionResponse];
-  'pri(yield.validateProcess)': [ValidateYieldProcessParams, TransactionError[]];
+  /* Earning */
 
+  /* Info */
+
+  'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
+  'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
+  'pri(yield.getTargets)': [RequestGetYieldPoolTargets, YieldPoolTarget[]];
+
+  // Deprecated
   'pri(yield.getNativeStakingValidators)': [YieldPoolInfo, ValidatorInfo[]];
   'pri(yield.getStakingNominationPools)': [YieldPoolInfo, NominationPoolInfo[]];
 
+  /* Info */
+
+  /* Actions */
+
+  /* Join */
+
+  'pri(yield.join.getOptimalPath)': [OptimalYieldPathParams, OptimalYieldPath];
+  'pri(yield.join.handleStep)': [HandleYieldStepParams, SWTransactionResponse];
+  'pri(yield.join.validateProcess)': [ValidateYieldProcessParams, TransactionError[]];
+
+  /* Join */
+
+  /* Leave */
+
+  'pri(yield.leave.submit)': [RequestYieldLeave, SWTransactionResponse];
+
+  // Deprecated
+  'pri(yield.submitRedeem)': [RequestYieldFastWithdrawal, SWTransactionResponse];
   'pri(yield.staking.submitUnstaking)': [RequestUnbondingSubmit, SWTransactionResponse];
-  'pri(yield.staking.submitWithdraw)': [RequestStakeWithdrawal, SWTransactionResponse];
-  'pri(yield.staking.submitCancelWithdrawal)': [RequestStakeCancelWithdrawal, SWTransactionResponse];
-  'pri(yield.staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
   'pri(yield.nominationPool.submitUnstaking)': [RequestStakePoolingUnbonding, SWTransactionResponse];
+
+  /* Leave */
+
+  /* Other */
+
+  'pri(yield.withdraw.submit)': [RequestStakeWithdrawal, SWTransactionResponse];
+  'pri(yield.cancelWithdrawal.submit)': [RequestStakeCancelWithdrawal, SWTransactionResponse];
+  'pri(yield.claimReward.submit)': [RequestStakeClaimReward, SWTransactionResponse];
+
+  /* Other */
+
+  /* Actions */
+
+  /* Earning */
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

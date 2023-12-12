@@ -10,11 +10,12 @@ import BaseSpecialStakingPoolHandler from '../special';
 
 export default abstract class BaseLiquidStakingPoolHandler extends BaseSpecialStakingPoolHandler {
   public readonly type = YieldPoolType.LIQUID_STAKING;
+  /** Rate convert token when redeem */
   protected readonly minAmountPercent: number = 0.98;
 
   /* Leave pool action */
 
-  async createParamToLeave (amount: string, address: string): Promise<number> {
+  async createParamToRedeem (amount: string, address: string): Promise<number> {
     const yieldPositionInfo = await this.getPoolPosition(address);
     const poolInfo = await this.getPoolInfo();
     const originTokenSlug = this.inputAsset;

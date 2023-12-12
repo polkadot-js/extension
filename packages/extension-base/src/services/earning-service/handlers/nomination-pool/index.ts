@@ -27,21 +27,8 @@ export interface PalletStakingNominations {
   suppressed: boolean
 }
 
-export interface UnlockingChunk {
-  value: number,
-  era: number
-}
-
-export interface PalletStakingStakingLedger {
-  stash: string,
-  total: number,
-  active: number,
-  unlocking: UnlockingChunk[],
-  claimedRewards: number[]
-}
-
 export default class NominationPoolHandler extends BasePoolHandler {
-  protected readonly type = YieldPoolType.NOMINATION_POOL;
+  public readonly type = YieldPoolType.NOMINATION_POOL;
   protected readonly description: string;
   protected readonly group: YieldPoolGroup;
   protected readonly name: string;

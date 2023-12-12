@@ -164,7 +164,7 @@ export default class KoniState {
     this.mintCampaignService = new MintCampaignService(this);
     this.buyService = new BuyService(this);
 
-    this.transactionService = new TransactionService(this.chainService, this.eventService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService, this.mintCampaignService);
+    this.transactionService = new TransactionService(this);
 
     this.earningService = new EarningService(this);
 

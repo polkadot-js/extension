@@ -51,11 +51,11 @@
     "web-runner:publish": "gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'",
     "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
     "webapp:build": "cd packages/webapp && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
+    "webapp:change-build-number-webapp": "node scripts/change-build-number-webapp.cjs",
     "webapp:deploy": "yarn webapp:build && gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
     "webapp:dev": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "webapp:publish": "gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
-    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development",
-    "webapp:change-build-number-webapp": "node scripts/change-build-number-webapp.cjs"
+    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development"
   },
   "dependencies": {
     "@types/node": "^17.0.10",

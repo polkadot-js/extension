@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningStatus, UnstakingStatus, YieldPoolType } from '@subwallet/extension-base/types';
+import { EarningStatus, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { t } from 'i18next';
@@ -387,30 +387,28 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
   const result: YieldAction[] = [];
 
   if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(yieldPoolInfo.type)) {
-    const nominatorMetadata = yieldPosition.metadata as NominatorMetadata;
-
     result.push(YieldAction.STAKE);
 
-    const bnActiveStake = new BN(nominatorMetadata.activeStake);
+    const bnActiveStake = new BN(yieldPosition.activeStake);
 
-    if (nominatorMetadata.activeStake && bnActiveStake.gt(BN_ZERO)) {
+    if (yieldPosition.activeStake && bnActiveStake.gt(BN_ZERO)) {
       result.push(YieldAction.UNSTAKE);
 
-      const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
-      const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain);
+      const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(yieldPosition.chain);
+      const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(yieldPosition.chain);
       const bnUnclaimedReward = new BN(unclaimedReward || '0');
 
       if (
-        ((nominatorMetadata.type === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
+        ((yieldPosition.type === YieldPoolType.NOMINATION_POOL || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
         isAstarNetwork
       ) {
         result.push(YieldAction.CLAIM_REWARD);
       }
     }
 
-    if (nominatorMetadata.unstakings.length > 0) {
+    if (yieldPosition.unstakings.length > 0) {
       result.push(YieldAction.CANCEL_UNSTAKE);
-      const hasClaimable = nominatorMetadata.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
+      const hasClaimable = yieldPosition.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
 
       if (hasClaimable) {
         result.push(YieldAction.WITHDRAW);
@@ -425,8 +423,7 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
       result.push(YieldAction.UNSTAKE);
     }
 
-    const metadata = yieldPosition.metadata as NominatorMetadata;
-    const hasWithdrawal = metadata.unstakings.some((unstakingInfo) => unstakingInfo.status === UnstakingStatus.CLAIMABLE);
+    const hasWithdrawal = yieldPosition.unstakings.some((unstakingInfo) => unstakingInfo.status === UnstakingStatus.CLAIMABLE);
 
     if (hasWithdrawal) {
       result.push(YieldAction.WITHDRAW);

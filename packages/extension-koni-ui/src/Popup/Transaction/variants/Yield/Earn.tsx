@@ -33,7 +33,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { fetchEarningChainValidators, getJoinYieldParams, handleValidateYield, handleYieldStep } from '../../helper';
 import { FreeBalance, FreeBalanceToYield, TransactionContent, YieldOutlet } from '../../parts';
-import { OptimalYieldPathRequest } from '@subwallet/extension-base/types/yield/actions/join';
+import { OptimalYieldPathParams } from '@subwallet/extension-base/types/yield/actions/join';
 
 interface Props extends ThemeProps {
   item: YieldPoolInfo;
@@ -532,7 +532,7 @@ const Component = () => {
 
   useEffect(() => {
     if (currentStep === 0) {
-      const submitData: OptimalYieldPathRequest = {
+      const submitData: OptimalYieldPathParams = {
         address: currentFrom,
         amount: currentAmount,
         poolInfo: currentPoolInfo

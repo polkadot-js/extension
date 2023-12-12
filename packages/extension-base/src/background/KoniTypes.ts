@@ -11,7 +11,6 @@ import { CrowdloanContributionsResponse } from '@subwallet/extension-base/servic
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BuyServiceInfo, BuyTokenInfo, EarningStatus, NominationPoolInfo, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldStepSubmit, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { OptimalYieldPathRequest } from '@subwallet/extension-base/types/yield/actions/join';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -567,6 +566,11 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.REDEEM_LDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.REDEEM_SDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.REDEEM_STDOT]: RequestYieldFastWithdrawal,
+
+  [ExtrinsicType.UNSTAKE_QDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_VDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldFastWithdrawal,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
@@ -2515,7 +2519,7 @@ export interface KoniRequestSignatures {
 
   // yield
   'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
-  'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalYieldPath];
+  'pri(yield.getOptimalPath)': [OptimalYieldPathParams, OptimalYieldPath];
   'pri(yield.handleStep)': [HandleYieldStepParams, SWTransactionResponse];
   'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
   'pri(yield.submitRedeem)': [RequestYieldFastWithdrawal, SWTransactionResponse];

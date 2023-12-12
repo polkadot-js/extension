@@ -22,7 +22,7 @@ import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, getRelayPools
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { generateNaiveOptimalPath, handleLiquidStakingDefaultUnstake, handleLiquidStakingDefaultWithdraw, handleYieldRedeem, handleYieldStep, validateYieldProcess } from '@subwallet/extension-base/koni/api/yield';
+import { handleLiquidStakingDefaultUnstake, handleLiquidStakingDefaultWithdraw, handleYieldRedeem } from '@subwallet/extension-base/koni/api/yield';
 import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
@@ -60,7 +60,6 @@ import { TypeRegistry } from '@polkadot/types';
 import { assert, BN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { addressToEvm, base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
-import { OptimalYieldPathRequest } from '@subwallet/extension-base/types/yield/actions/join';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -3857,23 +3856,8 @@ export default class KoniExtension {
     return this.#koniState.getYieldPoolInfo();
   }
 
-  private async getOptimalYieldPath (request: OptimalYieldPathRequest) {
-    // only works with current account, fix later
-    const assetInfoMap = this.#koniState.getAssetRegistry();
-    const chainInfoMap = this.#koniState.getChainInfoMap();
-    const balanceMap = this.#koniState.getBalance().details;
-    const substrateApiMap = this.#koniState.getSubstrateApiMap();
-    const evmApiMap = this.#koniState.getEvmApiMap();
-    const balanceService = this.#koniState.balanceService;
-
-    return await generateNaiveOptimalPath({
-      ...request,
-      assetInfoMap,
-      balanceMap,
-      chainInfoMap,
-      substrateApiMap,
-      evmApiMap
-    }, balanceService);
+  private async getOptimalYieldPath (request: OptimalYieldPathParams) {
+    return await this.#koniState.earningService.generateOptimalSteps(request);
   }
 
   private async handleYieldStep (inputData: RequestYieldStepSubmit): Promise<SWTransactionResponse> {
@@ -3887,7 +3871,7 @@ export default class KoniExtension {
 
     const isLastStep = inputData.currentStep + 1 === path.steps.length;
 
-    const yieldValidation: TransactionError[] = await this.#koniState.earningService.validateYieldJoin({ data, path}); // TODO: validate, set to fail upon submission
+    const yieldValidation: TransactionError[] = await this.#koniState.earningService.validateYieldJoin({ data, path }); // TODO: validate, set to fail upon submission
 
     if (yieldValidation.length > 0) {
       return this.#koniState.transactionService
@@ -3896,7 +3880,7 @@ export default class KoniExtension {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { extrinsic, extrinsicType, transferNativeAmount, txChain, txData } = await this.#koniState.earningService.handleYieldJoin(inputData);
-    const isPoolSupportAlternativeFee = await this.#koniState.earningService.isPoolSupportAlternativeFee(inputData.data.slug);
+    const isPoolSupportAlternativeFee = this.#koniState.earningService.isPoolSupportAlternativeFee(inputData.data.slug);
 
     const isMintingStep = YIELD_EXTRINSIC_TYPES.includes(extrinsicType);
     const chainInfo = this.#koniState.getChainInfo(txChain);
@@ -4420,7 +4404,7 @@ export default class KoniExtension {
       case 'pri(yield.subscribePoolInfo)':
         return this.subscribeYieldPoolInfo(id, port);
       case 'pri(yield.getOptimalPath)':
-        return await this.getOptimalYieldPath(request as OptimalYieldPathRequest);
+        return await this.getOptimalYieldPath(request as OptimalYieldPathParams);
       case 'pri(yield.handleStep)':
         return await this.handleYieldStep(request as RequestYieldStepSubmit);
       case 'pri(yield.getNativeStakingValidators)':

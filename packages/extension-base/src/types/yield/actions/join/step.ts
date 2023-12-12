@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo } from '../../info';
-
 export interface RuntimeDispatchInfo {
   weight: {
     refTime: number,
@@ -13,18 +11,8 @@ export interface RuntimeDispatchInfo {
 }
 
 /**
- * @interface OptimalYieldPathRequest
- * @description Request to generate steps
- * */
-export interface OptimalYieldPathRequest {
-  address: string,
-  amount: string,
-  poolInfo: YieldPoolInfo
-}
-
-/**
  * @interface OptimalYieldPathParams
- * @description Params use on function to generate steps
+ * @description Params to generate steps
  * */
 export interface OptimalYieldPathParams {
   slug: string;

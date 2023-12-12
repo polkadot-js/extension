@@ -6,7 +6,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { ExtrinsicType, StakeCancelWithdrawalParams } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 
 /**
  * @class BasePoolHandler
@@ -19,17 +19,20 @@ export default abstract class BasePoolHandler {
   /** Pool's chain */
   public readonly chain: string;
 
-  /** Pool's chain */
+  /** Pool's slug */
   public abstract slug: string;
 
-  /** Pool's chain */
+  /** Pool's type */
+  public abstract type: YieldPoolType;
+
+  /** Pool's group */
+  protected abstract group: YieldPoolGroup;
+
+  /** Pool's name */
   protected abstract name: string;
 
-  /** Pool's chain */
+  /** Pool's description */
   protected abstract description: string;
-
-  /** Pool's chain */
-  protected abstract group: YieldPoolGroup;
 
   /**
    * @constructor

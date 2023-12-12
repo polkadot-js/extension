@@ -9,7 +9,7 @@ import { YieldPoolType } from '@subwallet/extension-base/types';
 import BaseSpecialStakingPoolHandler from '../special';
 
 export default abstract class BaseLiquidStakingPoolHandler extends BaseSpecialStakingPoolHandler {
-  protected readonly type = YieldPoolType.LIQUID_STAKING;
+  public readonly type = YieldPoolType.LIQUID_STAKING;
   protected readonly minAmountPercent: number = 0.98;
 
   /* Leave pool action */

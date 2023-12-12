@@ -6,7 +6,7 @@ import { LendingYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/t
 import BaseSpecialStakingPoolHandler from '../special';
 
 export default abstract class BaseLendingPoolHandler extends BaseSpecialStakingPoolHandler {
-  protected readonly type = YieldPoolType.LENDING;
+  public readonly type = YieldPoolType.LENDING;
 
   /* Subscribe pool info */
 

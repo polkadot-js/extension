@@ -12,7 +12,7 @@ import AcalaLiquidStakingPoolHandler from '@subwallet/extension-base/services/ea
 import BifrostLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/bifrost';
 import ParallelLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/parallel';
 import NominationPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/nomination-pool';
-import { HandleYieldStepData, HandleYieldStepParams, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 export default class EarningService {
@@ -71,21 +71,19 @@ export default class EarningService {
     }
   }
 
-  protected getPoolHandler (slug: string): BasePoolHandler | undefined {
+  public getPoolHandler (slug: string): BasePoolHandler | undefined {
     this.initHandlers();
 
     return this.handlers[slug];
   }
 
-  public async isPoolSupportAlternativeFee (slug: string): Promise<boolean> {
-    await this.state.eventService.waitChainReady;
-
+  public isPoolSupportAlternativeFee (slug: string): boolean {
     const handler = this.getPoolHandler(slug);
 
     if (handler) {
       return handler.isPoolSupportAlternativeFee;
     } else {
-      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+      throw new TransactionError(BasicTxErrorType.INTERNAL_ERROR);
     }
   }
 
@@ -228,8 +226,17 @@ export default class EarningService {
 
   /* Join */
 
-  public async generateOptimalSteps () {
+  public async generateOptimalSteps (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
+    await this.state.eventService.waitChainReady;
 
+    const { slug } = params;
+    const handler = this.getPoolHandler(slug);
+
+    if (handler) {
+      return handler.generateOptimalPath(params);
+    } else {
+      throw new TransactionError(BasicTxErrorType.INTERNAL_ERROR);
+    }
   }
 
   public async validateYieldJoin (params: ValidateYieldProcessParams): Promise<TransactionError[]> {

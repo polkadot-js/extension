@@ -7,13 +7,13 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 
 import { sendMessage } from '../base';
 import { NominationPoolInfo } from '@subwallet/extension-base/types';
-import { OptimalYieldPathRequest } from '@subwallet/extension-base/types/yield/actions/join';
+import { OptimalYieldPathParams } from '@subwallet/extension-base/types/yield/actions/join';
 
 export async function subscribeYieldPoolInfo (callback: (data: YieldPoolInfo[]) => void): Promise<YieldPoolInfo[]> {
   return sendMessage('pri(yield.subscribePoolInfo)', null, callback);
 }
 
-export async function getOptimalYieldPath (data: OptimalYieldPathRequest) {
+export async function getOptimalYieldPath (data: OptimalYieldPathParams) {
   return sendMessage('pri(yield.getOptimalPath)', data);
 }
 

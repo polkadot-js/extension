@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _EXPECTED_BLOCK_TIME, _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { reformatAddress } from '@subwallet/extension-base/utils';
@@ -247,12 +247,13 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
   const chain = chainInfo.slug;
   const chainApi = await substrateApi.isReady;
 
-  const [_nominations, _currentEra, _bonded, _minimumActiveStake, _minNominatorBond] = await Promise.all([
+  const [_nominations, _currentEra, _bonded, _minimumActiveStake, _minNominatorBond, _deriveSessionProgress] = await Promise.all([
     chainApi.api.query?.staking?.nominators(address),
     chainApi.api.query?.staking?.currentEra(),
     chainApi.api.query?.staking?.bonded(address),
     chainApi.api.query?.staking?.minimumActiveStake && chainApi.api.query?.staking?.minimumActiveStake(),
-    chainApi.api.query?.staking?.minNominatorBond()
+    chainApi.api.query?.staking?.minNominatorBond(),
+    chainApi.api.derive?.session?.progress()
   ]);
 
   const minActiveStake = _minimumActiveStake?.toString() || '0';
@@ -330,9 +331,18 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
   }
 
   ledger.unlocking.forEach((unlockingChunk) => {
+    // Calculate the remaining era
     const isClaimable = unlockingChunk.era - parseInt(currentEra) < 0;
     const remainingEra = unlockingChunk.era - parseInt(currentEra);
-    const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+
+    // Calculate the remaining time for current era ending
+    const expectedBlockTime = _EXPECTED_BLOCK_TIME[chain];
+    const eraLength = _deriveSessionProgress.eraLength.toNumber();
+    const eraProgress = _deriveSessionProgress.eraProgress.toNumber();
+    const remainingSlots = eraLength - eraProgress;
+    const remainingHours = expectedBlockTime * remainingSlots / 60 / 60;
+
+    const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain] + remainingHours;
 
     unstakingList.push({
       chain,
@@ -495,10 +505,11 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
   const poolsPalletId = substrateApi.api.consts.nominationPools.palletId.toString();
   const poolStashAccount = parsePoolStashAddress(substrateApi.api, 0, poolMemberInfo.poolId, poolsPalletId);
 
-  const [_nominations, _poolMetadata, _currentEra] = await Promise.all([
+  const [_nominations, _poolMetadata, _currentEra, _deriveSessionProgress] = await Promise.all([
     substrateApi.api.query.staking.nominators(poolStashAccount),
     substrateApi.api.query.nominationPools.metadata(poolMemberInfo.poolId),
-    substrateApi.api.query.staking.currentEra()
+    substrateApi.api.query.staking.currentEra(),
+    substrateApi.api.derive?.session?.progress()
   ]);
 
   const poolMetadata = _poolMetadata.toPrimitive() as unknown as Bytes;
@@ -559,8 +570,19 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
   Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
     const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) < 0;
     const remainingEra = parseInt(unlockingEra) - parseInt(currentEra);
-    const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
+    // const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
 
+    // Calculate the remaining time for current era ending
+    const expectedBlockTime = _EXPECTED_BLOCK_TIME[chainInfo.slug];
+    const eraLength = _deriveSessionProgress.eraLength.toNumber();
+    const eraProgress = _deriveSessionProgress.eraProgress.toNumber();
+    const remainingSlots = eraLength - eraProgress;
+    const remainingHours = expectedBlockTime * remainingSlots / 60 / 60;
+
+    const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug] + remainingHours;
+
+    console.log('waitingTime', waitingTime);
+    
     unstakings.push({
       chain: chainInfo.slug,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,

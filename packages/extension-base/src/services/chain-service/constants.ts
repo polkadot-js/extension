@@ -101,6 +101,22 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   goldberg_testnet: 24
 };
 
+export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
+  alephTest: 1,
+  aleph: 1,
+  polkadot: 6,
+  kusama: 6,
+  polkadex: 12,
+  ternoa: 6,
+  ternoa_alphanet: 6,
+  westend: 6,
+  kate: 20,
+  edgeware: 6,
+  creditcoin: 12,
+  vara_network: 3,
+  goldberg_testnet: 20
+};
+
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
   moonbeam: { // https://docs.moonbeam.network/learn/features/staking/#annual-inflation
     reward: 0.5,

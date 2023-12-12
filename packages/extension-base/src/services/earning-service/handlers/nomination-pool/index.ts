@@ -1,8 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
+import { UnsubscribePromise } from '@polkadot/api-base/types/base';
+import { Bytes } from '@polkadot/types';
+import { Codec } from '@polkadot/types/types';
+import { BN, BN_ZERO, hexToString, isHex } from '@polkadot/util';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { APIItemState, BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, StakingTxErrorType, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, StakingTxErrorType, StakingType, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, getExistUnstakeErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parsePoolStashAddress, transformPoolName } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
@@ -13,11 +17,6 @@ import { fakeAddress } from '@subwallet/extension-base/services/earning-service/
 import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, RequestStakePoolingBonding, RuntimeDispatchInfo, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
-
-import { UnsubscribePromise } from '@polkadot/api-base/types/base';
-import { Bytes } from '@polkadot/types';
-import { Codec } from '@polkadot/types/types';
-import { BN, BN_ZERO, hexToString, isHex } from '@polkadot/util';
 
 import BasePoolHandler from '../base';
 
@@ -422,7 +421,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
     let bnTotalStake = new BN(amount);
     const bnMinStake = new BN(poolInfo.metadata.minJoinPool || '0');
     const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
-    const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, true);
+    const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, StakingType.POOLED, true);
 
     if (selectedPool.state !== 'Open') {
       errors.push(new TransactionError(StakingTxErrorType.INACTIVE_NOMINATION_POOL));

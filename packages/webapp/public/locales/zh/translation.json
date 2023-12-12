@@ -385,7 +385,6 @@
   "Claim Reward transaction": "领取奖励交易",
   "Withdraw transaction": "提款交易",
   "Cancel unstake transaction": "取消解除质押交易",
-  "Search history": "搜索记录",
   "Your NFT collectible will appear here!": "你可合集的NFT将在此处出现！",
   "No NFT collectible": "无NFT可合集",
   "Deleted NFT collection successfully": "NFT收藏集删除成功",
@@ -798,8 +797,6 @@
   "Add network": "导入网络",
   "Try adding one manually": "请手动导入",
   "Add token": "导入代币",
-  "Your transactions will show up here": "您的交易将在此处出现",
-  "No transactions found": "未找到交易",
   "Add NFT": "导入NFT",
   "You can stake in-app easily": "您可以在钱包内方便地进行质押",
   "No staking found": "未找到质押",
@@ -1078,5 +1075,13 @@
   "Unstake qDOT tranasction": "",
   "Unstake vDOT tranasction": "",
   "Unstake LDOT tranasction": "",
-  "Unstake sDOT tranasction": ""
+  "Unstake sDOT tranasction": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Loading ...": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Token Details": "",
+  "Account Details": ""
 }

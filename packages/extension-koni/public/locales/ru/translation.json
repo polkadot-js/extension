@@ -385,7 +385,6 @@
   "Claim Reward transaction": "Tранзакция требования награды",
   "Withdraw transaction": "Транзакция вывода",
   "Cancel unstake transaction": "Отменить транзакцию анстейк",
-  "Search history": "История поиска",
   "Your NFT collectible will appear here!": "Ваш предмет коллекционирования NFT появится здесь!",
   "No NFT collectible": "Нет предмета коллекционирования NFT",
   "Deleted NFT collection successfully": "Коллекция NFT успешно удалена",
@@ -798,8 +797,6 @@
   "Add network": "",
   "Try adding one manually": "",
   "Add token": "",
-  "Your transactions will show up here": "",
-  "No transactions found": "",
   "Add NFT": "",
   "You can stake in-app easily": "",
   "No staking found": "",
@@ -1078,5 +1075,13 @@
   "Unstake qDOT tranasction": "",
   "Unstake vDOT tranasction": "",
   "Unstake LDOT tranasction": "",
-  "Unstake sDOT tranasction": ""
+  "Unstake sDOT tranasction": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Loading ...": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Token Details": "",
+  "Account Details": ""
 }

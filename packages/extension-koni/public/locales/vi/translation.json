@@ -385,7 +385,6 @@
   "Claim Reward transaction": "Giao dịch nhận phần thưởng",
   "Withdraw transaction": "Giao dịch rút stake",
   "Cancel unstake transaction": "Giao dịch huỷ unstake",
-  "Search history": "Lịch sử tìm kiếm",
   "Your NFT collectible will appear here!": "Bộ sưu tập NFT của bạn sẽ hiển thị tại đây",
   "No NFT collectible": "Không có NFT được sưu tập",
   "Deleted NFT collection successfully": "Đã xóa bộ sưu tập NFT thành công",
@@ -798,8 +797,6 @@
   "Add network": "Nhập mạng",
   "Try adding one manually": "Vui lòng nhập thủ công",
   "Add token": "Nhập token",
-  "Your transactions will show up here": "Giao dịch của bạn sẽ hiển thị tại đây",
-  "No transactions found": "Không tìm thấy giao dịch",
   "Add NFT": "Nhập NFT",
   "You can stake in-app easily": "Bạn có thể stake dễ dàng trong ví",
   "No staking found": "Không tìm thấy stake",
@@ -1078,5 +1075,13 @@
   "Unstake qDOT tranasction": "",
   "Unstake vDOT tranasction": "",
   "Unstake LDOT tranasction": "",
-  "Unstake sDOT tranasction": ""
+  "Unstake sDOT tranasction": "",
+  "You can unstake from a pool once": "",
+  "You cannot stake more for a pool you are unstaking from": "",
+  "Loading ...": "",
+  "Nomination": "",
+  "Open": "",
+  "State": "",
+  "Token Details": "",
+  "Account Details": ""
 }

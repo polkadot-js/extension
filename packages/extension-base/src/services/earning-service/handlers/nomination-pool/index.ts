@@ -10,7 +10,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, RequestStakePoolingBonding, RuntimeDispatchInfo, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, RuntimeDispatchInfo, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -20,12 +20,6 @@ import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO, hexToString, isHex } from '@polkadot/util';
 
 import BasePoolHandler from '../base';
-
-export interface PalletStakingNominations {
-  targets: string[],
-  submittedIn: number,
-  suppressed: boolean
-}
 
 export default class NominationPoolHandler extends BasePoolHandler {
   public readonly type = YieldPoolType.NOMINATION_POOL;

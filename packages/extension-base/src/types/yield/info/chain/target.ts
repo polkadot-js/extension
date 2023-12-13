@@ -40,3 +40,9 @@ export type YieldPoolTarget = NominationPoolInfo | ValidatorInfo;
 export interface RequestGetYieldPoolTargets {
   slug: string;
 }
+
+export interface CollatorExtraInfo {
+  active: boolean,
+  identity?: string,
+  isVerified: boolean,
+}

@@ -6,16 +6,9 @@ import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/backg
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import BasePoolHandler from '@subwallet/extension-base/services/earning-service/handlers/base';
-import InterlayLendingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/lending/interlay';
-import AcalaLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/acala';
-import BifrostLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/bifrost';
-import ParallelLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/parallel';
-import StellaSwapLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/stella-swap';
-import RelayNativeStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/native-staking/relay-chain';
-import NominationPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/nomination-pool';
 import { EarningRewardItem, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestYieldLeave, RequestYieldWithdrawal, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
+import { AcalaLiquidStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
 
 export default class EarningService {
   protected readonly state: KoniState;
@@ -35,6 +28,10 @@ export default class EarningService {
 
       if (_STAKING_CHAIN_GROUP.relay.includes(chain)) {
         handlers.push(new RelayNativeStakingPoolHandler(this.state, chain));
+      }
+
+      if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+        handlers.push(new ParaNativeStakingPoolHandler(this.state, chain));
       }
 
       if (_STAKING_CHAIN_GROUP.nominationPool.includes(chain)) {

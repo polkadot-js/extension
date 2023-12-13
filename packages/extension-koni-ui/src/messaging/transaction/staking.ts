@@ -3,9 +3,9 @@
 
 import { ChainStakingMetadata, NominatorMetadata, RequestBondingSubmit, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, StakingJson, StakingRewardJson, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { NominationPoolInfo } from '@subwallet/extension-base/types';
 
 import { sendMessage } from '../base';
-import { NominationPoolInfo } from '@subwallet/extension-base/types';
 
 export async function submitPoolBonding (request: RequestStakePoolingBonding): Promise<SWTransactionResponse> {
   return sendMessage('pri(bonding.nominationPool.submitBonding)', request);

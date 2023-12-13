@@ -4,10 +4,11 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingTxErrorType, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getBondedValidators, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getParaCurrentInflation, getStakingStatusByNominations, InflationConfig, isUnstakeAll, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getBondedValidators, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getParaCurrentInflation, getStakingStatusByNominations, InflationConfig, isUnstakeAll, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
 import { EarningStatus, UnstakingStatus } from '@subwallet/extension-base/types';
 import { isSameAddress, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 

@@ -35,8 +35,7 @@ import TransactionService from '@subwallet/extension-base/services/transaction-s
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { BalanceInfo, BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
+import { BalanceInfo, BalanceItem, BalanceJson, BalanceMap, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { isAccountAll, isSameAddress, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
 import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';

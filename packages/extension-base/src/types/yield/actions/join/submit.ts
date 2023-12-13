@@ -24,7 +24,6 @@ export interface AbstractSubmitYieldJoinData {
 
 export interface SubmitJoinNativeStaking extends AbstractSubmitYieldJoinData {
   selectedValidators: ValidatorInfo[];
-  nominatorMetadata?: YieldPositionInfo
 }
 
 export interface SubmitJoinNominationPool extends AbstractSubmitYieldJoinData {
@@ -51,10 +50,21 @@ export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
 
 export interface StakePoolingBondingParams extends BaseRequestSign {
   poolPosition?: YieldPositionInfo,
-  chain: string,
+  slug: string,
   selectedPool: NominationPoolInfo,
   amount: string,
   address: string
 }
 
 export type RequestStakePoolingBonding = InternalRequestSign<StakePoolingBondingParams>;
+
+export interface BondingSubmitParams extends BaseRequestSign {
+  slug: string,
+  poolPosition?: YieldPositionInfo, // undefined if user has no stake
+  amount: string,
+  address: string,
+  selectedValidators: ValidatorInfo[],
+  lockPeriod?: number // in month
+}
+
+export type RequestBondingSubmit = InternalRequestSign<BondingSubmitParams>;

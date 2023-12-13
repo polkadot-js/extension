@@ -3,9 +3,10 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { BlockHeader, getBondedValidators, getStakingStatusByNominations, isUnstakeAll, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { BlockHeader, getBondedValidators, getStakingStatusByNominations, isUnstakeAll, ParachainStakingStakeOption } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
 import { EarningStatus, UnstakingStatus } from '@subwallet/extension-base/types';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 

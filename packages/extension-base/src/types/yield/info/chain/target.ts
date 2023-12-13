@@ -1,19 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-/* Pool */
+import { PalletNominationPoolsBondedPoolInner } from '../pallet';
 
-export interface PalletNominationPoolsBondedPoolInner {
-  points: number;
-  state: 'Open' | 'Destroying' | 'Locked';
-  memberCounter: number;
-  roles: {
-    depositor: string;
-    root: string;
-    nominator: string;
-    bouncer: string;
-  }
-}
+/* Pool */
 
 export interface NominationPoolInfo extends Pick<PalletNominationPoolsBondedPoolInner, 'roles' | 'memberCounter' | 'state'> {
   id: number;

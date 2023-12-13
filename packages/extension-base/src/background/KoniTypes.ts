@@ -1,9 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SignerResult } from '@polkadot/types/types/extrinsic';
-import { KeypairType } from '@polkadot/util-crypto/types';
-import { HexString } from '@polkadot/util/types';
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _FundStatus, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
@@ -23,6 +20,10 @@ import { DexieExportJsonStructure } from 'dexie-export-import';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
+
+import { SignerResult } from '@polkadot/types/types/extrinsic';
+import { HexString } from '@polkadot/util/types';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
 

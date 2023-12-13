@@ -50,4 +50,3 @@ export enum YieldCompoundingPeriod {
   MONTHLY = 30,
   YEARLY = 365
 }
-

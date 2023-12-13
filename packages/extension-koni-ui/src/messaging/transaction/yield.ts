@@ -4,10 +4,10 @@
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestUnbondingSubmit, RequestYieldFastWithdrawal, RequestYieldStepSubmit, ValidateYieldProcessParams, ValidatorInfo, YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-
-import { sendMessage } from '../base';
 import { NominationPoolInfo } from '@subwallet/extension-base/types';
 import { OptimalYieldPathParams } from '@subwallet/extension-base/types/yield/actions/join';
+
+import { sendMessage } from '../base';
 
 export async function subscribeYieldPoolInfo (callback: (data: YieldPoolInfo[]) => void): Promise<YieldPoolInfo[]> {
   return sendMessage('pri(yield.subscribePoolInfo)', null, callback);

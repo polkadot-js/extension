@@ -12,6 +12,7 @@ import AcalaLiquidStakingPoolHandler from '@subwallet/extension-base/services/ea
 import BifrostLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/bifrost';
 import ParallelLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/parallel';
 import StellaSwapLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/stella-swap';
+import RelayNativeStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/native-staking/relay-chain';
 import NominationPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/nomination-pool';
 import { EarningRewardItem, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestYieldLeave, RequestYieldWithdrawal, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
@@ -31,6 +32,10 @@ export default class EarningService {
 
     for (const chain of chains) {
       const handlers: BasePoolHandler[] = [];
+
+      if (_STAKING_CHAIN_GROUP.relay.includes(chain)) {
+        handlers.push(new RelayNativeStakingPoolHandler(this.state, chain));
+      }
 
       if (_STAKING_CHAIN_GROUP.nominationPool.includes(chain)) {
         handlers.push(new NominationPoolHandler(this.state, chain));

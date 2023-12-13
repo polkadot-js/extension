@@ -3,19 +3,19 @@
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { APIItemState, BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, StakingTxErrorType, StakingType, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, calculateInflation, getExistUnstakeErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parsePoolStashAddress, transformPoolName } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateChainStakedReturn, calculateInflation, getExistUnstakeErrorMessage, getMinStakeErrorMessage, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, RequestStakePoolingBonding, RuntimeDispatchInfo, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, RequestStakePoolingBonding, RuntimeDispatchInfo, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 import { t } from 'i18next';
 
 import { UnsubscribePromise } from '@polkadot/api-base/types/base';
-import { Bytes } from '@polkadot/types';
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO, hexToString, isHex } from '@polkadot/util';
 
@@ -77,6 +77,10 @@ export default class NominationPoolHandler extends BasePoolHandler {
         return;
       }
 
+      if (!substrateApi.api.query.nominationPools) {
+        return;
+      }
+
       const currentEra = _currentEra.toString();
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
@@ -100,38 +104,36 @@ export default class NominationPoolHandler extends BasePoolHandler {
       const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
       const unlockingPeriod = parseInt(unlockingEras) * (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default); // in hours
 
-      if (substrateApi.api.query.nominationPools) {
-        const minToHuman = formatNumber(minPoolJoin || '0', nativeToken.decimals || 0, balanceFormatter);
+      const minToHuman = formatNumber(minPoolJoin || '0', nativeToken.decimals || 0, balanceFormatter);
 
-        const data: NormalYieldPoolInfo = {
-          // TODO
-          ...defaultData,
-          description: this.description.replaceAll('{{amount}}', minToHuman),
-          type: this.type,
-          metadata: {
-            isAvailable: true,
-            maxCandidatePerFarmer: 1,
-            maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
-            minJoinPool: minPoolJoin || '0',
-            farmerCount: 0, // TODO recheck
-            era: parseInt(currentEra),
-            assetEarning: [
-              {
-                slug: _getChainNativeTokenSlug(chainInfo),
-                apy: expectedReturn
-              }
-            ],
-            tvl: bnTotalEraStake.toString(), // TODO recheck
-            totalApy: expectedReturn, // TODO recheck
-            unstakingPeriod: unlockingPeriod,
-            allowCancelUnstaking: false,
-            inflation: inflation,
-            minWithdrawal: '0'
-          }
-        };
+      const data: NormalYieldPoolInfo = {
+        // TODO
+        ...defaultData,
+        description: this.description.replaceAll('{{amount}}', minToHuman),
+        type: this.type,
+        metadata: {
+          isAvailable: true,
+          maxCandidatePerFarmer: 1,
+          maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
+          minJoinPool: minPoolJoin || '0',
+          farmerCount: 0, // TODO recheck
+          era: parseInt(currentEra),
+          assetEarning: [
+            {
+              slug: _getChainNativeTokenSlug(chainInfo),
+              apy: expectedReturn
+            }
+          ],
+          tvl: bnTotalEraStake.toString(), // TODO recheck
+          totalApy: expectedReturn, // TODO recheck
+          unstakingPeriod: unlockingPeriod,
+          allowCancelUnstaking: false,
+          inflation: inflation,
+          minWithdrawal: '0'
+        }
+      };
 
-        callback(data);
-      }
+      callback(data);
     }) as unknown as UnsubscribePromise);
 
     return () => {
@@ -144,7 +146,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
   /* Subscribe pool position */
 
-  async getRelayChainPoolMemberMetadata (address: string, substrateApi: _SubstrateApi, poolMemberInfo: PalletNominationPoolsPoolMember): Promise<Pick<YieldPositionInfo, 'activeStake' | 'balance' | 'isBondedBefore' | 'nominations' | 'status' | 'unstakings'>> {
+  async parsePoolMemberMetadata (substrateApi: _SubstrateApi, poolMemberInfo: PalletNominationPoolsPoolMember): Promise<Pick<YieldPositionInfo, 'activeStake' | 'balance' | 'isBondedBefore' | 'nominations' | 'status' | 'unstakings'>> {
     const chainInfo = this.chainInfo;
 
     const _maxNominatorRewardedPerValidator = substrateApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
@@ -158,14 +160,12 @@ export default class NominationPoolHandler extends BasePoolHandler {
       substrateApi.api.query.staking.currentEra()
     ]);
 
-    const poolMetadata = _poolMetadata.toPrimitive() as unknown as Bytes;
+    const poolMetadata = _poolMetadata.toPrimitive() as unknown as string;
     const currentEra = _currentEra.toString();
     const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
+    const poolName = isHex(poolMetadata) ? hexToString(poolMetadata) : poolMetadata;
 
     let stakingStatus = EarningStatus.NOT_EARNING;
-
-    // TODO: update new logic
-    const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
 
     if (nominations) {
       const validatorList = nominations.targets;
@@ -173,9 +173,19 @@ export default class NominationPoolHandler extends BasePoolHandler {
       await Promise.all(validatorList.map(async (validatorAddress) => {
         const _eraStaker = await substrateApi.api.query.staking.erasStakers(currentEra, validatorAddress);
         const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-        const topNominators = eraStaker.others.map((nominator) => {
-          return nominator.who;
-        }).slice(0, maxNominatorRewardedPerValidator);
+
+        const sortedNominators = eraStaker.others
+          .sort((a, b) => {
+            return new BigN(b.value).minus(a.value).toNumber();
+          })
+        ;
+
+        const topNominators = sortedNominators
+          .map((nominator) => {
+            return nominator.who;
+          })
+          .slice(0, maxNominatorRewardedPerValidator)
+        ;
 
         if (topNominators.includes(reformatAddress(poolStashAccount, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
           stakingStatus = EarningStatus.EARNING_REWARD;
@@ -247,7 +257,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
           const owner = reformatAddress(useAddresses[i], 42);
 
           if (poolMemberInfo) {
-            const nominatorMetadata = await this.getRelayChainPoolMemberMetadata(owner, substrateApi, poolMemberInfo);
+            const nominatorMetadata = await this.parsePoolMemberMetadata(substrateApi, poolMemberInfo);
 
             resultCallback({
               ...defaultInfo,
@@ -258,7 +268,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
           } else {
             resultCallback({
               ...defaultInfo,
-              type: YieldPoolType.NOMINATION_POOL,
+              type: this.type,
               address: owner,
               balance: [
                 {
@@ -345,8 +355,6 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
       const poolMetadata = _metadata.toPrimitive() as unknown as string;
       const bondedPool = _bondedPool.toPrimitive() as unknown as PalletNominationPoolsBondedPoolInner;
-
-      // const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
 
       const poolName = isHex(poolMetadata) ? hexToString(poolMetadata) : poolMetadata;
 
@@ -466,7 +474,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     const joinPoolData: RequestStakePoolingBonding = {
       poolPosition: positionInfo,
-      chain: this.chain,
+      slug: this.slug,
       selectedPool,
       amount,
       address
@@ -485,6 +493,9 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
   /* Leave pool action */
 
+  /**
+   * @todo Recheck
+   * */
   async validateYieldLeave (amount: string, address: string, fastLeave: boolean, selectedTarget?: string): Promise<TransactionError[]> {
     const errors: TransactionError[] = [];
 
@@ -493,6 +504,10 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     if (!poolInfo || !poolPosition || fastLeave) {
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+    }
+
+    if (fastLeave) {
+      return [new TransactionError(BasicTxErrorType.INVALID_PARAMS)];
     }
 
     const bnActiveStake = new BN(poolPosition.activeStake);

@@ -47,8 +47,6 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
   protected readonly rewardAssets: string[] = ['moonbeam-LOCAL-xcDOT'];
   protected readonly feeAssets: string[] = ['moonbeam-NATIVE-GLMR'];
   /** @inner */
-  protected override readonly minAmountPercent = 0.98;
-  /** @inner */
   protected override readonly allowDefaultUnstake = true;
   /** @inner */
   protected override readonly allowFastUnstake = false;
@@ -87,8 +85,6 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const exchangeRateCall = stakingContract.methods.getPooledTokenByShares(sampleTokenShare);
 
-    console.debug(123123);
-
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const [aprObject, tvl, equivalentTokenShare] = await Promise.all([
       aprPromise,
@@ -97,10 +93,8 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
       exchangeRateCall.call()
     ]);
-    console.debug(456456);
 
     const exchangeRate = (equivalentTokenShare as number) / (10 ** _getAssetDecimals(derivativeTokenInfo));
-    console.debug(789789);
 
     return {
       ...this.extraInfo,

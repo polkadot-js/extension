@@ -5,6 +5,7 @@ import { ExtrinsicType, NominatorMetadata, StakingType, ValidatorInfo } from '@s
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { NominationPoolInfo } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, HiddenInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import NetworkInformation from '@subwallet/extension-koni-ui/components/NetworkInformation';
@@ -28,7 +29,6 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { accountFilterFunc, fetchChainValidators } from '../../helper';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
-import { NominationPoolInfo } from '@subwallet/extension-base/types';
 
 type Props = ThemeProps;
 

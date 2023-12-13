@@ -3,11 +3,11 @@
 
 import { StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { NominationPoolInfo } from '@subwallet/extension-base/types';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { NominationPoolInfo } from '@subwallet/extension-base/types';
 
 export type NominationPoolDataType = NominationPoolInfo & {
   symbol: string;

@@ -4,3 +4,4 @@
 export * from './account';
 export * from './base';
 export * from './chain';
+export * from './pallet';

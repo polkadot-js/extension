@@ -148,7 +148,7 @@ const MissionPool = new LazyLoader('MissionPool', () => import('@subwallet/exten
 
 const NotFoundContent = new LazyLoader('NotFoundContent', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Content'));
 const NotFoundRedirect = new LazyLoader('NotFoundRedirect', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Redirect'));
-
+const UnsafeAccess = new LazyLoader('UnsafeAccess', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Access'));
 /* 404 */
 
 // A Placeholder page
@@ -318,7 +318,8 @@ export const router = createBrowserRouter([
         ]
       },
       NotFoundContent.generateRouterObject('not-found'),
-      NotFoundRedirect.generateRouterObject('*')
+      NotFoundRedirect.generateRouterObject('*'),
+      UnsafeAccess.generateRouterObject('unsafe-access')
     ]
   },
   PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)

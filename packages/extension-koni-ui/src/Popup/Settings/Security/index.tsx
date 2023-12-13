@@ -256,7 +256,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [onClickItem]);
 
   useEffect(() => {
-    if (camera) {
+    if (camera && window.navigator.mediaDevices) {
       window.navigator.mediaDevices.getUserMedia({ video: true })
         .then((stream) => {
           // Close video
@@ -265,8 +265,10 @@ const Component: React.FC<Props> = (props: Props) => {
           });
         })
         .catch(console.error);
+    } else if (!window.navigator.mediaDevices) {
+      navigate('/unsafe-access');
     }
-  }, [camera]);
+  }, [camera, navigate]);
 
   useEffect(() => {
     setOnBack(onBack);

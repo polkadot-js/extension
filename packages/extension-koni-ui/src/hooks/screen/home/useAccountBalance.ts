@@ -233,7 +233,7 @@ function getAccountBalance (
       }
     });
 
-    const isTokenGroupBalanceReady = tokenGroupBalanceReady.every((e) => e);
+    const isTokenGroupBalanceReady = tokenGroupBalanceReady.some((e) => e);
 
     tokenGroupBalance.isReady = isTokenGroupBalanceReady;
     tokenGroupBalance.isNotSupport = tokenGroupNotSupport.every((e) => e);

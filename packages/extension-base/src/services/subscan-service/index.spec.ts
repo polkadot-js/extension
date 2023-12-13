@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Test for index.ts
+
+import { SUBSCAN_API_CHAIN_MAP } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+
 import { SubscanService } from './index';
 
 jest.setTimeout(60000);
@@ -10,7 +13,7 @@ describe('SubscanService', () => {
   let subscanService: SubscanService;
 
   beforeAll(() => {
-    subscanService = new SubscanService();
+    subscanService = new SubscanService(SUBSCAN_API_CHAIN_MAP);
   });
 
   it('Get multi-chain balance', async () => {

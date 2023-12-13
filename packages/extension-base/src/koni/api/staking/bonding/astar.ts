@@ -80,6 +80,10 @@ export async function getAstarStakingMetadata (chain: string, substrateApi: _Sub
   } as ChainStakingMetadata;
 }
 
+const convertAddress = (address: string) => {
+  return isEthereumAddress(address) ? address.toLowerCase() : address;
+};
+
 export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletDappsStakingAccountLedger) {
   const nominationList: NominationInfo[] = [];
   const unstakingList: UnstakingInfo[] = [];
@@ -108,7 +112,7 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
     const dAppInfoMap: Record<string, PalletDappsStakingDappInfo> = {};
 
     allDapps.forEach((dappInfo) => {
-      dAppInfoMap[dappInfo.address.toLowerCase()] = dappInfo;
+      dAppInfoMap[convertAddress(dappInfo.address)] = dappInfo;
     });
 
     for (const item of _stakerInfo) {
@@ -117,7 +121,8 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
       const stakeData = item[1].toPrimitive() as Record<string, Record<string, string>[]>;
       const stakeList = stakeData.stakes;
 
-      const dappAddress = stakedDapp.Evm ? stakedDapp.Evm.toLowerCase() : stakedDapp.Wasm;
+      const _dappAddress = stakedDapp.Evm ? stakedDapp.Evm.toLowerCase() : stakedDapp.Wasm;
+      const dappAddress = convertAddress(_dappAddress);
       const currentStake = stakeList.slice(-1)[0].staked.toString() || '0';
 
       const bnCurrentStake = new BN(currentStake);
@@ -131,7 +136,7 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
         nominationList.push({
           status: dappStakingStatus,
           chain: chainInfo.slug,
-          validatorAddress: isEthereumAddress(dappAddress) ? dappAddress.toLowerCase() : dappAddress,
+          validatorAddress: dappAddress,
           activeStake: currentStake,
           validatorMinStake: '0',
           validatorIdentity: dappInfo?.name,
@@ -183,6 +188,9 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
   } as NominatorMetadata;
 }
 
+/**
+ * Deprecated
+ * */
 export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (isEthereumAddress(address)) {
     return;
@@ -230,7 +238,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
       const stakeData = item[1].toPrimitive() as Record<string, Record<string, string>[]>;
       const stakeList = stakeData.stakes;
 
-      const dappAddress = isEthereumAddress(stakedDapp.Evm) ? stakedDapp.Evm.toLowerCase() : stakedDapp.Evm;
+      const dappAddress = convertAddress(stakedDapp.Evm);
       const currentStake = stakeList.slice(-1)[0].staked.toString() || '0';
 
       const bnCurrentStake = new BN(currentStake);
@@ -338,7 +346,7 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
     allDappsInfo.push({
       commission: 0,
       expectedReturn: 0,
-      address: isEthereumAddress(dappAddress) ? dappAddress.toLowerCase() : dappAddress,
+      address: convertAddress(dappAddress),
       totalStake: totalStake,
       ownStake: '0',
       otherStake: totalStake.toString(),

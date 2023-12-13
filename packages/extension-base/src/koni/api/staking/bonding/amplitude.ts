@@ -3,7 +3,7 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { BlockHeader, getBondedValidators, getStakingStatusByNominations, isUnstakeAll, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { BlockHeader, getBondedValidators, getStakingStatusByNominations, isUnstakeAll, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
@@ -97,8 +97,7 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
   let activeStake = '0';
 
   if (delegatorState) { // delegatorState can be null while unstaking all
-    const identityInfo = substrateApi.api.query.identity ? (await substrateApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration : undefined;
-    const identity = identityInfo ? parseIdentity(identityInfo) : undefined;
+    const [identity] = await parseIdentity(substrateApi, delegatorState.owner);
 
     activeStake = delegatorState.amount.toString();
     const bnActiveStake = new BN(activeStake);
@@ -159,6 +158,9 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
   } as NominatorMetadata;
 }
 
+/**
+ * Deprecated
+ * */
 export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (isEthereumAddress(address)) {
     return;
@@ -194,8 +196,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
   let activeStake = '0';
 
   if (delegatorState) { // delegatorState can be null while unstaking all
-    const identityInfo = chainApi.api.query.identity ? (await chainApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration : undefined;
-    const identity = identityInfo ? parseIdentity(identityInfo) : undefined;
+    const [identity] = await parseIdentity(substrateApi, delegatorState.owner);
 
     activeStake = delegatorState.amount.toString();
     const bnActiveStake = new BN(activeStake);

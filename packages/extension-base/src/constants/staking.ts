@@ -3,5 +3,6 @@
 
 export const PREDEFINED_STAKING_POOL: Record<string, number> = {
   kusama: 80,
-  polkadot: 39
+  polkadot: 39,
+  vara_network: 29
 };

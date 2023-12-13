@@ -238,7 +238,9 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
       onCancel={onCloseModal}
       title={t(modalTitle)}
     >
-      <MetaInfo>
+      <MetaInfo
+        className='base-info'
+      >
         <MetaInfo.Account
           accounts={isAccountAll(address) ? stakingAccounts : undefined}
           address={address}
@@ -379,6 +381,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                             address={item.validatorAddress}
                             className={'__nomination-label'}
                             name={item.validatorIdentity}
+                            networkPrefix={networkPrefix}
                           />
                         )}
                       >
@@ -393,11 +396,14 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                       className={'__nomination-field'}
                       decimals={decimals}
                       key={`${item.validatorAddress}-${item.activeStake}-${item.validatorIdentity || item.validatorMinStake || item.chain}`}
-                      label={<AccountItem
-                        address={item.validatorAddress}
-                        className={'__nomination-label'}
-                        name={name}
-                      />}
+                      label={(
+                        <AccountItem
+                          address={item.validatorAddress}
+                          className={'__nomination-label'}
+                          name={name}
+                          networkPrefix={networkPrefix}
+                        />
+                      )}
                       suffix={staking.nativeToken}
                       value={item.activeStake || ''}
                       valueColorSchema={'gray'}
@@ -456,6 +462,12 @@ const StakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props
   return {
     '.expected-return div:first-child': {
       flex: 2
+    },
+
+    '.base-info': {
+      '.__value-col': {
+        flex: 2
+      }
     },
 
     '.staking-detail-modal-footer': {

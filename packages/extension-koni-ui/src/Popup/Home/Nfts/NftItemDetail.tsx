@@ -34,7 +34,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import Transaction from '../../Transaction/Transaction';
 import SendNFT from '../../Transaction/variants/SendNFT';
-import { INftItemDetail } from '.';
+import { INftItemDetail } from './index';
 
 type WrapperProps = ThemeProps;
 type Props = WrapperProps & {

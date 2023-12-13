@@ -89,7 +89,7 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
     <BaseModal
       className={className}
       destroyOnClose={true}
-      fullSize
+      fullSizeOnMobile
       id={id}
       onCancel={onCancel}
       title={t('Select token')}

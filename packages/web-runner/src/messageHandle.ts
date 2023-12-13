@@ -11,7 +11,7 @@ export interface CustomResponse<T> {
   error?: string
 }
 
-export type PageStatus = CustomResponse<{ status: 'init' | 'load' | 'crypto_ready' }>
+export type PageStatus = CustomResponse<{ status: 'init' | 'load' | 'crypto_ready' | 'require_restore' }>
 
 export function responseMessage (response: TransportResponseMessage<keyof RequestSignatures> | PageStatus) {
   // @ts-ignore

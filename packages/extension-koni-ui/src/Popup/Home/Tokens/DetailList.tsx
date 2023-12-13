@@ -272,10 +272,14 @@ function Component (): React.ReactElement {
   }, []);
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
-    setCurrentTokenInfo({
-      slug: item.slug,
-      symbol: item.symbol
-    });
+    return () => {
+      if (item.isReady) {
+        setCurrentTokenInfo({
+          slug: item.slug,
+          symbol: item.symbol
+        });
+      }
+    };
   }, []);
 
   const onOpenSendFund = useCallback(() => {
@@ -352,10 +356,8 @@ function Component (): React.ReactElement {
     setDetailTitle?.(detailTitle);
   }, [detailTitle, setDetailTitle]);
 
-  const itemClickAction = useCallback((item: TokenBalanceItemType) => {
-    return () => {
-      onClickItem(item);
-    };
+  const onClickRow = useCallback((item: TokenBalanceItemType) => {
+    return onClickItem(item)();
   }, [onClickItem]);
 
   return (
@@ -401,7 +403,7 @@ function Component (): React.ReactElement {
                   <TokenBalanceDetailItem
                     key={item.slug}
                     {...item}
-                    onClick={itemClickAction(item)}
+                    onClick={onClickItem(item)}
                   />
                 ))
               }
@@ -471,7 +473,7 @@ function Component (): React.ReactElement {
                 }
               ]}
               dataSource={tokenBalanceItems}
-              onClick={onClickItem}
+              onClick={onClickRow}
             />
           )}
 

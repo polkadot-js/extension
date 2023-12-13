@@ -7,6 +7,7 @@ import type { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, R
 
 import { RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
 import { DEFAULT_SETTING } from '@subwallet/extension-base/services/setting-service/constants';
+import { SWStorage } from '@subwallet/extension-base/storage';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { stripUrl } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -160,7 +161,7 @@ export default class State {
     extractMetadata(this.#metaStore);
 
     // retrieve previously set authorizations
-    const authString = localStorage.getItem(AUTH_URLS_KEY) || '{}';
+    const authString = SWStorage.instance.getItem(AUTH_URLS_KEY) || '{}';
     const previousAuth = JSON.parse(authString) as AuthUrls;
 
     this.#authUrls = previousAuth;
@@ -297,7 +298,7 @@ export default class State {
   };
 
   private saveCurrentAuthList () {
-    localStorage.setItem(AUTH_URLS_KEY, JSON.stringify(this.#authUrls));
+    SWStorage.instance.setItem(AUTH_URLS_KEY, JSON.stringify(this.#authUrls));
   }
 
   private metaComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {

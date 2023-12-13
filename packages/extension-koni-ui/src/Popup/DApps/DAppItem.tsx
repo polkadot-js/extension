@@ -162,7 +162,6 @@ function Component (props: Props): React.ReactElement<Props> {
 }
 
 const DAppItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
-
   return {
     overflow: 'hidden',
     cursor: 'pointer',
@@ -209,7 +208,7 @@ const DAppItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
       color: token.colorTextLight3,
-      height : token.lineHeightSM * 3 * token.fontSizeSM,
+      height: token.lineHeightSM * 3 * token.fontSizeSM,
       display: '-webkit-box',
       '-webkit-line-clamp': '3',
       '-webkit-box-orient': 'vertical',

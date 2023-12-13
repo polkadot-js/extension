@@ -3,7 +3,7 @@
 
 import { AccountJson, Resolver } from '@subwallet/extension-base/background/types';
 import { detectTranslate, isAccountAll } from '@subwallet/extension-base/utils';
-import { baseServiceItems, Layout, PageWrapper, ServiceItem } from '@subwallet/extension-koni-ui/components';
+import { BaseModal, baseServiceItems, Layout, PageWrapper, ServiceItem } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { ServiceSelector } from '@subwallet/extension-koni-ui/components/Field/BuyTokens/ServiceSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
@@ -15,7 +15,7 @@ import { createBanxaOrder, createCoinbaseOrder, createTransakOrder, findAccountB
 import { getAccountType } from '@subwallet/extension-koni-ui/utils/account/account';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
-import { Button, Form, Icon, ModalContext, SwModal, SwSubHeader } from '@subwallet/react-ui';
+import { Button, Form, Icon, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, ShoppingCartSimple, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -443,7 +443,8 @@ function Component ({ className, modalContent, slug }: Props) {
           {t('Buy now')}
         </Button>
       </div>
-      <SwModal
+      <BaseModal
+        center={true}
         className={CN(className)}
         footer={(
           <>
@@ -510,7 +511,7 @@ function Component ({ className, modalContent, slug }: Props) {
             service: serviceName
           }}
         />
-      </SwModal>
+      </BaseModal>
     </PageWrapper>
   );
 }

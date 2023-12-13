@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
-import axios from 'axios';
 
 interface GeckoItem {
   id: string,
@@ -21,7 +20,7 @@ export const getTokenPrice = async (priceIds: Set<string>, currency = 'usd'): Pr
 
     if (!useBackupApi) {
       try {
-        res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=250&ids=${idStr}`);
+        res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=250&ids=${idStr}`);
       } catch (err) {
         useBackupApi = true;
       }
@@ -29,14 +28,14 @@ export const getTokenPrice = async (priceIds: Set<string>, currency = 'usd'): Pr
 
     if (useBackupApi || res?.status !== 200) {
       useBackupApi = true;
-      res = await axios.get(`https://chain-data.subwallet.app/api/price/get?ids=${idStr}`);
+      res = await fetch(`https://chain-data.subwallet.app/api/price/get?ids=${idStr}`);
     }
 
     if (res.status !== 200) {
       console.warn('Failed to get token price');
     }
 
-    const responseData = res.data as Array<GeckoItem> || [];
+    const responseData = await res.json() as Array<GeckoItem> || [];
     const priceMap: Record<string, number> = {};
     const price24hMap: Record<string, number> = {};
 

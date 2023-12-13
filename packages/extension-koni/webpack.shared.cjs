@@ -145,11 +145,6 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
         filename: 'notification.html',
         template: 'public/notification.html',
         chunks: ['extension']
-      }),
-      new HtmlWebpackPlugin({
-        filename: 'background.html',
-        template: 'public/background.html',
-        chunks: ['background']
       })
     ],
     resolve: {

@@ -3,11 +3,11 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ExtrinsicType, StakeCancelWithdrawalParams } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 /**
  * @class BasePoolHandler

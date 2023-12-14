@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestStakeCancelWithdrawal } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestStakeCancelWithdrawal } from '@subwallet/extension-base/types';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';

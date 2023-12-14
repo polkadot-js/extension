@@ -3,12 +3,12 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getEarningStatusByNominations } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { EarningStatus, NormalYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { EarningStatus, NormalYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, isUrl, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 

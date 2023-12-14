@@ -3,14 +3,14 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { EarningStatus, NormalYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, RuntimeDispatchInfo, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { EarningStatus, NormalYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
 

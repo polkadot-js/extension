@@ -6,7 +6,7 @@ import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/backg
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestYieldLeave, RequestYieldWithdrawal, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
@@ -313,6 +313,32 @@ export default class EarningService {
 
     if (handler) {
       return handler.handleYieldWithdraw(params.address, params.unstakingInfo);
+    } else {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+    }
+  }
+
+  public async handleYieldCancelUnstake (params: RequestStakeCancelWithdrawal): Promise<TransactionData> {
+    await this.state.eventService.waitChainReady;
+
+    const { slug } = params;
+    const handler = this.getPoolHandler(slug);
+
+    if (handler) {
+      return handler.handleYieldCancelUnstake(params);
+    } else {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+    }
+  }
+
+  public async handleYieldClaimReward (params: RequestStakeClaimReward): Promise<TransactionData> {
+    await this.state.eventService.waitChainReady;
+
+    const { slug } = params;
+    const handler = this.getPoolHandler(slug);
+
+    if (handler) {
+      return handler.handleYieldClaimReward(params.address, params.bondReward);
     } else {
       return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
     }

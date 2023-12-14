@@ -10,7 +10,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BalanceMap, BuyServiceInfo, BuyTokenInfo, EarningStatus, NominationPoolInfo, RequestGetYieldPoolTargets, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { BalanceJson, BalanceMap, BuyServiceInfo, BuyTokenInfo, EarningStatus, NominationPoolInfo, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, StakeClaimRewardParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -1656,24 +1656,6 @@ export interface StakeWithdrawalParams extends BaseRequestSign {
 export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;
 
 // Claim
-
-export interface StakeClaimRewardParams extends BaseRequestSign {
-  address: string,
-  chain: string,
-  stakingType: StakingType,
-  unclaimedReward?: string,
-  bondReward?: boolean
-}
-
-export type RequestStakeClaimReward = InternalRequestSign<StakeClaimRewardParams>;
-
-export interface StakeCancelWithdrawalParams extends BaseRequestSign {
-  address: string,
-  chain: string,
-  selectedUnstaking: UnstakingInfo
-}
-
-export type RequestStakeCancelWithdrawal = InternalRequestSign<StakeCancelWithdrawalParams>;
 
 // Compound
 

@@ -3,13 +3,13 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getBondedValidators, getEarningStatusByNominations, isUnstakeAll } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BlockHeader, EarningStatus, NormalYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BlockHeader, EarningStatus, NormalYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';

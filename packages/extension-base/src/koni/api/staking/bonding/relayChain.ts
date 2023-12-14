@@ -581,8 +581,6 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
 
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug] + remainingHours;
 
-    console.log('waitingTime', waitingTime);
-    
     unstakings.push({
       chain: chainInfo.slug,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,

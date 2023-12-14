@@ -3,7 +3,7 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getStakingStatusByNominations, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getEarningStatusByNominations, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { EarningStatus, UnstakingStatus } from '@subwallet/extension-base/types';
@@ -176,7 +176,7 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
     } as NominatorMetadata;
   }
 
-  const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
+  const stakingStatus = getEarningStatusByNominations(bnTotalActiveStake, nominationList);
 
   return {
     chain: chainInfo.slug,
@@ -292,7 +292,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
     } as NominatorMetadata;
   }
 
-  const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
+  const stakingStatus = getEarningStatusByNominations(bnTotalActiveStake, nominationList);
 
   return {
     chain,

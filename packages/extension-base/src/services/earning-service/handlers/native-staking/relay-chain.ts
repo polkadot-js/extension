@@ -3,18 +3,18 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, StakingTxErrorType, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { DEFAULT_YIELD_FIRST_STEP, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { _STAKING_CHAIN_GROUP, fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { EarningStatus, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, RuntimeDispatchInfo, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningStatus, NormalYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, RuntimeDispatchInfo, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
 
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { UnsubscribePromise } from '@polkadot/api-base/types/base';
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -402,40 +402,6 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
   /* Join pool action */
 
-  async generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
-    const bnAmount = new BN(params.amount);
-    const result: OptimalYieldPath = {
-      totalFee: [],
-      steps: [DEFAULT_YIELD_FIRST_STEP]
-    };
-
-    const feeAsset = this.nativeToken.slug;
-    const substrateApi = await this.substrateApi.isReady;
-
-    result.steps.push({
-      id: result.steps.length,
-      name: 'Nominate validators',
-      type: YieldStepType.NOMINATE
-    });
-
-    const [_bondFeeInfo, _nominateFeeInfo] = await Promise.all([
-      substrateApi.api.tx.staking.bond(bnAmount, 'Staked').paymentInfo(fakeAddress),
-      substrateApi.api.tx.staking.nominate(syntheticSelectedValidators).paymentInfo(fakeAddress)
-    ]);
-
-    const bondFeeInfo = _bondFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-    const nominateFeeInfo = _nominateFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-
-    const totalFee = bondFeeInfo.partialFee + nominateFeeInfo.partialFee;
-
-    result.totalFee.push({
-      slug: feeAsset,
-      amount: totalFee.toString()
-    });
-
-    return result;
-  }
-
   async validateYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]> {
     const { address, amount, selectedValidators } = data as SubmitJoinNativeStaking;
     const _poolInfo = await this.getPoolInfo();
@@ -481,13 +447,14 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     return errors;
   }
 
-  async createJoinExtrinsic (data: SubmitJoinNativeStaking, positionInfo?: YieldPositionInfo, bondDest = 'Staked'): Promise<TransactionData> {
+  async createJoinExtrinsic (data: SubmitJoinNativeStaking, positionInfo?: YieldPositionInfo, bondDest = 'Staked'): Promise<[TransactionData, YieldTokenBaseInfo]> {
     const { address, amount, selectedValidators: targetValidators } = data;
     const chainApi = await this.substrateApi.isReady;
     const binaryAmount = new BN(amount);
+    const tokenSlug = this.nativeToken.slug;
 
-    let bondTx;
-    let nominateTx;
+    let bondTx: SubmittableExtrinsic<'promise'> | undefined;
+    let nominateTx: SubmittableExtrinsic<'promise'> | undefined;
 
     const _params = chainApi.api.tx.staking.bond.toJSON() as Record<string, any>;
     const paramsCount = (_params.args as any[]).length;
@@ -495,6 +462,18 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const validatorParamList = targetValidators.map((validator) => {
       return validator.address;
     });
+
+    const compoundTransactions = async (bondTx: SubmittableExtrinsic<'promise'>, nominateTx: SubmittableExtrinsic<'promise'>): Promise<[TransactionData, YieldTokenBaseInfo]> => {
+      const extrinsic = chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
+      const fees = await Promise.all([bondTx.paymentInfo(address), nominateTx.paymentInfo(address)]);
+      const totalFee = fees.reduce((previousValue, currentItem) => {
+        const fee = currentItem.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+        return previousValue + fee.partialFee;
+      }, 0);
+
+      return [extrinsic, { slug: tokenSlug, amount: totalFee.toString() }];
+    };
 
     if (!positionInfo) {
       if (paramsCount === 2) {
@@ -505,7 +484,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
       nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
 
-      return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
+      return compoundTransactions(bondTx, nominateTx);
     }
 
     if (!positionInfo.isBondedBefore) { // first time
@@ -517,7 +496,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
       nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
 
-      return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
+      return compoundTransactions(bondTx, nominateTx);
     } else {
       if (binaryAmount.gt(BN_ZERO)) {
         bondTx = chainApi.api.tx.staking.bondExtra(binaryAmount);
@@ -529,12 +508,22 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     }
 
     if (bondTx && !nominateTx) {
-      return bondTx;
+      const feeInfo = await bondTx.paymentInfo(address);
+      const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      return [bondTx, { slug: tokenSlug, amount: fee.partialFee.toString() }];
     } else if (nominateTx && !bondTx) {
-      return nominateTx;
+      const feeInfo = await nominateTx.paymentInfo(address);
+      const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      return [nominateTx, { slug: tokenSlug, amount: fee.partialFee.toString() }];
     }
 
-    return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
+    if (bondTx && nominateTx) {
+      return compoundTransactions(bondTx, nominateTx);
+    } else {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+    }
   }
 
   /* Join pool action */

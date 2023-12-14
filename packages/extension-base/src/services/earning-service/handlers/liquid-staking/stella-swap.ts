@@ -204,7 +204,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     };
   }
 
-  async getTokenApproveStep (params: OptimalYieldPathParams): Promise<[BaseYieldStepDetail, YieldTokenBaseInfo] | undefined> {
+  override async getTokenApproveStep (params: OptimalYieldPathParams): Promise<[BaseYieldStepDetail, YieldTokenBaseInfo] | undefined> {
     const evmApi = this.evmApi;
 
     const derivativeTokenSlug = this.derivativeAssets[0];

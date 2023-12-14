@@ -155,3 +155,12 @@ export interface PalletStakingStakingLedger {
   unlocking: UnlockingChunk[],
   claimedRewards: number[]
 }
+
+export interface RuntimeDispatchInfo {
+  weight: {
+    refTime: number,
+    proofSize: number
+  },
+  class: string,
+  partialFee: number
+}

@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiPromise } from '@polkadot/api';
-import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
@@ -13,6 +11,9 @@ import { EarningStatus, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPosi
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { t } from 'i18next';
+
+import { ApiPromise } from '@polkadot/api';
+import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
 
 export interface PalletDappsStakingDappInfo {
   address: string,
@@ -480,7 +481,7 @@ export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
   return result;
 }
 
-export function getStakingStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): EarningStatus {
+export function getEarningStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): EarningStatus {
   let stakingStatus: EarningStatus = EarningStatus.EARNING_REWARD;
 
   if (bnTotalActiveStake.isZero()) {

@@ -4,17 +4,16 @@
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { APIItemState, BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, StakingTxErrorType, StakingType, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, getExistUnstakeErrorMessage, getMinStakeErrorMessage, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, RuntimeDispatchInfo, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, RuntimeDispatchInfo, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
 
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { UnsubscribePromise } from '@polkadot/api-base/types/base';
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO, hexToString, isHex } from '@polkadot/util';
@@ -375,34 +374,45 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
   /* Join pool action */
 
-  async generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
-    const result: OptimalYieldPath = {
-      totalFee: [],
-      steps: [DEFAULT_YIELD_FIRST_STEP]
-    };
-
-    const feeAsset = this.nativeToken.slug;
-    const substrateApi = await this.substrateApi.isReady;
-
-    result.steps.push({
-      id: result.steps.length,
-      metadata: {
-        amount: params.amount
+  get defaultSubmitStep (): YieldStepBaseInfo {
+    return [
+      {
+        name: 'Join nomination pool',
+        type: YieldStepType.JOIN_NOMINATION_POOL
       },
-      name: 'Join nomination pool',
-      type: YieldStepType.JOIN_NOMINATION_POOL
-    });
+      {
+        slug: this.nativeToken.slug,
+        amount: '0'
+      }
+    ];
+  }
 
-    // TODO: check existing position
-    const _joinPoolFeeInfo = await substrateApi.api.tx.nominationPools.join(params.amount, 1).paymentInfo(fakeAddress);
-    const joinPoolFeeInfo = _joinPoolFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+  protected async getSubmitStep (params: OptimalYieldPathParams): Promise<YieldStepBaseInfo> {
+    const { address, amount, slug, targets } = params;
 
-    result.totalFee.push({
-      slug: feeAsset,
-      amount: joinPoolFeeInfo.partialFee.toString()
-    });
+    if (!targets || !targets.length) {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INVALID_PARAMS));
+    }
 
-    return result;
+    const data: SubmitJoinNominationPool = {
+      amount,
+      address,
+      slug,
+      selectedPool: targets[0] as NominationPoolInfo
+    };
+    const positionInfo = await this.getPoolPosition(address);
+    const [, fee] = await this.createJoinExtrinsic(data, positionInfo);
+
+    return [
+      {
+        name: 'Join nomination pool',
+        type: YieldStepType.JOIN_NOMINATION_POOL,
+        metadata: {
+          amount: amount
+        }
+      },
+      fee
+    ];
   }
 
   async validateYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]> {
@@ -447,24 +457,36 @@ export default class NominationPoolHandler extends BasePoolHandler {
     return errors;
   }
 
-  async createJoinExtrinsic (data: SubmitJoinNominationPool, positionInfo?: YieldPositionInfo): Promise<TransactionData> {
-    const { amount, selectedPool: { id: selectedPoolId } } = data;
+  async createJoinExtrinsic (data: SubmitJoinNominationPool, positionInfo?: YieldPositionInfo): Promise<[TransactionData, YieldTokenBaseInfo]> {
+    const { address, amount, selectedPool: { id: selectedPoolId } } = data;
 
     const chainApi = await this.substrateApi.isReady;
     const bnActiveStake = new BN(positionInfo?.activeStake || '0');
 
+    const compoundResult = async (extrinsic: SubmittableExtrinsic<'promise'>): Promise<[TransactionData, YieldTokenBaseInfo]> => {
+      const tokenSlug = this.nativeToken.slug;
+      const feeInfo = await extrinsic.paymentInfo(address);
+      const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      return [extrinsic, { slug: tokenSlug, amount: fee.partialFee.toString() }];
+    };
+
     if (bnActiveStake.gt(BN_ZERO)) { // already joined a pool
-      return chainApi.api.tx.nominationPools.bondExtra({ FreeBalance: amount });
+      const extrinsic = chainApi.api.tx.nominationPools.bondExtra({ FreeBalance: amount });
+
+      return compoundResult(extrinsic);
     }
 
-    return chainApi.api.tx.nominationPools.join(amount, selectedPoolId);
+    const extrinsic = chainApi.api.tx.nominationPools.join(amount, selectedPoolId);
+
+    return compoundResult(extrinsic);
   }
 
   async handleYieldJoin (_data: SubmitYieldJoinData, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
     const data = _data as SubmitJoinNominationPool;
     const { address, amount, selectedPool } = data;
     const positionInfo = await this.getPoolPosition(address);
-    const extrinsic = await this.createJoinExtrinsic(data);
+    const [extrinsic] = await this.createJoinExtrinsic(data);
 
     const joinPoolData: RequestStakePoolingBonding = {
       poolPosition: positionInfo,

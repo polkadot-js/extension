@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingTxErrorType, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getBondedValidators, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getParaCurrentInflation, getStakingStatusByNominations, InflationConfig, isUnstakeAll, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getBondedValidators, getEarningStatusByNominations, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getParaCurrentInflation, InflationConfig, isUnstakeAll, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -267,7 +267,7 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
   //   nomination.validatorMinStake = collatorInfo.lowestTopDelegationAmount.toString();
   // }));
 
-  const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
+  const stakingStatus = getEarningStatusByNominations(bnTotalActiveStake, nominationList);
 
   return {
     chain: chainInfo.slug,
@@ -380,7 +380,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
     nomination.validatorMinStake = collatorInfo.lowestTopDelegationAmount.toString();
   }));
 
-  const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
+  const stakingStatus = getEarningStatusByNominations(bnTotalActiveStake, nominationList);
 
   return {
     chain,

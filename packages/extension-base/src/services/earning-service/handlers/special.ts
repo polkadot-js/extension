@@ -7,13 +7,12 @@ import { BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, StakingTxEr
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldProcessValidation, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldProcessValidation, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import BN from 'bn.js';
 import { t } from 'i18next';
 
 import { BN_ZERO, noop } from '@polkadot/util';
 
-import { DEFAULT_YIELD_FIRST_STEP, fakeAddress } from '../constants';
 import BasePoolHandler from './base';
 
 export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHandler {
@@ -52,7 +51,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
   /* Subscribe pool info */
 
-  abstract getPoolStat(): Promise<SpecialYieldPoolInfo>;
+  abstract getPoolStat (): Promise<SpecialYieldPoolInfo>;
 
   async subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
@@ -110,30 +109,16 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   /* Generate steps */
 
   /**
-   * @function submitJoinStepInfo
-   * @description Base info of submit step
-   * @return Fee of the submitting step
-   * */
-  abstract get submitJoinStepInfo(): BaseYieldStepDetail;
-
-  /**
    * @async
-   * @function getSubmitStepFee
-   * @description Get submit step fee
-   * @return {Promise<YieldTokenBaseInfo>} Fee of the submitting step
+   * @function getXcmStep
    * */
-  abstract getSubmitStepFee(params: OptimalYieldPathParams): Promise<YieldTokenBaseInfo>;
-
-  /**
-   * @async
-   * @function getSubmitStepFee
-   * */
-  async getXcmStep (params: OptimalYieldPathParams): Promise<[BaseYieldStepDetail, YieldTokenBaseInfo] | undefined> {
-    const bnAmount = new BN(params.amount);
+  override async getXcmStep (params: OptimalYieldPathParams): Promise<[BaseYieldStepDetail, YieldTokenBaseInfo] | undefined> {
+    const { address, amount } = params;
+    const bnAmount = new BN(amount);
     const inputTokenSlug = this.inputAsset; // assume that the pool only has 1 input token, will update later
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
 
-    const inputTokenBalance = await this.state.balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug);
+    const inputTokenBalance = await this.state.balanceService.getTokenFreeBalance(address, inputTokenInfo.originChain, inputTokenSlug);
 
     const bnInputTokenBalance = new BN(inputTokenBalance.value);
 
@@ -141,7 +126,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       if (this.altInputAsset) {
         const altInputTokenSlug = this.altInputAsset;
         const altInputTokenInfo = this.state.getAssetBySlug(altInputTokenSlug);
-        const altInputTokenBalance = await this.state.balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug);
+        const altInputTokenBalance = await this.state.balanceService.getTokenFreeBalance(address, altInputTokenInfo.originChain, altInputTokenSlug);
         const bnAltInputTokenBalance = new BN(altInputTokenBalance.value || '0');
 
         if (bnAltInputTokenBalance.gt(BN_ZERO)) {
@@ -161,12 +146,12 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
             originTokenInfo: altInputTokenInfo,
             destinationTokenInfo: inputTokenInfo,
             sendingValue: bnAmount.toString(),
-            recipient: fakeAddress,
+            recipient: address,
             chainInfoMap: this.state.getChainInfoMap(),
             substrateApi: xcmOriginSubstrateApi
           });
 
-          const _xcmFeeInfo = await xcmTransfer.paymentInfo(fakeAddress);
+          const _xcmFeeInfo = await xcmTransfer.paymentInfo(address);
           const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
           // TODO: calculate fee for destination chain
 
@@ -183,67 +168,35 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     return undefined;
   }
 
-  override async generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
-    const result: OptimalYieldPath = {
-      totalFee: [{ slug: '' }],
-      steps: [DEFAULT_YIELD_FIRST_STEP]
-    };
-
-    try {
-      /* XCM step */
-
-      const xcmStep = await this.getXcmStep(params);
-
-      if (xcmStep) {
-        const [step, fee] = xcmStep;
-
-        result.steps.push({
-          id: result.steps.length,
-          ...step
-        });
-
-        result.totalFee.push(fee);
-      }
-
-      /* XCM step */
-
-      /* Submit step */
-
-      const submitFee = await this.getSubmitStepFee(params);
-
-      result.steps.push({
-        id: result.steps.length,
-        ...this.submitJoinStepInfo
-      });
-
-      result.totalFee.push(submitFee);
-
-      /* Submit step */
-
-      return result;
-    } catch (e) {
-      const errorMessage = (e as Error).message;
-
-      if (errorMessage.includes('network')) {
-        result.connectionError = errorMessage.split(' ')[0];
-      }
-
-      /* Submit step */
-
-      result.steps.push({
-        id: result.steps.length,
-        ...this.submitJoinStepInfo
-      });
-
-      result.totalFee.push({
+  protected get defaultSubmitStep (): YieldStepBaseInfo {
+    return [
+      this.submitJoinStepInfo,
+      {
         slug: this.feeAssets[0],
         amount: '0'
-      });
+      }
+    ];
+  }
 
-      /* Submit step */
+  /**
+   * @function submitJoinStepInfo
+   * @description Base info of submit step
+   * @return Fee of the submitting step
+   * */
+  abstract get submitJoinStepInfo(): BaseYieldStepDetail;
 
-      return result;
-    }
+  /**
+   * @async
+   * @function getSubmitStepFee
+   * @description Get submit step fee
+   * @return {Promise<YieldTokenBaseInfo>} Fee of the submitting step
+   * */
+  abstract getSubmitStepFee(params: OptimalYieldPathParams): Promise<YieldTokenBaseInfo>;
+
+  protected async getSubmitStep (params: OptimalYieldPathParams): Promise<YieldStepBaseInfo> {
+    const fee = await this.getSubmitStepFee(params);
+
+    return [this.submitJoinStepInfo, fee];
   }
 
   /* Generate steps */
@@ -335,7 +288,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     return [];
   }
 
-  override async validateYieldJoin (params: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]> {
+  async validateYieldJoin (params: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]> {
     const inputTokenSlug = this.inputAsset;
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
     const balanceService = this.state.balanceService;

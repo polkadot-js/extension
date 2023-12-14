@@ -1,14 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-export interface RuntimeDispatchInfo {
-  weight: {
-    refTime: number,
-    proofSize: number
-  },
-  class: string,
-  partialFee: number
-}
+import { YieldPoolTarget } from '@subwallet/extension-base/types';
 
 /**
  * @interface OptimalYieldPathParams
@@ -18,6 +11,7 @@ export interface OptimalYieldPathParams {
   slug: string;
   address: string;
   amount: string;
+  targets?: YieldPoolTarget[];
 }
 
 /**
@@ -54,29 +48,44 @@ export enum YieldStepType {
 /**
  * @interface BaseYieldStepDetail
  * @description Base info of a step
+ * @prop {string} name - Step's name
+ * @prop {YieldStepType} type - Step's type
+ * @prop {Record<string,unknown>} [metadata] - Metadata for generating extrinsic
  * */
 export interface BaseYieldStepDetail {
-  name: string,
-  type: YieldStepType,
-  metadata?: Record<string, unknown>; // for generating extrinsic
+  /** Step's name */
+  name: string;
+  /** Step's type */
+  type: YieldStepType;
+  /** Metadata for generating extrinsic */
+  metadata?: Record<string, unknown>;
 }
 
 /**
  * @interface YieldStepDetail
  * @extends BaseYieldStepDetail
  * @description Detail of a step
+ * @prop {number} id - Step's id
  * */
 export interface YieldStepDetail extends BaseYieldStepDetail {
-  id: number,
+  /** Step's id */
+  id: number;
 }
 
 /**
  * @interface YieldTokenBaseInfo
+ * @prop {string} slug - Token's slug
+ * @prop {string} [amount] - Token's amount
  * */
 export interface YieldTokenBaseInfo {
-  slug: string,
-  amount?: string,
+  /** Token's slug */
+  slug: string;
+  /** Token's amount */
+  amount?: string;
 }
+
+/** Base info and fee of a step */
+export type YieldStepBaseInfo = [BaseYieldStepDetail, YieldTokenBaseInfo]
 
 /**
  * @interface OptimalYieldPath
@@ -87,3 +96,5 @@ export interface OptimalYieldPath {
   steps: YieldStepDetail[],
   connectionError?: string
 }
+
+export type GenStepFunction = (params: OptimalYieldPathParams) => Promise<YieldStepBaseInfo | undefined>;

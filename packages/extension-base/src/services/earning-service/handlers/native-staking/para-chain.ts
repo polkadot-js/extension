@@ -3,23 +3,23 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, StakingTxErrorType, StakingType, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
-import { getBondedValidators, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getParaCurrentInflation, getStakingStatusByNominations, InflationConfig, isUnstakeAll } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { DEFAULT_YIELD_FIRST_STEP, syntheticSelectedValidators } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getBondedValidators, getEarningStatusByNominations, getParaCurrentInflation, InflationConfig, isUnstakeAll } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import BaseNativeStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/native-staking/base';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { CollatorExtraInfo, EarningStatus, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, RuntimeDispatchInfo, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { balanceFormatter, formatNumber, isSameAddress, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import { CollatorExtraInfo, EarningStatus, NormalYieldPoolInfo, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, RuntimeDispatchInfo, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { UnsubscribePromise } from '@polkadot/api-base/types/base';
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
-export default class ParaNativeStakingPoolHandler extends BaseNativeStakingPoolHandler {
+import BaseParaNativeStakingPoolHandler from './base-para';
+
+export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingPoolHandler {
   /* Subscribe pool info */
 
   async subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction> {
@@ -191,7 +191,7 @@ export default class ParaNativeStakingPoolHandler extends BaseNativeStakingPoolH
     //   nomination.validatorMinStake = collatorInfo.lowestTopDelegationAmount.toString();
     // }));
 
-    const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
+    const stakingStatus = getEarningStatusByNominations(bnTotalActiveStake, nominationList);
 
     const activeStake = bnTotalActiveStake.toString();
 
@@ -343,185 +343,43 @@ export default class ParaNativeStakingPoolHandler extends BaseNativeStakingPoolH
 
   /* Join pool action */
 
-  // Todo
-  async generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
-    const bnAmount = new BN(params.amount);
-    const result: OptimalYieldPath = {
-      totalFee: [],
-      steps: [DEFAULT_YIELD_FIRST_STEP]
-    };
-
-    const feeAsset = this.nativeToken.slug;
-    const substrateApi = await this.substrateApi.isReady;
-
-    result.steps.push({
-      id: result.steps.length,
-      name: 'Nominate validators',
-      type: YieldStepType.NOMINATE
-    });
-
-    const [_bondFeeInfo, _nominateFeeInfo] = await Promise.all([
-      substrateApi.api.tx.staking.bond(bnAmount, 'Staked').paymentInfo(fakeAddress),
-      substrateApi.api.tx.staking.nominate(syntheticSelectedValidators).paymentInfo(fakeAddress)
-    ]);
-
-    const bondFeeInfo = _bondFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-    const nominateFeeInfo = _nominateFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-
-    const totalFee = bondFeeInfo.partialFee + nominateFeeInfo.partialFee;
-
-    result.totalFee.push({
-      slug: feeAsset,
-      amount: totalFee.toString()
-    });
-
-    return result;
-  }
-
-  async validateYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]> {
-    const { address, amount, selectedValidators } = data as SubmitJoinNativeStaking;
-    const poolInfo = await this.getPoolInfo();
-    const poolPosition = await this.getPoolPosition(address);
-    const chainInfo = this.chainInfo;
-
-    if (!poolInfo) {
-      return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
-    }
-
-    const errors: TransactionError[] = [];
-    const selectedCollator = selectedValidators[0];
-    let bnTotalStake = new BN(amount);
-    const bnChainMinStake = new BN(poolInfo.metadata.minJoinPool || '0');
-    const bnCollatorMinStake = new BN(selectedCollator.minBond || '0');
-    const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
-    const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
-    const maxValidator = poolInfo.metadata.maxCandidatePerFarmer;
-    const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, maxValidator);
-    const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, StakingType.NOMINATED, true);
-
-    if (!poolPosition || poolPosition.status === EarningStatus.NOT_STAKING) {
-      if (!bnTotalStake.gte(bnMinStake)) {
-        errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
-      }
-
-      return errors;
-    }
-
-    const { bondedValidators } = getBondedValidators(poolPosition.nominations);
-    const parsedSelectedCollatorAddress = reformatAddress(selectedCollator.address, 0);
-
-    if (!bondedValidators.includes(parsedSelectedCollatorAddress)) { // new delegation
-      if (!bnTotalStake.gte(bnMinStake)) {
-        errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
-      }
-
-      const delegationCount = poolPosition.nominations.length + 1;
-
-      if (delegationCount > maxValidator) {
-        errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS, maxValidatorErrorMessage));
-      }
-    } else {
-      let currentDelegationAmount = '0';
-      let hasUnstaking = false;
-
-      for (const delegation of poolPosition.nominations) {
-        if (reformatAddress(delegation.validatorAddress, 0) === parsedSelectedCollatorAddress) {
-          currentDelegationAmount = delegation.activeStake;
-          hasUnstaking = !!delegation.hasUnstaking && delegation.hasUnstaking;
-
-          break;
-        }
-      }
-
-      bnTotalStake = bnTotalStake.add(new BN(currentDelegationAmount));
-
-      if (!bnTotalStake.gte(bnMinStake)) {
-        errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
-      }
-
-      if (hasUnstaking) {
-        errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST, existUnstakeErrorMessage));
-      }
-    }
-
-    return errors;
-  }
-
-  async createJoinExtrinsic (data: SubmitJoinNativeStaking, positionInfo?: YieldPositionInfo): Promise<TransactionData> {
-    const { amount, selectedValidators } = data;
+  async createJoinExtrinsic (data: SubmitJoinNativeStaking, positionInfo?: YieldPositionInfo): Promise<[TransactionData, YieldTokenBaseInfo]> {
+    const { address, amount, selectedValidators } = data;
     const apiPromise = await this.substrateApi.isReady;
     const binaryAmount = new BN(amount);
     const selectedCollatorInfo = selectedValidators[0];
 
+    const compoundResult = async (extrinsic: SubmittableExtrinsic<'promise'>): Promise<[TransactionData, YieldTokenBaseInfo]> => {
+      const tokenSlug = this.nativeToken.slug;
+      const feeInfo = await extrinsic.paymentInfo(address);
+      const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      return [extrinsic, { slug: tokenSlug, amount: fee.partialFee.toString() }];
+    };
+
     if (!positionInfo) {
-      return apiPromise.api.tx.parachainStaking.delegate(selectedCollatorInfo.address, binaryAmount, new BN(selectedCollatorInfo.nominatorCount), 0);
+      const extrinsic = apiPromise.api.tx.parachainStaking.delegate(selectedCollatorInfo.address, binaryAmount, new BN(selectedCollatorInfo.nominatorCount), 0);
+
+      return compoundResult(extrinsic);
     }
 
     const { bondedValidators, nominationCount } = getBondedValidators(positionInfo.nominations);
     const parsedSelectedCollatorAddress = reformatAddress(selectedCollatorInfo.address, 0);
 
     if (!bondedValidators.includes(parsedSelectedCollatorAddress)) {
-      return apiPromise.api.tx.parachainStaking.delegate(selectedCollatorInfo.address, binaryAmount, new BN(selectedCollatorInfo.nominatorCount), nominationCount);
+      const extrinsic = apiPromise.api.tx.parachainStaking.delegate(selectedCollatorInfo.address, binaryAmount, new BN(selectedCollatorInfo.nominatorCount), nominationCount);
+
+      return compoundResult(extrinsic);
     } else {
-      return apiPromise.api.tx.parachainStaking.delegatorBondMore(selectedCollatorInfo.address, binaryAmount);
+      const extrinsic = apiPromise.api.tx.parachainStaking.delegatorBondMore(selectedCollatorInfo.address, binaryAmount);
+
+      return compoundResult(extrinsic);
     }
   }
 
   /* Join pool action */
 
   /* Leave pool action */
-
-  /**
-   * @todo Recheck
-   * */
-  async validateYieldLeave (amount: string, address: string, fastLeave: boolean, selectedTarget?: string): Promise<TransactionError[]> {
-    const errors: TransactionError[] = [];
-
-    const poolInfo = await this.getPoolInfo();
-    const poolPosition = await this.getPoolPosition(address);
-
-    if (!poolInfo || !poolPosition || fastLeave || !selectedTarget) {
-      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
-    }
-
-    if (fastLeave) {
-      return [new TransactionError(BasicTxErrorType.INVALID_PARAMS)];
-    }
-
-    let targetNomination: NominationInfo | undefined;
-
-    for (const nomination of poolPosition.nominations) {
-      if (isSameAddress(nomination.validatorAddress, selectedTarget)) {
-        targetNomination = nomination;
-
-        break;
-      }
-    }
-
-    if (!targetNomination) {
-      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
-
-      return errors;
-    }
-
-    const bnActiveStake = new BN(targetNomination.activeStake);
-    const bnRemainingStake = bnActiveStake.sub(new BN(amount));
-
-    const bnChainMinStake = new BN(poolInfo.metadata.minJoinPool || '0');
-    const bnCollatorMinStake = new BN(targetNomination.validatorMinStake || '0');
-    const bnMinStake = BN.max(bnCollatorMinStake, bnChainMinStake);
-    const existUnstakeErrorMessage = getExistUnstakeErrorMessage(this.chain, StakingType.NOMINATED);
-
-    if (targetNomination.hasUnstaking) {
-      errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST, existUnstakeErrorMessage));
-    }
-
-    if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(bnMinStake))) {
-      errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE));
-    }
-
-    return errors;
-  }
 
   async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const apiPromise = await this.substrateApi.isReady;
@@ -556,7 +414,6 @@ export default class ParaNativeStakingPoolHandler extends BaseNativeStakingPoolH
     return chainApi.api.tx.parachainStaking.cancelDelegationRequest(selectedUnstaking.validatorAddress);
   }
 
-  // Todo
   async handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData> {
     const collatorAddress = unstakingInfo.validatorAddress;
 

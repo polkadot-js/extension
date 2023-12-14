@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ExtrinsicType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, ValidatorInfo, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { noop } from '@polkadot/util';
 
 import BasePoolHandler from '../base';
-
 
 export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandler {
   public readonly type = YieldPoolType.NATIVE_STAKING;
@@ -52,13 +51,47 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
 
   /* Join pool action */
 
-  abstract createJoinExtrinsic (data: SubmitJoinNativeStaking, positionInfo?: YieldPositionInfo, bondDest?: string): Promise<TransactionData>
+  get defaultSubmitStep (): YieldStepBaseInfo {
+    return [
+      {
+        name: 'Nominate validators',
+        type: YieldStepType.NOMINATE
+      },
+      {
+        slug: this.nativeToken.slug,
+        amount: '0'
+      }
+    ];
+  }
+
+  abstract createJoinExtrinsic (data: SubmitJoinNativeStaking, positionInfo?: YieldPositionInfo, bondDest?: string): Promise<[TransactionData, YieldTokenBaseInfo]>
+
+  protected async getSubmitStep (params: OptimalYieldPathParams): Promise<YieldStepBaseInfo> {
+    const { address, amount, slug, targets } = params;
+    const selectedValidators = !targets ? [] : targets as ValidatorInfo[];
+    const data: SubmitJoinNativeStaking = {
+      amount,
+      address,
+      slug,
+      selectedValidators
+    };
+    const positionInfo = await this.getPoolPosition(address);
+    const [, fee] = await this.createJoinExtrinsic(data, positionInfo);
+
+    return [
+      {
+        name: 'Nominate validators',
+        type: YieldStepType.NOMINATE
+      },
+      fee
+    ];
+  }
 
   async handleYieldJoin (_data: SubmitYieldJoinData, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData> {
     const data = _data as SubmitJoinNativeStaking;
     const { address, amount, selectedValidators } = data;
     const positionInfo = await this.getPoolPosition(address);
-    const extrinsic = await this.createJoinExtrinsic(data, positionInfo);
+    const [extrinsic] = await this.createJoinExtrinsic(data, positionInfo);
 
     const bondingData: RequestBondingSubmit = {
       poolPosition: positionInfo,
@@ -78,7 +111,6 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
   }
 
   /* Join pool action */
-
 
   /* Leave pool action */
 

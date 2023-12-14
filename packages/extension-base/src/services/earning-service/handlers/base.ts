@@ -6,7 +6,8 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { ExtrinsicType, StakeCancelWithdrawalParams } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/services/earning-service/constants';
+import { EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 /**
  * @class BasePoolHandler
@@ -85,36 +86,145 @@ export default abstract class BasePoolHandler {
   /* Subscribe data */
 
   /** Subscribe pool info */
-  abstract subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction>;
+  public abstract subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction>;
   /** Subscribe pool position */
-  abstract subscribePoolPosition (useAddresses: string[], callback: (rs: YieldPositionInfo) => void): Promise<VoidFunction>;
+  public abstract subscribePoolPosition (useAddresses: string[], callback: (rs: YieldPositionInfo) => void): Promise<VoidFunction>;
   /** Get pool reward */
-  abstract getPoolReward (useAddresses: string[], callback: (rs: EarningRewardItem) => void): Promise<VoidFunction>; // TODO: Change callback
+  public abstract getPoolReward (useAddresses: string[], callback: (rs: EarningRewardItem) => void): Promise<VoidFunction>; // TODO: Change callback
   /** Get pool target */
-  abstract getPoolTargets (): Promise<YieldPoolTarget[]>;
+  public abstract getPoolTargets (): Promise<YieldPoolTarget[]>;
 
   /* Subscribe data */
 
   /* Join action */
 
+  /* Generate steps */
+
+  /**
+   * @function firstStepFee
+   * */
+  protected get firstStepFee (): YieldTokenBaseInfo {
+    return {
+      slug: ''
+    };
+  }
+
+  /**
+   * @function defaultSubmitStep
+   * @description Default submit step data
+   * */
+  protected abstract get defaultSubmitStep (): YieldStepBaseInfo;
+
+  /**
+   * @async
+   * @function getTokenApproveStep
+   * @param {OptimalYieldPathParams} params - base param to join pool
+   * @description Generate token approve step data
+   * */
+  protected async getTokenApproveStep (params: OptimalYieldPathParams): Promise<YieldStepBaseInfo | undefined> {
+    return Promise.resolve(undefined);
+  }
+
+  /**
+   * @async
+   * @function getXcmStep
+   * @param {OptimalYieldPathParams} params - base param to join pool
+   * @description Generate token approve step data
+   * */
+  protected async getXcmStep (params: OptimalYieldPathParams): Promise<YieldStepBaseInfo | undefined> {
+    return Promise.resolve(undefined);
+  }
+
+  /**
+   * @async
+   * @function getSubmitStep
+   * @param {OptimalYieldPathParams} params - base param to join pool
+   * @description Generate token approve step data
+   * */
+  protected abstract getSubmitStep (params: OptimalYieldPathParams): Promise<YieldStepBaseInfo>;
+
   /** Generate the optimal steps to join pool */
-  abstract generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath>;
+  public async generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
+    const result: OptimalYieldPath = {
+      totalFee: [this.firstStepFee],
+      steps: [DEFAULT_YIELD_FIRST_STEP]
+    };
+
+    try {
+      const stepFunctions: GenStepFunction[] = [
+        this.getTokenApproveStep,
+        this.getXcmStep,
+        this.getSubmitStep
+      ];
+
+      for (const stepFunction of stepFunctions) {
+        const step = await stepFunction(params);
+
+        if (step) {
+          const [info, fee] = step;
+
+          result.steps.push({
+            id: result.steps.length,
+            ...info
+          });
+
+          result.totalFee.push(fee);
+        }
+      }
+
+      return result;
+    } catch (e) {
+      const errorMessage = (e as Error).message;
+
+      if (errorMessage.includes('network')) {
+        result.connectionError = errorMessage.split(' ')[0];
+      }
+
+      /* Submit step */
+
+      const [step, fee] = this.defaultSubmitStep;
+
+      result.steps.push({
+        id: result.steps.length,
+        ...step
+      });
+
+      result.totalFee.push(fee);
+
+      /* Submit step */
+
+      return result;
+    }
+  }
+
+  /* Generate steps */
+
+  /* Validate */
+
   /** Validate param to join the pool */
-  abstract validateYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]>
+  public abstract validateYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]>
+
+  /* Validate */
+
+  /* Submit */
+
   /** Create `transaction` to join the pool step-by-step */
-  abstract handleYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData>;
-  /* Join action */
+  public abstract handleYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath, currentStep: number): Promise<HandleYieldStepData>;
+
+  /* Submit */
 
   /* Join action */
+
+  /* Leave action */
 
   /** Validate param to leave the pool */
-  abstract validateYieldLeave (amount: string, address: string, fastLeave: boolean, selectedTarget?: string): Promise<TransactionError[]>
+  public abstract validateYieldLeave (amount: string, address: string, fastLeave: boolean, selectedTarget?: string): Promise<TransactionError[]>
   /** Create `transaction` to leave the pool normal (default unstake) */
-  abstract handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]>;
+  protected abstract handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]>;
   /** Create `transaction` to leave the pool fast (swap token) */
-  abstract handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]>;
+  protected abstract handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]>;
   /** Create `transaction` to leave the pool */
-  async handleYieldLeave (fastLeave: boolean, amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+  public async handleYieldLeave (fastLeave: boolean, amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     if (fastLeave) {
       return this.handleYieldRedeem(amount, address, selectedTarget);
     } else {
@@ -122,16 +232,16 @@ export default abstract class BasePoolHandler {
     }
   }
 
-  /* Join action */
+  /* Leave action */
 
   /* Other actions */
 
   /** Create `transaction` to withdraw unstaked amount */
-  abstract handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData>;
+  public abstract handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData>;
   /** Create `transaction` to cancel unstake */
-  abstract handleYieldCancelUnstake (params: StakeCancelWithdrawalParams): Promise<TransactionData>;
+  public abstract handleYieldCancelUnstake (params: StakeCancelWithdrawalParams): Promise<TransactionData>;
   /** Create `transaction` to claim reward */
-  abstract handleYieldClaimReward (address: string, bondReward?: boolean): Promise<TransactionData>;
+  public abstract handleYieldClaimReward (address: string, bondReward?: boolean): Promise<TransactionData>;
 
   /* Other actions */
 }

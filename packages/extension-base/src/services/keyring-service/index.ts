@@ -27,10 +27,12 @@ export class KeyringService {
   });
 
   constructor (private eventService: EventService) {
-    this.currentAccountStore.get('CurrentAccountInfo', (rs) => {
-      rs && this.currentAccountSubject.next(rs);
-    });
-    this.subscribeAccounts().catch(console.error);
+    this.eventService.waitCryptoReady.then(() => {
+      this.currentAccountStore.get('CurrentAccountInfo', (rs) => {
+        rs && this.currentAccountSubject.next(rs);
+      });
+      this.subscribeAccounts().catch(console.error);
+    }).catch(console.error);
   }
 
   private async subscribeAccounts () {
@@ -72,8 +74,10 @@ export class KeyringService {
 
   updateKeyringState (isReady = true) {
     if (!this.keyringState.isReady && isReady) {
-      this.eventService.emit('keyring.ready', true);
-      this.eventService.emit('account.ready', true);
+      this.eventService.waitCryptoReady.then(() => {
+        this.eventService.emit('keyring.ready', true);
+        this.eventService.emit('account.ready', true);
+      }).catch(console.error);
     }
 
     this.keyringStateSubject.next({

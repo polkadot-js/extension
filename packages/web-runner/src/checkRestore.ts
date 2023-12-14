@@ -2,22 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { mobile } from '@subwallet/extension-base/koni/background/handlers';
+import { isWebRunnerDataReset } from '@subwallet/extension-base/koni/background/handlers/Mobile';
 
 import { PageStatus, responseMessage } from './messageHandle';
 
 export async function checkRestore (): Promise<void> {
-  return new Promise((resolve) => {
-    const needRestore = !localStorage.getItem('keyring:subwallet');
+  const needRestore = await isWebRunnerDataReset();
 
-    if (needRestore) {
-      responseMessage({ id: '0', response: { status: 'require_restore' } } as PageStatus);
-      mobile.waitRestore()
-        .catch((err) => console.warn(err))
-        .finally(() => {
-          resolve();
-        });
-    } else {
-      resolve();
+  if (needRestore) {
+    responseMessage({ id: '0', response: { status: 'require_restore' } } as PageStatus);
+
+    try {
+      await mobile.waitRestore();
+    } catch (e) {
+      console.error(e);
     }
-  });
+  }
 }

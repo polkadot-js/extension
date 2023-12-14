@@ -5,6 +5,7 @@ import BaseMigrationJob from '../Base';
 import MigrateEthProvider from './providers/MigrateEthProvider';
 import MigratePioneerProvider from './providers/MigratePioneerProvider';
 import MigrateProvidersV1M1P24 from './providers/MigrateProvidersV1M1P24';
+import MigratePolygonUSDCProvider from './tokens/MigratePolygonUSDCProvider';
 import AutoEnableChainsTokens from './AutoEnableChainsTokens';
 import DeleteChain from './DeleteChain';
 import EnableVaraChain from './EnableVaraChain';
@@ -21,7 +22,7 @@ import MigrateWalletReference from './MigrateWalletReference';
 
 export const EVERYTIME = '__everytime__';
 
-export default <Record<string, typeof BaseMigrationJob>> {
+export default <Record<string, typeof BaseMigrationJob>>{
   '1.0.1-11': MigrateNetworkSettings,
   '1.0.1-20': MigrateImportedToken,
   '1.0.1-30': MigrateTransactionHistory,
@@ -37,6 +38,7 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.1.13-01': MigrateTokenDecimals,
   '1.1.17-01': MigratePioneerProvider,
   '1.1.17-03': EnableVaraChain,
-  '1.1.24-01': MigrateProvidersV1M1P24
+  '1.1.24-01': MigrateProvidersV1M1P24,
+  '1.1.26-01': MigratePolygonUSDCProvider
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

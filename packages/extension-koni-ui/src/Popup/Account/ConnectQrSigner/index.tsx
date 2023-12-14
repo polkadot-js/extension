@@ -150,6 +150,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   <a
                     className='link'
                     href={instructionUrl}
+                    target='__blank'
                   />
                 )
               }}

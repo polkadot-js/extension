@@ -26,7 +26,12 @@ function Component ({ children, className, fullSizeOnMobile = true, motion, ...p
           '-desktop': isWebUI,
           '-mobile': !isWebUI,
           '-full-size-on-mobile': fullSizeOnMobile
-        })}
+        },
+        _motion === 'move-right' && [
+          'ant-move-right-enter',
+          'ant-move-right-enter-active'
+        ]
+        )}
         motion={_motion}
         width={'100%'}
       >
@@ -49,6 +54,7 @@ export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemePro
       bottom: token.paddingLG,
       top: token.paddingLG,
       maxWidth: 404,
+      animationDuration: '0.45s',
 
       '.ant-sw-modal-content': {
         width: '100%',

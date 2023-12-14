@@ -79,10 +79,7 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
     const [, fee] = await this.createJoinExtrinsic(data, positionInfo);
 
     return [
-      {
-        name: 'Nominate validators',
-        type: YieldStepType.NOMINATE
-      },
+      this.defaultSubmitStep[0],
       fee
     ];
   }

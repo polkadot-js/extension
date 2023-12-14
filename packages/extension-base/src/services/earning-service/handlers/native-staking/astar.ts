@@ -3,12 +3,12 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakeCancelWithdrawalParams, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getEarningStatusByNominations } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { EarningStatus, NormalYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { EarningStatus, NormalYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, isUrl, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -347,6 +347,19 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
   /* Join pool action */
 
+  override get defaultSubmitStep (): YieldStepBaseInfo {
+    return [
+      {
+        name: 'Nominate dApps',
+        type: YieldStepType.NOMINATE
+      },
+      {
+        slug: this.nativeToken.slug,
+        amount: '0'
+      }
+    ];
+  }
+
   async createJoinExtrinsic (data: SubmitJoinNativeStaking, positionInfo?: YieldPositionInfo, bondDest = 'Staked'): Promise<[TransactionData, YieldTokenBaseInfo]> {
     const { address, amount, selectedValidators: targetValidators } = data;
     const chainApi = await this.substrateApi.isReady;
@@ -385,7 +398,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
   /* Other action */
 
-  async handleYieldCancelUnstake (params: StakeCancelWithdrawalParams): Promise<TransactionData> {
+  override async handleYieldCancelUnstake (params: StakeCancelWithdrawalParams): Promise<TransactionData> {
     return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
   }
 

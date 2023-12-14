@@ -2,16 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, NominationInfo, StakingTxErrorType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, NominationInfo, StakingTxErrorType, StakingType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getBondedValidators, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import BaseNativeStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/native-staking/base';
-import { EarningStatus, OptimalYieldPath, SubmitJoinNativeStaking, SubmitYieldJoinData } from '@subwallet/extension-base/types';
+import { EarningStatus, OptimalYieldPath, SubmitJoinNativeStaking, SubmitYieldJoinData, YieldStepBaseInfo } from '@subwallet/extension-base/types';
 import { isSameAddress, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { BN } from '@polkadot/util';
 
 export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativeStakingPoolHandler {
   /* Join pool action */
+
+  override get defaultSubmitStep (): YieldStepBaseInfo {
+    return [
+      {
+        name: 'Nominate collators',
+        type: YieldStepType.NOMINATE
+      },
+      {
+        slug: this.nativeToken.slug,
+        amount: '0'
+      }
+    ];
+  }
 
   async validateYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]> {
     const { address, amount, selectedValidators } = data as SubmitJoinNativeStaking;

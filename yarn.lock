@@ -6057,8 +6057,8 @@ __metadata:
     enzyme: ^3.11.0
     enzyme-adapter-react-16: ^1.15.7
     file-saver: ^2.0.5
+    humanize-duration: ^3.31.0
     i18next: ^21.9.2
-    moment: ^2.29.4
     phosphor-react: ^1.4.1
     querystring: ^0.2.1
     rc-input: ^0.2.2
@@ -14900,6 +14900,13 @@ __metadata:
   version: 2.1.0
   resolution: "human-signals@npm:2.1.0"
   checksum: b87fd89fce72391625271454e70f67fe405277415b48bcc0117ca73d31fa23a4241787afdc8d67f5a116cf37258c052f59ea82daffa72364d61351423848e3b8
+  languageName: node
+  linkType: hard
+
+"humanize-duration@npm:^3.31.0":
+  version: 3.31.0
+  resolution: "humanize-duration@npm:3.31.0"
+  checksum: a21b1c80d43580c28fef07213846f74703c467270d41b774faeb4df6041b1da65effc554346fe6f0a70c4096b011d75f2ba6c2fd254b5a3c93231d85910533fe
   languageName: node
   linkType: hard
 

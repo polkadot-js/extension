@@ -11,7 +11,8 @@ import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { DexieExportJsonStructure } from 'dexie-export-import';
 
 export function isLocalStorageReset (): boolean {
-  if (window?.localStorage) {
+  // Todo: MV3 fix this
+  if (typeof window !== 'undefined' && window?.localStorage) {
     return !window.localStorage.getItem('keyring:subwallet');
   } else {
     return false;

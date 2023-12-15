@@ -58,7 +58,7 @@ const script = document.createElement('script');
 const version = process.env.PKG_VERSION as string;
 const walletKey = 'subwallet-js';
 
-script.src = chrome.extension.getURL('page.js');
+script.src = chrome.runtime.getURL('page.js');
 
 placeholderScript.textContent = `class SubWalletPlaceholder {
   provider = undefined;

@@ -18,7 +18,7 @@ function detectRuntimeEnvironment (): RuntimeEnvironmentInfo {
       environment: RuntimeEnvironment.ServiceWorker,
       version: navigator.userAgent,
       host: self.location.host,
-      protocol: window.location.protocol
+      protocol: 'https'
     };
   } else if (typeof process !== 'undefined' && process.versions && process.versions.node) {
     // Node.js environment
@@ -61,28 +61,33 @@ function detectRuntimeEnvironment (): RuntimeEnvironmentInfo {
 export const RuntimeInfo: RuntimeEnvironmentInfo = detectRuntimeEnvironment();
 
 export const getOS = (): OSType => {
-  const userAgent = window.navigator.userAgent;
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-  const platform: string = window.navigator?.userAgentData?.platform || window.navigator.platform;
-  const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K', 'macOS'];
-  const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
-  const iosPlatforms = ['iPhone', 'iPad', 'iPod'];
-  let os: OSType = 'Unknown';
+  if (typeof window !== 'undefined') {
+    const userAgent = window.navigator.userAgent;
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const platform: string = window.navigator?.userAgentData?.platform || window.navigator.platform;
+    const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K', 'macOS'];
+    const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
+    const iosPlatforms = ['iPhone', 'iPad', 'iPod'];
+    let os: OSType = 'Unknown';
 
-  if (macosPlatforms.indexOf(platform) !== -1) {
-    os = 'Mac OS';
-  } else if (iosPlatforms.indexOf(platform) !== -1) {
-    os = 'iOS';
-  } else if (windowsPlatforms.indexOf(platform) !== -1) {
-    os = 'Windows';
-  } else if (/Android/.test(userAgent)) {
-    os = 'Android';
-  } else if (/Linux/.test(platform)) {
-    os = 'Linux';
+    if (macosPlatforms.indexOf(platform) !== -1) {
+      os = 'Mac OS';
+    } else if (iosPlatforms.indexOf(platform) !== -1) {
+      os = 'iOS';
+    } else if (windowsPlatforms.indexOf(platform) !== -1) {
+      os = 'Windows';
+    } else if (/Android/.test(userAgent)) {
+      os = 'Android';
+    } else if (/Linux/.test(platform)) {
+      os = 'Linux';
+    }
+
+    return os;
+  } else {
+    // Todo: MV3 fix this
+    return 'Unknown';
   }
-
-  return os;
 };
 
 export const TARGET_ENV = (process.env.TARGET_ENV || 'extension') as TargetEnvironment;
@@ -90,3 +95,6 @@ export const TARGET_ENV = (process.env.TARGET_ENV || 'extension') as TargetEnvir
 export const MODULE_SUPPORT: EnvironmentSupport = {
   MANTA_ZK: TARGET_ENV === 'extension'
 };
+
+// Todo: MV3 fix this
+export const isFirefox = false;

@@ -1703,7 +1703,7 @@ export default class KoniState {
     // This logic is moved to installation.ts
     // try {
     //   // Open expand page
-    //   const url = `${chrome.extension.getURL('index.html')}#/`;
+    //   const url = `${chrome.runtime.getURL('index.html')}#/`;
     //
     //   withErrorLog(() => chrome.tabs.create({ url }));
     // } catch (e) {

@@ -97,7 +97,6 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
   const { isUILocked } = useUILock();
   const needUnlock = isUILocked || (isLocked && unlockType === WalletUnlockType.ALWAYS_REQUIRED);
-
   const needMigrate = useMemo(
     () => !!accounts
       .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected)

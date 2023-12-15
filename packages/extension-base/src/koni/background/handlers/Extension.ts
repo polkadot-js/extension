@@ -379,7 +379,7 @@ export default class KoniExtension {
       }
     }
 
-    const url = `${chrome.extension.getURL('index.html')}#${path}${subPath || ''}${paramString}`;
+    const url = `${chrome.runtime.getURL('index.html')}#${path}${subPath || ''}${paramString}`;
 
     if (!ALLOWED_PATH.includes(path)) {
       console.error('Not allowed to open the url:', url);

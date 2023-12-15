@@ -68,7 +68,7 @@ interface SignRequest extends Resolver<ResponseSigning> {
   url: string;
 }
 
-const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
+const NOTIFICATION_URL = chrome.runtime.getURL('notification.html');
 
 const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,

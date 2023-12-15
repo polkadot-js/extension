@@ -5903,7 +5903,7 @@ __metadata:
     "@subwallet/extension-inject": ^1.1.25-1
     "@subwallet/extension-mocks": ^1.1.25-1
     "@subwallet/keyring": ^0.1.1
-    "@subwallet/ui-keyring": ^0.1.1
+     "@subwallet/ui-keyring": ^0.1.3
     "@types/uuid": ^9.0.1
     "@walletconnect/sign-client": ^2.8.4
     "@walletconnect/types": ^2.8.4
@@ -6034,7 +6034,7 @@ __metadata:
     "@subwallet/extension-mocks": ^1.1.25-1
     "@subwallet/keyring": ^0.1.1
     "@subwallet/react-ui": 5.1.2-b72
-    "@subwallet/ui-keyring": ^0.1.1
+    "@subwallet/ui-keyring": ^0.1.3
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
     "@types/enzyme-adapter-react-16": ^1.0.6

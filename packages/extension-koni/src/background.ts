@@ -11,6 +11,7 @@ import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults
 import handlers, { state as koniState } from '@subwallet/extension-base/koni/background/handlers';
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import KeyringStore from '@subwallet/extension-base/stores/Keyring';
+import { isManifestV3 } from '@subwallet/extension-base/utils/mv3';
 import keyring from '@subwallet/ui-keyring';
 
 import { assert } from '@polkadot/util';
@@ -23,7 +24,9 @@ let waitingToStop = false;
 let openCount = 0;
 
 // setup the notification (same a FF default background, white text)
-withErrorLog(() => chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' }));
+const badgeBackgroundColor = '#d90000';
+
+withErrorLog(() => isManifestV3() ? chrome.action.setBadgeBackgroundColor({ color: badgeBackgroundColor }) : chrome.browserAction.setBadgeBackgroundColor({ color: badgeBackgroundColor }));
 
 function handleExtensionIdling () { // handle extension being idle since the init of the extension/browser
   waitingToStop = true;
@@ -52,7 +55,10 @@ chrome.runtime.onConnect.addListener((port): void => {
   }
 
   // message and disconnect handlers
-  port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => handlers(data, port));
+  port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => {
+    handlers(data, port);
+  });
+
   port.onDisconnect.addListener(() => {
     if (PORT_EXTENSION === port.name) {
       openCount -= 1;
@@ -80,10 +86,9 @@ chrome.runtime.onConnect.addListener((port): void => {
 chrome.runtime.setUninstallURL('https://slink.subwallet.app/uninstall-feedback');
 
 chrome.runtime.onStartup.addListener(function () {
-  handleExtensionIdling();
+  // Todo: MV3 fix this with lifecycle
 });
 
-// initial setup
 cryptoWaitReady()
   .then((): void => {
     // load all the keyring data
@@ -98,5 +103,5 @@ cryptoWaitReady()
     handleExtensionIdling();
   })
   .catch((error): void => {
-    console.error('initialization failed', error);
+    console.error('initialization fail ed', error);
   });

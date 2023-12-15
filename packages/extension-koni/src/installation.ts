@@ -9,7 +9,7 @@ chrome.runtime.onInstalled.addListener(function (details) {
     setTimeout(() => {
       try {
         // Open expand page
-        const url = `${chrome.extension.getURL('index.html')}#/`;
+        const url = `${chrome.runtime.getURL('index.html')}#/`;
 
         withErrorLog(() => chrome.tabs.create({ url }));
       } catch (e) {

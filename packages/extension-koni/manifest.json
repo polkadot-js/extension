@@ -10,7 +10,6 @@
     "storage",
     "tabs"
   ],
-  "minimum_chrome_version": "105",
   "background": {
     "service_worker": "background.js"
   },
@@ -41,8 +40,9 @@
     "resources": ["page.js"],
     "matches": ["<all_urls>"]
   }],
+  "minimum_chrome_version": "111",
   "content_security_policy": {
-    "extension_pages": "worker-src 'self' 'wasm-unsafe-eval'; script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   },
   "version": "0.0.1"
 }

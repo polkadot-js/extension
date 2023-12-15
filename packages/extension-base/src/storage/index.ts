@@ -1,8 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { xglobal } from '@polkadot/x-global';
+
+const hasLocalStorage = typeof localStorage !== 'undefined';
+
+// Create localStorage adaptor
+
 export class SWStorage {
   private _storage = {} as Record<string, string>;
+  // Todo: MV3 fix this
+  private localStorage = hasLocalStorage ? localStorage : null;
 
   constructor () {
     this.sync();
@@ -10,21 +18,21 @@ export class SWStorage {
 
   setItem (key: string, value: string) {
     this._storage[key] = value;
-    localStorage.setItem(key, value);
+    this.localStorage?.setItem(key, value);
   }
 
   getItem (key: string): string | null {
-    return this._storage[key] || localStorage.getItem(key) || null;
+    return this._storage[key] || this.localStorage?.getItem(key) || null;
   }
 
   removeItem (key: string) {
     this._storage[key] && delete this._storage[key];
-    localStorage.removeItem(key);
+    this.localStorage?.removeItem(key);
   }
 
   clear () {
     this._storage = {};
-    localStorage.clear();
+    this.localStorage?.clear();
   }
 
   key (index: number): string | null {
@@ -45,18 +53,18 @@ export class SWStorage {
   }
 
   sync () {
-    this._storage = JSON.parse(JSON.stringify(localStorage)) as Record<string, string>;
+    if (hasLocalStorage) {
+      this._storage = JSON.parse(JSON.stringify(this.localStorage)) as Record<string, string>;
+    } else {
+      this._storage = {};
+    }
   }
 
   static get instance () {
-    // @ts-ignore
-    if (!window.SWStorage) {
-      console.log('SWStorage init');
-      // @ts-ignore
-      window.SWStorage = new SWStorage();
+    if (!xglobal.SWStorage) {
+      xglobal.SWStorage = new SWStorage();
     }
 
-    // @ts-ignore
-    return window.SWStorage as SWStorage;
+    return xglobal.SWStorage as SWStorage;
   }
 }

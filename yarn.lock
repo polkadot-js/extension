@@ -6310,8 +6310,8 @@ __metadata:
     "@polkadot/util": ^12.6.1
     "@polkadot/util-crypto": ^12.6.1
     "@polkadot/x-global": ^12.2.1
-    "@types/chrome": ^0.0.197
-    "@types/firefox-webext-browser": ^94.0.1
+    "@types/chrome": ^0.0.254
+    "@types/firefox-webext-browser": ^120.0.0
     web3-core: ^1.10.0
   peerDependencies:
     "@polkadot/api": "*"
@@ -6410,9 +6410,12 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
+    "@polkadot/x-global": ^12.6.1
     "@subwallet/extension-base": ^1.1.25-1
     "@subwallet/extension-inject": ^1.1.25-1
     "@subwallet/extension-koni-ui": ^1.1.25-1
+    "@types/chrome": ^0.0.254
+    "@types/serviceworker": ^0.0.80
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -6739,13 +6742,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chrome@npm:^0.0.197":
-  version: 0.0.197
-  resolution: "@types/chrome@npm:0.0.197"
+"@types/chrome@npm:^0.0.254":
+  version: 0.0.254
+  resolution: "@types/chrome@npm:0.0.254"
   dependencies:
     "@types/filesystem": "*"
     "@types/har-format": "*"
-  checksum: 65ac5780acaf9da41248781f6671eb92460a50183356e34b21cd9c7273523eb4e0849f8bba5534961e89e139e114e3d52ffc4dfb59fad10a9683227e035eca5a
+  checksum: ec54e73b792eb93cdadead294a0de0f757cc30d8ddebabab548cbfd3ed479c2a557aa33cee6eb190b67f500eebbc2e09496017a1dd521df1154a7b38cdca70d3
   languageName: node
   linkType: hard
 
@@ -6874,10 +6877,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/firefox-webext-browser@npm:^94.0.1":
-  version: 94.0.1
-  resolution: "@types/firefox-webext-browser@npm:94.0.1"
-  checksum: 43f7e34857f5750c6dc6833f3c4735e75782dcc71800dd29eadc8211a58de0e36611cec79ca7a238da855d5ed7badea46992baec4420b067c4dfa4b052e91465
+"@types/firefox-webext-browser@npm:^120.0.0":
+  version: 120.0.0
+  resolution: "@types/firefox-webext-browser@npm:120.0.0"
+  checksum: d2561da2c1b1a6c79c74746286035e614904baeb4e13ce0c590b1b79c71f25ff07e4b108e75eaa98229b3d35c5b39e56f70083b081d1e3554c981c7114f3a419
   languageName: node
   linkType: hard
 
@@ -7216,6 +7219,13 @@ __metadata:
     "@types/mime": "*"
     "@types/node": "*"
   checksum: b6ac93d471fb0f53ddcac1f9b67572a09cd62806f7db5855244b28f6f421139626f24799392566e97d1ffc61b12f9de7f30380c39fcae3c8a161fe161d44edf2
+  languageName: node
+  linkType: hard
+
+"@types/serviceworker@npm:^0.0.80":
+  version: 0.0.80
+  resolution: "@types/serviceworker@npm:0.0.80"
+  checksum: c7daef526ed3bc242af2eac42fd4d616b4a1b8522ae77d33f2034d3725237b07965252a832b6beccbc344ac95cc92ec9787918a24047a73d6e38f8f8449423e4
   languageName: node
   linkType: hard
 

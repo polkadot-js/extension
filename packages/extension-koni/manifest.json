@@ -27,6 +27,17 @@
         "https://*/*"
       ],
       "run_at": "document_start"
+    },
+    {
+      "js": [
+        "page.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
     }
   ],
   "icons": {

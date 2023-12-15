@@ -6,6 +6,6 @@ const createConfig = require('./webpack.shared.cjs');
 module.exports = createConfig({
   content: './src/content.ts',
   page: './src/page.ts',
-  background: ['./src/installation.ts', './src/background.ts'],
+  background: ['./src/background-init.ts', './src/background.ts'],
   extension: './src/extension.ts'
 });

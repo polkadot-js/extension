@@ -6,12 +6,10 @@ import '@subwallet/extension-inject/crossenv';
 
 import type { RequestSignatures, TransportRequestMessage } from '@subwallet/extension-base/background/types';
 
-import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import handlers, { state as koniState } from '@subwallet/extension-base/koni/background/handlers';
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import KeyringStore from '@subwallet/extension-base/stores/Keyring';
-import { isManifestV3 } from '@subwallet/extension-base/utils/mv3';
 import keyring from '@subwallet/ui-keyring';
 
 import { assert } from '@polkadot/util';
@@ -22,11 +20,6 @@ const IDLE_TIME = 60000 * 2; // 2 minutes
 let idleTimer: NodeJS.Timeout;
 let waitingToStop = false;
 let openCount = 0;
-
-// setup the notification (same a FF default background, white text)
-const badgeBackgroundColor = '#d90000';
-
-withErrorLog(() => isManifestV3() ? chrome.action.setBadgeBackgroundColor({ color: badgeBackgroundColor }) : chrome.browserAction.setBadgeBackgroundColor({ color: badgeBackgroundColor }));
 
 function handleExtensionIdling () { // handle extension being idle since the init of the extension/browser
   waitingToStop = true;

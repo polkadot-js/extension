@@ -3,6 +3,10 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 
+// Todo: MV3 fix this detect fetch events and await for special event
+
+withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));
+
 chrome.runtime.onInstalled.addListener(function (details) {
   if (details.reason === 'install') {
     // Add small timeout to avoid unwanted problems with the extension popup in the first time loaded

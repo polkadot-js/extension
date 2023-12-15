@@ -191,5 +191,5 @@ module.exports = (entry, alias = {}, compileWithHtml = false) => {
     experiments: {
       asyncWebAssembly: true
     }
-  }
+  };
 };

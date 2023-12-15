@@ -69,10 +69,8 @@
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "browserify-sign": "^4.2.2",
     "@ethereumjs/common": "^2.6.5",
     "@polkadot/api": "^10.9.1",
-    "http-cache-semantics": "^4.1.1",
     "@polkadot/api-contract": "^10.9.1",
     "@polkadot/networks": "^12.3.2",
     "@polkadot/types": "^10.9.1",
@@ -83,6 +81,8 @@
     "@subwallet/ui-keyring": "^0.1.1",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^29.3.1",
+    "browserify-sign": "^4.2.2",
+    "http-cache-semantics": "^4.1.1",
     "jest": "^29.5.0",
     "rxjs": "^7.8.1",
     "safe-buffer": "^5.2.1",

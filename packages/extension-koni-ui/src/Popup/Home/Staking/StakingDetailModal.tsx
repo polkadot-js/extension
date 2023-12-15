@@ -472,7 +472,7 @@ const StakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props
       '.unclaimed-reward': {
         '.__value-col': {
           flex: 1
-        },
+        }
       }
     },
 

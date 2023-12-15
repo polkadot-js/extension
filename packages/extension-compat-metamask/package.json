@@ -22,8 +22,8 @@
   "dependencies": {
     "@babel/runtime": "^7.20.6",
     "@metamask/detect-provider": "^1.2.0",
-    "@polkadot/types": "^10.9.1",
-    "@polkadot/util": "^12.3.2",
+    "@polkadot/types": "^10.11.1",
+    "@polkadot/util": "^12.6.1",
     "@subwallet/extension-inject": "^1.1.25-1",
     "web3": "^1.10.0"
   },

@@ -6,3 +6,5 @@ export const PREDEFINED_STAKING_POOL: Record<string, number> = {
   polkadot: 39,
   vara_network: 29
 };
+
+export const MAX_NOMINATIONS = '16';

@@ -43,10 +43,10 @@ export type EventType = keyof EventRegistry;
 
 export const COMMON_RELOAD_EVENTS: EventType[] = [
   'account.updateCurrent',
-  'asset.updateState',
   'account.add',
-  'chain.updateState',
   'account.remove',
+  'asset.updateState',
+  'chain.updateState',
   'chain.add',
   'mantaPay.initSync', // TODO: re-check this
   'mantaPay.enable'

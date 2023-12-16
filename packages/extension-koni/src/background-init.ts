@@ -2,12 +2,33 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
+import { ActionHandler } from '@subwallet/extension-koni/helper/ActionHandler';
 
-// Todo: MV3 fix this detect fetch events and await for special event
+import { xglobal } from '@polkadot/x-global';
+
+const actionHandler = ActionHandler.getInstance();
+
+xglobal.addEventListener('fetch', function (event: FetchEvent) {
+  if (event.request.url.endsWith('popup.html')) {
+    console.log('Open popup tab');
+    event.respondWith(new Response('OKs'));
+  }
+});
 
 withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));
 
+chrome.runtime.onConnect.addListener((port): void => {
+  actionHandler.handlePort(port);
+});
+
+chrome.runtime.onStartup.addListener(function () {
+  actionHandler.onStartup();
+});
+
+// Open expand page after install
 chrome.runtime.onInstalled.addListener(function (details) {
+  actionHandler.onInstalled(details);
+
   if (details.reason === 'install') {
     // Add small timeout to avoid unwanted problems with the extension popup in the first time loaded
     setTimeout(() => {
@@ -22,3 +43,6 @@ chrome.runtime.onInstalled.addListener(function (details) {
     }, 900);
   }
 });
+
+// Setup uninstall URL every background start
+chrome.runtime.setUninstallURL('https://slink.subwallet.app/uninstall-feedback');

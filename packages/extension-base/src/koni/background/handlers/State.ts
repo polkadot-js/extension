@@ -163,7 +163,7 @@ export default class KoniState {
     this.logger = createLogger('State');
 
     // Init state
-    if (TARGET_ENV !== 'mobile') {
+    if (TARGET_ENV === 'webapp') {
       this.init().catch(console.error);
     }
   }

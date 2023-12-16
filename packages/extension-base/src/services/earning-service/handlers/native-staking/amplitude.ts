@@ -9,7 +9,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BlockHeader, EarningStatus, NormalYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BlockHeader, EarningStatus, NativeYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -81,7 +81,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
       const staked = await substrateApi.api.query.parachainStaking.totalCollatorStake();
       const stakeInfo = staked.toPrimitive() as unknown as CollatorStakeInfo;
 
-      const data: NormalYieldPoolInfo = {
+      const data: NativeYieldPoolInfo = {
         // TODO
         ...defaultData,
         description: this.description.replaceAll('{{amount}}', minToHuman),

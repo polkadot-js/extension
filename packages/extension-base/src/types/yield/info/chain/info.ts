@@ -151,6 +151,8 @@ export interface AbstractYieldPoolInfo {
  * @prop {string} [altInputAssets] - Alt input token (slug) - optional
  * */
 export interface SpecialYieldPoolInfo extends AbstractYieldPoolInfo {
+  type: YieldPoolType.LIQUID_STAKING | YieldPoolType.LENDING;
+
   /* Special info */
 
   /** Array of derivative tokens (slug) */
@@ -195,18 +197,27 @@ export interface LendingYieldPoolInfo extends SpecialYieldPoolInfo {
 }
 
 /**
- * @interface NormalYieldPoolInfo
+ * @interface NominationYieldPoolInfo
  * @extends AbstractYieldPoolInfo
- * @prop {Exclude<YieldPoolType,YieldPoolType.LIQUID_STAKING|YieldPoolType.LENDING>} type - Pool's type
+ * @prop {YieldPoolType.NOMINATION_POOL} type - Pool's type
  * */
-export interface NormalYieldPoolInfo extends AbstractYieldPoolInfo {
-  type: Exclude<YieldPoolType, YieldPoolType.LIQUID_STAKING | YieldPoolType.LENDING>;
+export interface NominationYieldPoolInfo extends AbstractYieldPoolInfo {
+  type: YieldPoolType.NOMINATION_POOL;
+}
+
+/**
+ * @interface NativeYieldPoolInfo
+ * @extends AbstractYieldPoolInfo
+ * @prop {YieldPoolType.NATIVE_STAKING} type - Pool's type
+ * */
+export interface NativeYieldPoolInfo extends AbstractYieldPoolInfo {
+  type: YieldPoolType.NATIVE_STAKING;
 }
 
 /**
  * Info of yield pool
  * */
-export type YieldPoolInfo = NormalYieldPoolInfo | LiquidYieldPoolInfo | LendingYieldPoolInfo;
+export type YieldPoolInfo = NativeYieldPoolInfo | NominationYieldPoolInfo | LiquidYieldPoolInfo | LendingYieldPoolInfo;
 
 /**
  * @interface YieldAssetExpectedEarning

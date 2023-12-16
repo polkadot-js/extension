@@ -8,7 +8,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NormalYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NominationYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -99,7 +99,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
       const minToHuman = formatNumber(minPoolJoin || '0', nativeToken.decimals || 0, balanceFormatter);
 
-      const data: NormalYieldPoolInfo = {
+      const data: NominationYieldPoolInfo = {
         // TODO
         ...defaultData,
         description: this.description.replaceAll('{{amount}}', minToHuman),
@@ -423,7 +423,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
 
-    const poolInfo = _poolInfo as NormalYieldPoolInfo;
+    const poolInfo = _poolInfo as NominationYieldPoolInfo;
     const chainInfo = this.chainInfo;
 
     const positionInfo = await this.getPoolPosition(address);

@@ -9,7 +9,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { CollatorExtraInfo, EarningStatus, NormalYieldPoolInfo, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { CollatorExtraInfo, EarningStatus, NativeYieldPoolInfo, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -76,7 +76,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
       const minStake = '0';
       const minToHuman = formatNumber(minStake.toString(), nativeToken.decimals || 0, balanceFormatter);
 
-      const data: NormalYieldPoolInfo = {
+      const data: NativeYieldPoolInfo = {
         // TODO
         ...defaultData,
         description: this.description.replaceAll('{{amount}}', minToHuman),

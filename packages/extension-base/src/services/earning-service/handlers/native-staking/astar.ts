@@ -8,7 +8,7 @@ import { getEarningStatusByNominations } from '@subwallet/extension-base/koni/ap
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { EarningStatus, NormalYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, isUrl, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -75,7 +75,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
       const unstakingPeriod = parseInt(unstakingDelay) * _STAKING_ERA_LENGTH_MAP[this.chain];
       const minToHuman = formatNumber(minDelegatorStake, nativeToken.decimals || 0, balanceFormatter);
 
-      const data: NormalYieldPoolInfo = {
+      const data: NativeYieldPoolInfo = {
         // TODO
         ...defaultData,
         description: this.description.replaceAll('{{amount}}', minToHuman),

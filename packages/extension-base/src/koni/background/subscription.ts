@@ -107,7 +107,7 @@ export class KoniSubscription {
       this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
     };
 
-    this.state.eventService.onLazy(this.eventHandler);
+    this.state.eventService.onLazy(this.eventHandler.bind(this));
   }
 
   async stop () {

@@ -1121,16 +1121,18 @@ export default class KoniExtension {
     return this.getPrice();
   }
 
-  private getBalance (reset?: boolean): BalanceJson {
+  private async getBalance (reset?: boolean) {
     return this.#koniState.getBalance(reset);
   }
 
-  private subscribeBalance (id: string, port: chrome.runtime.Port): BalanceJson {
+  private async subscribeBalance (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(balance.getSubscription)'>(id, port);
 
     const balanceSubscription = this.#koniState.subscribeBalance().subscribe({
       next: (rs) => {
-        cb(rs);
+        const data = { details: rs } as BalanceJson;
+
+        cb(data);
       }
     });
 
@@ -1140,7 +1142,7 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return this.getBalance(true);
+    return await this.getBalance(true);
   }
 
   private getCrowdloan (reset?: boolean): CrowdloanJson {
@@ -4296,9 +4298,9 @@ export default class KoniExtension {
       case 'pri(price.getSubscription)':
         return await this.subscribePrice(id, port);
       case 'pri(balance.getBalance)':
-        return this.getBalance();
+        return await this.getBalance();
       case 'pri(balance.getSubscription)':
-        return this.subscribeBalance(id, port);
+        return await this.subscribeBalance(id, port);
       case 'pri(crowdloan.getCrowdloan)':
         return this.getCrowdloan();
       case 'pri(crowdloan.getCrowdloanContributions)':

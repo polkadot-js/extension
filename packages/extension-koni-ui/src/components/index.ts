@@ -21,7 +21,6 @@ export * from './Avatar';
 export * from './Confirmation';
 export * from './EmptyList';
 export * from './Field';
-export * from './Earning';
 export * from './History';
 export * from './Icon';
 export * from './Layout';

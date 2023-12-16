@@ -6,7 +6,7 @@ export { default as BaseTransactionConfirmation } from './Base';
 export { default as BondTransactionConfirmation } from './Bond';
 export { default as CancelUnstakeTransactionConfirmation } from './CancelUnstake';
 export { default as ClaimRewardTransactionConfirmation } from './ClaimReward';
-export { default as FastWithdrawTransactionConfirmation } from './FastWithdraw';
+// export { default as FastWithdrawTransactionConfirmation } from './FastWithdraw';
 export { default as JoinPoolTransactionConfirmation } from './JoinPool';
 export { default as LeavePoolTransactionConfirmation } from './LeavePool';
 export { default as SendNftTransactionConfirmation } from './SendNft';

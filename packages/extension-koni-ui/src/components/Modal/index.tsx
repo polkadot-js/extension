@@ -14,7 +14,6 @@ export * from './BaseSelectModal';
 export * from './CustomModal';
 export * from './Campaign';
 export * from './Customize/CustomizeModal';
-export * from './Earning';
 export * from './FilterModal';
 export * from './GlobalSearchTokenModal';
 export * from './ReceiveModal';

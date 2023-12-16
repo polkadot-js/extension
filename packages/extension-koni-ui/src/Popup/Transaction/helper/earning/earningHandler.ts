@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { OptimalYieldPath, ValidatorInfo, YieldPoolInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { NominationPoolInfo, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldPoolType } from '@subwallet/extension-base/types';
+import { NominationPoolInfo, OptimalYieldPath, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { getYieldNativeStakingValidators, getYieldNominationPools, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 
@@ -56,28 +56,26 @@ export async function handleYieldStep (
   data: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool
 ): Promise<SWTransactionResponse> {
   return submitJoinYieldPool({
-    address,
     path: path,
-    yieldPoolInfo,
     currentStep,
     data
   });
 }
 
-export function getJoinYieldParams (yieldPoolInfo: YieldPoolInfo, amount: string, feeStructure: YieldTokenBaseInfo): SubmitYieldStepData {
-  // @ts-ignore
-  const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 0;
-
-  return {
-    slug: yieldPoolInfo.slug,
-    exchangeRate,
-    inputTokenSlug: yieldPoolInfo.inputAssets[0],
-    derivativeTokenSlug: yieldPoolInfo?.derivativeAssets ? yieldPoolInfo.derivativeAssets[0] : undefined, // TODO
-    rewardTokenSlug: yieldPoolInfo.rewardAssets[0],
-    amount,
-    feeTokenSlug: feeStructure.slug
-  };
-}
+// export function getJoinYieldParams (yieldPoolInfo: YieldPoolInfo, amount: string, feeStructure: YieldTokenBaseInfo): SubmitYieldStepData {
+//   // @ts-ignore
+//   const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 0;
+//
+//   return {
+//     slug: yieldPoolInfo.slug,
+//     exchangeRate,
+//     inputTokenSlug: yieldPoolInfo.inputAssets[0],
+//     derivativeTokenSlug: yieldPoolInfo?.derivativeAssets ? yieldPoolInfo.derivativeAssets[0] : undefined, // TODO
+//     rewardTokenSlug: yieldPoolInfo.rewardAssets[0],
+//     amount,
+//     feeTokenSlug: feeStructure.slug
+//   };
+// }
 
 export async function handleValidateYield (
   address: string,
@@ -87,10 +85,7 @@ export async function handleValidateYield (
   data: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool
 ): Promise<TransactionError[]> {
   return validateYieldProcess({
-    address,
     path: path,
-    yieldPoolInfo,
-    data,
-    amount
+    data
   });
 }

@@ -3,12 +3,13 @@
 
 import { Layout, SocialGroup } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useDefaultNavigate, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { Button, ButtonProps, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { GlobeSimple, House } from 'phosphor-react';
-import React, { useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 interface Props {
@@ -17,37 +18,39 @@ interface Props {
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { goHome } = useDefaultNavigate();
+  const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const { isWebUI } = useContext(ScreenContext);
 
+  const goSecuritySetting = useCallback(() => {
+    navigate('/settings/security');
+  }, [navigate]);
+
   const footerBtn = useMemo((): ButtonProps => ({
-    children: t('Back to home'),
+    children: t('Back to Security settings'),
     icon: (
       <Icon
         phosphorIcon={House}
         weight='fill'
       />
     ),
-    onClick: goHome
-  }), [goHome, t]);
+    onClick: goSecuritySetting
+  }), [goSecuritySetting, t]);
 
   return (
     <Layout.Base
       className={CN(className)}
-      onBack={goHome}
+      onBack={goSecuritySetting}
       rightFooterButton={!isWebUI ? footerBtn : undefined}
       showBackButton={isWebUI}
       subHeaderPaddingVertical={true}
       title={isWebUI ? t('Danger ahead!') : undefined}
     >
       <div className='title'>
-        <div className='title-text'>4</div>
         <PageIcon
           color={token.colorError}
           iconProps={{ phosphorIcon: GlobeSimple, weight: 'fill' }}
         />
-        <div className='title-text'>4</div>
       </div>
       <div className='sub-title h3-text'>{t('Danger ahead!')}</div>
       <div className='h5-text description'>{t('Attackers might trick you into doing something dangerous like installing software or revealing your personal information. Stay away from this page!')}</div>
@@ -94,14 +97,6 @@ const UnsafeAccess = styled(Component)<Props>(({ theme }) => {
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'center'
-    },
-
-    '.title-text': {
-      color: token.colorError,
-      fontWeight: token.fontWeightStrong,
-      fontSize: token.fontSizeSuper1,
-      lineHeight: token.lineHeightSuper1,
-      margin: `0 -${token.marginLG}px`
     },
 
     '.sub-title': {

@@ -205,7 +205,7 @@ export const _TRANSFER_NOT_SUPPORTED_CHAINS = ['subspace_gemini_3a', 'kulupu', '
 
 export const _TRANSFER_CHAIN_GROUP = {
   acala: ['karura', 'acala', 'acala_testnet'],
-  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay', 'hydradx_main', 'mangatax_para'],
+  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry', 'bifrost', 'bifrost_dot'],
@@ -213,7 +213,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
   avail: ['kate', 'goldberg_testnet'],
-  pendulum: ['pendulum', 'amplitude', 'amplitude_test'],
+  pendulum: ['pendulum', 'amplitude', 'amplitude_test', 'hydradx_main'],
   centrifuge: ['centrifuge']
 };
 

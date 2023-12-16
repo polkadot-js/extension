@@ -272,6 +272,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
         {!!rewardItem?.unclaimedReward && (
           <MetaInfo.Number
+            className='unclaimed-reward'
             decimals={decimals}
             label={t('Unclaimed rewards')}
             suffix={staking.nativeToken}
@@ -466,6 +467,12 @@ const StakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props
     '.base-info': {
       '.__value-col': {
         flex: 2
+      },
+
+      '.unclaimed-reward': {
+        '.__value-col': {
+          flex: 1
+        }
       }
     },
 

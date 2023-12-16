@@ -4132,7 +4132,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/api-base@npm:10.9.1":
+"@polkadot/api-base@npm:^10.9.1":
   version: 10.9.1
   resolution: "@polkadot/api-base@npm:10.9.1"
   dependencies:
@@ -5890,6 +5890,7 @@ __metadata:
     "@metaverse-network-sdk/type-definitions": ^0.0.1-13
     "@oak-foundation/types": ^0.0.23
     "@polkadot/api": ^10.9.1
+    "@polkadot/api-base": ^10.9.1
     "@polkadot/api-contract": ^10.9.1
     "@polkadot/api-derive": ^10.9.1
     "@polkadot/apps-config": ^0.132.1

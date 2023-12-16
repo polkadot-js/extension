@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestYieldStepSubmit } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
-import { SubmitYieldStepData } from '@subwallet/extension-base/types';
+import { RequestYieldStepSubmit, SubmitYieldStepData } from '@subwallet/extension-base/types';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import CN from 'classnames';

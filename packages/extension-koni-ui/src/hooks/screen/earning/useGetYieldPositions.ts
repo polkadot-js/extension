@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldPositionInfo } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { useMemo } from 'react';

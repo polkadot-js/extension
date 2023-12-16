@@ -51,18 +51,20 @@ export interface RequestYieldWithdrawal extends BaseRequestSign {
 }
 
 export interface StakeCancelWithdrawalParams extends BaseRequestSign {
-  address: string,
-  slug: string,
-  selectedUnstaking: UnstakingInfo
+  address: string;
+  slug: string;
+  chain: string;
+  selectedUnstaking: UnstakingInfo;
 }
 
 export type RequestStakeCancelWithdrawal = InternalRequestSign<StakeCancelWithdrawalParams>;
 
 export interface StakeClaimRewardParams extends BaseRequestSign {
-  address: string,
-  slug: string,
-  unclaimedReward?: string,
-  bondReward?: boolean
+  address: string;
+  slug: string;
+  chain: string;
+  unclaimedReward?: string;
+  bondReward?: boolean;
 }
 
 export type RequestStakeClaimReward = InternalRequestSign<StakeClaimRewardParams>;

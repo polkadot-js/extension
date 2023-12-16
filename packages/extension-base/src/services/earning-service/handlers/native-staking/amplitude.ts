@@ -3,13 +3,13 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getBondedValidators, getEarningStatusByNominations, isUnstakeAll } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BlockHeader, EarningStatus, NormalYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BlockHeader, EarningStatus, NormalYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -44,6 +44,11 @@ interface CollatorInfo {
   status: string | Record<string, string>
 }
 
+interface CollatorStakeInfo {
+  collators: string;
+  delegators: string;
+}
+
 export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeStakingPoolHandler {
   /* Subscribe pool info */
 
@@ -54,7 +59,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
     const defaultData = this.defaultInfo;
     const substrateApi = await this.substrateApi.isReady;
 
-    const unsub = await (substrateApi.api.query.parachainStaking.round((_round: Codec) => {
+    const unsub = await (substrateApi.api.query.parachainStaking.round(async (_round: Codec) => {
       if (cancel) {
         unsub();
 
@@ -72,6 +77,9 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
       const blockDuration = (_STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
       const unstakingPeriod = blockDuration * parseInt(unstakingDelay);
       const minToHuman = formatNumber(minDelegatorStake, nativeToken.decimals || 0, balanceFormatter);
+      const delegatorStorages = await substrateApi.api.query.parachainStaking.delegatorState.keys();
+      const staked = await substrateApi.api.query.parachainStaking.totalCollatorStake();
+      const stakeInfo = staked.toPrimitive() as unknown as CollatorStakeInfo;
 
       const data: NormalYieldPoolInfo = {
         // TODO
@@ -80,17 +88,17 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         type: this.type,
         metadata: {
           isAvailable: true,
-          maxCandidatePerFarmer: parseInt(maxDelegations), // temporary fix for Astar, there's no limit for now
+          maxCandidatePerFarmer: parseInt(maxDelegations),
           maxWithdrawalRequestPerFarmer: 1, // by default
           minJoinPool: minDelegatorStake,
-          farmerCount: 0, // TODO recheck
+          farmerCount: delegatorStorages.length, // One delegator (farmer) - One collator (candidate) - on storage
           era: round,
           assetEarning: [
             {
               slug: _getChainNativeTokenSlug(chainInfo)
             }
           ],
-          tvl: undefined, // TODO recheck
+          tvl: stakeInfo.delegators, // TODO recheck
           totalApy: undefined, // TODO recheck
           unstakingPeriod,
           allowCancelUnstaking: true,

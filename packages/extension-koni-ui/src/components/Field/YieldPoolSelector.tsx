@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { POOL_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
@@ -68,7 +68,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const nominationPoolValueList = useMemo((): string[] => {
-    return (nominatorMetadata[0]?.metadata as NominatorMetadata)?.nominations?.map((item) => item.validatorAddress) || [];
+    return nominatorMetadata[0]?.nominations?.map((item) => item.validatorAddress) || [];
   }, [nominatorMetadata]);
 
   const isDisabled = useMemo(() =>

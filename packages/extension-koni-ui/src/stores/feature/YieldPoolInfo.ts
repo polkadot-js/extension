@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
-import { YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { ReduxStatus, YieldPoolStore } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {

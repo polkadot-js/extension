@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldPoolInfo } from '@subwallet/extension-base/types';
 import { useSelectModalInputHelper, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, InputRef, Logo, Web3Block } from '@subwallet/react-ui';
@@ -28,7 +28,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
   const filteredItems = useMemo(() => {
-    return items.filter((item) => item.stats?.isAvailable !== false);
+    return items.filter((item) => item.metadata?.isAvailable !== false);
   }, [items]);
 
   const chainLogo = useMemo(() => {

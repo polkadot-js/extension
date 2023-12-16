@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { ExtrinsicType, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { RuntimeDispatchInfo, YieldPoolInfo } from '@subwallet/extension-base/types';
+import { RuntimeDispatchInfo, YieldPoolInfo, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/types';
 
 export const syntheticSelectedValidators = [
   '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',

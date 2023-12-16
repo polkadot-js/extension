@@ -82,6 +82,7 @@
     "@google/model-viewer": "3.1.1",
     "@ledgerhq/hw-app-eth": "6.33.4",
     "@polkadot/api": "^10.9.1",
+    "@polkadot/api-base": "^10.9.1",
     "@polkadot/api-contract": "^10.9.1",
     "@polkadot/networks": "^12.3.2",
     "@polkadot/types": "^10.9.1",

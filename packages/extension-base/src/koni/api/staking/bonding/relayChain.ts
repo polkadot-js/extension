@@ -4,6 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { MAX_NOMINATIONS } from '@subwallet/extension-base/constants';
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _EXPECTED_BLOCK_TIME, _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -121,7 +122,7 @@ export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: st
 export function subscribeRelayChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
   return substrateApi.api.query.staking.currentEra(async (_currentEra: Codec) => {
     const currentEra = _currentEra.toString();
-    const maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16'; // TODO
+    const maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || MAX_NOMINATIONS; // TODO
     const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
     const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
@@ -264,7 +265,8 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
 
   const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
 
-  const _maxNominatorRewardedPerValidator = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+  const unlimitedNominatorRewarded = chainApi.api.consts.staking.maxExposurePageSize !== undefined;
+  const _maxNominatorRewardedPerValidator = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
   const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
   const nominations = _nominations.toPrimitive() as unknown as PalletStakingNominations;
   const currentEra = _currentEra.toString();
@@ -298,7 +300,7 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
 
       if (!topNominators.includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if nominator has target but not in nominator list
         nominationStatus = StakingStatus.WAITING;
-      } else if (topNominators.slice(0, maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
+      } else if (topNominators.slice(0, unlimitedNominatorRewarded ? undefined : maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
         nominationStatus = StakingStatus.EARNING_REWARD;
       }
 
@@ -393,7 +395,8 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
 
   const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
 
-  const _maxNominatorRewardedPerValidator = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+  const unlimitedNominatorRewarded = chainApi.api.consts.staking.maxExposurePageSize !== undefined;
+  const _maxNominatorRewardedPerValidator = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
   const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
   const ledger = _ledger.toPrimitive() as unknown as PalletStakingStakingLedger;
   const nominations = _nominations.toPrimitive() as unknown as PalletStakingNominations;
@@ -441,7 +444,7 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
 
       if (!topNominators.includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if nominator has target but not in nominator list
         nominationStatus = StakingStatus.WAITING;
-      } else if (topNominators.slice(0, maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
+      } else if (topNominators.slice(0, unlimitedNominatorRewarded ? undefined : maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
         nominationStatus = StakingStatus.EARNING_REWARD;
       }
 
@@ -500,7 +503,8 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
 }
 
 export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, poolMemberInfo: PalletNominationPoolsPoolMember) {
-  const _maxNominatorRewardedPerValidator = substrateApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+  const unlimitedNominatorRewarded = substrateApi.api.consts.staking.maxExposurePageSize !== undefined;
+  const _maxNominatorRewardedPerValidator = (substrateApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
   const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
   const poolsPalletId = substrateApi.api.consts.nominationPools.palletId.toString();
   const poolStashAccount = parsePoolStashAddress(substrateApi.api, 0, poolMemberInfo.poolId, poolsPalletId);
@@ -547,7 +551,7 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
         .map((nominator) => {
           return nominator.who;
         })
-        .slice(0, maxNominatorRewardedPerValidator)
+        .slice(0, unlimitedNominatorRewarded ? undefined : maxNominatorRewardedPerValidator)
       ;
 
       if (topNominators.includes(reformatAddress(poolStashAccount, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
@@ -617,7 +621,8 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
     chainApi.api.query.staking.currentEra()
   ]);
 
-  const _maxNominatorRewardedPerValidator = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+  const unlimitedNominatorRewarded = chainApi.api.consts.staking.maxExposurePageSize !== undefined;
+  const _maxNominatorRewardedPerValidator = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
   const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
   const poolsPalletId = chainApi.api.consts.nominationPools.palletId.toString();
   const poolMemberInfo = _poolMemberInfo.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
@@ -673,7 +678,7 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
         .map((nominator) => {
           return nominator.who;
         })
-        .slice(0, maxNominatorRewardedPerValidator)
+        .slice(0, unlimitedNominatorRewarded ? undefined : maxNominatorRewardedPerValidator)
       ;
 
       if (topNominators.includes(reformatAddress(poolStashAccount, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
@@ -741,7 +746,8 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
 
   const stakingRewards = _stakingRewards?.toPrimitive() as unknown as TernoaStakingRewardsStakingRewardsData;
 
-  const maxNominatorRewarded = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+  const unlimitedNominatorRewarded = chainApi.api.consts.staking.maxExposurePageSize !== undefined;
+  const maxNominatorRewarded = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
   const bnTotalEraStake = new BN(_totalEraStake.toString());
   const eraStakers = _eraStakers as any[];
 
@@ -789,7 +795,7 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
       blocked: false,
       isVerified: false,
       minBond,
-      isCrowded: nominatorCount > parseInt(maxNominatorRewarded)
+      isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded)
     } as ValidatorInfo);
   }
 

@@ -6410,6 +6410,7 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
+    "@polkadot/x-global": ^12.6.1
     "@subwallet/extension-base": ^1.1.26-0
     "@subwallet/extension-inject": ^1.1.26-0
     "@subwallet/extension-koni-ui": ^1.1.26-0

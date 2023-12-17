@@ -1044,6 +1044,9 @@ export default class KoniTabs {
       return this.redirectIfPhishing(url);
     }
 
+    // Wait for account ready and chain ready
+    await Promise.all([this.#koniState.eventService.waitAccountReady, this.#koniState.eventService.waitChainReady]);
+
     if (type !== 'pub(authorize.tabV2)' && !this.isEvmPublicRequest(type, request as RequestArguments)) {
       await this.#koniState.ensureUrlAuthorizedV2(url)
         .catch((e: Error) => {

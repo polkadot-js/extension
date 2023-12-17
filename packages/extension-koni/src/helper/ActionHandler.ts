@@ -15,6 +15,7 @@ export class ActionHandler {
   // Common handlers
   private waitStartHandler = createPromiseHandler<() => void>();
   private waitInstallHandler = createPromiseHandler<(details: chrome.runtime.InstalledDetails) => void>();
+  private waitActiveHandler = createPromiseHandler<boolean>();
 
   // Port handlers
   private portHandler?: HandlerMethod;
@@ -26,8 +27,8 @@ export class ActionHandler {
   private waitFirstTrigger = createPromiseHandler<void>();
   public waitFirstActiveMessage = this.waitFirstTrigger.promise;
 
-  private wakeUpHandler?: () => void;
-  private sleepHandler?: () => void;
+  private wakeUpHandler?: () => Promise<void>;
+  private sleepHandler?: () => Promise<void>;
   private isActive = false;
   private sleepTimeout?: NodeJS.Timeout;
 
@@ -72,11 +73,11 @@ export class ActionHandler {
     }).catch(console.error);
   }
 
-  setWakeUpHandler (handler: () => void): void {
+  setWakeUpHandler (handler: () => Promise<void>): void {
     this.wakeUpHandler = handler;
   }
 
-  setSleepHandler (handler: () => void): void {
+  setSleepHandler (handler: () => Promise<void>): void {
     this.sleepHandler = handler;
   }
 
@@ -84,8 +85,15 @@ export class ActionHandler {
     return `${port.sender?.documentId || 'extension-popup'}`;
   }
 
-  private _onPortMessage (port: chrome.runtime.Port, data: TransportRequestMessage<keyof RequestSignatures>, portId: string): void {
-    if (!this.connectionMap[portId] && data?.message && data.message !== 'pub(phishing.redirectIfDenied)') {
+  private async _onPortMessage (port: chrome.runtime.Port, data: TransportRequestMessage<keyof RequestSignatures>, portId: string) {
+    // message and disconnect handlers
+    if (!this.portHandler) {
+      this.portHandler = await this.waitPortHandler.promise;
+    }
+
+    const requireActive = data.message !== 'pub(phishing.redirectIfDenied)';
+
+    if (!this.connectionMap[portId] && data?.message && requireActive) {
       this.connectionMap[portId] = port.name;
 
       if (!this.firstTrigger) {
@@ -101,23 +109,15 @@ export class ActionHandler {
 
       if (!this.isActive) {
         this.isActive = true;
-        this.wakeUpHandler && this.wakeUpHandler();
+        this.wakeUpHandler && await this.wakeUpHandler();
+        this.waitActiveHandler.resolve(true);
       }
     }
 
-    // message and disconnect handlers
-    const handlerPromise = this.waitPortHandler.promise;
-
-    if (this.portHandler) {
-      this.portHandler(data, port);
-    } else {
-      handlerPromise.then((handler) => {
-        handler(data, port);
-      }).catch(console.error);
-    }
+    this.portHandler(data, port);
   }
 
-  private _onPortDisconnect (port: chrome.runtime.Port, portId: string): void {
+  private _onPortDisconnect (port: chrome.runtime.Port, portId: string) {
     if (this.connectionMap[portId]) {
       delete this.connectionMap[portId];
 
@@ -125,8 +125,10 @@ export class ActionHandler {
       if (Object.keys(this.connectionMap).length === 0) {
         this.sleepTimeout && clearTimeout(this.sleepTimeout);
         this.sleepTimeout = setTimeout(() => {
+          // Reset active status
           this.isActive = false;
-          this.sleepHandler && this.sleepHandler();
+          this.waitActiveHandler = createPromiseHandler<boolean>();
+          this.sleepHandler && this.sleepHandler().catch(console.error);
         }, SLEEP_TIMEOUT);
       }
     }
@@ -137,7 +139,7 @@ export class ActionHandler {
     const portId = this._getPortId(port);
 
     port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => {
-      this._onPortMessage(port, data, portId);
+      this._onPortMessage(port, data, portId).catch(console.error);
     });
 
     port.onDisconnect.addListener(() => {

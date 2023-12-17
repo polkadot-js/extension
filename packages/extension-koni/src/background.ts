@@ -17,12 +17,8 @@ const actionHandler = ActionHandler.getInstance();
 
 actionHandler.setPortHandler(handlers);
 actionHandler.setInstallHandler(state.onInstall.bind(state));
-actionHandler.setSleepHandler(() => {
-  state.sleep().catch(console.error);
-});
-actionHandler.setWakeUpHandler(() => {
-  state.wakeup().catch(console.error);
-});
+actionHandler.setSleepHandler(state.sleep.bind(state));
+actionHandler.setWakeUpHandler(state.wakeup.bind(state));
 
 Promise.all([cryptoWaitReady(), actionHandler.waitFirstActiveMessage])
   .then((): void => {

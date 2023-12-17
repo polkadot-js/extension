@@ -176,8 +176,6 @@ export default class Tabs {
       return this.redirectIfPhishing(url);
     }
 
-    // Todo: MV3 fix connect dapps with chains requests
-
     switch (type) {
       case 'pub(authorize.tab)':
         return this.authorize(url, request as RequestAuthorizeTab);

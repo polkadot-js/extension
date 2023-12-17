@@ -43,9 +43,9 @@ export interface BalanceItem {
 }
 
 /** Balance info of all tokens on an address */
-export type BalanceInfo = Record<string, BalanceItem>;
+export type BalanceInfo = Record<string, BalanceItem>; // Key is tokenSlug
 /** Balance info of all addresses */
-export type BalanceMap = Record<string, BalanceInfo>;
+export type BalanceMap = Record<string, BalanceInfo>; // Key is address
 
 export interface BalanceJson {
   reset?: boolean,

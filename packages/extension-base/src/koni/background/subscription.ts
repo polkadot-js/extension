@@ -100,7 +100,7 @@ export class KoniSubscription {
       this.subscribeStakingOnChain(address, serviceInfo.chainApiMap.substrate);
     };
 
-    this.state.eventService.onLazy(this.eventHandler);
+    this.state.eventService.onLazy(this.eventHandler.bind(this));
   }
 
   async stop () {

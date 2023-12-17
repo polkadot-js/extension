@@ -179,9 +179,9 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     }
   } else if (_TRANSFER_CHAIN_GROUP.pendulum.includes(networkKey) && isTxTokensSupported && !_isNativeToken(tokenInfo)) {
     if (transferAll) {
-      transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo), false);
+      transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), false);
     } else if (value) {
-      transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo), new BN(value));
+      transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), new BN(value));
     }
   } else if (
     _TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey)

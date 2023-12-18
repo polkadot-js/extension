@@ -89,6 +89,22 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   goldberg_testnet: 24
 };
 
+export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
+  alephTest: 1,
+  aleph: 1,
+  polkadot: 6,
+  kusama: 6,
+  polkadex: 12,
+  ternoa: 6,
+  ternoa_alphanet: 6,
+  westend: 6,
+  kate: 20,
+  edgeware: 6,
+  creditcoin: 12,
+  vara_network: 3,
+  goldberg_testnet: 20
+};
+
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
   moonbeam: { // https://docs.moonbeam.network/learn/features/staking/#annual-inflation
     reward: 0.5,
@@ -177,7 +193,7 @@ export const _TRANSFER_NOT_SUPPORTED_CHAINS = ['subspace_gemini_3a', 'kulupu', '
 
 export const _TRANSFER_CHAIN_GROUP = {
   acala: ['karura', 'acala', 'acala_testnet'],
-  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay', 'hydradx_main', 'mangatax_para'],
+  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry', 'bifrost', 'bifrost_dot'],
@@ -185,7 +201,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
   avail: ['kate', 'goldberg_testnet'],
-  pendulum: ['pendulum', 'amplitude', 'amplitude_test'],
+  pendulum: ['pendulum', 'amplitude', 'amplitude_test', 'hydradx_main'],
   centrifuge: ['centrifuge']
 };
 

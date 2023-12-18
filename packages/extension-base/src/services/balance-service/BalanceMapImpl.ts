@@ -43,10 +43,6 @@ export class BalanceMapImpl {
   public updateBalanceItem (balanceItem: BalanceItem, trigger = false): void {
     const { address, tokenSlug } = balanceItem;
 
-    if (!address.startsWith('5') && !address.startsWith('0x')) {
-      console.log('check address', address);
-    }
-
     if (!this._map[address]) {
       this._map[address] = {};
     }

@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 1.1.26
+Build date: Dec 16, 2023.
+
+Features & Update:
+- Support some XCM transfer (#2353)
+- Update chain-list (#2329)
+  - Update USDC on Polygon network
+  - Support Energy Web X testate
+- Update rdns for EIP-6963 (#2328)
+- Show Copy and QR code when hover account (#2114)
+- Update precise start/end time of an era (#2313)
+- Add support for AZERO fiat onramp on Banxa (#2319)
+- Update top nominators getting rewards (#2324)
+
+Bugs fixed:
+- Fixed bug show incorrect balance on All account mode when switch account (#2323)
+- Fixed bug do not navigate when click on hyperlink in attach account (#2316)
+
 ## 1.1.25
 Build date: Dec 7, 2023.
 

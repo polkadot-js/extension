@@ -9,6 +9,7 @@ import { _ApiOptions, _EvmChainSpec } from '@subwallet/extension-base/services/c
 import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SmartContractTokenInfo } from '@subwallet/extension-base/services/chain-service/types';
 import BigN from 'bignumber.js';
+import fetch from 'cross-fetch';
 import { Contract } from 'web3-eth-contract';
 
 import { logger as createLogger } from '@polkadot/util/logger';

@@ -3,6 +3,7 @@
 
 import * as Sc from '@substrate/connect';
 import { WellKnownChain } from '@substrate/connect';
+import fetch from 'cross-fetch';
 
 import { ScProvider } from '@polkadot/rpc-provider';
 import { ProviderInterface, ProviderInterfaceCallback, ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkadot/rpc-provider/types';

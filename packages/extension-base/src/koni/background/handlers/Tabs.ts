@@ -25,6 +25,7 @@ import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/ext
 import { KeyringPair } from '@subwallet/keyring/types';
 import keyring from '@subwallet/ui-keyring';
 import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
+import fetch from 'cross-fetch';
 import { t } from 'i18next';
 import { Subscription } from 'rxjs';
 import Web3 from 'web3';

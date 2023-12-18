@@ -27,8 +27,8 @@
     "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.251",
-    "@types/firefox-webext-browser": "^111.0.4"
+    "@types/chrome": "^0.0.254",
+    "@types/firefox-webext-browser": "^111.0.5"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

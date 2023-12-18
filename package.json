@@ -38,8 +38,8 @@
     "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env browser"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.77.1",
-    "@types/node": "^20.9.1",
+    "@polkadot/dev": "^0.78.1",
+    "@types/node": "^20.10.5",
     "i18next-scanner": "^4.4.0",
     "sinon-chrome": "^3.0.1"
   },

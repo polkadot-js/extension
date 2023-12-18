@@ -157,6 +157,29 @@ function findLedgerChainOfSelectedAccount (
   return undefined;
 }
 
+function filterDuplicateItems (items: TransactionHistoryItem[]): TransactionHistoryItem[] {
+  const uniqueBlockNumbers: Record<string, boolean> = {};
+  const result: TransactionHistoryItem[] = [];
+
+  for (const item of items) {
+    if (item.origin === 'app' || !uniqueBlockNumbers[item.blockNumber]) {
+      // If origin is 'app', replace the existing item with the new 'app' item
+      if (item.origin === 'app' && uniqueBlockNumbers[item.blockNumber]) {
+        const indexToRemove = result.findIndex(
+          (existingItem) => existingItem.blockNumber === item.blockNumber
+        );
+
+        result.splice(indexToRemove, 1);
+      }
+
+      result.push(item);
+      uniqueBlockNumbers[item.blockNumber] = true;
+    }
+  }
+
+  return result;
+}
+
 const modalId = HISTORY_DETAIL_MODAL;
 const DEFAULT_ITEMS_COUNT = 20;
 const NEXT_ITEMS_COUNT = 10;
@@ -529,7 +552,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       selectedAddress,
       (items: TransactionHistoryItem[]) => {
         if (isSubscribed) {
-          setRawHistoryList(items);
+          setRawHistoryList(filterDuplicateItems(items));
         }
 
         setLoading(false);
@@ -538,7 +561,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       id = res.id;
 
       if (isSubscribed) {
-        setRawHistoryList(res.items);
+        setRawHistoryList(filterDuplicateItems(res.items));
       } else {
         cancelSubscription(id).catch(console.log);
       }

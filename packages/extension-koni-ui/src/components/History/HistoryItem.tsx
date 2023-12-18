@@ -4,6 +4,7 @@
 import { TransactionDirection } from '@subwallet/extension-base/background/KoniTypes';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
+import { isAbleToShowFee } from '@subwallet/extension-koni-ui/utils';
 import { Icon, Logo, Number, Web3Block } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CaretRight } from 'phosphor-react';
@@ -58,7 +59,9 @@ function Component (
               value={item?.amount?.value || '0'}
             />
             <Number
-              className={'__fee'}
+              className={CN('__fee', {
+                '-hide': !isAbleToShowFee(item)
+              })}
               decimal={item?.fee?.decimals || 0}
               decimalOpacity={0.45}
               hide={!isShowBalance}
@@ -141,6 +144,10 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
       color: token.colorTextLight4
+    },
+
+    '.__fee.-hide': {
+      opacity: 0
     },
 
     '.__value-wrapper': {

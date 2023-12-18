@@ -1,10 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EnvironmentSupport, OSType, RuntimeEnvironment, RuntimeEnvironmentInfo, TargetEnvironment } from '../background/KoniTypes';
+import { isSupportWindow } from '@subwallet/extension-base/utils/mv3';
+import Bowser from 'bowser';
+
+import { EnvironmentSupport, RuntimeEnvironment, RuntimeEnvironmentInfo, TargetEnvironment } from '../background/KoniTypes';
 
 function detectRuntimeEnvironment (): RuntimeEnvironmentInfo {
-  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  if (isSupportWindow) {
     // Web environment
     return {
       environment: RuntimeEnvironment.Web,
@@ -60,41 +63,15 @@ function detectRuntimeEnvironment (): RuntimeEnvironmentInfo {
 
 export const RuntimeInfo: RuntimeEnvironmentInfo = detectRuntimeEnvironment();
 
-export const getOS = (): OSType => {
-  if (typeof window !== 'undefined') {
-    const userAgent = window.navigator.userAgent;
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const platform: string = window.navigator?.userAgentData?.platform || window.navigator.platform;
-    const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K', 'macOS'];
-    const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
-    const iosPlatforms = ['iPhone', 'iPad', 'iPod'];
-    let os: OSType = 'Unknown';
-
-    if (macosPlatforms.indexOf(platform) !== -1) {
-      os = 'Mac OS';
-    } else if (iosPlatforms.indexOf(platform) !== -1) {
-      os = 'iOS';
-    } else if (windowsPlatforms.indexOf(platform) !== -1) {
-      os = 'Windows';
-    } else if (/Android/.test(userAgent)) {
-      os = 'Android';
-    } else if (/Linux/.test(platform)) {
-      os = 'Linux';
-    }
-
-    return os;
-  } else {
-    // Todo: MV3 fix this
-    return 'Unknown';
-  }
-};
+// Todo: Support more in backend case
+export const BowserParser = Bowser.getParser(typeof navigator !== 'undefined' ? navigator.userAgent : '');
+export const isFirefox = BowserParser.getBrowserName(true) === 'firefox';
 
 export const TARGET_ENV = (process.env.TARGET_ENV || 'extension') as TargetEnvironment;
+export const targetIsExtension = TARGET_ENV === 'extension';
+export const targetIsWeb = TARGET_ENV === 'webapp';
+export const targetIsMobile = TARGET_ENV === 'mobile';
 
 export const MODULE_SUPPORT: EnvironmentSupport = {
-  MANTA_ZK: TARGET_ENV === 'extension'
+  MANTA_ZK: targetIsExtension
 };
-
-// Todo: MV3 fix this
-export const isFirefox = false;

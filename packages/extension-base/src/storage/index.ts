@@ -6,7 +6,6 @@ import { xglobal } from '@polkadot/x-global';
 const hasLocalStorage = typeof localStorage !== 'undefined';
 
 // Create localStorage adaptor
-
 export class SWStorage {
   private _storage = {} as Record<string, string>;
   // Todo: MV3 fix this

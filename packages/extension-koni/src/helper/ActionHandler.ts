@@ -97,7 +97,6 @@ export class ActionHandler {
       this.connectionMap[portId] = port.name;
 
       if (!this.firstTrigger) {
-        console.log('Check ddd', portId, data.message);
         this.firstTrigger = true;
         this.waitFirstTrigger.resolve();
       }

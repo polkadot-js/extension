@@ -6,13 +6,13 @@ import { MessageTypes, RequestTypes, ResponseType } from '@subwallet/extension-b
 import { state } from '@subwallet/extension-base/koni/background/handlers/index';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { SWStorage } from '@subwallet/extension-base/storage';
-import { listMerge } from '@subwallet/extension-base/utils';
+import { isSupportWindow, listMerge } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { DexieExportJsonStructure } from 'dexie-export-import';
 
 export function isLocalStorageReset (): boolean {
   // Todo: MV3 fix this
-  if (typeof window !== 'undefined' && window?.localStorage) {
+  if (isSupportWindow && window?.localStorage) {
     return !window.localStorage.getItem('keyring:subwallet');
   } else {
     return false;

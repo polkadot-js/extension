@@ -5,11 +5,11 @@ import { withErrorLog } from '@subwallet/extension-base/background/handlers/help
 import { BrowserConfirmationType, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { DEFAULT_NOTIFICATION_TYPE } from '@subwallet/extension-base/services/setting-service/constants';
-import { getOS } from '@subwallet/extension-base/utils';
+import { BowserParser } from '@subwallet/extension-base/utils';
 
 const NOTIFICATION_URL = chrome.runtime.getURL('notification.html');
 
-const OS = getOS();
+const OS = BowserParser.getOSName();
 
 const extraHeight = OS === 'Linux' ? 0 : 28;
 const extraWidth = OS === 'Windows' ? 16 : 0;

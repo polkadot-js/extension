@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getOS } from '@subwallet/extension-base/utils';
+import { BowserParser } from '@subwallet/extension-base/utils';
 import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Input, InputRef } from '@subwallet/react-ui';
@@ -57,7 +57,7 @@ interface ControlData {
   [cmdFirefoxKey]: boolean;
 }
 
-const isMacOs = getOS() === 'Mac OS';
+const isMacOs = BowserParser.getOSName() === 'MacOS';
 
 const isControlKey = (keycode: number) => {
   if (isMacOs) {

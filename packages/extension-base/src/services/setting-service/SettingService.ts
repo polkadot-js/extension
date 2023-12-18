@@ -16,6 +16,12 @@ export default class SettingService {
   private readonly passPhishingStore = new PassPhishingStore();
 
   constructor () {
+    const storage = SWStorage.instance;
+
+    storage.waitReady.then(this.initSetting.bind(this)).catch(console.error);
+  }
+
+  public initSetting () {
     let old: LanguageType = SWStorage.instance.getItem(LANGUAGE) as LanguageType || 'en';
 
     const updateLanguage = ({ language }: UiSettings) => {

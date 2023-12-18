@@ -139,6 +139,8 @@ export default class Mobile {
   }
 
   private async _getLocalStorageExportData (): Promise<string> {
+    await swStorage.waitReady;
+
     return Promise.resolve(JSON.stringify(swStorage.copy()));
   }
 

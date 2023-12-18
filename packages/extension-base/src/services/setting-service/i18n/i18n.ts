@@ -7,9 +7,15 @@ import i18next from 'i18next';
 
 import Backend from './Backend';
 
-i18next
-  .use(Backend)
-  .init({
+const defaultLanguage = 'en';
+const storage = SWStorage.instance;
+
+const i18nInit = i18next.use(Backend);
+
+storage.waitReady.then(() => {
+  const lang = storage.getItem(LANGUAGE);
+
+  i18nInit.init({
     backend: {},
     debug: false,
     fallbackLng: 'en',
@@ -17,14 +23,17 @@ i18next
       escapeValue: false
     },
     keySeparator: false,
-    lng: SWStorage.instance.getItem(LANGUAGE) || 'en',
+    lng: lang || defaultLanguage,
     load: 'languageOnly',
     nsSeparator: false,
     returnEmptyString: false,
     returnNull: false
-  })
-  .catch((error: Error): void =>
-    console.log('i18n: failure', error)
-  );
+  }).then(() => {
+    // Listen to the changes
+    i18next.on('languageChanged', (lng) => {
+      storage.setItem(LANGUAGE, lng);
+    });
+  }).catch(console.error);
+}).catch(console.error);
 
 export default i18next;

@@ -24,6 +24,10 @@ export interface IChain extends _ChainInfo {
   currentProvider: string
 }
 export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc, DefaultChainDoc {}
+export interface IKeyValue {
+  key: string,
+  value: string
+}
 export interface INft extends NftItem, DefaultAddressDoc {}
 export interface ITransactionHistoryItem extends TransactionHistoryItem, DefaultAddressDoc, DefaultChainDoc {}
 
@@ -61,6 +65,8 @@ export default class KoniDatabase extends Dexie {
   public mantaPay!: Table<IMantaPayLedger, object>;
   public campaign!: Table<ICampaign, object>;
 
+  public keyValue!: Table<IKeyValue, object>;
+
   private schemaVersion: number;
 
   public constructor (name = DEFAULT_DATABASE, schemaVersion = 11) {
@@ -97,6 +103,10 @@ export default class KoniDatabase extends Dexie {
     this.conditionalVersion(4, {
       campaign: 'slug'
     });
+
+    this.conditionalVersion(5, {
+      keyValue: 'key'
+    });
   }
 
   private conditionalVersion (
@@ -113,5 +123,16 @@ export default class KoniDatabase extends Dexie {
     if (upgrade != null) {
       dexieVersion.upgrade(upgrade);
     }
+  }
+
+  // Singletons
+  public static instance: KoniDatabase;
+
+  public static getInstance (name?: string, schemaVersion?: number): KoniDatabase {
+    if (!KoniDatabase.instance) {
+      KoniDatabase.instance = new KoniDatabase(name, schemaVersion);
+    }
+
+    return KoniDatabase.instance;
   }
 }

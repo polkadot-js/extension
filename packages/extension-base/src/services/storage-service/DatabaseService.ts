@@ -32,7 +32,7 @@ export default class DatabaseService {
 
   constructor (private eventService: EventService) {
     this.logger = createLogger('DB-Service');
-    this._db = new KoniDatabase();
+    this._db = KoniDatabase.getInstance();
     this._db.on('ready', () => {
       this.eventService.emit('database.ready', true);
     });

@@ -70,35 +70,41 @@ global.chrome.storage = {
       keys: string[] | string | undefined | null,
       callback: (val: object) => void
     ) => {
-      if (!keys) {
-        keys = storage.keys();
-      }
+      storage.waitReady.then(() => {
+        if (!keys) {
+          keys = storage.keys();
+        }
 
-      if (typeof keys === 'string') {
-        keys = [keys];
-      }
+        if (typeof keys === 'string') {
+          keys = [keys];
+        }
 
-      const rs: Record<string, any> = {};
+        const rs: Record<string, any> = {};
 
-      keys.forEach((k) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        rs[k] = getLocalStorageItem(k);
-      });
+        keys.forEach((k) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          rs[k] = getLocalStorageItem(k);
+        });
 
-      callback(rs);
+        callback(rs);
+      }).catch(console.error);
     },
     // @ts-ignore
     set: (input: object, callback?: () => void) => {
-      Object.entries(input).forEach(([k, v]) => {
-        setLocalStorageItem(k, v);
-      });
+      storage.waitReady.then(() => {
+        Object.entries(input).forEach(([k, v]) => {
+          setLocalStorageItem(k, v);
+        });
 
-      callback && callback();
+        callback && callback();
+      }).catch(console.error);
     },
     // @ts-ignore
     remove: (key: string, value: any, callback?: () => void) => {
-      removeLocalStorageItem(key);
-      callback && callback();
+      storage.waitReady.then(() => {
+        removeLocalStorageItem(key);
+        callback && callback();
+      }).catch(console.error);
     }
   }
 };

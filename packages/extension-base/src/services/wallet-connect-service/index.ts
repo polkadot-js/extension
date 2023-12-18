@@ -53,6 +53,7 @@ export default class WalletConnectService {
 
   async #initClient (force?: boolean) {
     this.#removeListener();
+    await storage.waitReady;
 
     if (force || this.#haveData) {
       this.#client = await SignClient.init(this.#option);
@@ -184,6 +185,8 @@ export default class WalletConnectService {
   }
 
   public async connect (uri: string) {
+    await storage.waitReady;
+
     if (!this.#haveData) {
       await this.#initClient(true);
     }

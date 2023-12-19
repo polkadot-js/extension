@@ -70,7 +70,8 @@ const simplePages = [
   '/earning-demo',
   '/crowdloan-unlock-campaign/check-contributions',
   '/crowdloan-unlock-campaign/contributions-result',
-  '/not-found'
+  '/not-found',
+  '/unsafe-access'
 ];
 
 export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) => {

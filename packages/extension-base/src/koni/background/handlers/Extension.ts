@@ -3460,6 +3460,10 @@ export default class KoniExtension {
       return await this.#koniState.reloadNft();
     } else if (data === 'staking') {
       return await this.#koniState.reloadStaking();
+    } else if (data === 'balance') {
+      return await this.#koniState.reloadBalance();
+    } else if (data === 'crowdloan') {
+      return await this.#koniState.reloadCrowdloan();
     }
 
     return Promise.resolve(false);

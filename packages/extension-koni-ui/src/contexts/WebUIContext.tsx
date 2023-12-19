@@ -53,7 +53,7 @@ function checkSettingPage (pathname: string) {
 }
 
 function checkPortfolioPage (pathname: string) {
-  return pathname.startsWith('/home/tokens') || pathname.startsWith('/home/nfts') || pathname.startsWith('/home/statistics');
+  return pathname.startsWith('/home/tokens') || pathname.startsWith('/home/nfts') || pathname.startsWith('/home/statistics') || pathname.startsWith('/home/ordinals');
 }
 
 function checkEarningDonePage (pathname: string) {

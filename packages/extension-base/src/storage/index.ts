@@ -149,8 +149,6 @@ export class SWStorage {
   }
 
   async sync () {
-    !this.isReady && await this.waitReady;
-
     if (this.localStorage) {
       this._storage = JSON.parse(JSON.stringify(this.localStorage)) as Record<string, string>;
     } else {

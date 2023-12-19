@@ -14,8 +14,8 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": [
-    "./detectPackage.js",
-    "./detectPackage.cjs"
+    "./packageDetect.js",
+    "./packageDetect.cjs"
   ],
   "type": "module",
   "version": "0.46.7-0-x",
@@ -23,8 +23,8 @@
   "dependencies": {
     "@metamask/detect-provider": "^2.0.0",
     "@polkadot/extension-inject": "0.46.7-0-x",
-    "@polkadot/types": "^10.11.1",
-    "@polkadot/util": "^12.6.1",
+    "@polkadot/types": "^10.11.2",
+    "@polkadot/util": "^12.6.2",
     "tslib": "^2.6.2",
     "web3": "^1.10.3"
   },

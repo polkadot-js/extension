@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
+import { reloadCron, saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
-import { CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import { ArrowClockwise, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -32,10 +32,20 @@ function Component (
     totalValue }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state) => state.settings);
+  const [reloading, setReloading] = useState(false);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
   }, [isShowBalance]);
+
+  const reloadBalance = useCallback(() => {
+    setReloading(true);
+    reloadCron({ data: 'balance' })
+      .catch(console.error)
+      .finally(() => {
+        setReloading(false);
+      });
+  }, []);
 
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
@@ -134,6 +144,21 @@ function Component (
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
           tooltip={t('Buy token')}
+        />
+        <div className={'__button-space'} />
+        <Button
+          icon={
+            <Icon
+              phosphorIcon={ArrowClockwise}
+              size={isShrink ? 'sm' : 'md' }
+              weight={'duotone'}
+            />
+          }
+          loading={reloading}
+          onClick={reloadBalance}
+          shape='squircle'
+          size={isShrink ? 'xs' : 'sm'}
+          tooltip={t('Reload')}
         />
       </div>
     </div>

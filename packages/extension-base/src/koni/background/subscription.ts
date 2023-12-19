@@ -348,6 +348,7 @@ export class KoniSubscription {
   async reloadBalance () {
     const currentAddress = this.state.keyringService.currentAccount?.address;
 
+    await this.state.handleResetBalance(currentAddress, true);
     this.subscribeBalances(currentAddress, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
 
     await waitTimeout(1800);
@@ -356,7 +357,6 @@ export class KoniSubscription {
   async reloadCrowdloan () {
     const currentAddress = this.state.keyringService.currentAccount?.address;
 
-    await this.state.handleResetBalance(currentAddress, true);
     this.subscribeCrowdloans(currentAddress, this.state.getSubstrateApiMap());
 
     await waitTimeout(1800);

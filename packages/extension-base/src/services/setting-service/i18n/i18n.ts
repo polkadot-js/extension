@@ -12,9 +12,7 @@ const storage = SWStorage.instance;
 
 const i18nInit = i18next.use(Backend);
 
-storage.waitReady.then(() => {
-  const lang = storage.getItem(LANGUAGE);
-
+storage.getItem(LANGUAGE).then((lang) => {
   i18nInit.init({
     backend: {},
     debug: false,
@@ -31,7 +29,7 @@ storage.waitReady.then(() => {
   }).then(() => {
     // Listen to the changes
     i18next.on('languageChanged', (lng) => {
-      storage.setItem(LANGUAGE, lng);
+      storage.setItem(LANGUAGE, lng).catch(console.error);
     });
   }).catch(console.error);
 }).catch(console.error);

@@ -6215,7 +6215,6 @@ __metadata:
     "@subwallet/extension-chains": ^1.1.26-0
     "@subwallet/extension-dapp": ^1.1.26-0
     "@subwallet/extension-inject": ^1.1.26-0
-    "@subwallet/extension-mocks": ^1.1.26-0
     "@subwallet/keyring": ^0.1.1
     "@subwallet/ui-keyring": ^0.1.3
     "@types/uuid": ^9.0.1

@@ -61,7 +61,9 @@ export default class Mobile {
     this.state = state;
 
     if (!isLocalStorageReset()) {
-      this.lastRestoreData.storage = swStorage.copy();
+      swStorage.copy().then((data) => {
+        this.lastRestoreData.storage = data;
+      }).catch(console.error);
     }
 
     (async () => {
@@ -192,7 +194,7 @@ export default class Mobile {
       const storageData = JSON.parse(storage) as Record<string, string>;
 
       for (const key in storageData) {
-        swStorage.setItem(key, storageData[key]);
+        await swStorage.setItem(key, storageData[key]);
       }
     }
 

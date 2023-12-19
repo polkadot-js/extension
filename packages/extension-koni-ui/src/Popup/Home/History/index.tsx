@@ -158,24 +158,31 @@ function findLedgerChainOfSelectedAccount (
 }
 
 function filterDuplicateItems (items: TransactionHistoryItem[]): TransactionHistoryItem[] {
-  const uniqueBlockNumbers: Record<string, boolean> = {};
   const result: TransactionHistoryItem[] = [];
 
-  for (const item of items) {
-    if (item.origin === 'app' || !uniqueBlockNumbers[item.blockNumber]) {
-      // If origin is 'app', replace the existing item with the new 'app' item
-      if (item.origin === 'app' && uniqueBlockNumbers[item.blockNumber]) {
-        const indexToRemove = result.findIndex(
-          (existingItem) => existingItem.blockNumber === item.blockNumber
-        );
+  const exclusionMap: Record<string, boolean> = {};
 
-        result.splice(indexToRemove, 1);
-      }
+  const getExclusionKey = (i: TransactionHistoryItem): string => {
+    return `${i.direction}_${i.blockNumber}_${i.type}_${i.from}_${i.to}`.toLowerCase();
+  };
 
-      result.push(item);
-      uniqueBlockNumbers[item.blockNumber] = true;
+  items.forEach((i) => {
+    if (i.origin === 'app' && i.blockNumber > 0 && i.type === ExtrinsicType.TRANSFER_BALANCE) {
+      exclusionMap[getExclusionKey(i)] = true;
     }
+  });
+
+  if (!Object.keys(exclusionMap).length) {
+    return items;
   }
+
+  items.forEach((i) => {
+    if (i.origin === 'subscan' && exclusionMap[getExclusionKey(i)]) {
+      return;
+    }
+
+    result.push(i);
+  });
 
   return result;
 }
@@ -539,6 +546,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [onClickFilter]);
 
+  const isSelectedChainEvm = useMemo(() => {
+    const selectedChainInfo = chainInfoMap[selectedChain];
+
+    return selectedChainInfo && _isChainEvmCompatible(selectedChainInfo);
+  }, [chainInfoMap, selectedChain]);
+
   useEffect(() => {
     let id: string;
     let isSubscribed = true;
@@ -552,7 +565,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       selectedAddress,
       (items: TransactionHistoryItem[]) => {
         if (isSubscribed) {
-          setRawHistoryList(filterDuplicateItems(items));
+          setRawHistoryList(isSelectedChainEvm ? filterDuplicateItems(items) : items);
         }
 
         setLoading(false);
@@ -561,7 +574,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       id = res.id;
 
       if (isSubscribed) {
-        setRawHistoryList(filterDuplicateItems(res.items));
+        setRawHistoryList(isSelectedChainEvm ? filterDuplicateItems(res.items) : res.items);
       } else {
         cancelSubscription(id).catch(console.log);
       }
@@ -576,7 +589,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         cancelSubscription(id).catch(console.log);
       }
     };
-  }, [selectedAddress, selectedChain]);
+  }, [isSelectedChainEvm, selectedAddress, selectedChain]);
 
   useEffect(() => {
     if (chainItems.length) {

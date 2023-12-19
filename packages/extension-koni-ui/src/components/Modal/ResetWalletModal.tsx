@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRM_GENERAL_TERM, CONFIRM_TERM_SEED_PHRASE, RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { resetWallet } from '@subwallet/extension-koni-ui/messaging';
@@ -12,6 +12,7 @@ import { ArrowCounterClockwise, Trash, WarningCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import useNotification from '../../hooks/common/useNotification';
 
@@ -25,7 +26,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const notify = useNotification();
   const { unlock } = useUILock();
-
+  const [, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
+  const [, setIsConfirmTermSeedPhrase] = useLocalStorage(CONFIRM_TERM_SEED_PHRASE, 'nonConfirmed');
   const { inactiveModal } = useContext(ModalContext);
   const { disableInject } = useContext(InjectContext);
 
@@ -54,6 +56,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 type: 'error'
               });
             } else {
+              setIsConfirmedTermGeneral('nonConfirmed');
+              setIsConfirmTermSeedPhrase('nonConfirmed');
               unlock();
             }
           })
@@ -69,7 +73,7 @@ const Component: React.FC<Props> = (props: Props) => {
           });
       }, 300);
     };
-  }, [disableInject, notify, onClose, unlock]);
+  }, [disableInject, notify, onClose, setIsConfirmTermSeedPhrase, setIsConfirmedTermGeneral, unlock]);
 
   return (
     <SwModal

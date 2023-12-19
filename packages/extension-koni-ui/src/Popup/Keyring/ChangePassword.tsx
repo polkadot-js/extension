@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useFocusFormItem, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { Form, Icon, Input, PageIcon } from '@subwallet/react-ui';
+import { Checkbox, Form, Icon, Input, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FloppyDiskBack, ShieldCheck } from 'phosphor-react';
+import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,12 +21,14 @@ enum FormFieldName {
   PASSWORD = 'password',
   OLD_PASSWORD = 'old_password',
   CONFIRM_PASSWORD = 'confirm_password',
+  CONFIRM_CHECKBOX = 'confirm_checkbox'
 }
 
 interface ChangePasswordFormState {
   [FormFieldName.PASSWORD]: string;
   [FormFieldName.OLD_PASSWORD]: string;
   [FormFieldName.CONFIRM_PASSWORD]: string;
+  [FormFieldName.CONFIRM_CHECKBOX]: boolean;
 }
 
 const formName = 'change-password-form';
@@ -42,6 +46,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const newPasswordRules = useMemo(() => renderBasePasswordRules(t('New password'), t), [t]);
   const confirmPasswordRules = useMemo(() => renderBaseConfirmPasswordRules(FormFieldName.PASSWORD, t), [t]);
+  const checkBoxValidator = useCallback((rule: RuleObject, value: boolean): Promise<void> => {
+    if (!value) {
+      return Promise.reject(new Error(t('CheckBox is required')));
+    }
+
+    return Promise.resolve();
+  }, [t]);
 
   const goBack = useCallback(() => {
     navigate('/settings/security');
@@ -50,8 +61,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onSubmit: FormCallbacks<ChangePasswordFormState>['onFinish'] = useCallback((values: ChangePasswordFormState) => {
     const password = values[FormFieldName.PASSWORD];
     const oldPassword = values[FormFieldName.OLD_PASSWORD];
+    const checkBox = values[FormFieldName.CONFIRM_CHECKBOX];
 
-    if (password && oldPassword) {
+    if (password && oldPassword && checkBox) {
       setLoading(true);
       setTimeout(() => {
         keyringChangeMasterPassword({
@@ -128,7 +140,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             initialValues={{
               [FormFieldName.OLD_PASSWORD]: '',
               [FormFieldName.PASSWORD]: '',
-              [FormFieldName.CONFIRM_PASSWORD]: ''
+              [FormFieldName.CONFIRM_PASSWORD]: '',
+              [FormFieldName.CONFIRM_CHECKBOX]: ''
             }}
             name={formName}
             onFieldsChange={onUpdate}
@@ -174,6 +187,28 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               />
             </Form.Item>
             <Form.Item
+              className={'form-checkbox'}
+              name={FormFieldName.CONFIRM_CHECKBOX}
+              rules={[
+                {
+                  validator: checkBoxValidator
+                }
+              ]}
+              statusHelpAsTooltip={true}
+              valuePropName={'checked'}
+            >
+              <Checkbox
+                className={'checkbox'}
+              >
+                I understand that SubWallet can’t recover the password. <a
+                  href={TERMS_OF_SERVICE_URL}
+                  rel='noreferrer'
+                  style={{ textDecoration: 'underline' }}
+                  target={'_blank'}
+                >Learn more.</a>
+              </Checkbox>
+            </Form.Item>
+            <Form.Item
               help={submitError}
               validateStatus={submitError && 'error'}
             />
@@ -193,8 +228,19 @@ const ChangePassword = styled(Component)<Props>(({ theme: { token } }: Props) =>
       '.page-icon': {
         display: 'flex',
         justifyContent: 'center',
-        marginTop: token.margin,
+        marginTop: token.marginSM,
         '--page-icon-color': token.colorSecondary
+      },
+
+      '.form-checkbox': {
+        '.checkbox': {
+          textAlign: 'left',
+          display: 'flex',
+          alignItems: 'center'
+        }
+      },
+      '.ant-form-item-explain-connected': {
+        paddingBottom: 0
       },
 
       '.title': {

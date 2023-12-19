@@ -907,10 +907,17 @@ export default class KoniState {
   private isFirstLoad = true;
 
   public async handleResetBalance (newAddress: string, forceRefresh?: boolean) {
-    if (this.isFirstLoad || forceRefresh) {
+    if (this.isFirstLoad) {
       const backupBalanceData = await this.dbService.getStoredBalance();
 
       this.balanceMap.updateBalanceItems(backupBalanceData, isAccountAll(newAddress));
+
+      this.isFirstLoad = false;
+    }
+
+    if (forceRefresh) {
+      this.balanceMap.setData({});
+      await this.dbService.stores.balance.clear();
     }
 
     await Promise.all([this.removeInactiveChainBalances()]);

@@ -227,6 +227,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       activeModal(VALIDATOR_DETAIL_MODAL);
     };
   }, [activeModal]);
+  const handleValidatorLabel = useMemo(() => {
+    const label = getValidatorLabel(chain);
+
+    return label !== 'dApp' ? label.toLowerCase() : label;
+  }, [chain]);
 
   const renderEmpty = useCallback(() => {
     return (
@@ -236,7 +241,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         validatorTitle={t(handleValidatorLabel)}
       />
     );
-  }, [chain, items.length, setForceFetchValidator, t]);
+  }, [handleValidatorLabel, items.length, setForceFetchValidator, t]);
 
   const renderItem = useCallback((item: ValidatorDataType) => {
     const key = getValidatorKey(item.address, item.identity);
@@ -300,12 +305,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       onResetFilter();
     }
   }, [isActive, onResetFilter]);
-
-  const handleValidatorLabel = useMemo(() => {
-    const label = getValidatorLabel(chain);
-
-    return label !== 'dApp' ? label.toLowerCase() : label;
-  }, [chain]);
 
   return (
     <>

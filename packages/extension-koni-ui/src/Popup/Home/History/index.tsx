@@ -157,6 +157,36 @@ function findLedgerChainOfSelectedAccount (
   return undefined;
 }
 
+function filterDuplicateItems (items: TransactionHistoryItem[]): TransactionHistoryItem[] {
+  const result: TransactionHistoryItem[] = [];
+
+  const exclusionMap: Record<string, boolean> = {};
+
+  const getExclusionKey = (i: TransactionHistoryItem): string => {
+    return `${i.direction}_${i.blockNumber}_${i.type}_${i.from}_${i.to}`.toLowerCase();
+  };
+
+  items.forEach((i) => {
+    if (i.origin === 'app' && i.blockNumber > 0 && i.type === ExtrinsicType.TRANSFER_BALANCE) {
+      exclusionMap[getExclusionKey(i)] = true;
+    }
+  });
+
+  if (!Object.keys(exclusionMap).length) {
+    return items;
+  }
+
+  items.forEach((i) => {
+    if (i.origin === 'subscan' && exclusionMap[getExclusionKey(i)]) {
+      return;
+    }
+
+    result.push(i);
+  });
+
+  return result;
+}
+
 const modalId = HISTORY_DETAIL_MODAL;
 const DEFAULT_ITEMS_COUNT = 20;
 const NEXT_ITEMS_COUNT = 10;
@@ -516,6 +546,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [onClickFilter]);
 
+  const isSelectedChainEvm = useMemo(() => {
+    const selectedChainInfo = chainInfoMap[selectedChain];
+
+    return selectedChainInfo && _isChainEvmCompatible(selectedChainInfo);
+  }, [chainInfoMap, selectedChain]);
+
   useEffect(() => {
     let id: string;
     let isSubscribed = true;
@@ -529,7 +565,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       selectedAddress,
       (items: TransactionHistoryItem[]) => {
         if (isSubscribed) {
-          setRawHistoryList(items);
+          setRawHistoryList(isSelectedChainEvm ? filterDuplicateItems(items) : items);
         }
 
         setLoading(false);
@@ -538,7 +574,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       id = res.id;
 
       if (isSubscribed) {
-        setRawHistoryList(res.items);
+        setRawHistoryList(isSelectedChainEvm ? filterDuplicateItems(res.items) : res.items);
       } else {
         cancelSubscription(id).catch(console.log);
       }
@@ -553,7 +589,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         cancelSubscription(id).catch(console.log);
       }
     };
-  }, [selectedAddress, selectedChain]);
+  }, [isSelectedChainEvm, selectedAddress, selectedChain]);
 
   useEffect(() => {
     if (chainItems.length) {

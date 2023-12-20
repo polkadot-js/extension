@@ -17,3 +17,4 @@ export * from './buy';
 export * from './campaigns';
 export * from './transaction';
 export * from './yield';
+export * from './ordinal';

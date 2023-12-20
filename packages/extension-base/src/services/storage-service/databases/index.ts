@@ -84,7 +84,6 @@ export default class KoniDatabase extends Dexie {
       stakings: '[chain+address+type], [chain+address], chain, address, type',
       transactions: '[chain+address+extrinsicHash], &[chain+address+extrinsicHash], chain, address, extrinsicHash, action',
       migrations: '[key+name]',
-
       chainStakingMetadata: '[chain+type], chain, type',
       nominatorMetadata: '[chain+address+type], [chain+address], chain, address, type'
     });

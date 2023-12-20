@@ -11,7 +11,7 @@ on:
 
 jobs:
   master:
-    if: "! startsWith(github.event.head_commit.message, '[CI Skip]')"
+    if: "! startsWith(github.event.head_commit.message, '[CI Skip]') || github.ref == 'refs/heads/webapp'"
     name: Deploy WebApp Preview
     runs-on: ubuntu-22.04
     steps:

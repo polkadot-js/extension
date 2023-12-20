@@ -2,3 +2,4 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export const LANGUAGE = 'current-language';
+export const DEFAULT_LANGUAGE = 'en';

@@ -14,7 +14,7 @@ export class SWStorage {
   private localStorage = hasLocalStorage ? localStorage : undefined;
   private kvDatabase = KoniDatabase.getInstance().keyValue;
   private isReady = false;
-  private waitReadyHandler = createPromiseHandler<void>();
+  private waitReadyHandler = createPromiseHandler<SWStorage>();
 
   public get waitReady () {
     return this.waitReadyHandler.promise;
@@ -24,7 +24,7 @@ export class SWStorage {
     this.sync()
       .then(() => {
         this.isReady = true;
-        this.waitReadyHandler.resolve();
+        this.waitReadyHandler.resolve(this);
       })
       .catch(console.error);
   }

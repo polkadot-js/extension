@@ -14,3 +14,7 @@ export async function importIndexedDB (request: string): Promise<boolean> {
 export async function getIndexedDBJson (): Promise<object> {
   return sendMessage('pri(database.exportJson)', null);
 }
+
+export async function migrateLocalStorage (request: string): Promise<boolean> {
+  return sendMessage('pri(database.migrateLocalStorage)', request);
+}

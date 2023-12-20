@@ -4441,6 +4441,8 @@ export default class KoniExtension {
         return this.#koniState.dbService.importDB(request as string);
       case 'pri(database.exportJson)':
         return this.#koniState.dbService.getExportJson();
+      case 'pri(database.migrateLocalStorage)':
+        return this.#koniState.migrateMV3LocalStorage(request as string);
         /* Database */
       // Default
       default:

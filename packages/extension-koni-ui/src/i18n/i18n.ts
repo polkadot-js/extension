@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LANGUAGE } from '@subwallet/extension-base/constants';
+import { DEFAULT_LANGUAGE, LANGUAGE } from '@subwallet/extension-base/constants';
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -18,7 +18,7 @@ i18next
       escapeValue: false
     },
     keySeparator: false,
-    lng: localStorage.getItem(LANGUAGE) || 'en',
+    lng: localStorage.getItem(LANGUAGE) || DEFAULT_LANGUAGE,
     load: 'languageOnly',
     nsSeparator: false,
     returnEmptyString: false,

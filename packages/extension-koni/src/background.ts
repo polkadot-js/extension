@@ -16,7 +16,7 @@ import { cryptoWaitReady } from '@polkadot/util-crypto';
 const actionHandler = ActionHandler.getInstance();
 
 actionHandler.setPortHandler(handlers);
-actionHandler.setInstallHandler(state.onInstall.bind(state));
+actionHandler.setInstallHandler(state.onInstallOrUpdate.bind(state));
 actionHandler.setSleepHandler(state.sleep.bind(state));
 actionHandler.setWakeUpHandler(state.wakeup.bind(state));
 

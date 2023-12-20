@@ -32,6 +32,7 @@ import { SUBSCAN_API_CHAIN_MAP, SUBSCAN_BALANCE_CHAIN_MAP_REVERSE } from '@subwa
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
+import { SWStorage } from '@subwallet/extension-base/storage';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
 import { addLazy, isAccountAll, stripUrl, targetIsWeb } from '@subwallet/extension-base/utils';
@@ -1618,9 +1619,52 @@ export default class KoniState {
     return await this.requestService.completeConfirmation(request);
   }
 
-  public onInstall () {
-    // const singleModes = Object.values(_PREDEFINED_SINGLE_MODES);
+  private async onMV3Update () {
+    const migrationStatus = await SWStorage.instance.getItem('mv3_migration');
 
+    if (!migrationStatus || migrationStatus !== 'done') {
+      // Open migration tab
+      const url = `${chrome.runtime.getURL('index.html')}#/mv3-migration`;
+
+      await chrome.tabs.create({ url });
+
+      // migrateMV3LocalStorage will be called when user open migration tab with data from localStorage on frontend
+    }
+  }
+
+  public async migrateMV3LocalStorage (data: string) {
+    try {
+      const parsedData = JSON.parse(data) as Record<string, string>;
+
+      parsedData.mv3_migration = 'done';
+
+      await SWStorage.instance.setMap(parsedData);
+
+      // Reload some services use SWStorage
+      // wallet connect
+      this.walletConnectService.initClient().catch(console.error);
+
+      return true;
+    } catch (e) {
+      console.error(e);
+
+      return false;
+    }
+  }
+
+  private async onMV3Install () {
+    await SWStorage.instance.setItem('mv3_migration', 'done');
+  }
+
+  public onInstallOrUpdate (details: chrome.runtime.InstalledDetails) {
+    // Open mv3 migration window
+    if (details.reason === 'install') {
+      this.onMV3Install().catch(console.error);
+    } else if (details.reason === 'update') {
+      this.onMV3Update().catch(console.error);
+    }
+
+    // const singleModes = Object.values(_PREDEFINED_SINGLE_MODES);
     // This logic is moved to installation.ts
     // try {
     //   // Open expand page

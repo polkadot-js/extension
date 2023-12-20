@@ -2381,6 +2381,7 @@ export interface KoniRequestSignatures {
   'pri(database.export)': [null, string];
   'pri(database.import)': [string, boolean];
   'pri(database.exportJson)': [null, DexieExportJsonStructure];
+  'pri(database.migrateLocalStorage)': [string, boolean];
   /* Database Service */
 }
 

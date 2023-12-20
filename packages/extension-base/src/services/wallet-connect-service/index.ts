@@ -36,7 +36,7 @@ export default class WalletConnectService {
     this.#polkadotRequestHandler = new PolkadotRequestHandler(this, requestService);
     this.#eip155RequestHandler = new Eip155RequestHandler(this.#koniState, this);
 
-    this.#initClient().catch(console.error);
+    this.initClient().catch(console.error);
   }
 
   private async haveData () {
@@ -51,7 +51,7 @@ export default class WalletConnectService {
     return !!sessions.length || !!pairings.length || !!subscriptions.length;
   }
 
-  async #initClient (force?: boolean) {
+  public async initClient (force?: boolean) {
     this.#removeListener();
 
     if (force || await this.haveData()) {
@@ -180,12 +180,12 @@ export default class WalletConnectService {
 
   public async changeOption (newOption: Omit<SignClientTypes.Options, 'projectId'>) {
     this.#option = Object.assign({}, this.#option, newOption);
-    await this.#initClient();
+    await this.initClient();
   }
 
   public async connect (uri: string) {
     if (!(await this.haveData())) {
-      await this.#initClient(true);
+      await this.initClient(true);
     }
 
     this.#checkClient();
@@ -256,7 +256,7 @@ export default class WalletConnectService {
       }
     }
 
-    await this.#initClient();
+    await this.initClient();
     this.#updateSessions();
   }
 

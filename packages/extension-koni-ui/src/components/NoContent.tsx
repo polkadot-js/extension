@@ -13,7 +13,7 @@ import { PhosphorIcon, ThemeProps } from '../types';
 export enum PAGE_TYPE {
   NFT_COLLECTION = 'nft_collection',
   NFT_COLLECTION_DETAIL = 'nft_collection_detail',
-  ORDINAL = 'ordinal',
+  INSCRIPTION = 'inscription',
   TOKEN = 'token',
   SEARCH = 'search',
   CROWDLOANS = 'crowdloans',
@@ -49,10 +49,10 @@ const Component: React.FC<Props> = ({ className, pageType }: Props) => {
         title: t('No collectible found'),
         content: t('Your collectibles will appear here')
       },
-      [PAGE_TYPE.ORDINAL]: {
+      [PAGE_TYPE.INSCRIPTION]: {
         icon: Image,
-        title: t('No ordinal found'),
-        content: t('Your ordinals will appear here')
+        title: t('No inscription found'),
+        content: t('Your inscriptions will appear here')
       },
       [PAGE_TYPE.NFT_COLLECTION_DETAIL]: {
         icon: Image,

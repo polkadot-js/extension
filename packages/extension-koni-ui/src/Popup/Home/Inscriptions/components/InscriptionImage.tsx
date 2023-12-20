@@ -58,7 +58,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const OrdinalImage = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const InscriptionImage = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     backgroundColor: token.colorBgInput,
     position: 'relative',
@@ -99,4 +99,4 @@ const OrdinalImage = styled(Component)<Props>(({ theme: { token } }: Props) => {
   };
 });
 
-export default OrdinalImage;
+export default InscriptionImage;

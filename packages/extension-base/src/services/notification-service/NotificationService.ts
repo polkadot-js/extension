@@ -46,7 +46,7 @@ export default class NotificationService {
             if (onClick) {
               onClick();
             } else {
-              window.open(link);
+              chrome.tabs.create({ url: link }).catch(console.error);
             }
           }
         });

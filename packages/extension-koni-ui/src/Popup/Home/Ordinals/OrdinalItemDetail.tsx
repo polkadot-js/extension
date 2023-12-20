@@ -174,7 +174,10 @@ const Component: React.FC<Props> = (props: Props) => {
                 width: imageSize
               }}
             >
-              <OrdinalImage properties={nftItem.properties as OrdinalNftProperties} />
+              <OrdinalImage
+                alone={true}
+                properties={nftItem.properties as OrdinalNftProperties}
+              />
             </div>
           </div>
 
@@ -242,8 +245,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 <Field
                   className={'nft_item_detail__id_field'}
                   content={nftItem.id}
-                  key={'NFT ID'}
-                  label={'NFT ID'}
+                  key={'Ordinal ID'}
+                  label={'Ordinal ID'}
                   width={'fit-content'}
                 />
 

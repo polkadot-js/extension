@@ -16,13 +16,25 @@ const parseParamData = (param: SubscanBatchChildParam, event: SubscanEventBaseIt
       const properties: Record<string, { value: any }> = {};
 
       for (const [key, value] of Object.entries(ordinalData)) {
-        properties[key] = { value: value as unknown };
+        const _name = key.charAt(0).toUpperCase() + key.slice(1);
+
+        properties[_name] = { value: value as unknown };
       }
 
       properties['Block number'] = { value: event.extrinsic_index.split('-')[0] };
-      properties.Date = { value: event.block_timestamp };
+      properties.Timestamp = { value: event.block_timestamp };
 
-      const name = [ordinalData.tick, ordinalData.op, ordinalData.p].join('_');
+      const op = ordinalData.op.charAt(0).toUpperCase() + ordinalData.op.slice(1);
+
+      const nameParams = [op];
+
+      if (ordinalData.amt !== undefined) {
+        nameParams.push(ordinalData.amt);
+      }
+
+      nameParams.push(ordinalData.tick);
+
+      const name = nameParams.join(' ');
 
       return {
         chain: chain,

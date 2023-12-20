@@ -69,13 +69,13 @@ export interface OrdinalRemarkData {
 }
 
 export interface OrdinalNftProperties {
-  p: {
+  P: {
     value: string;
   };
-  op: {
+  Op: {
     value: string;
   };
-  tick: {
+  Tick: {
     value: string;
   };
 }

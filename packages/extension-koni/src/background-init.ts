@@ -6,7 +6,7 @@ import { ActionHandler } from '@subwallet/extension-koni/helper/ActionHandler';
 
 import { xglobal } from '@polkadot/x-global';
 
-const actionHandler = ActionHandler.getInstance();
+const actionHandler = ActionHandler.instance;
 
 xglobal.addEventListener('fetch', function (event: FetchEvent) {
   if (event.request.url.endsWith('popup.html')) {
@@ -19,10 +19,6 @@ withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));
 
 chrome.runtime.onConnect.addListener((port): void => {
   actionHandler.handlePort(port);
-});
-
-chrome.runtime.onStartup.addListener(function () {
-  actionHandler.onStartup();
 });
 
 // Open expand page after install

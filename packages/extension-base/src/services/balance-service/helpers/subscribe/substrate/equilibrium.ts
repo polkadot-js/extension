@@ -4,7 +4,7 @@
 import { SignedBalance } from '@equilab/api/genshiro/interfaces';
 import { _AssetType } from '@subwallet/chain-list/types';
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
-import { state } from '@subwallet/extension-base/koni/background/handlers';
+import { SWHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem } from '@subwallet/extension-base/types';
 import BigN from 'bignumber.js';
@@ -21,6 +21,7 @@ type EqBalanceV0 = {
 }
 
 export async function subscribeEquilibriumTokenBalance (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem[]) => void, includeNativeToken?: boolean): Promise<() => void> {
+  const state = SWHandler.instance.state;
   const tokenTypes = includeNativeToken ? [_AssetType.NATIVE, _AssetType.LOCAL] : [_AssetType.LOCAL];
   const tokenMap = state.getAssetByChainAndAsset(chain, tokenTypes);
 
@@ -77,6 +78,7 @@ export async function subscribeEquilibriumTokenBalance (addresses: string[], cha
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function subscribeEqBalanceAccountPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem[]) => void, includeNativeToken?: boolean): Promise<() => void> {
+  const state = SWHandler.instance.state;
   const tokenTypes = includeNativeToken ? [_AssetType.NATIVE, _AssetType.LOCAL] : [_AssetType.LOCAL];
   const tokenMap = state.getAssetByChainAndAsset(chain, tokenTypes);
 

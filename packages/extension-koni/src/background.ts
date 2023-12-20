@@ -4,7 +4,7 @@
 // Runs in the extension background, handling all keyring access
 import '@subwallet/extension-inject/crossenv';
 
-import handlers, { state as koniState, state } from '@subwallet/extension-base/koni/background/handlers';
+import { SWHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import KeyringStore from '@subwallet/extension-base/stores/Keyring';
 import { ActionHandler } from '@subwallet/extension-koni/helper/ActionHandler';
@@ -13,15 +13,14 @@ import keyring from '@subwallet/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 // Set handler
-const actionHandler = ActionHandler.getInstance();
+const actionHandler = ActionHandler.instance;
 
-actionHandler.setPortHandler(handlers);
-actionHandler.setInstallHandler(state.onInstallOrUpdate.bind(state));
-actionHandler.setSleepHandler(state.sleep.bind(state));
-actionHandler.setWakeUpHandler(state.wakeup.bind(state));
+actionHandler.setHandler(SWHandler.instance);
 
-Promise.all([cryptoWaitReady(), actionHandler.waitFirstActiveMessage])
+cryptoWaitReady()
   .then((): void => {
+    const koniState = SWHandler.instance.state;
+
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519', password_store: new KeyringStore() });
 
@@ -29,8 +28,12 @@ Promise.all([cryptoWaitReady(), actionHandler.waitFirstActiveMessage])
       koniState.updateKeyringState();
     });
     koniState.eventService.emit('crypto.ready', true);
-    koniState.init().catch(console.error);
+
+    // Manual Init koniState
+    actionHandler.waitFirstActiveMessage.then(() => {
+      koniState.init().catch(console.error);
+    }).catch(console.error);
   })
   .catch((error): void => {
-    console.error('initialization fail', error);
+    console.error('Initialization fail', error);
   });

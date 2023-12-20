@@ -6,7 +6,7 @@ import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { getEVMBalance } from '@subwallet/extension-base/koni/api/tokens/evm/balance';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
-import { state } from '@subwallet/extension-base/koni/background/handlers';
+import { SWHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem } from '@subwallet/extension-base/types';
@@ -50,7 +50,7 @@ export function subscribeERC20Interval (addresses: string[], chain: string, evmA
     });
   };
 
-  tokenList = state.getAssetByChainAndAsset(chain, [_AssetType.ERC20]);
+  tokenList = SWHandler.instance.state.getAssetByChainAndAsset(chain, [_AssetType.ERC20]);
 
   Object.entries(tokenList).forEach(([slug, tokenInfo]) => {
     erc20ContractMap[slug] = getERC20Contract(chain, _getContractAddressOfToken(tokenInfo), evmApiMap);

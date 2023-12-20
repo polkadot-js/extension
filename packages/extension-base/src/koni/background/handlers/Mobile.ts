@@ -3,7 +3,7 @@
 
 import { ActiveCronAndSubscriptionMap, CronServiceType, MobileData, RequestCronAndSubscriptionAction, RequestInitCronAndSubscription, SubscriptionServiceType } from '@subwallet/extension-base/background/KoniTypes';
 import { MessageTypes, RequestTypes, ResponseType } from '@subwallet/extension-base/background/types';
-import { state } from '@subwallet/extension-base/koni/background/handlers/index';
+import { SWHandler } from '@subwallet/extension-base/koni/background/handlers/index';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { SWStorage } from '@subwallet/extension-base/storage';
 import { isSupportWindow, listMerge } from '@subwallet/extension-base/utils';
@@ -21,7 +21,7 @@ export function isLocalStorageReset (): boolean {
 
 export async function isIndexedDBReset (): Promise<boolean> {
   try {
-    return (await state.dbService.stores.migration.table.count()) < 1;
+    return (await SWHandler.instance.state.dbService.stores.migration.table.count()) < 1;
   } catch (e) {
     return true;
   }

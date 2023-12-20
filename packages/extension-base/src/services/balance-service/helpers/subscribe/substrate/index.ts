@@ -7,7 +7,7 @@ import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/co
 import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
-import { state } from '@subwallet/extension-base/koni/background/handlers';
+import { SWHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { subscribeERC20Interval } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/evm';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -140,6 +140,7 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
 }
 
 function subscribePSP22Balance (addresses: string[], chain: string, api: ApiPromise, callBack: (result: BalanceItem[]) => void) {
+  const state = SWHandler.instance.state;
   let tokenList = {} as Record<string, _ChainAsset>;
   const psp22ContractMap = {} as Record<string, ContractPromise>;
 
@@ -194,6 +195,7 @@ function subscribePSP22Balance (addresses: string[], chain: string, api: ApiProm
 }
 
 async function subscribeTokensAccountsPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem[]) => void, includeNativeToken?: boolean) {
+  const state = SWHandler.instance.state;
   const tokenTypes = includeNativeToken ? [_AssetType.NATIVE, _AssetType.LOCAL] : [_AssetType.LOCAL];
   const tokenMap = state.getAssetByChainAndAsset(chain, tokenTypes);
 
@@ -245,6 +247,7 @@ async function subscribeTokensAccountsPallet (addresses: string[], chain: string
 }
 
 async function subscribeAssetsAccountPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem[]) => void) {
+  const state = SWHandler.instance.state;
   const tokenMap = state.getAssetByChainAndAsset(chain, [_AssetType.LOCAL]);
 
   Object.values(tokenMap).forEach((token) => {
@@ -313,6 +316,7 @@ async function subscribeAssetsAccountPallet (addresses: string[], chain: string,
 
 // eslint-disable-next-line @typescript-eslint/require-await
 async function subscribeOrmlTokensPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem[]) => void): Promise<() => void> {
+  const state = SWHandler.instance.state;
   const tokenTypes = [_AssetType.LOCAL];
   const tokenMap = state.getAssetByChainAndAsset(chain, tokenTypes);
 

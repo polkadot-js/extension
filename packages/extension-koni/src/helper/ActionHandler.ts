@@ -3,32 +3,26 @@
 
 import { MessageTypes, RequestSignatures, TransportRequestMessage } from '@subwallet/extension-base/background/types';
 import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
+import { SWHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 
 import { assert } from '@polkadot/util';
 
-export type HandlerMethod = <TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port, extensionPortName?: string) => void;
+export type HandlerMethod = <TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port) => void;
 
 const SLEEP_TIMEOUT = 60 * 1000;
 
 export class ActionHandler {
-  // Common handlers
-  private waitStartHandler = createPromiseHandler<() => void>();
-  private waitInstallHandler = createPromiseHandler<(details: chrome.runtime.InstalledDetails) => void>();
-  private waitActiveHandler = createPromiseHandler<boolean>();
-
-  // Port handlers
-  private portHandler?: HandlerMethod;
-  private waitPortHandler = createPromiseHandler<HandlerMethod>();
+  private mainHandler?: SWHandler;
+  private waitMainHandler = createPromiseHandler<SWHandler>();
 
   // Lifecycle handlers
   private connectionMap: Record<string, string> = {};
   private firstTrigger = false;
   private waitFirstTrigger = createPromiseHandler<void>();
+  private waitActiveHandler = createPromiseHandler<boolean>();
   public waitFirstActiveMessage = this.waitFirstTrigger.promise;
 
-  private wakeUpHandler?: () => Promise<void>;
-  private sleepHandler?: () => Promise<void>;
   private isActive = false;
   private sleepTimeout?: NodeJS.Timeout;
 
@@ -41,44 +35,18 @@ export class ActionHandler {
   }
 
   constructor () {
-    // Set timeout for all required handlers
-    setTimeout(() => {
-      this.waitPortHandler.reject(new Error('Timeout while waiting for port handler'));
-      this.waitInstallHandler.reject(new Error('Timeout while waiting for install handler'));
-      // this.waitStartHandler.reject(new Error('Timeout while waiting for start handler'));
-    }, 12000);
+    console.log('ActionHandler init');
   }
 
-  public setPortHandler (handler: HandlerMethod): void {
-    this.waitPortHandler.resolve(handler);
-  }
-
-  public setInstallHandler (handler: (details: chrome.runtime.InstalledDetails) => void): void {
-    this.waitInstallHandler.resolve(handler);
+  setHandler (handler: SWHandler): void {
+    this.mainHandler = handler;
+    this.waitMainHandler.resolve(handler);
   }
 
   public onInstalled (details: chrome.runtime.InstalledDetails): void {
-    this.waitInstallHandler.promise.then((handler) => {
-      handler(details);
+    this.waitMainHandler.promise.then((handler) => {
+      handler.state.onInstallOrUpdate(details);
     }).catch(console.error);
-  }
-
-  public setStartHandler (handler: () => void): void {
-    this.waitStartHandler.resolve(handler);
-  }
-
-  public onStartup (): void {
-    this.waitStartHandler.promise.then((handler) => {
-      handler();
-    }).catch(console.error);
-  }
-
-  setWakeUpHandler (handler: () => Promise<void>): void {
-    this.wakeUpHandler = handler;
-  }
-
-  setSleepHandler (handler: () => Promise<void>): void {
-    this.sleepHandler = handler;
   }
 
   private _getPortId (port: chrome.runtime.Port): string {
@@ -87,8 +55,8 @@ export class ActionHandler {
 
   private async _onPortMessage (port: chrome.runtime.Port, data: TransportRequestMessage<keyof RequestSignatures>, portId: string) {
     // message and disconnect handlers
-    if (!this.portHandler) {
-      this.portHandler = await this.waitPortHandler.promise;
+    if (!this.mainHandler) {
+      this.mainHandler = await this.waitMainHandler.promise;
     }
 
     const requireActive = data.message !== 'pub(phishing.redirectIfDenied)';
@@ -108,12 +76,12 @@ export class ActionHandler {
 
       if (!this.isActive) {
         this.isActive = true;
-        this.wakeUpHandler && await this.wakeUpHandler();
+        this.mainHandler && await this.mainHandler.state.wakeup();
         this.waitActiveHandler.resolve(true);
       }
     }
 
-    this.portHandler(data, port);
+    this.mainHandler?.handle(data, port);
   }
 
   private _onPortDisconnect (port: chrome.runtime.Port, portId: string) {
@@ -127,7 +95,7 @@ export class ActionHandler {
           // Reset active status
           this.isActive = false;
           this.waitActiveHandler = createPromiseHandler<boolean>();
-          this.sleepHandler && this.sleepHandler().catch(console.error);
+          this.mainHandler && this.mainHandler.state.sleep().catch(console.error);
         }, SLEEP_TIMEOUT);
       }
     }
@@ -147,13 +115,13 @@ export class ActionHandler {
   }
 
   // Singleton
-  static instance: ActionHandler;
+  static _instance: ActionHandler;
 
-  static getInstance (): ActionHandler {
-    if (!this.instance) {
-      this.instance = new ActionHandler();
+  static get instance (): ActionHandler {
+    if (!this._instance) {
+      this._instance = new ActionHandler();
     }
 
-    return this.instance;
+    return this._instance;
   }
 }

@@ -80,7 +80,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const notify = useNotification();
 
   const TAB_LIST = useMemo(() => {
-    return [t('Tokens'), t('NFTs'), t('Statistics')];
+    return [t('Tokens'), t('NFTs'), t('Ordinals'), t('Statistics')];
   }, [t]);
 
   const handleSelectTab = useCallback((index: number) => {
@@ -89,6 +89,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     } else if (index === 1) {
       navigate('nfts/collections');
     } else if (index === 2) {
+      navigate('ordinals');
+    } else if (index === 3) {
       navigate('statistics');
     }
   }, [navigate]);
@@ -148,6 +150,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
                     {/* fake tabpane to remove error logs */}
                     <div style={{ display: 'none' }}>
+                      <TabPanel></TabPanel>
                       <TabPanel></TabPanel>
                       <TabPanel></TabPanel>
                       <TabPanel></TabPanel>

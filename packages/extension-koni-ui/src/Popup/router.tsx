@@ -64,6 +64,9 @@ const NftCollections = new LazyLoader('NftCollections', () => import('@subwallet
 const NftCollectionDetail = new LazyLoader('NftCollectionDetail', () => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
 const NftImport = new LazyLoader('NftImport', () => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftImport'));
 
+const OrdinalItems = new LazyLoader('OrdinalItems', () => import('@subwallet/extension-koni-ui/Popup/Home/Ordinals/OrdinalItemList'));
+const OrdinalItemDetail = new LazyLoader('OrdinalItemDetail', () => import('@subwallet/extension-koni-ui/Popup/Home/Ordinals/OrdinalItemDetail'));
+
 const History = new LazyLoader('History', () => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = new LazyLoader('Crowdloans', () => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = new LazyLoader('Home', () => import('@subwallet/extension-koni-ui/Popup/Home'));
@@ -187,6 +190,14 @@ export const router = createBrowserRouter([
               NftCollections.generateRouterObject('collections'),
               NftCollectionDetail.generateRouterObject('collection-detail'),
               NftItemDetail.generateRouterObject('item-detail')
+            ]
+          },
+          {
+            path: 'ordinals',
+            element: <NestedOutlet />,
+            children: [
+              OrdinalItems.generateRouterObject(''),
+              OrdinalItemDetail.generateRouterObject('item-detail')
             ]
           },
           Crowdloans.generateRouterObject('crowdloans'),

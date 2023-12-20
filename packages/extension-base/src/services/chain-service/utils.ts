@@ -173,6 +173,12 @@ export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP34) || false;
 }
 
+export const _isSupportOrdinal = (chain: string) => {
+  const chains = ['polkadot'];
+
+  return chains.includes(chain);
+};
+
 export function _getNftTypesSupportedByChain (chainInfo: _ChainInfo): _AssetType[] {
   const result: _AssetType[] = [];
 

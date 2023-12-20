@@ -4,8 +4,40 @@
 import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ORDINAL_COLLECTION, ORDINAL_METHODS } from '@subwallet/extension-base/constants';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
-import { fetchEventRemarkExtrinsic, fetchExtrinsicParams } from '@subwallet/extension-base/koni/api/nft/ordinal_nft/utils';
-import { OrdinalRemarkData } from '@subwallet/extension-base/types';
+import { fetchExtrinsicParams, fetchRemarkEvent } from '@subwallet/extension-base/koni/api/nft/ordinal_nft/utils';
+import { state } from '@subwallet/extension-base/koni/background/handlers';
+import { OrdinalRemarkData, SubscanBatchChild, SubscanBatchChildParam, SubscanEventBaseItemData, SubscanExtrinsicParam } from '@subwallet/extension-base/types';
+
+const parseParamData = (param: SubscanBatchChildParam, event: SubscanEventBaseItemData, chain: string, address: string): NftItem | undefined => {
+  const ordinalData = JSON.parse(param.value) as OrdinalRemarkData;
+
+  if ('p' in ordinalData) {
+    if (ORDINAL_METHODS.includes(ordinalData.p)) {
+      const properties: Record<string, { value: any }> = {};
+
+      for (const [key, value] of Object.entries(ordinalData)) {
+        properties[key] = { value: value as unknown };
+      }
+
+      properties['Block number'] = { value: event.extrinsic_index.split('-')[0] };
+      properties.Date = { value: event.block_timestamp };
+
+      const name = [ordinalData.tick, ordinalData.op, ordinalData.p].join('_');
+
+      return {
+        chain: chain,
+        collectionId: ORDINAL_COLLECTION,
+        id: event.extrinsic_hash,
+        description: JSON.stringify(ordinalData),
+        name,
+        owner: address,
+        properties: properties
+      };
+    }
+  }
+
+  return undefined;
+};
 
 export default class OrdinalNftApi extends BaseNftApi {
   subscanChain: string;
@@ -16,46 +48,48 @@ export default class OrdinalNftApi extends BaseNftApi {
   }
 
   public async handleNft (address: string, handleNftParams: HandleNftParams) {
-    const extrinsics = await fetchEventRemarkExtrinsic(this.subscanChain, address);
+    const events: SubscanEventBaseItemData[] = await state.subscanService.addRequest(async () => {
+      return await fetchRemarkEvent(this.subscanChain, address);
+    });
 
-    if (extrinsics && extrinsics.length) {
-      const extrinsicIds = extrinsics.map((data) => data.extrinsic_index);
-      const extrinsicParams = await fetchExtrinsicParams(this.subscanChain, extrinsicIds);
+    if (events && events.length) {
+      const extrinsicIds = events.map((data) => data.extrinsic_index);
+      const extrinsicParams: SubscanExtrinsicParam[] = await state.subscanService.addRequest(async () => {
+        return await fetchExtrinsicParams(this.subscanChain, extrinsicIds);
+      });
       const items: NftItem[] = [];
 
       for (const data of extrinsicParams) {
         const { extrinsic_index: extrinsicIndex, params } = data;
 
-        const extrinsic = extrinsics.find((item) => item.extrinsic_index === extrinsicIndex);
+        const event = events.find((item) => item.extrinsic_index === extrinsicIndex);
 
-        if (params.length === 1 && extrinsic) {
+        if (params.length === 1 && event) {
           const [param] = params;
 
           if (param.name === 'remark') {
-            const ordinalData = JSON.parse(param.value) as OrdinalRemarkData;
+            const childParam: SubscanBatchChildParam = {
+              name: param.name,
+              type: param.type,
+              value: param.value as string
+            };
+            const item = parseParamData(childParam, event, this.chain, address);
 
-            if ('p' in ordinalData) {
-              if (ORDINAL_METHODS.includes(ordinalData.p)) {
-                const properties: Record<string, { value: any }> = {};
+            if (item) {
+              items.push(item);
+            }
+          } else if (param.name === 'calls') {
+            const children = param.value as SubscanBatchChild[];
 
-                for (const [key, value] of Object.entries(ordinalData)) {
-                  properties[key] = { value: value as unknown };
+            for (const child of children) {
+              if (child.call_module === 'System' && child.call_name === 'remark_with_event') {
+                for (const childParam of child.params) {
+                  const item = parseParamData(childParam, event, this.chain, address);
+
+                  if (item) {
+                    items.push(item);
+                  }
                 }
-
-                properties['Block number'] = { value: extrinsic.block_num };
-                properties.Date = { value: extrinsic.block_timestamp };
-
-                const name = [ordinalData.tick, ordinalData.op, ordinalData.p].join('_');
-
-                items.push({
-                  chain: this.chain,
-                  collectionId: ORDINAL_COLLECTION,
-                  id: extrinsic.extrinsic_hash,
-                  description: JSON.stringify(ordinalData),
-                  name,
-                  owner: address,
-                  properties: properties
-                });
               }
             }
           }

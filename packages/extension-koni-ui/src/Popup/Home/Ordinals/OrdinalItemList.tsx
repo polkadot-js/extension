@@ -12,9 +12,9 @@ import { useSelector, useSetCurrentPage, useTranslation } from '@subwallet/exten
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { IOrdinalItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Ordinals/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Icon, SwList } from '@subwallet/react-ui';
+import { SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Image, Trash } from 'phosphor-react';
+import { Image } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,15 +22,6 @@ import styled from 'styled-components';
 import { OrdinalGalleryWrapper } from './components/OrdinalGalleryWrapper';
 
 type Props = ThemeProps;
-
-const subHeaderRightButton = (
-  <Icon
-    customSize={'24px'}
-    phosphorIcon={Trash}
-    type='phosphor'
-    weight={'light'}
-  />
-);
 
 const Component: React.FC<Props> = (props: Props) => {
   useSetCurrentPage('/home/ordinals');
@@ -60,7 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [navigate]);
 
   const renderNft = useCallback((nftItem: NftItem) => {
-    const routingParams = { nftItemId: nftItem.id } as IOrdinalItemDetail;
+    const routingParams = { nftItem } as IOrdinalItemDetail;
 
     return (
       <OrdinalGalleryWrapper
@@ -89,41 +80,12 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return (
       <EmptyList
-        emptyMessage={t('Your NFT collectible will appear here!')}
-        emptyTitle={t('No NFT collectible')}
+        emptyMessage={t('Your ordinals will appear here')}
+        emptyTitle={t('No ordinal found')}
         phosphorIcon={Image}
       />
     );
   }, [isWebUI, t]);
-
-  // const handleDeleteNftCollection = useCallback(() => {
-  //   handleSimpleConfirmModal().then(() => {
-  //     if (collectionInfo.originAsset) {
-  //       deleteCustomAssets(collectionInfo.originAsset)
-  //         .then((result) => {
-  //           if (result) {
-  //             goBack();
-  //             showNotification({
-  //               message: t('Deleted NFT collection successfully')
-  //             });
-  //           } else {
-  //             showNotification({
-  //               message: t('Deleted NFT collection unsuccessfully')
-  //             });
-  //           }
-  //         })
-  //         .catch(console.log);
-  //     }
-  //   }).catch(console.log);
-  // }, [collectionInfo.originAsset, goBack, handleSimpleConfirmModal, showNotification, t]);
-
-  const subHeaderButton: ButtonProps[] = [
-    {
-      icon: subHeaderRightButton,
-      // onClick: handleDeleteNftCollection,
-      disabled: false
-    }
-  ];
 
   useEffect(() => {
     if (outletContext) {
@@ -143,7 +105,6 @@ const Component: React.FC<Props> = (props: Props) => {
           showSubHeader: true,
           subHeaderBackground: 'transparent',
           subHeaderCenter: false,
-          subHeaderIcons: subHeaderButton,
           subHeaderPaddingVertical: true,
           title: t('Ordinals')
         }}
@@ -151,36 +112,17 @@ const Component: React.FC<Props> = (props: Props) => {
         {isWebUI
           ? (
             <>
-              {!!nftList.length && (
-                <div className={'nft-item-list-wrapper'}>
-                  <SwList
-                    className={CN('nft_item_list')}
-                    displayGrid={true}
-                    gridGap={'14px'}
-                    list={nftList}
-                    minColumnWidth={'160px'}
-                    renderItem={renderNft}
-                    renderOnScroll={true}
-                    renderWhenEmpty={emptyNft}
-                  />
-                </div>
-              )}
-
-              <div className={'__delete-nft-button-wrapper'}>
-                <Button
-                  block={!isWebUI}
-                  className={'__delete-nft-button'}
-                  disabled={true}
-                  icon={(
-                    <Icon
-                      phosphorIcon={Trash}
-                      size='xs'
-                    />
-                  )}
-                  type='ghost'
-                >
-                  {t('Delete this collectible')}
-                </Button>
+              <div className={'nft-item-list-wrapper'}>
+                <SwList
+                  className={CN('nft_item_list')}
+                  displayGrid={true}
+                  gridGap={'14px'}
+                  list={nftList}
+                  minColumnWidth={'160px'}
+                  renderItem={renderNft}
+                  renderOnScroll={true}
+                  renderWhenEmpty={emptyNft}
+                />
               </div>
             </>
           )

@@ -51,16 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { token } = useTheme() as Theme;
   const location = useLocation();
   const navigate = useNavigate();
-  const [{ nftItemId }] = useState((location.state as IOrdinalItemDetail));
-
-  const outletContext: {
-    searchInput: string,
-    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>,
-    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
-    setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>
-  } = useOutletContext();
-
-  const { setDetailTitle, setShowSearchInput } = outletContext;
+  const [{ nftItem: { id: nftItemId } }] = useState((location.state as IOrdinalItemDetail));
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
@@ -153,17 +144,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     if (!nftItem) {
-      navigate('/home/nfts/collections');
+      navigate('/home/ordinals');
     }
   }, [navigate, nftItem]);
-
-  useEffect(() => {
-    setShowSearchInput?.(false);
-
-    if (nftItem) {
-      setDetailTitle?.(nftItem.name || nftItem.id);
-    }
-  }, [nftItem, setDetailTitle, setShowSearchInput]);
 
   if (!nftItem || !originChainInfo) {
     return null;
@@ -316,22 +299,58 @@ const Component: React.FC<Props> = (props: Props) => {
 };
 
 function WrapperComponent (props: WrapperProps): React.ReactElement<WrapperProps> {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [itemDetail] = useState((location.state as IOrdinalItemDetail));
+
+  const nftItem = itemDetail?.nftItem;
+  const originChainInfo = useGetChainInfo(nftItem?.chain || '');
+
   const dataContext = useContext(DataContext);
+  const outletContext: {
+    setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>,
+    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
+  } = useOutletContext();
+
+  const setDetailTitle = outletContext?.setDetailTitle;
+  const setShowSearchInput = outletContext?.setShowSearchInput;
+
+  const isEmptyInfo = !nftItem || !originChainInfo;
 
   const waitReady = useMemo(() => {
     return new Promise((resolve, reject) => {
       dataContext.awaitStores(['nft', 'accountState', 'chainStore']).then(() => {
-        resolve(true);
+        if (!isEmptyInfo) {
+          resolve(true);
+        }
       }).catch(reject);
     });
-  }, [dataContext]);
+  }, [dataContext, isEmptyInfo]);
+
+  useEffect(() => {
+    if (!nftItem) {
+      navigate('/home/ordinals');
+    }
+  }, [navigate, nftItem]);
+
+  useEffect(() => {
+    setShowSearchInput?.(false);
+
+    if (nftItem) {
+      setDetailTitle?.(nftItem.name || nftItem.id);
+    }
+  }, [nftItem, setDetailTitle, setShowSearchInput]);
 
   return (
     <PageWrapper
       className={`${props.className || ''}`}
       resolve={waitReady}
     >
-      <Component />
+      {
+        !isEmptyInfo && (
+          <Component />
+        )
+      }
     </PageWrapper>
   );
 }

@@ -1,4 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-export interface IOrdinalItemDetail { nftItemId: string }
+import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
+
+export interface IOrdinalItemDetail {
+  nftItem: NftItem
+}

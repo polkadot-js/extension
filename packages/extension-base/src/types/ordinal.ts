@@ -7,45 +7,51 @@ export interface OrdinalItem {
   data: Record<string, any>;
 }
 
-export interface SubscanExtrinsicBaseItemData {
+export interface SubscanEventBaseItemData {
   id: number;
-  block_num: number;
   block_timestamp: number;
   extrinsic_index: string;
-  call_module_function: string;
-  call_module: string;
-  nonce: number;
   extrinsic_hash: string;
-  success: boolean;
-  fee: string;
-  fee_used: string;
-  tip: string;
   finalized: boolean;
-  account_display: {
-    address: string;
-  }
+  event_index: string;
+  phase: number,
+  module_id: string;
+  event_id: string;
 }
 
-export interface SubscanExtrinsicListResponse {
+export interface SubscanEventListResponse {
   code: number,
   message: string,
   generated_at: number,
   data: {
     count: number,
-    extrinsics: SubscanExtrinsicBaseItemData[]
+    events: SubscanEventBaseItemData[]
   }
 }
 
-export interface SubscanExtrinsicDetail {
+export interface SubscanBatchChildParam {
+  name: string;
+  type: string;
+  value: string;
+}
+
+export interface SubscanBatchChild {
+  call_index: string;
+  call_module: string;
+  call_name: string;
+  params: SubscanBatchChildParam[];
+}
+
+export interface SubscanExtrinsicParamDetail {
   name: string;
   type: string;
   type_name: string;
-  value: string;
+  value: string | SubscanBatchChild[];
 }
 
 export interface SubscanExtrinsicParam {
   extrinsic_index: string,
-  params: SubscanExtrinsicDetail[]
+  params: SubscanExtrinsicParamDetail[]
 }
 
 export interface SubscanExtrinsicParamResponse {

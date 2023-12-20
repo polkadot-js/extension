@@ -45,7 +45,7 @@ export class SubscanService {
     });
   }
 
-  private addRequest<T> (run: SubscanRequest<T>['run']) {
+  public addRequest<T> (run: SubscanRequest<T>['run']) {
     const newId = this.getId();
 
     return new Promise<T>((resolve, reject) => {

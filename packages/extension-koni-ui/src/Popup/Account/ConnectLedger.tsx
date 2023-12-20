@@ -53,7 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [firstStep, setFirstStep] = useState(true);
 
   const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
-    name: network.networkName,
+    name: !network.isEthereum ? network.networkName.replace(' network', '') : network.networkName,
     slug: network.slug
   })), [supportedLedger]);
 
@@ -247,7 +247,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <div className={CN('container')}>
           <div className='sub-title'>
-            {t('Connect and unlock your Ledger, then open the selected network on your Ledger.')}
+            {t('Connect and unlock your Ledger, then open the selected network on your Ledger')}
           </div>
           {
             firstStep && (

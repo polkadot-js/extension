@@ -233,7 +233,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <EmptyValidator
         isDataEmpty={items.length === 0}
         onClickReload={setForceFetchValidator}
-        validatorTitle={t(getValidatorLabel(chain).toLowerCase())}
+        validatorTitle={t(handleValidatorLabel)}
       />
     );
   }, [chain, items.length, setForceFetchValidator, t]);
@@ -301,12 +301,18 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     }
   }, [isActive, onResetFilter]);
 
+  const handleValidatorLabel = useMemo(() => {
+    const label = getValidatorLabel(chain);
+
+    return label !== 'dApp' ? label.toLowerCase() : label;
+  }, [chain]);
+
   return (
     <>
       <SelectValidatorInput
         chain={chain}
         disabled={!chain || !from}
-        label={t('Select') + ' ' + t(getValidatorLabel(chain).toLowerCase())}
+        label={t('Select') + ' ' + t(handleValidatorLabel)}
         loading={loading}
         onClick={onActiveValidatorSelector}
         value={value || ''}
@@ -346,7 +352,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             activeModal(SORTING_MODAL_ID);
           }
         }}
-        title={t('Select') + ' ' + t(getValidatorLabel(chain).toLowerCase())}
+        title={t('Select') + ' ' + t(handleValidatorLabel)}
       >
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
@@ -359,7 +365,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
-          searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain).toLowerCase()}`)}
+          searchPlaceholder={t<string>(`Search ${handleValidatorLabel}`)}
           // showActionBtn
         />
       </SwModal>

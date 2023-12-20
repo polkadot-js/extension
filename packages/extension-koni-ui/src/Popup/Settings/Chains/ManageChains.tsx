@@ -221,7 +221,7 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-network-item-name': {
       overflow: 'hidden',
-      textWrap: 'nowrap',
+      'white-space': 'nowrap',
       textOverflow: 'ellipsis',
       paddingRight: token.paddingXS
     }

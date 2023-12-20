@@ -206,9 +206,10 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
       overflow: 'hidden'
     },
 
-    '.ant-sw-header-container-padding-vertical': {
-      paddingBottom: token.padding,
-      paddingTop: token.paddingXS
+    '.ant-sw-sub-header-container': {
+      paddingBottom: token.paddingXS,
+      paddingTop: token.paddingXS,
+      minHeight: 64
     },
 
     '.empty-list': {

@@ -15,7 +15,7 @@
   "sideEffects": false,
   "type": "module",
   "version": "1.1.25",
-  "buildNumber": "1125006",
+  "buildNumber": "1125007",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
     "@subwallet/extension-base": "^1.1.25-1",

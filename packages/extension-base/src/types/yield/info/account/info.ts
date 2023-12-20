@@ -12,20 +12,14 @@ export interface YieldAssetBalance {
 }
 
 /**
- * @interface YieldPositionInfo
+ * @interface BaseYieldPositionInfo
  * @prop {string} address - Account address
  * @prop {string} chain - Chain's slug
  * @prop {YieldPoolGroup} group - Pool's group
  * @prop {string} slug - Pool's slug
  * @prop {YieldPoolType} type - Pool's type
- * @prop {string} activeStake - Active stake of the account
- * @prop {YieldAssetBalance[]} balance - List balance related with stake
- * @prop {boolean} [isBondedBefore] - Is the account bonded in pool before?
- * @prop {NominationInfo[]} nominations - List nominations account joined - use for nomination pool and native staking
- * @prop {EarningStatus} status - Earning status of the account
- * @prop {UnstakingInfo[]} unstakings - List unstake request of the account - use for nomination pool and native staking
  * */
-export interface YieldPositionInfo {
+export interface BaseYieldPositionInfo {
   /* Base info */
 
   /** Account address */
@@ -38,17 +32,38 @@ export interface YieldPositionInfo {
   slug: string;
   /** Pool's type */
   type: YieldPoolType;
+  /** Total stake of the account */
 
   /* Base info */
+}
 
+/**
+ * @interface AbstractYieldPositionInfo
+ * @prop {string} address - Account address
+ * @prop {string} chain - Chain's slug
+ * @prop {YieldPoolGroup} group - Pool's group
+ * @prop {string} slug - Pool's slug
+ * @prop {YieldPoolType} type - Pool's type
+ * @prop {string} totalStake - Total stake of the account
+ * @prop {string} activeStake - Active stake of the account
+ * @prop {string} unstakeBalance - Unstaking balance of the account
+ * @prop {YieldAssetBalance[]} balance - List balance related with stake
+ * @prop {boolean} isBondedBefore - Is the account bonded in pool before?
+ * @prop {NominationInfo[]} nominations - List nominations account joined - use for nomination pool and native staking
+ * @prop {EarningStatus} status - Earning status of the account
+ * @prop {UnstakingInfo[]} unstakings - List unstake request of the account - use for nomination pool and native staking
+ * */
+export interface AbstractYieldPositionInfo extends BaseYieldPositionInfo {
   /* Special info */
 
+  /** Total stake of the account */
+  totalStake: string;
   /** Active stake of the account */
   activeStake: string;
-  /** List balance related with stake */
-  balance: YieldAssetBalance[]; // TODO: Must change
+  /** Unstaking balance of the account */
+  unstakeBalance: string;
   /** Is the account bonded in pool before? */
-  isBondedBefore?: boolean;
+  isBondedBefore: boolean;
   /** List nominations account joined - use for nomination pool and native staking */
   nominations: NominationInfo[];
   /** Earning status of the account */
@@ -58,3 +73,59 @@ export interface YieldPositionInfo {
 
   /* Special info */
 }
+
+/**
+ * @interface SpecialYieldPositionInfo
+ * @extends AbstractYieldPositionInfo
+ * @prop {string} rootAsset - Input token - Root token before stake and after unstake (slug)
+ * */
+export interface SpecialYieldPositionInfo extends AbstractYieldPositionInfo {
+  type: YieldPoolType.LIQUID_STAKING | YieldPoolType.LENDING;
+  /** @description
+   * <p>Derivative token - Token got after stake (slug)</p>
+   * <p>To detect exchange rate</p>
+   * <p>Exchange rate = root token amount / balance token amount</p>
+   * */
+  derivativeToken: string;
+}
+
+/**
+ * @interface LiquidYieldPositionInfo
+ * @extends SpecialYieldPositionInfo
+ * @prop {YieldPoolType.LIQUID_STAKING} type - Pool's type
+ * */
+export interface LiquidYieldPositionInfo extends SpecialYieldPositionInfo {
+  type: YieldPoolType.LIQUID_STAKING;
+}
+
+/**
+ * @interface LendingYieldPositionInfo
+ * @extends SpecialYieldPositionInfo
+ * @prop {YieldPoolType.LENDING} type - Pool's type
+ * */
+export interface LendingYieldPositionInfo extends SpecialYieldPositionInfo {
+  type: YieldPoolType.LENDING;
+}
+
+/**
+ * @interface NominationYieldPositionInfo
+ * @extends AbstractYieldPositionInfo
+ * @prop {YieldPoolType.NOMINATION_POOL} type - Pool's type
+ * */
+export interface NominationYieldPositionInfo extends AbstractYieldPositionInfo {
+  type: YieldPoolType.NOMINATION_POOL;
+}
+
+/**
+ * @interface NativeYieldPositionInfo
+ * @extends AbstractYieldPositionInfo
+ * @prop {YieldPoolType.NATIVE_STAKING} type - Pool's type
+ * */
+export interface NativeYieldPositionInfo extends AbstractYieldPositionInfo {
+  type: YieldPoolType.NATIVE_STAKING;
+}
+
+/**
+ * Info of yield pool
+ * */
+export type YieldPositionInfo = NativeYieldPositionInfo | NominationYieldPositionInfo | LiquidYieldPositionInfo | LendingYieldPositionInfo;

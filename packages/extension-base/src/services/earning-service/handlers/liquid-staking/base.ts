@@ -4,7 +4,7 @@
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { convertDerivativeToOriginToken } from '@subwallet/extension-base/koni/api/yield/helper/utils';
-import { YieldPoolType } from '@subwallet/extension-base/types';
+import { SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 
 import BaseSpecialStakingPoolHandler from '../special';
 
@@ -27,7 +27,7 @@ export default abstract class BaseLiquidStakingPoolHandler extends BaseSpecialSt
       return Promise.reject(new TransactionError(BasicTxErrorType.INVALID_PARAMS));
     }
 
-    const formattedMinAmount = convertDerivativeToOriginToken(amount, poolInfo, derivativeTokenInfo, originTokenInfo);
+    const formattedMinAmount = convertDerivativeToOriginToken(amount, poolInfo as SpecialYieldPoolInfo, derivativeTokenInfo, originTokenInfo);
 
     return Math.floor(this.minAmountPercent * formattedMinAmount);
   }

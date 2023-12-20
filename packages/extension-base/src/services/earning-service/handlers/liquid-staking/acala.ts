@@ -5,7 +5,7 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPoolGroup, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import fetch from 'cross-fetch';
 
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -94,9 +94,11 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     const totalStakingBonded = new BN(_totalStakingBonded.toString());
 
     return {
-      ...this.extraInfo,
+      ...this.defaultInfo,
+      description: this.description,
       type: this.type,
       metadata: {
+        ...this.baseMetadata,
         isAvailable: true,
         allowCancelUnstaking: false,
         assetEarning: [
@@ -142,20 +144,19 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
       for (let i = 0; i < balances.length; i++) {
         const balanceItem = balances[i];
         const address = useAddresses[i];
-        const activeBalance = balanceItem.free || BN_ZERO;
+        const bnTotalBalance = balanceItem.free || BN_ZERO;
+        const totalBalance = bnTotalBalance.toString();
 
         const result: YieldPositionInfo = {
           ...this.defaultInfo,
-          type: YieldPoolType.LIQUID_STAKING,
+          type: this.type,
           address,
-          balance: [
-            {
-              slug: derivativeTokenSlug, // token slug
-              activeBalance: activeBalance.toString()
-            }
-          ],
+          totalStake: totalBalance,
+          activeStake: totalBalance,
+          unstakeBalance: '0',
           status: EarningStatus.EARNING_REWARD,
-          activeStake: activeBalance.toString(),
+          derivativeToken: derivativeTokenSlug,
+          isBondedBefore: bnTotalBalance.gt(BN_ZERO),
           nominations: [],
           unstakings: []
         };

@@ -9,7 +9,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BlockHeader, EarningStatus, NativeYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, BlockHeader, EarningStatus, NativeYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -54,7 +54,6 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
   async subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
-    const chainInfo = this.chainInfo;
     const nativeToken = this.nativeToken;
     const defaultData = this.defaultInfo;
     const substrateApi = await this.substrateApi.isReady;
@@ -93,16 +92,10 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           minJoinPool: minDelegatorStake,
           farmerCount: delegatorStorages.length, // One delegator (farmer) - One collator (candidate) - on storage
           era: round,
-          assetEarning: [
-            {
-              slug: _getChainNativeTokenSlug(chainInfo)
-            }
-          ],
           tvl: stakeInfo.delegators, // TODO recheck
           totalApy: undefined, // TODO recheck
           unstakingPeriod,
-          allowCancelUnstaking: true,
-          minWithdrawal: '0'
+          allowCancelUnstaking: true
         }
       };
 
@@ -119,12 +112,13 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
   /* Subscribe pool position */
 
-  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, delegatorState: ParachainStakingStakeOption, unstakingInfo: Record<string, number>): Promise<Pick<YieldPositionInfo, 'activeStake' | 'balance' | 'isBondedBefore' | 'nominations' | 'status' | 'unstakings'>> {
+  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, delegatorState: ParachainStakingStakeOption, unstakingInfo: Record<string, number>): Promise<Omit<YieldPositionInfo, keyof BaseYieldPositionInfo>> {
     const nominationList: NominationInfo[] = [];
     const unstakingList: UnstakingInfo[] = [];
     const minDelegatorStake = substrateApi.api.consts.parachainStaking.minDelegatorStake.toString();
 
     let activeStake = '0';
+    let unstakingBalance = '0';
 
     if (delegatorState) { // delegatorState can be null while unstaking all
       const [identity] = await parseIdentity(substrateApi, delegatorState.owner);
@@ -166,6 +160,8 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
       const remainingBlock = parseInt(nearestUnstakingBlock) - currentBlockNumber;
       const waitingTime = remainingBlock * blockDuration;
 
+      unstakingBalance = nearestUnstakingAmount.toString();
+
       unstakingList.push({
         chain: chainInfo.slug,
         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
@@ -175,16 +171,15 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
       });
     }
 
+    const totalBalance = new BN(activeStake).add(new BN(unstakingBalance));
     const stakingStatus = getEarningStatusByNominations(new BN(activeStake), nominationList);
 
     return {
       status: stakingStatus,
-      balance: [{
-        slug: this.nativeToken.slug,
-        activeBalance: activeStake
-      }],
-      isBondedBefore: true,
+      totalStake: totalBalance.toString(),
       activeStake: activeStake,
+      unstakeBalance: unstakingBalance,
+      isBondedBefore: true,
       nominations: nominationList,
       unstakings: unstakingList
     };
@@ -193,7 +188,6 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
   async subscribePoolPosition (useAddresses: string[], resultCallback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const substrateApi = await this.substrateApi.isReady;
-    const nativeToken = this.nativeToken;
     const defaultInfo = this.defaultInfo;
     const chainInfo = this.chainInfo;
 
@@ -218,14 +212,11 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
               ...defaultInfo,
               type: this.type,
               address: owner,
-              balance: [
-                {
-                  slug: nativeToken.slug,
-                  activeBalance: '0'
-                }
-              ],
-              status: EarningStatus.NOT_STAKING,
+              totalStake: '0',
               activeStake: '0',
+              unstakeBalance: '0',
+              status: EarningStatus.NOT_STAKING,
+              isBondedBefore: false,
               nominations: [],
               unstakings: []
             });

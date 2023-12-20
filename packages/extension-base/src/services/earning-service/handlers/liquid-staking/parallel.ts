@@ -6,7 +6,7 @@ import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/s
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TransactionData, YieldPoolGroup, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -83,9 +83,11 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
     const apy = (exchangeRate / beginExchangeRate) ** (365 * 24 * 60 * 60000 / (currentTimestamp - beginTimestamp)) - 1;
 
     return {
-      ...this.extraInfo,
+      ...this.defaultInfo,
+      description: this.description,
       type: this.type,
       metadata: {
+        ...this.baseMetadata,
         isAvailable: true,
         allowCancelUnstaking: false,
         assetEarning: [
@@ -135,20 +137,19 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
 
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
-        const addressBalance = bdata && bdata.balance ? new BN(String(bdata?.balance).replaceAll(',', '') || '0') : BN_ZERO;
+        const bnTotalBalance = bdata && bdata.balance ? new BN(String(bdata?.balance).replaceAll(',', '') || '0') : BN_ZERO;
+        const totalBalance = bnTotalBalance.toString();
 
         const result: YieldPositionInfo = {
           ...this.defaultInfo,
-          type: YieldPoolType.LIQUID_STAKING,
+          type: this.type,
           address,
-          balance: [
-            {
-              slug: derivativeTokenSlug, // token slug
-              activeBalance: addressBalance.toString()
-            }
-          ],
+          totalStake: totalBalance,
+          activeStake: totalBalance,
+          unstakeBalance: '0',
           status: EarningStatus.EARNING_REWARD,
-          activeStake: addressBalance.toString(),
+          derivativeToken: derivativeTokenSlug,
+          isBondedBefore: bnTotalBalance.gt(BN_ZERO),
           nominations: [],
           unstakings: []
         };

@@ -554,8 +554,8 @@ export default class TransactionService {
         const data = parseTransactionData<ExtrinsicType.REDEEM_QDOT>(transaction.data);
         const yieldPoolInfo = data.yieldPoolInfo as SpecialYieldPoolInfo;
 
-        if (yieldPoolInfo.derivativeAssets) {
-          const inputTokenSlug = yieldPoolInfo.inputAsset;
+        if (yieldPoolInfo.metadata.derivativeAssets) {
+          const inputTokenSlug = yieldPoolInfo.metadata.inputAsset;
           const inputTokenInfo = this.state.chainService.getAssetBySlug(inputTokenSlug);
 
           historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
@@ -574,8 +574,8 @@ export default class TransactionService {
         const data = parseTransactionData<ExtrinsicType.REDEEM_VDOT>(transaction.data);
         const yieldPoolInfo = data.yieldPoolInfo as SpecialYieldPoolInfo;
 
-        if (yieldPoolInfo.derivativeAssets) {
-          const derivativeTokenSlug = yieldPoolInfo.derivativeAssets[0];
+        if (yieldPoolInfo.metadata.derivativeAssets) {
+          const derivativeTokenSlug = yieldPoolInfo.metadata.derivativeAssets[0];
           const derivativeTokenInfo = this.state.chainService.getAssetBySlug(derivativeTokenSlug);
           const chainInfo = this.state.chainService.getChainInfoByKey(data.yieldPoolInfo.chain);
 

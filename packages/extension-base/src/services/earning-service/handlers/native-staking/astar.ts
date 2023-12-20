@@ -8,7 +8,7 @@ import { getEarningStatusByNominations } from '@subwallet/extension-base/koni/ap
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, isUrl, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -29,7 +29,6 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
   async subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
-    const chainInfo = this.chainInfo;
     const nativeToken = this.nativeToken;
     const defaultData = this.defaultInfo;
 
@@ -87,17 +86,10 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
           minJoinPool: minDelegatorStake,
           farmerCount: 0, // TODO recheck
           era: parseInt(era),
-          assetEarning: [
-            {
-              slug: _getChainNativeTokenSlug(chainInfo),
-              apy: aprInfo !== null ? aprInfo as number : undefined
-            }
-          ],
           tvl: undefined, // TODO recheck
           totalApy: aprInfo !== null ? aprInfo as number : undefined, // TODO recheck
           unstakingPeriod,
-          allowCancelUnstaking: false,
-          minWithdrawal: '0'
+          allowCancelUnstaking: false
         }
       };
 
@@ -114,7 +106,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
   /* Subscribe pool position */
 
-  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletDappsStakingAccountLedger): Promise<Pick<YieldPositionInfo, 'activeStake' | 'balance' | 'isBondedBefore' | 'nominations' | 'status' | 'unstakings'>> {
+  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletDappsStakingAccountLedger): Promise<Omit<YieldPositionInfo, keyof BaseYieldPositionInfo>> {
     const nominationList: NominationInfo[] = [];
     const unstakingList: UnstakingInfo[] = [];
 
@@ -195,11 +187,9 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
     if (nominationList.length === 0 && unstakingList.length === 0) {
       return {
+        totalStake: '0',
+        unstakeBalance: '0',
         status: EarningStatus.NOT_STAKING,
-        balance: [{
-          slug: this.nativeToken.slug,
-          activeBalance: '0'
-        }],
         isBondedBefore: false,
         activeStake: '0',
         nominations: [],
@@ -209,15 +199,18 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
     const stakingStatus = getEarningStatusByNominations(bnTotalActiveStake, nominationList);
     const activeStake = bnTotalActiveStake.toString();
+    const unstakeBalance = unstakingList.reduce((old, currentValue) => {
+      return old.add(new BN(currentValue.claimable));
+    }, BN_ZERO);
+
+    const totalStake = unstakeBalance.add(bnTotalActiveStake);
 
     return {
       status: stakingStatus,
-      balance: [{
-        slug: this.nativeToken.slug,
-        activeBalance: activeStake
-      }],
-      isBondedBefore: true,
+      totalStake: totalStake.toString(),
       activeStake: activeStake,
+      unstakeBalance: unstakeBalance.toString(),
+      isBondedBefore: totalStake.gt(BN_ZERO),
       nominations: nominationList,
       unstakings: unstakingList
     };
@@ -226,7 +219,6 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
   async subscribePoolPosition (useAddresses: string[], resultCallback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const substrateApi = await this.substrateApi.isReady;
-    const nativeToken = this.nativeToken;
     const defaultInfo = this.defaultInfo;
     const chainInfo = this.chainInfo;
 
@@ -257,14 +249,11 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
               ...defaultInfo,
               type: this.type,
               address: owner,
-              balance: [
-                {
-                  slug: nativeToken.slug,
-                  activeBalance: '0'
-                }
-              ],
-              status: EarningStatus.NOT_STAKING,
+              totalStake: '0',
               activeStake: '0',
+              unstakeBalance: '0',
+              isBondedBefore: false,
+              status: EarningStatus.NOT_STAKING,
               nominations: [],
               unstakings: []
             });

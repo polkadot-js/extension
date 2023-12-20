@@ -9,7 +9,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { CollatorExtraInfo, EarningStatus, NativeYieldPoolInfo, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, CollatorExtraInfo, EarningStatus, NativeYieldPoolInfo, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -25,7 +25,6 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
   async subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const chainApi = this.substrateApi;
-    const chainInfo = this.chainInfo;
     const nativeToken = this.nativeToken;
     const defaultData = this.defaultInfo;
 
@@ -88,17 +87,11 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
           minJoinPool: minStake.toString(),
           farmerCount: 0, // TODO recheck
           era: round,
-          assetEarning: [
-            {
-              slug: _getChainNativeTokenSlug(chainInfo)
-            }
-          ],
           totalApy: undefined, // not have
           tvl: totalStake.toString(),
           unstakingPeriod: unstakingPeriod,
           allowCancelUnstaking: true,
-          inflation,
-          minWithdrawal: '0'
+          inflation
         }
       };
 
@@ -115,11 +108,13 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
 
   /* Subscribe pool position */
 
-  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, delegatorState: PalletParachainStakingDelegator): Promise<Pick<YieldPositionInfo, 'activeStake' | 'balance' | 'isBondedBefore' | 'nominations' | 'status' | 'unstakings'>> {
+  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, delegatorState: PalletParachainStakingDelegator): Promise<Omit<YieldPositionInfo, keyof BaseYieldPositionInfo>> {
     const nominationList: NominationInfo[] = [];
     const unstakingMap: Record<string, UnstakingInfo> = {};
 
     let bnTotalActiveStake = BN_ZERO;
+    let bnTotalStake = BN_ZERO;
+    let bnTotalUnstaking = BN_ZERO;
 
     const _roundInfo = await substrateApi.api.query.parachainStaking.round();
     const roundInfo = _roundInfo.toPrimitive() as Record<string, number>;
@@ -164,7 +159,6 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
 
       const bnStake = new BN(delegation.amount);
       const bnUnstakeBalance = unstakingMap[delegation.owner] ? new BN(unstakingMap[delegation.owner].claimable) : BN_ZERO;
-
       const bnActiveStake = bnStake.sub(bnUnstakeBalance);
 
       if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegation))) {
@@ -172,6 +166,8 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
       }
 
       bnTotalActiveStake = bnTotalActiveStake.add(bnActiveStake);
+      bnTotalStake = bnTotalStake.add(bnStake);
+      bnTotalUnstaking = bnTotalUnstaking.add(bnUnstakeBalance);
 
       nominationList.push({
         chain: chainInfo.slug,
@@ -193,16 +189,16 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
 
     const stakingStatus = getEarningStatusByNominations(bnTotalActiveStake, nominationList);
 
+    const totalStake = bnTotalStake.toString();
     const activeStake = bnTotalActiveStake.toString();
+    const unstakingBalance = bnTotalUnstaking.toString();
 
     return {
       status: stakingStatus,
-      balance: [{
-        slug: this.nativeToken.slug,
-        activeBalance: activeStake
-      }],
-      isBondedBefore: !!nominationList.length,
+      totalStake,
       activeStake: activeStake,
+      unstakeBalance: unstakingBalance,
+      isBondedBefore: !!nominationList.length,
       nominations: nominationList,
       unstakings: Object.values(unstakingMap)
     };
@@ -211,7 +207,6 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
   async subscribePoolPosition (useAddresses: string[], resultCallback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const substrateApi = this.substrateApi;
-    const nativeToken = this.nativeToken;
     const defaultInfo = this.defaultInfo;
     const chainInfo = this.chainInfo;
 
@@ -243,14 +238,11 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
               ...defaultInfo,
               type: this.type,
               address: owner,
-              balance: [
-                {
-                  slug: nativeToken.slug,
-                  activeBalance: '0'
-                }
-              ],
-              status: EarningStatus.NOT_STAKING,
+              totalStake: '0',
               activeStake: '0',
+              unstakeBalance: '0',
+              status: EarningStatus.NOT_STAKING,
+              isBondedBefore: false,
               nominations: [],
               unstakings: []
             });

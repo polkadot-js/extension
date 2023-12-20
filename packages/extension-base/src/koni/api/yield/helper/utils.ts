@@ -4,7 +4,7 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { RuntimeDispatchInfo, YieldPoolInfo, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/types';
+import { RuntimeDispatchInfo, SpecialYieldPoolInfo, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/types';
 
 export const syntheticSelectedValidators = [
   '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',
@@ -61,7 +61,7 @@ export const YIELD_POOL_MIN_AMOUNT_PERCENT: Record<string, number> = {
   default: 0.98
 };
 
-export function convertDerivativeToOriginToken (amount: string, poolInfo: YieldPoolInfo, derivativeTokenInfo: _ChainAsset, originTokenInfo: _ChainAsset) {
+export function convertDerivativeToOriginToken (amount: string, poolInfo: SpecialYieldPoolInfo, derivativeTokenInfo: _ChainAsset, originTokenInfo: _ChainAsset) {
   const derivativeDecimals = _getAssetDecimals(derivativeTokenInfo);
   const originDecimals = _getAssetDecimals(originTokenInfo);
 

@@ -628,7 +628,6 @@
   "{{time}} days": "{{time}} дней",
   "Available for withdrawal": "Доступно для вывода",
   "Withdraw in {{time}}": "Вывести через {{time}}",
-  "Withdrawable in a day": "Выводимо в течение дня",
   "Token is not supported": "Токен не поддерживается",
   "Unable to sign": "Невозможно подписать",
   "Unable to send": "Невозможно отправить",

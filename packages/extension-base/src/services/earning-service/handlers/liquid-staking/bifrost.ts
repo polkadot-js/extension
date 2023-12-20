@@ -6,7 +6,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getAssetDecimals, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolGroup, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, LiquidYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolGroup, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -113,9 +113,11 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
 
     return {
-      ...this.extraInfo,
+      ...this.defaultInfo,
+      description: this.description,
       type: this.type,
       metadata: {
+        ...this.baseMetadata,
         isAvailable: true,
         allowCancelUnstaking: false,
         assetEarning: [
@@ -233,8 +235,8 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
         const formattedAddress = reformatAddress(address);
 
         const bnActiveBalance = activeBalanceMap[formattedAddress];
-
         const unlockings = unlockingMap[formattedAddress];
+        let unlockBalance = BN_ZERO;
 
         if (unlockings) {
           unlockings.forEach((unlocking) => {
@@ -242,6 +244,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
             const remainingEra = unlocking.era - currentRelayEra;
             const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[this.chain];
 
+            unlockBalance = unlockBalance.add(new BN(unlocking.balance));
             unstakingList.push({
               chain: this.chain,
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
@@ -251,16 +254,16 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
           });
         }
 
-        const result: YieldPositionInfo = {
+        const totalBalance = bnActiveBalance.add(unlockBalance);
+
+        const result: LiquidYieldPositionInfo = {
           ...this.defaultInfo,
           type: this.type,
           address,
-          balance: [
-            {
-              slug: derivativeTokenSlug, // token slug
-              activeBalance: bnActiveBalance.toString()
-            }
-          ],
+          isBondedBefore: totalBalance.gt(BN_ZERO),
+          derivativeToken: derivativeTokenSlug,
+          totalStake: totalBalance.toString(),
+          unstakeBalance: unlockBalance.toString(),
           status: bnActiveBalance.eq(BN_ZERO) ? EarningStatus.NOT_EARNING : EarningStatus.EARNING_REWARD,
           activeStake: bnActiveBalance.toString(),
           nominations: [],

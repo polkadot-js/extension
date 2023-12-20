@@ -10,7 +10,7 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
 
@@ -85,18 +85,11 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           minJoinPool: minStake.toString(),
           farmerCount: 0, // TODO recheck
           era: parseInt(currentEra),
-          assetEarning: [
-            {
-              slug: _getChainNativeTokenSlug(chainInfo),
-              apy: expectedReturn
-            }
-          ],
           tvl: bnTotalEraStake.toString(), // TODO recheck
           totalApy: expectedReturn, // TODO recheck
           unstakingPeriod: unlockingPeriod,
           allowCancelUnstaking: true,
-          inflation: inflation,
-          minWithdrawal: '0'
+          inflation: inflation
         }
       };
 
@@ -113,7 +106,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
   /* Subscribe pool position */
 
-  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletStakingStakingLedger): Promise<Pick<YieldPositionInfo, 'activeStake' | 'balance' | 'isBondedBefore' | 'nominations' | 'status' | 'unstakings'>> {
+  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletStakingStakingLedger): Promise<Omit<YieldPositionInfo, keyof BaseYieldPositionInfo>> {
     const chain = chainInfo.slug;
 
     const [_nominations, _currentEra, _bonded, _minimumActiveStake, _minNominatorBond] = await Promise.all([
@@ -132,13 +125,16 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
 
-    const _maxNominatorRewardedPerValidator = substrateApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+    const unlimitedNominatorRewarded = substrateApi.api.consts.staking.maxExposurePageSize !== undefined;
+    const _maxNominatorRewardedPerValidator = (substrateApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
     const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
     const nominations = _nominations.toPrimitive() as unknown as PalletStakingNominations;
     const currentEra = _currentEra.toString();
     const bonded = _bonded.toHuman();
 
     const activeStake = ledger.active.toString();
+    const totalStake = ledger.total.toString();
+    const unstakingBalance = (ledger.total - ledger.active).toString();
     const nominationList: NominationInfo[] = [];
     const unstakingList: UnstakingInfo[] = [];
 
@@ -158,7 +154,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
         if (!topNominators.includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if nominator has target but not in nominator list
           nominationStatus = EarningStatus.WAITING;
-        } else if (topNominators.slice(0, maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
+        } else if (topNominators.slice(0, unlimitedNominatorRewarded ? undefined : maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
           nominationStatus = EarningStatus.EARNING_REWARD;
         }
 
@@ -205,12 +201,10 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     return {
       status: stakingStatus,
-      balance: [{
-        slug: this.nativeToken.slug,
-        activeBalance: activeStake
-      }],
-      isBondedBefore: bonded !== null,
+      totalStake: totalStake,
       activeStake: activeStake,
+      unstakeBalance: unstakingBalance,
+      isBondedBefore: bonded !== null,
       nominations: nominationList,
       unstakings: unstakingList
     };
@@ -219,7 +213,6 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
   async subscribePoolPosition (useAddresses: string[], resultCallback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const substrateApi = await this.substrateApi.isReady;
-    const nativeToken = this.nativeToken;
     const defaultInfo = this.defaultInfo;
     const chainInfo = this.chainInfo;
 
@@ -249,14 +242,11 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
               ...defaultInfo,
               type: this.type,
               address: owner,
-              balance: [
-                {
-                  slug: nativeToken.slug,
-                  activeBalance: '0'
-                }
-              ],
-              status: EarningStatus.NOT_STAKING,
+              totalStake: '0',
               activeStake: '0',
+              unstakeBalance: '0',
+              isBondedBefore: false,
+              status: EarningStatus.NOT_STAKING,
               nominations: [],
               unstakings: []
             });
@@ -300,7 +290,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const stakingRewards = _stakingRewards?.toPrimitive() as unknown as TernoaStakingRewardsStakingRewardsData;
 
-    const maxNominatorRewarded = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+    const unlimitedNominatorRewarded = chainApi.api.consts.staking.maxExposurePageSize !== undefined;
+    const maxNominatorRewarded = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
     const bnTotalEraStake = new BN(_totalEraStake.toString());
     const eraStakers = _eraStakers as any[];
 
@@ -348,7 +339,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
         blocked: false,
         isVerified: false,
         minBond,
-        isCrowded: nominatorCount > parseInt(maxNominatorRewarded)
+        isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded)
       } as ValidatorInfo);
     }
 

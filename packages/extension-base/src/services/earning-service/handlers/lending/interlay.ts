@@ -5,7 +5,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, LendingYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPoolGroup, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import BN from 'bn.js';
 
 import { BN_ZERO } from '@polkadot/util';
@@ -49,9 +49,11 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     const decimals = 10 ** 18;
 
     return {
-      ...this.extraInfo,
+      ...this.defaultInfo,
+      description: this.description,
       type: this.type,
       metadata: {
+        ...this.baseMetadata,
         isAvailable: true,
         allowCancelUnstaking: false,
         assetEarning: [
@@ -97,20 +99,19 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
       for (let i = 0; i < balances.length; i++) {
         const balanceItem = balances[i];
         const address = useAddresses[i];
-        const totalBalance = balanceItem.free || BN_ZERO;
+        const bnTotalBalance = balanceItem.free || BN_ZERO;
+        const totalBalance = bnTotalBalance.toString();
 
-        const result: YieldPositionInfo = {
+        const result: LendingYieldPositionInfo = {
           ...this.defaultInfo,
-          type: YieldPoolType.LENDING,
+          type: this.type,
           address,
-          balance: [
-            {
-              slug: derivativeTokenSlug, // token slug
-              activeBalance: totalBalance.toString()
-            }
-          ],
+          totalStake: totalBalance,
+          activeStake: totalBalance,
+          unstakeBalance: '0',
           status: EarningStatus.EARNING_REWARD,
-          activeStake: totalBalance.toString(),
+          derivativeToken: derivativeTokenSlug,
+          isBondedBefore: bnTotalBalance.gt(BN_ZERO),
           nominations: [],
           unstakings: []
         };
@@ -182,7 +183,7 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     }
 
     const bnAmount = new BN(amount);
-    const bnActiveBalance = new BN(yieldPositionInfo.balance[0].activeBalance);
+    const bnActiveBalance = new BN(yieldPositionInfo.activeStake);
 
     const redeemAll = bnAmount.eq(bnActiveBalance);
 

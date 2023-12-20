@@ -8,9 +8,12 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolGroup, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BN } from 'bn.js';
 import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
+
+import { BN_ZERO } from '@polkadot/util';
 
 import { DEFAULT_YIELD_FIRST_STEP, ST_LIQUID_TOKEN_ABI } from '../../constants';
 import BaseLiquidStakingPoolHandler from './base';
@@ -97,9 +100,11 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const exchangeRate = (equivalentTokenShare as number) / (10 ** _getAssetDecimals(derivativeTokenInfo));
 
     return {
-      ...this.extraInfo,
+      ...this.defaultInfo,
+      description: this.description,
       type: this.type,
       metadata: {
+        ...this.baseMetadata,
         isAvailable: true,
         allowCancelUnstaking: false,
         assetEarning: [
@@ -143,8 +148,10 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           const unbondedObject = (await contract.methods.getUnbonded(address).call()) as StellaswapUnbonding;
           const unstakings: UnstakingInfo[] = [];
+          let unlockBalance = BN_ZERO;
 
           if (parseInt(unbondedObject.unbonded) > 0) {
+            unlockBalance = unlockBalance.add(new BN(unbondedObject.unbonded));
             unstakings.push({
               chain: this.chain,
               claimable: unbondedObject.unbonded,
@@ -154,6 +161,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
           }
 
           if (parseInt(unbondedObject.waiting) > 0) {
+            unlockBalance = unlockBalance.add(new BN(unbondedObject.waiting));
             unstakings.push({
               chain: this.chain,
               claimable: unbondedObject.waiting,
@@ -162,18 +170,18 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
             });
           }
 
+          const totalBalance = new BN(balance).add(unlockBalance);
+
           const result: YieldPositionInfo = {
             ...this.defaultInfo,
             type: this.type,
             address,
-            balance: [
-              {
-                slug: derivativeTokenSlug, // token slug
-                activeBalance: balance
-              }
-            ],
+            totalStake: totalBalance.toString(),
+            activeStake: balance.toString(),
+            unstakeBalance: unlockBalance.toString(),
+            isBondedBefore: totalBalance.gt(BN_ZERO),
+            derivativeToken: derivativeTokenSlug,
             status: EarningStatus.EARNING_REWARD,
-            activeStake: balance,
             nominations: [],
             unstakings
           };

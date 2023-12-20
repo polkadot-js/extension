@@ -369,7 +369,7 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
   } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
     result.push(YieldAction.START_EARNING);
 
-    const activeBalance = new BN(yieldPosition.balance[0].activeBalance || '0');
+    const activeBalance = new BN(yieldPosition.activeStake || '0');
 
     if (activeBalance.gt(BN_ZERO)) {
       result.push(YieldAction.UNSTAKE);

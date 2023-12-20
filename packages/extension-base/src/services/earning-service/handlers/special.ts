@@ -7,7 +7,7 @@ import { BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, StakingTxEr
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldProcessValidation, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SpecialYieldPoolMetadata, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldProcessValidation, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import BN from 'bn.js';
 import { t } from 'i18next';
 
@@ -26,17 +26,15 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   /** Allow to create fast unstake transaction */
   protected readonly allowFastUnstake: boolean = true;
 
-  protected get extraInfo (): Omit<
-  SpecialYieldPoolInfo,
-  'metadata' |
-  'type'
+  protected get baseMetadata (): Pick<
+  SpecialYieldPoolMetadata,
+  'altInputAssets' |
+  'derivativeAssets' |
+  'inputAsset' |
+  'rewardAssets' |
+  'feeAssets'
   > {
     return {
-      description: this.description,
-      name: this.name,
-      group: this.group,
-      chain: this.chain,
-      slug: this.slug,
       altInputAssets: this.altInputAsset,
       derivativeAssets: this.derivativeAssets,
       inputAsset: this.inputAsset,

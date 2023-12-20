@@ -876,14 +876,14 @@ export default class KoniState {
 
   private isFirstLoad = true;
 
-  public async handleSwitchAccount (newAddress: string) {
-    if (this.isFirstLoad) {
+  public async handleResetBalance (newAddress: string, forceRefresh?: boolean) {
+    if (this.isFirstLoad || forceRefresh) {
       const backupBalanceData = await this.dbService.getStoredBalance();
 
       this.balanceMap.updateBalanceItems(backupBalanceData, isAccountAll(newAddress));
     }
 
-    await Promise.all([this.resetCrowdloanMap(newAddress), this.removeInactiveChainBalances()]);
+    await Promise.all([this.removeInactiveChainBalances()]);
   }
 
   public async resetCrowdloanMap (newAddress: string) {
@@ -1848,6 +1848,18 @@ export default class KoniState {
 
   public async reloadStaking () {
     await this.subscription.reloadStaking();
+
+    return true;
+  }
+
+  public async reloadBalance () {
+    await this.subscription.reloadBalance();
+
+    return true;
+  }
+
+  public async reloadCrowdloan () {
+    await this.subscription.reloadCrowdloan();
 
     return true;
   }

@@ -247,8 +247,8 @@ export const router = createHashRouter([
           ConnectionDetail.generateRouterObject('detail/:topic')
         ]
       },
-      NotFound.generateRouterObject('*')
+      NotFound.generateRouterObject('*'),
+      PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)
     ]
-  },
-  PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)
+  }
 ]);

@@ -8,7 +8,7 @@ import CN from 'classnames';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import OrdinalImage from './OrdinalImage';
+import InscriptionImage from './InscriptionImage';
 
 interface Props extends ThemeProps {
   handleOnClick?: (params?: any) => void;
@@ -29,7 +29,7 @@ function Component (props: Props): React.ReactElement<Props> {
     <NftItem_
       className={CN(className, 'nft_gallery_wrapper')}
       customImageNode={(
-        <OrdinalImage
+        <InscriptionImage
           properties={properties}
         />
       )}
@@ -39,7 +39,7 @@ function Component (props: Props): React.ReactElement<Props> {
   );
 }
 
-export const OrdinalGalleryWrapper = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const InscriptionGalleryWrapper = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,

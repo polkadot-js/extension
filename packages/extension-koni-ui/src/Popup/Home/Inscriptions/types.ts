@@ -3,6 +3,6 @@
 
 import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 
-export interface IOrdinalItemDetail {
+export interface IInscriptionItemDetail {
   nftItem: NftItem
 }

@@ -12,8 +12,8 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetAccountInfoByAddress from '@subwallet/extension-koni-ui/hooks/screen/common/useGetAccountInfoByAddress';
-import OrdinalImage from '@subwallet/extension-koni-ui/Popup/Home/Ordinals/components/OrdinalImage';
-import { IOrdinalItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Ordinals/types';
+import InscriptionImage from '@subwallet/extension-koni-ui/Popup/Home/Inscriptions/components/InscriptionImage';
+import { IInscriptionItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Inscriptions/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
@@ -51,7 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { token } = useTheme() as Theme;
   const location = useLocation();
   const navigate = useNavigate();
-  const [{ nftItem: { id: nftItemId } }] = useState((location.state as IOrdinalItemDetail));
+  const [{ nftItem: { id: nftItemId } }] = useState((location.state as IInscriptionItemDetail));
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
@@ -62,7 +62,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem?.owner || '');
   const accountExternalUrl = getExplorerLink(originChainInfo, nftItem?.owner || '', 'account');
 
-  useNavigateOnChangeAccount('/home/ordinals');
+  useNavigateOnChangeAccount('/home/inscriptions');
 
   const ownerPrefix = useCallback(() => {
     if (nftItem?.owner) {
@@ -144,7 +144,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     if (!nftItem) {
-      navigate('/home/ordinals');
+      navigate('/home/inscriptions');
     }
   }, [navigate, nftItem]);
 
@@ -174,7 +174,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 width: imageSize
               }}
             >
-              <OrdinalImage
+              <InscriptionImage
                 alone={true}
                 properties={nftItem.properties as OrdinalNftProperties}
               />
@@ -245,8 +245,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 <Field
                   className={'nft_item_detail__id_field'}
                   content={nftItem.id}
-                  key={'Ordinal ID'}
-                  label={'Ordinal ID'}
+                  key={'Inscription ID'}
+                  label={'Inscription ID'}
                   width={'fit-content'}
                 />
 
@@ -304,7 +304,7 @@ const Component: React.FC<Props> = (props: Props) => {
 function WrapperComponent (props: WrapperProps): React.ReactElement<WrapperProps> {
   const navigate = useNavigate();
   const location = useLocation();
-  const [itemDetail] = useState((location.state as IOrdinalItemDetail));
+  const [itemDetail] = useState((location.state as IInscriptionItemDetail));
 
   const nftItem = itemDetail?.nftItem;
   const originChainInfo = useGetChainInfo(nftItem?.chain || '');
@@ -332,7 +332,7 @@ function WrapperComponent (props: WrapperProps): React.ReactElement<WrapperProps
 
   useEffect(() => {
     if (!nftItem) {
-      navigate('/home/ordinals');
+      navigate('/home/inscriptions');
     }
   }, [navigate, nftItem]);
 
@@ -358,7 +358,7 @@ function WrapperComponent (props: WrapperProps): React.ReactElement<WrapperProps
   );
 }
 
-const OrdinalItemDetail = styled(WrapperComponent)<WrapperProps>(({ theme: { token } }: WrapperProps) => {
+const InscriptionItemDetail = styled(WrapperComponent)<WrapperProps>(({ theme: { token } }: WrapperProps) => {
   return ({
     '.nft_item_detail__container': {
       marginTop: token.marginSM,
@@ -560,4 +560,4 @@ const OrdinalItemDetail = styled(WrapperComponent)<WrapperProps>(({ theme: { tok
   });
 });
 
-export default OrdinalItemDetail;
+export default InscriptionItemDetail;

@@ -9,8 +9,8 @@ import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/No
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { IInscriptionItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Inscriptions/types';
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
-import { IOrdinalItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Ordinals/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -19,12 +19,12 @@ import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { OrdinalGalleryWrapper } from './components/OrdinalGalleryWrapper';
+import { InscriptionGalleryWrapper } from './components/InscriptionGalleryWrapper';
 
 type Props = ThemeProps;
 
 const Component: React.FC<Props> = (props: Props) => {
-  useSetCurrentPage('/home/ordinals');
+  useSetCurrentPage('/home/inscriptions');
 
   const { className } = props;
 
@@ -47,14 +47,14 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [nftItems]);
 
   const handleOnClickNft = useCallback((state: INftItemDetail) => {
-    navigate('/home/ordinals/item-detail', { state });
+    navigate('/home/inscriptions/item-detail', { state });
   }, [navigate]);
 
   const renderNft = useCallback((nftItem: NftItem) => {
-    const routingParams = { nftItem } as IOrdinalItemDetail;
+    const routingParams = { nftItem } as IInscriptionItemDetail;
 
     return (
-      <OrdinalGalleryWrapper
+      <InscriptionGalleryWrapper
         handleOnClick={handleOnClickNft}
         key={`${nftItem.chain}_${nftItem.collectionId}_${nftItem.id}`}
         name={nftItem.name as string}
@@ -64,24 +64,20 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [handleOnClickNft]);
 
-  const onBack = useCallback(() => {
-    navigate('/home/nfts/collections');
-  }, [navigate]);
-
   const emptyNft = useCallback(() => {
     if (isWebUI) {
       return (
         <NoContent
           className={'__no-content-block'}
-          pageType={PAGE_TYPE.NFT_COLLECTION_DETAIL}
+          pageType={PAGE_TYPE.INSCRIPTION}
         />
       );
     }
 
     return (
       <EmptyList
-        emptyMessage={t('Your ordinals will appear here')}
-        emptyTitle={t('No ordinal found')}
+        emptyMessage={t('Your inscriptions will appear here')}
+        emptyTitle={t('No inscription found')}
         phosphorIcon={Image}
       />
     );
@@ -99,14 +95,13 @@ const Component: React.FC<Props> = (props: Props) => {
       resolve={dataContext.awaitStores(['nft'])}
     >
       <Layout.Base
-        onBack={onBack}
         {...!isWebUI && {
           showBackButton: true,
           showSubHeader: true,
           subHeaderBackground: 'transparent',
           subHeaderCenter: false,
           subHeaderPaddingVertical: true,
-          title: t('Ordinals')
+          title: t('Inscriptions')
         }}
       >
         {isWebUI
@@ -144,7 +139,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const OrdinalItemList = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const InscriptionItemList = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
@@ -210,4 +205,4 @@ const OrdinalItemList = styled(Component)<Props>(({ theme: { token } }: Props) =
   });
 });
 
-export default OrdinalItemList;
+export default InscriptionItemList;

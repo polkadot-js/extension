@@ -3883,7 +3883,7 @@ export default class KoniExtension {
     // only works with current account, fix later
     const assetInfoMap = this.#koniState.getAssetRegistry();
     const chainInfoMap = this.#koniState.getChainInfoMap();
-    const balanceMap = this.#koniState.getBalance().details;
+    const balanceMap = (await this.#koniState.getBalance()).details;
     const substrateApiMap = this.#koniState.getSubstrateApiMap();
     const balanceService = this.#koniState.balanceService;
 
@@ -3911,7 +3911,7 @@ export default class KoniExtension {
       address,
       amount: data?.amount || '0',
       assetInfoMap: this.#koniState.getAssetRegistry(),
-      balanceMap: this.#koniState.getBalance().details,
+      balanceMap: (await this.#koniState.getBalance()).details,
       chainInfoMap: this.#koniState.getChainInfoMap(),
       poolInfo: yieldPoolInfo,
       substrateApiMap: this.#koniState.getSubstrateApiMap()
@@ -3938,7 +3938,7 @@ export default class KoniExtension {
         address,
         amount: data?.amount || '0',
         assetInfoMap: this.#koniState.getAssetRegistry(),
-        balanceMap: this.#koniState.getBalance().details,
+        balanceMap: (await this.#koniState.getBalance()).details,
         chainInfoMap: this.#koniState.getChainInfoMap(),
         poolInfo: yieldPoolInfo,
         substrateApiMap: this.#koniState.getSubstrateApiMap()
@@ -3974,7 +3974,7 @@ export default class KoniExtension {
         address,
         amount,
         assetInfoMap: this.#koniState.getAssetRegistry(),
-        balanceMap: this.#koniState.getBalance().details,
+        balanceMap: (await this.#koniState.getBalance()).details,
         chainInfoMap: this.#koniState.getChainInfoMap(),
         poolInfo: yieldPoolInfo,
         substrateApiMap: this.#koniState.getSubstrateApiMap()
@@ -4024,12 +4024,12 @@ export default class KoniExtension {
     return this.#koniState.getYieldPositionInfo();
   }
 
-  private handleValidateYieldProcess (inputData: ValidateYieldProcessParams) {
+  private async handleValidateYieldProcess (inputData: ValidateYieldProcessParams) {
     const params: OptimalYieldPathParams = {
       address: inputData.address,
       amount: inputData.amount || '0',
       assetInfoMap: this.#koniState.getAssetRegistry(),
-      balanceMap: this.#koniState.getBalance().details,
+      balanceMap: (await this.#koniState.getBalance()).details,
       chainInfoMap: this.#koniState.getChainInfoMap(),
       poolInfo: inputData.yieldPoolInfo,
       substrateApiMap: this.#koniState.getSubstrateApiMap()
@@ -4481,7 +4481,7 @@ export default class KoniExtension {
       case 'pri(yield.submitRedeem)':
         return await this.handleYieldRedeem(request as RequestYieldFastWithdrawal);
       case 'pri(yield.validateProcess)':
-        return this.handleValidateYieldProcess(request as ValidateYieldProcessParams);
+        return await this.handleValidateYieldProcess(request as ValidateYieldProcessParams);
       case 'pri(yield.staking.submitUnstaking)':
         return await this.yieldSubmitUnstaking(request as RequestUnbondingSubmit);
       case 'pri(yield.staking.submitWithdraw)':

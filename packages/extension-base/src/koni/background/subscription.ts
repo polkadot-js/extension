@@ -153,15 +153,13 @@ export class KoniSubscription {
     this.updateSubscription('yieldPoolStats', this.initYieldPoolStatsSubscription(substrateApiMap, onlyRunOnFirstTime));
 
     if (address) {
-      this.state.handleSwitchAccount(address).then(() => {
-        const addresses = this.state.getDecodedAddresses(address);
+      const addresses = this.state.getDecodedAddresses(address);
 
-        if (!addresses.length) {
-          return;
-        }
+      if (!addresses.length) {
+        return;
+      }
 
-        this.updateSubscription('yieldPosition', this.initYieldPositionSubscription(addresses, substrateApiMap, chainInfoMap, assetInfoMap));
-      }).catch((e) => this.logger.warn(e));
+      this.updateSubscription('yieldPosition', this.initYieldPositionSubscription(addresses, substrateApiMap, chainInfoMap, assetInfoMap));
     }
   }
 

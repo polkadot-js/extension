@@ -34,7 +34,7 @@ jobs:
       run: |
         yarn install --immutable | grep -v 'YN0013'
         if [ ${{ github.ref_name }} == 'webapp-dev' ]; then
-            yarn run webapp:change-build-number-webapp
+            yarn run webapp:change-build-number
         fi
         yarn webapp:build
     - name: Publish to Cloudflare Pages

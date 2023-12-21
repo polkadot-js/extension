@@ -15,6 +15,7 @@
     "packages/*"
   ],
   "bin": {
+    "koni-ci-webapp-update-build-number": "./scripts/koni-ci-webapp-update-build-number.mjs",
     "koni-ci-build-dev": "./scripts/koni-ci-build-dev.mjs",
     "koni-ci-build-i18n": "./scripts/koni-ci-build-i18n.mjs",
     "koni-ci-build-webapp": "./scripts/koni-ci-build-webapp.mjs",
@@ -55,7 +56,7 @@
     "webapp:dev": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "webapp:publish": "gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
     "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development",
-    "webapp:change-build-number-webapp": "node scripts/change-build-number-webapp.cjs"
+    "webapp:change-build-number": "node scripts/koni-ci-webapp-update-build-number.mjs"
   },
   "dependencies": {
     "@types/node": "^17.0.10",

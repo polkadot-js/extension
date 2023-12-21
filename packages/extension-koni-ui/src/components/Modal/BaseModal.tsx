@@ -49,7 +49,7 @@ export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) 
       bottom: token.paddingLG,
       top: token.paddingLG,
       maxWidth: 404,
-
+      animationDuration: '0.45s',
       '.ant-sw-modal-content': {
         width: '100%',
         height: '100%',

@@ -228,3 +228,5 @@ export * from './transaction';
 export * from './click';
 export * from './walletConnect';
 export * from './crowdloan';
+export * from './crowdloan';
+export * from './history';

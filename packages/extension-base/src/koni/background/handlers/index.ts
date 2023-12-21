@@ -43,9 +43,10 @@ export default function handlers<TMessageType extends MessageTypes> ({ id, messa
   const isMobile = port.name === PORT_MOBILE;
   const isExtension = port.name === extensionPortName;
   const sender = port.sender as chrome.runtime.MessageSender;
+
   const from = isExtension
     ? 'extension'
-    : (sender.tab && sender.tab.url) || sender.url || '<unknown>';
+    : sender.url || (sender.tab && sender.tab.url) || '<unknown>';
   const source = `${from}: ${id}: ${message}`;
 
   // console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);

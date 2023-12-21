@@ -79,8 +79,21 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       result.unshift(all);
     }
 
+    if (!!currentAccount?.address && (currentAccount?.address !== (all && all.address))) {
+      const currentAccountIndex = result.findIndex((item) => {
+        return item.address === currentAccount?.address;
+      });
+
+      if (currentAccountIndex > -1) {
+        const _currentAccount = result[currentAccountIndex];
+
+        result.splice(currentAccountIndex, 1);
+        result.splice(1, 0, _currentAccount);
+      }
+    }
+
     return result;
-  }, [_accounts]);
+  }, [_accounts, currentAccount?.address]);
 
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));

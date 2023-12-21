@@ -25,6 +25,7 @@ import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEm
 import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 import { anyNumberToBN, recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -397,15 +398,18 @@ export default class TransactionService {
   private transactionToHistories (id: string, startBlock?: number, nonce?: number, eventLogs?: EventRecord[]): TransactionHistoryItem[] {
     const transaction = this.getTransaction(id);
     const extrinsicType = transaction.extrinsicType;
+
+    const formattedTransactionAddress = reformatAddress(transaction.address);
+
     const historyItem: TransactionHistoryItem = {
       origin: 'app',
       chain: transaction.chain,
       direction: TransactionDirection.SEND,
       type: transaction.extrinsicType,
-      from: transaction.address,
+      from: formattedTransactionAddress,
       to: '',
       chainType: transaction.chainType,
-      address: transaction.address,
+      address: formattedTransactionAddress,
       status: transaction.status,
       transactionId: transaction.id,
       extrinsicHash: transaction.extrinsicHash,

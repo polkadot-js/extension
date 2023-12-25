@@ -4,7 +4,7 @@
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, ValidatorInfo, YieldPoolGroup, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, ValidatorInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { noop } from '@polkadot/util';
 
@@ -13,7 +13,6 @@ import BasePoolHandler from '../base';
 export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandler {
   public readonly type = YieldPoolType.NATIVE_STAKING;
   protected readonly description: string;
-  protected readonly group: YieldPoolGroup;
   protected readonly name: string;
   public slug: string;
 
@@ -25,20 +24,9 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
 
     const symbol = _chainAsset.symbol;
 
-    const poolGroup = (): YieldPoolGroup => {
-      if (symbol.includes('DOT')) {
-        return YieldPoolGroup.DOT;
-      } else if (symbol.includes('KSM')) {
-        return YieldPoolGroup.KSM;
-      } else {
-        return YieldPoolGroup.OTHER;
-      }
-    };
-
     this.slug = `${symbol}___native_staking___${_chainInfo.slug}`;
     this.name = `${_chainInfo.name} Native Staking`;
     this.description = `Start staking with just {{amount}} ${symbol}`;
-    this.group = poolGroup();
   }
 
   /* Get pool reward */

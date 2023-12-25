@@ -73,7 +73,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       webSocketServer: false,
       historyApiFallback: true,
       compress: true,
-      port: 9000
+      port: 8080
     },
     module: {
       rules: [

@@ -86,6 +86,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         description: this.description.replaceAll('{{amount}}', minToHuman),
         type: this.type,
         metadata: {
+          inputAsset: nativeToken.slug,
           isAvailable: true,
           maxCandidatePerFarmer: parseInt(maxDelegations),
           maxWithdrawalRequestPerFarmer: 1, // by default
@@ -176,6 +177,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
     return {
       status: stakingStatus,
+      balanceToken: this.nativeToken.slug,
       totalStake: totalBalance.toString(),
       activeStake: activeStake,
       unstakeBalance: unstakingBalance,
@@ -212,6 +214,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
               ...defaultInfo,
               type: this.type,
               address: owner,
+              balanceToken: this.nativeToken.slug,
               totalStake: '0',
               activeStake: '0',
               unstakeBalance: '0',

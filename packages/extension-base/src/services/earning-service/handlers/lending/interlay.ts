@@ -5,7 +5,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, LendingYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPoolGroup, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, LendingYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import BN from 'bn.js';
 
 import { BN_ZERO } from '@polkadot/util';
@@ -15,7 +15,6 @@ import BaseLendingPoolHandler from './base';
 
 export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
   protected readonly description: string;
-  protected readonly group: YieldPoolGroup;
   protected readonly name: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['interlay-LOCAL-qDOT'];
@@ -32,7 +31,6 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     this.slug = `DOT___lending___${chain}`;
     this.name = `${chainInfo.name} Lending`;
     this.description = 'Earn rewards by lending DOT';
-    this.group = YieldPoolGroup.DOT;
   }
 
   /* Subscribe pool info */
@@ -106,6 +104,7 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
           ...this.defaultInfo,
           type: this.type,
           address,
+          balanceToken: this.inputAsset,
           totalStake: totalBalance,
           activeStake: totalBalance,
           unstakeBalance: '0',

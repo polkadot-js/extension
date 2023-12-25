@@ -7,7 +7,7 @@ import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolGroup, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { BN } from 'bn.js';
 import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
@@ -41,7 +41,6 @@ const MAX_INT = '115792089237316195423570985008687907853269984665640564039457584
 
 export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   protected readonly description: string;
-  protected readonly group: YieldPoolGroup;
   protected readonly name: string;
   protected readonly logo: string;
   protected readonly inputAsset: string = 'moonbeam-LOCAL-xcDOT';
@@ -61,7 +60,6 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     this.slug = 'xcDOT___liquid_staking___stellaswap';
     this.name = 'Stellaswap Liquid Staking';
     this.description = 'Earn rewards by staking xcDOT for stDOT';
-    this.group = YieldPoolGroup.DOT;
     this.logo = 'stellaswap';
   }
 
@@ -103,6 +101,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
       ...this.defaultInfo,
       description: this.description,
       type: this.type,
+      logo: 'stellaswap',
       metadata: {
         ...this.baseMetadata,
         isAvailable: true,
@@ -176,6 +175,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
             ...this.defaultInfo,
             type: this.type,
             address,
+            balanceToken: this.inputAsset,
             totalStake: totalBalance.toString(),
             activeStake: balance.toString(),
             unstakeBalance: unlockBalance.toString(),

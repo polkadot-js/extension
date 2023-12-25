@@ -5,7 +5,7 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPoolGroup, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import fetch from 'cross-fetch';
 
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -30,7 +30,6 @@ const EXCHANGE_RATE_REQUEST = 'query { dailySummaries(first:30, orderBy:TIMESTAM
 
 export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   protected readonly description: string;
-  protected readonly group: YieldPoolGroup;
   protected readonly name: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['acala-LOCAL-LDOT'];
@@ -51,7 +50,6 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     this.slug = `DOT___liquid_staking___${chain}`;
     this.name = `${chainInfo.name} Liquid Staking`;
     this.description = 'Stake DOT to earn yield on LDOT';
-    this.group = YieldPoolGroup.DOT;
   }
 
   /* Subscribe pool info */
@@ -151,6 +149,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
           ...this.defaultInfo,
           type: this.type,
           address,
+          balanceToken: this.inputAsset,
           totalStake: totalBalance,
           activeStake: totalBalance,
           unstakeBalance: '0',

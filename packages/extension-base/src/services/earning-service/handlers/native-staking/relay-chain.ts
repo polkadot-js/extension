@@ -79,6 +79,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
         description: this.description.replaceAll('{{amount}}', minToHuman),
         type: this.type,
         metadata: {
+          inputAsset: nativeToken.slug,
           isAvailable: true,
           maxCandidatePerFarmer: parseInt(maxNominations),
           maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
@@ -201,6 +202,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     return {
       status: stakingStatus,
+      balanceToken: this.nativeToken.slug,
       totalStake: totalStake,
       activeStake: activeStake,
       unstakeBalance: unstakingBalance,
@@ -241,6 +243,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
             resultCallback({
               ...defaultInfo,
               type: this.type,
+              balanceToken: this.nativeToken.slug,
               address: owner,
               totalStake: '0',
               activeStake: '0',

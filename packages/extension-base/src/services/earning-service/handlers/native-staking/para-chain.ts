@@ -81,6 +81,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
         description: this.description.replaceAll('{{amount}}', minToHuman),
         type: this.type,
         metadata: {
+          inputAsset: nativeToken.slug,
           isAvailable: true,
           maxCandidatePerFarmer: parseInt(maxDelegations),
           maxWithdrawalRequestPerFarmer: 1, // by default
@@ -196,6 +197,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
     return {
       status: stakingStatus,
       totalStake,
+      balanceToken: this.nativeToken.slug,
       activeStake: activeStake,
       unstakeBalance: unstakingBalance,
       isBondedBefore: !!nominationList.length,
@@ -238,6 +240,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
               ...defaultInfo,
               type: this.type,
               address: owner,
+              balanceToken: this.nativeToken.slug,
               totalStake: '0',
               activeStake: '0',
               unstakeBalance: '0',

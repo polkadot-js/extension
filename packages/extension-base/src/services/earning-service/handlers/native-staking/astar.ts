@@ -32,8 +32,8 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
     const nativeToken = this.nativeToken;
     const defaultData = this.defaultInfo;
 
-    const aprPromise = new Promise((resolve) => {
-      fetch(`https://api.astar.network/api/v1/${this.chain}/dapps-staking/apr`, {
+    const apyPromise = new Promise((resolve) => {
+      fetch(`https://api.astar.network/api/v1/${this.chain}/dapps-staking/apy`, {
         method: 'GET'
       }).then((resp) => {
         resolve(resp.json());
@@ -47,18 +47,20 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
       }, 8000);
     });
 
-    const aprRacePromise = Promise.race([
+    const apyRacePromise = Promise.race([
       timeout,
-      aprPromise
+      apyPromise
     ]); // need race because API often timeout
 
-    /**
-     * @todo Discuss more
-     * */
-    const [aprInfo, substrateApi] = await Promise.all([
-      aprRacePromise,
-      this.substrateApi.isReady
-    ]);
+    const substrateApi = await this.substrateApi.isReady;
+
+    let apyInfo: null | number;
+
+    try {
+      apyInfo = (await apyRacePromise) as number | null;
+    } catch (e) {
+      apyInfo = null;
+    }
 
     const unsub = await (substrateApi.api.query.dappsStaking.currentEra((_currentEra: Codec) => {
       if (cancel) {
@@ -80,6 +82,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
         description: this.description.replaceAll('{{amount}}', minToHuman),
         type: this.type,
         metadata: {
+          inputAsset: nativeToken.slug,
           isAvailable: true,
           maxCandidatePerFarmer: 100, // temporary fix for Astar, there's no limit for now
           maxWithdrawalRequestPerFarmer: 1, // by default
@@ -87,7 +90,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
           farmerCount: 0, // TODO recheck
           era: parseInt(era),
           tvl: undefined, // TODO recheck
-          totalApy: aprInfo !== null ? aprInfo as number : undefined, // TODO recheck
+          totalApy: apyInfo !== null ? apyInfo : undefined, // TODO recheck
           unstakingPeriod,
           allowCancelUnstaking: false
         }
@@ -187,6 +190,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
     if (nominationList.length === 0 && unstakingList.length === 0) {
       return {
+        balanceToken: this.nativeToken.slug,
         totalStake: '0',
         unstakeBalance: '0',
         status: EarningStatus.NOT_STAKING,
@@ -207,6 +211,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
     return {
       status: stakingStatus,
+      balanceToken: this.nativeToken.slug,
       totalStake: totalStake.toString(),
       activeStake: activeStake,
       unstakeBalance: unstakeBalance.toString(),
@@ -249,6 +254,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
               ...defaultInfo,
               type: this.type,
               address: owner,
+              balanceToken: this.nativeToken.slug,
               totalStake: '0',
               activeStake: '0',
               unstakeBalance: '0',

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolGroup, YieldPoolType } from '../base';
+import { YieldPoolType } from '../base';
 
 /**
  * @interface YieldAssetEarningStats
@@ -30,6 +30,7 @@ export interface YieldAssetEarningStats {
 /**
  * @interface BaseYieldPoolMetadata
  * @prop {boolean} isAvailable - Is the pool available?
+ * @prop {string} inputAsset - Input token (slug)
  * @prop {number} maxCandidatePerFarmer - Max candidates per farmer
  * @prop {number} maxWithdrawalRequestPerFarmer - Max withdrawal request per farmer
  * @prop {string} minJoinPool - Min amount to join pool
@@ -41,6 +42,9 @@ export interface YieldAssetEarningStats {
  * */
 export interface BaseYieldPoolMetadata {
   /* Common info */
+
+  /** Input token (slug) */
+  inputAsset: string; // slug
 
   /** Is the pool available? */
   isAvailable: boolean;
@@ -105,7 +109,6 @@ export interface NormalYieldPoolMetadata extends BaseYieldPoolMetadata {
  * @prop {number} [unstakingPeriod] - Time to wait withdraw un-stake, in hour
  * @prop {number} [inflation] - Inflation rate
  * @prop {string[]} derivativeAssets - Array of derivative tokens (slug)
- * @prop {string} inputAsset - Input token (slug)
  * @prop {string[]} rewardAssets - Array of reward tokens (slug)
  * @prop {string[]} feeAssets - Array of fee tokens (slug)
  * @prop {string} [altInputAssets] - Alt input token (slug) - optional
@@ -121,9 +124,6 @@ export interface SpecialYieldPoolMetadata extends BaseYieldPoolMetadata {
 
   /** Array of derivative tokens (slug) */
   derivativeAssets?: string[];
-
-  /** Input token (slug) */
-  inputAsset: string; // slug
 
   /** Array of reward tokens (slug) */
   rewardAssets: string[]; // slug
@@ -168,7 +168,7 @@ export interface AbstractYieldPoolInfo {
   type: YieldPoolType;
 
   /** Pool's group (by token) */
-  group: YieldPoolGroup;
+  group: string;
 
   /** Pool's description */
   description: string;

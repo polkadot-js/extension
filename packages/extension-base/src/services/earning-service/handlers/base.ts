@@ -7,7 +7,7 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolGroup, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 /**
  * @class BasePoolHandler
@@ -26,9 +26,6 @@ export default abstract class BasePoolHandler {
   /** Pool's type */
   public abstract type: YieldPoolType;
 
-  /** Pool's group */
-  protected abstract group: YieldPoolGroup;
-
   /** Pool's name */
   protected abstract name: string;
 
@@ -43,6 +40,12 @@ export default abstract class BasePoolHandler {
   protected constructor (state: KoniState, chain: string) {
     this.state = state;
     this.chain = chain;
+  }
+
+  public get group (): string {
+    const groupSlug = this.nativeToken.multiChainAsset;
+
+    return groupSlug || this.nativeToken.slug;
   }
 
   protected get substrateApi (): _SubstrateApi {

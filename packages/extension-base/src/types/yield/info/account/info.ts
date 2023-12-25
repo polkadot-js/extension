@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolGroup, YieldPoolType } from '../base';
+import { YieldPoolType } from '../base';
 import { EarningStatus, NominationInfo } from './target';
 import { UnstakingInfo } from './unstake';
 
@@ -15,7 +15,7 @@ export interface YieldAssetBalance {
  * @interface BaseYieldPositionInfo
  * @prop {string} address - Account address
  * @prop {string} chain - Chain's slug
- * @prop {YieldPoolGroup} group - Pool's group
+ * @prop {string} group - Pool's group
  * @prop {string} slug - Pool's slug
  * @prop {YieldPoolType} type - Pool's type
  * */
@@ -27,7 +27,7 @@ export interface BaseYieldPositionInfo {
   /** Chain's slug */
   chain: string;
   /** Pool's group */
-  group: YieldPoolGroup;
+  group: string;
   /** Pool's slug */
   slug: string;
   /** Pool's type */
@@ -56,6 +56,8 @@ export interface BaseYieldPositionInfo {
 export interface AbstractYieldPositionInfo extends BaseYieldPositionInfo {
   /* Special info */
 
+  /** Token to show */
+  balanceToken: string;
   /** Total stake of the account */
   totalStake: string;
   /** Active stake of the account */

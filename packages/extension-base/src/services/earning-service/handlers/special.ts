@@ -47,6 +47,13 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     return this.feeAssets.length > 1;
   }
 
+  override get group (): string {
+    const inputAsset = this.state.getAssetBySlug(this.inputAsset);
+    const groupSlug = inputAsset.multiChainAsset;
+
+    return groupSlug || this.inputAsset;
+  }
+
   /* Subscribe pool info */
 
   abstract getPoolStat (): Promise<SpecialYieldPoolInfo>;
@@ -57,7 +64,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const getStatInterval = () => {
       this.getPoolStat()
         .then((rs) => {
-          if (cancel) {
+          if (!cancel) {
             callback(rs);
           }
         })

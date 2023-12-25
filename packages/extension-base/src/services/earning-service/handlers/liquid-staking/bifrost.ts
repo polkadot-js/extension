@@ -6,7 +6,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getAssetDecimals, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, LiquidYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolGroup, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, LiquidYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -53,7 +53,6 @@ const BIFROST_EXCHANGE_RATE_REQUEST = 'query MyQuery{slp_polkadot_ratio(limit:1 
 
 export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   protected readonly description: string;
-  protected readonly group: YieldPoolGroup;
   protected readonly name: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['bifrost_dot-LOCAL-vDOT'];
@@ -72,7 +71,6 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     this.slug = `DOT___liquid_staking___${chain}`;
     this.name = `${chainInfo.name} Liquid Staking`;
     this.description = 'Stake DOT to earn yield on vDOT';
-    this.group = YieldPoolGroup.DOT;
   }
 
   /* Subscribe pool info */
@@ -260,12 +258,13 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
           ...this.defaultInfo,
           type: this.type,
           address,
-          isBondedBefore: totalBalance.gt(BN_ZERO),
+          balanceToken: this.inputAsset,
           derivativeToken: derivativeTokenSlug,
           totalStake: totalBalance.toString(),
+          activeStake: bnActiveBalance.toString(),
           unstakeBalance: unlockBalance.toString(),
           status: bnActiveBalance.eq(BN_ZERO) ? EarningStatus.NOT_EARNING : EarningStatus.EARNING_REWARD,
-          activeStake: bnActiveBalance.toString(),
+          isBondedBefore: totalBalance.gt(BN_ZERO),
           nominations: [],
           unstakings: unstakingList
         };

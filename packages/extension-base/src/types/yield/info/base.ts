@@ -26,21 +26,6 @@ export enum YieldPoolType {
 }
 
 /**
- * @enum {string}
- * @description The groups of yield pools.
- * */
-export enum YieldPoolGroup {
-  /** Polkadot */
-  DOT = 'DOT',
-
-  /** Kusama */
-  KSM = 'KSM',
-
-  /** Other */
-  OTHER = 'OTHER'
-}
-
-/**
  * @enum {number}
  * @description Time to calculate profit
  * */

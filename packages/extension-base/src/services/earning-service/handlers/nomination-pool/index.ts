@@ -8,7 +8,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldPositionInfo, EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NominationYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolGroup, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NominationYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -23,7 +23,6 @@ import BasePoolHandler from '../base';
 export default class NominationPoolHandler extends BasePoolHandler {
   public readonly type = YieldPoolType.NOMINATION_POOL;
   protected readonly description: string;
-  protected readonly group: YieldPoolGroup;
   protected readonly name: string;
   public slug: string;
 
@@ -36,20 +35,9 @@ export default class NominationPoolHandler extends BasePoolHandler {
     const symbol = _chainAsset.symbol;
     const tokenName = _chainAsset.name;
 
-    const poolGroup = (): YieldPoolGroup => {
-      if (symbol.includes('DOT')) {
-        return YieldPoolGroup.DOT;
-      } else if (symbol.includes('KSM')) {
-        return YieldPoolGroup.KSM;
-      } else {
-        return YieldPoolGroup.OTHER;
-      }
-    };
-
     this.slug = `${symbol}___nomination_pool___${_chainInfo.slug}`;
     this.name = `${tokenName} Nomination Pool`;
     this.description = `Start staking with just {{amount}} ${symbol}`;
-    this.group = poolGroup();
   }
 
   /* Subscribe pool info */
@@ -105,6 +93,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
         description: this.description.replaceAll('{{amount}}', minToHuman),
         type: this.type,
         metadata: {
+          inputAsset: nativeToken.slug,
           isAvailable: true,
           maxCandidatePerFarmer: 1,
           maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
@@ -215,6 +204,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     return {
       status: stakingStatus,
+      balanceToken: this.nativeToken.slug,
       totalStake: bnTotalStake.toString(),
       activeStake: bnActiveStake.toString(),
       unstakeBalance: unstakingBalance.toString(),
@@ -257,6 +247,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
               ...defaultInfo,
               type: this.type,
               address: owner,
+              balanceToken: this.nativeToken.slug,
               totalStake: '0',
               activeStake: '0',
               unstakeBalance: '0',

@@ -5,7 +5,7 @@ import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks'
 import { reloadCron, saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
-import { ArrowClockwise, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import { ArrowsClockwise, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
@@ -101,6 +101,19 @@ function Component (
               weight={700}
             />
           </Tag>
+          <Button
+            className='button-change-show-balance'
+            icon={(
+              <Icon
+                phosphorIcon={ ArrowsClockwise }
+              />
+            )}
+            loading={reloading}
+            onClick={reloadBalance}
+            size='xs'
+            tooltip={t('Refresh balance')}
+            type='ghost'
+          />
         </div>
       )}
       <div className={'__action-button-container'}>
@@ -144,21 +157,6 @@ function Component (
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
           tooltip={t('Buy token')}
-        />
-        <div className={'__button-space'} />
-        <Button
-          icon={
-            <Icon
-              phosphorIcon={ArrowClockwise}
-              size={isShrink ? 'sm' : 'md' }
-              weight={'duotone'}
-            />
-          }
-          loading={reloading}
-          onClick={reloadBalance}
-          shape='squircle'
-          size={isShrink ? 'xs' : 'sm'}
-          tooltip={t('Reload')}
         />
       </div>
     </div>

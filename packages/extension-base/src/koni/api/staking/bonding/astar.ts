@@ -15,6 +15,20 @@ import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+const convertAddress = (address: string) => {
+  return isEthereumAddress(address) ? address.toLowerCase() : address;
+};
+
+const fetchDApps = async (network: string) => {
+  return new Promise(function (resolve) {
+    fetch(`https://api.astar.network/api/v1/${network}/dapps-staking/dappssimple`, {
+      method: 'GET'
+    }).then((resp) => {
+      resolve(resp.json());
+    }).catch(console.error);
+  });
+};
+
 export function subscribeAstarStakingMetadata (chain: string, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
   return substrateApi.api.query.dappsStaking.currentEra((_currentEra: Codec) => {
     const era = _currentEra.toString();
@@ -81,21 +95,11 @@ export async function getAstarStakingMetadata (chain: string, substrateApi: _Sub
   } as ChainStakingMetadata;
 }
 
-const convertAddress = (address: string) => {
-  return isEthereumAddress(address) ? address.toLowerCase() : address;
-};
-
 export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletDappsStakingAccountLedger) {
   const nominationList: NominationInfo[] = [];
   const unstakingList: UnstakingInfo[] = [];
 
-  const allDappsReq = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${chainInfo.slug}/dapps-staking/dapps`, {
-      method: 'GET'
-    }).then((resp) => {
-      resolve(resp.json());
-    }).catch(console.error);
-  });
+  const allDappsReq = fetchDApps(chainInfo.slug);
 
   const [_allDapps, _era, _stakerInfo] = await Promise.all([
     allDappsReq,
@@ -203,13 +207,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
   const nominationList: NominationInfo[] = [];
   const unstakingList: UnstakingInfo[] = [];
 
-  const allDappsReq = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${chain}/dapps-staking/dapps`, {
-      method: 'GET'
-    }).then((resp) => {
-      resolve(resp.json());
-    }).catch(console.error);
-  });
+  const allDappsReq = fetchDApps(chain);
 
   const [_ledger, _era, _stakerInfo] = await Promise.all([
     chainApi.api.query.dappsStaking.ledger(address),
@@ -312,13 +310,7 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
   const allDappsInfo: ValidatorInfo[] = [];
   const maxStakerPerContract = parseRawNumber(rawMaxStakerPerContract);
 
-  const allDappsReq = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
-      method: 'GET'
-    }).then((resp) => {
-      resolve(resp.json());
-    }).catch(console.error);
-  });
+  const allDappsReq = fetchDApps(networkKey);
 
   const [_era, _allDapps] = await Promise.all([
     chainApi.api.query.dappsStaking.currentEra(),

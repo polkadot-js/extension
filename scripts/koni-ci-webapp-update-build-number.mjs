@@ -1,5 +1,9 @@
-const fs = require('fs');
-const pkgJson = require('../packages/webapp/package.json');
+// Copyright 2019-2022 @subwallet/extension authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import fs from 'fs';
+import pkgJson from '../packages/webapp/package.json' assert {type: 'json'};
+
 function getBuildNumber(number) {
     if (number < 10) {
         return `00${number}`

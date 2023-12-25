@@ -11,7 +11,7 @@ on:
 
 jobs:
   master:
-    if: "! startsWith(github.event.head_commit.message, '[CI Skip]')"
+    if: "! startsWith(github.event.head_commit.message, '[CI Skip]') || github.ref == 'refs/heads/webapp'"
     name: Deploy WebApp Preview
     runs-on: ubuntu-22.04
     steps:
@@ -34,7 +34,7 @@ jobs:
       run: |
         yarn install --immutable | grep -v 'YN0013'
         if [ ${{ github.ref_name }} == 'webapp-dev' ]; then
-            yarn run webapp:change-build-number-webapp
+            yarn run webapp:change-build-number
         fi
         yarn webapp:build
     - name: Publish to Cloudflare Pages

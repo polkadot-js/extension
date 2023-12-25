@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
-import { SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
+import { BaseSelectModal, SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
@@ -22,9 +22,8 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { AccountBriefInfo, AccountCardItem, AccountItemWithName } from '../../../Account';
 import { GeneralEmptyList } from '../../../EmptyList';
-import { BaseSelectModal } from '../../../Modal';
 import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
-import SelectAccountFooter from './Footer';
+import SelectAccountFooter from '../SelectAccount/Footer';
 
 type Props = ThemeProps
 
@@ -80,8 +79,21 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       result.unshift(all);
     }
 
+    if (!!currentAccount?.address && (currentAccount?.address !== (all && all.address))) {
+      const currentAccountIndex = result.findIndex((item) => {
+        return item.address === currentAccount?.address;
+      });
+
+      if (currentAccountIndex > -1) {
+        const _currentAccount = result[currentAccountIndex];
+
+        result.splice(currentAccountIndex, 1);
+        result.splice(1, 0, _currentAccount);
+      }
+    }
+
     return result;
-  }, [_accounts]);
+  }, [_accounts, currentAccount?.address]);
 
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));
@@ -174,6 +186,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         className={className}
         genesisHash={item.genesisHash}
         isSelected={_selected}
+        moreIcon={!isInjected ? undefined : SignOut}
         onClickQrButton={onClickItemQrButton}
         onPressMoreButton={isInjected ? openDisconnectExtensionModal : onClickDetailAccount(item.address)}
         source={item.source}
@@ -422,7 +435,8 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       '.ant-account-card-name': {
         textOverflow: 'ellipsis',
         overflow: 'hidden',
-        'white-space': 'nowrap'
+        'white-space': 'nowrap',
+        maxWidth: 120
       },
 
       '.ant-input-container .ant-input': {

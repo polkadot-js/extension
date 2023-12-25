@@ -3480,6 +3480,10 @@ export default class KoniExtension {
       return await this.#koniState.reloadNft();
     } else if (data === 'staking') {
       return await this.#koniState.reloadStaking();
+    } else if (data === 'balance') {
+      return await this.#koniState.reloadBalance();
+    } else if (data === 'crowdloan') {
+      return await this.#koniState.reloadCrowdloan();
     }
 
     return Promise.resolve(false);
@@ -4356,7 +4360,7 @@ export default class KoniExtension {
       case 'pri(yield.join.handleStep)':
         return await this.handleYieldStep(request as RequestYieldStepSubmit);
       case 'pri(yield.join.validateProcess)':
-        return this.handleValidateYieldProcess(request as ValidateYieldProcessParams);
+        return await this.handleValidateYieldProcess(request as ValidateYieldProcessParams);
 
         /* Join */
 

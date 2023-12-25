@@ -164,7 +164,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoadingCamera(false);
         });
     };
-  }, [isPopup]);
+  }, [isCheckCamera, isPopup, navigate]);
 
   const updateChainPatrolEnable = useCallback((currentValue: boolean) => {
     return () => {
@@ -268,7 +268,7 @@ const Component: React.FC<Props> = (props: Props) => {
         })
         .catch(console.error);
     }
-  }, [camera, navigate]);
+  }, [camera, isCheckCamera, navigate]);
 
   useEffect(() => {
     setOnBack(onBack);

@@ -10,7 +10,7 @@ import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate, openInNewTab, toShort } from '@subwallet/extension-koni-ui/utils';
+import { customFormatDate, isAbleToShowFee, openInNewTab, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
@@ -102,7 +102,9 @@ function Component (
                 value={item?.amount?.value || '0'}
               />
               <Number
-                className={'__fee'}
+                className={CN('__fee', {
+                  '-hide': !isAbleToShowFee(item)
+                })}
                 decimal={item?.fee?.decimals || 0}
                 decimalOpacity={0.45}
                 hide={!isShowBalance}
@@ -277,6 +279,10 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
       color: token.colorTextLight4
+    },
+
+    '.__fee.-hide': {
+      opacity: 0
     },
 
     '.__value-wrapper': {

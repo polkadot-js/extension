@@ -330,8 +330,8 @@ export const router = createBrowserRouter([
       },
       NotFoundContent.generateRouterObject('not-found'),
       NotFoundRedirect.generateRouterObject('*'),
-      UnsafeAccess.generateRouterObject('unsafe-access')
+      UnsafeAccess.generateRouterObject('unsafe-access'),
+      PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)
     ]
-  },
-  PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)
+  }
 ]);

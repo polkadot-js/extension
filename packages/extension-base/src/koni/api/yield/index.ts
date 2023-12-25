@@ -292,8 +292,6 @@ export async function generatePathForLiquidStaking (params: OptimalYieldPathPara
       amount: mintFee
     });
 
-    console.log('result', result);
-
     return result;
   } catch (e) {
     // @ts-ignore

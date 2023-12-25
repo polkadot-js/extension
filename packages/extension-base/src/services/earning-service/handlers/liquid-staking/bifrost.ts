@@ -54,6 +54,7 @@ const BIFROST_EXCHANGE_RATE_REQUEST = 'query MyQuery{slp_polkadot_ratio(limit:1 
 export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   protected readonly description: string;
   protected readonly name: string;
+  protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['bifrost_dot-LOCAL-vDOT'];
   protected readonly inputAsset: string = 'bifrost_dot-LOCAL-DOT';
@@ -71,6 +72,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     this.slug = `DOT___liquid_staking___${chain}`;
     this.name = `${chainInfo.name} Liquid Staking`;
     this.description = 'Stake DOT to earn yield on vDOT';
+    this.shortName = chainInfo.name.replaceAll(' Relay Chain', '');
   }
 
   /* Subscribe pool info */

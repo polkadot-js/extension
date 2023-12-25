@@ -19,6 +19,7 @@ interface BlockHeader {
 export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   protected readonly description: string;
   protected readonly name: string;
+  protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['parallel-LOCAL-sDOT'];
   protected readonly inputAsset: string = 'parallel-LOCAL-DOT';
@@ -37,6 +38,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
 
     this.slug = `DOT___liquid_staking___${chain}`;
     this.name = `${chainInfo.name} Liquid Staking`;
+    this.shortName = chainInfo.name.replaceAll(' Relay Chain', '');
     this.description = 'Stake DOT to earn yield on sDOT';
   }
 

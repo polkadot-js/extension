@@ -176,6 +176,9 @@ export interface AbstractYieldPoolInfo {
   /** Pool's name */
   name: string;
 
+  /** Pool's short name */
+  shortName: string;
+
   /** Pool's logo - optional */
   logo?: string;
 

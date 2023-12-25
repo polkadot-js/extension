@@ -29,6 +29,9 @@ export default abstract class BasePoolHandler {
   /** Pool's name */
   protected abstract name: string;
 
+  /** Pool's short name */
+  protected abstract shortName: string;
+
   /** Pool's description */
   protected abstract description: string;
 
@@ -64,9 +67,10 @@ export default abstract class BasePoolHandler {
     return this.state.getNativeTokenInfo(this.chain);
   }
 
-  protected get defaultInfo (): Pick<YieldPoolInfo, 'name' | 'group' | 'chain' | 'slug'> {
+  protected get defaultInfo (): Pick<YieldPoolInfo, 'name' | 'group' | 'chain' | 'slug' | 'shortName'> {
     return {
       name: this.name,
+      shortName: this.shortName,
       group: this.group,
       chain: this.chain,
       slug: this.slug

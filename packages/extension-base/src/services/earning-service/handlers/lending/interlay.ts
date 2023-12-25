@@ -16,6 +16,7 @@ import BaseLendingPoolHandler from './base';
 export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
   protected readonly description: string;
   protected readonly name: string;
+  protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['interlay-LOCAL-qDOT'];
   protected readonly inputAsset: string = 'interlay-LOCAL-DOT';
@@ -30,6 +31,7 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
 
     this.slug = `DOT___lending___${chain}`;
     this.name = `${chainInfo.name} Lending`;
+    this.shortName = chainInfo.name.replaceAll(' Relay Chain', '');
     this.description = 'Earn rewards by lending DOT';
   }
 

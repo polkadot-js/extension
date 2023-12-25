@@ -42,6 +42,7 @@ const MAX_INT = '115792089237316195423570985008687907853269984665640564039457584
 export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   protected readonly description: string;
   protected readonly name: string;
+  protected readonly shortName: string;
   protected readonly logo: string;
   protected readonly inputAsset: string = 'moonbeam-LOCAL-xcDOT';
   protected readonly altInputAsset: string = '';
@@ -61,6 +62,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     this.name = 'Stellaswap Liquid Staking';
     this.description = 'Earn rewards by staking xcDOT for stDOT';
     this.logo = 'stellaswap';
+    this.shortName = 'Stellaswap';
   }
 
   /* Subscribe pool info */

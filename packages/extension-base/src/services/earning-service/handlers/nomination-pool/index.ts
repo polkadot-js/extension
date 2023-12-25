@@ -24,6 +24,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
   public readonly type = YieldPoolType.NOMINATION_POOL;
   protected readonly description: string;
   protected readonly name: string;
+  protected readonly shortName: string;
   public slug: string;
 
   constructor (state: KoniState, chain: string) {
@@ -37,6 +38,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     this.slug = `${symbol}___nomination_pool___${_chainInfo.slug}`;
     this.name = `${tokenName} Nomination Pool`;
+    this.shortName = _chainInfo.name.replaceAll(' Relay Chain', '');
     this.description = `Start staking with just {{amount}} ${symbol}`;
   }
 

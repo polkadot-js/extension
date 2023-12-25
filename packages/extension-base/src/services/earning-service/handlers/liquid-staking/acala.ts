@@ -31,6 +31,7 @@ const EXCHANGE_RATE_REQUEST = 'query { dailySummaries(first:30, orderBy:TIMESTAM
 export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   protected readonly description: string;
   protected readonly name: string;
+  protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['acala-LOCAL-LDOT'];
   protected readonly inputAsset: string = 'acala-LOCAL-DOT';
@@ -49,6 +50,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
 
     this.slug = `DOT___liquid_staking___${chain}`;
     this.name = `${chainInfo.name} Liquid Staking`;
+    this.shortName = chainInfo.name.replaceAll(' Relay Chain', '');
     this.description = 'Stake DOT to earn yield on LDOT';
   }
 

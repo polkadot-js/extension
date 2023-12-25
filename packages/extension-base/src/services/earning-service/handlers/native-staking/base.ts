@@ -14,6 +14,7 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
   public readonly type = YieldPoolType.NATIVE_STAKING;
   protected readonly description: string;
   protected readonly name: string;
+  protected readonly shortName: string;
   public slug: string;
 
   constructor (state: KoniState, chain: string) {
@@ -26,6 +27,7 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
 
     this.slug = `${symbol}___native_staking___${_chainInfo.slug}`;
     this.name = `${_chainInfo.name} Native Staking`;
+    this.shortName = _chainInfo.name.replaceAll(' Relay Chain', '');
     this.description = `Start staking with just {{amount}} ${symbol}`;
   }
 

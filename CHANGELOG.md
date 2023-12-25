@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.1.28
+Build date: Dec 25, 2023.
+
+Features & Update:
+- Add support Polimec (#2404)
+- Allow access extension from iframe (#2406)
+
 ## 1.1.27
 Build date: Dec 20, 2023.
 

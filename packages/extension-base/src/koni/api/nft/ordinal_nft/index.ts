@@ -32,7 +32,6 @@ const parseParamData = (param: SubscanBatchChildParam, event: SubscanEventBaseIt
     }
 
     nameParams.push(ordinalData.tick);
-
     const name = nameParams.join(' ');
 
     return {

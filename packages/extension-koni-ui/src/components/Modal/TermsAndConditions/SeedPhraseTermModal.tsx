@@ -14,7 +14,7 @@ import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
-  onOk: () => void
+  onOk?: () => void
 }
 
 const modalId = TERM_AND_CONDITION_SEED_PHRASE_MODAL;
@@ -33,7 +33,7 @@ const valueStateTermDefault: Record<TermSeedPhrase, boolean> = {
   [TermSeedPhrase.TERM_4]: false
 };
 
-const Component = ({ className, onOk }: Props) => {
+const Component = ({ className }: Props) => {
   const { inactiveModal } = useContext(ModalContext);
   const { t } = useTranslation();
   const [, setIsConfirmTermSeedPhrase] = useLocalStorage(CONFIRM_TERM_SEED_PHRASE, 'nonConfirmed');
@@ -97,8 +97,7 @@ const Component = ({ className, onOk }: Props) => {
   const onConfirm = useCallback(() => {
     inactiveModal(modalId);
     setIsConfirmTermSeedPhrase(isCheckDontShow ? 'confirmed' : 'nonConfirmed');
-    onOk();
-  }, [inactiveModal, isCheckDontShow, onOk, setIsConfirmTermSeedPhrase]);
+  }, [inactiveModal, isCheckDontShow, setIsConfirmTermSeedPhrase]);
 
   return (
     <SwModal
@@ -151,55 +150,64 @@ export const SeedPhraseTermModal = styled(Component)<Props>(({ theme: { token } 
       overflow: 'hidden',
       maxHeight: 600,
       paddingBottom: 0,
+      overflowY: 'hidden'
+    },
 
-      '.ant-sw-header-center-part': {
-        width: 300
+    '.ant-sw-header-center-part': {
+      width: 300
+    },
+
+    '.term-body': {
+      height: 380,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.padding
+    },
+
+    '.annotation': {
+      fontSize: token.fontSizeSM,
+      color: token.colorTextLight5,
+      textAlign: 'center'
+    },
+
+    '.term-list': {
+      gap: token.paddingSM,
+      display: 'flex',
+      flexDirection: 'column',
+      overflowY: 'auto'
+    },
+
+    '.term-box': {
+      backgroundColor: token.colorBgSecondary,
+      borderRadius: token.borderRadiusLG,
+      WebkitTransition: 'background 0.2s ease-in-out',
+      transition: 'background 0.2s ease-in-out',
+
+      '&:hover': {
+        backgroundColor: token.colorBgInput
+      }
+    },
+
+    '.term-detail': {
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeightLG,
+      fontWeight: 500,
+      color: token.colorTextLight1
+    },
+
+    '.term-footer': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.padding,
+      paddingTop: 4,
+
+      '.term-footer-checkbox': {
+        alignItems: 'center',
+        marginLeft: 0
       },
-      '.term-body': {
-        maxHeight: 500,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: token.padding,
-        '.annotation': {
-          fontSize: token.fontSizeSM,
-          color: token.colorTextLight5,
-          textAlign: 'center'
-        },
-        '.term-list': {
-          gap: token.paddingSM,
-          display: 'flex',
-          flexDirection: 'column',
-          '.term-box': {
-            backgroundColor: token.colorBgSecondary,
-            borderRadius: token.borderRadiusLG,
-            WebkitTransition: 'background 0.2s ease-in-out',
-            transition: 'background 0.2s ease-in-out',
-            '.term-detail': {
-              fontSize: token.fontSize,
-              lineHeight: token.lineHeightLG,
-              fontWeight: 500,
-              color: token.colorTextLight1
-            },
-            '&:hover': {
-              backgroundColor: token.colorBgInput
-            }
-          }
-        }
-      },
 
-      '.term-footer': {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: token.padding,
-
-        '.term-footer-checkbox': {
-          alignItems: 'center',
-          marginLeft: 0
-        },
-
-        '.term-footer-button': {
-          marginBottom: token.marginLG
-        }
+      '.term-footer-button': {
+        marginBottom: token.marginXS
       }
     }
   };

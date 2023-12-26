@@ -118,58 +118,61 @@ export const GeneralTermModal = styled(Component)<Props>(({ theme: { token } }: 
     '.ant-sw-modal-content': {
       overflow: 'hidden',
       maxHeight: 600,
-      paddingBottom: 0,
+      paddingBottom: 0
+    },
 
-      '.term-body': {
-        maxHeight: 294,
-        h3: {
-          color: token.colorWhite,
-          fontSize: token.fontSize,
-          gap: token.margin
-        },
-        'p, li': {
-          color: token.colorTextLight4,
-          fontSize: token.fontSizeSM
-        },
-
-        '.term-body-caret-button': {
-          position: 'absolute',
-          top: 338,
-          left: 334
-        },
-        display: 'block',
-        overflowY: 'scroll',
-        scrollBehavior: 'smooth'
-
+    '.term-body': {
+      maxHeight: 294,
+      h3: {
+        color: token.colorWhite,
+        fontSize: token.fontSize,
+        gap: token.margin
+      },
+      'p, li': {
+        color: token.colorTextLight4,
+        fontSize: token.fontSizeSM
       },
 
-      '.term-footer': {
-        display: 'flex',
-        alignItems: 'center',
-        flexDirection: 'column',
-        marginTop: token.marginXS,
-        gap: token.margin,
+      '.term-body-caret-button': {
+        position: 'absolute',
+        top: 338,
+        left: 334
+      },
+      display: 'block',
+      overflowY: 'scroll',
+      scrollBehavior: 'smooth'
 
-        '.term-footer-checkbox': {
-          alignItems: 'center'
-        },
+    },
 
-        '.term-footer-button-group': {
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          paddingLeft: token.padding,
-          paddingRight: token.padding,
-          width: 390,
-          height: 80,
-          justifyContent: 'space-between',
+    '.term-footer': {
+      display: 'flex',
+      alignItems: 'center',
+      flexDirection: 'column',
+      marginTop: token.marginXS,
+      gap: token.margin
 
-          '.term-footer-annotation': {
-            color: token.colorTextLight4,
-            fontSize: token.fontSizeSM
-          }
-        }
-      }
+    },
+
+    '.term-footer-checkbox': {
+      alignItems: 'center'
+    },
+
+    '.term-footer-button-group': {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
+      width: 390,
+      height: 80,
+      justifyContent: 'space-between'
+
+    },
+
+    '.term-footer-annotation': {
+      color: token.colorTextLight4,
+      fontSize: token.fontSizeSM
     }
+
   };
 });

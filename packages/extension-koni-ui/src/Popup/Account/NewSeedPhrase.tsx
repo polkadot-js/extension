@@ -99,12 +99,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [seedPhrase, checkUnlock, accountName, accountTypes, onComplete, notify]);
 
   const onConfirmTerms = useCallback(() => {
+    _onCreate();
+  }, [_onCreate]);
+
+  useEffect(() => {
     if (_isConfirmedTermSeedPhrase === 'nonConfirmed') {
       activeModal(TERM_AND_CONDITION_SEED_PHRASE_MODAL);
-    } else {
-      _onCreate();
     }
-  }, [_isConfirmedTermSeedPhrase, _onCreate, activeModal]);
+  }, [_isConfirmedTermSeedPhrase, activeModal]);
 
   useEffect(() => {
     createSeedV2(undefined, undefined, DEFAULT_ACCOUNT_TYPES)
@@ -149,7 +151,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       >
         <div className={'container'}>
           <div className='description'>
-            {t('Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.')}
+            {t('Keep your seed phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.')}
           </div>
           <WordPhrase
             enableDownload={true}

@@ -10,7 +10,7 @@ import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeCo
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { BackgroundColorMap, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { useNotification, useReceiveQR, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
+import { reloadCron, saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import BuyTokens from '@subwallet/extension-koni-ui/Popup/BuyTokens';
 import Transaction from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import SendFund from '@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund';
@@ -19,7 +19,7 @@ import { BuyTokenInfo, PhosphorIcon, ThemeProps } from '@subwallet/extension-kon
 import { getAccountType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowFatLinesDown, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import { ArrowFatLinesDown, ArrowsClockwise, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -42,6 +42,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const locationPathname = useLocation().pathname;
   const tokenGroupSlug = useParams()?.slug;
   const isShowBalance = useSelector((state: RootState) => state.settings.isShowBalance);
+  const [reloading, setReloading] = useState(false);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -185,6 +186,15 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     return !!buyInfos.length;
   }, [buyInfos.length, locationPathname]);
 
+  const reloadBalance = useCallback(() => {
+    setReloading(true);
+    reloadCron({ data: 'balance' })
+      .catch(console.error)
+      .finally(() => {
+        setReloading(false);
+      });
+  }, []);
+
   const actions: Action[] = [
     {
       label: 'Receive',
@@ -212,7 +222,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       <div className={CN('__block-item', '__total-balance-block')}>
         <div className={'__block-title-wrapper'}>
           <div className={'__block-title'}>{t('Total balance')}</div>
-
           <Button
             className='__balance-visibility-toggle'
             icon={
@@ -223,6 +232,19 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             onClick={onChangeShowBalance}
             size={'xs'}
             tooltip={isShowBalance ? t('Hide balance') : t('Show balance')}
+            type='ghost'
+          />
+          <Button
+            className='__balance-reload-toggle'
+            icon={
+              <Icon
+                phosphorIcon={ArrowsClockwise}
+              />
+            }
+            loading={reloading}
+            onClick={reloadBalance}
+            size={'xs'}
+            tooltip={t('Refresh Balance')}
             type='ghost'
           />
         </div>
@@ -488,6 +510,10 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       fontSize: 30,
       lineHeight: '38px'
     }
+  },
+
+  '.__balance-reload-toggle': {
+    marginLeft: -token.sizeXS/2
   },
 
   '.__action-block': {

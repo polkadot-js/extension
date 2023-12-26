@@ -12,6 +12,8 @@ import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import reformatAddress from '../utils/account/reformatAddress';
+
 type Props = ThemeProps;
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -25,7 +27,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const viewInHistory = useCallback(
     () => {
       if (address && chain && transactionId) {
-        navigate(`/home/history/${address}/${chain}/${transactionId}`);
+        navigate(`/home/history/${reformatAddress(address)}/${chain}/${transactionId}`);
       } else {
         navigate('/home/history');
       }

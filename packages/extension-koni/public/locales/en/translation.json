@@ -865,5 +865,8 @@
   "Open": "",
   "State": "",
   "Earning status": "",
-  "Earning": ""
+  "Earning": "",
+  "Switch to another token to see account balance": "",
+  "No account with {{symbol}} balance found": "",
+  "Refresh balance": ""
 }

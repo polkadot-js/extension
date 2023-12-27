@@ -24,6 +24,10 @@ function getBlockExplorerAccountRoute (explorerLink: string) {
     return 'account';
   }
 
+  if (explorerLink.includes('3dpscan.io')) {
+    return 'account';
+  }
+
   return 'address';
 }
 

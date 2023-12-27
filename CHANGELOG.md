@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 1.1.28
+Build date: Dec 25, 2023.
+
+Features & Update:
+- Add support Polimec (#2404)
+- Allow access extension from iframe (#2406)
+
+## 1.1.27
+Build date: Dec 20, 2023.
+
+Features & Update:
+- Sort the Current account on top in the Account selector (#2318)
+- Update API staking for Astar (#2370)
+- Add Azero Domains is default pool (#2385)
+- Update chain-list (#2368)
+  - Some update for 3DPass (addd new RPC, update logo, update explorer, update price)
+    - Add support Energy Web X
+
+Bugs fixed:
+- Fixed bug dApp detection when connect wallet (#1936)
+- Fixed UI bug show balance in the Token details screen (#2201)
+- Fixed bug show EVM transaction history (#2362)
+- Fixed bug show transfer NFT history details (#2373)
+- Fixed bug phishing detection (#2372)
+
 ## 1.1.26
 Build date: Dec 16, 2023.
 

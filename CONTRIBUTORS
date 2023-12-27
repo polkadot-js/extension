@@ -1,8 +1,8 @@
     1879	Nam Phạm                      	[Issue 2313] fix eslint
-    1787	AnhMTV                        	Release version 1.1.26
-    1504	S2kael                        	[Issue-2324] Update logic to get staking status
+    1804	AnhMTV                        	Release version 1.1.28
+    1514	S2kael                        	[Issue-2404] Update chain-list
      465	Jaco                          	0.42.5 (#969)
-     301	lw-cdm                        	[Issue-2326] Fix issue related to history filter
+     303	lw-cdm                        	[Issue-2373] Fix issue related to history after sending NFT
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       98	lw-cdm                        	
@@ -15,8 +15,8 @@
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
+       8	nguyentiendung                	[Issue-2318] Sort the Current account on top in the Account selector.
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
-       6	nguyentiendung                	[Issue-1849] UI bug on the Buy token screen on the Firefox browser
        6	unknown                       	refactor code
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft

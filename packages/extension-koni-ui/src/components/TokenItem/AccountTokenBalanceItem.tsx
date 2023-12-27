@@ -146,7 +146,8 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
       },
 
       '.__label': {
-        flex: '1'
+        flex: '1',
+        'white-space': 'nowrap'
       }
     },
 

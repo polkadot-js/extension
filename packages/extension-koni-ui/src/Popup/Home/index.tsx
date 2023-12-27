@@ -10,7 +10,6 @@ import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeCo
 import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { noop } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -45,6 +44,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     inactiveModal(GlobalSearchTokenModalId);
   }, [inactiveModal]);
 
+  const onAfterConfirmTermModal = useCallback(() => {
+    setIsConfirmedTermGeneral('confirmed');
+  }, [setIsConfirmedTermGeneral]);
+
   useEffect(() => {
     if (mantaPayConfig && mantaPayConfig.enabled && !mantaPayConfig.isInitialSync && !isZkModeSyncing) {
       handleMantaPaySync(mantaPayConfig.address);
@@ -60,7 +63,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useEffect(() => {
     if (isConfirmedTermGeneral.includes('nonConfirmed')) {
       activeModal(GENERAL_TERM_AND_CONDITION_MODAL);
-      setIsConfirmedTermGeneral('confirmed');
     }
   }, [activeModal, isConfirmedTermGeneral, setIsConfirmedTermGeneral]);
 
@@ -78,7 +80,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             showSearchIcon
           >
             <Outlet />
-            <GeneralTermModal onOk={noop} />
+            <GeneralTermModal onOk={onAfterConfirmTermModal} />
           </Layout.Home>
         </div>
       </HomeContext.Provider>

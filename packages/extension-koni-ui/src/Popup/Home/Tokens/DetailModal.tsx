@@ -143,7 +143,10 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
     }
   }, [form, isActive]);
 
-  const filteredItems = accountItems.filter((item) => item.free !== '0');
+  const filteredItems = accountItems
+    .filter((item) => {
+      return new BigN(item.free).gt(0);
+    });
 
   return (
     <SwModal

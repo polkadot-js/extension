@@ -865,5 +865,8 @@
   "Open": "",
   "State": "",
   "Earning status": "",
-  "Earning": ""
+  "Earning": "",
+  "Switch to another token to see account balance": "请选择其他代币查看账户余额",
+  "Refresh balance": "",
+  "No account with {{symbol}} balance found": "未找到有{{symbol}}余额的账户"
 }

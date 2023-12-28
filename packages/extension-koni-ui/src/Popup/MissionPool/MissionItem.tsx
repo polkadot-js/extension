@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/MissionPool/predefined';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
@@ -244,6 +245,7 @@ function Component (props: Props): React.ReactElement<Props> {
           />
           <Button
             className={'__item-join-now-button'}
+            disabled={data.status === MissionCategoryType.ARCHIVED}
             icon={(
               <Icon
                 phosphorIcon={PlusCircle}

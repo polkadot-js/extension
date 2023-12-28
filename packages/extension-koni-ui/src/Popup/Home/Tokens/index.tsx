@@ -358,86 +358,95 @@ const Component = (): React.ReactElement => {
   }
 
   return (
-    <div
-      className={'tokens-screen-container'}
-      onScroll={handleScroll}
-      ref={containerRef}
-    >
+    <>
+      {isShrink &&
+        <div className={'__header-overlay'}>
+
+        </div>
+      }
       <div
-        className={classNames('__upper-block-wrapper', {
-          '-is-shrink': isShrink,
-          '-decrease': isTotalBalanceDecrease
-        })}
-        ref={topBlockRef}
+        className={'tokens-screen-container'}
+        onScroll={handleScroll}
+        ref={containerRef}
       >
-        <UpperBlock
-          isPriceDecrease={isTotalBalanceDecrease}
-          isShrink={isShrink}
-          onOpenBuyTokens={onOpenBuyTokens}
-          onOpenReceive={onOpenReceive}
-          onOpenSendFund={onOpenSendFund}
-          totalChangePercent={totalBalanceInfo.change.percent}
-          totalChangeValue={totalBalanceInfo.change.value}
-          totalValue={totalBalanceInfo.convertedValue}
-        />
-      </div>
-      <div
-        className={'__scroll-container'}
-      >
-        {
-          tokenGroupBalanceItems.map((item) => {
-            return (
-              <TokenGroupBalanceItem
-                key={item.slug}
-                {...item}
-                onPressItem={tokenBalanceClick(item)}
+
+        <div
+          className={classNames('__upper-block-wrapper', {
+            '-is-shrink': isShrink,
+            '-decrease': isTotalBalanceDecrease
+          })}
+          ref={topBlockRef}
+        >
+          <UpperBlock
+            isPriceDecrease={isTotalBalanceDecrease}
+            isShrink={isShrink}
+            onOpenBuyTokens={onOpenBuyTokens}
+            onOpenReceive={onOpenReceive}
+            onOpenSendFund={onOpenSendFund}
+            totalChangePercent={totalBalanceInfo.change.percent}
+            totalChangeValue={totalBalanceInfo.change.value}
+            totalValue={totalBalanceInfo.convertedValue}
+          />
+        </div>
+
+        <div
+          className={'__scroll-container'}
+        >
+          {
+            tokenGroupBalanceItems.map((item) => {
+              return (
+                <TokenGroupBalanceItem
+                  key={item.slug}
+                  {...item}
+                  onPressItem={tokenBalanceClick(item)}
+                />
+              );
+            })
+          }
+          {
+            !tokenGroupBalanceItems.length && (
+              <EmptyList
+                className={'__empty-list'}
+                emptyMessage={t('Try searching or importing one')}
+                emptyTitle={t('No tokens found')}
+                phosphorIcon={Coins}
               />
-            );
-          })
-        }
+            )
+          }
+          <div className={'__scroll-footer'}>
+            <Button
+              icon={<Icon phosphorIcon={FadersHorizontal} />}
+              onClick={onClickManageToken}
+              size={'xs'}
+              type={'ghost'}
+            >
+              {t('Manage tokens')}
+            </Button>
+          </div>
+        </div>
         {
-          !tokenGroupBalanceItems.length && (
-            <EmptyList
-              className={'__empty-list'}
-              emptyMessage={t('Try searching or importing one')}
-              emptyTitle={t('No tokens found')}
-              phosphorIcon={Coins}
-            />
+          !isWebUI && (
+            <>
+              <AccountSelectorModal
+                items={accountSelectorItems}
+                onSelectItem={openSelectAccount}
+              />
+
+              <TokensSelectorModal
+                address={selectedAccount}
+                items={tokenSelectorItems}
+                onSelectItem={openSelectToken}
+              />
+
+              <ReceiveQrModal
+                address={selectedAccount}
+                selectedNetwork={selectedNetwork}
+              />
+            </>
           )
         }
-        <div className={'__scroll-footer'}>
-          <Button
-            icon={<Icon phosphorIcon={FadersHorizontal} />}
-            onClick={onClickManageToken}
-            size={'xs'}
-            type={'ghost'}
-          >
-            {t('Manage tokens')}
-          </Button>
-        </div>
       </div>
-      {
-        !isWebUI && (
-          <>
-            <AccountSelectorModal
-              items={accountSelectorItems}
-              onSelectItem={openSelectAccount}
-            />
-
-            <TokensSelectorModal
-              address={selectedAccount}
-              items={tokenSelectorItems}
-              onSelectItem={openSelectToken}
-            />
-
-            <ReceiveQrModal
-              address={selectedAccount}
-              selectedNetwork={selectedNetwork}
-            />
-          </>
-        )
-      }
-    </div>
+    </>
   );
 };
 
@@ -583,6 +592,15 @@ const Tokens = styled(WrapperComponent)<WrapperProps>(({ theme: { extendToken, t
           color: token.colorTextLight4
         }
       }
+    },
+    '.__header-overlay': {
+      position: 'fixed',
+      height: 10,
+      top: token.sizeXXL,
+      left: 0,
+      right: 0,
+      zIndex: 5,
+      backgroundColor: token.colorBgSecondary
     }
   });
 });

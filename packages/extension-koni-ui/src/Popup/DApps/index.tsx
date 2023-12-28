@@ -355,7 +355,8 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
       gap: token.size,
       alignItems: 'center',
       position: 'sticky',
-      top: 0,
+      top: -10,
+      paddingTop: 10,
       backgroundColor: token.colorBgDefault,
       zIndex: 30,
       paddingBottom: token.paddingXS,
@@ -455,7 +456,7 @@ const DApps = styled(Component)<Props>(({ theme: { token } }: Props) => {
       },
 
       '.__dapp-list-area': {
-        marginTop: 24
+        marginTop: 14
       },
 
       '.slick-arrow': {

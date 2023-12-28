@@ -2,5 +2,4 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './PoolDetailModal';
-export * from './StakingNetworkDetailModal';
 export * from './ValidatorDetailModal';

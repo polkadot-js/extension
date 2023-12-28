@@ -20,6 +20,9 @@ export default abstract class BasePoolHandler {
   /** Pool's chain */
   public readonly chain: string;
 
+  /** Pool's logo */
+  protected _logo: string;
+
   /** Pool's slug */
   public abstract slug: string;
 
@@ -43,6 +46,11 @@ export default abstract class BasePoolHandler {
   protected constructor (state: KoniState, chain: string) {
     this.state = state;
     this.chain = chain;
+    this._logo = chain;
+  }
+
+  public get logo (): string {
+    return this._logo;
   }
 
   public get group (): string {
@@ -67,11 +75,12 @@ export default abstract class BasePoolHandler {
     return this.state.getNativeTokenInfo(this.chain);
   }
 
-  protected get defaultInfo (): Pick<YieldPoolInfo, 'name' | 'group' | 'chain' | 'slug' | 'shortName'> {
+  protected get defaultInfo (): Pick<YieldPoolInfo, 'name' | 'group' | 'chain' | 'slug' | 'shortName' | 'logo'> {
     return {
       name: this.name,
       shortName: this.shortName,
       group: this.group,
+      logo: this.logo,
       chain: this.chain,
       slug: this.slug
     };

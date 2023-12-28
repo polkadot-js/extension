@@ -6,7 +6,7 @@ import { BaseRequestSign, InternalRequestSign } from '@subwallet/extension-base/
 import { UnstakingInfo } from '../info';
 
 /**
- * @interface RequestYieldLeave
+ * @interface YieldLeaveParams
  * @description Request params to leave pool
  * @prop {string} address - Request account
  * @prop {string} amount - Amount token want to leave
@@ -14,7 +14,7 @@ import { UnstakingInfo } from '../info';
  * @prop {string} [selectedTarget] - Pool target want to leave (nomination pool and native staking need)
  * @prop {boolean} fastLeave - Fast leave pool (swap token)
  * */
-export interface RequestYieldLeave extends BaseRequestSign {
+export interface YieldLeaveParams extends BaseRequestSign {
   /** Request account */
   address: string;
   /** Amount token want to leave */
@@ -27,6 +27,8 @@ export interface RequestYieldLeave extends BaseRequestSign {
   fastLeave: boolean;
 }
 
+export type RequestYieldLeave = InternalRequestSign<YieldLeaveParams>;
+
 /**
  * @interface RequestYieldWithdrawal
  * @description Request params to withdraw
@@ -34,7 +36,7 @@ export interface RequestYieldLeave extends BaseRequestSign {
  * @prop {string} slug - Pool's slug
  * @prop {UnstakingInfo} unstakingInfo - Info of unstaking request wants to withdraw
  * */
-export interface RequestYieldWithdrawal extends BaseRequestSign {
+export interface YieldWithdrawalParams extends BaseRequestSign {
   /** Request account */
   address: string;
   /** Pool's slug */
@@ -50,10 +52,11 @@ export interface RequestYieldWithdrawal extends BaseRequestSign {
   unstakingInfo: UnstakingInfo;
 }
 
+export type RequestYieldWithdrawal = InternalRequestSign<YieldWithdrawalParams>;
+
 export interface StakeCancelWithdrawalParams extends BaseRequestSign {
   address: string;
   slug: string;
-  chain: string;
   selectedUnstaking: UnstakingInfo;
 }
 
@@ -62,7 +65,6 @@ export type RequestStakeCancelWithdrawal = InternalRequestSign<StakeCancelWithdr
 export interface StakeClaimRewardParams extends BaseRequestSign {
   address: string;
   slug: string;
-  chain: string;
   unclaimedReward?: string;
   bondReward?: boolean;
 }

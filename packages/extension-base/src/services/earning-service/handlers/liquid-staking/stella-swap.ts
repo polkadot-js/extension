@@ -43,7 +43,6 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
   protected readonly description: string;
   protected readonly name: string;
   protected readonly shortName: string;
-  protected readonly logo: string;
   protected readonly inputAsset: string = 'moonbeam-LOCAL-xcDOT';
   protected readonly altInputAsset: string = '';
   protected readonly derivativeAssets: string[] = ['moonbeam-ERC20-stDOT-0xbc7E02c4178a7dF7d3E564323a5c359dc96C4db4'];
@@ -61,7 +60,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     this.slug = 'xcDOT___liquid_staking___stellaswap';
     this.name = 'Stellaswap Liquid Staking';
     this.description = 'Earn rewards by staking xcDOT for stDOT';
-    this.logo = 'stellaswap';
+    this._logo = 'stellaswap';
     this.shortName = 'Stellaswap';
   }
 
@@ -103,7 +102,6 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
       ...this.defaultInfo,
       description: this.description,
       type: this.type,
-      logo: 'stellaswap',
       metadata: {
         ...this.baseMetadata,
         isAvailable: true,

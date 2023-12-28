@@ -162,7 +162,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
           const fee: YieldTokenBaseInfo = {
             slug: altInputTokenSlug,
-            amount: (xcmFeeInfo.partialFee * 1.2).toString() // TODO
+            amount: Math.round(xcmFeeInfo.partialFee * 1.2).toString() // TODO
           };
 
           return [step, fee];

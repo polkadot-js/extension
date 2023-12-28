@@ -49,3 +49,8 @@ export interface EarningRewardItem {
 
   /* Special info */
 }
+
+export interface EarningRewardJson {
+  ready: boolean;
+  data: Record<string, EarningRewardItem>;
+}

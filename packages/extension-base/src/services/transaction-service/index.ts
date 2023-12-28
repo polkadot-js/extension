@@ -511,7 +511,7 @@ export default class TransactionService {
       case ExtrinsicType.STAKING_WITHDRAW: {
         const data = parseTransactionData<ExtrinsicType.STAKING_WITHDRAW>(transaction.data);
 
-        historyItem.to = data.validatorAddress || '';
+        historyItem.to = data.unstakingInfo.validatorAddress || '';
         historyItem.amount = { ...baseNativeAmount, value: data.unstakingInfo.claimable || '0' };
         break;
       }

@@ -4,9 +4,8 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
-import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
+import { getNominationStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
 import { subscribeEssentialChainStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
-import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-base/koni/api/staking/paraChain';
 import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { subscribeBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/balance';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
@@ -14,7 +13,7 @@ import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/s
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import { COMMON_RELOAD_EVENTS, EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { waitTimeout } from '@subwallet/extension-base/utils';
 
 import { logger as createLogger, noop } from '@polkadot/util';
@@ -411,14 +410,11 @@ export class KoniSubscription {
       activeNetworks.push(key);
     });
 
-    const updateState = (result: StakingRewardItem) => {
-      this.state.updateStakingReward(result);
+    const updateState = (result: EarningRewardItem) => {
+      this.state.earningService.updateEarningReward(result);
     };
 
     await Promise.all([
-      getPoolingStakingRewardData(pooledAddresses, targetChainMap, this.state.getSubstrateApiMap(), updateState),
-      getAmplitudeUnclaimedStakingReward(this.state.getSubstrateApiMap(), addresses, chainInfoMap, activeNetworks, updateState),
-      // @ts-ignore
       this.state.earningService.getPoolReward(addresses, updateState) // TODO
     ]);
   }

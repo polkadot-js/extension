@@ -7,7 +7,6 @@ import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '
 import { getEarningStatusByNominations } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, isUrl, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
@@ -23,6 +22,31 @@ import BaseParaNativeStakingPoolHandler from './base-para';
 const convertAddress = (address: string) => {
   return isEthereumAddress(address) ? address.toLowerCase() : address;
 };
+
+export function getAstarWithdrawable (yieldPosition: YieldPositionInfo): UnstakingInfo | undefined {
+  const unstakingInfo: UnstakingInfo = {
+    chain: yieldPosition.chain,
+    status: UnstakingStatus.CLAIMABLE,
+    claimable: '0',
+    waitingTime: 0
+  };
+
+  let bnWithdrawable = BN_ZERO;
+
+  for (const unstaking of yieldPosition.unstakings) {
+    if (unstaking.status === UnstakingStatus.CLAIMABLE) {
+      bnWithdrawable = bnWithdrawable.add(new BN(unstaking.claimable));
+    }
+  }
+
+  if (bnWithdrawable.gt(BN_ZERO)) {
+    unstakingInfo.claimable = bnWithdrawable.toString();
+
+    return unstakingInfo;
+  } else {
+    return undefined;
+  }
+}
 
 export default class AstarNativeStakingPoolHandler extends BaseParaNativeStakingPoolHandler {
   /* Subscribe pool info */

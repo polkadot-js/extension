@@ -10,7 +10,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningStatus, HandleYieldStepParams, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, StakeClaimRewardParams, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, EarningStatus, HandleYieldStepParams, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -515,7 +515,7 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.STAKING_BOND]: RequestStakePoolingBonding,
   [ExtrinsicType.STAKING_UNBOND]: RequestUnbondingSubmit,
   [ExtrinsicType.STAKING_CLAIM_REWARD]: RequestStakeClaimReward,
-  [ExtrinsicType.STAKING_WITHDRAW]: RequestStakeWithdrawal,
+  [ExtrinsicType.STAKING_WITHDRAW]: RequestYieldWithdrawal,
   [ExtrinsicType.STAKING_COMPOUNDING]: RequestTuringStakeCompound,
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: RequestTuringCancelStakeCompound,
   [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: RequestStakeCancelWithdrawal,
@@ -1643,18 +1643,6 @@ export interface UnbondingSubmitParams extends BaseRequestSign {
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
 
-// WithdrawStake
-
-export interface StakeWithdrawalParams extends BaseRequestSign {
-  nominatorMetadata: NominatorMetadata,
-  unstakingInfo: UnstakingInfo,
-  chain: string,
-  validatorAddress?: string,
-  isLiquidStaking?: boolean
-}
-
-export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;
-
 // Claim
 
 // Compound
@@ -1745,20 +1733,6 @@ export type RequestCrossChainTransferExternal = InternalRequestSign<RequestCheck
 export type RequestNftTransferExternalSubstrate = InternalRequestSign<SubstrateNftSubmitTransaction>;
 
 export type RequestNftTransferExternalEvm = InternalRequestSign<EvmNftSubmitTransaction>;
-
-// Stake
-
-export type RequestStakeExternal = InternalRequestSign<BondingSubmitParams>;
-
-export type RequestUnStakeExternal = InternalRequestSign<UnbondingSubmitParams>;
-
-export type RequestWithdrawStakeExternal = InternalRequestSign<StakeWithdrawalParams>;
-
-export type RequestClaimRewardExternal = InternalRequestSign<StakeClaimRewardParams>;
-
-export type RequestCreateCompoundStakeExternal = InternalRequestSign<TuringStakeCompoundParams>;
-
-export type RequestCancelCompoundStakeExternal = InternalRequestSign<TuringCancelStakeCompoundParams>;
 
 export enum ChainEditStandard {
   EVM = 'EVM',
@@ -2164,7 +2138,6 @@ export interface KoniRequestSignatures {
   'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, SWTransactionResponse];
   'pri(staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
   'pri(staking.submitCancelWithdrawal)': [RequestStakeCancelWithdrawal, SWTransactionResponse];
-  'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, SWTransactionResponse];
   'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, SWTransactionResponse];
   'pri(bonding.submitBondingTransaction)': [RequestBondingSubmit, SWTransactionResponse];
   'pri(bonding.subscribeChainStakingMetadata)': [null, ChainStakingMetadata[], ChainStakingMetadata[]];
@@ -2319,6 +2292,7 @@ export interface KoniRequestSignatures {
 
   'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
   'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
+  'pri(yield.subscribeYieldReward)': [null, EarningRewardJson, EarningRewardJson];
   'pri(yield.getTargets)': [RequestGetYieldPoolTargets, YieldPoolTarget[]];
 
   // Deprecated
@@ -2350,7 +2324,7 @@ export interface KoniRequestSignatures {
 
   /* Other */
 
-  'pri(yield.withdraw.submit)': [RequestStakeWithdrawal, SWTransactionResponse];
+  'pri(yield.withdraw.submit)': [RequestYieldWithdrawal, SWTransactionResponse];
   'pri(yield.cancelWithdrawal.submit)': [RequestStakeCancelWithdrawal, SWTransactionResponse];
   'pri(yield.claimReward.submit)': [RequestStakeClaimReward, SWTransactionResponse];
 

@@ -6,14 +6,16 @@ import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/backg
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
+import { BehaviorSubject } from 'rxjs';
 
 import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
 
 export default class EarningService {
   protected readonly state: KoniState;
   protected handlers: Record<string, BasePoolHandler> = {};
+  private earningRewardSubject: BehaviorSubject<EarningRewardJson> = new BehaviorSubject<EarningRewardJson>({ ready: false, data: {} });
 
   constructor (state: KoniState) {
     this.state = state;
@@ -169,6 +171,21 @@ export default class EarningService {
 
   /* Get pools' reward */
 
+  public updateEarningReward (stakingRewardData: EarningRewardItem, callback?: (earningRewardData: EarningRewardJson) => void): void {
+    const stakingRewardState = this.earningRewardSubject.getValue();
+
+    stakingRewardState.ready = true;
+    const key = `${stakingRewardData.slug}___${stakingRewardData.address}`;
+
+    stakingRewardState.data[key] = stakingRewardData;
+
+    if (callback) {
+      callback(stakingRewardState);
+    }
+
+    this.earningRewardSubject.next(stakingRewardState);
+  }
+
   public async getPoolReward (addresses: string[], callback: (result: EarningRewardItem) => void): Promise<VoidFunction> {
     let cancel = false;
 
@@ -202,6 +219,14 @@ export default class EarningService {
         unsub?.();
       });
     };
+  }
+
+  public subscribeEarningReward (): BehaviorSubject<EarningRewardJson> {
+    return this.earningRewardSubject;
+  }
+
+  public getEarningRewards (): EarningRewardJson {
+    return this.earningRewardSubject.getValue();
   }
 
   /* Get pools' reward */

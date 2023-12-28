@@ -3,13 +3,13 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getBondedValidators, getEarningStatusByNominations, isUnstakeAll } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BaseYieldPositionInfo, BlockHeader, EarningStatus, NativeYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, BlockHeader, EarningRewardItem, EarningStatus, NativeYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -244,6 +244,39 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
   }
 
   /* Subscribe pool position */
+
+  /* Get pool reward */
+
+  override async getPoolReward (useAddresses: string[], callBack: (rs: EarningRewardItem) => void): Promise<VoidFunction> {
+    let cancel = false;
+    const substrateApi = this.substrateApi;
+
+    await substrateApi.isReady;
+
+    if (!_STAKING_CHAIN_GROUP.kilt.includes(this.chain)) {
+      await Promise.all(useAddresses.map(async (address) => {
+        const _unclaimedReward = await substrateApi.api.query.parachainStaking.rewards(address);
+
+        if (cancel) {
+          return;
+        }
+
+        callBack({
+          ...this.defaultInfo,
+          address: address,
+          type: this.type,
+          unclaimedReward: _unclaimedReward.toString(),
+          state: APIItemState.READY
+        });
+      }));
+    }
+
+    return () => {
+      cancel = false;
+    };
+  }
+
+  /* Get pool reward */
 
   /* Get pool targets */
 

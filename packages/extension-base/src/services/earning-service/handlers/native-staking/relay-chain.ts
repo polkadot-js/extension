@@ -45,11 +45,12 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
-      const [_totalEraStake, _totalIssuance, _auctionCounter, _minNominatorBond, _minimumActiveStake] = await Promise.all([
+      const [_totalEraStake, _totalIssuance, _auctionCounter, _minNominatorBond, _counterForNominators, _minimumActiveStake] = await Promise.all([
         substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
         substrateApi.api.query.balances.totalIssuance(),
         substrateApi.api.query.auctions?.auctionCounter(),
         substrateApi.api.query.staking.minNominatorBond(),
+        substrateApi.api.query.staking.counterForNominators(),
         substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake()
       ]);
 
@@ -70,6 +71,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
       const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
       const unlockingPeriod = parseInt(unlockingEras) * (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default); // in hours
+      const farmerCount = _counterForNominators.toPrimitive() as number;
 
       const minToHuman = formatNumber(minStake.toString(), nativeToken.decimals || 0, balanceFormatter);
 
@@ -84,7 +86,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           maxCandidatePerFarmer: parseInt(maxNominations),
           maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
           minJoinPool: minStake.toString(),
-          farmerCount: 0, // TODO recheck
+          farmerCount: farmerCount,
           era: parseInt(currentEra),
           tvl: bnTotalEraStake.toString(), // TODO recheck
           totalApy: expectedReturn, // TODO recheck

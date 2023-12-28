@@ -3,7 +3,8 @@
 
 import { PalletIdentityRegistration, PalletIdentitySuper } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { YieldAssetExpectedEarning, YieldCompoundingPeriod } from '@subwallet/extension-base/types';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolType } from '@subwallet/extension-base/types';
 
 import { hexToString, isHex } from '@polkadot/util';
 
@@ -102,4 +103,20 @@ export async function parseIdentity (substrateApi: _SubstrateApi, address: strin
   }
 
   return [undefined, false];
+}
+
+export function isActionFromValidator (stakingType: YieldPoolType, chain: string) {
+  if (stakingType === YieldPoolType.NOMINATION_POOL || stakingType === YieldPoolType.LIQUID_STAKING || stakingType === YieldPoolType.LENDING) {
+    return false;
+  }
+
+  if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+    return true;
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+    return true;
+  } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+    return true;
+  }
+
+  return false;
 }

@@ -81,7 +81,7 @@ const Component: React.FC<Props> = (props: Props) => {
 const WCNetworkBase = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '&.network-modal': {
-      '--row-gap': token.sizeXS,
+      '--row-gap': `${token.sizeXS}px`,
       '.ant-sw-modal-body': {
         padding: `${token.padding}px 0 ${token.padding}px`,
         flexDirection: 'column',

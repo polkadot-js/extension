@@ -147,7 +147,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
 const DeriveAccountModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--row-gap': token.sizeXS,
+    '--row-gap': `${token.sizeXS}px`,
 
     '.ant-sw-modal-body': {
       padding: `${token.padding}px 0`,

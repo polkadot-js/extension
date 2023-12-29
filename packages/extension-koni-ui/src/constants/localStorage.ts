@@ -20,3 +20,6 @@ export const TRANSACTION_STORAGES = [TRANSFER_TRANSACTION, NFT_TRANSACTION, STAK
 
 export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';
 export const SEED_PREVENT_MODAL = 'seed.prevent-modal';
+
+export const CONFIRM_GENERAL_TERM = 'general.term-and-condition';
+export const CONFIRM_TERM_SEED_PHRASE = 'seed-phrase.term-and-condition';

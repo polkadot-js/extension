@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCopy } from '@subwallet/extension-koni-ui/hooks';
-import { ThemeProps, WordItem } from '@subwallet/extension-koni-ui/types';
+import { Theme, ThemeProps, WordItem } from '@subwallet/extension-koni-ui/types';
 import { convertToWords } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -10,7 +10,7 @@ import { saveAs } from 'file-saver';
 import { CopySimple, EyeSlash } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
   seedPhrase: string;
@@ -25,6 +25,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const words: Array<WordItem> = useMemo(() => convertToWords(seedPhrase), [seedPhrase]);
 
   const onCopy = useCopy(seedPhrase);
+  const { token } = useTheme() as Theme;
 
   const backupMnemonicSeed = useCallback(() => {
     const blob = new Blob([seedPhrase], { type: 'text/plain' });
@@ -32,13 +33,15 @@ const Component: React.FC<Props> = (props: Props) => {
     saveAs(blob, 'mnemonic-seed.txt');
   }, [seedPhrase]);
 
-  const onClick = useCallback(() => {
+  const onClickToCopy = useCallback(() => {
     onCopy();
+  }, [onCopy]);
 
+  const onClickToSave = useCallback(() => {
     if (enableDownload) {
       backupMnemonicSeed();
     }
-  }, [backupMnemonicSeed, enableDownload, onCopy]);
+  }, [backupMnemonicSeed, enableDownload]);
 
   return (
     <div className={CN(className)}>
@@ -70,11 +73,22 @@ const Component: React.FC<Props> = (props: Props) => {
         icon={(
           <Icon phosphorIcon={CopySimple} />
         )}
-        onClick={onClick}
+        onClick={onClickToCopy}
         size='xs'
         type='ghost'
       >
-        {enableDownload ? t('Copy & Save to the clipboard') : t('Copy to clipboard')}
+        {t('Copy to the clipboard')}
+      </Button>
+      <span style={{ color: token.colorTextLight5, marginTop: '-4px', marginBottom: '-4px' }}>{t('or')}</span>
+      <Button
+        disabled={!enableDownload}
+        icon={(<></>)}
+        onClick={onClickToSave}
+        size='xs'
+        style={{ textDecoration: 'underline' }}
+        type='ghost'
+      >
+        {t('Download seed phrase')}
       </Button>
     </div>
   );

@@ -30,3 +30,8 @@ export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
 /* Campaign */
 export const HOME_CAMPAIGN_BANNER_MODAL = 'home-campaign-banner-modal';
 /* Campaign */
+
+/* Terms and Conditions */
+export const GENERAL_TERM_AND_CONDITION_MODAL = 'general-term-and-condition-modal';
+export const TERM_AND_CONDITION_SEED_PHRASE_MODAL = 'term-and-condition-seed-phrase-modal';
+/* Terms and Conditions */

@@ -4,7 +4,8 @@
 import { CampaignBanner } from '@subwallet/extension-base/background/KoniTypes';
 import { CampaignBannerModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
-import { HOME_CAMPAIGN_BANNER_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/GeneralTermModal';
+import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -14,6 +15,7 @@ import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps;
 
@@ -25,7 +27,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const tokenGroupStructure = useTokenGroup(chainsByAccountType);
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-
+  const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
   const mantaPayConfig = useGetMantaPayConfig(currentAccount?.address);
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const handleMantaPaySync = useHandleMantaPaySync();
@@ -42,6 +44,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     inactiveModal(GlobalSearchTokenModalId);
   }, [inactiveModal]);
 
+  const onAfterConfirmTermModal = useCallback(() => {
+    setIsConfirmedTermGeneral('confirmed');
+  }, [setIsConfirmedTermGeneral]);
+
   useEffect(() => {
     if (mantaPayConfig && mantaPayConfig.enabled && !mantaPayConfig.isInitialSync && !isZkModeSyncing) {
       handleMantaPaySync(mantaPayConfig.address);
@@ -53,6 +59,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       activeModal(HOME_CAMPAIGN_BANNER_MODAL);
     }
   }, [activeModal, firstBanner]);
+
+  useEffect(() => {
+    if (isConfirmedTermGeneral.includes('nonConfirmed')) {
+      activeModal(GENERAL_TERM_AND_CONDITION_MODAL);
+    }
+  }, [activeModal, isConfirmedTermGeneral, setIsConfirmedTermGeneral]);
 
   return (
     <>
@@ -68,6 +80,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             showSearchIcon
           >
             <Outlet />
+            <GeneralTermModal onOk={onAfterConfirmTermModal} />
           </Layout.Home>
         </div>
       </HomeContext.Provider>

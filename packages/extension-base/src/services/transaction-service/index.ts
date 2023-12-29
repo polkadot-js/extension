@@ -495,7 +495,7 @@ export default class TransactionService {
         {
           const data = parseTransactionData<ExtrinsicType.STAKING_LEAVE_POOL>(transaction.data);
 
-          historyItem.to = data.nominatorMetadata.address || '';
+          historyItem.to = data.address || '';
           historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
         }
 

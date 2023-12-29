@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -53,6 +53,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
   /** @inner */
   protected override readonly allowFastUnstake = false;
   public slug: string;
+  public override transactionChainType: ChainType = ChainType.EVM;
 
   constructor (state: KoniState, chain: string) {
     super(state, chain);

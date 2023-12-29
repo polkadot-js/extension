@@ -567,7 +567,19 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
     }
 
-    const extrinsic = chainApi.api.tx.nominationPools.unbond({ Id: poolPosition.address }, amount);
+    let extrinsic: TransactionData;
+    const binaryAmount = new BN(amount);
+
+    const isUnstakeAll = amount === poolPosition.activeStake;
+
+    if (isUnstakeAll) {
+      const chillTx = chainApi.api.tx.staking.chill();
+      const unbondTx = chainApi.api.tx.staking.unbond(binaryAmount);
+
+      extrinsic = chainApi.api.tx.utility.batchAll([chillTx, unbondTx]);
+    } else {
+      extrinsic = chainApi.api.tx.staking.unbond(binaryAmount);
+    }
 
     return [ExtrinsicType.STAKING_LEAVE_POOL, extrinsic];
   }

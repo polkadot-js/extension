@@ -511,7 +511,7 @@ export interface ExtrinsicDataTypeMap {
 
   // Staking
   [ExtrinsicType.STAKING_JOIN_POOL]: RequestStakePoolingBonding,
-  [ExtrinsicType.STAKING_LEAVE_POOL]: RequestStakePoolingUnbonding,
+  [ExtrinsicType.STAKING_LEAVE_POOL]: RequestYieldLeave,
   [ExtrinsicType.STAKING_BOND]: RequestStakePoolingBonding,
   [ExtrinsicType.STAKING_UNBOND]: RequestUnbondingSubmit,
   [ExtrinsicType.STAKING_CLAIM_REWARD]: RequestStakeClaimReward,

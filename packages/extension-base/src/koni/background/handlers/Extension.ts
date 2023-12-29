@@ -3923,7 +3923,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: params, // TODO
       extrinsicType,
-      chainType: ChainType.SUBSTRATE
+      chainType: handler?.transactionChainType || ChainType.SUBSTRATE
     });
   }
 
@@ -3980,7 +3980,6 @@ export default class KoniExtension {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
-    const chainInfo = poolHandler.chainInfo;
     const extrinsic = await this.#koniState.earningService.handleYieldWithdraw(params);
 
     return await this.#koniState.transactionService.handleTransaction({
@@ -3989,7 +3988,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: params,
       extrinsicType: ExtrinsicType.STAKING_WITHDRAW,
-      chainType: _isChainEvmCompatible(chainInfo) ? ChainType.EVM : ChainType.SUBSTRATE
+      chainType: poolHandler?.transactionChainType || ChainType.SUBSTRATE
     });
   }
 
@@ -4010,7 +4009,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: params,
       extrinsicType: ExtrinsicType.STAKING_CANCEL_UNSTAKE,
-      chainType: ChainType.SUBSTRATE
+      chainType: poolHandler?.transactionChainType || ChainType.SUBSTRATE
     });
   }
 
@@ -4030,7 +4029,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: params,
       extrinsicType: ExtrinsicType.STAKING_CLAIM_REWARD,
-      chainType: ChainType.SUBSTRATE
+      chainType: poolHandler?.transactionChainType || ChainType.SUBSTRATE
     });
   }
 

@@ -2023,7 +2023,7 @@ export default class KoniExtension {
             };
 
             const _price = await web3.api.eth.getGasPrice();
-            const gasPrice = recalculateGasPrice(_price, networkKey, true);
+            const gasPrice = recalculateGasPrice(_price, networkKey);
             const gasLimit = await web3.api.eth.estimateGas(transaction);
 
             estimatedFee = (gasLimit * parseInt(gasPrice)).toString();

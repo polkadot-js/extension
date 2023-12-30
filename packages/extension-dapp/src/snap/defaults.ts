@@ -5,7 +5,7 @@ import { getLatestPackageVersion } from "./utils.js";
 
 // export const DEFAULT_SNAP_ORIGIN = `local:http://localhost:8080`; 
 export const DEFAULT_SNAP_ORIGIN = `npm:@polkagate/snap`
-export let DEFAULT_SNAP_VERSION = '0.1.10';
+export let DEFAULT_SNAP_VERSION = '0.1.11';
 export const DEFAULT_SNAP_NAME = 'polkamask';
 
 export const SUPPORTED_SNAPS = {

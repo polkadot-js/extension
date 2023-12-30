@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-export const hasMetamask = window.ethereum;
+export const hasMetamask = window.ethereum.isMetaMask;
 
 export async function getLatestPackageVersion(packageName: string): Promise<string> {
   try {

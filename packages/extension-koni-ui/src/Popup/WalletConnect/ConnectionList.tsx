@@ -128,7 +128,7 @@ const ConnectionList = styled(Component)<Props>(({ theme: { token } }: Props) =>
     flexDirection: 'column',
 
     '.sessions-list': {
-      '--row-gap': token.sizeXS,
+      '--row-gap': `${token.sizeXS}px`,
       margin: `0 -${token.margin}px`
     }
   };

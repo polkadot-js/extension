@@ -54,7 +54,7 @@ const Component: React.FC<SelectAccountTypeProps> = (props: SelectAccountTypePro
     {
       icon: 'polkadot',
       key: SUBSTRATE_ACCOUNT_TYPE,
-      label: t('Substrate'),
+      label: t('Polkadot'),
       onClick: onClickItem(SUBSTRATE_ACCOUNT_TYPE)
     },
     {

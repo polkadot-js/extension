@@ -2,15 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, DEFAULT_ACCOUNT_TYPES, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/GeneralTermModal';
+import { ATTACH_ACCOUNT_MODAL, CONFIRM_GENERAL_TERM, CREATE_ACCOUNT_MODAL, DEFAULT_ACCOUNT_TYPES, GENERAL_TERM_AND_CONDITION_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useSetSelectedAccountTypes, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ButtonProps, Icon, Image, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps;
 
@@ -27,7 +29,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const setSelectedAccountTypes = useSetSelectedAccountTypes(false);
-
+  const [modalIdAfterConfirm, setModalIdAfterConfirm] = useState('');
+  const [_isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
   const items = useMemo((): WelcomeButtonItem[] => [
     {
       description: t('Create a new account with SubWallet'),
@@ -61,8 +64,22 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         inactiveModal(SELECT_ACCOUNT_MODAL);
         activeModal(id);
       }
+
+      setIsConfirmedTermGeneral('confirmed');
     };
-  }, [activeModal, inactiveModal, navigate, setSelectedAccountTypes]);
+  }, [activeModal, inactiveModal, navigate, setIsConfirmedTermGeneral, setSelectedAccountTypes]);
+
+  const onClickToSelectTypeConnect = useCallback((idModal: string) => {
+    return () => {
+      setModalIdAfterConfirm(idModal);
+
+      if (_isConfirmedTermGeneral.includes('nonConfirmed')) {
+        activeModal(GENERAL_TERM_AND_CONDITION_MODAL);
+      } else {
+        openModal(idModal)();
+      }
+    };
+  }, [_isConfirmedTermGeneral, activeModal, openModal]);
 
   return (
     <Layout.Base
@@ -95,7 +112,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                   />
                 )}
                 key={item.id}
-                onClick={openModal(item.id)}
+                onClick={onClickToSelectTypeConnect(item.id)}
                 schema={item.schema}
               >
                 <div className='welcome-import-button-content'>
@@ -107,6 +124,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           }
         </div>
       </div>
+      <GeneralTermModal onOk={openModal(modalIdAfterConfirm)} />
     </Layout.Base>
   );
 }

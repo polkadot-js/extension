@@ -311,7 +311,7 @@ function Component ({ className, request }: Props) {
 }
 
 const AuthorizeConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({
-  '--content-gap': token.size,
+  '--content-gap': `${token.size}px`,
 
   '.title.sub-title': {
     fontSize: token.fontSizeHeading6,

@@ -378,7 +378,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
 const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--row-gap': token.sizeXS,
+    '--row-gap': `${token.sizeXS}px`,
 
     '.container': {
       padding: token.padding,

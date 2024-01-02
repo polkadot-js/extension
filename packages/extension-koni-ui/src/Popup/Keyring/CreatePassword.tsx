@@ -3,6 +3,7 @@
 
 import { AlertBox, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import { TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants/common';
 import { REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { useNotification } from '@subwallet/extension-koni-ui/hooks';
@@ -14,10 +15,10 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/utils/form/validators/password';
-import { Form, Icon, Input, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
+import { Checkbox, Form, Icon, Input, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CaretLeft, CheckCircle, ShieldPlus } from 'phosphor-react';
-import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
+import { CaretLeft, CheckCircle } from 'phosphor-react';
+import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -28,11 +29,13 @@ type Props = ThemeProps
 enum FormFieldName {
   PASSWORD = 'password',
   CONFIRM_PASSWORD = 'confirm_password',
+  CONFIRM_CHECKBOX = 'confirm_checkbox'
 }
 
 interface CreatePasswordFormState {
   [FormFieldName.PASSWORD]: string;
   [FormFieldName.CONFIRM_PASSWORD]: string;
+  [FormFieldName.CONFIRM_CHECKBOX]: boolean;
 }
 
 const FooterIcon = (
@@ -59,7 +62,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const passwordRules = useMemo(() => renderBasePasswordRules(t('Password'), t), [t]);
   const confirmPasswordRules = useMemo(() => renderBaseConfirmPasswordRules(FormFieldName.PASSWORD, t), [t]);
+  const checkBoxValidator = useCallback((rule: RuleObject, value: boolean): Promise<void> => {
+    if (!value) {
+      return Promise.reject(new Error(t('CheckBox is required')));
+    }
 
+    return Promise.resolve();
+  }, [t]);
   const [form] = Form.useForm<CreatePasswordFormState>();
   const [isDisabled, setIsDisable] = useState(true);
 
@@ -75,8 +84,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const onSubmit: Callbacks<CreatePasswordFormState>['onFinish'] = useCallback((values: CreatePasswordFormState) => {
     const password = values[FormFieldName.PASSWORD];
+    const checkBox = values[FormFieldName.CONFIRM_CHECKBOX];
 
-    if (password) {
+    if (password && checkBox) {
       setLoading(true);
       keyringChangeMasterPassword({
         createNew: true,
@@ -146,23 +156,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         title={t('Create a password')}
       >
         <div className='body-container'>
-          <div className='page-icon'>
-            <PageIcon
-              color='var(--page-icon-color)'
-              iconProps={{
-                weight: 'fill',
-                phosphorIcon: ShieldPlus
-              }}
-            />
-          </div>
-          <div className='title'>
-            {t('Create a password')}
+          <div className='notify'>
+            {t('This password can only unlock your SubWallet on this browser')}
           </div>
           <Form
             form={form}
             initialValues={{
               [FormFieldName.PASSWORD]: '',
-              [FormFieldName.CONFIRM_PASSWORD]: ''
+              [FormFieldName.CONFIRM_PASSWORD]: '',
+              [FormFieldName.CONFIRM_CHECKBOX]: ''
             }}
             name={formName}
             onFieldsChange={onUpdate}
@@ -190,11 +192,31 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               />
             </Form.Item>
             <Form.Item>
-              <AlertBox
-                description={t('8 characters at least. Uppercase, numbers, and special characters are recommended.')}
-                title={t('Always choose a strong password!')}
-                type='warning'
-              />
+              <div className={'annotation'}>
+                {t('Passwords should be at least 8 characters in length, including letters and numbers')}
+              </div>
+            </Form.Item>
+            <Form.Item
+              className={'form-checkbox'}
+              name={FormFieldName.CONFIRM_CHECKBOX}
+              rules={[
+                {
+                  validator: checkBoxValidator
+                }
+              ]}
+              statusHelpAsTooltip={true}
+              valuePropName={'checked'}
+            >
+              <Checkbox
+                className={'checkbox'}
+              >
+                I understand that SubWallet can’t recover the password. <a
+                  href={TERMS_OF_SERVICE_URL}
+                  rel='noreferrer'
+                  style={{ textDecoration: 'underline' }}
+                  target={'_blank'}
+                >Learn more.</a>
+              </Checkbox>
             </Form.Item>
           </Form>
           <SwModal
@@ -242,13 +264,26 @@ const CreatePassword = styled(Component)<Props>(({ theme: { token } }: Props) =>
         '--page-icon-color': token.colorSecondary
       },
 
-      '.title': {
+      '.notify': {
         marginTop: token.margin,
         marginBottom: token.margin * 2,
         fontWeight: token.fontWeightStrong,
-        fontSize: token.fontSizeHeading3,
+        fontSize: token.fontSize,
         lineHeight: token.lineHeightHeading3,
-        color: token.colorTextBase
+        color: token.colorWarningText
+      },
+
+      '.annotation': {
+        fontSize: token.fontSizeSM,
+        color: token.colorTextLight5,
+        textAlign: 'left'
+      },
+      '.form-checkbox': {
+        '.checkbox': {
+          textAlign: 'left',
+          display: 'flex',
+          alignItems: 'center'
+        }
       }
     },
 

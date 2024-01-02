@@ -174,6 +174,10 @@ export const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorFallback />,
     children: [
+      {
+        path: '/wc',
+        element: <div />
+      },
       Welcome.generateRouterObject('/welcome', true),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),

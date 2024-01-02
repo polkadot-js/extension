@@ -174,7 +174,7 @@ export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
 }
 
 export const _isSupportOrdinal = (chain: string) => {
-  const chains = ['polkadot'];
+  const chains = ['polkadot', 'astar', 'bifrost_dot', 'moonbeam'];
 
   return chains.includes(chain);
 };

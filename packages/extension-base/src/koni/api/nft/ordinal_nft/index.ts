@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { ORDINAL_COLLECTION, ORDINAL_METHODS } from '@subwallet/extension-base/constants';
+import { ORDINAL_COLLECTION } from '@subwallet/extension-base/constants';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { fetchExtrinsicParams, fetchRemarkEvent } from '@subwallet/extension-base/koni/api/nft/ordinal_nft/utils';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
@@ -12,40 +12,37 @@ const parseParamData = (param: SubscanBatchChildParam, event: SubscanEventBaseIt
   const ordinalData = JSON.parse(param.value) as OrdinalRemarkData;
 
   if ('p' in ordinalData) {
-    if (ORDINAL_METHODS.includes(ordinalData.p)) {
-      const properties: Record<string, { value: any }> = {};
+    const properties: Record<string, { value: any }> = {};
 
-      for (const [key, value] of Object.entries(ordinalData)) {
-        const _name = key.charAt(0).toUpperCase() + key.slice(1);
+    for (const [key, value] of Object.entries(ordinalData)) {
+      const _name = key.charAt(0).toUpperCase() + key.slice(1);
 
-        properties[_name] = { value: value as unknown };
-      }
-
-      properties['Block number'] = { value: event.extrinsic_index.split('-')[0] };
-      properties.Timestamp = { value: event.block_timestamp };
-
-      const op = ordinalData.op.charAt(0).toUpperCase() + ordinalData.op.slice(1);
-
-      const nameParams = [op];
-
-      if (ordinalData.amt !== undefined) {
-        nameParams.push(ordinalData.amt);
-      }
-
-      nameParams.push(ordinalData.tick);
-
-      const name = nameParams.join(' ');
-
-      return {
-        chain: chain,
-        collectionId: ORDINAL_COLLECTION,
-        id: event.extrinsic_hash,
-        description: JSON.stringify(ordinalData),
-        name,
-        owner: address,
-        properties: properties
-      };
+      properties[_name] = { value: value as unknown };
     }
+
+    properties['Block number'] = { value: event.extrinsic_index.split('-')[0] };
+    properties.Timestamp = { value: event.block_timestamp };
+
+    const op = ordinalData.op.charAt(0).toUpperCase() + ordinalData.op.slice(1);
+
+    const nameParams = [op];
+
+    if (ordinalData.amt !== undefined) {
+      nameParams.push(ordinalData.amt);
+    }
+
+    nameParams.push(ordinalData.tick);
+    const name = nameParams.join(' ');
+
+    return {
+      chain: chain,
+      collectionId: ORDINAL_COLLECTION,
+      id: event.extrinsic_hash,
+      description: JSON.stringify(ordinalData),
+      name,
+      owner: address,
+      properties: properties
+    };
   }
 
   return undefined;

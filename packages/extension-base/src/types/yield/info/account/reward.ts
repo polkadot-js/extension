@@ -3,34 +3,23 @@
 
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 
-import { YieldPoolType } from '../base';
+import { BasePoolInfo } from '../base';
 
 /**
  * @interface EarningRewardItem
+ * @extends BasePoolInfo
  * @prop {string} address - Account address
- * @prop {string} chain - Chain's slug
- * @prop {string} group - Pool's group
- * @prop {string} slug - Pool's slug
- * @prop {YieldPoolType} type - Pool's type
  * @prop {APIItemState} state - State of item
  * @prop {string} [latestReward] - Latest rewarded claimed
  * @prop {string} [totalReward] - Total rewarded claimed
  * @prop {string} [totalSlash] - Total token slashed
  * @prop {string} [unclaimedReward] - Un-claim reward
  * */
-export interface EarningRewardItem {
+export interface EarningRewardItem extends BasePoolInfo {
   /* Base info */
 
   /** Account address */
   address: string;
-  /** Chain's slug */
-  chain: string;
-  /** Pool's group */
-  group: string;
-  /** Pool's slug */
-  slug: string;
-  /** Pool's type */
-  type: YieldPoolType;
 
   /* Base info */
 

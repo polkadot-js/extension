@@ -175,7 +175,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const bnActiveStake = new BN(activeStake);
     let waitingNominationCount = 0;
 
-    if (bnActiveStake.gte(minStake)) {
+    if (bnActiveStake.gte(minStake) && bnActiveStake.gt(BN_ZERO)) {
       for (const nomination of nominationList) {
         if (nomination.status === EarningStatus.EARNING_REWARD) { // only need 1 earning nomination to count
           stakingStatus = EarningStatus.EARNING_REWARD;

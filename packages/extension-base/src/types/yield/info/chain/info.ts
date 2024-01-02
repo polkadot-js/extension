@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolType } from '../base';
+import { BasePoolInfo, YieldPoolType } from '../base';
 
 /**
  * @interface YieldAssetEarningStats
@@ -146,29 +146,15 @@ export type YieldPoolMetadata = NormalYieldPoolMetadata | SpecialYieldPoolMetada
 
 /**
  * @interface AbstractYieldPoolInfo
- * @prop {string} slug - Pool's slug
- * @prop {string} chain - Pool's chain
- * @prop {string} type - Pool's type
- * @prop {string} group - Pool's group (by token)
+ * @extends BasePoolInfo
  * @prop {string} description - Pool's description
  * @prop {string} name - Pool's name
- * @prop {string} [logo] - Pool's logo
+ * @prop {string} shortName - Pool's short name
+ * @prop {string} logo - Pool's logo
  * @prop {YieldPoolMetadata} metadata - Pool's metadata
  * */
-export interface AbstractYieldPoolInfo {
+export interface AbstractYieldPoolInfo extends BasePoolInfo {
   /* Common info */
-
-  /** Pool's slug */
-  slug: string;
-
-  /** Pool's chain */
-  chain: string;
-
-  /** Pool's type */
-  type: YieldPoolType;
-
-  /** Pool's group (by token) */
-  group: string;
 
   /** Pool's description */
   description: string;
@@ -179,8 +165,8 @@ export interface AbstractYieldPoolInfo {
   /** Pool's short name */
   shortName: string;
 
-  /** Pool's logo - optional */
-  logo?: string;
+  /** Pool's logo */
+  logo: string;
 
   /* Common info */
 

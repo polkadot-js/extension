@@ -35,3 +35,26 @@ export enum YieldCompoundingPeriod {
   MONTHLY = 30,
   YEARLY = 365
 }
+
+/**
+ * @interface BasePoolInfo
+ * @prop {string} slug - Pool's slug
+ * @prop {string} chain - Pool's chain
+ * @prop {string} type - Pool's type
+ * @prop {string} group - Pool's group (by token)
+ * */
+export interface BasePoolInfo {
+  /* Common info */
+
+  /** Pool's slug */
+  slug: string;
+
+  /** Pool's chain */
+  chain: string;
+
+  /** Pool's type */
+  type: YieldPoolType;
+
+  /** Pool's group (by token) */
+  group: string;
+}

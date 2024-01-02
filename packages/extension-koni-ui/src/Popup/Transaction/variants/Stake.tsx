@@ -495,6 +495,7 @@ const Component: React.FC = () => {
                 decimals={(chain && from) ? decimals : -1}
                 maxValue={maxValue}
                 showMaxButton={false}
+                disabled={!(chain && from)}
               />
             </Form.Item>
           </div>

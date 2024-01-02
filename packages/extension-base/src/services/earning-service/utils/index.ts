@@ -4,7 +4,7 @@
 import { PalletIdentityRegistration, PalletIdentitySuper } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolType } from '@subwallet/extension-base/types';
+import { LendingYieldPoolInfo, LiquidYieldPoolInfo, NativeYieldPoolInfo, NominationYieldPoolInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 
 import { hexToString, isHex } from '@polkadot/util';
 
@@ -120,3 +120,19 @@ export function isActionFromValidator (stakingType: YieldPoolType, chain: string
 
   return false;
 }
+
+export const isNominationPool = (pool: YieldPoolInfo): pool is NominationYieldPoolInfo => {
+  return pool.type === YieldPoolType.NOMINATION_POOL;
+};
+
+export const isNativeStakingPool = (pool: YieldPoolInfo): pool is NativeYieldPoolInfo => {
+  return pool.type === YieldPoolType.NATIVE_STAKING;
+};
+
+export const isLiquidPool = (pool: YieldPoolInfo): pool is LiquidYieldPoolInfo => {
+  return pool.type === YieldPoolType.LIQUID_STAKING;
+};
+
+export const isLendingPool = (pool: YieldPoolInfo): pool is LendingYieldPoolInfo => {
+  return pool.type === YieldPoolType.LENDING;
+};

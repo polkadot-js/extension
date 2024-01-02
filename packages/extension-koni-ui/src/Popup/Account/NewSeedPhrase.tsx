@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SEED_PREVENT_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { SeedPhraseTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/SeedPhraseTermModal';
+import { CONFIRM_TERM_SEED_PHRASE, DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SEED_PREVENT_MODAL, SELECTED_ACCOUNT_TYPE, TERM_AND_CONDITION_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetDefaultAccountName, useIsPopup, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -45,7 +46,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const notify = useNotification();
   const navigate = useNavigate();
-
+  const [_isConfirmedTermSeedPhrase] = useLocalStorage(CONFIRM_TERM_SEED_PHRASE, 'nonConfirmed');
   const { goHome } = useDefaultNavigate();
   const { activeModal } = useContext(ModalContext);
   const checkUnlock = useUnlockChecker();
@@ -110,6 +111,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     });
   }, [seedPhrase, checkUnlock, accountName, accountTypes, onComplete, notify]);
 
+  const onConfirmTerms = useCallback(() => {
+    _onCreate();
+  }, [_onCreate]);
+
+  useEffect(() => {
+    if (_isConfirmedTermSeedPhrase === 'nonConfirmed') {
+      activeModal(TERM_AND_CONDITION_SEED_PHRASE_MODAL);
+    }
+  }, [_isConfirmedTermSeedPhrase, activeModal]);
+
   useEffect(() => {
     createSeedV2(undefined, undefined, DEFAULT_ACCOUNT_TYPES)
       .then((response): void => {
@@ -125,7 +136,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const buttonProps = {
     children: t('I have saved it somewhere safe'),
     icon: FooterIcon,
-    onClick: _onCreate,
+    onClick: onConfirmTerms,
     disabled: !seedPhrase,
     loading: loading
   };
@@ -168,7 +179,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         >
           <div className={'seed-phrase-container'}>
             <div className='description'>
-              {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
+              {t('Keep your seed phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.')}
             </div>
             <WordPhrase
               enableDownload={true}
@@ -189,6 +200,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         </div>
 
       </Layout.Base>
+      <SeedPhraseTermModal onOk={_onCreate} />
     </PageWrapper>
   );
 };

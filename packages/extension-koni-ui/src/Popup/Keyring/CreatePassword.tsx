@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { AlertBox, BaseModal, InfoIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { CREATE_RETURN, REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { BaseModal, InfoIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { CREATE_RETURN, REQUEST_CREATE_PASSWORD_MODAL, TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFocusFormItem, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -11,7 +11,8 @@ import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messag
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon, Input, ModalContext, PageIcon } from '@subwallet/react-ui';
+import { Button, Checkbox, Form, Icon, Input, ModalContext, PageIcon } from '@subwallet/react-ui';
+import { RuleObject } from '@subwallet/react-ui/es/form';
 import CN from 'classnames';
 import { CaretLeft, CheckCircle, ShieldPlus } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
@@ -26,11 +27,13 @@ type Props = ThemeProps
 enum FormFieldName {
   PASSWORD = 'password',
   CONFIRM_PASSWORD = 'confirm_password',
+  CONFIRM_CHECKBOX = 'confirm_checkbox'
 }
 
 interface CreatePasswordFormState {
   [FormFieldName.PASSWORD]: string;
   [FormFieldName.CONFIRM_PASSWORD]: string;
+  [FormFieldName.CONFIRM_CHECKBOX]: boolean;
 }
 
 const FooterIcon = (
@@ -66,7 +69,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const passwordRules = useMemo(() => renderBasePasswordRules(t('Password'), t), [t]);
   const confirmPasswordRules = useMemo(() => renderBaseConfirmPasswordRules(FormFieldName.PASSWORD, t), [t]);
+  const checkBoxValidator = useCallback((rule: RuleObject, value: boolean): Promise<void> => {
+    if (!value) {
+      return Promise.reject(new Error(t('CheckBox is required')));
+    }
 
+    return Promise.resolve();
+  }, [t]);
   const [form] = Form.useForm<CreatePasswordFormState>();
   const [isDisabled, setIsDisable] = useState(true);
 
@@ -96,8 +105,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const onSubmit: Callbacks<CreatePasswordFormState>['onFinish'] = useCallback((values: CreatePasswordFormState) => {
     const password = values[FormFieldName.PASSWORD];
+    const checkBox = values[FormFieldName.CONFIRM_CHECKBOX];
 
-    if (password) {
+    if (password && checkBox) {
       setLoading(true);
       keyringChangeMasterPassword({
         createNew: true,
@@ -195,12 +205,17 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             </>
           )}
 
+          <div className='notify'>
+            {t('This password can only unlock your SubWallet on this browser')}
+          </div>
+
           <div className='form-container'>
             <Form
               form={form}
               initialValues={{
                 [FormFieldName.PASSWORD]: '',
-                [FormFieldName.CONFIRM_PASSWORD]: ''
+                [FormFieldName.CONFIRM_PASSWORD]: '',
+                [FormFieldName.CONFIRM_CHECKBOX]: ''
               }}
               name={formName}
               onFieldsChange={onUpdate}
@@ -229,11 +244,31 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 />
               </Form.Item>
               <Form.Item>
-                <AlertBox
-                  description={t('8 characters at least. Uppercase, numbers, and special characters are recommended.')}
-                  title={t('Always choose a strong password!')}
-                  type='warning'
-                />
+                <div className={'annotation'}>
+                  {t('Passwords should be at least 8 characters in length, including letters and numbers')}
+                </div>
+              </Form.Item>
+              <Form.Item
+                className={'form-checkbox'}
+                name={FormFieldName.CONFIRM_CHECKBOX}
+                rules={[
+                  {
+                    validator: checkBoxValidator
+                  }
+                ]}
+                statusHelpAsTooltip={true}
+                valuePropName={'checked'}
+              >
+                <Checkbox
+                  className={'checkbox'}
+                >
+                  I understand that SubWallet can’t recover the password. <a
+                    href={TERMS_OF_SERVICE_URL}
+                    rel='noreferrer'
+                    style={{ textDecoration: 'underline' }}
+                    target={'_blank'}
+                  >Learn more.</a>
+                </Checkbox>
               </Form.Item>
               {isWebUI && (
                 <Button
@@ -319,6 +354,28 @@ const CreatePassword = styled(Component)<Props>(({ theme: { extendToken, token }
         fontSize: token.fontSizeHeading3,
         lineHeight: token.lineHeightHeading3,
         color: token.colorTextBase
+      },
+
+      '.notify': {
+        marginTop: token.margin,
+        marginBottom: token.margin * 2,
+        fontWeight: token.fontWeightStrong,
+        fontSize: token.fontSize,
+        lineHeight: token.lineHeightHeading3,
+        color: token.colorWarningText
+      },
+
+      '.annotation': {
+        fontSize: token.fontSizeSM,
+        color: token.colorTextLight5,
+        textAlign: 'left'
+      },
+      '.form-checkbox': {
+        '.checkbox': {
+          textAlign: 'left',
+          display: 'flex',
+          alignItems: 'center'
+        }
       }
     },
 

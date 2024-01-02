@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { AutoConnect, CONNECT_EXTENSION, CREATE_RETURN, DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, PREDEFINED_WALLETS, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
-import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { AutoConnect, CONFIRM_GENERAL_TERM, CONNECT_EXTENSION, CREATE_RETURN, DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, PREDEFINED_WALLETS, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, GENERAL_TERM_AND_CONDITION_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
+import { GeneralTermModal } from '../components/Modal/TermsAndConditions/GeneralTermModal';
 import SocialGroup from '../components/SocialGroup';
 import { ScreenContext } from '../contexts/ScreenContext';
 import useGetDefaultAccountName from '../hooks/account/useGetDefaultAccountName';
@@ -54,6 +55,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const autoGenAttachReadonlyAccountName = useGetDefaultAccountName();
   const [, setSelectedAccountTypes] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
   const [_returnPath, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
+  const [modalIdAfterConfirm, setModalIdAfterConfirm] = useState('');
+  const [_isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
 
   const [form] = Form.useForm<ReadOnlyAccountInput>();
 
@@ -202,9 +205,23 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         inactiveModal(SELECT_ACCOUNT_MODAL);
         activeModal(id);
       }
+
+      setIsConfirmedTermGeneral('confirmed');
     };
   }
   , [activeModal, selectWallet, inactiveModal, navigate, setSelectedAccountTypes]);
+
+  const onClickToSelectTypeConnect = useCallback((idModal: string) => {
+    return () => {
+      setModalIdAfterConfirm(idModal);
+
+      if (_isConfirmedTermGeneral.includes('nonConfirmed')) {
+        activeModal(GENERAL_TERM_AND_CONDITION_MODAL);
+      } else {
+        openModal(idModal)();
+      }
+    };
+  }, [_isConfirmedTermGeneral, activeModal, openModal]);
 
   useEffect(() => {
     if (!isNoAccount) {
@@ -272,7 +289,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 }
                 key={item.id}
                 loading={item.loading}
-                onClick={openModal(item.id)}
+                onClick={onClickToSelectTypeConnect(item.id)}
                 schema={item.schema}
               >
                 <div className='welcome-import-button-content'>
@@ -337,6 +354,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       {isWebUI && (
         <SocialGroup className={'social-group'} />
       )}
+      <GeneralTermModal onOk={openModal(modalIdAfterConfirm)} />
     </Layout.Base>
   );
 }

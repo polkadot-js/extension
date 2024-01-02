@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 1.1.29
+Build date: Dec 29, 2023.
+
+Features & Update:
+- Add T&C (#2330)
+- Add reload balance feature (#2381)
+- Update token details screen (#2340)
+- Remove some RPC on Polkadot and Kusama (#2425)
+
+Bugs fixed:
+- Fixed some UI bug (#2203)
+- Fixed bug can not connect to WalletConnect (#2413)
+
 ## 1.1.28
 Build date: Dec 25, 2023.
 

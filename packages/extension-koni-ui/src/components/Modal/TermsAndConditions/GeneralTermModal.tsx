@@ -3,10 +3,12 @@
 
 // eslint-disable-next-line header/header
 import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
+import { BaseModal } from '@subwallet/extension-koni-ui/components';
 import { GENERAL_TERM_AND_CONDITION_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Checkbox, Icon, ModalContext, SwModal, Typography } from '@subwallet/react-ui';
+import { Button, Checkbox, Icon, ModalContext, Typography } from '@subwallet/react-ui';
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
 import CN from 'classnames';
 import { ArrowCircleRight, CaretDown } from 'phosphor-react';
@@ -27,7 +29,7 @@ interface StaticDataInterface {
 const Component = ({ className, onOk }: Props) => {
   const { inactiveModal } = useContext(ModalContext);
   const { t } = useTranslation();
-
+  const { isWebUI } = useContext(ScreenContext);
   const [staticData, setStaticData] = useState({} as StaticDataInterface);
   const [isChecked, setIsChecked] = useState(false);
   const [isScrollEnd, setIsScrollEnd] = useState(false);
@@ -61,11 +63,15 @@ const Component = ({ className, onOk }: Props) => {
   }, [inactiveModal, onOk]);
 
   return (
-    <SwModal
-      className={CN(className)}
+    <BaseModal
+      center={true}
+      className={CN(className, {
+        '-desktop-term': isWebUI
+      })}
       closable={false}
       id={modalId}
       title={t('Terms of Use')}
+      width={ isWebUI ? 784 : undefined }
     >
       <div
         className={'term-body'}
@@ -109,7 +115,7 @@ const Component = ({ className, onOk }: Props) => {
         </div>
 
       </div>
-    </SwModal>
+    </BaseModal>
   );
 };
 
@@ -133,15 +139,16 @@ export const GeneralTermModal = styled(Component)<Props>(({ theme: { token } }: 
         fontSize: token.fontSizeSM
       },
 
-      '.term-body-caret-button': {
-        position: 'absolute',
-        top: 338,
-        left: 334
-      },
       display: 'block',
       overflowY: 'scroll',
       scrollBehavior: 'smooth'
 
+    },
+
+    '.term-body-caret-button': {
+      position: 'absolute',
+      top: '60%',
+      right: '5%'
     },
 
     '.term-footer': {
@@ -172,6 +179,20 @@ export const GeneralTermModal = styled(Component)<Props>(({ theme: { token } }: 
     '.term-footer-annotation': {
       color: token.colorTextLight4,
       fontSize: token.fontSizeSM
+    },
+
+    '&.-desktop-term .ant-sw-modal-content': {
+      maxHeight: 746,
+      width: '100%',
+
+      '.term-body': {
+        maxHeight: 496
+      },
+
+      '.term-body-caret-button': {
+        top: '75%'
+      }
+
     }
 
   };

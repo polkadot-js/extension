@@ -49,6 +49,7 @@ const InstructionContainer = styled(Component)<PropsType>(({ theme: { token } }:
   '.alert-title.alert-title': {
     color: token.colorTextLight1
   }
+
 }));
 
 export default InstructionContainer;

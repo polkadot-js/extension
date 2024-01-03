@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { BaseModal, InfoIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AlertBox, BaseModal, InfoIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { CREATE_RETURN, REQUEST_CREATE_PASSWORD_MODAL, TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -11,10 +11,10 @@ import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messag
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { Button, Checkbox, Form, Icon, Input, ModalContext, PageIcon } from '@subwallet/react-ui';
+import { Button, Checkbox, Form, Icon, Input, ModalContext } from '@subwallet/react-ui';
 import { RuleObject } from '@subwallet/react-ui/es/form';
 import CN from 'classnames';
-import { CaretLeft, CheckCircle, ShieldPlus } from 'phosphor-react';
+import { CaretLeft, CheckCircle } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -190,24 +190,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             '__web-ui': isWebUI
           })}
         >
-          {!isWebUI && (
-            <>
-              <div className='page-icon'>
-                <PageIcon
-                  color='var(--page-icon-color)'
-                  iconProps={{
-                    weight: 'fill',
-                    phosphorIcon: ShieldPlus
-                  }}
-                />
-              </div>
-              <div className='title'>{t('Create a password')}</div>
-            </>
-          )}
-
-          <div className='notify'>
+          {!isWebUI && <div className='notify'>
             {t('This password can only unlock your SubWallet on this browser')}
           </div>
+          }
 
           <div className='form-container'>
             <Form
@@ -221,6 +207,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               onFieldsChange={onUpdate}
               onFinish={onSubmit}
             >
+              {isWebUI && <Form.Item>
+                <AlertBox
+                  description={t('Recommended security practice')}
+                  title={t('Always choose a strong password!')}
+                  type={'warning'}
+                />
+              </Form.Item>}
               <Form.Item
                 name={FormFieldName.PASSWORD}
                 rules={passwordRules}

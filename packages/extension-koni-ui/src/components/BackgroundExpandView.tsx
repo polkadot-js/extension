@@ -29,7 +29,9 @@ const Component: React.FC<Props> = (props: Props) => {
   const isShowFooter = useMemo(() => {
     const pathName = location.pathname;
 
-    return !['/create-done'].includes(pathName);
+    console.log(pathName);
+
+    return !['/create-done', '/accounts/new-seed-phrase'].includes(pathName);
   }, [location.pathname]);
 
   const isShowNotification = useMemo(() => {

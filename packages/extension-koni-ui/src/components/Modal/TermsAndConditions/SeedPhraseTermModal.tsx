@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
+import { BaseModal } from '@subwallet/extension-koni-ui/components';
 import { CONFIRM_TERM_SEED_PHRASE, TERM_AND_CONDITION_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Checkbox, Icon, ModalContext, SwList, SwModal, Web3Block } from '@subwallet/react-ui';
+import { Button, Checkbox, Icon, ModalContext, SwList, Web3Block } from '@subwallet/react-ui';
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle } from 'phosphor-react';
@@ -40,6 +42,7 @@ const Component = ({ className }: Props) => {
   const [isCheckDontShow, setIsCheckDontShow] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { isWebUI } = useContext(ScreenContext);
   const [termsIsChecked, setTermsIsChecked] = useState<Record<TermSeedPhrase, boolean>>(valueStateTermDefault);
   const { token } = useTheme() as Theme;
 
@@ -100,11 +103,15 @@ const Component = ({ className }: Props) => {
   }, [inactiveModal, isCheckDontShow, setIsConfirmTermSeedPhrase]);
 
   return (
-    <SwModal
-      className={CN(className)}
+    <BaseModal
+      center={true}
+      className={CN(className, {
+        '-desktop-term': isWebUI
+      })}
       closable={false}
       id={modalId}
       title={t('Keep your seed phrase safe')}
+      width={ isWebUI ? 584 : undefined }
     >
       <div
         className={'term-body'}
@@ -125,22 +132,24 @@ const Component = ({ className }: Props) => {
           className={'term-footer-checkbox'}
           onChange={onCheckedInput}
         >{t('Don’t show again')}</Checkbox>
-        <Button
-          block={true}
-          className={'term-footer-button'}
-          disabled={!isChecked}
-          icon={ (
-            <Icon
-              phosphorIcon={ArrowCircleRight}
-              weight='fill'
-            />
-          )}
-          onClick={onConfirm}
-        >
-          {t('Continue')}
-        </Button>
+        <div className={'term-footer-button-group'}>
+          <Button
+            block={true}
+            className={'term-footer-button'}
+            disabled={!isChecked}
+            icon={ (
+              <Icon
+                phosphorIcon={ArrowCircleRight}
+                weight='fill'
+              />
+            )}
+            onClick={onConfirm}
+          >
+            {t('Continue')}
+          </Button>
+        </div>
       </div>
-    </SwModal>
+    </BaseModal>
   );
 };
 
@@ -149,7 +158,6 @@ export const SeedPhraseTermModal = styled(Component)<Props>(({ theme: { token } 
     '.ant-sw-modal-content': {
       overflow: 'hidden',
       maxHeight: 600,
-      paddingBottom: 0,
       overflowY: 'hidden'
     },
 
@@ -200,14 +208,44 @@ export const SeedPhraseTermModal = styled(Component)<Props>(({ theme: { token } 
       flexDirection: 'column',
       gap: token.padding,
       paddingTop: 4,
+      paddingBottom: token.padding,
 
       '.term-footer-checkbox': {
         alignItems: 'center',
-        marginLeft: 0
+        marginLeft: 0,
+        color: token.colorTextLight5
+      }
+    },
+
+    '.term-footer-button-group': {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
+      width: '100%',
+      justifyContent: 'space-between'
+    },
+
+    '&.-desktop-term .ant-sw-modal-content': {
+      maxHeight: 746,
+      width: '100%',
+
+      '.term-body': {
+        maxHeight: 496
       },
 
-      '.term-footer-button': {
-        marginBottom: token.marginXS
+      '.term-footer': {
+        marginTop: -token.margin
+      },
+
+      '.annotation': {
+        textAlign: 'left'
+      },
+
+      '.term-footer-button-group': {
+        width: 390,
+        margin: 'auto'
       }
     }
   };

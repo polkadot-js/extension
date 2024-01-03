@@ -164,11 +164,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             </div>
           )}
           <div className='form-container'>
-            <AlertBox
+            {isWebUI && <AlertBox
               description={t('Recommended security practice')}
               title={t('Always choose a strong password!')}
               type='warning'
-            />
+            />}
             <Form
               form={form}
               initialValues={{
@@ -219,6 +219,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   placeholder={t('Confirm new password')}
                   type='password'
                 />
+              </Form.Item>
+              <Form.Item>
+                {isWebUI && <div className={'annotation'}>
+                  {t('Passwords should be at least 8 characters in length, including letters and numbers')}
+                </div>}
               </Form.Item>
               <Form.Item
                 className={'form-checkbox'}
@@ -331,6 +336,12 @@ const ChangePassword = styled(Component)<Props>(({ theme: { extendToken, token }
         lineHeight: token.lineHeightHeading3,
         color: token.colorTextBase
       }
+    },
+
+    '.annotation': {
+      fontSize: token.fontSizeSM,
+      color: token.colorTextLight5,
+      textAlign: 'left'
     }
   };
 });

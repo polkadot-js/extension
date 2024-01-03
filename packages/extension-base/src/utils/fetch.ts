@@ -9,7 +9,7 @@ export type fetchJsonOptions = RequestInit & {
   timeout?: number;
 }
 
-export async function fetchJson<T = any> (url: string, options: fetchJsonOptions = {}) {
+export async function fetchData (url: string, options: fetchJsonOptions = {}) {
   const { data, params, timeout, ...fetchOptions } = options;
   let timeoutId: NodeJS.Timeout | undefined;
 
@@ -44,5 +44,17 @@ export async function fetchJson<T = any> (url: string, options: fetchJsonOptions
     clearTimeout(timeoutId);
   }
 
+  return response;
+}
+
+export async function fetchJson<T = any> (url: string, options: fetchJsonOptions = {}) {
+  const response = await fetchData(url, options);
+
   return await response.json() as T;
+}
+
+export async function fetchText<T = any> (url: string, options: fetchJsonOptions = {}) {
+  const response = await fetchData(url, options);
+
+  return await response.text() as T;
 }

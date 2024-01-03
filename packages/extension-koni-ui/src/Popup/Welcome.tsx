@@ -127,37 +127,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     [accounts, t]
   );
 
-  const onSubmitAttachReadonlyAccount = useCallback(() => {
-    setLoading(true);
-
-    if (reformatAttachAddress) {
-      createAccountExternalV2({
-        name: autoGenAttachReadonlyAccountName,
-        address: reformatAttachAddress,
-        genesisHash: '',
-        isEthereum: isAttachAddressEthereum,
-        isAllowed: true,
-        isReadOnly: true
-      })
-        .then((errors) => {
-          if (errors.length) {
-            form.setFields([
-              { name: 'address', errors: errors.map((e) => e.message) }
-            ]);
-          } else {
-            navigate('/create-done');
-          }
-        })
-        .catch((error: Error) => {
-          form.setFields([{ name: 'address', errors: [error.message] }]);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
-  }, [reformatAttachAddress, autoGenAttachReadonlyAccountName, isAttachAddressEthereum, form, navigate]);
 
   const buttonList = useMemo((): WelcomeButtonItem[] => [
     {
@@ -222,6 +191,51 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       }
     };
   }, [_isConfirmedTermGeneral, activeModal, openModal]);
+
+  const afterConfirmTermToAttachReadonlyAccount = useCallback(() => {
+    setLoading(true);
+
+    if (reformatAttachAddress) {
+      createAccountExternalV2({
+        name: autoGenAttachReadonlyAccountName,
+        address: reformatAttachAddress,
+        genesisHash: '',
+        isEthereum: isAttachAddressEthereum,
+        isAllowed: true,
+        isReadOnly: true
+      })
+        .then((errors) => {
+          if (errors.length) {
+            form.setFields([
+              { name: 'address', errors: errors.map((e) => e.message) }
+            ]);
+          } else {
+            navigate('/create-done');
+          }
+        })
+        .catch((error: Error) => {
+          form.setFields([{ name: 'address', errors: [error.message] }]);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+
+    setIsConfirmedTermGeneral('confirmed');
+  }, [reformatAttachAddress, setIsConfirmedTermGeneral, autoGenAttachReadonlyAccountName, isAttachAddressEthereum, form, navigate]);
+
+  const onSubmitAttachReadonlyAccount = useCallback(() => {
+
+      setModalIdAfterConfirm('');
+
+      if (_isConfirmedTermGeneral.includes('nonConfirmed')) {
+        activeModal(GENERAL_TERM_AND_CONDITION_MODAL);
+      } else {
+        afterConfirmTermToAttachReadonlyAccount();
+      }
+    }, [_isConfirmedTermGeneral, activeModal, afterConfirmTermToAttachReadonlyAccount]);
 
   useEffect(() => {
     if (!isNoAccount) {
@@ -354,7 +368,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       {isWebUI && (
         <SocialGroup className={'social-group'} />
       )}
-      <GeneralTermModal onOk={openModal(modalIdAfterConfirm)} />
+      <GeneralTermModal onOk={modalIdAfterConfirm === '' ? afterConfirmTermToAttachReadonlyAccount : openModal(modalIdAfterConfirm)}  />
     </Layout.Base>
   );
 }

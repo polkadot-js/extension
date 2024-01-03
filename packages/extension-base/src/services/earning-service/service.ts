@@ -6,7 +6,7 @@ import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/backg
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
@@ -256,6 +256,19 @@ export default class EarningService {
   /* Handle actions */
 
   /* Join */
+
+  public async earlyValidateJoin (request: RequestEarlyValidateYield): Promise<ResponseEarlyValidateYield> {
+    await this.state.eventService.waitChainReady;
+
+    const { slug } = request;
+    const handler = this.getPoolHandler(slug);
+
+    if (handler) {
+      return handler.earlyValidate(request);
+    } else {
+      throw new TransactionError(BasicTxErrorType.INTERNAL_ERROR);
+    }
+  }
 
   public async generateOptimalSteps (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
     await this.state.eventService.waitChainReady;

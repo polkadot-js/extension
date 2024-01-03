@@ -34,7 +34,7 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionE
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { createTransactionFromRLP, recalculateGasPrice, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -3863,6 +3863,10 @@ export default class KoniExtension {
     return this.#koniState.getYieldPoolInfo();
   }
 
+  private async earlyValidateJoin (request: RequestEarlyValidateYield) {
+    return await this.#koniState.earningService.earlyValidateJoin(request);
+  }
+
   private async getOptimalYieldPath (request: OptimalYieldPathParams) {
     return await this.#koniState.earningService.generateOptimalSteps(request);
   }
@@ -4353,6 +4357,8 @@ export default class KoniExtension {
 
         /* Join */
 
+      case 'pri(yield.join.earlyValidate)':
+        return await this.earlyValidateJoin(request as RequestEarlyValidateYield);
       case 'pri(yield.join.getOptimalPath)':
         return await this.getOptimalYieldPath(request as OptimalYieldPathParams);
       case 'pri(yield.join.handleStep)':

@@ -7,7 +7,7 @@ import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/K
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 /**
  * @class BasePoolHandler
@@ -116,6 +116,14 @@ export default abstract class BasePoolHandler {
   /* Subscribe data */
 
   /* Join action */
+
+  /* Early validate */
+
+  public earlyValidate (request: RequestEarlyValidateYield): Promise<ResponseEarlyValidateYield> {
+    return Promise.resolve({ passed: false });
+  }
+
+  /* Early validate */
 
   /* Generate steps */
 

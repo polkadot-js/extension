@@ -4,6 +4,27 @@
 import { YieldPoolTarget } from '@subwallet/extension-base/types';
 
 /**
+ * @interface RequestEarlyValidateYield
+ * @description Params to early validate join pool
+ * @prop {string} slug - Pool's slug
+ * @prop {string} address - Account's address
+ * */
+export interface RequestEarlyValidateYield {
+  /** Pool's slug */
+  slug: string;
+  /** Account's address */
+  address: string;
+}
+
+/**
+ * @interface ResponseEarlyValidateYield
+ * @prop {boolean} passed - Passed validate
+ * */
+export interface ResponseEarlyValidateYield {
+  passed: boolean;
+}
+
+/**
  * @interface OptimalYieldPathParams
  * @description Params to generate steps
  * */

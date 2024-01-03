@@ -347,6 +347,11 @@ export default class DatabaseService {
 
   /* Earning */
 
+  async removeOldEarningData () {
+    await this.stores.yieldPoolInfo.clear();
+    await this.stores.yieldPosition.clear();
+  }
+
   async updateYieldPoolStore (data: YieldPoolInfo) {
     await this.stores.yieldPoolInfo.upsert(data);
   }

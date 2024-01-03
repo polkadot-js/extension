@@ -200,7 +200,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const WCAccountSelect = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--row-gap': token.sizeXS,
+    '--row-gap': `${token.sizeXS}px`,
 
     '.account-list.no-modal': {
       display: 'flex',

@@ -359,7 +359,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 >
                   <Input
                     disabled={loading}
-                    placeholder={t('Type your Subwallet password')}
+                    placeholder={t('Type your SubWallet password')}
                     suffix={<span />}
                     type='password'
                   />

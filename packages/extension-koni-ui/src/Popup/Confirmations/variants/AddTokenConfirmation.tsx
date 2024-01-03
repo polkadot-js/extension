@@ -183,7 +183,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AddTokenConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--content-gap': token.sizeSM,
+    '--content-gap': `${token.sizeSM}px`,
 
     '.ant-field-container': {
       textAlign: 'left',

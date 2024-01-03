@@ -4,15 +4,16 @@
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceItem } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountTokenBalanceItem, RadioGroup } from '@subwallet/extension-koni-ui/components';
+import { AccountTokenBalanceItem, EmptyList, RadioGroup } from '@subwallet/extension-koni-ui/components';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Form, ModalContext, Number, SwModal } from '@subwallet/react-ui';
+import { Form, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
+import { ArrowCircleLeft, Coins } from 'phosphor-react';
 import React, { useContext, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -134,11 +135,18 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
     });
   }, [balanceMap, currentAccount?.address, currentTokenInfo?.slug, isAllAccount]);
 
+  const symbol = currentTokenInfo?.symbol || '';
+
   useEffect(() => {
     if (!isActive) {
       form?.resetFields();
     }
   }, [form, isActive]);
+
+  const filteredItems = accountItems
+    .filter((item) => {
+      return new BigN(item.free).gt(0);
+    });
 
   return (
     <SwModal
@@ -191,12 +199,38 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
         {
           view === ViewValue.DETAIL && (
             <>
-              {accountItems.map((item) => (
-                <AccountTokenBalanceItem
-                  item={item}
-                  key={item.address}
-                />
-              ))}
+              {filteredItems.length
+                ? (filteredItems.map((item) => (
+                  <AccountTokenBalanceItem
+                    item={item}
+                    key={item.address}
+                  />
+                )))
+                : (
+                  <>
+                    <EmptyList
+                      buttonProps={{
+                        icon: <Icon
+                          phosphorIcon={ArrowCircleLeft}
+                          weight={'fill'}
+                        />,
+                        onClick: onCancel,
+                        size: 'xs',
+                        shape: 'circle',
+                        children: t('Back to home')
+                      }}
+                      className='__empty-list'
+                      emptyMessage={t('Switch to another token to see account balance')}
+                      emptyTitle={t('No account with {{symbol}} balance found', {
+                        replace: {
+                          symbol: symbol
+                        }
+                      })}
+                      key='empty-list'
+                      phosphorIcon={Coins}
+                    />
+                  </>
+                )}
             </>
           )
         }

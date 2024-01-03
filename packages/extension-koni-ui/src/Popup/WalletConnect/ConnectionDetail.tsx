@@ -290,7 +290,7 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
     '.body-container': {
       padding: token.padding
     },
-    '--row-gap': token.sizeXS,
+    '--row-gap': `${token.sizeXS}px`,
 
     '.dapp-info-container': {
       '.__col.-to-right': {

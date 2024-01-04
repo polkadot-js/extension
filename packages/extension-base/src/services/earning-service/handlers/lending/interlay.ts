@@ -14,7 +14,6 @@ import { fakeAddress } from '../../constants';
 import BaseLendingPoolHandler from './base';
 
 export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
-  protected readonly description: string;
   protected readonly name: string;
   protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
@@ -32,7 +31,10 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     this.slug = `DOT___lending___${chain}`;
     this.name = `${chainInfo.name} Lending`;
     this.shortName = chainInfo.name.replaceAll(' Relay Chain', '');
-    this.description = 'Earn rewards by lending DOT';
+  }
+
+  protected getDescription (): string {
+    return 'Earn rewards by lending DOT';
   }
 
   /* Subscribe pool info */
@@ -49,13 +51,13 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     const decimals = 10 ** 18;
 
     return {
-      ...this.defaultInfo,
-      description: this.description,
+      ...this.baseInfo,
       type: this.type,
       metadata: {
-        ...this.baseMetadata,
-        isAvailable: true,
-        allowCancelUnstaking: false,
+        ...this.metadataInfo,
+        description: this.getDescription()
+      },
+      statistic: {
         assetEarning: [
           {
             slug: this.rewardAssets[0],
@@ -103,7 +105,7 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
         const totalBalance = bnTotalBalance.toString();
 
         const result: LendingYieldPositionInfo = {
-          ...this.defaultInfo,
+          ...this.baseInfo,
           type: this.type,
           address,
           balanceToken: this.inputAsset,

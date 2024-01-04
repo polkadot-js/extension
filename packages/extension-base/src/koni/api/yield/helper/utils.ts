@@ -65,7 +65,7 @@ export function convertDerivativeToOriginToken (amount: string, poolInfo: Specia
   const derivativeDecimals = _getAssetDecimals(derivativeTokenInfo);
   const originDecimals = _getAssetDecimals(originTokenInfo);
 
-  const exchangeRate = poolInfo.metadata.assetEarning?.[0].exchangeRate || 1;
+  const exchangeRate = poolInfo.statistic?.assetEarning?.[0].exchangeRate || 1;
   const formattedAmount = parseInt(amount) / (10 ** derivativeDecimals); // TODO: decimals
   const minAmount = formattedAmount * exchangeRate;
 

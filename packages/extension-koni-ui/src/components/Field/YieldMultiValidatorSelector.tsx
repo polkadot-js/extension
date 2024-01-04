@@ -86,7 +86,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const sectionRef = useRef<SwListSectionRef>(null);
 
-  const maxCount = chainStakingMetadata?.metadata?.maxCandidatePerFarmer || 1;
+  const maxCount = chainStakingMetadata?.statistic?.maxCandidatePerFarmer || 1;
 
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
   const nominations = useMemo(() => {

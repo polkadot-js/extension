@@ -7,7 +7,7 @@ import { calculateChainStakedReturn, calculateInflation, getExistUnstakeErrorMes
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldPositionInfo, EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NominationYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
@@ -22,7 +22,6 @@ import BasePoolHandler from '../base';
 
 export default class NominationPoolHandler extends BasePoolHandler {
   public readonly type = YieldPoolType.NOMINATION_POOL;
-  protected readonly description: string;
   protected readonly name: string;
   protected readonly shortName: string;
   public slug: string;
@@ -39,7 +38,13 @@ export default class NominationPoolHandler extends BasePoolHandler {
     this.slug = `${symbol}___nomination_pool___${_chainInfo.slug}`;
     this.name = `${tokenName} Nomination Pool`;
     this.shortName = _chainInfo.name.replaceAll(' Relay Chain', '');
-    this.description = `Start staking with just {{amount}} ${symbol}`;
+  }
+
+  protected getDescription (amount = '0'): string {
+    const _chainAsset = this.nativeToken;
+    const symbol = _chainAsset.symbol;
+
+    return `Start staking with just {{amount}} ${symbol}`.replace('{{amount}}', amount);
   }
 
   /* Subscribe pool info */
@@ -49,7 +54,24 @@ export default class NominationPoolHandler extends BasePoolHandler {
     const substrateApi = this.substrateApi;
     const chainInfo = this.chainInfo;
     const nativeToken = this.nativeToken;
-    const defaultData = this.defaultInfo;
+
+    if (!this.isActive) {
+      const data: NominationYieldPoolInfo = {
+        // TODO
+        ...this.baseInfo,
+        type: this.type,
+        metadata: {
+          ...this.metadataInfo,
+          description: this.getDescription()
+        }
+      };
+
+      callback(data);
+
+      return () => {
+        cancel = true;
+      };
+    }
 
     await substrateApi.isReady;
 
@@ -91,12 +113,13 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
       const data: NominationYieldPoolInfo = {
         // TODO
-        ...defaultData,
-        description: this.description.replaceAll('{{amount}}', minToHuman),
+        ...this.baseInfo,
         type: this.type,
         metadata: {
-          inputAsset: nativeToken.slug,
-          isAvailable: true,
+          ...this.metadataInfo,
+          description: this.getDescription(minToHuman)
+        },
+        statistic: {
           maxCandidatePerFarmer: 1,
           maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
           minJoinPool: minPoolJoin || '0',
@@ -105,7 +128,6 @@ export default class NominationPoolHandler extends BasePoolHandler {
           tvl: bnTotalEraStake.toString(), // TODO recheck
           totalApy: expectedReturn, // TODO recheck
           unstakingPeriod: unlockingPeriod,
-          allowCancelUnstaking: false,
           inflation: inflation
         }
       };
@@ -219,7 +241,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
   async subscribePoolPosition (useAddresses: string[], resultCallback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const substrateApi = this.substrateApi;
-    const defaultInfo = this.defaultInfo;
+    const defaultInfo = this.baseInfo;
 
     await substrateApi.isReady;
 
@@ -286,7 +308,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
           if (_unclaimedReward) {
             callBack({
-              ...this.defaultInfo,
+              ...this.baseInfo,
               address: address,
               type: this.type,
               unclaimedReward: _unclaimedReward.toString(),
@@ -403,7 +425,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
     const { address, amount, selectedPool } = data as SubmitJoinNominationPool;
     const _poolInfo = await this.getPoolInfo();
 
-    if (!_poolInfo) {
+    if (!_poolInfo || !_poolInfo.statistic) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
 
@@ -416,7 +438,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
     // amount >= min stake
     const errors: TransactionError[] = [];
     let bnTotalStake = new BN(amount);
-    const bnMinStake = new BN(poolInfo.metadata.minJoinPool || '0');
+    const bnMinStake = new BN(poolInfo.statistic?.minJoinPool || '0');
     const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
     const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, StakingType.POOLED, true);
 
@@ -502,7 +524,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
     const poolInfo = await this.getPoolInfo();
     const poolPosition = await this.getPoolPosition(address);
 
-    if (!poolInfo || !poolPosition || fastLeave) {
+    if (!poolInfo || !poolPosition || fastLeave || !poolInfo.statistic) {
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 
@@ -512,8 +534,8 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     const bnActiveStake = new BN(poolPosition.activeStake);
     const bnRemainingStake = bnActiveStake.sub(new BN(amount));
-    const minStake = new BN(poolInfo.metadata.minJoinPool || '0');
-    const maxUnstake = poolInfo.metadata.maxWithdrawalRequestPerFarmer;
+    const minStake = new BN(poolInfo.statistic.minJoinPool || '0');
+    const maxUnstake = poolInfo.statistic.maxWithdrawalRequestPerFarmer;
 
     if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
       errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE));

@@ -40,7 +40,6 @@ interface StellaswapUnbonding {
 const MAX_INT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
 export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
-  protected readonly description: string;
   protected readonly name: string;
   protected readonly shortName: string;
   protected readonly inputAsset: string = 'moonbeam-LOCAL-xcDOT';
@@ -60,9 +59,12 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
 
     this.slug = 'xcDOT___liquid_staking___stellaswap';
     this.name = 'Stellaswap Liquid Staking';
-    this.description = 'Earn rewards by staking xcDOT for stDOT';
     this._logo = 'stellaswap';
     this.shortName = 'Stellaswap';
+  }
+
+  protected getDescription (): string {
+    return 'Earn rewards by staking xcDOT for stDOT';
   }
 
   /* Subscribe pool info */
@@ -100,13 +102,13 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const exchangeRate = (equivalentTokenShare as number) / (10 ** _getAssetDecimals(derivativeTokenInfo));
 
     return {
-      ...this.defaultInfo,
-      description: this.description,
+      ...this.baseInfo,
       type: this.type,
       metadata: {
-        ...this.baseMetadata,
-        isAvailable: true,
-        allowCancelUnstaking: false,
+        ...this.metadataInfo,
+        description: this.getDescription()
+      },
+      statistic: {
         assetEarning: [
           {
             slug: this.rewardAssets[0],
@@ -173,7 +175,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
           const totalBalance = new BN(balance).add(unlockBalance);
 
           const result: YieldPositionInfo = {
-            ...this.defaultInfo,
+            ...this.baseInfo,
             type: this.type,
             address,
             balanceToken: this.inputAsset,

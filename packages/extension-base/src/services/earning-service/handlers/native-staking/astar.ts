@@ -7,7 +7,7 @@ import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '
 import { getEarningStatusByNominations } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPoolMetadata, BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, isUrl, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -49,12 +49,37 @@ export function getAstarWithdrawable (yieldPosition: YieldPositionInfo): Unstaki
 }
 
 export default class AstarNativeStakingPoolHandler extends BaseParaNativeStakingPoolHandler {
+  protected override get metadataInfo (): Omit<BaseYieldPoolMetadata, 'description'> {
+    const result = super.metadataInfo;
+
+    result.allowCancelUnstaking = false;
+
+    return result;
+  }
+
   /* Subscribe pool info */
 
   async subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const nativeToken = this.nativeToken;
-    const defaultData = this.defaultInfo;
+
+    if (!this.isActive) {
+      const data: NativeYieldPoolInfo = {
+        // TODO
+        ...this.baseInfo,
+        type: this.type,
+        metadata: {
+          ...this.metadataInfo,
+          description: this.getDescription()
+        }
+      };
+
+      callback(data);
+
+      return () => {
+        cancel = true;
+      };
+    }
 
     const apyPromise = new Promise((resolve) => {
       fetch(`https://api.astar.network/api/v1/${this.chain}/dapps-staking/apy`, {
@@ -102,12 +127,13 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
       const data: NativeYieldPoolInfo = {
         // TODO
-        ...defaultData,
-        description: this.description.replaceAll('{{amount}}', minToHuman),
+        ...this.baseInfo,
         type: this.type,
         metadata: {
-          inputAsset: nativeToken.slug,
-          isAvailable: true,
+          ...this.metadataInfo,
+          description: this.getDescription(minToHuman)
+        },
+        statistic: {
           maxCandidatePerFarmer: 100, // temporary fix for Astar, there's no limit for now
           maxWithdrawalRequestPerFarmer: 1, // by default
           minJoinPool: minDelegatorStake,
@@ -115,8 +141,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
           era: parseInt(era),
           tvl: undefined, // TODO recheck
           totalApy: apyInfo !== null ? apyInfo : undefined, // TODO recheck
-          unstakingPeriod,
-          allowCancelUnstaking: false
+          unstakingPeriod
         }
       };
 
@@ -248,7 +273,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
   async subscribePoolPosition (useAddresses: string[], resultCallback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const substrateApi = await this.substrateApi.isReady;
-    const defaultInfo = this.defaultInfo;
+    const defaultInfo = this.baseInfo;
     const chainInfo = this.chainInfo;
 
     const unsub = await substrateApi.api.query.dappsStaking.ledger.multi(useAddresses, async (ledgers: Codec[]) => {

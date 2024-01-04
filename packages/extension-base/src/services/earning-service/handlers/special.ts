@@ -7,7 +7,7 @@ import { BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, StakingTxEr
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SpecialYieldPoolMetadata, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldProcessValidation, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolMetadata, SpecialYieldPoolInfo, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldProcessValidation, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import BN from 'bn.js';
 import { t } from 'i18next';
 
@@ -21,25 +21,25 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   protected abstract inputAsset: string;
   protected abstract rewardAssets: string[];
   protected abstract feeAssets: string[];
+  /** Pool's type */
+  public abstract override type: YieldPoolType.LIQUID_STAKING | YieldPoolType.LENDING;
   /** Allow to create default unstake transaction */
   protected readonly allowDefaultUnstake: boolean = false;
   /** Allow to create fast unstake transaction */
   protected readonly allowFastUnstake: boolean = true;
 
-  protected get baseMetadata (): Pick<
-  SpecialYieldPoolMetadata,
-  'altInputAssets' |
-  'derivativeAssets' |
-  'inputAsset' |
-  'rewardAssets' |
-  'feeAssets'
-  > {
+  protected override get metadataInfo (): Omit<SpecialYieldPoolMetadata, 'description'> {
     return {
       altInputAssets: this.altInputAsset,
       derivativeAssets: this.derivativeAssets,
       inputAsset: this.inputAsset,
       rewardAssets: this.rewardAssets,
-      feeAssets: this.feeAssets
+      feeAssets: this.feeAssets,
+      logo: this.logo,
+      shortName: this.shortName,
+      name: this.name,
+      isAvailable: true,
+      allowCancelUnstaking: false
     };
   }
 
@@ -62,13 +62,28 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     let cancel = false;
 
     const getStatInterval = () => {
-      this.getPoolStat()
-        .then((rs) => {
-          if (!cancel) {
-            callback(rs);
-          }
-        })
-        .catch(console.error);
+      if (!this.isActive) {
+        if (!cancel) {
+          const rs: SpecialYieldPoolInfo = {
+            ...this.baseInfo,
+            type: this.type,
+            metadata: {
+              ...this.metadataInfo,
+              description: this.getDescription()
+            }
+          };
+
+          callback(rs);
+        }
+      } else {
+        this.getPoolStat()
+          .then((rs) => {
+            if (!cancel) {
+              callback(rs);
+            }
+          })
+          .catch(console.error);
+      }
     };
 
     getStatInterval();
@@ -250,6 +265,11 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     }
 
     const poolInfo = _poolInfo as SpecialYieldPoolInfo;
+
+    if (!poolInfo.statistic) {
+      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+    }
+
     const processValidation: YieldProcessValidation = {
       ok: true,
       status: YieldValidationStatus.OK
@@ -274,7 +294,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       }
     }
 
-    if (!bnAmount.gte(new BN(poolInfo.metadata.minJoinPool || '0'))) {
+    if (!bnAmount.gte(new BN(poolInfo.statistic.minJoinPool || '0'))) {
       processValidation.failedStep = path.steps[id];
       processValidation.ok = false;
       processValidation.status = YieldValidationStatus.NOT_ENOUGH_MIN_JOIN_POOL;
@@ -414,7 +434,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const poolInfo = await this.getPoolInfo();
     const poolPosition = await this.getPoolPosition(address);
 
-    if (!poolInfo || !poolPosition) {
+    if (!poolInfo || !poolInfo.statistic || !poolPosition) {
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 
@@ -429,8 +449,8 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const errors: TransactionError[] = [];
     const bnActiveStake = new BN(poolPosition.activeStake);
     const bnRemainingStake = bnActiveStake.sub(new BN(amount));
-    const minStake = new BN(poolInfo.metadata.minJoinPool || '0');
-    const maxUnstake = poolInfo.metadata.maxWithdrawalRequestPerFarmer;
+    const minStake = new BN(poolInfo.statistic.minJoinPool || '0');
+    const maxUnstake = poolInfo.statistic.maxWithdrawalRequestPerFarmer;
 
     if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
       errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE));

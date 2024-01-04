@@ -32,18 +32,18 @@ export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativ
     const poolPosition = await this.getPoolPosition(address);
     const chainInfo = this.chainInfo;
 
-    if (!poolInfo) {
+    if (!poolInfo || !poolInfo.statistic) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
 
     const errors: TransactionError[] = [];
     const selectedCollator = selectedValidators[0];
     let bnTotalStake = new BN(amount);
-    const bnChainMinStake = new BN(poolInfo.metadata.minJoinPool || '0');
+    const bnChainMinStake = new BN(poolInfo.statistic.minJoinPool || '0');
     const bnCollatorMinStake = new BN(selectedCollator.minBond || '0');
     const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
     const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
-    const maxValidator = poolInfo.metadata.maxCandidatePerFarmer;
+    const maxValidator = poolInfo.statistic.maxCandidatePerFarmer;
     const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, maxValidator);
     const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, StakingType.NOMINATED, true);
 
@@ -108,7 +108,7 @@ export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativ
     const poolInfo = await this.getPoolInfo();
     const poolPosition = await this.getPoolPosition(address);
 
-    if (!poolInfo || !poolPosition || fastLeave || !selectedTarget) {
+    if (!poolInfo || !poolInfo.statistic || !poolPosition || fastLeave || !selectedTarget) {
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 
@@ -135,7 +135,7 @@ export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativ
     const bnActiveStake = new BN(targetNomination.activeStake);
     const bnRemainingStake = bnActiveStake.sub(new BN(amount));
 
-    const bnChainMinStake = new BN(poolInfo.metadata.minJoinPool || '0');
+    const bnChainMinStake = new BN(poolInfo.statistic.minJoinPool || '0');
     const bnCollatorMinStake = new BN(targetNomination.validatorMinStake || '0');
     const bnMinStake = BN.max(bnCollatorMinStake, bnChainMinStake);
     const existUnstakeErrorMessage = getExistUnstakeErrorMessage(this.chain, StakingType.NOMINATED);

@@ -17,7 +17,6 @@ interface BlockHeader {
 }
 
 export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
-  protected readonly description: string;
   protected readonly name: string;
   protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
@@ -39,7 +38,10 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
     this.slug = `DOT___liquid_staking___${chain}`;
     this.name = `${chainInfo.name} Liquid Staking`;
     this.shortName = chainInfo.name.replaceAll(' Relay Chain', '');
-    this.description = 'Stake DOT to earn yield on sDOT';
+  }
+
+  protected getDescription (): string {
+    return 'Stake DOT to earn yield on sDOT';
   }
 
   /* Subscribe pool info */
@@ -83,13 +85,13 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
     const apy = (exchangeRate / beginExchangeRate) ** (365 * 24 * 60 * 60000 / (currentTimestamp - beginTimestamp)) - 1;
 
     return {
-      ...this.defaultInfo,
-      description: this.description,
+      ...this.baseInfo,
       type: this.type,
       metadata: {
-        ...this.baseMetadata,
-        isAvailable: true,
-        allowCancelUnstaking: false,
+        ...this.metadataInfo,
+        description: this.getDescription()
+      },
+      statistic: {
         assetEarning: [
           {
             slug: this.rewardAssets[0],
@@ -141,7 +143,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
         const totalBalance = bnTotalBalance.toString();
 
         const result: YieldPositionInfo = {
-          ...this.defaultInfo,
+          ...this.baseInfo,
           type: this.type,
           address,
           balanceToken: this.inputAsset,

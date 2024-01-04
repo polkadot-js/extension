@@ -29,7 +29,6 @@ const GRAPHQL_API = 'https://api.polkawallet.io/acala-liquid-staking-subql';
 const EXCHANGE_RATE_REQUEST = 'query { dailySummaries(first:30, orderBy:TIMESTAMP_DESC) {nodes { exchangeRate timestamp }}}';
 
 export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
-  protected readonly description: string;
   protected readonly name: string;
   protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
@@ -51,7 +50,10 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     this.slug = `DOT___liquid_staking___${chain}`;
     this.name = `${chainInfo.name} Liquid Staking`;
     this.shortName = chainInfo.name.replaceAll(' Relay Chain', '');
-    this.description = 'Stake DOT to earn yield on LDOT';
+  }
+
+  protected getDescription (): string {
+    return 'Stake DOT to earn yield on LDOT';
   }
 
   /* Subscribe pool info */
@@ -94,13 +96,13 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     const totalStakingBonded = new BN(_totalStakingBonded.toString());
 
     return {
-      ...this.defaultInfo,
-      description: this.description,
+      ...this.baseInfo,
       type: this.type,
       metadata: {
-        ...this.baseMetadata,
-        isAvailable: true,
-        allowCancelUnstaking: false,
+        ...this.metadataInfo,
+        description: this.getDescription()
+      },
+      statistic: {
         assetEarning: [
           {
             slug: this.rewardAssets[0],
@@ -148,7 +150,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
         const totalBalance = bnTotalBalance.toString();
 
         const result: YieldPositionInfo = {
-          ...this.defaultInfo,
+          ...this.baseInfo,
           type: this.type,
           address,
           balanceToken: this.inputAsset,

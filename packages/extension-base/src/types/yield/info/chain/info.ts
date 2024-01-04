@@ -29,8 +29,90 @@ export interface YieldAssetEarningStats {
 
 /**
  * @interface BaseYieldPoolMetadata
+ * @prop {string} description - Pool's description
+ * @prop {string} name - Pool's name
+ * @prop {string} shortName - Pool's short name
+ * @prop {string} logo - Pool's logo
  * @prop {boolean} isAvailable - Is the pool available?
  * @prop {string} inputAsset - Input token (slug)
+ * @prop {boolean} allowCancelUnstaking - Allow canceling un-stake
+ * */
+export interface BaseYieldPoolMetadata {
+  /* Common info */
+
+  /** Pool's description */
+  description: string;
+
+  /** Pool's name */
+  name: string;
+
+  /** Pool's short name */
+  shortName: string;
+
+  /** Pool's logo */
+  logo: string;
+
+  /** Input token (slug) */
+  inputAsset: string;
+
+  /** Is the pool available? */
+  isAvailable: boolean;
+
+  /* Common info */
+
+  /* Special info */
+
+  /** Allow to cancel un-stake */
+  allowCancelUnstaking: boolean; // for native staking
+
+  /* Special info */
+}
+
+/**
+ * @interface NormalYieldPoolMetadata
+ * @extends BaseYieldPoolMetadata
+ * */
+export type NormalYieldPoolMetadata = BaseYieldPoolMetadata
+
+/**
+ * @interface SpecialYieldPoolMetadata
+ * @extends BaseYieldPoolMetadata
+ * @prop {string[]} derivativeAssets - Array of derivative tokens (slug)
+ * @prop {string[]} rewardAssets - Array of reward tokens (slug)
+ * @prop {string[]} feeAssets - Array of fee tokens (slug)
+ * @prop {string} [altInputAssets] - Alt input token (slug) - optional
+ * */
+export interface SpecialYieldPoolMetadata extends BaseYieldPoolMetadata {
+  /* Special info */
+
+  /** Array of derivative tokens (slug) */
+  derivativeAssets: string[];
+
+  /** Array of reward tokens (slug) */
+  rewardAssets: string[]; // slug
+
+  /** Alt input token (slug) - optional */
+  altInputAssets?: string; // TODO
+
+  /**
+   * Array of fee tokens (slug)
+   * <p>
+   * If the pool has more than one token, the mint step can use input token for fee instead native token
+   * </p>
+   *  */
+  feeAssets: string[],
+
+  /* Special info */
+}
+
+/**
+ * @description Required data
+ * */
+export type YieldPoolMetadata = NormalYieldPoolMetadata | SpecialYieldPoolMetadata;
+
+/**
+ * @interface BaseYieldPoolStatistic
+ * @description Statistic data of pool
  * @prop {number} maxCandidatePerFarmer - Max candidates per farmer
  * @prop {number} maxWithdrawalRequestPerFarmer - Max withdrawal request per farmer
  * @prop {string} minJoinPool - Min amount to join pool
@@ -38,16 +120,9 @@ export interface YieldAssetEarningStats {
  * @prop {string} [tvl] - Total value staked in pool
  * @prop {number} [totalApy] - Total apy of earning assets
  * @prop {number} [totalApr] - Total apr of earning assets
- * @prop {boolean} allowCancelUnstaking - Allow canceling un-stake
  * */
-export interface BaseYieldPoolMetadata {
+export interface BaseYieldPoolStatistic {
   /* Common info */
-
-  /** Input token (slug) */
-  inputAsset: string; // slug
-
-  /** Is the pool available? */
-  isAvailable: boolean;
 
   /** Max candidate per farmer  */
   maxCandidatePerFarmer: number; // like maxValidatorPerNominator with native staking
@@ -71,23 +146,16 @@ export interface BaseYieldPoolMetadata {
   totalApr?: number;
 
   /* Common info */
-
-  /* Special info */
-
-  /** Allow to cancel un-stake */
-  allowCancelUnstaking: boolean; // for native staking
-
-  /* Special info */
 }
 
 /**
- * @interface NormalYieldPoolMetadata
- * @extends BaseYieldPoolMetadata
+ * @interface NormalYieldPoolStatistic
+ * @extends BaseYieldPoolStatistic
  * @prop {number} era - Current era of network
  * @prop {number} unstakingPeriod - Time to wait withdraw un-stake, in hour
  * @prop {number} [inflation] - Inflation rate
  * */
-export interface NormalYieldPoolMetadata extends BaseYieldPoolMetadata {
+export interface NormalYieldPoolStatistic extends BaseYieldPoolStatistic {
   /* Special info */
 
   /** Current era of network */
@@ -103,17 +171,12 @@ export interface NormalYieldPoolMetadata extends BaseYieldPoolMetadata {
 }
 
 /**
- * @interface SpecialYieldPoolMetadata
- * @extends BaseYieldPoolMetadata
- * @prop {number} [era] - Current era of network
- * @prop {number} [unstakingPeriod] - Time to wait withdraw un-stake, in hour
- * @prop {number} [inflation] - Inflation rate
- * @prop {string[]} derivativeAssets - Array of derivative tokens (slug)
- * @prop {string[]} rewardAssets - Array of reward tokens (slug)
- * @prop {string[]} feeAssets - Array of fee tokens (slug)
- * @prop {string} [altInputAssets] - Alt input token (slug) - optional
+ * @interface SpecialYieldPoolStatistic
+ * @extends BaseYieldPoolStatistic
+ * @prop {YieldAssetEarningStats[]} assetEarning - Info for asset earning
+ * @prop {string} minWithdrawal - Min amount for withdrawal request
  * */
-export interface SpecialYieldPoolMetadata extends BaseYieldPoolMetadata {
+export interface SpecialYieldPoolStatistic extends BaseYieldPoolStatistic {
   /* Special info */
 
   /** Info for asset earning */
@@ -122,27 +185,10 @@ export interface SpecialYieldPoolMetadata extends BaseYieldPoolMetadata {
   /** Min amount for withdrawal request */
   minWithdrawal: string;
 
-  /** Array of derivative tokens (slug) */
-  derivativeAssets?: string[];
-
-  /** Array of reward tokens (slug) */
-  rewardAssets: string[]; // slug
-
-  /** Alt input token (slug) - optional */
-  altInputAssets?: string; // TODO
-
-  /**
-   * Array of fee tokens (slug)
-   * <p>
-   * If the pool has more than one token, the mint step can use input token for fee instead native token
-   * </p>
-   *  */
-  feeAssets: string[],
-
   /* Special info */
 }
 
-export type YieldPoolMetadata = NormalYieldPoolMetadata | SpecialYieldPoolMetadata;
+export type YieldPoolStatistic = NormalYieldPoolStatistic | SpecialYieldPoolStatistic;
 
 /**
  * @interface AbstractYieldPoolInfo
@@ -151,29 +197,19 @@ export type YieldPoolMetadata = NormalYieldPoolMetadata | SpecialYieldPoolMetada
  * @prop {string} name - Pool's name
  * @prop {string} shortName - Pool's short name
  * @prop {string} logo - Pool's logo
- * @prop {YieldPoolMetadata} metadata - Pool's metadata
+ * @prop {YieldPoolStatistic} [statistic] - Pool's metadata
  * */
 export interface AbstractYieldPoolInfo extends BasePoolInfo {
   /* Common info */
 
-  /** Pool's description */
-  description: string;
-
-  /** Pool's name */
-  name: string;
-
-  /** Pool's short name */
-  shortName: string;
-
-  /** Pool's logo */
-  logo: string;
+  metadata: YieldPoolMetadata;
 
   /* Common info */
 
   /* Special info */
 
   /** Pool's metadata */
-  metadata: YieldPoolMetadata;
+  statistic?: YieldPoolStatistic;
 
   /* Special info */
 }
@@ -181,11 +217,12 @@ export interface AbstractYieldPoolInfo extends BasePoolInfo {
 /**
  * @interface SpecialYieldPoolInfo
  * @extends AbstractYieldPoolInfo
- * @prop {SpecialYieldPoolMetadata} metadata - Pool's metadata
+ * @prop {SpecialYieldPoolStatistic} [statistic] - Pool's metadata
  * */
 export interface SpecialYieldPoolInfo extends AbstractYieldPoolInfo {
   type: YieldPoolType.LIQUID_STAKING | YieldPoolType.LENDING;
   metadata: SpecialYieldPoolMetadata;
+  statistic?: SpecialYieldPoolStatistic;
 }
 
 /**
@@ -210,22 +247,24 @@ export interface LendingYieldPoolInfo extends SpecialYieldPoolInfo {
  * @interface NominationYieldPoolInfo
  * @extends AbstractYieldPoolInfo
  * @prop {YieldPoolType.NOMINATION_POOL} type - Pool's type
- * @prop {NormalYieldPoolMetadata} metadata - Pool's metadata
+ * @prop {NormalYieldPoolStatistic} [statistic] - Pool's metadata
  * */
 export interface NominationYieldPoolInfo extends AbstractYieldPoolInfo {
   type: YieldPoolType.NOMINATION_POOL;
   metadata: NormalYieldPoolMetadata;
+  statistic?: NormalYieldPoolStatistic;
 }
 
 /**
  * @interface NativeYieldPoolInfo
  * @extends AbstractYieldPoolInfo
  * @prop {YieldPoolType.NATIVE_STAKING} type - Pool's type
- * @prop {NormalYieldPoolMetadata} metadata - Pool's metadata
+ * @prop {NormalYieldPoolStatistic} [statistic] - Pool's metadata
  * */
 export interface NativeYieldPoolInfo extends AbstractYieldPoolInfo {
   type: YieldPoolType.NATIVE_STAKING;
   metadata: NormalYieldPoolMetadata;
+  statistic?: NormalYieldPoolStatistic;
 }
 
 /**

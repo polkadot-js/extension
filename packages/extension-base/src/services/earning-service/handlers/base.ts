@@ -7,7 +7,7 @@ import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/K
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BasePoolInfo, BaseYieldPoolMetadata, EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 /**
  * @class BasePoolHandler
@@ -35,9 +35,6 @@ export default abstract class BasePoolHandler {
   /** Pool's short name */
   protected abstract shortName: string;
 
-  /** Pool's description */
-  protected abstract description: string;
-
   /** Pool's transaction type */
   public readonly transactionChainType: ChainType = ChainType.SUBSTRATE;
 
@@ -62,6 +59,10 @@ export default abstract class BasePoolHandler {
     return groupSlug || this.nativeToken.slug;
   }
 
+  public get isActive (): boolean {
+    return this.state.activeChainSlugs.includes(this.chain);
+  }
+
   protected get substrateApi (): _SubstrateApi {
     return this.state.getSubstrateApi(this.chain);
   }
@@ -78,14 +79,24 @@ export default abstract class BasePoolHandler {
     return this.state.getNativeTokenInfo(this.chain);
   }
 
-  protected get defaultInfo (): Pick<YieldPoolInfo, 'name' | 'group' | 'chain' | 'slug' | 'shortName' | 'logo'> {
+  protected get baseInfo (): Omit<BasePoolInfo, 'type'> {
+    return {
+      group: this.group,
+      chain: this.chain,
+      slug: this.slug
+    };
+  }
+
+  protected abstract getDescription (amount?: string): string;
+
+  protected get metadataInfo (): Omit<BaseYieldPoolMetadata, 'description'> {
     return {
       name: this.name,
       shortName: this.shortName,
-      group: this.group,
       logo: this.logo,
-      chain: this.chain,
-      slug: this.slug
+      inputAsset: this.nativeToken.slug,
+      isAvailable: true,
+      allowCancelUnstaking: false
     };
   }
 

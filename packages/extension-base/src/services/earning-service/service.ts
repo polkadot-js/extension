@@ -24,7 +24,7 @@ export default class EarningService {
   }
 
   public initHandlers () {
-    const chains = this.state.activeChainSlugs;
+    const chains = Object.keys(this.state.getChainInfoMap());
 
     for (const chain of chains) {
       const handlers: BasePoolHandler[] = [];
@@ -103,21 +103,18 @@ export default class EarningService {
     await this.state.eventService.waitChainReady;
     this.initHandlers();
 
-    const activeChains = this.state.activeChainSlugs;
     const unsubList: Array<VoidFunction> = [];
 
     for (const handler of Object.values(this.handlers)) {
-      if (activeChains.includes(handler.chain)) {
-        handler.subscribePoolInfo(callback)
-          .then((unsub) => {
-            if (cancel) {
-              unsub();
-            } else {
-              unsubList.push(unsub);
-            }
-          })
-          .catch(console.error);
-      }
+      handler.subscribePoolInfo(callback)
+        .then((unsub) => {
+          if (cancel) {
+            unsub();
+          } else {
+            unsubList.push(unsub);
+          }
+        })
+        .catch(console.error);
     }
 
     return () => {

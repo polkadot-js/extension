@@ -28,7 +28,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
   const filteredItems = useMemo(() => {
-    return items.filter((item) => item.metadata?.isAvailable !== false);
+    return items.filter((item) => item.metadata.isAvailable);
   }, [items]);
 
   const chainLogo = useMemo(() => {
@@ -48,7 +48,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const renderMethodSelected = useCallback((item: YieldPoolInfo) => {
     return (
       <div className={'__selected-item'}>
-        {item.name}
+        {item.metadata.name}
         {showChainInSelected}
       </div>
     );
@@ -57,7 +57,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const searchFunction = useCallback((item: YieldPoolInfo, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
-    return item.name.toLowerCase().includes(searchTextLowerCase);
+    return item.metadata.name.toLowerCase().includes(searchTextLowerCase);
   }, []);
 
   const renderItem = useCallback((item: YieldPoolInfo, selected: boolean) => {
@@ -73,7 +73,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         middleItem={(
           <div className='token-info-container'>
             <div className='token-symbol'>
-              {item.name}
+              {item.metadata.name}
             </div>
             {/* <Tag bgType={'default'} color={TagTypes()[item.type].color}  icon={TagTypes()[item.type].icon}>{TagTypes()[item.type].label}</Tag> */}
           </div>

@@ -4,7 +4,7 @@
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, ValidatorInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPoolMetadata, EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, ValidatorInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { noop } from '@polkadot/util';
 
@@ -12,7 +12,6 @@ import BasePoolHandler from '../base';
 
 export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandler {
   public readonly type = YieldPoolType.NATIVE_STAKING;
-  protected readonly description: string;
   protected readonly name: string;
   protected readonly shortName: string;
   public slug: string;
@@ -28,7 +27,21 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
     this.slug = `${symbol}___native_staking___${_chainInfo.slug}`;
     this.name = `${_chainInfo.name} Native Staking`;
     this.shortName = _chainInfo.name.replaceAll(' Relay Chain', '');
-    this.description = `Start staking with just {{amount}} ${symbol}`;
+  }
+
+  protected getDescription (amount = '0'): string {
+    const _chainAsset = this.nativeToken;
+    const symbol = _chainAsset.symbol;
+
+    return `Start staking with just {{amount}} ${symbol}`.replace('{{amount}}', amount);
+  }
+
+  protected override get metadataInfo (): Omit<BaseYieldPoolMetadata, 'description'> {
+    const result = super.metadataInfo;
+
+    result.allowCancelUnstaking = true;
+
+    return result;
   }
 
   /* Get pool reward */

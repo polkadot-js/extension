@@ -55,7 +55,25 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
   async subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const nativeToken = this.nativeToken;
-    const defaultData = this.defaultInfo;
+
+    if (!this.isActive) {
+      const data: NativeYieldPoolInfo = {
+        // TODO
+        ...this.baseInfo,
+        type: this.type,
+        metadata: {
+          ...this.metadataInfo,
+          description: this.getDescription()
+        }
+      };
+
+      callback(data);
+
+      return () => {
+        cancel = true;
+      };
+    }
+
     const substrateApi = await this.substrateApi.isReady;
 
     const unsub = await (substrateApi.api.query.parachainStaking.round(async (_round: Codec) => {
@@ -82,12 +100,13 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
       const data: NativeYieldPoolInfo = {
         // TODO
-        ...defaultData,
-        description: this.description.replaceAll('{{amount}}', minToHuman),
+        ...this.baseInfo,
         type: this.type,
         metadata: {
-          inputAsset: nativeToken.slug,
-          isAvailable: true,
+          ...this.metadataInfo,
+          description: this.getDescription(minToHuman)
+        },
+        statistic: {
           maxCandidatePerFarmer: parseInt(maxDelegations),
           maxWithdrawalRequestPerFarmer: 1, // by default
           minJoinPool: minDelegatorStake,
@@ -95,8 +114,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           era: round,
           tvl: stakeInfo.delegators, // TODO recheck
           totalApy: undefined, // TODO recheck
-          unstakingPeriod,
-          allowCancelUnstaking: true
+          unstakingPeriod
         }
       };
 
@@ -190,7 +208,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
   async subscribePoolPosition (useAddresses: string[], resultCallback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const substrateApi = await this.substrateApi.isReady;
-    const defaultInfo = this.defaultInfo;
+    const defaultInfo = this.baseInfo;
     const chainInfo = this.chainInfo;
 
     const unsub = await substrateApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: Codec[]) => {
@@ -262,7 +280,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         }
 
         callBack({
-          ...this.defaultInfo,
+          ...this.baseInfo,
           address: address,
           type: this.type,
           unclaimedReward: _unclaimedReward.toString(),

@@ -7,7 +7,7 @@ import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, Un
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
 import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
@@ -29,7 +29,24 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const substrateApi = this.substrateApi;
     const chainInfo = this.chainInfo;
     const nativeToken = this.nativeToken;
-    const defaultData = this.defaultInfo;
+
+    if (!this.isActive) {
+      const data: NativeYieldPoolInfo = {
+        // TODO
+        ...this.baseInfo,
+        type: this.type,
+        metadata: {
+          ...this.metadataInfo,
+          description: this.getDescription()
+        }
+      };
+
+      callback(data);
+
+      return () => {
+        cancel = true;
+      };
+    }
 
     await substrateApi.isReady;
 
@@ -77,12 +94,13 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
       const data: NativeYieldPoolInfo = {
         // TODO
-        ...defaultData,
-        description: this.description.replaceAll('{{amount}}', minToHuman),
+        ...this.baseInfo,
         type: this.type,
         metadata: {
-          inputAsset: nativeToken.slug,
-          isAvailable: true,
+          ...this.metadataInfo,
+          description: this.getDescription(minToHuman)
+        },
+        statistic: {
           maxCandidatePerFarmer: parseInt(maxNominations),
           maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
           minJoinPool: minStake.toString(),
@@ -91,7 +109,6 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           tvl: bnTotalEraStake.toString(), // TODO recheck
           totalApy: expectedReturn, // TODO recheck
           unstakingPeriod: unlockingPeriod,
-          allowCancelUnstaking: true,
           inflation: inflation
         }
       };
@@ -217,7 +234,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
   async subscribePoolPosition (useAddresses: string[], resultCallback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const substrateApi = await this.substrateApi.isReady;
-    const defaultInfo = this.defaultInfo;
+    const defaultInfo = this.baseInfo;
     const chainInfo = this.chainInfo;
 
     const unsub = await substrateApi.api.query.staking?.ledger.multi(useAddresses, async (ledgers: Codec[]) => {
@@ -276,7 +293,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const chainApi = await this.substrateApi.isReady;
     const poolInfo = await this.getPoolInfo();
 
-    if (!poolInfo) {
+    if (!poolInfo || !poolInfo.statistic) {
       return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
     }
 
@@ -375,14 +392,14 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const bnValidatorStake = totalStakeMap[validator.address].div(bnDecimals);
 
       if (_STAKING_CHAIN_GROUP.aleph.includes(this.chain)) {
-        validator.expectedReturn = calculateAlephZeroValidatorReturn(poolInfo.metadata.totalApy as number, getCommission(commission));
+        validator.expectedReturn = calculateAlephZeroValidatorReturn(poolInfo.statistic.totalApy as number, getCommission(commission));
       } else if (_STAKING_CHAIN_GROUP.ternoa.includes(this.chain)) {
         const rewardPerValidator = new BN(stakingRewards.sessionExtraRewardPayout).divn(allValidators.length).div(bnDecimals);
         const validatorStake = totalStakeMap[validator.address].div(bnDecimals).toNumber();
 
         validator.expectedReturn = calculateTernoaValidatorReturn(rewardPerValidator.toNumber(), validatorStake, getCommission(commission));
       } else {
-        validator.expectedReturn = calculateValidatorStakedReturn(poolInfo.metadata.totalApy as number, bnValidatorStake, bnAvgStake, getCommission(commission));
+        validator.expectedReturn = calculateValidatorStakedReturn(poolInfo.statistic.totalApy as number, bnValidatorStake, bnAvgStake, getCommission(commission));
       }
 
       validator.commission = parseFloat(commission.split('%')[0]);
@@ -410,18 +427,22 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const poolInfo = _poolInfo as NativeYieldPoolInfo;
 
+    if (!poolInfo.statistic) {
+      return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
     const errors: TransactionError[] = [];
     let bnTotalStake = new BN(amount);
-    const bnMinStake = new BN(poolInfo.metadata.minJoinPool);
+    const bnMinStake = new BN(poolInfo.statistic.minJoinPool);
     const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
-    const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, poolInfo.metadata.maxCandidatePerFarmer);
+    const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, poolInfo.statistic.maxCandidatePerFarmer);
 
     if (!poolPosition || poolPosition.status === EarningStatus.NOT_STAKING) {
       if (!bnTotalStake.gte(bnMinStake)) {
         errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
       }
 
-      if (selectedValidators.length > poolInfo.metadata.maxCandidatePerFarmer) {
+      if (selectedValidators.length > poolInfo.statistic.maxCandidatePerFarmer) {
         errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS, maxValidatorErrorMessage));
       }
 
@@ -436,7 +457,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
     }
 
-    if (selectedValidators.length > poolInfo.metadata.maxCandidatePerFarmer) {
+    if (selectedValidators.length > poolInfo.statistic.maxCandidatePerFarmer) {
       errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS, maxValidatorErrorMessage));
     }
 
@@ -535,7 +556,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const poolInfo = await this.getPoolInfo();
     const poolPosition = await this.getPoolPosition(address);
 
-    if (!poolInfo || !poolPosition || fastLeave) {
+    if (!poolInfo || !poolInfo.statistic || !poolPosition || fastLeave) {
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 
@@ -545,8 +566,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const bnActiveStake = new BN(poolPosition.activeStake);
     const bnRemainingStake = bnActiveStake.sub(new BN(amount));
-    const minStake = new BN(poolInfo.metadata.minJoinPool || '0');
-    const maxUnstake = poolInfo.metadata.maxWithdrawalRequestPerFarmer;
+    const minStake = new BN(poolInfo.statistic.minJoinPool || '0');
+    const maxUnstake = poolInfo.statistic.maxWithdrawalRequestPerFarmer;
 
     if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
       errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE));

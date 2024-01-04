@@ -79,7 +79,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   : detectTranslate('<main>Yay! You supplied</main><sub><span>in</span><logo /><span>{{poolName}}</span></sub>')
               }
               values={{
-                poolName: pool?.name || ''
+                poolName: pool?.metadata.name || ''
               }}
             />
           )

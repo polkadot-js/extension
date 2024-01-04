@@ -26,7 +26,24 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
     let cancel = false;
     const chainApi = this.substrateApi;
     const nativeToken = this.nativeToken;
-    const defaultData = this.defaultInfo;
+
+    if (!this.isActive) {
+      const data: NativeYieldPoolInfo = {
+        // TODO
+        ...this.baseInfo,
+        type: this.type,
+        metadata: {
+          ...this.metadataInfo,
+          description: this.getDescription()
+        }
+      };
+
+      callback(data);
+
+      return () => {
+        cancel = true;
+      };
+    }
 
     await chainApi.isReady;
 
@@ -77,12 +94,13 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
 
       const data: NativeYieldPoolInfo = {
         // TODO
-        ...defaultData,
-        description: this.description.replaceAll('{{amount}}', minToHuman),
+        ...this.baseInfo,
         type: this.type,
         metadata: {
-          inputAsset: nativeToken.slug,
-          isAvailable: true,
+          ...this.metadataInfo,
+          description: this.getDescription(minToHuman)
+        },
+        statistic: {
           maxCandidatePerFarmer: parseInt(maxDelegations),
           maxWithdrawalRequestPerFarmer: 1, // by default
           minJoinPool: minStake.toString(),
@@ -91,7 +109,6 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
           totalApy: undefined, // not have
           tvl: totalStake.toString(),
           unstakingPeriod: unstakingPeriod,
-          allowCancelUnstaking: true,
           inflation
         }
       };
@@ -209,7 +226,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
   async subscribePoolPosition (useAddresses: string[], resultCallback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
     const substrateApi = this.substrateApi;
-    const defaultInfo = this.defaultInfo;
+    const defaultInfo = this.baseInfo;
     const chainInfo = this.chainInfo;
 
     await substrateApi.isReady;

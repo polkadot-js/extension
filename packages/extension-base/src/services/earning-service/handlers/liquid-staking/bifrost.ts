@@ -52,7 +52,6 @@ const BIFROST_GRAPHQL_ENDPOINT = 'https://bifrost-subsql.liebi.com/v1/graphql';
 const BIFROST_EXCHANGE_RATE_REQUEST = 'query MyQuery{slp_polkadot_ratio(limit:1 where:{key:{_eq:"0"}} order_by:{timestamp:desc_nulls_first}){ratio key timestamp total_issuance token_pool}}';
 
 export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
-  protected readonly description: string;
   protected readonly name: string;
   protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
@@ -71,8 +70,11 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
 
     this.slug = `DOT___liquid_staking___${chain}`;
     this.name = `${chainInfo.name} Liquid Staking`;
-    this.description = 'Stake DOT to earn yield on vDOT';
     this.shortName = chainInfo.name.replaceAll(' Relay Chain', '');
+  }
+
+  protected getDescription (): string {
+    return 'Stake DOT to earn yield on vDOT';
   }
 
   /* Subscribe pool info */
@@ -113,13 +115,13 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
 
     return {
-      ...this.defaultInfo,
-      description: this.description,
+      ...this.baseInfo,
       type: this.type,
       metadata: {
-        ...this.baseMetadata,
-        isAvailable: true,
-        allowCancelUnstaking: false,
+        ...this.metadataInfo,
+        description: this.getDescription()
+      },
+      statistic: {
         assetEarning: [
           {
             slug: this.rewardAssets[0],
@@ -257,7 +259,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
         const totalBalance = bnActiveBalance.add(unlockBalance);
 
         const result: LiquidYieldPositionInfo = {
-          ...this.defaultInfo,
+          ...this.baseInfo,
           type: this.type,
           address,
           balanceToken: this.inputAsset,

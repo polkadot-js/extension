@@ -75,7 +75,7 @@ const CustomizeModalContent = styled(Component)<Props>(({ theme: { token } }: Pr
 
     '.ant-network-item-name': {
       overflow: 'hidden',
-      textWrap: 'nowrap',
+      'white-space': 'nowrap',
       textOverflow: 'ellipsis',
       paddingRight: token.paddingXS
     },

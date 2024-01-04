@@ -185,10 +185,12 @@ const Component: React.FC<Props> = (props: Props) => {
                     <a
                       className='link'
                       href='https://docs.subwallet.app/main/extension-user-guide/account-management/import-and-restore-an-account#import-by-qr-code'
+                      rel='noopener noreferrer'
+                      target='_blank'
                     />
                   )
                 }}
-                i18nKey={detectTranslate('Click the "Scan QR" button, or read <highlight>this instruction</highlight>, for more details.')}
+                i18nKey={detectTranslate('Click the "Scan QR" button, or read <highlight>this instruction</highlight>, for more details')}
               />
             </div>
           </div>

@@ -1880,6 +1880,7 @@ export default class KoniState {
       stores.balance.removeAllByAddress(address).catch(console.error);
       stores.balance.removeAllByAddress(ALL_ACCOUNT_KEY).catch(console.error);
       this.balanceMap.removeBalanceItems([address, ALL_ACCOUNT_KEY]);
+      this.balanceMap.computeAllAccountBalance();
 
       // Remove NFT
       stores.nft.deleteNftByAddress([address]).catch(console.error);

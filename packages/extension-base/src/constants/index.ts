@@ -26,9 +26,9 @@ export const IGNORE_QR_SIGNER: string[] = [];
 
 export const XCM_MIN_AMOUNT_RATIO = 1.2;
 
-export const GAS_PRICE_RATIO = 1.05;
+export const GAS_PRICE_RATIO = 1 + (2 / 100);
 
-export const NETWORK_MULTI_GAS_FEE = ['astarEvm'];
+export const NETWORK_MULTI_GAS_FEE = ['*'];
 
 export * from './staking';
 export * from './storage';

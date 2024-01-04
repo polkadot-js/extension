@@ -94,5 +94,5 @@ export const DEFAULT_WITHDRAW_PARAMS: WithdrawParams = {
 export const DEFAULT_CLAIM_REWARD_PARAMS: ClaimRewardParams = {
   ...DEFAULT_TRANSACTION_PARAMS,
   type: '' as StakingType,
-  bondReward: true
+  bondReward: false
 };

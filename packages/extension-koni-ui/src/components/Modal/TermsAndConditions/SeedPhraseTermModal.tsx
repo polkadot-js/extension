@@ -165,6 +165,13 @@ export const SeedPhraseTermModal = styled(Component)<Props>(({ theme: { token } 
       width: 300
     },
 
+    '.ant-web3-block-left-item': {
+      width: 40,
+      height: 40,
+      padding: token.paddingSM - 2,
+      alignItems: 'stretch'
+    },
+
     '.term-body': {
       height: 380,
       display: 'flex',
@@ -190,6 +197,8 @@ export const SeedPhraseTermModal = styled(Component)<Props>(({ theme: { token } 
       borderRadius: token.borderRadiusLG,
       WebkitTransition: 'background 0.2s ease-in-out',
       transition: 'background 0.2s ease-in-out',
+      alignItems: 'center',
+      gap: token.paddingSM - 4,
 
       '&:hover': {
         backgroundColor: token.colorBgInput

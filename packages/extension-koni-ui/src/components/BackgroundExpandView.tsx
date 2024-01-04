@@ -31,7 +31,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     console.log(pathName);
 
-    return !['/create-done', '/accounts/new-seed-phrase'].includes(pathName);
+    return !['/create-done'].includes(pathName);
   }, [location.pathname]);
 
   const isShowNotification = useMemo(() => {

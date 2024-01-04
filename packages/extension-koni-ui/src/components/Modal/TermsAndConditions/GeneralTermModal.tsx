@@ -161,7 +161,8 @@ export const GeneralTermModal = styled(Component)<Props>(({ theme: { token } }: 
     },
 
     '.term-footer-checkbox': {
-      alignItems: 'center'
+      alignItems: 'center',
+      alignSelf: 'flex-start'
     },
 
     '.term-footer-button-group': {
@@ -191,6 +192,10 @@ export const GeneralTermModal = styled(Component)<Props>(({ theme: { token } }: 
 
       '.term-body-caret-button': {
         top: '75%'
+      },
+
+      '.ant-sw-modal-body': {
+        padding: '16px 24px'
       }
 
     }

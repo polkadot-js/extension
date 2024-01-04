@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BackgroundExpandView, CloseIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
+import { CloseIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
 import { SeedPhraseTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/SeedPhraseTermModal';
 import { CONFIRM_TERM_SEED_PHRASE, DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SEED_PREVENT_MODAL, SELECTED_ACCOUNT_TYPE, TERM_AND_CONDITION_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -13,7 +13,7 @@ import { isFirefox } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { saveAs } from 'file-saver';
-import { CheckCircle, Upload } from 'phosphor-react';
+import { CheckCircle, Download } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -91,7 +91,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               style={{ textDecoration: 'underline' }}
             >{t('Download seed phrase ')}
               <Icon
-                phosphorIcon={Upload}
+                phosphorIcon={Download}
                 size='sm'
                 type='phosphor'
                 weight='fill'
@@ -227,7 +227,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
       </Layout.WithSubHeaderOnly>
       <SeedPhraseTermModal onOk={_onCreate} />
-      <BackgroundExpandView />
     </PageWrapper>
   );
 };
@@ -278,7 +277,9 @@ const NewSeedPhrase = styled(Component)<Props>(({ theme: { extendToken, token } 
     },
 
     '.__instruction-content-download': {
-      cursor: 'pointer'
+      cursor: 'pointer',
+      display : 'inline-flex',
+      gap: token.paddingSM - 6
     }
   };
 });

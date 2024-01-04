@@ -206,6 +206,11 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   } else if (_TRANSFER_CHAIN_GROUP.sora_substrate.includes(networkKey) && isTxAssetsSupported) {
     transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
   } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
+    if (networkKey === 'invarch') {
+      // forbid transfer in this case
+      return [null, transferAmount || value];
+    }
+
     if (transferAll) {
       transfer = api.tx.balances.transferAll(to, false);
     } else if (value) {

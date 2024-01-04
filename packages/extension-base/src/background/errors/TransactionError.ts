@@ -80,6 +80,10 @@ const defaultErrorMap = {
     message: detectTranslate('Invalid. Inactive nomination pool'),
     code: undefined
   },
+  [StakingTxErrorType.CAN_NOT_GET_METADATA]: {
+    message: detectTranslate('Unable to fetch staking data. Re-enable current network and try again'),
+    code: undefined
+  },
   [TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT]: {
     message: detectTranslate('Receiver is not enough existential deposit'),
     code: undefined

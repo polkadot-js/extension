@@ -882,5 +882,7 @@
   "CheckBox is required": "",
   "I understand that SubWallet can’t recover the password.": "",
   "This password can only unlock your SubWallet on this browser": "",
-  "Passwords should be at least 8 characters in length, including letters and numbers": ""
+  "Passwords should be at least 8 characters in length, including letters and numbers": "",
+  "Unable to fetch staking data. Re-enable current network and try again": "",
+  "Unable to fetch staking data. Re-enable \"{{chainName}}\" and try again.": ""
 }

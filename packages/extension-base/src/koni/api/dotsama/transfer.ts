@@ -88,7 +88,10 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
   }
 
   // TODO: need review
-  if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
+  if (networkKey === 'invarch') {
+    result.supportTransfer = false;
+    result.supportTransferAll = false;
+  } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
   } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
@@ -206,11 +209,6 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   } else if (_TRANSFER_CHAIN_GROUP.sora_substrate.includes(networkKey) && isTxAssetsSupported) {
     transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
   } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
-    if (networkKey === 'invarch') {
-      // forbid transfer in this case
-      return [null, transferAmount || value];
-    }
-
     if (transferAll) {
       transfer = api.tx.balances.transferAll(to, false);
     } else if (value) {

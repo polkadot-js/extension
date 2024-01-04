@@ -22,10 +22,7 @@
       "js": [
         "content.js"
       ],
-      "matches": [
-        "http://*/*",
-        "https://*/*"
-      ],
+      "matches": ["file://*/*", "http://*/*", "https://*/*"],
       "run_at": "document_start",
       "all_frames": true
     },
@@ -33,10 +30,7 @@
       "js": [
         "page.js"
       ],
-      "matches": [
-        "http://*/*",
-        "https://*/*"
-      ],
+      "matches": ["file://*/*", "http://*/*", "https://*/*"],
       "run_at": "document_start",
       "world": "MAIN",
       "all_frames": true
@@ -51,7 +45,8 @@
   },
   "web_accessible_resources": [{
     "resources": ["page.js"],
-    "matches": ["<all_urls>"]
+    "use_dynamic_url": false,
+    "matches": ["file://*/*", "http://*/*", "https://*/*"]
   }],
   "minimum_chrome_version": "111",
   "content_security_policy": {

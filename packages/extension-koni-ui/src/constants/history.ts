@@ -67,5 +67,10 @@ export const HistoryStatusMap: Record<ExtrinsicStatus, StatusType> = {
     schema: 'danger',
     icon: StopCircle,
     name: detectTranslate('Unknown')
+  },
+  [ExtrinsicStatus.TIMEOUT]: {
+    schema: 'gold',
+    icon: Spinner,
+    name: detectTranslate('Timeout')
   }
 };

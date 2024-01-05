@@ -37,7 +37,7 @@ const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
 };
 
 function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
-  if (item.status === ExtrinsicStatus.PROCESSING || item.status === ExtrinsicStatus.SUBMITTING) {
+  if (item.status === ExtrinsicStatus.PROCESSING || item.status === ExtrinsicStatus.TIMEOUT || item.status === ExtrinsicStatus.SUBMITTING) {
     return IconMap.processing;
   }
 
@@ -99,6 +99,11 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
   if (item.status === ExtrinsicStatus.PROCESSING) {
     displayData.className = '-processing';
     displayData.typeName = nameMap.processing;
+  }
+
+  if (item.status === ExtrinsicStatus.TIMEOUT) {
+    displayData.className = '-processing';
+    displayData.typeName = nameMap.timeout;
   }
 
   if (item.status === ExtrinsicStatus.SUBMITTING) {
@@ -277,6 +282,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     default: t('Transaction'),
     submitting: t('Submitting...'),
     processing: t('Processing...'),
+    timeout: t('Timeout'),
     send: t('Send'),
     received: t('Receive'),
     [ExtrinsicType.SEND_NFT]: t('NFT'),

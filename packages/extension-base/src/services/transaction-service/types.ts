@@ -62,4 +62,5 @@ export interface TransactionEventMap {
   extrinsicHash: (response: TransactionEventResponse) => void;
   error: (response: TransactionEventResponse) => void;
   success: (response: TransactionEventResponse) => void;
+  timeout: (response: TransactionEventResponse) => void;
 }

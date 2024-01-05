@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.1.30
+Build date: Jan 05, 2024.
+
+Features & Update:
+- Update chain-list (#2447)
+  - Add new provider for Parallel
+  - Add support new network: InvArch
+  - Add support new token: cDOT-7/14 (Parallel)
+- Handle fallback for online content (#2391)
+
+Bugs fixed:
+- Hot fix bug estimating EVM transaction fee (#2412)
+- Fixed bug Do not display the account in the account details tab in case the entire account balance is locked (#2429)
+
 ## 1.1.29
 Build date: Dec 29, 2023.
 

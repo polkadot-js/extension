@@ -1,6 +1,6 @@
     1879	Nam Phạm                      	[Issue 2313] fix eslint
-    1819	AnhMTV                        	Allow web-runner on [CI-skip]
-    1515	S2kael                        	[Issue-2425] Update chain-list
+    1826	AnhMTV                        	
+    1518	S2kael                        	[Issue-2412] Rollback hot fix case max transfer
      465	Jaco                          	0.42.5 (#969)
      303	lw-cdm                        	[Issue-2373] Fix issue related to history after sending NFT
      185	quangdo                       	
@@ -12,16 +12,17 @@
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
       24	S2kael                        	
-      15	nguyentiendung                	[Issue-2203] Fix UI Extension issue related to manage network
+      20	nguyentiendung                	[Issue-2438] Extension - Handle the case of default untick checkbox Bond reward when Claim reward
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
+       6	Thiendekaco                   	Change static content of T&C
        6	unknown                       	refactor code
+       5	bluedot                       	[Issue-2447] Update chainlist
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        4	Quangdm-cdm                   	
-       4	Thiendekaco                   	[Issue 2330] Add T&C for extension and webapp ( recheck case update version extension )
        3	Antoine Estienne              	Add eth test for extension signature (#909)
        3	quangdm                       	Update style for Auth Transaction Screen, Export Screen, Derive Screen
        2	Axel Chalon                   	Add typings to messages (#130)

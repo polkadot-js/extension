@@ -3,14 +3,16 @@
 
 import { getLatestPackageVersion } from "./utils.js";
 
-// export const DEFAULT_SNAP_ORIGIN = `local:http://localhost:8080`; 
-export const DEFAULT_SNAP_ORIGIN = `npm:@polkagate/snap`
+// const LOCAL_SNAP_ID = 'local:http://localhost:8080';
+const NPM_SNAP_ID = 'npm:@polkagate/snap';
+
+export const DEFAULT_SNAP_ORIGIN =  NPM_SNAP_ID ;
+
 export let DEFAULT_SNAP_VERSION = '0.1.11';
 export const DEFAULT_SNAP_NAME = 'polkamask';
 
 export const SUPPORTED_SNAPS = {
   [DEFAULT_SNAP_ORIGIN]: { version: `>=${DEFAULT_SNAP_VERSION}` },
-//   'npm:@chainsafe/polkadot-snap': {},
 };
 
 

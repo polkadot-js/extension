@@ -55,16 +55,20 @@ const getSnap = async (_id: string = DEFAULT_SNAP_ORIGIN, _version?: string): Pr
 
 /** @internal Invokes a method on a Snap and returns the result. */
 const invokeSnap = async (args: SnapRpcRequestParams) => {
-  console.info('args in invokeSnap:', args)
+  console.info('Args in invokeSnap:', args);
+
+  const snapId = args?.snapId || DEFAULT_SNAP_ORIGIN;
+  const request = {
+    method: args.method,
+    params: args?.params || []
+  };
+  
   const result = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-      snapId: args?.snapId || DEFAULT_SNAP_ORIGIN,
-      request: {
-        method: args.method,
-        params: args?.params,
-      },
-    },
+      snapId,
+      request
+    }
   });
 
   return result as unknown as any;
@@ -72,11 +76,11 @@ const invokeSnap = async (args: SnapRpcRequestParams) => {
 
 /** @internal Gets the list of Snap accounts available in the connected wallet. */
 const getSnapAccounts = async (
-  anyType?: boolean,
+  // anyType?: boolean,
 ): Promise<InjectedAccount[]> => {
   const _addressAnyChain = await invokeSnap({
     method: 'getAddress',
-    params: { anyType }, // if we can have chainName here, we can show formatted address to users
+    // params: { chainName: anyType ? 'any' : undefined }, // if we can have chainName here, we can show formatted address to users
   });
 
   const account = {
@@ -150,8 +154,8 @@ export const snapSubscriptionManager = () => {
       subscribers = subscribers.filter((subscriber) => subscriber !== callback);
 
       getSnapAccounts()
-      .then(callback)
-      .catch(console.error);
+        .then(callback)
+        .catch(console.error);
     };
   };
 

@@ -25,7 +25,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
   protected readonly rewardAssets: string[] = ['parallel-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['parallel-NATIVE-PARA'];
   /** @inner */
-  protected override readonly minAmountPercent = 0.97;
+  public override readonly minAmountPercent = 0.97;
   /** @inner */
   protected override readonly allowDefaultUnstake = true;
   public slug: string;

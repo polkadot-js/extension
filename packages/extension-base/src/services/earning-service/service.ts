@@ -6,7 +6,8 @@ import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/backg
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import BaseLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/base';
+import { EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
@@ -16,15 +17,18 @@ export default class EarningService {
   protected readonly state: KoniState;
   protected handlers: Record<string, BasePoolHandler> = {};
   private earningRewardSubject: BehaviorSubject<EarningRewardJson> = new BehaviorSubject<EarningRewardJson>({ ready: false, data: {} });
+  private minAmountPercentSubject: BehaviorSubject<Record<string, number>> = new BehaviorSubject<Record<string, number>>({});
 
   constructor (state: KoniState) {
     this.state = state;
 
-    this.initHandlers();
+    this.initHandlers().catch(console.error);
   }
 
-  public initHandlers () {
+  private async initHandlers () {
+    await this.state.eventService.waitChainReady;
     const chains = Object.keys(this.state.getChainInfoMap());
+    const minAmountPercent: Record<string, number> = {};
 
     for (const chain of chains) {
       const handlers: BasePoolHandler[] = [];
@@ -77,11 +81,19 @@ export default class EarningService {
         this.handlers[handler.slug] = handler;
       }
     }
+
+    for (const handler of Object.values(this.handlers)) {
+      if (handler.type === YieldPoolType.LIQUID_STAKING) {
+        minAmountPercent[handler.slug] = (handler as BaseLiquidStakingPoolHandler).minAmountPercent;
+      }
+    }
+
+    minAmountPercent.default = BaseLiquidStakingPoolHandler.defaultMinAmountPercent;
+
+    this.minAmountPercentSubject.next(minAmountPercent);
   }
 
   public getPoolHandler (slug: string): BasePoolHandler | undefined {
-    this.initHandlers();
-
     return this.handlers[slug];
   }
 
@@ -95,13 +107,20 @@ export default class EarningService {
     }
   }
 
+  public subscribeMinAmountPercent (): BehaviorSubject<Record<string, number>> {
+    return this.minAmountPercentSubject;
+  }
+
+  public getMinAmountPercent (): Record<string, number> {
+    return this.minAmountPercentSubject.getValue();
+  }
+
   /* Subscribe pools' info */
 
   public async subscribePoolsInfo (callback: (rs: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
 
     await this.state.eventService.waitChainReady;
-    this.initHandlers();
 
     const unsubList: Array<VoidFunction> = [];
 
@@ -133,7 +152,6 @@ export default class EarningService {
     let cancel = false;
 
     await this.state.eventService.waitChainReady;
-    this.initHandlers();
 
     const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
     const activeChains = this.state.activeChainSlugs;
@@ -187,7 +205,6 @@ export default class EarningService {
     let cancel = false;
 
     await this.state.eventService.waitChainReady;
-    this.initHandlers();
 
     const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
     const activeChains = this.state.activeChainSlugs;

@@ -37,7 +37,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
   protected readonly rewardAssets: string[] = ['acala-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['acala-NATIVE-ACA', 'acala-LOCAL-DOT'];
   /** @inner */
-  protected override readonly minAmountPercent = 0.98;
+  public override readonly minAmountPercent = 0.98;
   /** @inner */
   protected override readonly allowDefaultUnstake = true;
   public slug: string;

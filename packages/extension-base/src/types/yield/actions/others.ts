@@ -3,7 +3,7 @@
 
 import { BaseRequestSign, InternalRequestSign } from '@subwallet/extension-base/background/KoniTypes';
 
-import { UnstakingInfo } from '../info';
+import { UnstakingInfo, YieldPoolInfo } from '../info';
 
 /**
  * @interface YieldLeaveParams
@@ -13,6 +13,7 @@ import { UnstakingInfo } from '../info';
  * @prop {string} slug - Pool's slug
  * @prop {string} [selectedTarget] - Pool target want to leave (nomination pool and native staking need)
  * @prop {boolean} fastLeave - Fast leave pool (swap token)
+ * @prop {YieldPoolInfo} poolInfo - Pool's info - use for create history
  * */
 export interface YieldLeaveParams extends BaseRequestSign {
   /** Request account */
@@ -25,6 +26,8 @@ export interface YieldLeaveParams extends BaseRequestSign {
   selectedTarget?: string;
   /** Fast leave pool (swap token) */
   fastLeave: boolean;
+  /** Pool's info - use for create history */
+  poolInfo: YieldPoolInfo;
 }
 
 export type RequestYieldLeave = InternalRequestSign<YieldLeaveParams>;

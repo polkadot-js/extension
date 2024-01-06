@@ -41,6 +41,11 @@ export interface RequestGetYieldPoolTargets {
   slug: string;
 }
 
+export interface ResponseGetYieldPoolTargets {
+  slug: string;
+  targets: YieldPoolTarget[];
+}
+
 export interface CollatorExtraInfo {
   active: boolean,
   identity?: string,

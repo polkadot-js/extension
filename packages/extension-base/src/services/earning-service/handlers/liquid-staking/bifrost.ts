@@ -60,7 +60,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
   protected readonly rewardAssets: string[] = ['bifrost_dot-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['bifrost_dot-NATIVE-BNC', 'bifrost_dot-LOCAL-DOT'];
   /** @inner */
-  protected override readonly minAmountPercent = 0.99;
+  public override readonly minAmountPercent = 0.99;
   public slug: string;
 
   constructor (state: KoniState, chain: string) {

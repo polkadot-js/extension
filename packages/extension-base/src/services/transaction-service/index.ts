@@ -556,7 +556,7 @@ export default class TransactionService {
 
       case ExtrinsicType.REDEEM_QDOT: {
         const data = parseTransactionData<ExtrinsicType.REDEEM_QDOT>(transaction.data);
-        const yieldPoolInfo = data.yieldPoolInfo as SpecialYieldPoolInfo;
+        const yieldPoolInfo = data.poolInfo as SpecialYieldPoolInfo;
 
         if (yieldPoolInfo.metadata.derivativeAssets) {
           const inputTokenSlug = yieldPoolInfo.metadata.inputAsset;
@@ -576,12 +576,12 @@ export default class TransactionService {
       // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.REDEEM_VDOT: {
         const data = parseTransactionData<ExtrinsicType.REDEEM_VDOT>(transaction.data);
-        const yieldPoolInfo = data.yieldPoolInfo as SpecialYieldPoolInfo;
+        const yieldPoolInfo = data.poolInfo as SpecialYieldPoolInfo;
 
         if (yieldPoolInfo.metadata.derivativeAssets) {
           const derivativeTokenSlug = yieldPoolInfo.metadata.derivativeAssets[0];
           const derivativeTokenInfo = this.state.chainService.getAssetBySlug(derivativeTokenSlug);
-          const chainInfo = this.state.chainService.getChainInfoByKey(data.yieldPoolInfo.chain);
+          const chainInfo = this.state.chainService.getChainInfoByKey(data.poolInfo.chain);
 
           historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(derivativeTokenInfo), decimals: _getAssetDecimals(derivativeTokenInfo) };
           eventLogs && !_isChainEvmCompatible(chainInfo) && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);

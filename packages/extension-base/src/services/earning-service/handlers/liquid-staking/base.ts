@@ -8,10 +8,16 @@ import { SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/t
 
 import BaseSpecialStakingPoolHandler from '../special';
 
+const DEFAULT_MIN_AMOUNT_PERCENT = 0.98;
+
 export default abstract class BaseLiquidStakingPoolHandler extends BaseSpecialStakingPoolHandler {
   public readonly type = YieldPoolType.LIQUID_STAKING;
   /** Rate convert token when redeem */
-  protected readonly minAmountPercent: number = 0.98;
+  public readonly minAmountPercent: number = DEFAULT_MIN_AMOUNT_PERCENT;
+
+  public static get defaultMinAmountPercent (): number {
+    return DEFAULT_MIN_AMOUNT_PERCENT;
+  }
 
   /* Leave pool action */
 

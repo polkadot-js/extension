@@ -10,7 +10,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, EarningStatus, HandleYieldStepParams, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, EarningStatus, HandleYieldStepParams, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, ResponseGetYieldPoolTargets, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -530,11 +530,11 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.MINT_STDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_STDOT]: RequestYieldStepSubmit,
 
-  [ExtrinsicType.REDEEM_VDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.REDEEM_QDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.REDEEM_LDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.REDEEM_SDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.REDEEM_STDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.REDEEM_VDOT]: RequestYieldLeave,
+  [ExtrinsicType.REDEEM_QDOT]: RequestYieldLeave,
+  [ExtrinsicType.REDEEM_LDOT]: RequestYieldLeave,
+  [ExtrinsicType.REDEEM_SDOT]: RequestYieldLeave,
+  [ExtrinsicType.REDEEM_STDOT]: RequestYieldLeave,
 
   [ExtrinsicType.UNSTAKE_QDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.UNSTAKE_VDOT]: RequestYieldFastWithdrawal,
@@ -2293,7 +2293,8 @@ export interface KoniRequestSignatures {
   'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
   'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
   'pri(yield.subscribeYieldReward)': [null, EarningRewardJson, EarningRewardJson];
-  'pri(yield.getTargets)': [RequestGetYieldPoolTargets, YieldPoolTarget[]];
+  'pri(yield.getTargets)': [RequestGetYieldPoolTargets, ResponseGetYieldPoolTargets];
+  'pri(yield.minAmountPercent)': [null, Record<string, number>, Record<string, number>];
 
   // Deprecated
   'pri(yield.getNativeStakingValidators)': [YieldPoolInfo, ValidatorInfo[]];

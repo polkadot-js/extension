@@ -34,7 +34,7 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionE
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { createTransactionFromRLP, recalculateGasPrice, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -3931,10 +3931,15 @@ export default class KoniExtension {
     });
   }
 
-  private async getYieldPoolTargets (request: RequestGetYieldPoolTargets) {
+  private async getYieldPoolTargets (request: RequestGetYieldPoolTargets): Promise<ResponseGetYieldPoolTargets> {
     const { slug } = request;
 
-    return this.#koniState.earningService.getPoolTargets(slug);
+    const targets = await this.#koniState.earningService.getPoolTargets(slug);
+
+    return {
+      slug,
+      targets
+    };
   }
 
   private async subscribeYieldPosition (id: string, port: chrome.runtime.Port) {
@@ -3970,6 +3975,23 @@ export default class KoniExtension {
     });
 
     return this.#koniState.earningService.getEarningRewards();
+  }
+
+  private subscribeEarningMinAmountPercent (id: string, port: chrome.runtime.Port): Record<string, number> {
+    const cb = createSubscription<'pri(yield.minAmountPercent)'>(id, port);
+    const earningMinAmountPercentSubscription = this.#koniState.earningService.subscribeMinAmountPercent().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, earningMinAmountPercentSubscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.earningService.getMinAmountPercent();
   }
 
   private handleValidateYieldProcess (inputData: ValidateYieldProcessParams) {
@@ -4350,6 +4372,8 @@ export default class KoniExtension {
         return this.subscribeYieldPosition(id, port);
       case 'pri(yield.subscribeYieldReward)':
         return this.subscribeYieldReward(id, port);
+      case 'pri(yield.minAmountPercent)':
+        return this.subscribeEarningMinAmountPercent(id, port);
 
         /* Info */
 

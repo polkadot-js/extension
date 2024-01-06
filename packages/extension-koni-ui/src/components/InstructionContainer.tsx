@@ -34,6 +34,7 @@ const Component: React.FC<PropsType> = ({ className, contents }: PropsType) => {
             description={typeof alert.description === 'string' ? t(alert.description) : alert.description}
             key={index}
             title={t(alert.title)}
+            className={'__alert-box'}
             type={alert.type || 'warning'}
           />
         ))
@@ -48,7 +49,12 @@ const InstructionContainer = styled(Component)<PropsType>(({ theme: { token } }:
   gap: 10,
   '.alert-title.alert-title': {
     color: token.colorTextLight1
+  },
+
+  '.__alert-box': {
+    minWidth: 300
   }
+
 }));
 
 export default InstructionContainer;

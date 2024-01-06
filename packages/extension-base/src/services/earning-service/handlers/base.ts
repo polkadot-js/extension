@@ -196,7 +196,7 @@ export default abstract class BasePoolHandler {
       ];
 
       for (const stepFunction of stepFunctions) {
-        const step = await stepFunction(params);
+        const step = await stepFunction.bind(this, params)();
 
         if (step) {
           const [info, fee] = step;

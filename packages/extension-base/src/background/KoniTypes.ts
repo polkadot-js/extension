@@ -523,12 +523,12 @@ export interface ExtrinsicDataTypeMap {
 
   // Yield
   [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_VDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_LDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_SDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_QDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_STDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_STDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_VDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_LDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_SDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_QDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_STDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_STDOT]: SubmitYieldStepData,
 
   [ExtrinsicType.REDEEM_VDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_QDOT]: RequestYieldLeave,

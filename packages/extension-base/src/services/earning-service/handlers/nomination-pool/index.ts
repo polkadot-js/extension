@@ -492,7 +492,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
     const data = _data as SubmitJoinNominationPool;
     const { address, amount, selectedPool } = data;
     const positionInfo = await this.getPoolPosition(address);
-    const [extrinsic] = await this.createJoinExtrinsic(data);
+    const [extrinsic] = await this.createJoinExtrinsic(data, positionInfo);
 
     const joinPoolData: RequestStakePoolingBonding = {
       poolPosition: positionInfo,

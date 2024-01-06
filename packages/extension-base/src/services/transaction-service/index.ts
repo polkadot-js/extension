@@ -17,7 +17,7 @@ import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEm
 import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
-import { RequestYieldStepSubmit, SpecialYieldPoolInfo, SubmitYieldStepData, YieldPoolType } from '@subwallet/extension-base/types';
+import { RequestStakePoolingBonding, RequestYieldStepSubmit, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { anyNumberToBN, recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
@@ -539,8 +539,8 @@ export default class TransactionService {
 
       // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.MINT_VDOT: {
-        const data = parseTransactionData<ExtrinsicType.MINT_VDOT>(transaction.data);
-        const params = data.data as SubmitYieldStepData;
+        const params = parseTransactionData<ExtrinsicType.MINT_VDOT>(transaction.data);
+
         const inputTokenInfo = this.state.chainService.getAssetBySlug(params.inputTokenSlug);
         const isFeePaidWithInputAsset = params.feeTokenSlug === params.inputTokenSlug;
 
@@ -1093,9 +1093,15 @@ export default class TransactionService {
   private handlePostEarningTransaction (id: string) {
     const transaction = this.getTransaction(id);
 
-    const data = transaction.data as RequestYieldStepSubmit;
+    let slug: string;
 
-    const slug = data.data.slug;
+    // TODO
+    if ('data' in transaction.data) {
+      slug = (transaction.data as RequestYieldStepSubmit).data.slug;
+    } else {
+      slug = (transaction.data as RequestStakePoolingBonding).slug;
+    }
+
     const poolHandler = this.state.earningService.getPoolHandler(slug);
 
     if (poolHandler) {

@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-inject authors & contributors
+// Copyright 2019-2024 @polkadot/extension-inject authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Signer as InjectedSigner } from '@polkadot/api/types';

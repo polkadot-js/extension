@@ -44,7 +44,6 @@ const createDoneUrl = '/create-done';
 
 const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
-
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
@@ -160,11 +159,13 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
       return null;
     }
 
-    const notRequireLogin = pathName !== loginUrl && pathName !== mv3MigrationUrl && !pathName.startsWith(phishingUrl);
+    const requireLogin = pathName !== mv3MigrationUrl && !pathName.startsWith(phishingUrl);
 
-    if (needMigrate && hasMasterPassword && !needUnlock) {
+    if (!requireLogin) {
+      // Do nothing
+    } else if (needMigrate && hasMasterPassword && !needUnlock) {
       redirectTarget = migratePasswordUrl;
-    } else if (hasMasterPassword && needUnlock && notRequireLogin) {
+    } else if (hasMasterPassword && needUnlock) {
       redirectTarget = loginUrl;
     } else if (hasMasterPassword && pathName === createPasswordUrl) {
       redirectTarget = DEFAULT_ROUTER_PATH;

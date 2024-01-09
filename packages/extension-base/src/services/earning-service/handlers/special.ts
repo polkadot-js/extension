@@ -28,8 +28,6 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   protected readonly allowFastUnstake: boolean = true;
 
   protected override get metadataInfo (): Omit<SpecialYieldPoolMetadata, 'description'> {
-    const maintainBalance = this.state.getAssetBySlug(this.inputAsset)?.minAmount || '0';
-
     return {
       altInputAssets: this.altInputAsset,
       derivativeAssets: this.derivativeAssets,
@@ -42,7 +40,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       isAvailable: true,
       allowCancelUnstaking: false,
       maintainAsset: this.nativeToken.slug,
-      maintainBalance
+      maintainBalance: this.maintainBalance
     };
   }
 

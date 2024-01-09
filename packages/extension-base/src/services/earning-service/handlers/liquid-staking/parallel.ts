@@ -99,6 +99,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
             exchangeRate: exchangeRate / decimals
           }
         ],
+        unstakingPeriod: 24 * 28,
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '10000000000',

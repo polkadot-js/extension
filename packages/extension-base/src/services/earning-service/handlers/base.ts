@@ -9,6 +9,8 @@ import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/services/earning-service/constants';
 import { BasePoolInfo, BaseYieldPoolMetadata, EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
+import { BN, BN_TEN } from '@polkadot/util';
+
 /**
  * @class BasePoolHandler
  * @description Base pool handler
@@ -89,9 +91,16 @@ export default abstract class BasePoolHandler {
 
   protected abstract getDescription (amount?: string): string;
 
-  protected get metadataInfo (): Omit<BaseYieldPoolMetadata, 'description'> {
-    const maintainBalance = this.nativeToken.minAmount || '0';
+  protected get maintainBalance () {
+    const decimals = this.nativeToken.decimals || 0;
+    const defaultMaintainBalance = new BN(1).mul(BN_TEN.pow(new BN(decimals)));
+    const ed = new BN(this.nativeToken.minAmount || '0');
+    const maintainBalance = ed.gt(defaultMaintainBalance) ? ed.mul(new BN(1.5)) : defaultMaintainBalance;
 
+    return maintainBalance.toString();
+  }
+
+  protected get metadataInfo (): Omit<BaseYieldPoolMetadata, 'description'> {
     return {
       name: this.name,
       shortName: this.shortName,
@@ -100,7 +109,7 @@ export default abstract class BasePoolHandler {
       isAvailable: true,
       allowCancelUnstaking: false,
       maintainAsset: this.nativeToken.slug,
-      maintainBalance
+      maintainBalance: this.maintainBalance
     };
   }
 

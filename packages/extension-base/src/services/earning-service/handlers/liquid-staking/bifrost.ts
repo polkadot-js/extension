@@ -129,6 +129,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
             exchangeRate: parseFloat(exchangeRate.data.slp_polkadot_ratio[0].ratio)
           }
         ],
+        unstakingPeriod: 24 * 28,
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '5000000000',

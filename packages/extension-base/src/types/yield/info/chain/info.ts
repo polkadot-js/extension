@@ -185,12 +185,16 @@ export interface NormalYieldPoolStatistic extends BaseYieldPoolStatistic {
  * @interface SpecialYieldPoolStatistic
  * @extends BaseYieldPoolStatistic
  * @prop {string} minWithdrawal - Min amount for withdrawal request
+ * @prop {number} [unstakingPeriod] - Time to wait withdraw un-stake, in hour
  * */
 export interface SpecialYieldPoolStatistic extends BaseYieldPoolStatistic {
   /* Special info */
 
   /** Min amount for withdrawal request */
   minWithdrawal: string;
+
+  /** Time to wait withdraw un-stake, in hour */
+  unstakingPeriod?: number; // for normal un-stake (not fast un-stake)
 
   /* Special info */
 }

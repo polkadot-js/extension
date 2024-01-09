@@ -86,7 +86,10 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
         method: 'GET'
       }).then((resp) => {
         resolve(resp.json());
-      }).catch(console.error);
+      }).catch((e) => {
+        console.error(e);
+        resolve(null);
+      });
     });
 
     const timeout = new Promise((resolve) => {

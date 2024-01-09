@@ -110,6 +110,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
             exchangeRate: latestExchangeRate / decimals
           }
         ],
+        unstakingPeriod: 24 * 28,
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
         minJoinPool: '50000000000',

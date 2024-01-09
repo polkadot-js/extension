@@ -7,7 +7,7 @@ import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '
 import { getEarningStatusByNominations } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { BaseYieldPoolMetadata, BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPoolMetadata, BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, isUrl, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -134,6 +134,12 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
           description: this.getDescription(minToHuman)
         },
         statistic: {
+          assetEarning: [
+            {
+              slug: this.nativeToken.slug,
+              apy: apyInfo !== null ? apyInfo : undefined
+            }
+          ],
           maxCandidatePerFarmer: 100, // temporary fix for Astar, there's no limit for now
           maxWithdrawalRequestPerFarmer: 1, // by default
           minJoinPool: minDelegatorStake,
@@ -405,7 +411,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
   }
 
   async createJoinExtrinsic (data: SubmitJoinNativeStaking, positionInfo?: YieldPositionInfo, bondDest = 'Staked'): Promise<[TransactionData, YieldTokenBaseInfo]> {
-    const { address, amount, selectedValidators: targetValidators } = data;
+    const { amount, selectedValidators: targetValidators } = data;
     const chainApi = await this.substrateApi.isReady;
     const binaryAmount = new BN(amount);
     const dappInfo = targetValidators[0];
@@ -413,10 +419,11 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
     const dappParam = isEthereumAddress(dappInfo.address) ? { Evm: dappInfo.address } : { Wasm: dappInfo.address };
     const extrinsic = chainApi.api.tx.dappsStaking.bondAndStake(dappParam, binaryAmount);
     const tokenSlug = this.nativeToken.slug;
-    const feeInfo = await extrinsic.paymentInfo(address);
-    const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+    // const feeInfo = await extrinsic.paymentInfo(address);
+    // const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-    return [extrinsic, { slug: tokenSlug, amount: fee.partialFee.toString() }];
+    // Not use the fee to validate and to display on UI
+    return [extrinsic, { slug: tokenSlug, amount: '0' }];
   }
 
   /* Join pool action */

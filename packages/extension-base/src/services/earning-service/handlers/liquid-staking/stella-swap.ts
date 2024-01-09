@@ -8,12 +8,11 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
-import { BN } from 'bn.js';
 import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
 
-import { BN_ZERO } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 import { DEFAULT_YIELD_FIRST_STEP, ST_LIQUID_TOKEN_ABI } from '../../constants';
 import BaseLiquidStakingPoolHandler from './base';
@@ -259,19 +258,26 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const derivativeTokenSlug = this.derivativeAssets[0];
     const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
 
-    const stakingContract = getStellaswapLiquidStakingContract(this.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApi);
+    if (new BN(params.amount).gt(BN_ZERO)) {
+      const stakingContract = getStellaswapLiquidStakingContract(this.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApi);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const depositCall = stakingContract.methods.deposit(params.amount);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      const depositCall = stakingContract.methods.deposit(params.amount);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    const estimatedDepositGas = (await depositCall.estimateGas()) as number;
-    const gasPrice = await evmApi.api.eth.getGasPrice();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const estimatedDepositGas = (await depositCall.estimateGas()) as number;
+      const gasPrice = await evmApi.api.eth.getGasPrice();
 
-    return {
-      slug: this.feeAssets[0],
-      amount: (estimatedDepositGas * parseInt(gasPrice)).toString()
-    };
+      return {
+        slug: this.feeAssets[0],
+        amount: (estimatedDepositGas * parseInt(gasPrice)).toString()
+      };
+    } else {
+      return {
+        slug: this.feeAssets[0],
+        amount: '0'
+      };
+    }
   }
 
   override async generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {

@@ -10,7 +10,7 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
 
@@ -101,6 +101,12 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           description: this.getDescription(minToHuman)
         },
         statistic: {
+          assetEarning: [
+            {
+              slug: this.nativeToken.slug,
+              apy: expectedReturn
+            }
+          ],
           maxCandidatePerFarmer: parseInt(maxNominations),
           maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
           minJoinPool: minStake.toString(),
@@ -480,16 +486,18 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       return validator.address;
     });
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     const compoundTransactions = async (bondTx: SubmittableExtrinsic<'promise'>, nominateTx: SubmittableExtrinsic<'promise'>): Promise<[TransactionData, YieldTokenBaseInfo]> => {
       const extrinsic = chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
-      const fees = await Promise.all([bondTx.paymentInfo(address), nominateTx.paymentInfo(address)]);
-      const totalFee = fees.reduce((previousValue, currentItem) => {
-        const fee = currentItem.toPrimitive() as unknown as RuntimeDispatchInfo;
+      // const fees = await Promise.all([bondTx.paymentInfo(address), nominateTx.paymentInfo(address)]);
+      // const totalFee = fees.reduce((previousValue, currentItem) => {
+      //   const fee = currentItem.toPrimitive() as unknown as RuntimeDispatchInfo;
+      //
+      //   return previousValue + fee.partialFee;
+      // }, 0);
 
-        return previousValue + fee.partialFee;
-      }, 0);
-
-      return [extrinsic, { slug: tokenSlug, amount: totalFee.toString() }];
+      // Not use the fee to validate and to display on UI
+      return [extrinsic, { slug: tokenSlug, amount: '0' }];
     };
 
     if (!positionInfo) {
@@ -525,15 +533,15 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     }
 
     if (bondTx && !nominateTx) {
-      const feeInfo = await bondTx.paymentInfo(address);
-      const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+      // const feeInfo = await bondTx.paymentInfo(address);
+      // const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-      return [bondTx, { slug: tokenSlug, amount: fee.partialFee.toString() }];
+      return [bondTx, { slug: tokenSlug, amount: '0' }];
     } else if (nominateTx && !bondTx) {
-      const feeInfo = await nominateTx.paymentInfo(address);
-      const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+      // const feeInfo = await nominateTx.paymentInfo(address);
+      // const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-      return [nominateTx, { slug: tokenSlug, amount: fee.partialFee.toString() }];
+      return [nominateTx, { slug: tokenSlug, amount: '0' }];
     }
 
     if (bondTx && nominateTx) {

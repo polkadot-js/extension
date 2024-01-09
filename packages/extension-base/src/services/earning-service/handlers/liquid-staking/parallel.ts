@@ -182,13 +182,20 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
     const poolOriginSubstrateApi = await this.substrateApi.isReady;
     const defaultFeeTokenSlug = this.feeAssets[0];
 
-    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.liquidStaking.stake(params.amount).paymentInfo(fakeAddress);
-    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+    if (new BN(params.amount).gt(BN_ZERO)) {
+      const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.liquidStaking.stake(params.amount).paymentInfo(fakeAddress);
+      const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-    return {
-      amount: mintFeeInfo.partialFee.toString(),
-      slug: defaultFeeTokenSlug
-    };
+      return {
+        amount: mintFeeInfo.partialFee.toString(),
+        slug: defaultFeeTokenSlug
+      };
+    } else {
+      return {
+        amount: '0',
+        slug: defaultFeeTokenSlug
+      };
+    }
   }
 
   async handleSubmitStep (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<HandleYieldStepData> {

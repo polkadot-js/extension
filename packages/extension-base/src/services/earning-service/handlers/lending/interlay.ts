@@ -6,9 +6,8 @@ import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/backg
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, LendingYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
-import BN from 'bn.js';
 
-import { BN_ZERO } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 import { fakeAddress } from '../../constants';
 import BaseLendingPoolHandler from './base';
@@ -146,13 +145,20 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
     const defaultFeeTokenSlug = this.feeAssets[0];
 
-    const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.loans.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount).paymentInfo(fakeAddress);
-    const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+    if (new BN(params.amount).gt(BN_ZERO)) {
+      const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.loans.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount).paymentInfo(fakeAddress);
+      const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-    return {
-      amount: mintFeeInfo.partialFee.toString(),
-      slug: defaultFeeTokenSlug
-    };
+      return {
+        amount: mintFeeInfo.partialFee.toString(),
+        slug: defaultFeeTokenSlug
+      };
+    } else {
+      return {
+        amount: '0',
+        slug: defaultFeeTokenSlug
+      };
+    }
   }
 
   async handleSubmitStep (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<HandleYieldStepData> {

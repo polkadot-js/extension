@@ -8,10 +8,9 @@ import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SpecialYieldPoolMetadata, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldProcessValidation, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
-import BN from 'bn.js';
 import { t } from 'i18next';
 
-import { BN_ZERO, noop } from '@polkadot/util';
+import { BN, BN_ZERO, noop } from '@polkadot/util';
 
 import BasePoolHandler from './base';
 
@@ -29,6 +28,8 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   protected readonly allowFastUnstake: boolean = true;
 
   protected override get metadataInfo (): Omit<SpecialYieldPoolMetadata, 'description'> {
+    const maintainBalance = this.state.getAssetBySlug(this.inputAsset)?.minAmount || '0';
+
     return {
       altInputAssets: this.altInputAsset,
       derivativeAssets: this.derivativeAssets,
@@ -39,7 +40,9 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       shortName: this.shortName,
       name: this.name,
       isAvailable: true,
-      allowCancelUnstaking: false
+      allowCancelUnstaking: false,
+      maintainAsset: this.nativeToken.slug,
+      maintainBalance
     };
   }
 

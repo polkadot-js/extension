@@ -90,13 +90,17 @@ export default abstract class BasePoolHandler {
   protected abstract getDescription (amount?: string): string;
 
   protected get metadataInfo (): Omit<BaseYieldPoolMetadata, 'description'> {
+    const maintainBalance = this.nativeToken.minAmount || '0';
+
     return {
       name: this.name,
       shortName: this.shortName,
       logo: this.logo,
       inputAsset: this.nativeToken.slug,
       isAvailable: true,
-      allowCancelUnstaking: false
+      allowCancelUnstaking: false,
+      maintainAsset: this.nativeToken.slug,
+      maintainBalance
     };
   }
 

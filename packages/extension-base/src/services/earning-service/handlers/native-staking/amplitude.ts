@@ -9,7 +9,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BaseYieldPositionInfo, BlockHeader, EarningRewardItem, EarningStatus, NativeYieldPoolInfo, ParachainStakingStakeOption, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, BlockHeader, EarningRewardItem, EarningStatus, NativeYieldPoolInfo, ParachainStakingStakeOption, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -107,6 +107,11 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           description: this.getDescription(minToHuman)
         },
         statistic: {
+          assetEarning: [
+            {
+              slug: this.nativeToken.slug
+            }
+          ],
           maxCandidatePerFarmer: parseInt(maxDelegations),
           maxWithdrawalRequestPerFarmer: 1, // by default
           minJoinPool: minDelegatorStake,
@@ -362,12 +367,14 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
     const poolPosition = await this.getPoolPosition(address);
     const selectedValidatorInfo = targetValidators[0];
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     const compoundResult = async (extrinsic: SubmittableExtrinsic<'promise'>): Promise<[TransactionData, YieldTokenBaseInfo]> => {
       const tokenSlug = this.nativeToken.slug;
-      const feeInfo = await extrinsic.paymentInfo(address);
-      const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+      // const feeInfo = await extrinsic.paymentInfo(address);
+      // const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-      return [extrinsic, { slug: tokenSlug, amount: fee.partialFee.toString() }];
+      // Not use the fee to validate and to display on UI
+      return [extrinsic, { slug: tokenSlug, amount: '0' }];
     };
 
     if (!poolPosition) {

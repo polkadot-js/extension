@@ -8,7 +8,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldPositionInfo, EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NominationYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, RuntimeDispatchInfo, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NominationYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -120,6 +120,12 @@ export default class NominationPoolHandler extends BasePoolHandler {
           description: this.getDescription(minToHuman)
         },
         statistic: {
+          assetEarning: [
+            {
+              slug: this.nativeToken.slug,
+              apy: expectedReturn
+            }
+          ],
           maxCandidatePerFarmer: 1,
           maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
           minJoinPool: minPoolJoin || '0',
@@ -464,17 +470,19 @@ export default class NominationPoolHandler extends BasePoolHandler {
   }
 
   async createJoinExtrinsic (data: SubmitJoinNominationPool, positionInfo?: YieldPositionInfo): Promise<[TransactionData, YieldTokenBaseInfo]> {
-    const { address, amount, selectedPool: { id: selectedPoolId } } = data;
+    const { amount, selectedPool: { id: selectedPoolId } } = data;
 
     const chainApi = await this.substrateApi.isReady;
     const bnActiveStake = new BN(positionInfo?.activeStake || '0');
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     const compoundResult = async (extrinsic: SubmittableExtrinsic<'promise'>): Promise<[TransactionData, YieldTokenBaseInfo]> => {
       const tokenSlug = this.nativeToken.slug;
-      const feeInfo = await extrinsic.paymentInfo(address);
-      const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+      // const feeInfo = await extrinsic.paymentInfo(address);
+      // const fee = feeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-      return [extrinsic, { slug: tokenSlug, amount: fee.partialFee.toString() }];
+      // Not use the fee to validate and to display on UI
+      return [extrinsic, { slug: tokenSlug, amount: '0' }];
     };
 
     if (bnActiveStake.gt(BN_ZERO)) { // already joined a pool

@@ -36,6 +36,8 @@ export interface YieldAssetEarningStats {
  * @prop {boolean} isAvailable - Is the pool available?
  * @prop {string} inputAsset - Input token (slug)
  * @prop {boolean} allowCancelUnstaking - Allow canceling un-stake
+ * @prop {string} maintainAsset - Asset to maintain account's pool
+ * @prop {string} maintainBalance - Balance to maintain account's pool
  * */
 export interface BaseYieldPoolMetadata {
   /* Common info */
@@ -64,6 +66,12 @@ export interface BaseYieldPoolMetadata {
 
   /** Allow to cancel un-stake */
   allowCancelUnstaking: boolean; // for native staking
+
+  /** Asset to maintain account's pool */
+  maintainAsset: string;
+
+  /** Balance to maintain account's pool */
+  maintainBalance: string;
 
   /* Special info */
 }
@@ -113,6 +121,7 @@ export type YieldPoolMetadata = NormalYieldPoolMetadata | SpecialYieldPoolMetada
 /**
  * @interface BaseYieldPoolStatistic
  * @description Statistic data of pool
+ * @prop {YieldAssetEarningStats[]} assetEarning - Info for asset earning
  * @prop {number} maxCandidatePerFarmer - Max candidates per farmer
  * @prop {number} maxWithdrawalRequestPerFarmer - Max withdrawal request per farmer
  * @prop {string} minJoinPool - Min amount to join pool
@@ -123,6 +132,8 @@ export type YieldPoolMetadata = NormalYieldPoolMetadata | SpecialYieldPoolMetada
  * */
 export interface BaseYieldPoolStatistic {
   /* Common info */
+  /** Info for asset earning */
+  assetEarning: YieldAssetEarningStats[];
 
   /** Max candidate per farmer  */
   maxCandidatePerFarmer: number; // like maxValidatorPerNominator with native staking
@@ -173,14 +184,10 @@ export interface NormalYieldPoolStatistic extends BaseYieldPoolStatistic {
 /**
  * @interface SpecialYieldPoolStatistic
  * @extends BaseYieldPoolStatistic
- * @prop {YieldAssetEarningStats[]} assetEarning - Info for asset earning
  * @prop {string} minWithdrawal - Min amount for withdrawal request
  * */
 export interface SpecialYieldPoolStatistic extends BaseYieldPoolStatistic {
   /* Special info */
-
-  /** Info for asset earning */
-  assetEarning: YieldAssetEarningStats[]; // TODO: Special for type
 
   /** Min amount for withdrawal request */
   minWithdrawal: string;

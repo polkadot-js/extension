@@ -6,7 +6,8 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
 import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
-import moment from 'moment';
+// @ts-ignore
+import humanizeDuration from 'humanize-duration';
 import { TFunction } from 'react-i18next';
 
 export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
@@ -27,13 +28,28 @@ export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t:
   if (status === UnstakingStatus.CLAIMABLE) {
     return t('Available for withdrawal');
   } else {
-    if (waitingTime > 24) {
-      const days = moment.duration(waitingTime, 'hours').humanize();
+    const waitingTimeInMs = waitingTime * 60 * 60 * 1000;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+    const formattedWaitingTime = humanizeDuration(waitingTimeInMs, {
+      units: ['d', 'h'],
+      round: true,
+      delimiter: ' ',
+      language: 'shortEn',
+      languages: {
+        shortEn: {
+          y: () => 'y',
+          mo: () => 'mo',
+          w: () => 'w',
+          d: () => 'd',
+          h: () => 'hr',
+          m: () => 'm',
+          s: () => 's',
+          ms: () => 'ms'
+        }
+      } // TODO: should not be shorten
+    }) as string;
 
-      return t('Withdraw in {{time}}', { replace: { time: days } });
-    } else {
-      return t('Withdrawable in a day');
-    }
+    return t('Withdraw in {{time}}', { replace: { time: formattedWaitingTime } });
   }
 }
 

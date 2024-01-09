@@ -15,6 +15,7 @@ import styled from 'styled-components';
 
 import SocialGroup from '../components/SocialGroup';
 import { ScreenContext } from '../contexts/ScreenContext';
+import reformatAddress from '../utils/account/reformatAddress';
 
 type Props = ThemeProps;
 
@@ -29,7 +30,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const viewInHistory = useCallback(
     () => {
       if (address && chain && transactionId) {
-        navigate(`/home/history/${address}/${chain}/${transactionId}`);
+        navigate(`/home/history/${reformatAddress(address)}/${chain}/${transactionId}`);
       } else {
         navigate('/home/history');
       }

@@ -220,12 +220,13 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.ant-web3-block .ant-web3-block-middle-item': {
-      width: 190
+      width: 190,
+      overflow: 'hidden'
     },
 
     '.ant-network-item-name': {
       overflow: 'hidden',
-      textWrap: 'nowrap',
+      'white-space': 'nowrap',
       textOverflow: 'ellipsis',
       paddingRight: token.paddingXS
     }

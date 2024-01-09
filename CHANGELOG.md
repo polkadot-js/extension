@@ -1,5 +1,61 @@
 # CHANGELOG
 
+## 1.1.29
+Build date: Dec 29, 2023.
+
+Features & Update:
+- Add T&C (#2330)
+- Add reload balance feature (#2381)
+- Update token details screen (#2340)
+- Remove some RPC on Polkadot and Kusama (#2425)
+
+Bugs fixed:
+- Fixed some UI bug (#2203)
+- Fixed bug can not connect to WalletConnect (#2413)
+
+## 1.1.28
+Build date: Dec 25, 2023.
+
+Features & Update:
+- Add support Polimec (#2404)
+- Allow access extension from iframe (#2406)
+
+## 1.1.27
+Build date: Dec 20, 2023.
+
+Features & Update:
+- Sort the Current account on top in the Account selector (#2318)
+- Update API staking for Astar (#2370)
+- Add Azero Domains is default pool (#2385)
+- Update chain-list (#2368)
+  - Some update for 3DPass (addd new RPC, update logo, update explorer, update price)
+    - Add support Energy Web X
+
+Bugs fixed:
+- Fixed bug dApp detection when connect wallet (#1936)
+- Fixed UI bug show balance in the Token details screen (#2201)
+- Fixed bug show EVM transaction history (#2362)
+- Fixed bug show transfer NFT history details (#2373)
+- Fixed bug phishing detection (#2372)
+
+## 1.1.26
+Build date: Dec 16, 2023.
+
+Features & Update:
+- Support some XCM transfer (#2353)
+- Update chain-list (#2329)
+  - Update USDC on Polygon network
+  - Support Energy Web X testate
+- Update rdns for EIP-6963 (#2328)
+- Show Copy and QR code when hover account (#2114)
+- Update precise start/end time of an era (#2313)
+- Add support for AZERO fiat onramp on Banxa (#2319)
+- Update top nominators getting rewards (#2324)
+
+Bugs fixed:
+- Fixed bug show incorrect balance on All account mode when switch account (#2323)
+- Fixed bug do not navigate when click on hyperlink in attach account (#2316)
+
 ## 1.1.25
 Build date: Dec 7, 2023.
 

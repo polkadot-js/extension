@@ -8,6 +8,7 @@ import { BitCountryNftApi } from '@subwallet/extension-base/koni/api/nft/bit.cou
 import { EvmNftApi } from '@subwallet/extension-base/koni/api/nft/evm_nft';
 import { KaruraNftApi } from '@subwallet/extension-base/koni/api/nft/karura_nft';
 import { BaseNftApi } from '@subwallet/extension-base/koni/api/nft/nft';
+import OrdinalNftApi from '@subwallet/extension-base/koni/api/nft/ordinal_nft';
 import { RmrkNftApi } from '@subwallet/extension-base/koni/api/nft/rmrk_nft';
 import StatemineNftApi from '@subwallet/extension-base/koni/api/nft/statemine_nft';
 import UniqueNftApi from '@subwallet/extension-base/koni/api/nft/unique_nft';
@@ -15,7 +16,7 @@ import { VaraNftApi } from '@subwallet/extension-base/koni/api/nft/vara_nft';
 import { WasmNftApi } from '@subwallet/extension-base/koni/api/nft/wasm_nft';
 import { _NFT_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportWasmNft, _isSupportOrdinal } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 import StatemintNftApi from './statemint_nft';
@@ -55,6 +56,10 @@ function createWeb3NftApi (chain: string, evmApi: _EvmApi | null, addresses: str
 
   return new EvmNftApi(evmApi, evmAddresses, chain);
 }
+
+const createOrdinalApi = (chain: string, subscanChain: string, addresses: string[]) => {
+  return new OrdinalNftApi(addresses, chain, subscanChain);
+};
 
 export class NftHandler {
   // General settings
@@ -146,6 +151,18 @@ export class NftHandler {
           if (_isChainSupportWasmNft(chainInfo)) {
             if (this.substrateApiMap[chain]) {
               const handler = createWasmNftApi(chain, this.substrateApiMap[chain], substrateAddresses);
+
+              if (handler && !this.handlers.includes(handler)) {
+                this.handlers.push(handler);
+              }
+            }
+          }
+
+          if (_isSupportOrdinal(chain)) {
+            const subscanChain = chainInfo.extraInfo?.subscanSlug;
+
+            if (subscanChain) {
+              const handler = createOrdinalApi(chain, subscanChain, substrateAddresses);
 
               if (handler && !this.handlers.includes(handler)) {
                 this.handlers.push(handler);

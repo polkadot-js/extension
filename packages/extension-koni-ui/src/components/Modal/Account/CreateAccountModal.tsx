@@ -78,7 +78,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       disabled: false,
       icon: Leaf,
       key: 'new-seed-phrase',
-      label: t('Create with new seed phrase'),
+      label: t('Create with a new seed phrase'),
       onClick: () => {
         inactiveModal(modalId);
         activeModal(NEW_SEED_MODAL);

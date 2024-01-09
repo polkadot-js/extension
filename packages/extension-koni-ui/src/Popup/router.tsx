@@ -64,6 +64,9 @@ const NftCollections = new LazyLoader('NftCollections', () => import('@subwallet
 const NftCollectionDetail = new LazyLoader('NftCollectionDetail', () => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
 const NftImport = new LazyLoader('NftImport', () => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftImport'));
 
+const InscriptionItems = new LazyLoader('InscriptionItems', () => import('@subwallet/extension-koni-ui/Popup/Home/Inscriptions/InscriptionItemList'));
+const InscriptionItemDetail = new LazyLoader('InscriptionItemDetail', () => import('@subwallet/extension-koni-ui/Popup/Home/Inscriptions/InscriptionItemDetail'));
+
 const History = new LazyLoader('History', () => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = new LazyLoader('Crowdloans', () => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = new LazyLoader('Home', () => import('@subwallet/extension-koni-ui/Popup/Home'));
@@ -148,7 +151,7 @@ const MissionPool = new LazyLoader('MissionPool', () => import('@subwallet/exten
 
 const NotFoundContent = new LazyLoader('NotFoundContent', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Content'));
 const NotFoundRedirect = new LazyLoader('NotFoundRedirect', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Redirect'));
-
+const UnsafeAccess = new LazyLoader('UnsafeAccess', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Access'));
 /* 404 */
 
 // A Placeholder page
@@ -171,6 +174,10 @@ export const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorFallback />,
     children: [
+      {
+        path: '/wc',
+        element: <div />
+      },
       Welcome.generateRouterObject('/welcome', true),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
@@ -187,6 +194,14 @@ export const router = createBrowserRouter([
               NftCollections.generateRouterObject('collections'),
               NftCollectionDetail.generateRouterObject('collection-detail'),
               NftItemDetail.generateRouterObject('item-detail')
+            ]
+          },
+          {
+            path: 'inscriptions',
+            element: <NestedOutlet />,
+            children: [
+              InscriptionItems.generateRouterObject(''),
+              InscriptionItemDetail.generateRouterObject('item-detail')
             ]
           },
           Crowdloans.generateRouterObject('crowdloans'),
@@ -318,8 +333,9 @@ export const router = createBrowserRouter([
         ]
       },
       NotFoundContent.generateRouterObject('not-found'),
-      NotFoundRedirect.generateRouterObject('*')
+      NotFoundRedirect.generateRouterObject('*'),
+      UnsafeAccess.generateRouterObject('unsafe-access'),
+      PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)
     ]
-  },
-  PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)
+  }
 ]);

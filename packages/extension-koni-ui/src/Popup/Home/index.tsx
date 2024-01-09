@@ -3,6 +3,8 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
+import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/GeneralTermModal';
+import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
@@ -16,6 +18,7 @@ import CN from 'classnames';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps;
 
@@ -26,6 +29,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const chainsByAccountType = useGetChainSlugsByAccountType();
   const tokenGroupStructure = useTokenGroup(chainsByAccountType);
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
+  const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { isPortfolio } = useContext(WebUIContext);
@@ -39,6 +43,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     inactiveModal(GlobalSearchTokenModalId);
   }, [inactiveModal]);
 
+  const onAfterConfirmTermModal = useCallback(() => {
+    setIsConfirmedTermGeneral('confirmed');
+  }, [setIsConfirmedTermGeneral]);
+
   useEffect(() => {
     const pathEls = pathname.split('/').filter((i: string) => !!i);
 
@@ -46,6 +54,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       navigate('/home/tokens');
     }
   }, [navigate, pathname]);
+
+  useEffect(() => {
+    if (isConfirmedTermGeneral.includes('nonConfirmed')) {
+      activeModal(GENERAL_TERM_AND_CONDITION_MODAL);
+    }
+  }, [activeModal, isConfirmedTermGeneral, setIsConfirmedTermGeneral]);
 
   return (
     <>
@@ -64,6 +78,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             >
               <Outlet />
             </Layout.Home>}
+          <GeneralTermModal onOk={onAfterConfirmTermModal} />
         </div>
       </HomeContext.Provider>
 

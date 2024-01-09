@@ -178,7 +178,7 @@ function Component (
           decimalOpacity={0.45}
           hide={!isShowBalance}
           suffix={item?.amount?.symbol}
-          value={balanceValue}
+          value={balanceValue.isNaN() ? '0' : balanceValue}
         />
         <Number
           className={'__meta'}
@@ -188,7 +188,7 @@ function Component (
           intOpacity={0.45}
           prefix='$'
           unitOpacity={0.45}
-          value={convertedBalanceValue}
+          value={convertedBalanceValue.isNaN() ? '0' : convertedBalanceValue}
         />
       </div>
 

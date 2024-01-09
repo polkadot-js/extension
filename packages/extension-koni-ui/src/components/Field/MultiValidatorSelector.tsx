@@ -222,16 +222,21 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       activeModal(VALIDATOR_DETAIL_MODAL);
     };
   }, [activeModal]);
+  const handleValidatorLabel = useMemo(() => {
+    const label = getValidatorLabel(chain);
+
+    return label !== 'dApp' ? label.toLowerCase() : label;
+  }, [chain]);
 
   const renderEmpty = useCallback(() => {
     return (
       <EmptyValidator
         isDataEmpty={items.length === 0}
         onClickReload={setForceFetchValidator}
-        validatorTitle={t(getValidatorLabel(chain).toLowerCase())}
+        validatorTitle={t(handleValidatorLabel)}
       />
     );
-  }, [chain, items.length, setForceFetchValidator, t]);
+  }, [handleValidatorLabel, items.length, setForceFetchValidator, t]);
 
   const renderItem = useCallback((item: ValidatorDataType) => {
     const key = getValidatorKey(item.address, item.identity);
@@ -301,7 +306,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <SelectValidatorInput
         chain={chain}
         disabled={!chain || !from || disabled}
-        label={t('Select') + ' ' + t(getValidatorLabel(chain).toLowerCase())}
+        label={t('Select') + ' ' + t(handleValidatorLabel)}
         loading={loading}
         onClick={onActiveValidatorSelector}
         value={value || ''}
@@ -341,7 +346,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             activeModal(SORTING_MODAL_ID);
           }
         }}
-        title={t('Select') + ' ' + t(getValidatorLabel(chain).toLowerCase())}
+        title={t('Select') + ' ' + t(handleValidatorLabel)}
       >
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
@@ -354,7 +359,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
-          searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain).toLowerCase()}`)}
+          searchPlaceholder={t<string>(`Search ${handleValidatorLabel}`)}
           // showActionBtn
         />
       </BaseModal>

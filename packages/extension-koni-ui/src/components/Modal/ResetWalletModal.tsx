@@ -26,7 +26,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const notify = useNotification();
   const { unlock } = useUILock();
-
   const { inactiveModal } = useContext(ModalContext);
   const { disableInject } = useContext(InjectContext);
 

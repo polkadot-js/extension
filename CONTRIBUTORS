@@ -1,5 +1,5 @@
     1879	Nam Phạm                      	[Issue 2313] fix eslint
-    1827	AnhMTV                        	Release version 1.1.30
+    1833	AnhMTV                        	
     1518	S2kael                        	[Issue-2412] Rollback hot fix case max transfer
      465	Jaco                          	0.42.5 (#969)
      303	lw-cdm                        	[Issue-2373] Fix issue related to history after sending NFT
@@ -12,14 +12,14 @@
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
       24	S2kael                        	
-      20	nguyentiendung                	[Issue-2438] Extension - Handle the case of default untick checkbox Bond reward when Claim reward
+      21	nguyentiendung                	[Issue-2452] Show custom network on the token list when nominate
+      16	bluedot                       	build chainlist
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	Thiendekaco                   	Change static content of T&C
        6	unknown                       	refactor code
-       5	bluedot                       	[Issue-2447] Update chainlist
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        4	Quangdm-cdm                   	

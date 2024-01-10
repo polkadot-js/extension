@@ -207,6 +207,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
 
       const unlockingMap: Record<string, BifrostUnlockInfo[]> = {};
 
+      // TODO: review unstaking info vtokenMinting.userUnlockLedger
       const _unlockInfoList = await substrateApi.api.query.vtokenMinting.tokenUnlockLedger.multi(unlockLedgerList.map(({ ledgerId }) => [_getTokenOnChainInfo(inputTokenInfo), ledgerId]));
 
       for (let i = 0; i < _unlockInfoList.length; i++) {
@@ -343,6 +344,16 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const extrinsic = substrateApi.api.tx.stablePool.swap(0, 1, 0, amount, weightedMinAmount);
 
     return [ExtrinsicType.REDEEM_VDOT, extrinsic];
+  }
+
+  override async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
+    const chainApi = await this.substrateApi.isReady;
+    const inputTokenSlug = this.inputAsset;
+    const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
+
+    const extrinsic = chainApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(inputTokenInfo), amount);
+
+    return [ExtrinsicType.UNSTAKE_VDOT, extrinsic];
   }
 
   /* Leave pool action */

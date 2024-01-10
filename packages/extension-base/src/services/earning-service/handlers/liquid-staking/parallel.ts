@@ -155,6 +155,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
           derivativeToken: derivativeTokenSlug,
           isBondedBefore: bnTotalBalance.gt(BN_ZERO),
           nominations: [],
+          // TODO: add unstaking info from liquidStaking.unlockings
           unstakings: []
         };
 

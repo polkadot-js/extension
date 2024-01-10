@@ -162,6 +162,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
           derivativeToken: derivativeTokenSlug,
           isBondedBefore: bnTotalBalance.gt(BN_ZERO),
           nominations: [],
+          // TODO: add unstaking info from homa.redeemRequests
           unstakings: []
         };
 

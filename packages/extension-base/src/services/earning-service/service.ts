@@ -7,7 +7,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import BaseLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/base';
-import { EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardHistoryItem, EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
@@ -17,6 +17,7 @@ export default class EarningService {
   protected readonly state: KoniState;
   protected handlers: Record<string, BasePoolHandler> = {};
   private earningRewardSubject: BehaviorSubject<EarningRewardJson> = new BehaviorSubject<EarningRewardJson>({ ready: false, data: {} });
+  private earningRewardHistorySubject: BehaviorSubject<Record<string, EarningRewardHistoryItem>> = new BehaviorSubject<Record<string, EarningRewardHistoryItem>>({});
   private minAmountPercentSubject: BehaviorSubject<Record<string, number>> = new BehaviorSubject<Record<string, number>>({});
 
   constructor (state: KoniState) {
@@ -186,17 +187,13 @@ export default class EarningService {
 
   /* Get pools' reward */
 
-  public updateEarningReward (stakingRewardData: EarningRewardItem, callback?: (earningRewardData: EarningRewardJson) => void): void {
+  public updateEarningReward (stakingRewardData: EarningRewardItem): void {
     const stakingRewardState = this.earningRewardSubject.getValue();
 
     stakingRewardState.ready = true;
-    const key = `${stakingRewardData.slug}___${stakingRewardData.address}`;
+    const key = `${stakingRewardData.slug}---${stakingRewardData.address}`;
 
     stakingRewardState.data[key] = stakingRewardData;
-
-    if (callback) {
-      callback(stakingRewardState);
-    }
 
     this.earningRewardSubject.next(stakingRewardState);
   }
@@ -241,6 +238,58 @@ export default class EarningService {
 
   public getEarningRewards (): EarningRewardJson {
     return this.earningRewardSubject.getValue();
+  }
+
+  public async fetchPoolRewardHistory (addresses: string[], callback: (result: EarningRewardHistoryItem) => void): Promise<VoidFunction> {
+    let cancel = false;
+
+    await this.state.eventService.waitChainReady;
+
+    const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
+    const activeChains = this.state.activeChainSlugs;
+    const unsubList: Array<VoidFunction> = [];
+
+    for (const handler of Object.values(this.handlers)) {
+      if (activeChains.includes(handler.chain)) {
+        const chainInfo = handler.chainInfo;
+        const useAddresses = _isChainEvmCompatible(chainInfo) ? evmAddresses : substrateAddresses;
+
+        handler.getPoolRewardHistory(useAddresses, callback)
+          .then((unsub) => {
+            if (cancel) {
+              unsub();
+            } else {
+              unsubList.push(unsub);
+            }
+          })
+          .catch(console.error);
+      }
+    }
+
+    return () => {
+      cancel = true;
+      unsubList.forEach((unsub) => {
+        unsub?.();
+      });
+    };
+  }
+
+  public updateEarningRewardHistory (earningRewardHistory: EarningRewardHistoryItem): void {
+    const earningRewardHistoryState = this.earningRewardHistorySubject.getValue();
+
+    const key = `${earningRewardHistory.slug}---${earningRewardHistory.address}---${earningRewardHistory.blockTimestamp}`;
+
+    earningRewardHistoryState[key] = earningRewardHistory;
+
+    this.earningRewardHistorySubject.next(earningRewardHistoryState);
+  }
+
+  public subscribeEarningRewardHistory (): BehaviorSubject<Record<string, EarningRewardHistoryItem>> {
+    return this.earningRewardHistorySubject;
+  }
+
+  public getEarningRewardHistory (): Record<string, EarningRewardHistoryItem> {
+    return this.earningRewardHistorySubject.getValue();
   }
 
   /* Get pools' reward */

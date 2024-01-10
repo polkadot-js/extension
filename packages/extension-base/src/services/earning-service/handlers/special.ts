@@ -115,6 +115,10 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     return new Promise((resolve) => resolve(noop));
   }
 
+  async getPoolRewardHistory (): Promise<VoidFunction> {
+    return new Promise((resolve) => resolve(noop));
+  }
+
   /* Get pool reward */
 
   /* Get pool targets */

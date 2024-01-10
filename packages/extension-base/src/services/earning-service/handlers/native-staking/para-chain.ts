@@ -88,7 +88,8 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
 
       const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
       const inflation = getParaCurrentInflation(parseRawNumber(totalStake.toString()), inflationConfig);
-      const unstakingPeriod = parseInt(unstakingDelay) * (_STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default);
+      const eraTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default; // in hours
+      const unstakingPeriod = parseInt(unstakingDelay) * eraTime;
       const minStake = '0';
       const minToHuman = formatNumber(minStake.toString(), nativeToken.decimals || 0, balanceFormatter);
 
@@ -111,6 +112,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
           minJoinPool: minStake.toString(),
           farmerCount: 0, // TODO recheck
           era: round,
+          eraTime,
           totalApy: undefined, // not have
           tvl: totalStake.toString(),
           unstakingPeriod: unstakingPeriod,

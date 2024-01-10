@@ -125,7 +125,8 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
       const minDelegatorStake = substrateApi.api.consts.dappsStaking.minimumStakingAmount.toString();
       const unstakingDelay = substrateApi.api.consts.dappsStaking.unbondingPeriod.toString();
 
-      const unstakingPeriod = parseInt(unstakingDelay) * _STAKING_ERA_LENGTH_MAP[this.chain];
+      const eraTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default; // in hours
+      const unstakingPeriod = parseInt(unstakingDelay) * eraTime;
       const minToHuman = formatNumber(minDelegatorStake, nativeToken.decimals || 0, balanceFormatter);
 
       const data: NativeYieldPoolInfo = {
@@ -148,6 +149,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
           minJoinPool: minDelegatorStake,
           farmerCount: 0, // TODO recheck
           era: parseInt(era),
+          eraTime,
           tvl: undefined, // TODO recheck
           totalApy: apyInfo !== null ? apyInfo : undefined, // TODO recheck
           unstakingPeriod

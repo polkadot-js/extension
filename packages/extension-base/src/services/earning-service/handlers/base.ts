@@ -7,7 +7,7 @@ import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/K
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/services/earning-service/constants';
-import { BasePoolInfo, BaseYieldPoolMetadata, EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BasePoolInfo, BaseYieldPoolMetadata, EarningRewardHistoryItem, EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { BN, BN_TEN } from '@polkadot/util';
 
@@ -95,7 +95,7 @@ export default abstract class BasePoolHandler {
     const decimals = this.nativeToken.decimals || 0;
     const defaultMaintainBalance = new BN(1).mul(BN_TEN.pow(new BN(decimals)));
     const ed = new BN(this.nativeToken.minAmount || '0');
-    const maintainBalance = ed.gt(defaultMaintainBalance) ? ed.mul(new BN(1.5)) : defaultMaintainBalance;
+    const maintainBalance = ed.gte(defaultMaintainBalance) ? ed.mul(new BN(1.5)) : defaultMaintainBalance;
 
     return maintainBalance.toString();
   }
@@ -133,7 +133,9 @@ export default abstract class BasePoolHandler {
   /** Subscribe pool position */
   public abstract subscribePoolPosition (useAddresses: string[], callback: (rs: YieldPositionInfo) => void): Promise<VoidFunction>;
   /** Get pool reward */
-  public abstract getPoolReward (useAddresses: string[], callback: (rs: EarningRewardItem) => void): Promise<VoidFunction>; // TODO: Change callback
+  public abstract getPoolReward (useAddresses: string[], callback: (rs: EarningRewardItem) => void): Promise<VoidFunction>;
+  /** Get pool reward history */
+  public abstract getPoolRewardHistory (useAddresses: string[], callback: (rs: EarningRewardHistoryItem) => void): Promise<VoidFunction>;
   /** Get pool target */
   public abstract getPoolTargets (): Promise<YieldPoolTarget[]>;
 

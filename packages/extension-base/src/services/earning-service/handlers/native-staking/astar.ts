@@ -7,7 +7,7 @@ import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '
 import { getEarningStatusByNominations } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { BaseYieldPoolMetadata, BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPoolMethodInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, isUrl, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -49,13 +49,14 @@ export function getAstarWithdrawable (yieldPosition: YieldPositionInfo): Unstaki
 }
 
 export default class AstarNativeStakingPoolHandler extends BaseParaNativeStakingPoolHandler {
-  protected override get metadataInfo (): Omit<BaseYieldPoolMetadata, 'description'> {
-    const result = super.metadataInfo;
-
-    result.allowCancelUnstaking = false;
-
-    return result;
-  }
+  protected override readonly availableMethod: YieldPoolMethodInfo = {
+    join: true,
+    defaultUnstake: true,
+    fastUnstake: false,
+    cancelUnstake: false,
+    withdraw: true,
+    claimReward: true
+  };
 
   /* Subscribe pool info */
 

@@ -28,6 +28,35 @@ export interface YieldAssetEarningStats {
 }
 
 /**
+ * @interface YieldPoolMethodInfo
+ * @prop {boolean} join - Pool can join
+ * @prop {boolean} defaultUnstake - Pool can default unstake
+ * @prop {boolean} fastUnstake - Pool can fast unstake
+ * @prop {boolean} cancelUnstake - Pool can cancel unstake
+ * @prop {boolean} withdraw - Pool can withdraw
+ * @prop {boolean} claimReward - Pool can claim reward
+ * */
+export interface YieldPoolMethodInfo {
+  /** Pool can join */
+  join: boolean;
+
+  /** Pool can default unstake */
+  defaultUnstake: boolean;
+
+  /** Pool can fast unstake */
+  fastUnstake: boolean;
+
+  /** Pool can cancel unstake */
+  cancelUnstake: boolean;
+
+  /** Pool can withdraw */
+  withdraw: boolean;
+
+  /** Pool can claim reward */
+  claimReward: boolean;
+}
+
+/**
  * @interface BaseYieldPoolMetadata
  * @prop {string} description - Pool's description
  * @prop {string} name - Pool's name
@@ -35,9 +64,9 @@ export interface YieldAssetEarningStats {
  * @prop {string} logo - Pool's logo
  * @prop {boolean} isAvailable - Is the pool available?
  * @prop {string} inputAsset - Input token (slug)
- * @prop {boolean} allowCancelUnstaking - Allow canceling un-stake
  * @prop {string} maintainAsset - Asset to maintain account's pool
  * @prop {string} maintainBalance - Balance to maintain account's pool
+ * @prop {YieldPoolMethodInfo} availableMethod - Pool's available method
  * */
 export interface BaseYieldPoolMetadata {
   /* Common info */
@@ -64,14 +93,14 @@ export interface BaseYieldPoolMetadata {
 
   /* Special info */
 
-  /** Allow to cancel un-stake */
-  allowCancelUnstaking: boolean; // for native staking
-
   /** Asset to maintain account's pool */
   maintainAsset: string;
 
   /** Balance to maintain account's pool */
   maintainBalance: string;
+
+  /** Pool's available method */
+  availableMethod: YieldPoolMethodInfo;
 
   /* Special info */
 }

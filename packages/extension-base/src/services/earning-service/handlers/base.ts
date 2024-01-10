@@ -7,7 +7,7 @@ import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/K
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/services/earning-service/constants';
-import { BasePoolInfo, BaseYieldPoolMetadata, EarningRewardHistoryItem, EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BasePoolInfo, BaseYieldPoolMetadata, EarningRewardHistoryItem, EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolMethodInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { BN, BN_TEN } from '@polkadot/util';
 
@@ -39,6 +39,9 @@ export default abstract class BasePoolHandler {
 
   /** Pool's transaction type */
   public readonly transactionChainType: ChainType = ChainType.SUBSTRATE;
+
+  /** Pool's available method */
+  protected abstract readonly availableMethod: YieldPoolMethodInfo;
 
   /**
    * @constructor
@@ -107,9 +110,9 @@ export default abstract class BasePoolHandler {
       logo: this.logo,
       inputAsset: this.nativeToken.slug,
       isAvailable: true,
-      allowCancelUnstaking: false,
       maintainAsset: this.nativeToken.slug,
-      maintainBalance: this.maintainBalance
+      maintainBalance: this.maintainBalance,
+      availableMethod: this.availableMethod
     };
   }
 

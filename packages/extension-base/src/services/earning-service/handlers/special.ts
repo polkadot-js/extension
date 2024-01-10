@@ -22,10 +22,6 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   protected abstract feeAssets: string[];
   /** Pool's type */
   public abstract override type: YieldPoolType.LIQUID_STAKING | YieldPoolType.LENDING;
-  /** Allow to create default unstake transaction */
-  protected readonly allowDefaultUnstake: boolean = false;
-  /** Allow to create fast unstake transaction */
-  protected readonly allowFastUnstake: boolean = true;
 
   protected override get metadataInfo (): Omit<SpecialYieldPoolMetadata, 'description'> {
     return {
@@ -38,9 +34,9 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       shortName: this.shortName,
       name: this.name,
       isAvailable: true,
-      allowCancelUnstaking: false,
       maintainAsset: this.nativeToken.slug,
-      maintainBalance: this.maintainBalance
+      maintainBalance: this.maintainBalance,
+      availableMethod: this.availableMethod
     };
   }
 
@@ -443,11 +439,11 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 
-    if (!this.allowDefaultUnstake && !fastLeave) {
+    if (!this.availableMethod.defaultUnstake && !fastLeave) {
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 
-    if (!this.allowFastUnstake && fastLeave) {
+    if (!this.availableMethod.fastUnstake && fastLeave) {
       return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
     }
 

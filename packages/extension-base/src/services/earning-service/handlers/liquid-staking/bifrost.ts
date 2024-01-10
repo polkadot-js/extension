@@ -6,7 +6,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getAssetDecimals, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, LiquidYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, LiquidYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -52,6 +52,7 @@ const BIFROST_GRAPHQL_ENDPOINT = 'https://bifrost-subsql.liebi.com/v1/graphql';
 const BIFROST_EXCHANGE_RATE_REQUEST = 'query MyQuery{slp_polkadot_ratio(limit:1 where:{key:{_eq:"0"}} order_by:{timestamp:desc_nulls_first}){ratio key timestamp total_issuance token_pool}}';
 
 export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
+  public slug: string;
   protected readonly name: string;
   protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
@@ -59,9 +60,15 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
   protected readonly inputAsset: string = 'bifrost_dot-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['bifrost_dot-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['bifrost_dot-NATIVE-BNC', 'bifrost_dot-LOCAL-DOT'];
-  /** @inner */
   public override readonly minAmountPercent = 0.99;
-  public slug: string;
+  protected readonly availableMethod: YieldPoolMethodInfo = {
+    join: true,
+    defaultUnstake: true,
+    fastUnstake: true,
+    cancelUnstake: false,
+    withdraw: false,
+    claimReward: false
+  };
 
   constructor (state: KoniState, chain: string) {
     super(state, chain);

@@ -5,7 +5,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, LendingYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, LendingYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -13,6 +13,7 @@ import { fakeAddress } from '../../constants';
 import BaseLendingPoolHandler from './base';
 
 export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
+  public slug: string;
   protected readonly name: string;
   protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
@@ -20,7 +21,14 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
   protected readonly inputAsset: string = 'interlay-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['interlay-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['interlay-NATIVE-INTR', 'interlay-LOCAL-DOT'];
-  public slug: string;
+  protected readonly availableMethod: YieldPoolMethodInfo = {
+    join: true,
+    defaultUnstake: false,
+    fastUnstake: true,
+    cancelUnstake: false,
+    withdraw: false,
+    claimReward: false
+  };
 
   constructor (state: KoniState, chain: string) {
     super(state, chain);

@@ -4,7 +4,7 @@
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { BaseYieldPoolMetadata, EarningRewardHistoryItem, EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, ValidatorInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { EarningRewardHistoryItem, EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, ValidatorInfo, YieldPoolMethodInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { noop } from '@polkadot/util';
 
@@ -15,6 +15,14 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
   protected readonly name: string;
   protected readonly shortName: string;
   public slug: string;
+  protected readonly availableMethod: YieldPoolMethodInfo = {
+    join: true,
+    defaultUnstake: true,
+    fastUnstake: false,
+    cancelUnstake: true,
+    withdraw: true,
+    claimReward: false
+  };
 
   constructor (state: KoniState, chain: string) {
     super(state, chain);
@@ -34,14 +42,6 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
     const symbol = _chainAsset.symbol;
 
     return `Start staking with just {{amount}} ${symbol}`.replace('{{amount}}', amount);
-  }
-
-  protected override get metadataInfo (): Omit<BaseYieldPoolMetadata, 'description'> {
-    const result = super.metadataInfo;
-
-    result.allowCancelUnstaking = true;
-
-    return result;
   }
 
   /* Get pool reward */

@@ -5,7 +5,7 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import fetch from 'cross-fetch';
 
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -36,10 +36,17 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
   protected readonly inputAsset: string = 'acala-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['acala-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['acala-NATIVE-ACA', 'acala-LOCAL-DOT'];
-  /** @inner */
   public override readonly minAmountPercent = 0.98;
-  /** @inner */
-  protected override readonly allowDefaultUnstake = true;
+
+  protected readonly availableMethod: YieldPoolMethodInfo = {
+    join: true,
+    defaultUnstake: true,
+    fastUnstake: true,
+    cancelUnstake: false,
+    withdraw: true,
+    claimReward: false
+  };
+
   public slug: string;
 
   constructor (state: KoniState, chain: string) {

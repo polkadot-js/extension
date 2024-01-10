@@ -7,7 +7,7 @@ import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
@@ -41,6 +41,7 @@ interface StellaswapUnbonding {
 const MAX_INT = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
 export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
+  public slug: string;
   protected readonly name: string;
   protected readonly shortName: string;
   protected readonly inputAsset: string = 'moonbeam-LOCAL-xcDOT';
@@ -48,12 +49,15 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
   protected readonly derivativeAssets: string[] = ['moonbeam-ERC20-stDOT-0xbc7E02c4178a7dF7d3E564323a5c359dc96C4db4'];
   protected readonly rewardAssets: string[] = ['moonbeam-LOCAL-xcDOT'];
   protected readonly feeAssets: string[] = ['moonbeam-NATIVE-GLMR'];
-  /** @inner */
-  protected override readonly allowDefaultUnstake = true;
-  /** @inner */
-  protected override readonly allowFastUnstake = false;
-  public slug: string;
   public override transactionChainType: ChainType = ChainType.EVM;
+  protected readonly availableMethod: YieldPoolMethodInfo = {
+    join: true,
+    defaultUnstake: true,
+    fastUnstake: true,
+    cancelUnstake: false,
+    withdraw: true,
+    claimReward: false
+  };
 
   constructor (state: KoniState, chain: string) {
     super(state, chain);
@@ -416,27 +420,6 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  override async handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData> {
-    const evmApi = this.evmApi;
-    const derivativeTokenSlug = this.derivativeAssets[0];
-    const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
-
-    const stakingContract = getStellaswapLiquidStakingContract(this.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApi);
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const withdrawCall = stakingContract.methods.claimUnbonded();
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const withdrawEncodedCall = withdrawCall.encodeABI() as string;
-
-    return {
-      from: address,
-      to: _getContractAddressOfToken(derivativeTokenInfo),
-      data: withdrawEncodedCall
-    }; // TODO: check tx history parsing
-  }
-
-  // eslint-disable-next-line @typescript-eslint/require-await
   override async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const evmApi = this.evmApi;
     const derivativeTokenSlug = this.derivativeAssets[0];
@@ -460,4 +443,29 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
   }
 
   /* Leave pool action */
+
+  /* Other actions */
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  override async handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData> {
+    const evmApi = this.evmApi;
+    const derivativeTokenSlug = this.derivativeAssets[0];
+    const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
+
+    const stakingContract = getStellaswapLiquidStakingContract(this.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApi);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const withdrawCall = stakingContract.methods.claimUnbonded();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const withdrawEncodedCall = withdrawCall.encodeABI() as string;
+
+    return {
+      from: address,
+      to: _getContractAddressOfToken(derivativeTokenInfo),
+      data: withdrawEncodedCall
+    }; // TODO: check tx history parsing
+  }
+
+  /* Other actions */
 }

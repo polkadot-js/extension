@@ -27,11 +27,6 @@ export interface BaseYieldPositionInfo extends BasePoolInfo {
 
 /**
  * @interface AbstractYieldPositionInfo
- * @prop {string} address - Account address
- * @prop {string} chain - Chain's slug
- * @prop {YieldPoolGroup} group - Pool's group
- * @prop {string} slug - Pool's slug
- * @prop {YieldPoolType} type - Pool's type
  * @prop {string} totalStake - Total stake of the account
  * @prop {string} activeStake - Active stake of the account
  * @prop {string} unstakeBalance - Unstaking balance of the account
@@ -67,15 +62,12 @@ export interface AbstractYieldPositionInfo extends BaseYieldPositionInfo {
 /**
  * @interface SpecialYieldPositionInfo
  * @extends AbstractYieldPositionInfo
- * @prop {string} rootAsset - Input token - Root token before stake and after unstake (slug)
+ * @prop {string} derivativeToken - Derivative token (slug)
  * */
 export interface SpecialYieldPositionInfo extends AbstractYieldPositionInfo {
   type: YieldPoolType.LIQUID_STAKING | YieldPoolType.LENDING;
-  /** @description
-   * <p>Derivative token - Token got after stake (slug)</p>
-   * <p>To detect exchange rate</p>
-   * <p>Exchange rate = root token amount / balance token amount</p>
-   * */
+
+  /** Derivative token (slug) */
   derivativeToken: string;
 }
 

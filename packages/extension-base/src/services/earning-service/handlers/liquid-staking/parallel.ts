@@ -6,7 +6,7 @@ import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/s
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TransactionData, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TransactionData, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -17,6 +17,7 @@ interface BlockHeader {
 }
 
 export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
+  public slug: string;
   protected readonly name: string;
   protected readonly shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
@@ -24,11 +25,15 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
   protected readonly inputAsset: string = 'parallel-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['parallel-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['parallel-NATIVE-PARA'];
-  /** @inner */
   public override readonly minAmountPercent = 0.97;
-  /** @inner */
-  protected override readonly allowDefaultUnstake = true;
-  public slug: string;
+  protected readonly availableMethod: YieldPoolMethodInfo = {
+    join: true,
+    defaultUnstake: true,
+    fastUnstake: true,
+    cancelUnstake: false,
+    withdraw: false,
+    claimReward: false
+  };
 
   constructor (state: KoniState, chain: string) {
     super(state, chain);

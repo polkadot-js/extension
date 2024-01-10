@@ -1,0 +1,298 @@
+[
+  {
+    "id": 9,
+    "name": "Stake DOT earn many",
+    "description": null,
+    "start_time": "2023-10-23T08:00:00.000Z",
+    "end_time": "2023-11-07T16:00:00.000Z",
+    "condition": {
+      "hasCrowdloan": true
+    },
+    "banners": [
+      {
+        "id": 18,
+        "alt": "Stake Dot, Earn Many",
+        "action": "open_url",
+        "metadata": {
+          "url": "https://web.subwallet.app/earning-demo?utm_source=crowdloantabbanner&utm_medium=extension&utm_campaign=stakedotearnmany"
+        },
+        "environments": [
+          "mobile",
+          "extension"
+        ],
+        "position": [
+          "crowdloan",
+          "browser"
+        ],
+        "buttons": [],
+        "media": "https://media-resources.subwallet.app//6/crowdloan_banner_f4e4f4e6de.png"
+      },
+      {
+        "id": 19,
+        "alt": "Stake Dot, Earn Many",
+        "action": "open_url",
+        "metadata": {
+          "url": "https://web.subwallet.app/earning-demo?utm_source=inapppopupbanner&utm_medium=mobile&utm_campaign=stakedotearnmany"
+        },
+        "environments": [
+          "mobile"
+        ],
+        "position": [
+          "home"
+        ],
+        "buttons": [
+          {
+            "name": "I don’t care",
+            "icon": "XCircle",
+            "color": "secondary",
+            "type": null,
+            "metadata": {
+              "doneOnClick": true
+            }
+          },
+          {
+            "name": "Join now",
+            "icon": "ArrowCircleRight",
+            "color": "primary",
+            "type": "open_url",
+            "metadata": {
+              "url": "https://web.subwallet.app/earning-demo?utm_source=inapppopupbanner&utm_medium=mobile&utm_campaign=stakedotearnmany",
+              "doneOnClick": true
+            }
+          }
+        ],
+        "media": "https://media-resources.subwallet.app//6/crowdloan_ads_banner_4x_41eb2486f4.png"
+      },
+      {
+        "id": 20,
+        "alt": "Stake Dot, Earn Many",
+        "action": "open_url",
+        "metadata": {
+          "url": "https://web.subwallet.app/earning-demo?utm_source=inapppopupbanner&utm_medium=extension&utm_campaign=stakedotearnmany"
+        },
+        "environments": [
+          "extension"
+        ],
+        "position": [
+          "home"
+        ],
+        "buttons": [
+          {
+            "name": "I don’t care",
+            "icon": "XCircle",
+            "color": "secondary",
+            "type": null,
+            "metadata": {
+              "doneOnClick": true
+            }
+          },
+          {
+            "name": "Join now",
+            "icon": "ArrowCircleRight",
+            "color": "primary",
+            "type": "open_url",
+            "metadata": {
+              "url": "https://web.subwallet.app/earning-demo?utm_source=inapppopupbanner&utm_medium=extension&utm_campaign=stakedotearnmany",
+              "doneOnClick": true
+            }
+          }
+        ],
+        "media": "https://media-resources.subwallet.app//6/crowdloan_ads_banner_7ae59c51ce.png"
+      }
+    ],
+    "notifications": [
+      {
+        "id": 8,
+        "title": "Earn DOT rewards with SubWallet",
+        "message": "Stake DOT now at SubWallet Web Dashboard with top protocols to earn exclusive rewards. Only from Oct 24 to Nov 07, be quick!",
+        "repeat": 1,
+        "repeat_after_minutes": 30,
+        "action": "open_url",
+        "metadata": {
+          "url": "https://web.subwallet.app/earning-demo?utm_source=extensionnotification&utm_medium=extension&utm_campaign=stakedotearnmany"
+        },
+        "buttons": [
+          {
+            "name": "Join now",
+            "icon": null,
+            "color": "none",
+            "type": "open_url",
+            "metadata": {
+              "url": "https://web.subwallet.app/earning-demo?utm_source=extensionnotification&utm_medium=extension&utm_campaign=stakedotearnmany"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Stake DOT earn many",
+    "description": null,
+    "start_time": "2023-11-05T02:00:00.000Z",
+    "end_time": "2023-11-07T16:00:00.000Z",
+    "condition": {
+      "hasCrowdloan": true
+    },
+    "banners": [
+      {
+        "id": 24,
+        "alt": "Stake Dot, Earn Many",
+        "action": "open_url",
+        "metadata": {
+          "url": "https://web.subwallet.app/earning-demo?utm_source=inapppopupbanner&utm_medium=mobile&utm_campaign=stakedotearnmany"
+        },
+        "environments": [
+          "mobile"
+        ],
+        "position": [
+          "home"
+        ],
+        "buttons": [
+          {
+            "name": "I don’t care",
+            "icon": "XCircle",
+            "color": "secondary",
+            "type": null,
+            "metadata": {
+              "doneOnClick": true
+            }
+          },
+          {
+            "name": "Join now",
+            "icon": "ArrowCircleRight",
+            "color": "primary",
+            "type": "open_url",
+            "metadata": {
+              "url": "https://web.subwallet.app/earning-demo?utm_source=inapppopupbanner&utm_medium=mobile&utm_campaign=stakedotearnmany",
+              "doneOnClick": true
+            }
+          }
+        ],
+        "media": "https://media-resources.subwallet.app/Home_screen_x4_fb0b54c7a1.png"
+      },
+      {
+        "id": 25,
+        "alt": "Stake Dot, Earn Many",
+        "action": "open_url",
+        "metadata": {
+          "url": "https://web.subwallet.app/earning-demo?utm_source=inapppopupbanner&utm_medium=extension&utm_campaign=stakedotearnmany"
+        },
+        "environments": [
+          "extension"
+        ],
+        "position": [
+          "home"
+        ],
+        "buttons": [
+          {
+            "name": "I don’t care",
+            "icon": "XCircle",
+            "color": "secondary",
+            "type": null,
+            "metadata": {
+              "doneOnClick": true
+            }
+          },
+          {
+            "name": "Join now",
+            "icon": "ArrowCircleRight",
+            "color": "primary",
+            "type": "open_url",
+            "metadata": {
+              "url": "https://web.subwallet.app/earning-demo?utm_source=inapppopupbanner&utm_medium=extension&utm_campaign=stakedotearnmany",
+              "doneOnClick": true
+            }
+          }
+        ],
+        "media": "https://media-resources.subwallet.app//6/Home_screen_x2_4e1b0b193a.png"
+      }
+    ],
+    "notifications": []
+  },
+  {
+    "id": 14,
+    "name": "Several networks notice",
+    "description": "Several networks notice",
+    "start_time": "2023-12-21T17:00:00.000Z",
+    "end_time": "2024-01-03T16:00:00.000Z",
+    "condition": {
+      "hasCrowdloan": false
+    },
+    "banners": [
+      {
+        "id": 28,
+        "alt": "Several networks notice",
+        "action": "open_url",
+        "metadata": {
+          "url": "https://docs.subwallet.app/main/mobile-app-user-guide/customize-your-end-point-provider?utm_source=mobile&utm_medium=inappbanner&utm_campaign=DOTRPC&utm_id=DOTRPC"
+        },
+        "environments": [
+          "mobile"
+        ],
+        "position": [
+          "home"
+        ],
+        "buttons": [
+          {
+            "name": "Dismiss",
+            "icon": "XCircle",
+            "color": "secondary",
+            "type": null,
+            "metadata": {
+              "doneOnClick": true
+            }
+          },
+          {
+            "name": "Review",
+            "icon": "ArrowCircleRight",
+            "color": "primary",
+            "type": "open_url",
+            "metadata": {
+              "url": "https://docs.subwallet.app/main/mobile-app-user-guide/customize-your-end-point-provider?utm_source=mobile&utm_medium=inappbanner&utm_campaign=DOTRPC&utm_id=DOTRPC",
+              "doneOnClick": true
+            }
+          }
+        ],
+        "media": "https://media-resources.subwallet.app//6/Important_notice_1_4770c76194.png"
+      },
+      {
+        "id": 29,
+        "alt": "Several networks notice",
+        "action": "open_url",
+        "metadata": {
+          "url": "https://docs.subwallet.app/main/extension-user-guide/customize-endpoint-provider?utm_source=mobile&utm_medium=inappbanner&utm_campaign=DOTRPC&utm_id=DOTRPC"
+        },
+        "environments": [
+          "extension"
+        ],
+        "position": [
+          "home"
+        ],
+        "buttons": [
+          {
+            "name": "Dismiss",
+            "icon": "XCircle",
+            "color": "secondary",
+            "type": null,
+            "metadata": {
+              "doneOnClick": true
+            }
+          },
+          {
+            "name": "Review",
+            "icon": "ArrowCircleRight",
+            "color": "primary",
+            "type": "open_url",
+            "metadata": {
+              "url": "https://docs.subwallet.app/main/extension-user-guide/customize-endpoint-provider?utm_source=mobile&utm_medium=inappbanner&utm_campaign=DOTRPC&utm_id=DOTRPC",
+              "doneOnClick": true
+            }
+          }
+        ],
+        "media": "https://media-resources.subwallet.app//6/Important_notice_1_4770c76194.png"
+      }
+    ],
+    "notifications": []
+  }
+]

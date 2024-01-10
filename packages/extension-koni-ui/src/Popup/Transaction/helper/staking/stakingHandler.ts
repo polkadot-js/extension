@@ -49,7 +49,7 @@ export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t:
       } // TODO: should not be shorten
     }) as string;
 
-    return t('Withdraw in {{time}}', { replace: { time: formattedWaitingTime } });
+    return t('Withdrawable in {{time}}', { replace: { time: formattedWaitingTime } });
   }
 }
 

@@ -5,7 +5,7 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import fetch from 'cross-fetch';
 
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -243,14 +243,20 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
       weightedMinAmount // should always set a min target to prevent unexpected result
     );
 
-    return [ExtrinsicType.REDEEM_QDOT, extrinsic];
+    return [ExtrinsicType.REDEEM_LDOT, extrinsic];
   }
 
   override async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const chainApi = await this.substrateApi.isReady;
     const extrinsic = chainApi.api.tx.homa.requestRedeem(amount, false);
 
-    return [ExtrinsicType.UNSTAKE_QDOT, extrinsic];
+    return [ExtrinsicType.UNSTAKE_LDOT, extrinsic];
+  }
+
+  override async handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData> {
+    const chainApi = await this.substrateApi.isReady;
+
+    return chainApi.api.tx.homa.claimRedemption(address);
   }
 
   /* Leave pool action */

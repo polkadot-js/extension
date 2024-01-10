@@ -132,6 +132,7 @@ export class KoniCron {
       // NFT
       (commonReload || needUpdateNft) && this.resetNft(address);
       (commonReload || needUpdateNft) && this.removeCron('refreshNft');
+      commonReload && this.removeCron('refreshPoolingStakingReward');
 
       // Chains
       if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network

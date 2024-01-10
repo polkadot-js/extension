@@ -25,6 +25,8 @@ export const getStellaswapLiquidStakingContract = (networkKey: string, assetAddr
 
 const APR_STATS_URL = 'https://apr-api.stellaswap.com/api/v1/stdot';
 
+const SUBWALLET_REFERRAL = '0x7e6815f45E624768548d085231f2d453f16FD7DD';
+
 interface StellaswapApr {
   code: number,
   result: number,
@@ -167,8 +169,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
             unstakings.push({
               chain: this.chain,
               claimable: unbondedObject.waiting,
-              status: UnstakingStatus.UNLOCKING,
-              waitingTime: 20 // TODO: Recheck
+              status: UnstakingStatus.UNLOCKING
             });
           }
 
@@ -225,7 +226,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
 
     const inputTokenContract = getERC20Contract(this.chain, _getContractAddressOfToken(inputTokenInfo), this.state.getEvmApiMap());
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const allowanceCall = inputTokenContract.methods.allowance(params.address, _getContractAddressOfToken(derivativeTokenInfo)); // TODO
+    const allowanceCall = inputTokenContract.methods.allowance(params.address, _getContractAddressOfToken(derivativeTokenInfo));
 
     const [allowance, gasPrice] = await Promise.all([
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -352,11 +353,13 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const { address } = data;
     const inputTokenSlug = this.inputAsset;
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
+    const derivativeTokenInfo = this.state.getAssetBySlug(this.derivativeAssets[0]);
+    const derivativeTokenContractAddress = _getContractAddressOfToken(derivativeTokenInfo);
 
     const inputTokenContract = getERC20Contract(this.chain, _getContractAddressOfToken(inputTokenInfo), this.state.getEvmApiMap());
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const approveCall = inputTokenContract.methods.approve(address, MAX_INT);
+    const approveCall = inputTokenContract.methods.approve(derivativeTokenContractAddress, MAX_INT); // TODO: need test
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const approveEncodedCall = approveCall.encodeABI() as string;
 
@@ -384,7 +387,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const stakingContract = getStellaswapLiquidStakingContract(this.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApi);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const depositCall = stakingContract.methods.deposit(amount); // TODO: referral
+    const depositCall = stakingContract.methods.deposit(amount, SUBWALLET_REFERRAL); // TODO: need test
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const depositEncodedCall = depositCall.encodeABI() as string;
@@ -410,6 +413,27 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
 
   async handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  override async handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData> {
+    const evmApi = this.evmApi;
+    const derivativeTokenSlug = this.derivativeAssets[0];
+    const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
+
+    const stakingContract = getStellaswapLiquidStakingContract(this.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApi);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const withdrawCall = stakingContract.methods.claimUnbonded();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const withdrawEncodedCall = withdrawCall.encodeABI() as string;
+
+    return {
+      from: address,
+      to: _getContractAddressOfToken(derivativeTokenInfo),
+      data: withdrawEncodedCall
+    }; // TODO: check tx history parsing
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await

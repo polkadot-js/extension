@@ -4,7 +4,7 @@
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { BaseYieldPoolMetadata, EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, ValidatorInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPoolMetadata, EarningRewardHistoryItem, EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, ValidatorInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { noop } from '@polkadot/util';
 
@@ -48,6 +48,50 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
 
   async getPoolReward (useAddresses: string[], callBack: (rs: EarningRewardItem) => void): Promise<VoidFunction> {
     return new Promise((resolve) => resolve(noop));
+  }
+
+  async getPoolRewardHistory (useAddresses: string[], callBack: (rs: EarningRewardHistoryItem) => void): Promise<VoidFunction> {
+    let cancel = false;
+    const haveSubscanService = this.state.subscanService.checkSupportedSubscanChain(this.chain);
+
+    if (haveSubscanService) {
+      for (const address of useAddresses) {
+        if (cancel) {
+          break;
+        }
+
+        try {
+          const rs = await this.state.subscanService.getRewardHistoryList(this.chain, address);
+          const items = rs.list;
+
+          if (items) {
+            for (const item of items) {
+              const now = new Date();
+              const isMillisecond = now.getTime().toString().length === item.block_timestamp.toString().length;
+              const timeStamp = isMillisecond ? item.block_timestamp : item.block_timestamp * 1000;
+
+              const data: EarningRewardHistoryItem = {
+                slug: this.slug,
+                type: this.type,
+                chain: this.chain,
+                address: address,
+                group: this.group,
+                blockTimestamp: timeStamp,
+                amount: item.amount
+              };
+
+              callBack(data);
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    return () => {
+      cancel = false;
+    };
   }
 
   /* Get pool reward */

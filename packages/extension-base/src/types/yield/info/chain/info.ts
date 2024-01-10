@@ -163,6 +163,7 @@ export interface BaseYieldPoolStatistic {
  * @interface NormalYieldPoolStatistic
  * @extends BaseYieldPoolStatistic
  * @prop {number} era - Current era of network
+ * @prop {number} eraTime - Time of an era - in hour
  * @prop {number} unstakingPeriod - Time to wait withdraw un-stake, in hour
  * @prop {number} [inflation] - Inflation rate
  * */
@@ -171,6 +172,9 @@ export interface NormalYieldPoolStatistic extends BaseYieldPoolStatistic {
 
   /** Current era of network */
   era: number; // also round for parachains
+
+  /** Time of an era - in hour */
+  eraTime: number; // also round for parachains
 
   /** Time to wait withdraw un-stake, in hour */
   unstakingPeriod: number; // for normal un-stake (not fast un-stake)

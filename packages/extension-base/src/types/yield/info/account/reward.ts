@@ -43,3 +43,19 @@ export interface EarningRewardJson {
   ready: boolean;
   data: Record<string, EarningRewardItem>;
 }
+
+/**
+ * @interface EarningRewardHistoryItem
+ * @extends BasePoolInfo
+ * @prop {string} address - Account address
+ * @prop {number} blockTimestamp - Reward history's block timestamp
+ * @prop {string} amount - Reward history's amount
+ * */
+export interface EarningRewardHistoryItem extends BasePoolInfo {
+  /** Account address */
+  address: string;
+  /** Reward history's block timestamp */
+  blockTimestamp: number;
+  /** Reward history's amount */
+  amount: string;
+}

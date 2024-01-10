@@ -87,11 +87,12 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
       const round = parseRawNumber(roundObj.current);
       const maxDelegations = substrateApi.api.consts.parachainStaking.maxDelegationsPerRound.toString();
       const minDelegatorStake = substrateApi.api.consts.parachainStaking.minDelegatorStake.toString();
-      const unstakingDelay = substrateApi.api.consts.parachainStaking.stakeDuration.toString();
+      const unstakingDelay = substrateApi.api.consts.parachainStaking.stakeDuration.toString(); // in blocks
       const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
       const blockPerRound = parseFloat(_blockPerRound);
 
-      const blockDuration = (_STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+      const roundTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default; // in hours
+      const blockDuration = roundTime / blockPerRound; // in hours
       const unstakingPeriod = blockDuration * parseInt(unstakingDelay);
       const minToHuman = formatNumber(minDelegatorStake, nativeToken.decimals || 0, balanceFormatter);
       const delegatorStorages = await substrateApi.api.query.parachainStaking.delegatorState.keys();
@@ -117,6 +118,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           minJoinPool: minDelegatorStake,
           farmerCount: delegatorStorages.length, // One delegator (farmer) - One collator (candidate) - on storage
           era: round,
+          eraTime: roundTime,
           tvl: stakeInfo.delegators, // TODO recheck
           totalApy: undefined, // TODO recheck
           unstakingPeriod

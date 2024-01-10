@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+export const BASE_SECOND_INTERVAL = 1000;
+export const BASE_MINUTE_INTERVAL = 60 * BASE_SECOND_INTERVAL;
 export const CRON_REFRESH_PRICE_INTERVAL = 30000;
 export const CRON_AUTO_RECOVER_DOTSAMA_INTERVAL = 60000;
 export const CRON_AUTO_RECOVER_WEB3_INTERVAL = 90000;
@@ -17,6 +19,7 @@ export const CRON_REFRESH_CHAIN_NOMINATOR_METADATA = 1800000;
 export const CRON_RECOVER_HISTORY_INTERVAL = 30000;
 export const CRON_SYNC_MANTA_PAY = 300000;
 export const MANTA_PAY_BALANCE_INTERVAL = 30000;
+export const CRON_REFRESH_EARNING_REWARD_HISTORY_INTERVAL = 15 * BASE_MINUTE_INTERVAL;
 
 export const ALL_ACCOUNT_KEY = 'ALL';
 export const ALL_NETWORK_KEY = 'all';

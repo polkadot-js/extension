@@ -13,7 +13,7 @@ import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/s
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import { COMMON_RELOAD_EVENTS, EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { EarningRewardItem, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardHistoryItem, EarningRewardItem, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { waitTimeout } from '@subwallet/extension-base/utils';
 
 import { logger as createLogger, noop } from '@polkadot/util';
@@ -192,7 +192,7 @@ export class KoniSubscription {
   initYieldPoolStatsSubscription (substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
     let cancel = false;
 
-    this.state.resetYieldPoolInfo(Object.keys(this.state.getActiveChainInfoMap()));
+    this.state.resetYieldPoolInfo(Object.keys(this.state.getChainInfoMap()));
 
     const updateYieldPoolStats = (data: YieldPoolInfo) => {
       this.state.updateYieldPoolInfo(data);
@@ -383,39 +383,28 @@ export class KoniSubscription {
       return;
     }
 
-    const pooledStakingItems = await this.state.getPooledPositionByAddress(addresses);
-
-    const pooledAddresses: string[] = [];
-
-    pooledStakingItems.forEach((pooledItem) => {
-      if (!pooledAddresses.includes(pooledItem.address)) {
-        pooledAddresses.push(pooledItem.address);
-      }
-    });
-
-    const chainInfoMap = this.state.getChainInfoMap();
-    const targetChainMap: Record<string, _ChainInfo> = {};
-
-    Object.entries(chainInfoMap).forEach(([key, network]) => {
-      const chainState = this.state.getChainStateByKey(key);
-
-      if (_isChainEnabled(chainState) && _isChainSupportSubstrateStaking(network)) {
-        targetChainMap[key] = network;
-      }
-    });
-
-    const activeNetworks: string[] = [];
-
-    Object.keys(targetChainMap).forEach((key) => {
-      activeNetworks.push(key);
-    });
-
     const updateState = (result: EarningRewardItem) => {
       this.state.earningService.updateEarningReward(result);
     };
 
     await Promise.all([
-      this.state.earningService.getPoolReward(addresses, updateState) // TODO
+      this.state.earningService.getPoolReward(addresses, updateState)
+    ]);
+  }
+
+  async subscribeEarningRewardHistoryInterval (address: string) {
+    const addresses = this.state.getDecodedAddresses(address);
+
+    if (!addresses.length) {
+      return;
+    }
+
+    const updateState = (result: EarningRewardHistoryItem) => {
+      this.state.earningService.updateEarningRewardHistory(result);
+    };
+
+    await Promise.all([
+      this.state.earningService.fetchPoolRewardHistory(addresses, updateState)
     ]);
   }
 

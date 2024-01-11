@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
@@ -16,6 +16,7 @@ import { t } from 'i18next';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { UnsubscribePromise } from '@polkadot/api-base/types/base';
+import { DeriveSessionProgress } from '@polkadot/api-derive/types';
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -132,30 +133,18 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
   /* Subscribe pool position */
 
-  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletStakingStakingLedger): Promise<Omit<YieldPositionInfo, keyof BaseYieldPositionInfo>> {
+  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletStakingStakingLedger, currentEra: string, minStake: BN, _deriveSessionProgress: DeriveSessionProgress): Promise<Omit<YieldPositionInfo, keyof BaseYieldPositionInfo>> {
     const chain = chainInfo.slug;
 
-    const [_nominations, _currentEra, _bonded, _minimumActiveStake, _minNominatorBond] = await Promise.all([
+    const [_nominations, _bonded] = await Promise.all([
       substrateApi.api.query?.staking?.nominators(address),
-      substrateApi.api.query?.staking?.currentEra(),
-      substrateApi.api.query?.staking?.bonded(address),
-      substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake(),
-      substrateApi.api.query?.staking?.minNominatorBond()
+      substrateApi.api.query?.staking?.bonded(address)
     ]);
-
-    const minActiveStake = _minimumActiveStake?.toString() || '0';
-    const minNominatorBond = _minNominatorBond.toString();
-
-    const bnMinActiveStake = new BN(minActiveStake);
-    const bnMinNominatorBond = new BN(minNominatorBond);
-
-    const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
 
     const unlimitedNominatorRewarded = substrateApi.api.consts.staking.maxExposurePageSize !== undefined;
     const _maxNominatorRewardedPerValidator = (substrateApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
     const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
     const nominations = _nominations.toPrimitive() as unknown as PalletStakingNominations;
-    const currentEra = _currentEra.toString();
     const bonded = _bonded.toHuman();
 
     const activeStake = ledger.active.toString();
@@ -213,9 +202,16 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     }
 
     ledger.unlocking.forEach((unlockingChunk) => {
+      // Calculate the remaining time for current era ending
       const isClaimable = unlockingChunk.era - parseInt(currentEra) < 0;
       const remainingEra = unlockingChunk.era - parseInt(currentEra);
-      const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+      const expectedBlockTime = _EXPECTED_BLOCK_TIME[chain];
+      const eraLength = _deriveSessionProgress.eraLength.toNumber();
+      const eraProgress = _deriveSessionProgress.eraProgress.toNumber();
+      const remainingSlots = eraLength - eraProgress;
+      const remainingHours = expectedBlockTime * remainingSlots / 60 / 60;
+      const eraTime = _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // in hours
+      const waitingTime = remainingEra * eraTime + remainingHours;
 
       unstakingList.push({
         chain,
@@ -251,12 +247,26 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       }
 
       if (ledgers) {
+        const [_currentEra, _minimumActiveStake, _minNominatorBond, _deriveSessionProgress] = await Promise.all([
+          substrateApi.api.query?.staking?.currentEra(),
+          substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake(),
+          substrateApi.api.query?.staking?.minNominatorBond(),
+          substrateApi.api.derive?.session?.progress()
+        ]);
+
+        const currentEra = _currentEra.toString();
+        const minActiveStake = _minimumActiveStake?.toString() || '0';
+        const minNominatorBond = _minNominatorBond.toString();
+        const bnMinActiveStake = new BN(minActiveStake);
+        const bnMinNominatorBond = new BN(minNominatorBond);
+        const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
+
         await Promise.all(ledgers.map(async (_ledger: Codec, i) => {
           const owner = reformatAddress(useAddresses[i], 42);
           const ledger = _ledger.toPrimitive() as unknown as PalletStakingStakingLedger;
 
           if (ledger) {
-            const nominatorMetadata = await this.parseNominatorMetadata(chainInfo, owner, substrateApi, ledger);
+            const nominatorMetadata = await this.parseNominatorMetadata(chainInfo, owner, substrateApi, ledger, currentEra, minStake, _deriveSessionProgress);
 
             resultCallback({
               ...defaultInfo,

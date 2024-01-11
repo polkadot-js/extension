@@ -54,7 +54,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
   protected readonly availableMethod: YieldPoolMethodInfo = {
     join: true,
     defaultUnstake: true,
-    fastUnstake: true,
+    fastUnstake: false,
     cancelUnstake: false,
     withdraw: true,
     claimReward: false

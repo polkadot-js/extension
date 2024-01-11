@@ -5,10 +5,10 @@ Build date: Jan 11, 2024.
 
 Features & Update:
 - Update chain-list (#2465)
-  - Add manta pacific chain
+  - Add Manta Pacific chain
   - Update endpoints for some chain (Parallel, Polkadex, Acala, Moonbeam, Bifrost Polkadot, Interlay)
   - Update logo for Energy Web X and Energy Web X Rococo
-  - Remove Polkadex on staking list
+  - Add Polkadex Parachain
 
 Bugs fixed:
 - Fixed bug Do not detect phishing page in case have no account in wallet (#2390)

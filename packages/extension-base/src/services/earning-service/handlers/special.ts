@@ -499,16 +499,24 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     const errors: TransactionError[] = [];
     const bnActiveStake = new BN(poolPosition.activeStake);
-    const bnRemainingStake = bnActiveStake.sub(new BN(amount));
+    const bnAmount = new BN(amount);
+    const bnRemainingStake = bnActiveStake.sub(bnAmount);
     const minStake = new BN(poolInfo.statistic.earningThreshold.join || '0');
-    const maxUnstake = poolInfo.statistic.maxWithdrawalRequestPerFarmer;
+    const minUnstake = new BN(poolInfo.statistic.earningThreshold.defaultUnstake || '0');
+    const maxUnstakeRequest = poolInfo.statistic.maxWithdrawalRequestPerFarmer;
+
+    const derivativeTokenInfo = this.state.getAssetBySlug(this.derivativeAssets[0]);
 
     if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
-      errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE));
+      errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE)); // TODO
     }
 
-    if (poolPosition.unstakings.length > maxUnstake) {
-      errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_UNSTAKING, t('You cannot unstake more than {{number}} times', { replace: { number: maxUnstake } })));
+    if (bnAmount.lt(minUnstake)) {
+      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_UNSTAKE, t('You need to unstake at least {{amount}} {{token}}', { replace: { amount: minUnstake.toString(), token: derivativeTokenInfo.symbol } })));
+    }
+
+    if (poolPosition.unstakings.length > maxUnstakeRequest) {
+      errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_UNSTAKING, t('You cannot unstake more than {{number}} times', { replace: { number: maxUnstakeRequest } })));
     }
 
     return Promise.resolve(errors);

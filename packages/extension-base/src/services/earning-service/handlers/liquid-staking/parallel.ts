@@ -4,9 +4,10 @@
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TransactionData, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TransactionData, UnlockingChunk, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -129,12 +130,16 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
     const derivativeTokenSlug = this.derivativeAssets[0];
     const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
 
-    const unsub = await substrateApi.api.query.assets.account.multi(useAddresses.map((address) => [_getTokenOnChainAssetId(derivativeTokenInfo), address]), (balances) => {
+    const unsub = await substrateApi.api.query.assets.account.multi(useAddresses.map((address) => [_getTokenOnChainAssetId(derivativeTokenInfo), address]), async (balances) => {
       if (cancel) {
         unsub();
 
         return;
       }
+
+      const unlockingChunks = await substrateApi.api.query.liquidStaking.unlockings.multi(useAddresses);
+      const _currentEra = await substrateApi.api.query.liquidStaking.currentEra();
+      const currentEra = _currentEra.toPrimitive() as number;
 
       for (let i = 0; i < balances.length; i++) {
         const b = balances[i];
@@ -142,26 +147,47 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
         const bdata = b?.toHuman();
+        const chunks = unlockingChunks[i].toPrimitive() as unknown as UnlockingChunk[];
 
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
-        const bnTotalBalance = bdata && bdata.balance ? new BN(String(bdata?.balance).replaceAll(',', '') || '0') : BN_ZERO;
-        const totalBalance = bnTotalBalance.toString();
+        const activeBalance = bdata && bdata.balance ? new BN(String(bdata?.balance).replaceAll(',', '') || '0') : BN_ZERO;
+        let totalBalance = activeBalance;
+        let unlockingBalance = BN_ZERO;
+        const unstakings: UnstakingInfo[] = [];
+
+        if (chunks) {
+          for (const chunk of chunks) {
+            const amount = new BN(chunk.value);
+            const isClaimable = chunk.era - currentEra < 0;
+            const remainingEra = chunk.era - currentEra;
+            const eraTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default;
+            const waitingTime = remainingEra * eraTime;
+
+            totalBalance = totalBalance.add(amount);
+            unlockingBalance = unlockingBalance.add(amount);
+            unstakings.push({
+              chain: this.chain,
+              status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+              claimable: amount.toString(),
+              waitingTime: waitingTime
+            } as UnstakingInfo);
+          }
+        }
 
         const result: YieldPositionInfo = {
           ...this.baseInfo,
           type: this.type,
           address,
           balanceToken: this.inputAsset,
-          totalStake: totalBalance,
-          activeStake: totalBalance,
-          unstakeBalance: '0',
+          totalStake: totalBalance.toString(),
+          activeStake: activeBalance.toString(),
+          unstakeBalance: unlockingBalance.toString(),
           status: EarningStatus.EARNING_REWARD,
           derivativeToken: derivativeTokenSlug,
-          isBondedBefore: bnTotalBalance.gt(BN_ZERO),
+          isBondedBefore: totalBalance.gt(BN_ZERO),
           nominations: [],
-          // TODO: add unstaking info from liquidStaking.unlockings
-          unstakings: []
+          unstakings: unstakings
         };
 
         resultCallback(result);

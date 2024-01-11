@@ -65,7 +65,6 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     if (!this.isActive) {
       const data: NominationYieldPoolInfo = {
-        // TODO
         ...this.baseInfo,
         type: this.type,
         metadata: {
@@ -121,7 +120,6 @@ export default class NominationPoolHandler extends BasePoolHandler {
       const minToHuman = formatNumber(minPoolJoin || '0', nativeToken.decimals || 0, balanceFormatter);
 
       const data: NominationYieldPoolInfo = {
-        // TODO
         ...this.baseInfo,
         type: this.type,
         metadata: {

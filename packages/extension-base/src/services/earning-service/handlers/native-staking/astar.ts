@@ -66,7 +66,6 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
     if (!this.isActive) {
       const data: NativeYieldPoolInfo = {
-        // TODO
         ...this.baseInfo,
         type: this.type,
         metadata: {
@@ -131,7 +130,6 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
       const minToHuman = formatNumber(minDelegatorStake, nativeToken.decimals || 0, balanceFormatter);
 
       const data: NativeYieldPoolInfo = {
-        // TODO
         ...this.baseInfo,
         type: this.type,
         metadata: {

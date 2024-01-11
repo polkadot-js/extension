@@ -5,25 +5,27 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import fetch from 'cross-fetch';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
 import BaseLiquidStakingPoolHandler from './base';
 
-interface BifrostLiquidStakingMetaItem {
+interface AcalaLiquidStakingMetaItem {
   exchangeRate: string,
   timestamp: string
 }
 
-interface BifrostLiquidStakingMeta {
+interface AcalaLiquidStakingMeta {
   data: {
     dailySummaries: {
-      nodes: BifrostLiquidStakingMetaItem[]
+      nodes: AcalaLiquidStakingMetaItem[]
     }
   }
 }
+
+type AcalaLiquidStakingRedeemRequest = [number, boolean];
 
 const GRAPHQL_API = 'https://api.polkawallet.io/acala-liquid-staking-subql';
 const EXCHANGE_RATE_REQUEST = 'query { dailySummaries(first:30, orderBy:TIMESTAMP_DESC) {nodes { exchangeRate timestamp }}}';
@@ -88,7 +90,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
       stakingMetaPromise
     ]);
 
-    const stakingMeta = _stakingMeta as BifrostLiquidStakingMeta;
+    const stakingMeta = _stakingMeta as AcalaLiquidStakingMeta;
     const stakingMetaList = stakingMeta.data.dailySummaries.nodes;
     const latestExchangeRate = parseInt(stakingMetaList[0].exchangeRate);
     const decimals = 10 ** 10;
@@ -142,7 +144,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     const derivativeTokenSlug = this.derivativeAssets[0];
     const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
 
-    const unsub = await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), (_balances) => {
+    const unsub = await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), async (_balances) => {
       if (cancel) {
         unsub();
 
@@ -150,27 +152,46 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
       }
 
       const balances = _balances as unknown as TokenBalanceRaw[];
+      const redeemRequests = await substrateApi.api.query.homa.redeemRequests.multi(useAddresses);
 
       for (let i = 0; i < balances.length; i++) {
         const balanceItem = balances[i];
         const address = useAddresses[i];
-        const bnTotalBalance = balanceItem.free || BN_ZERO;
-        const totalBalance = bnTotalBalance.toString();
+        const activeTotalBalance = balanceItem.free || BN_ZERO;
+        let totalBalance = activeTotalBalance;
+        let unlockingBalance = BN_ZERO;
+
+        const unstakings: UnstakingInfo[] = [];
+
+        const redeemRequest = redeemRequests[i].toPrimitive() as unknown as AcalaLiquidStakingRedeemRequest;
+
+        if (redeemRequest) {
+          const [redeemAmount, withdrawable] = redeemRequest;
+          const amount = new BN(redeemAmount);
+
+          totalBalance = totalBalance.add(amount);
+          unlockingBalance = unlockingBalance.add(amount);
+
+          unstakings.push({
+            chain: this.chain,
+            status: withdrawable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+            claimable: redeemAmount.toString()
+          });
+        }
 
         const result: YieldPositionInfo = {
           ...this.baseInfo,
           type: this.type,
           address,
           balanceToken: this.inputAsset,
-          totalStake: totalBalance,
-          activeStake: totalBalance,
-          unstakeBalance: '0',
+          totalStake: totalBalance.toString(),
+          activeStake: activeTotalBalance.toString(),
+          unstakeBalance: unlockingBalance.toString(),
           status: EarningStatus.EARNING_REWARD,
           derivativeToken: derivativeTokenSlug,
-          isBondedBefore: bnTotalBalance.gt(BN_ZERO),
+          isBondedBefore: totalBalance.gt(BN_ZERO),
           nominations: [],
-          // TODO: add unstaking info from homa.redeemRequests
-          unstakings: []
+          unstakings: unstakings
         };
 
         resultCallback(result);

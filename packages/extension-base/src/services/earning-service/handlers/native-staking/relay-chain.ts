@@ -32,7 +32,6 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     if (!this.isActive) {
       const data: NativeYieldPoolInfo = {
-        // TODO
         ...this.baseInfo,
         type: this.type,
         metadata: {
@@ -94,7 +93,6 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const minToHuman = formatNumber(minStake.toString(), nativeToken.decimals || 0, balanceFormatter);
 
       const data: NativeYieldPoolInfo = {
-        // TODO
         ...this.baseInfo,
         type: this.type,
         metadata: {

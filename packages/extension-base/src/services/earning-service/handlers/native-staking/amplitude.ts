@@ -58,7 +58,6 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
     if (!this.isActive) {
       const data: NativeYieldPoolInfo = {
-        // TODO
         ...this.baseInfo,
         type: this.type,
         metadata: {
@@ -100,7 +99,6 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
       const stakeInfo = staked.toPrimitive() as unknown as CollatorStakeInfo;
 
       const data: NativeYieldPoolInfo = {
-        // TODO
         ...this.baseInfo,
         type: this.type,
         metadata: {

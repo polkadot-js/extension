@@ -107,7 +107,11 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
           ],
           maxCandidatePerFarmer: parseInt(maxDelegations),
           maxWithdrawalRequestPerFarmer: 1, // by default
-          minJoinPool: minStake.toString(),
+          earningThreshold: {
+            join: minStake.toString(),
+            defaultUnstake: '0',
+            fastUnstake: '0'
+          },
           farmerCount: 0, // TODO recheck
           era: round,
           eraTime,

@@ -57,6 +57,18 @@ export interface YieldPoolMethodInfo {
 }
 
 /**
+ * @interface YieldThresholdInfo
+ * @prop {string} join - Min amount to join pool
+ * @prop {string} defaultUnstake - Min amount to unstake from pool
+ * @prop {string} fastUnstake - Min amount to fast unstake
+ * */
+export interface YieldThresholdInfo {
+  join: string;
+  defaultUnstake: string;
+  fastUnstake: string;
+}
+
+/**
  * @interface BaseYieldPoolMetadata
  * @prop {string} description - Pool's description
  * @prop {string} name - Pool's name
@@ -153,7 +165,7 @@ export type YieldPoolMetadata = NormalYieldPoolMetadata | SpecialYieldPoolMetada
  * @prop {YieldAssetEarningStats[]} assetEarning - Info for asset earning
  * @prop {number} maxCandidatePerFarmer - Max candidates per farmer
  * @prop {number} maxWithdrawalRequestPerFarmer - Max withdrawal request per farmer
- * @prop {string} minJoinPool - Min amount to join pool
+ * @prop {string} earningThreshold - Min amount to join pool
  * @prop {number} [farmerCount] - Total farmer
  * @prop {string} [tvl] - Total value staked in pool
  * @prop {number} [totalApy] - Total apy of earning assets
@@ -171,7 +183,7 @@ export interface BaseYieldPoolStatistic {
   maxWithdrawalRequestPerFarmer: number; // like maxWithdrawalRequestPerValidator with native staking
 
   /** Min amount to join pool */
-  minJoinPool: string;
+  earningThreshold: YieldThresholdInfo;
 
   /** Total farmer */
   farmerCount?: number;
@@ -217,14 +229,10 @@ export interface NormalYieldPoolStatistic extends BaseYieldPoolStatistic {
 /**
  * @interface SpecialYieldPoolStatistic
  * @extends BaseYieldPoolStatistic
- * @prop {string} minWithdrawal - Min amount for withdrawal request
  * @prop {number} [unstakingPeriod] - Time to wait withdraw un-stake, in hour
  * */
 export interface SpecialYieldPoolStatistic extends BaseYieldPoolStatistic {
   /* Special info */
-
-  /** Min amount for withdrawal request */
-  minWithdrawal: string;
 
   /** Time to wait withdraw un-stake, in hour */
   unstakingPeriod?: number; // for normal un-stake (not fast un-stake)

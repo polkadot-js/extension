@@ -136,7 +136,11 @@ export default class NominationPoolHandler extends BasePoolHandler {
           ],
           maxCandidatePerFarmer: 1,
           maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
-          minJoinPool: minPoolJoin || '0',
+          earningThreshold: {
+            join: minPoolJoin || '0',
+            defaultUnstake: '0',
+            fastUnstake: '0'
+          },
           farmerCount: 0, // TODO recheck
           era: parseInt(currentEra),
           eraTime,
@@ -468,7 +472,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
     // amount >= min stake
     const errors: TransactionError[] = [];
     let bnTotalStake = new BN(amount);
-    const bnMinStake = new BN(poolInfo.statistic?.minJoinPool || '0');
+    const bnMinStake = new BN(poolInfo.statistic?.earningThreshold.join || '0');
     const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
     const existUnstakeErrorMessage = getExistUnstakeErrorMessage(chainInfo.slug, StakingType.POOLED, true);
 
@@ -566,7 +570,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     const bnActiveStake = new BN(poolPosition.activeStake);
     const bnRemainingStake = bnActiveStake.sub(new BN(amount));
-    const minStake = new BN(poolInfo.statistic.minJoinPool || '0');
+    const minStake = new BN(poolInfo.statistic.earningThreshold.join || '0');
     const maxUnstake = poolInfo.statistic.maxWithdrawalRequestPerFarmer;
 
     if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {

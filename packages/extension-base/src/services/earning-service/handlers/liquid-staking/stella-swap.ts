@@ -125,8 +125,11 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
         unstakingPeriod: 24 * 28,
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '0',
-        minWithdrawal: '0',
+        earningThreshold: {
+          join: '0',
+          defaultUnstake: '0',
+          fastUnstake: '0'
+        },
         totalApr: (aprObject as StellaswapApr).result,
         tvl: (tvl as number).toString()
       }

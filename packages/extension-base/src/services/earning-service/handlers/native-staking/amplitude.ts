@@ -113,7 +113,11 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           ],
           maxCandidatePerFarmer: parseInt(maxDelegations),
           maxWithdrawalRequestPerFarmer: 1, // by default
-          minJoinPool: minDelegatorStake,
+          earningThreshold: {
+            join: minDelegatorStake,
+            defaultUnstake: '0',
+            fastUnstake: '0'
+          },
           farmerCount: delegatorStorages.length, // One delegator (farmer) - One collator (candidate) - on storage
           era: round,
           eraTime: roundTime,

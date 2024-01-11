@@ -87,6 +87,8 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
   /* Subscribe pool info */
 
   async getPoolStat (): Promise<LiquidYieldPoolInfo> {
+    const substrateApi = await this.substrateApi.isReady;
+
     const stakingMetaPromise = new Promise(function (resolve) {
       fetch(STATS_URL, {
         method: 'GET'
@@ -109,10 +111,18 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
       }).catch(console.error);
     });
 
-    const [_stakingMeta, _exchangeRate] = await Promise.all([
+    const derivativeTokenInfo = this.state.getAssetBySlug(this.derivativeAssets[0]);
+    const inputTokenInfo = this.state.getAssetBySlug(this.inputAsset);
+
+    const [_stakingMeta, _exchangeRate, _minimumRedeem, _minimumMint] = await Promise.all([
       stakingMetaPromise,
-      exchangeRatePromise
+      exchangeRatePromise,
+      substrateApi.api.query.vtokenMinting.minimumRedeem(_getTokenOnChainInfo(derivativeTokenInfo)),
+      substrateApi.api.query.vtokenMinting.minimumRedeem(_getTokenOnChainInfo(inputTokenInfo))
     ]);
+
+    const minimumRedeem = _minimumRedeem.toString();
+    const minimumMint = _minimumMint.toString();
 
     const stakingMeta = _stakingMeta as Record<string, BifrostLiquidStakingMeta>;
     const exchangeRate = _exchangeRate as BifrostVtokenExchangeRateResp;
@@ -139,8 +149,11 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
         unstakingPeriod: 24 * 28,
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '5000000000',
-        minWithdrawal: '4000000000',
+        earningThreshold: {
+          join: minimumMint,
+          defaultUnstake: minimumRedeem,
+          fastUnstake: minimumRedeem
+        },
         totalApy: parseFloat(vDOTStats.apyBase),
         tvl: (vDOTStats.tvm * assetDecimals).toString()
       }

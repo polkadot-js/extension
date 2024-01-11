@@ -145,7 +145,11 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
           ],
           maxCandidatePerFarmer: 100, // temporary fix for Astar, there's no limit for now
           maxWithdrawalRequestPerFarmer: 1, // by default
-          minJoinPool: minDelegatorStake,
+          earningThreshold: {
+            join: minDelegatorStake,
+            defaultUnstake: '0',
+            fastUnstake: '0'
+          },
           farmerCount: 0, // TODO recheck
           era: parseInt(era),
           eraTime,

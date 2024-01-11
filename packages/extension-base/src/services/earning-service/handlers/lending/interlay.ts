@@ -74,8 +74,11 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '10000000000',
-        minWithdrawal: '0',
+        earningThreshold: {
+          join: '10000000000',
+          defaultUnstake: '0',
+          fastUnstake: '0'
+        },
         totalApr: 1.29,
         tvl: '291890000000000'
       }

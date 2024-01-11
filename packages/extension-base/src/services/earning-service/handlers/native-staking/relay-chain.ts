@@ -109,7 +109,11 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           ],
           maxCandidatePerFarmer: parseInt(maxNominations),
           maxWithdrawalRequestPerFarmer: parseInt(maxUnlockingChunks), // TODO recheck
-          minJoinPool: minStake.toString(),
+          earningThreshold: {
+            join: minStake.toString(),
+            defaultUnstake: '0',
+            fastUnstake: '0'
+          },
           farmerCount: farmerCount,
           era: parseInt(currentEra),
           eraTime,
@@ -449,7 +453,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const errors: TransactionError[] = [];
     let bnTotalStake = new BN(amount);
-    const bnMinStake = new BN(poolInfo.statistic.minJoinPool);
+    const bnMinStake = new BN(poolInfo.statistic.earningThreshold.join);
     const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
     const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, poolInfo.statistic.maxCandidatePerFarmer);
 
@@ -584,7 +588,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const bnActiveStake = new BN(poolPosition.activeStake);
     const bnRemainingStake = bnActiveStake.sub(new BN(amount));
-    const minStake = new BN(poolInfo.statistic.minJoinPool || '0');
+    const minStake = new BN(poolInfo.statistic.earningThreshold.join || '0');
     const maxUnstake = poolInfo.statistic.maxWithdrawalRequestPerFarmer;
 
     if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {

@@ -151,7 +151,7 @@ export default abstract class BasePoolHandler {
   public async earlyValidate (request: RequestEarlyValidateYield): Promise<ResponseEarlyValidateYield> {
     const poolInfo = await this.getPoolInfo();
 
-    if (!poolInfo || !poolInfo.statistic?.minJoinPool) {
+    if (!poolInfo || !poolInfo.statistic?.earningThreshold.join) {
       return {
         passed: false,
         errorMessage: 'There\'s a trouble fetching data, please check your internet connection and try again'
@@ -162,7 +162,7 @@ export default abstract class BasePoolHandler {
     const nativeTokenBalance = await this.state.balanceService.getTokenFreeBalance(request.address, this.chain);
     const bnNativeTokenBalance = new BN(nativeTokenBalance.value);
 
-    if (bnNativeTokenBalance.lte(new BN(poolInfo.statistic?.minJoinPool))) {
+    if (bnNativeTokenBalance.lte(new BN(poolInfo.statistic?.earningThreshold?.join))) {
       return {
         passed: false,
         errorMessage: `You do not have enough ${nativeTokenInfo.symbol} (${nativeTokenInfo.originChain}) to start earning`

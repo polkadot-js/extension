@@ -90,6 +90,9 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
       stakingMetaPromise
     ]);
 
+    const mintThreshold = substrateApi.api.consts.homa.mintThreshold.toString();
+    const redeemThreshold = substrateApi.api.consts.homa.redeemThreshold.toString();
+
     const stakingMeta = _stakingMeta as AcalaLiquidStakingMeta;
     const stakingMetaList = stakingMeta.data.dailySummaries.nodes;
     const latestExchangeRate = parseInt(stakingMetaList[0].exchangeRate);
@@ -122,8 +125,11 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
         unstakingPeriod: 24 * 28,
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '50000000000',
-        minWithdrawal: '50000000000',
+        earningThreshold: {
+          join: mintThreshold,
+          defaultUnstake: redeemThreshold,
+          fastUnstake: redeemThreshold
+        },
         totalApy: apy * 100,
         tvl: totalStakingBonded.add(toBondPool).toString()
       }

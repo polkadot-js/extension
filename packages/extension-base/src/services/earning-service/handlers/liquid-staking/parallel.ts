@@ -90,6 +90,9 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
 
     const apy = (exchangeRate / beginExchangeRate) ** (365 * 24 * 60 * 60000 / (currentTimestamp - beginTimestamp)) - 1;
 
+    const minStake = substrateApi.api.consts.liquidStaking.minStake.toString();
+    const minUnstake = substrateApi.api.consts.liquidStaking.minUnstake.toString();
+
     return {
       ...this.baseInfo,
       type: this.type,
@@ -108,8 +111,11 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
         unstakingPeriod: 24 * 28,
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '10000000000',
-        minWithdrawal: '5000000000',
+        earningThreshold: {
+          join: minStake,
+          defaultUnstake: minUnstake,
+          fastUnstake: minUnstake
+        },
         totalApy: apy * 100,
         tvl: tvl.toString()
       }

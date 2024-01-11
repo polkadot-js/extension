@@ -39,7 +39,7 @@ export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativ
     const errors: TransactionError[] = [];
     const selectedCollator = selectedValidators[0];
     let bnTotalStake = new BN(amount);
-    const bnChainMinStake = new BN(poolInfo.statistic.minJoinPool || '0');
+    const bnChainMinStake = new BN(poolInfo.statistic.earningThreshold.join || '0');
     const bnCollatorMinStake = new BN(selectedCollator.minBond || '0');
     const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
     const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
@@ -135,7 +135,7 @@ export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativ
     const bnActiveStake = new BN(targetNomination.activeStake);
     const bnRemainingStake = bnActiveStake.sub(new BN(amount));
 
-    const bnChainMinStake = new BN(poolInfo.statistic.minJoinPool || '0');
+    const bnChainMinStake = new BN(poolInfo.statistic.earningThreshold.join || '0');
     const bnCollatorMinStake = new BN(targetNomination.validatorMinStake || '0');
     const bnMinStake = BN.max(bnCollatorMinStake, bnChainMinStake);
     const existUnstakeErrorMessage = getExistUnstakeErrorMessage(this.chain, StakingType.NOMINATED);

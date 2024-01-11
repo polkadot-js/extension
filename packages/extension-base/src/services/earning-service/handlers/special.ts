@@ -47,7 +47,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   override async earlyValidate (request: RequestEarlyValidateYield): Promise<ResponseEarlyValidateYield> {
     const poolInfo = await this.getPoolInfo();
 
-    if (!poolInfo || !poolInfo.statistic?.minJoinPool) {
+    if (!poolInfo || !poolInfo.statistic?.earningThreshold.join) {
       return {
         passed: false,
         errorMessage: 'There\'s a trouble fetching data, please check your internet connection and try again'
@@ -61,7 +61,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     const bnInputAssetBalance = new BN(inputAssetBalance.value);
     const bnAltInputAssetBalance = new BN(altInputAssetBalance.value);
-    const bnMinJoinPool = new BN(poolInfo.statistic.minJoinPool);
+    const bnMinJoinPool = new BN(poolInfo.statistic.earningThreshold.join);
 
     const inputTokenInfo = this.state.chainService.getAssetBySlug(this.inputAsset);
     const altInputTokenInfo = this.state.chainService.getAssetBySlug(this.altInputAsset);
@@ -345,7 +345,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       }
     }
 
-    if (!bnAmount.gte(new BN(poolInfo.statistic.minJoinPool || '0'))) {
+    if (!bnAmount.gte(new BN(poolInfo.statistic.earningThreshold.join || '0'))) {
       processValidation.failedStep = path.steps[id];
       processValidation.ok = false;
       processValidation.status = YieldValidationStatus.NOT_ENOUGH_MIN_JOIN_POOL;
@@ -500,7 +500,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const errors: TransactionError[] = [];
     const bnActiveStake = new BN(poolPosition.activeStake);
     const bnRemainingStake = bnActiveStake.sub(new BN(amount));
-    const minStake = new BN(poolInfo.statistic.minJoinPool || '0');
+    const minStake = new BN(poolInfo.statistic.earningThreshold.join || '0');
     const maxUnstake = poolInfo.statistic.maxWithdrawalRequestPerFarmer;
 
     if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {

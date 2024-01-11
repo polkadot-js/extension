@@ -44,6 +44,7 @@ const createDoneUrl = '/create-done';
 
 const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
+
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
@@ -98,6 +99,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
   const { isUILocked } = useUILock();
   const needUnlock = isUILocked || (isLocked && unlockType === WalletUnlockType.ALWAYS_REQUIRED);
+
   const needMigrate = useMemo(
     () => !!accounts
       .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected)

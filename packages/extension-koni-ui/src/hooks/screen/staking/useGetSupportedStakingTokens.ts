@@ -5,7 +5,7 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _getChainNativeTokenSlug, _getSubstrateGenesisHash, _isChainEvmCompatible, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenSlug, _getSubstrateGenesisHash, _isChainEvmCompatible, _isChainSupportSubstrateStaking, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountAddressType } from '@subwallet/extension-koni-ui/types/account';
@@ -48,7 +48,7 @@ export default function useGetSupportedStakingTokens (type: StakingType, address
         if (_isChainSupportSubstrateStaking(chainInfo)) {
           const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
-          if (assetRegistryMap[nativeTokenSlug] &&
+          if (!_isCustomAsset(nativeTokenSlug) && assetRegistryMap[nativeTokenSlug] &&
             isChainTypeValid(chainInfo, accounts, address) &&
             (!chain || chain === ALL_KEY || chain === chainInfo.slug)
           ) {
@@ -61,7 +61,7 @@ export default function useGetSupportedStakingTokens (type: StakingType, address
         if (_isChainSupportSubstrateStaking(chainInfo) && _STAKING_CHAIN_GROUP.nominationPool.includes(chainInfo.slug)) {
           const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
-          if (assetRegistryMap[nativeTokenSlug] &&
+          if (!_isCustomAsset(nativeTokenSlug) && assetRegistryMap[nativeTokenSlug] &&
             isChainTypeValid(chainInfo, accounts, address) &&
             (!chain || chain === ALL_KEY || chain === chainInfo.slug)
           ) {

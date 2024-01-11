@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## 1.1.31
+Build date: Jan 11, 2024.
+
+Features & Update:
+- Update chain-list (#2465)
+  - Add manta pacific chain
+  - Update endpoints for some chain (Parallel, Polkadex, Acala, Moonbeam, Bifrost Polkadot, Interlay)
+  - Update logo for Energy Web X and Energy Web X Rococo
+  - Remove Polkadex on staking list
+
+Bugs fixed:
+- Fixed bug Do not detect phishing page in case have no account in wallet (#2390)
+- Fixed bug Show custom network on the token list when nominate (#2452)
+
+## 1.1.30
+Build date: Jan 05, 2024.
+
+Features & Update:
+- Update chain-list (#2447)
+  - Add new provider for Parallel
+  - Add support new network: InvArch
+  - Add support new token: cDOT-7/14 (Parallel)
+- Handle fallback for online content (#2391)
+
+Bugs fixed:
+- Hot fix bug estimating EVM transaction fee (#2412)
+- Fixed bug Do not display the account in the account details tab in case the entire account balance is locked (#2429)
+
 ## 1.1.29
 Build date: Dec 29, 2023.
 

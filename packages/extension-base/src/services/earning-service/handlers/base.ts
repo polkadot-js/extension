@@ -148,8 +148,27 @@ export default abstract class BasePoolHandler {
 
   /* Early validate */
 
-  public earlyValidate (request: RequestEarlyValidateYield): Promise<ResponseEarlyValidateYield> {
-    return Promise.resolve({ passed: false });
+  public async earlyValidate (request: RequestEarlyValidateYield): Promise<ResponseEarlyValidateYield> {
+    const poolInfo = await this.getPoolInfo();
+
+    if (!poolInfo || !poolInfo.statistic?.minJoinPool) {
+      return {
+        passed: false
+      };
+    }
+
+    const nativeTokenBalance = await this.state.balanceService.getTokenFreeBalance(request.address, this.chain);
+    const bnNativeTokenBalance = new BN(nativeTokenBalance.value);
+
+    if (bnNativeTokenBalance.lte(new BN(poolInfo.statistic?.minJoinPool))) {
+      return {
+        passed: false
+      };
+    }
+
+    return {
+      passed: true
+    };
   }
 
   /* Early validate */

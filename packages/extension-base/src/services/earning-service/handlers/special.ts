@@ -7,7 +7,7 @@ import { BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, StakingTxEr
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SpecialYieldPoolInfo, SpecialYieldPoolMetadata, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldProcessValidation, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, RuntimeDispatchInfo, SpecialYieldPoolInfo, SpecialYieldPoolMetadata, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldProcessValidation, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import { t } from 'i18next';
 
 import { BN, BN_ZERO, noop } from '@polkadot/util';
@@ -42,6 +42,46 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
   override get isPoolSupportAlternativeFee () {
     return this.feeAssets.length > 1;
+  }
+
+  override async earlyValidate (request: RequestEarlyValidateYield): Promise<ResponseEarlyValidateYield> {
+    const poolInfo = await this.getPoolInfo();
+
+    if (!poolInfo || !poolInfo.statistic?.minJoinPool) {
+      return {
+        passed: false
+      };
+    }
+
+    const [inputAssetBalance, altInputAssetBalance] = await Promise.all([
+      this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.inputAsset),
+      this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.altInputAsset)
+    ]);
+
+    const bnInputAssetBalance = new BN(inputAssetBalance.value);
+    const bnAltInputAssetBalance = new BN(altInputAssetBalance.value);
+    const bnMinJoinPool = new BN(poolInfo.statistic.minJoinPool);
+
+    if (bnInputAssetBalance.add(bnAltInputAssetBalance).lt(bnMinJoinPool)) {
+      return {
+        passed: false
+      };
+    }
+
+    if (this.feeAssets.length === 1) {
+      const feeAssetBalance = await this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.feeAssets[0]);
+      const bnFeeAssetBalance = new BN(feeAssetBalance.value);
+
+      if (bnFeeAssetBalance.lte(BN_ZERO)) {
+        return {
+          passed: false
+        };
+      }
+    }
+
+    return {
+      passed: true
+    };
   }
 
   override get group (): string {

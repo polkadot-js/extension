@@ -40,6 +40,12 @@ export class SWStorage {
     }
   }
 
+  async getEntries () {
+    !this.isReady && await this.waitReady;
+
+    return Object.entries(this._storage);
+  }
+
   async setMap (map: Record<string, string>) {
     !this.isReady && await this.waitReady;
     this._storage = { ...this._storage, ...map };

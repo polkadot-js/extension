@@ -6,6 +6,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import RequestService from '@subwallet/extension-base/services/request-service';
 import Eip155RequestHandler from '@subwallet/extension-base/services/wallet-connect-service/handler/Eip155RequestHandler';
 import { SWStorage } from '@subwallet/extension-base/storage';
+import { IKeyValueStorage } from '@walletconnect/keyvaluestorage';
 import SignClient from '@walletconnect/sign-client';
 import { EngineTypes, SessionTypes, SignClientTypes } from '@walletconnect/types';
 import { getInternalError, getSdkError } from '@walletconnect/utils';
@@ -17,6 +18,32 @@ import { convertConnectRequest, convertNotSupportRequest, isSupportWalletConnect
 import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, ResultApproveWalletConnectSession, WalletConnectSigningMethod } from './types';
 
 const storage = SWStorage.instance;
+
+class WCStorage implements IKeyValueStorage {
+  async getEntries<T = any> (): Promise<[string, T][]> {
+    const datas = await storage.getEntries();
+
+    return Promise.resolve(datas.filter(([key]) => key.startsWith('wc@')).map(([key, value]) => [key, JSON.parse(value)] as [string, T]));
+  }
+
+  async getItem<T = any> (key: string) {
+    const data = await storage.getItem(key);
+
+    return data ? JSON.parse(data) as T : undefined;
+  }
+
+  async getKeys (): Promise<string[]> {
+    return (await storage.keys()).filter((key) => key.startsWith('wc@'));
+  }
+
+  async removeItem (key: string): Promise<void> {
+    return await storage.removeItem(key);
+  }
+
+  async setItem<T = any> (key: string, value: T): Promise<void> {
+    return await storage.setItem(key, JSON.stringify(value));
+  }
+}
 
 export default class WalletConnectService {
   readonly #requestService: RequestService;
@@ -32,6 +59,7 @@ export default class WalletConnectService {
   constructor (koniState: KoniState, requestService: RequestService, option: SignClientTypes.Options = DEFAULT_WALLET_CONNECT_OPTIONS) {
     this.#koniState = koniState;
     this.#requestService = requestService;
+    option.storage = new WCStorage();
     this.#option = option;
     this.#polkadotRequestHandler = new PolkadotRequestHandler(this, requestService);
     this.#eip155RequestHandler = new Eip155RequestHandler(this.#koniState, this);

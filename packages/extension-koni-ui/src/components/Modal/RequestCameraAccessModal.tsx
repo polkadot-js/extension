@@ -39,9 +39,9 @@ const Component: React.FC<Props> = (props: Props) => {
       center={true}
       id={modalId}
       onCancel={closeModal}
-      zIndex={1005}
       title={t('Cannot scan')}
       wrapClassName={CN(className)}
+      zIndex={1005}
     >
       <div className='body-container'>
         <div className='notice'>

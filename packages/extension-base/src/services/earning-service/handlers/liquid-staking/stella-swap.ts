@@ -8,6 +8,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
@@ -296,18 +297,24 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
     const derivativeTokenInfo = this.state.getAssetBySlug(this.derivativeAssets[0]);
     const derivativeTokenContractAddress = _getContractAddressOfToken(derivativeTokenInfo);
-
+    const evmApi = this.evmApi;
     const inputTokenContract = getERC20Contract(this.chain, _getContractAddressOfToken(inputTokenInfo), this.state.getEvmApiMap());
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const approveCall = inputTokenContract.methods.approve(derivativeTokenContractAddress, MAX_INT); // TODO: need test
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const approveEncodedCall = approveCall.encodeABI() as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const gasLimit = await approveCall.estimateGas({ from: address }) as number;
+    const _price = await evmApi.api.eth.getGasPrice();
+    const gasPrice = recalculateGasPrice(_price, this.chain);
 
     const transactionObject = {
       from: address,
       to: _getContractAddressOfToken(inputTokenInfo),
-      data: approveEncodedCall
+      data: approveEncodedCall,
+      gasPrice: gasPrice,
+      gas: gasLimit
     } as TransactionConfig;
 
     return Promise.resolve({
@@ -319,7 +326,6 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   async handleSubmitStep (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<HandleYieldStepData> {
     const { address, amount } = data;
     const evmApi = this.evmApi;
@@ -332,11 +338,17 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const depositEncodedCall = depositCall.encodeABI() as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const gasLimit = await depositCall.estimateGas({ from: address }) as number;
+    const _price = await evmApi.api.eth.getGasPrice();
+    const gasPrice = recalculateGasPrice(_price, this.chain);
 
     const transactionObject = {
       from: address,
       to: _getContractAddressOfToken(derivativeTokenInfo),
-      data: depositEncodedCall
+      data: depositEncodedCall,
+      gasPrice: gasPrice,
+      gas: gasLimit
     } as TransactionConfig;
 
     return {
@@ -356,7 +368,6 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   override async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const evmApi = this.evmApi;
     const derivativeTokenSlug = this.derivativeAssets[0];
@@ -369,21 +380,26 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const redeemEncodedCall = redeemCall.encodeABI() as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const gasLimit = await redeemCall.estimateGas({ from: address }) as number;
+    const _price = await evmApi.api.eth.getGasPrice();
+    const gasPrice = recalculateGasPrice(_price, this.chain);
 
     const transaction: TransactionConfig = {
       from: address,
       to: _getContractAddressOfToken(derivativeTokenInfo),
-      data: redeemEncodedCall
+      data: redeemEncodedCall,
+      gasPrice: gasPrice,
+      gas: gasLimit
     };
 
-    return [ExtrinsicType.STAKING_UNBOND, transaction];
+    return [ExtrinsicType.UNSTAKE_STDOT, transaction];
   }
 
   /* Leave pool action */
 
   /* Other actions */
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   override async handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData> {
     const evmApi = this.evmApi;
     const derivativeTokenSlug = this.derivativeAssets[0];
@@ -396,11 +412,17 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const withdrawEncodedCall = withdrawCall.encodeABI() as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const gasLimit = await withdrawCall.estimateGas({ from: address }) as number;
+    const _price = await evmApi.api.eth.getGasPrice();
+    const gasPrice = recalculateGasPrice(_price, this.chain);
 
     return {
       from: address,
       to: _getContractAddressOfToken(derivativeTokenInfo),
-      data: withdrawEncodedCall
+      data: withdrawEncodedCall,
+      gasPrice: gasPrice,
+      gas: gasLimit
     }; // TODO: check tx history parsing
   }
 

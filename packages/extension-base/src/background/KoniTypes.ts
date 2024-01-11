@@ -495,6 +495,7 @@ export enum ExtrinsicType {
   UNSTAKE_VDOT = 'earn.unstake_vdot',
   UNSTAKE_LDOT = 'earn.unstake_ldot',
   UNSTAKE_SDOT = 'earn.unstake_sdot',
+  UNSTAKE_STDOT = 'earn.unstake_stdot',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -534,6 +535,7 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.UNSTAKE_QDOT]: RequestYieldLeave,
   [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldLeave,
   [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldLeave,
+  [ExtrinsicType.UNSTAKE_STDOT]: RequestYieldLeave,
 
   [ExtrinsicType.REDEEM_VDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_QDOT]: RequestYieldLeave,

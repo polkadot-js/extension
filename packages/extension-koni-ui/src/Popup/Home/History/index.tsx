@@ -355,6 +355,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT'),
     [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT'),
     [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT'),
+    [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT'),
     [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
 
@@ -393,6 +394,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT tranasction'),
     [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT tranasction'),
     [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT tranasction'),
     [ExtrinsicType.UNKNOWN]: t('Unknown transaction')
   }), [t]);
 

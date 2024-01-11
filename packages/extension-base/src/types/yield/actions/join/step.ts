@@ -22,6 +22,7 @@ export interface RequestEarlyValidateYield {
  * */
 export interface ResponseEarlyValidateYield {
   passed: boolean;
+  errorMessage?: string;
 }
 
 /**

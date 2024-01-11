@@ -49,7 +49,8 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     if (!poolInfo || !poolInfo.statistic?.minJoinPool) {
       return {
-        passed: false
+        passed: false,
+        errorMessage: 'There\'s a trouble fetching data, please check your internet connection and try again'
       };
     }
 
@@ -62,19 +63,28 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const bnAltInputAssetBalance = new BN(altInputAssetBalance.value);
     const bnMinJoinPool = new BN(poolInfo.statistic.minJoinPool);
 
+    const inputTokenInfo = this.state.chainService.getAssetBySlug(this.inputAsset);
+    const altInputTokenInfo = this.state.chainService.getAssetBySlug(this.altInputAsset);
+    const parsedMinJoinPool = bnMinJoinPool.divn(10 ** (altInputTokenInfo.decimals || 0));
+
     if (bnInputAssetBalance.add(bnAltInputAssetBalance).lt(bnMinJoinPool)) {
       return {
-        passed: false
+        passed: false,
+        errorMessage: `You need at least ${parsedMinJoinPool.toString()} ${inputTokenInfo.symbol} (${inputTokenInfo.originChain}) or ${altInputTokenInfo.symbol} (${altInputTokenInfo.originChain}) to start earning`
       };
     }
 
     if (this.feeAssets.length === 1) {
+      const feeAssetInfo = this.state.chainService.getAssetBySlug(this.feeAssets[0]);
       const feeAssetBalance = await this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.feeAssets[0]);
       const bnFeeAssetBalance = new BN(feeAssetBalance.value);
+      const minFeeAssetBalance = new BN(feeAssetInfo.minAmount || '0');
+      const parsedMinFeeAssetBalance = minFeeAssetBalance.divn(10 ** (feeAssetInfo.decimals || 0)).muln(1.2);
 
       if (bnFeeAssetBalance.lte(BN_ZERO)) {
         return {
-          passed: false
+          passed: false,
+          errorMessage: `You need at least ${parsedMinFeeAssetBalance.toString()} ${feeAssetInfo.symbol} (${feeAssetInfo.originChain}) to start earning`
         };
       }
     }

@@ -153,16 +153,19 @@ export default abstract class BasePoolHandler {
 
     if (!poolInfo || !poolInfo.statistic?.minJoinPool) {
       return {
-        passed: false
+        passed: false,
+        errorMessage: 'There\'s a trouble fetching data, please check your internet connection and try again'
       };
     }
 
+    const nativeTokenInfo = this.state.chainService.getNativeTokenInfo(this.chain);
     const nativeTokenBalance = await this.state.balanceService.getTokenFreeBalance(request.address, this.chain);
     const bnNativeTokenBalance = new BN(nativeTokenBalance.value);
 
     if (bnNativeTokenBalance.lte(new BN(poolInfo.statistic?.minJoinPool))) {
       return {
-        passed: false
+        passed: false,
+        errorMessage: `You do not have enough ${nativeTokenInfo.symbol} (${nativeTokenInfo.originChain}) to start earning`
       };
     }
 

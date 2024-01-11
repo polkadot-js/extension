@@ -615,6 +615,8 @@
   "{{time}} days": "{{time}} 日",
   "Available for withdrawal": "引き出し可能",
   "Withdraw in {{time}}": "{{time}} で引き出し",
+  "Pools": "プール",
+  "Nominate": "ノミネート",
   "Token is not supported": "トークンはサポートされていません",
   "Unable to sign": "署名不可",
   "Unable to send": "送信不可",
@@ -714,7 +716,6 @@
   "support site": "",
   "You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}'s <termUrl/> and <policyUrl/>. For any question related to {{service}}'s services, please visit {{service}}'s <contactUrl/>.": "",
   "{{deviceName}} will provide you with a QR code to scan. Read <highlight>this instruction</highlight>, for more details.": "",
-  "Click the \"Scan QR\" button, or read <highlight>this instruction</highlight>, for more details.": "",
   "Transaction completed": "",
   "Transaction {{info}} completed": "",
   "Transaction failed": "",
@@ -1008,5 +1009,9 @@
   "CheckBox is required": "",
   "I understand that SubWallet can’t recover the password.": "",
   "This password can only unlock your SubWallet on this browser": "",
-  "Passwords should be at least 8 characters in length, including letters and numbers": ""
+  "Passwords should be at least 8 characters in length, including letters and numbers": "",
+  "Unable to fetch staking data. Re-enable current network and try again": "",
+  "Unable to fetch staking data. Re-enable \"{{chainName}}\" and try again.": "",
+  "Click the \"Scan QR\" button, or read <highlight>this instruction</highlight>, for more details": "",
+  "Withdrawable in {{time}}": ""
 }

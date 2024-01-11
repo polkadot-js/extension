@@ -29,9 +29,9 @@ export const IGNORE_QR_SIGNER: string[] = [];
 
 export const XCM_MIN_AMOUNT_RATIO = 1.2;
 
-export const GAS_PRICE_RATIO = 1.05;
+export const GAS_PRICE_RATIO = 1 + (2 / 100);
 
-export const NETWORK_MULTI_GAS_FEE = ['astarEvm'];
+export const NETWORK_MULTI_GAS_FEE = ['*'];
 
 export const ORDINAL_COLLECTION = '__Ordinal__';
 export const ORDINAL_METHODS = ['drc-20', 'pol-20'];

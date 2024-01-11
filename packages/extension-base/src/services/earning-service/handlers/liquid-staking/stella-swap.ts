@@ -14,7 +14,7 @@ import { Contract } from 'web3-eth-contract';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
-import { DEFAULT_YIELD_FIRST_STEP, ST_LIQUID_TOKEN_ABI } from '../../constants';
+import { ST_LIQUID_TOKEN_ABI } from '../../constants';
 import BaseLiquidStakingPoolHandler from './base';
 
 export const getStellaswapLiquidStakingContract = (networkKey: string, assetAddress: string, evmApi: _EvmApi, options = {}): Contract => {
@@ -147,7 +147,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const getTokenBalance = () => {
       if (!cancel) {
         useAddresses.map(async (address) => {
-          if (!cancel) {
+          if (cancel) {
             return;
           }
 
@@ -283,69 +283,6 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
         slug: this.feeAssets[0],
         amount: '0'
       };
-    }
-  }
-
-  override async generateOptimalPath (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
-    const result: OptimalYieldPath = {
-      totalFee: [{ slug: '' }],
-      steps: [DEFAULT_YIELD_FIRST_STEP]
-    };
-
-    try {
-      /* Token approve step */
-
-      const approveStep = await this.getTokenApproveStep(params);
-
-      if (approveStep) {
-        const [step, fee] = approveStep;
-
-        result.steps.push({
-          id: result.steps.length,
-          ...step
-        });
-
-        result.totalFee.push(fee);
-      }
-
-      /* Token approve step */
-
-      /* Submit step */
-
-      const submitFee = await this.getSubmitStepFee(params);
-
-      result.steps.push({
-        id: result.steps.length,
-        ...this.submitJoinStepInfo
-      });
-
-      result.totalFee.push(submitFee);
-
-      /* Submit step */
-
-      return result;
-    } catch (e) {
-      const errorMessage = (e as Error).message;
-
-      if (errorMessage.includes('network')) {
-        result.connectionError = errorMessage.split(' ')[0];
-      }
-
-      /* Submit step */
-
-      result.steps.push({
-        id: result.steps.length,
-        ...this.submitJoinStepInfo
-      });
-
-      result.totalFee.push({
-        slug: this.feeAssets[0],
-        amount: '0'
-      });
-
-      /* Submit step */
-
-      return result;
     }
   }
 

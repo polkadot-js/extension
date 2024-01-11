@@ -569,6 +569,10 @@ export default class TransactionService {
         break;
       }
 
+      case ExtrinsicType.UNSTAKE_QDOT:
+      case ExtrinsicType.UNSTAKE_VDOT:
+      case ExtrinsicType.UNSTAKE_LDOT:
+      case ExtrinsicType.UNSTAKE_SDOT:
       case ExtrinsicType.REDEEM_STDOT:
       case ExtrinsicType.REDEEM_LDOT:
       case ExtrinsicType.REDEEM_SDOT:

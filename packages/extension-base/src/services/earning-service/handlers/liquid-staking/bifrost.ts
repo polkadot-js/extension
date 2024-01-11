@@ -355,10 +355,9 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
 
   override async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const chainApi = await this.substrateApi.isReady;
-    const inputTokenSlug = this.inputAsset;
-    const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
-
-    const extrinsic = chainApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(inputTokenInfo), amount);
+    const derivativeTokenSlug = this.derivativeAssets[0];
+    const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
+    const extrinsic = chainApi.api.tx.vtokenMinting.redeem(_getTokenOnChainInfo(derivativeTokenInfo), amount);
 
     return [ExtrinsicType.UNSTAKE_VDOT, extrinsic];
   }

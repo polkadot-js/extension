@@ -530,16 +530,16 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.MINT_STDOT]: SubmitYieldStepData,
   [ExtrinsicType.MINT_STDOT]: SubmitYieldStepData,
 
+  [ExtrinsicType.UNSTAKE_VDOT]: RequestYieldLeave,
+  [ExtrinsicType.UNSTAKE_QDOT]: RequestYieldLeave,
+  [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldLeave,
+  [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldLeave,
+
   [ExtrinsicType.REDEEM_VDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_QDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_LDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_SDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_STDOT]: RequestYieldLeave,
-
-  [ExtrinsicType.UNSTAKE_QDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.UNSTAKE_VDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldFastWithdrawal,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,

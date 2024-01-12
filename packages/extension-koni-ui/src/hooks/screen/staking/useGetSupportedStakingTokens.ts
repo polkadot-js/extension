@@ -48,7 +48,7 @@ export default function useGetSupportedStakingTokens (type: StakingType, address
         if (_isChainSupportSubstrateStaking(chainInfo)) {
           const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
-          if (assetRegistryMap[nativeTokenSlug] &&
+          if (!_isCustomAsset(nativeTokenSlug) && assetRegistryMap[nativeTokenSlug] &&
             isChainTypeValid(chainInfo, accounts, address) &&
             (!chain || chain === ALL_KEY || chain === chainInfo.slug)
           ) {
@@ -61,7 +61,7 @@ export default function useGetSupportedStakingTokens (type: StakingType, address
         if (_isChainSupportSubstrateStaking(chainInfo) && _STAKING_CHAIN_GROUP.nominationPool.includes(chainInfo.slug)) {
           const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
-          if (assetRegistryMap[nativeTokenSlug] &&
+          if (!_isCustomAsset(nativeTokenSlug) && assetRegistryMap[nativeTokenSlug] &&
             isChainTypeValid(chainInfo, accounts, address) &&
             (!chain || chain === ALL_KEY || chain === chainInfo.slug)
           ) {

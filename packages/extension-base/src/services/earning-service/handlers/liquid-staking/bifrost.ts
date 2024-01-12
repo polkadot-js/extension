@@ -152,7 +152,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
         earningThreshold: {
           join: minimumMint,
           defaultUnstake: minimumRedeem,
-          fastUnstake: minimumRedeem
+          fastUnstake: '0'
         },
         totalApy: parseFloat(vDOTStats.apyBase),
         tvl: (vDOTStats.tvm * assetDecimals).toString()

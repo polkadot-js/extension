@@ -128,7 +128,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
         earningThreshold: {
           join: mintThreshold,
           defaultUnstake: redeemThreshold,
-          fastUnstake: redeemThreshold
+          fastUnstake: '0'
         },
         totalApy: apy * 100,
         tvl: totalStakingBonded.add(toBondPool).toString()

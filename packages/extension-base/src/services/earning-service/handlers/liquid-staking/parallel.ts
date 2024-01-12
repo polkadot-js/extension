@@ -114,7 +114,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
         earningThreshold: {
           join: minStake,
           defaultUnstake: minUnstake,
-          fastUnstake: minUnstake
+          fastUnstake: '0'
         },
         totalApy: apy * 100,
         tvl: tvl.toString()

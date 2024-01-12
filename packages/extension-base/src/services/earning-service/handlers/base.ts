@@ -98,7 +98,7 @@ export default abstract class BasePoolHandler {
     const decimals = this.nativeToken.decimals || 0;
     const defaultMaintainBalance = new BN(1).mul(BN_TEN.pow(new BN(decimals)));
     const ed = new BN(this.nativeToken.minAmount || '0');
-    const maintainBalance = ed.gte(defaultMaintainBalance) ? ed.mul(new BN(1.5)) : defaultMaintainBalance;
+    const maintainBalance = ed.gte(defaultMaintainBalance) ? new BN(15).mul(ed).div(BN_TEN) : defaultMaintainBalance;
 
     return maintainBalance.toString();
   }

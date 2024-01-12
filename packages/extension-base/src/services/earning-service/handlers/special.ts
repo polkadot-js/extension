@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, StakingTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, StakingTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
@@ -89,7 +89,9 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     const [inputAssetBalance, altInputAssetBalance, feeAssetBalance] = await Promise.all([
       this.state.balanceService.getTokenFreeBalance(request.address, inputAssetInfo.originChain, inputAssetInfo.slug),
-      this.state.balanceService.getTokenFreeBalance(request.address, altInputAssetInfo.originChain, altInputAssetInfo.slug),
+      altInputAssetInfo
+        ? this.state.balanceService.getTokenFreeBalance(request.address, altInputAssetInfo.originChain, altInputAssetInfo.slug)
+        : Promise.resolve<AmountData>({ symbol: '', decimals: 0, value: '0' }),
       this.state.balanceService.getTokenFreeBalance(request.address, feeAssetInfo.originChain, feeAssetInfo.slug)
     ]);
 
@@ -99,7 +101,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     const inputTokenInfo = this.state.chainService.getAssetBySlug(this.inputAsset);
     const altInputTokenInfo = this.state.chainService.getAssetBySlug(this.altInputAsset);
-    const minJoinDiv = BN_TEN.pow(new BN(altInputTokenInfo.decimals || 0));
+    const minJoinDiv = BN_TEN.pow(new BN(inputAssetInfo.decimals || 0));
     const parsedMinJoinPool = bnMinJoinPool.div(minJoinDiv);
 
     if (bnInputAssetBalance.add(bnAltInputAssetBalance).lt(bnMinJoinPool)) {

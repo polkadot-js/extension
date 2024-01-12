@@ -38,6 +38,7 @@ export const RouteState = {
 const welcomeUrl = '/welcome';
 const tokenUrl = '/home/tokens';
 const loginUrl = '/keyring/login';
+const phishingUrl = '/phishing-page-detected';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
 const securityUrl = '/settings/security';
@@ -178,7 +179,11 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       return redirectObj;
     }
 
-    if (needMigrate && hasMasterPassword && !needUnlock) {
+    const ignoreRedirect = pathName.startsWith(phishingUrl);
+
+    if (ignoreRedirect) {
+      // Do nothing
+    } else if (needMigrate && hasMasterPassword && !needUnlock) {
       redirectObj.redirect = migratePasswordUrl;
     } else if (hasMasterPassword && needUnlock) {
       redirectObj.redirect = loginUrl;

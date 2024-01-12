@@ -8,7 +8,7 @@ import BaseNativeStakingPoolHandler from '@subwallet/extension-base/services/ear
 import { EarningStatus, OptimalYieldPath, SubmitJoinNativeStaking, SubmitYieldJoinData, YieldStepBaseInfo, YieldStepType } from '@subwallet/extension-base/types';
 import { isSameAddress, reformatAddress } from '@subwallet/extension-base/utils';
 
-import { BN } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativeStakingPoolHandler {
   /* Join pool action */
@@ -31,6 +31,11 @@ export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativ
     const poolInfo = await this.getPoolInfo();
     const poolPosition = await this.getPoolPosition(address);
     const chainInfo = this.chainInfo;
+    const bnAmount = new BN(amount);
+
+    if (bnAmount.lte(BN_ZERO)) {
+      return [new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Amount must be greater than 0')];
+    }
 
     if (!poolInfo || !poolInfo.statistic) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);

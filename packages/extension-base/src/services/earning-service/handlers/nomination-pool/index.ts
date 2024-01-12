@@ -458,6 +458,11 @@ export default class NominationPoolHandler extends BasePoolHandler {
   async validateYieldJoin (data: SubmitYieldJoinData, path: OptimalYieldPath): Promise<TransactionError[]> {
     const { address, amount, selectedPool } = data as SubmitJoinNominationPool;
     const _poolInfo = await this.getPoolInfo();
+    const bnAmount = new BN(amount);
+
+    if (bnAmount.lte(BN_ZERO)) {
+      return [new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Amount must be greater than 0')];
+    }
 
     if (!_poolInfo || !_poolInfo.statistic) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);

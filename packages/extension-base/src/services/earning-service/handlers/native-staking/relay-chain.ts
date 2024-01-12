@@ -440,6 +440,11 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const _poolInfo = await this.getPoolInfo();
     const poolPosition = await this.getPoolPosition(address);
     const chainInfo = this.chainInfo;
+    const bnAmount = new BN(amount);
+
+    if (bnAmount.lte(BN_ZERO)) {
+      return [new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Amount must be greater than 0')];
+    }
 
     if (!_poolInfo) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);

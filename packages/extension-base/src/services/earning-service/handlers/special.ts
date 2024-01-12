@@ -370,6 +370,11 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const balanceService = this.state.balanceService;
     const inputTokenBalance = await balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug);
     const bnInputTokenBalance = new BN(inputTokenBalance.value || '0');
+    const bnAmount = new BN(params.amount);
+
+    if (bnAmount.lte(BN_ZERO)) {
+      return [new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Amount must be greater than 0')];
+    }
 
     let isXcmOk = false;
 

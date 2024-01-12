@@ -55,11 +55,13 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     }
 
     const feeAssetInfo = this.state.chainService.getAssetBySlug(this.feeAssets[0]);
+    const altInputAssetInfo = this.state.chainService.getAssetBySlug(this.altInputAsset);
+    const inputAssetInfo = this.state.chainService.getAssetBySlug(this.inputAsset);
 
     const [inputAssetBalance, altInputAssetBalance, feeAssetBalance] = await Promise.all([
-      this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.inputAsset),
-      this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.altInputAsset),
-      this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.feeAssets[0])
+      this.state.balanceService.getTokenFreeBalance(request.address, inputAssetInfo.originChain, inputAssetInfo.slug),
+      this.state.balanceService.getTokenFreeBalance(request.address, inputAssetInfo.originChain, altInputAssetInfo.slug),
+      this.state.balanceService.getTokenFreeBalance(request.address, inputAssetInfo.originChain, feeAssetInfo.slug)
     ]);
 
     const bnInputAssetBalance = new BN(inputAssetBalance.value);
@@ -513,12 +515,18 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     const derivativeTokenInfo = this.state.getAssetBySlug(this.derivativeAssets[0]);
 
+    if (bnAmount.lte(BN_ZERO)) {
+      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Amount must be greater than 0')));
+    }
+
     if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
       errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE)); // TODO
     }
 
     if (bnAmount.lt(minUnstake)) {
-      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_UNSTAKE, t('You need to unstake at least {{amount}} {{token}}', { replace: { amount: minUnstake.toString(), token: derivativeTokenInfo.symbol } })));
+      const parsedMinUnstake = minUnstake.divn(10 ** (derivativeTokenInfo.decimals || 0));
+
+      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_UNSTAKE, t('You need to unstake at least {{amount}} {{token}}', { replace: { amount: parsedMinUnstake.toString(), token: derivativeTokenInfo.symbol } })));
     }
 
     if (poolPosition.unstakings.length > maxUnstakeRequest) {

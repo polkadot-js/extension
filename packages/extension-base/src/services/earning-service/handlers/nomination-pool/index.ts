@@ -573,6 +573,12 @@ export default class NominationPoolHandler extends BasePoolHandler {
       return [new TransactionError(BasicTxErrorType.INVALID_PARAMS)];
     }
 
+    const bnAmount = new BN(amount);
+
+    if (bnAmount.lte(BN_ZERO)) {
+      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Amount must be greater than 0')));
+    }
+
     const bnActiveStake = new BN(poolPosition.activeStake);
     const bnRemainingStake = bnActiveStake.sub(new BN(amount));
     const minStake = new BN(poolInfo.statistic.earningThreshold.join || '0');

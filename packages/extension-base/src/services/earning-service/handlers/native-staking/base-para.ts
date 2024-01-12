@@ -9,6 +9,7 @@ import { EarningStatus, OptimalYieldPath, SubmitJoinNativeStaking, SubmitYieldJo
 import { isSameAddress, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
+import {t} from "i18next";
 
 export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativeStakingPoolHandler {
   /* Join pool action */
@@ -119,6 +120,12 @@ export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativ
 
     if (fastLeave) {
       return [new TransactionError(BasicTxErrorType.INVALID_PARAMS)];
+    }
+
+    const bnAmount = new BN(amount);
+
+    if (bnAmount.lte(BN_ZERO)) {
+      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Amount must be greater than 0')));
     }
 
     let targetNomination: NominationInfo | undefined;

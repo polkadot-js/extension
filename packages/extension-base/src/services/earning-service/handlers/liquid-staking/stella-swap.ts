@@ -13,7 +13,7 @@ import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
 
-import { BN, BN_ZERO } from '@polkadot/util';
+import { BN, BN_TEN, BN_ZERO } from '@polkadot/util';
 
 import { ST_LIQUID_TOKEN_ABI } from '../../constants';
 import BaseLiquidStakingPoolHandler from './base';
@@ -51,6 +51,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
   protected readonly rewardAssets: string[] = ['moonbeam-LOCAL-xcDOT'];
   protected readonly feeAssets: string[] = ['moonbeam-NATIVE-GLMR'];
   public override transactionChainType: ChainType = ChainType.EVM;
+  protected readonly rateDecimals = 10; // Derivative asset decimals
   protected readonly availableMethod: YieldPoolMethodInfo = {
     join: true,
     defaultUnstake: true,
@@ -105,7 +106,10 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
       exchangeRateCall.call()
     ]);
 
-    const exchangeRate = (equivalentTokenShare as number) / (10 ** _getAssetDecimals(derivativeTokenInfo));
+    const rate = equivalentTokenShare as number;
+    const exchangeRate = rate / (10 ** _getAssetDecimals(derivativeTokenInfo));
+
+    this.updateExchangeRate(rate);
 
     return {
       ...this.baseInfo,
@@ -155,6 +159,9 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
             return;
           }
 
+          const rate = await this.getExchangeRate();
+          const exchangeRate = new BN(rate);
+          const decimals = BN_TEN.pow(new BN(this.rateDecimals));
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           const balance = (await contract.methods.balanceOf(address).call()) as string;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -181,7 +188,8 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
             });
           }
 
-          const totalBalance = new BN(balance).add(unlockBalance);
+          const acviteToTotal = new BN(balance).mul(exchangeRate).div(decimals);
+          const totalBalance = acviteToTotal.add(unlockBalance);
 
           const result: YieldPositionInfo = {
             ...this.baseInfo,

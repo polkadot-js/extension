@@ -7,7 +7,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LendingYieldPoolInfo, LendingYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
-import { BN, BN_ZERO } from '@polkadot/util';
+import { BN, BN_TEN, BN_ZERO } from '@polkadot/util';
 
 import { fakeAddress } from '../../constants';
 import BaseLendingPoolHandler from './base';
@@ -29,6 +29,8 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     withdraw: false,
     claimReward: false
   };
+
+  protected readonly rateDecimals = 18;
 
   constructor (state: KoniState, chain: string) {
     super(state, chain);
@@ -55,7 +57,9 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     const _exchangeRate = await substrateApi.api.query.loans.exchangeRate(_getTokenOnChainInfo(inputTokenInfo));
 
     const exchangeRate = _exchangeRate.toPrimitive() as number;
-    const decimals = 10 ** 18;
+    const decimals = 10 ** this.rateDecimals;
+
+    this.updateExchangeRate(exchangeRate);
 
     return {
       ...this.baseInfo,
@@ -99,28 +103,30 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
     const derivativeTokenSlug = this.derivativeAssets[0];
     const derivativeTokenInfo = this.state.getAssetBySlug(derivativeTokenSlug);
 
-    const unsub = await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), (_balances) => {
+    const unsub = await substrateApi.api.query.tokens.accounts.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(derivativeTokenInfo)]), async (_balances) => {
       if (cancel) {
         unsub();
 
         return;
       }
 
+      const exchangeRate = await this.getExchangeRate();
+      const decimals = BN_TEN.pow(new BN(this.rateDecimals));
       const balances = _balances as unknown as TokenBalanceRaw[];
 
       for (let i = 0; i < balances.length; i++) {
         const balanceItem = balances[i];
         const address = useAddresses[i];
-        const bnTotalBalance = balanceItem.free || BN_ZERO;
-        const totalBalance = bnTotalBalance.toString();
+        const bnActiveBalance = balanceItem.free || BN_ZERO;
+        const bnTotalBalance = bnActiveBalance.mul(new BN(exchangeRate)).div(decimals);
 
         const result: LendingYieldPositionInfo = {
           ...this.baseInfo,
           type: this.type,
           address,
           balanceToken: this.inputAsset,
-          totalStake: totalBalance,
-          activeStake: totalBalance,
+          totalStake: bnTotalBalance.toString(),
+          activeStake: bnActiveBalance.toString(),
           unstakeBalance: '0',
           status: EarningStatus.EARNING_REWARD,
           derivativeToken: derivativeTokenSlug,

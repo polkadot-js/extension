@@ -9,7 +9,7 @@ import { _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chai
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TransactionData, UnlockingChunk, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
-import { BN, BN_ZERO } from '@polkadot/util';
+import { BN, BN_TEN, BN_ZERO } from '@polkadot/util';
 
 import BaseLiquidStakingPoolHandler from './base';
 
@@ -27,6 +27,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
   protected readonly rewardAssets: string[] = ['parallel-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['parallel-NATIVE-PARA'];
   public override readonly minAmountPercent = 0.97;
+  protected readonly rateDecimals = 18;
   protected readonly availableMethod: YieldPoolMethodInfo = {
     join: true,
     defaultUnstake: true,
@@ -86,12 +87,14 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
 
     const beginTimestamp = _beginTimestamp.toPrimitive() as number;
     const beginExchangeRate = _beginExchangeRate.toPrimitive() as number;
-    const decimals = 10 ** 18;
+    const decimals = 10 ** this.rateDecimals;
 
     const apy = (exchangeRate / beginExchangeRate) ** (365 * 24 * 60 * 60000 / (currentTimestamp - beginTimestamp)) - 1;
 
     const minStake = substrateApi.api.consts.liquidStaking.minStake.toString();
     const minUnstake = substrateApi.api.consts.liquidStaking.minUnstake.toString();
+
+    this.updateExchangeRate(exchangeRate);
 
     return {
       ...this.baseInfo,
@@ -143,9 +146,14 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
         return;
       }
 
-      const unlockingChunks = await substrateApi.api.query.liquidStaking.unlockings.multi(useAddresses);
-      const _currentEra = await substrateApi.api.query.liquidStaking.currentEra();
+      const [unlockingChunks, _currentEra, exchangeRate] = await Promise.all([
+        substrateApi.api.query.liquidStaking.unlockings.multi(useAddresses),
+        substrateApi.api.query.liquidStaking.currentEra(),
+        this.getExchangeRate()
+      ]);
+
       const currentEra = _currentEra.toPrimitive() as number;
+      const decimals = BN_TEN.pow(new BN(this.rateDecimals));
 
       for (let i = 0; i < balances.length; i++) {
         const b = balances[i];
@@ -158,7 +166,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
         const activeBalance = bdata && bdata.balance ? new BN(String(bdata?.balance).replaceAll(',', '') || '0') : BN_ZERO;
-        let totalBalance = activeBalance;
+        let totalBalance = activeBalance.mul(new BN(exchangeRate)).div(decimals);
         let unlockingBalance = BN_ZERO;
         const unstakings: UnstakingInfo[] = [];
 

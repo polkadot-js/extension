@@ -8,6 +8,7 @@ import { _getAssetDecimals, _getTokenOnChainInfo } from '@subwallet/extension-ba
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, LiquidYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
+import BigNumber from 'bignumber.js';
 import fetch from 'cross-fetch';
 
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -70,6 +71,8 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     claimReward: false
   };
 
+  protected readonly rateDecimals = 0;
+
   constructor (state: KoniState, chain: string) {
     super(state, chain);
 
@@ -130,6 +133,9 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const vDOTStats = stakingMeta.vDOT;
     const assetInfo = this.state.getAssetBySlug(this.inputAsset);
     const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
+    const rate = parseFloat(exchangeRate.data.slp_polkadot_ratio[0].ratio);
+
+    this.updateExchangeRate(rate);
 
     return {
       ...this.baseInfo,
@@ -143,7 +149,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
           {
             slug: this.rewardAssets[0],
             apy: parseFloat(vDOTStats.apyBase),
-            exchangeRate: parseFloat(exchangeRate.data.slp_polkadot_ratio[0].ratio)
+            exchangeRate: rate
           }
         ],
         unstakingPeriod: 24 * 28,
@@ -187,10 +193,13 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
 
       const balances = _balance as unknown as TokenBalanceRaw[];
 
-      const [_unlockLedgerList, _currentRelayEra] = await Promise.all([
+      const [_unlockLedgerList, _currentRelayEra, rate] = await Promise.all([
         substrateApi.api.query.vtokenMinting.userUnlockLedger.multi(useAddresses.map((address) => [address, _getTokenOnChainInfo(inputTokenInfo)])),
-        substrateApi.api.query.vtokenMinting.ongoingTimeUnit(_getTokenOnChainInfo(inputTokenInfo))
+        substrateApi.api.query.vtokenMinting.ongoingTimeUnit(_getTokenOnChainInfo(inputTokenInfo)),
+        this.getExchangeRate()
       ]);
+
+      const exchangeRate = new BigNumber(rate);
 
       const currentRelayEraObj = _currentRelayEra.toPrimitive() as Record<string, number>;
       const currentRelayEra = currentRelayEraObj.Era;
@@ -278,7 +287,8 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
           });
         }
 
-        const totalBalance = bnActiveBalance.add(unlockBalance);
+        const activeToTotalBalance = exchangeRate.multipliedBy(bnActiveBalance.toString());
+        const totalBalance = activeToTotalBalance.plus(unlockBalance.toString());
 
         const result: LiquidYieldPositionInfo = {
           ...this.baseInfo,
@@ -290,7 +300,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
           activeStake: bnActiveBalance.toString(),
           unstakeBalance: unlockBalance.toString(),
           status: bnActiveBalance.eq(BN_ZERO) ? EarningStatus.NOT_EARNING : EarningStatus.EARNING_REWARD,
-          isBondedBefore: totalBalance.gt(BN_ZERO),
+          isBondedBefore: totalBalance.gt(BN_ZERO.toString()),
           nominations: [],
           unstakings: unstakingList
         };

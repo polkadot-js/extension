@@ -6,8 +6,10 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, StakingTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, RuntimeDispatchInfo, SpecialYieldPoolInfo, SpecialYieldPoolMetadata, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldProcessValidation, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
 
 import { BN, BN_ZERO, noop } from '@polkadot/util';
@@ -22,8 +24,17 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   protected abstract feeAssets: string[];
   /** Pool's type */
   public abstract override type: YieldPoolType.LIQUID_STAKING | YieldPoolType.LENDING;
+  protected abstract readonly rateDecimals: number;
+  /** Exchange rate before divine with decimals */
+  protected rate = 0;
+  private exchangeRatePromise: PromiseHandler<boolean>;
 
-  protected override get metadataInfo (): Omit<SpecialYieldPoolMetadata, 'description'> {
+  protected constructor (state: KoniState, chain: string) {
+    super(state, chain);
+    this.exchangeRatePromise = createPromiseHandler<boolean>();
+  }
+
+  public override get metadataInfo (): Omit<SpecialYieldPoolMetadata, 'description'> {
     return {
       altInputAssets: this.altInputAsset,
       derivativeAssets: this.derivativeAssets,
@@ -38,6 +49,17 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       maintainBalance: this.maintainBalance,
       availableMethod: this.availableMethod
     };
+  }
+
+  protected updateExchangeRate (rate: number) {
+    this.rate = rate;
+    this.exchangeRatePromise.resolve(true);
+  }
+
+  protected async getExchangeRate (): Promise<number> {
+    await this.exchangeRatePromise.promise;
+
+    return this.rate;
   }
 
   override get isPoolSupportAlternativeFee () {

@@ -8,7 +8,7 @@ import { fakeAddress } from '@subwallet/extension-base/services/earning-service/
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import fetch from 'cross-fetch';
 
-import { BN, BN_ZERO } from '@polkadot/util';
+import { BN, BN_TEN, BN_ZERO } from '@polkadot/util';
 
 import BaseLiquidStakingPoolHandler from './base';
 
@@ -39,6 +39,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
   protected readonly rewardAssets: string[] = ['acala-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['acala-NATIVE-ACA', 'acala-LOCAL-DOT'];
   public override readonly minAmountPercent = 0.98;
+  protected readonly rateDecimals = 10;
 
   protected readonly availableMethod: YieldPoolMethodInfo = {
     join: true,
@@ -96,7 +97,9 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     const stakingMeta = _stakingMeta as AcalaLiquidStakingMeta;
     const stakingMetaList = stakingMeta.data.dailySummaries.nodes;
     const latestExchangeRate = parseInt(stakingMetaList[0].exchangeRate);
-    const decimals = 10 ** 10;
+    const decimals = 10 ** this.rateDecimals;
+
+    this.updateExchangeRate(latestExchangeRate);
 
     const endingBalance = parseInt(stakingMetaList[0].exchangeRate);
     const beginBalance = parseInt(stakingMetaList[29].exchangeRate);
@@ -159,12 +162,14 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
 
       const balances = _balances as unknown as TokenBalanceRaw[];
       const redeemRequests = await substrateApi.api.query.homa.redeemRequests.multi(useAddresses);
+      const exchangeRate = await this.getExchangeRate();
+      const decimals = BN_TEN.pow(new BN(this.rateDecimals));
 
       for (let i = 0; i < balances.length; i++) {
         const balanceItem = balances[i];
         const address = useAddresses[i];
         const activeTotalBalance = balanceItem.free || BN_ZERO;
-        let totalBalance = activeTotalBalance;
+        let totalBalance = activeTotalBalance.mul(new BN(exchangeRate)).div(decimals);
         let unlockingBalance = BN_ZERO;
 
         const unstakings: UnstakingInfo[] = [];

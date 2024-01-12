@@ -103,7 +103,7 @@ export default abstract class BasePoolHandler {
     return maintainBalance.toString();
   }
 
-  protected get metadataInfo (): Omit<BaseYieldPoolMetadata, 'description'> {
+  public get metadataInfo (): Omit<BaseYieldPoolMetadata, 'description'> {
     return {
       name: this.name,
       shortName: this.shortName,

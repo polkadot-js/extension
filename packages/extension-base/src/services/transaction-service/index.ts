@@ -511,8 +511,25 @@ export default class TransactionService {
       case ExtrinsicType.STAKING_WITHDRAW: {
         const data = parseTransactionData<ExtrinsicType.STAKING_WITHDRAW>(transaction.data);
 
+        const slug = data.slug;
+        const poolHandler = this.state.earningService.getPoolHandler(slug);
+
+        const amount: AmountData = {
+          ...baseNativeAmount,
+          value: data.unstakingInfo.claimable || '0'
+        };
+
+        if (poolHandler) {
+          const asset = this.state.getAssetBySlug(poolHandler.metadataInfo.inputAsset);
+
+          if (asset) {
+            amount.decimals = asset.decimals || 0;
+            amount.symbol = asset.symbol;
+          }
+        }
+
         historyItem.to = data.unstakingInfo.validatorAddress || '';
-        historyItem.amount = { ...baseNativeAmount, value: data.unstakingInfo.claimable || '0' };
+        historyItem.amount = amount;
         break;
       }
 

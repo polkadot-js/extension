@@ -41,11 +41,11 @@ export interface AbstractYieldPositionInfo extends BaseYieldPositionInfo {
 
   /** Token to show */
   balanceToken: string;
-  /** Total stake of the account */
+  /** Total stake of the account - input asset */
   totalStake: string;
-  /** Active stake of the account */
+  /** Active stake of the account - derivation/input asset */
   activeStake: string;
-  /** Unstaking balance of the account */
+  /** Unstaking balance of the account - input asset */
   unstakeBalance: string;
   /** Is the account bonded in pool before? */
   isBondedBefore: boolean;

@@ -4,13 +4,14 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/services/earning-service/constants';
 import { BasePoolInfo, BaseYieldPoolMetadata, EarningRewardHistoryItem, EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolMethodInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { formatNumber } from '@subwallet/extension-base/utils';
 
 import { BN, BN_TEN } from '@polkadot/util';
-import {ALL_ACCOUNT_KEY} from "@subwallet/extension-base/constants";
 
 /**
  * @class BasePoolHandler
@@ -170,9 +171,11 @@ export default abstract class BasePoolHandler {
     const bnNativeTokenBalance = new BN(nativeTokenBalance.value);
 
     if (bnNativeTokenBalance.lte(new BN(poolInfo.statistic?.earningThreshold?.join))) {
+      const minJoin = formatNumber(poolInfo.statistic?.earningThreshold?.join || '0', this.nativeToken.decimals || 0);
+
       return {
         passed: false,
-        errorMessage: `You do not have enough ${nativeTokenInfo.symbol} (${nativeTokenInfo.originChain}) to start earning`
+        errorMessage: `You need at least ${minJoin} ${nativeTokenInfo.symbol} (${nativeTokenInfo.originChain}) to start earning`
       };
     }
 

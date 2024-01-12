@@ -127,7 +127,7 @@ export const toBNString = (input: string | number | BigNumber, decimal: number):
 export const formatNumber = (
   input: string | number | BigNumber,
   decimal: number,
-  formatter: NumberFormatter,
+  formatter: NumberFormatter = balanceFormatter,
   metadata?: Record<string, number>
 ): string => {
   const raw = new BigNumber(input).dividedBy(BN_TEN.pow(decimal)).toFixed();

@@ -7,9 +7,9 @@ import { getBondedValidators, getExistUnstakeErrorMessage, getMaxValidatorErrorM
 import BaseNativeStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/native-staking/base';
 import { EarningStatus, OptimalYieldPath, SubmitJoinNativeStaking, SubmitYieldJoinData, YieldStepBaseInfo, YieldStepType } from '@subwallet/extension-base/types';
 import { isSameAddress, reformatAddress } from '@subwallet/extension-base/utils';
+import { t } from 'i18next';
 
 import { BN, BN_ZERO } from '@polkadot/util';
-import {t} from "i18next";
 
 export default abstract class BaseParaNativeStakingPoolHandler extends BaseNativeStakingPoolHandler {
   /* Join pool action */

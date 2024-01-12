@@ -54,9 +54,12 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       };
     }
 
-    const [inputAssetBalance, altInputAssetBalance] = await Promise.all([
+    const feeAssetInfo = this.state.chainService.getAssetBySlug(this.feeAssets[0]);
+
+    const [inputAssetBalance, altInputAssetBalance, feeAssetBalance] = await Promise.all([
       this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.inputAsset),
-      this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.altInputAsset)
+      this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.altInputAsset),
+      this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.feeAssets[0])
     ]);
 
     const bnInputAssetBalance = new BN(inputAssetBalance.value);
@@ -75,8 +78,6 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     }
 
     if (this.feeAssets.length === 1) {
-      const feeAssetInfo = this.state.chainService.getAssetBySlug(this.feeAssets[0]);
-      const feeAssetBalance = await this.state.balanceService.getTokenFreeBalance(request.address, this.chain, this.feeAssets[0]);
       const bnFeeAssetBalance = new BN(feeAssetBalance.value);
       const minFeeAssetBalance = new BN(feeAssetInfo.minAmount || '0');
       const parsedMinFeeAssetBalance = minFeeAssetBalance.divn(10 ** (feeAssetInfo.decimals || 0)).muln(1.2);

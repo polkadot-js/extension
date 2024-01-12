@@ -172,10 +172,11 @@ export default abstract class BasePoolHandler {
 
     if (bnNativeTokenBalance.lte(new BN(poolInfo.statistic?.earningThreshold?.join))) {
       const minJoin = formatNumber(poolInfo.statistic?.earningThreshold?.join || '0', this.nativeToken.decimals || 0);
+      const originChain = this.state.getChainInfo(nativeTokenInfo.originChain);
 
       return {
         passed: false,
-        errorMessage: `You need at least ${minJoin} ${nativeTokenInfo.symbol} (${nativeTokenInfo.originChain}) to start earning`
+        errorMessage: `You need at least ${minJoin} ${nativeTokenInfo.symbol} (${originChain.name}) to start earning`
       };
     }
 

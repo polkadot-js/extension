@@ -105,9 +105,12 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const parsedMinJoinPool = bnMinJoinPool.div(minJoinDiv);
 
     if (bnInputAssetBalance.add(bnAltInputAssetBalance).lt(bnMinJoinPool)) {
+      const originChain = this.state.getChainInfo(inputTokenInfo.originChain);
+      const altChain = this.state.getChainInfo(altInputTokenInfo.originChain);
+
       return {
         passed: false,
-        errorMessage: `You need at least ${parsedMinJoinPool.toString()} ${inputTokenInfo.symbol} (${inputTokenInfo.originChain}) or ${altInputTokenInfo.symbol} (${altInputTokenInfo.originChain}) to start earning`
+        errorMessage: `You need at least ${parsedMinJoinPool.toString()} ${inputTokenInfo.symbol} (${originChain.name}) or ${altInputTokenInfo.symbol} (${altChain.name}) to start earning`
       };
     }
 
@@ -118,9 +121,11 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       const parsedMinFeeAssetBalance = minFeeAssetBalance.div(feeAssetDiv).mul(new BN(12)).div(BN_TEN);
 
       if (bnFeeAssetBalance.lte(BN_ZERO)) {
+        const feeChain = this.state.getChainInfo(feeAssetInfo.originChain);
+
         return {
           passed: false,
-          errorMessage: `You need at least ${parsedMinFeeAssetBalance.toString()} ${feeAssetInfo.symbol} (${feeAssetInfo.originChain}) to start earning`
+          errorMessage: `You need at least ${parsedMinFeeAssetBalance.toString()} ${feeAssetInfo.symbol} (${feeChain.name}) to start earning`
         };
       }
     }

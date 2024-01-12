@@ -9,7 +9,7 @@ import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMa
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
-import { groupBalance } from '@subwallet/extension-base/services/balance-service/helpers/group';
+import { BalanceMapImpl } from '@subwallet/extension-base/services/balance-service/BalanceMapImpl';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import BuyService from '@subwallet/extension-base/services/buy-service';
 import CampaignService from '@subwallet/extension-base/services/campaign-service';
@@ -34,8 +34,8 @@ import TransactionService from '@subwallet/extension-base/services/transaction-s
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import { BalanceInfo, BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
-import { isAccountAll, isSameAddress, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
+import { BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
+import { addLazy, isAccountAll, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
 import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
@@ -90,8 +90,7 @@ export default class KoniState {
   private readonly unsubscriptionMap: Record<string, () => void> = {};
   private readonly accountRefStore = new AccountRefStore();
   private externalRequest: Record<string, ExternalRequestPromise> = {};
-  private balanceMap: BalanceMap = {};
-  private balanceSubject = new Subject<BalanceJson>();
+  private balanceMap = new BalanceMapImpl();
 
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
@@ -274,12 +273,12 @@ export default class KoniState {
     return this.requestService.authSubjectV2;
   }
 
-  public generateDefaultBalanceMap (): BalanceMap {
+  public generateDefaultBalanceMap (_addresses?: string[]): BalanceMap {
     const balanceMap: BalanceMap = {};
     const activeChains = this.chainService.getActiveChainInfoMap();
     const isAllAccount = isAccountAll(this.keyringService.currentAccount.address);
 
-    const addresses = isAllAccount ? Object.keys(this.keyringService.accounts) : [this.keyringService.currentAccount.address];
+    const addresses = _addresses || (isAllAccount ? Object.keys(this.keyringService.accounts) : [this.keyringService.currentAccount.address]);
 
     addresses.forEach((address) => {
       const temp: Record<string, BalanceItem> = {};
@@ -887,75 +886,41 @@ export default class KoniState {
     return keyring.getAccounts().map((account) => account.address);
   }
 
-  private removeInactiveChainBalances (balanceMap: Record<string, BalanceInfo>): BalanceMap {
-    const activeBalanceMap: BalanceMap = {};
+  public async removeInactiveChainBalances () {
+    const assetSettings = await this.chainService.getAssetSettings();
 
-    Object.entries(balanceMap).forEach(([address, balances]) => {
-      activeBalanceMap[address] = {};
-
-      Object.entries(balances).forEach(([tokenSlug, item]) => {
-        const tokenInfo = this.chainService.getAssetBySlug(tokenSlug);
-
-        if (tokenInfo) {
-          const chainInfo = this.chainService.getChainInfoByKey(tokenInfo.originChain);
-
-          if (chainInfo && this.getChainStateByKey(chainInfo.slug).active) {
-            activeBalanceMap[address][tokenSlug] = item;
-          }
-        }
-      });
+    this.balanceMap.removeBalanceItemByFilter((item) => {
+      return !assetSettings[item.tokenSlug];
     });
-
-    return activeBalanceMap;
   }
 
-  public getBalance (reset?: boolean): BalanceJson {
-    const activeData = this.removeInactiveChainBalances(this.balanceMap);
+  public async getBalance (reset?: boolean) {
+    await this.removeInactiveChainBalances();
 
-    return { details: activeData, reset } as BalanceJson;
+    return { details: this.balanceMap.map, reset } as BalanceJson;
   }
 
-  public async getStoredBalance (address: string): Promise<BalanceMap> {
-    const items = await this.dbService.stores.balance.getBalanceMapByAddresses(address);
-
-    return items || {};
+  public async getStoredBalance (address: string) {
+    return await this.dbService.stores.balance.getBalanceMapByAddresses(address);
   }
 
-  public async handleSwitchAccount (newAddress: string) {
-    await Promise.all([
-      this.resetBalanceMap(newAddress),
-      this.resetCrowdloanMap(newAddress)
-    ]);
-  }
+  private isFirstLoad = true;
 
-  public async resetBalanceMap (newAddress: string) {
-    const defaultData = this.generateDefaultBalanceMap();
-    let storedData = await this.getStoredBalance(newAddress);
+  public async handleResetBalance (newAddress: string, forceRefresh?: boolean) {
+    if (this.isFirstLoad) {
+      const backupBalanceData = await this.dbService.getStoredBalance();
 
-    storedData = this.removeInactiveChainBalances(storedData);
+      this.balanceMap.updateBalanceItems(backupBalanceData, isAccountAll(newAddress));
 
-    const result: BalanceMap = {};
-
-    for (const [address, balanceInfo] of Object.entries(defaultData)) {
-      result[address] = { ...balanceInfo };
+      this.isFirstLoad = false;
     }
 
-    for (const [address, balanceInfo] of Object.entries(storedData)) {
-      if (!result[address]) {
-        result[address] = { ...balanceInfo };
-      } else {
-        const temp: BalanceInfo = { ...result[address] };
-
-        for (const [slug, item] of Object.entries(balanceInfo)) {
-          temp[slug] = { ...item };
-        }
-
-        result[address] = { ...temp };
-      }
+    if (forceRefresh) {
+      this.balanceMap.setData({});
+      await this.dbService.stores.balance.clear();
     }
 
-    this.balanceMap = { ...defaultData, ...storedData };
-    this.publishBalance(true);
+    await Promise.all([this.removeInactiveChainBalances()]);
   }
 
   public async resetCrowdloanMap (newAddress: string) {
@@ -983,64 +948,31 @@ export default class KoniState {
     });
   }
 
+  private balanceUpdateCache: BalanceItem[] = [];
+
   /** Note: items must be same tokenSlug */
   public setBalanceItem (items: BalanceItem[]) {
     if (items.length) {
-      const tokens: string[] = [];
-      const updates: BalanceItem[] = [];
+      const nowTime = new Date().getTime();
 
       for (const item of items) {
-        const address = item.address;
-        const tokenSlug = item.tokenSlug;
+        const balance: BalanceItem = { timestamp: nowTime, ...item };
 
-        if (!tokens.includes(tokenSlug)) {
-          tokens.push(tokenSlug);
-        }
-
-        if (!this.balanceMap[address]) {
-          this.balanceMap[address] = {};
-        }
-
-        const data: BalanceItem = { timestamp: +new Date(), ...item };
-
-        this.balanceMap[address][tokenSlug] = data;
-
-        updates.push(data);
+        this.balanceUpdateCache.push(balance);
       }
 
-      const isAllAccount = isAccountAll(this.keyringService.currentAccount.address);
+      addLazy('updateBalanceStore', () => {
+        const isAllAccount = isAccountAll(this.keyringService.currentAccount.address);
 
-      if (isAllAccount) {
-        const address = ALL_ACCOUNT_KEY;
+        this.balanceMap.updateBalanceItems(this.balanceUpdateCache, isAllAccount);
 
-        for (const token of tokens) {
-          const items: BalanceItem[] = [];
-
-          for (const [_adr, balanceInfo] of Object.entries(this.balanceMap)) {
-            if (!isSameAddress(_adr, address)) {
-              const item = balanceInfo[token];
-
-              item && items.push(item);
-            }
-          }
-
-          const _balance = groupBalance(items, address, token);
-          const balance = { timestamp: +new Date(), ..._balance };
-
-          if (!this.balanceMap[address]) {
-            this.balanceMap[address] = {};
-          }
-
-          this.balanceMap[address][token] = balance;
-          updates.push(balance);
+        if (isAllAccount) {
+          this.balanceUpdateCache = [...this.balanceUpdateCache, ...Object.values(this.balanceMap.map[ALL_ACCOUNT_KEY])];
         }
-      }
 
-      this.updateBalanceStore(updates);
-
-      this.lazyNext('setBalanceItem', () => {
-        this.publishBalance();
-      });
+        this.updateBalanceStore(this.balanceUpdateCache);
+        this.balanceUpdateCache = [];
+      }, 300, 1800);
     }
   }
 
@@ -1049,7 +981,7 @@ export default class KoniState {
   }
 
   public subscribeBalance () {
-    return this.balanceSubject;
+    return this.balanceMap.mapSubject;
   }
 
   public getCrowdloan (reset?: boolean): CrowdloanJson {
@@ -1358,10 +1290,6 @@ export default class KoniState {
 
   async resumeAllNetworks () {
     return this.chainService.resumeAllChainApis();
-  }
-
-  private publishBalance (reset?: boolean) {
-    this.balanceSubject.next(this.getBalance(reset));
   }
 
   private publishCrowdloan (reset?: boolean) {
@@ -1937,6 +1865,7 @@ export default class KoniState {
       // Remove Balance
       stores.balance.removeAllByAddress(address).catch(console.error);
       stores.balance.removeAllByAddress(ALL_ACCOUNT_KEY).catch(console.error);
+      this.balanceMap.removeBalanceItems([address, ALL_ACCOUNT_KEY]);
 
       // Remove NFT
       stores.nft.deleteNftByAddress([address]).catch(console.error);
@@ -1956,6 +1885,18 @@ export default class KoniState {
 
   public async reloadStaking () {
     await this.subscription.reloadStaking();
+
+    return true;
+  }
+
+  public async reloadBalance () {
+    await this.subscription.reloadBalance();
+
+    return true;
+  }
+
+  public async reloadCrowdloan () {
+    await this.subscription.reloadCrowdloan();
 
     return true;
   }

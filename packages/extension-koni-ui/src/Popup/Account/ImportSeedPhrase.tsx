@@ -3,7 +3,7 @@
 
 import { CloseIcon, Layout, PageWrapper, PhraseNumberSelector, SeedPhraseInput } from '@subwallet/extension-koni-ui/components';
 import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
-import { DEFAULT_ACCOUNT_TYPES, IMPORT_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_ACCOUNT_TYPES, IMPORT_ACCOUNT_MODAL, IMPORT_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useFocusFormItem, useGetDefaultAccountName, useGoBackFromCreateAccount, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
@@ -62,7 +62,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const notification = useNotification();
 
   const onComplete = useCompleteCreateAccount();
-  const onBack = useGoBackFromCreateAccount(IMPORT_SEED_MODAL);
+  const onBack = useGoBackFromCreateAccount(isWebUI ? IMPORT_ACCOUNT_MODAL : IMPORT_SEED_MODAL);
 
   const accountName = useGetDefaultAccountName();
 

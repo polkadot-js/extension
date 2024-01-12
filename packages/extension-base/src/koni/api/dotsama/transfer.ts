@@ -179,9 +179,9 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     }
   } else if (_TRANSFER_CHAIN_GROUP.pendulum.includes(networkKey) && isTxTokensSupported && !_isNativeToken(tokenInfo)) {
     if (transferAll) {
-      transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo), false);
+      transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), false);
     } else if (value) {
-      transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo), new BN(value));
+      transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), new BN(value));
     }
   } else if (
     _TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey)
@@ -206,6 +206,10 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   } else if (_TRANSFER_CHAIN_GROUP.sora_substrate.includes(networkKey) && isTxAssetsSupported) {
     transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
   } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
+    if (networkKey === 'invarch') {
+      return [null, transferAmount || value];
+    }
+
     if (transferAll) {
       transfer = api.tx.balances.transferAll(to, false);
     } else if (value) {

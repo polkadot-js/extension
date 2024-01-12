@@ -7,7 +7,6 @@ on:
 
 jobs:
   master:
-    if: "! startsWith(github.event.head_commit.message, '[CI Skip]')"
     strategy:
       matrix:
         step: ['web-runner:build-zip']

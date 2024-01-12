@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
+import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
 import axios from 'axios';
 
 const PRODUCTION_BRANCHES = ['master', 'webapp', 'webapp-dev'];
@@ -9,7 +10,12 @@ const fetchTarget = PRODUCTION_BRANCHES.indexOf(branchName) > -1 ? 'list.json' :
 
 export async function fetchStaticData<T> (slug: string, targetFile?: string) {
   const fetchFile = targetFile || fetchTarget;
-  const rs = await axios.get(`https://static-data.subwallet.app/${slug}/${fetchFile}`);
 
-  return rs.data as T;
+  try {
+    const rs = await axios.get(`https://static-data.subwallet.app/${slug}/${fetchFile}`);
+
+    return rs.data as T;
+  } catch (e) {
+    return staticData[slug as StaticKey] as T;
+  }
 }

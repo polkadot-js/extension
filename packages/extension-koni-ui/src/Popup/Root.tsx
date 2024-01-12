@@ -169,6 +169,10 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     const pathName = location.pathname;
     const redirectObj: RedirectProps = { redirect: null, modal: null };
 
+    if (pathName === '/wc') {
+      window.location.replace('https://docs.subwallet.app/main/extension-user-guide/connect-dapps-and-manage-website-access/connect-dapp-with-walletconnect');
+    }
+
     // Wait until data loaded
     if (!dataLoaded) {
       return redirectObj;

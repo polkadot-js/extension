@@ -14,11 +14,11 @@ type Props = ThemeProps & SwModalProps & {
   center?: boolean;
 };
 
-function Component ({ center, children, className, fullSizeOnMobile, motion, ...props }: Props): React.ReactElement<Props> {
+function Component ({ center, children, className, fullSizeOnMobile, motion, width, ...props }: Props): React.ReactElement<Props> {
   const { isWebUI } = useContext(ScreenContext);
 
   const _motion = motion || (isWebUI && !center ? 'move-right' : undefined);
-  const _width = center ? (!isWebUI ? '100%' : undefined) : '100%';
+  const _width = width || (center ? (!isWebUI ? '100%' : undefined) : '100%');
 
   return (
     <SwModal
@@ -36,7 +36,6 @@ function Component ({ center, children, className, fullSizeOnMobile, motion, ...
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-modal-content.ant-sw-modal-content': {
@@ -49,7 +48,7 @@ export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) 
       bottom: token.paddingLG,
       top: token.paddingLG,
       maxWidth: 404,
-
+      animationDuration: '0.45s',
       '.ant-sw-modal-content': {
         width: '100%',
         height: '100%',

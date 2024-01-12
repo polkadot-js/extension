@@ -675,7 +675,8 @@ export enum StakingTxErrorType {
   EXIST_UNSTAKING_REQUEST = 'EXIST_UNSTAKING_REQUEST',
   INVALID_ACTIVE_STAKE = 'INVALID_ACTIVE_STAKE',
   EXCEED_MAX_UNSTAKING = 'EXCEED_MAX_UNSTAKING',
-  INACTIVE_NOMINATION_POOL = 'INACTIVE_NOMINATION_POOL'
+  INACTIVE_NOMINATION_POOL = 'INACTIVE_NOMINATION_POOL',
+  CAN_NOT_GET_METADATA = 'CAN_NOT_GET_METADATA'
 }
 
 export enum TransferTxErrorType {
@@ -1981,7 +1982,7 @@ export interface Notification {
 export type NotificationParams = Omit<Notification, 'id'>;
 
 export interface CronReloadRequest {
-  data: 'nft' | 'staking'
+  data: 'nft' | 'staking' | 'balance' | 'crowdloan'
 }
 
 export interface AllLogoMap {

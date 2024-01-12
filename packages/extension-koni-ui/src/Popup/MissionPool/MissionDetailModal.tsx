@@ -4,7 +4,7 @@
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import NetworkGroup from '@subwallet/extension-koni-ui/components/MetaInfo/parts/NetworkGroup';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { missionCategoryMap } from '@subwallet/extension-koni-ui/Popup/MissionPool/predefined';
+import { missionCategoryMap, MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/MissionPool/predefined';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
@@ -128,7 +128,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
               }
               <MetaInfo.Default
                 label={t('Status')}
-                valueColorSchema={'success'}
+                valueColorSchema={data.status === MissionCategoryType.ARCHIVED ? 'warning' : 'success'}
               >
                 {status}
               </MetaInfo.Default>
@@ -197,6 +197,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                 />
                 <Button
                   className={'__modal-join-now-button'}
+                  disabled={data.status === MissionCategoryType.ARCHIVED}
                   icon={(
                     <Icon
                       phosphorIcon={PlusCircle}

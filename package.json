@@ -10,7 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "1.1.25",
+  "version": "1.1.30",
   "workspaces": [
     "packages/*"
   ],
@@ -19,6 +19,7 @@
     "koni-ci-build-i18n": "./scripts/koni-ci-build-i18n.mjs",
     "koni-ci-build-webapp": "./scripts/koni-ci-build-webapp.mjs",
     "koni-ci-ghact-build": "./scripts/koni-ci-ghact-build.mjs",
+    "koni-ci-webapp-update-build-number": "./scripts/koni-ci-webapp-update-build-number.mjs",
     "koni-dev-build-ts": "./scripts/koni-dev-build-ts.mjs"
   },
   "scripts": {
@@ -51,11 +52,11 @@
     "web-runner:publish": "gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'",
     "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
     "webapp:build": "cd packages/webapp && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
-    "webapp:change-build-number-webapp": "node scripts/change-build-number-webapp.cjs",
     "webapp:deploy": "yarn webapp:build && gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
     "webapp:dev": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "webapp:publish": "gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
-    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development"
+    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development",
+    "webapp:change-build-number": "node scripts/koni-ci-webapp-update-build-number.mjs"
   },
   "dependencies": {
     "@types/node": "^17.0.10",
@@ -68,7 +69,7 @@
     "@babel/core": "^7.19.3",
     "@polkadot/dev": "^0.65.23",
     "@types/jest": "^29.5.0",
-    "axios": "^1.2.1",
+    "axios": "^1.6.2",
     "discord-webhook-node": "^1.1.8",
     "i18next-scanner": "^4.0.0",
     "jest": "^29.5.0",
@@ -87,10 +88,14 @@
     "@polkadot/types": "^10.9.1",
     "@polkadot/util": "^12.3.2",
     "@polkadot/util-crypto": "^12.3.2",
-    "@subwallet/chain-list": "0.2.29",
+    "@subwallet/chain-list": "0.2.34",
     "@subwallet/keyring": "^0.1.1",
     "@subwallet/ui-keyring": "^0.1.1",
     "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^29.3.1",
+    "browserify-sign": "^4.2.2",
+    "http-cache-semantics": "^4.1.1",
+    "jest": "^29.5.0",
     "rxjs": "^7.8.1",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.8.4"

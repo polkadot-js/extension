@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
+import { BaseSelectModal, SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, Icon, Logo, ModalContext, Tooltip } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, ModalContext, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CaretDown, Plug, Plugs, PlugsConnected, SignOut } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -19,11 +20,10 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import { AccountBriefInfo, AccountCardSelection, AccountItemWithName } from '../../../Account';
+import { AccountBriefInfo, AccountCardItem, AccountItemWithName } from '../../../Account';
 import { GeneralEmptyList } from '../../../EmptyList';
-import { BaseSelectModal } from '../../../Modal';
 import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
-import SelectAccountFooter from './Footer';
+import SelectAccountFooter from '../SelectAccount/Footer';
 
 type Props = ThemeProps
 
@@ -48,6 +48,7 @@ const ConnectWebsiteId = 'connectWebsiteId';
 const renderEmpty = () => <GeneralEmptyList />;
 
 const modalId = SELECT_ACCOUNT_MODAL;
+const simpleQrModalId = 'simple-qr-modal-id';
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -65,6 +66,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isCurrentTabFetched = !!currentTab;
   const currentAuth = useGetCurrentAuth();
   const isPopup = useIsPopup();
+  const [selectedQrAddress, setSelectedQrAddress] = useState<string | undefined>();
 
   const accounts = useMemo((): AccountJson[] => {
     const result = [..._accounts].sort(funcSortByName);
@@ -77,8 +79,21 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       result.unshift(all);
     }
 
+    if (!!currentAccount?.address && (currentAccount?.address !== (all && all.address))) {
+      const currentAccountIndex = result.findIndex((item) => {
+        return item.address === currentAccount?.address;
+      });
+
+      if (currentAccountIndex > -1) {
+        const _currentAccount = result[currentAccountIndex];
+
+        result.splice(currentAccountIndex, 1);
+        result.splice(1, 0, _currentAccount);
+      }
+    }
+
     return result;
-  }, [_accounts]);
+  }, [_accounts, currentAccount?.address]);
 
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));
@@ -138,6 +153,13 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     activeModal(DISCONNECT_EXTENSION_MODAL);
   }, [activeModal]);
 
+  const onClickItemQrButton = useCallback((address: string) => {
+    setSelectedQrAddress(address);
+    activeModal(simpleQrModalId);
+  }, [activeModal]);
+
+  const onQrModalBack = useGoBackSelectAccount(simpleQrModalId);
+
   const renderItem = useCallback((item: AccountJson, _selected: boolean): React.ReactNode => {
     const currentAccountIsAll = isAccountAll(item.address);
 
@@ -158,26 +180,19 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     const isInjected = !!item.isInjected;
 
     return (
-      <AccountCardSelection
+      <AccountCardItem
         accountName={item.name || ''}
         address={item.address}
         className={className}
         genesisHash={item.genesisHash}
         isSelected={_selected}
-        isShowSubIcon
         moreIcon={!isInjected ? undefined : SignOut}
-        onPressMoreBtn={isInjected ? openDisconnectExtensionModal : onClickDetailAccount(item.address)}
+        onClickQrButton={onClickItemQrButton}
+        onPressMoreButton={isInjected ? openDisconnectExtensionModal : onClickDetailAccount(item.address)}
         source={item.source}
-        subIcon={(
-          <Logo
-            network={isEthereumAddress(item.address) ? 'ethereum' : 'polkadot'}
-            shape={'circle'}
-            size={16}
-          />
-        )}
       />
     );
-  }, [className, onClickDetailAccount, openDisconnectExtensionModal, showAllAccount]);
+  }, [className, onClickDetailAccount, openDisconnectExtensionModal, onClickItemQrButton, showAllAccount]);
 
   const renderSelectedItem = useCallback((item: AccountJson): React.ReactNode => {
     return (
@@ -347,6 +362,11 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         onCancel={onCloseConnectWebsiteModal}
         url={currentTab?.url || ''}
       />
+      <SimpleQrModal
+        address={selectedQrAddress}
+        id={simpleQrModalId}
+        onBack={onQrModalBack}
+      />
     </div>
   );
 }
@@ -398,16 +418,25 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       },
 
       '.all-account-selection': {
+        cursor: 'pointer',
+        borderRadius: token.borderRadiusLG,
+        transition: `background ${token.motionDurationMid} ease-in-out`,
+
         '.account-item-name': {
           fontSize: token.fontSizeHeading5,
           lineHeight: token.lineHeightHeading5
+        },
+
+        '&:hover': {
+          background: token.colorBgInput
         }
       },
 
       '.ant-account-card-name': {
         textOverflow: 'ellipsis',
         overflow: 'hidden',
-        whiteSpace: 'nowrap'
+        'white-space': 'nowrap',
+        maxWidth: 120
       },
 
       '.ant-input-container .ant-input': {

@@ -61,7 +61,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const location = useLocation();
   const canGoBack = !!location.state;
   const isPopup = useIsPopup();
-
+  const isCheckCamera = useMemo(() => window.navigator.mediaDevices, []);
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { setOnBack } = useContext(WebUIContext);
 
@@ -142,13 +142,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
       let openNewTab = false;
 
-      if (!currentValue) {
+      if (!currentValue && isCheckCamera) {
         if (isPopup) {
           openNewTab = true;
         }
+      } else if (!isCheckCamera) {
+        navigate('/unsafe-access');
       }
 
-      saveCameraSetting(!currentValue)
+      saveCameraSetting(window.navigator.mediaDevices ? !currentValue : currentValue)
         .then(() => {
           if (openNewTab) {
             windowOpen({ allowedPath: '/settings/security' })
@@ -162,7 +164,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoadingCamera(false);
         });
     };
-  }, [isPopup]);
+  }, [isCheckCamera, isPopup, navigate]);
 
   const updateChainPatrolEnable = useCallback((currentValue: boolean) => {
     return () => {
@@ -256,7 +258,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [onClickItem]);
 
   useEffect(() => {
-    if (camera) {
+    if (camera && isCheckCamera) {
       window.navigator.mediaDevices.getUserMedia({ video: true })
         .then((stream) => {
           // Close video
@@ -266,7 +268,7 @@ const Component: React.FC<Props> = (props: Props) => {
         })
         .catch(console.error);
     }
-  }, [camera]);
+  }, [camera, isCheckCamera, navigate]);
 
   useEffect(() => {
     setOnBack(onBack);

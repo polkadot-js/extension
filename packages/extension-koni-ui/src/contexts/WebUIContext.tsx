@@ -53,7 +53,7 @@ function checkSettingPage (pathname: string) {
 }
 
 function checkPortfolioPage (pathname: string) {
-  return pathname.startsWith('/home/tokens') || pathname.startsWith('/home/nfts') || pathname.startsWith('/home/statistics');
+  return pathname.startsWith('/home/tokens') || pathname.startsWith('/home/nfts') || pathname.startsWith('/home/statistics') || pathname.startsWith('/home/inscriptions');
 }
 
 function checkEarningDonePage (pathname: string) {
@@ -70,7 +70,8 @@ const simplePages = [
   '/earning-demo',
   '/crowdloan-unlock-campaign/check-contributions',
   '/crowdloan-unlock-campaign/contributions-result',
-  '/not-found'
+  '/not-found',
+  '/unsafe-access'
 ];
 
 export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) => {

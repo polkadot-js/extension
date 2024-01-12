@@ -25,6 +25,36 @@ type Props = ThemeProps;
 
 const FILTER_MODAL_ID = 'mission-filter-modal';
 
+function computeStatus (item: MissionInfo): MissionCategoryType {
+  const now = Date.now();
+
+  try {
+    if (item.start_time) {
+      const startTime = new Date(item.start_time).getTime();
+
+      if (now < startTime) {
+        return MissionCategoryType.UPCOMING;
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  try {
+    if (item.end_time) {
+      const endTime = new Date(item.end_time).getTime();
+
+      if (now > endTime) {
+        return MissionCategoryType.ARCHIVED;
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  return MissionCategoryType.LIVE;
+}
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { setTitle } = useContext(WebUIContext);
@@ -43,6 +73,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       setTitle(t('Mission Pools'));
     }
   }, [location.pathname, setTitle, t]);
+
+  const computedMission = useMemo(() => {
+    return missions.map((item) => {
+      return {
+        ...item,
+        status: computeStatus(item)
+      };
+    });
+  }, [missions]);
 
   const filterOptions = useMemo(() => [
     ...missionCategories.map((c) => ({
@@ -102,8 +141,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       return filterTabFunction(_item) && filterFunction(_item) && searchFunction(_item, searchInput);
     };
 
-    return missions.filter(_filterFunction);
-  }, [missions, filterFunction, searchFunction, searchInput, selectedFilterTab]);
+    return computedMission.filter(_filterFunction);
+  }, [computedMission, filterFunction, searchFunction, searchInput, selectedFilterTab]);
 
   const onSelectFilterTab = useCallback((value: string) => {
     setSelectedFilterTab(value);

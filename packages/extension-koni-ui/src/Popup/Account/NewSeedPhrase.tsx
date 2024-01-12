@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SEED_PREVENT_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { SeedPhraseTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/SeedPhraseTermModal';
+import { CONFIRM_TERM_SEED_PHRASE, DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SEED_PREVENT_MODAL, SELECTED_ACCOUNT_TYPE, TERM_AND_CONDITION_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetDefaultAccountName, useIsPopup, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -11,8 +12,9 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isFirefox } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { saveAs } from 'file-saver';
+import { CheckCircle, Download } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -27,25 +29,12 @@ const FooterIcon = (
   />
 );
 
-const instructionContent: InstructionContentType[] = [
-  {
-    title: 'What is a recovery phrase?',
-    description: 'Recovery phrase is a 12- or 24-word phrase that can be used to restore your wallet. The recovery phrase alone can give anyone full access to your wallet and the funds.',
-    type: 'warning'
-  },
-  {
-    title: 'What if I lose the recovery phrase?',
-    description: 'There is no way to get back your recovery phrase if you lose it. Make sure you store them at someplace safe which is accessible only to you.',
-    type: 'warning'
-  }
-];
-
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
   const { t } = useTranslation();
   const notify = useNotification();
   const navigate = useNavigate();
-
+  const [_isConfirmedTermSeedPhrase] = useLocalStorage(CONFIRM_TERM_SEED_PHRASE, 'nonConfirmed');
   const { goHome } = useDefaultNavigate();
   const { activeModal } = useContext(ModalContext);
   const checkUnlock = useUnlockChecker();
@@ -77,6 +66,42 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       }
     }
   }, [navigate, preventModal, isNoAccount, activeModal]);
+
+  const onClickToSave = useCallback(() => {
+    const blob = new Blob([seedPhrase], { type: 'text/plain' });
+
+    saveAs(blob, 'mnemonic-seed.txt');
+  }, [seedPhrase]);
+
+  const instructionContent: InstructionContentType[] = useMemo(() => {
+    return [
+      {
+        title: 'What is a seed phrase?',
+        description: 'Seed phrase is a 12- or 24-word phrase that can be used to restore your wallet. The recovery phrase alone can give anyone full access to your wallet and the funds.',
+        type: 'warning'
+      },
+      {
+        title: 'What if I lose the seed phrase?',
+        description:
+          <div>
+            {t('There is no way to get back your seed phrase if you lose it. Make sure you store them at someplace safe which is accessible only to you. ')}
+            <u
+              className={'__instruction-content-download'}
+              onClick={onClickToSave}
+              style={{ textDecoration: 'underline' }}
+            >{t('Download seed phrase ')}
+              <Icon
+                phosphorIcon={Download}
+                size='sm'
+                type='phosphor'
+                weight='fill'
+              />
+            </u>
+          </div>,
+        type: 'warning'
+      }
+    ];
+  }, [onClickToSave, t]);
 
   const _onCreate = useCallback((): void => {
     if (!seedPhrase) {
@@ -110,6 +135,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     });
   }, [seedPhrase, checkUnlock, accountName, accountTypes, onComplete, notify]);
 
+  const onConfirmTerms = useCallback(() => {
+    _onCreate();
+  }, [_onCreate]);
+
+  useEffect(() => {
+    if (_isConfirmedTermSeedPhrase === 'nonConfirmed') {
+      activeModal(TERM_AND_CONDITION_SEED_PHRASE_MODAL);
+    }
+  }, [_isConfirmedTermSeedPhrase, activeModal]);
+
   useEffect(() => {
     createSeedV2(undefined, undefined, DEFAULT_ACCOUNT_TYPES)
       .then((response): void => {
@@ -125,7 +160,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const buttonProps = {
     children: t('I have saved it somewhere safe'),
     icon: FooterIcon,
-    onClick: _onCreate,
+    onClick: onConfirmTerms,
     disabled: !seedPhrase,
     loading: loading
   };
@@ -142,7 +177,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       className={CN(className)}
       resolve={new Promise((resolve) => !!seedPhrase && resolve(true))}
     >
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={onBack}
         {...(!isWebUI
           ? {
@@ -155,10 +190,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           }
           : {})}
         subHeaderIcons={[
-          {
-            icon: <CloseIcon />,
-            onClick: goHome
-          }
+          !isWebUI
+            ? {
+              icon: <CloseIcon />,
+              onClick: goHome
+            }
+            : {}
         ]}
         title={t('Your seed phrase')}
       >
@@ -168,7 +205,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         >
           <div className={'seed-phrase-container'}>
             <div className='description'>
-              {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
+              {t('Keep your seed phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
             </div>
             <WordPhrase
               enableDownload={true}
@@ -188,18 +225,26 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           )}
         </div>
 
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
+      <SeedPhraseTermModal onOk={_onCreate} />
     </PageWrapper>
   );
 };
 
-const NewSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const NewSeedPhrase = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return {
     '.container': {
+      padding: `0 ${token.padding}px`,
+      textAlign: 'center',
+      width: extendToken.twoColumnWidth,
+      maxWidth: '100%',
+      margin: '0 auto',
+
       '.seed-phrase-container': {
         padding: token.padding,
         textAlign: 'center',
         flex: 1
+
       },
 
       '&.__web-ui': {
@@ -207,6 +252,7 @@ const NewSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => 
         justifyContent: 'center',
         maxWidth: '60%',
         margin: '0 auto',
+        gap: token.paddingMD,
 
         '.action': {
           marginTop: 40,
@@ -228,6 +274,12 @@ const NewSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => 
       lineHeight: token.lineHeightHeading6,
       color: token.colorTextDescription,
       marginBottom: token.margin
+    },
+
+    '.__instruction-content-download': {
+      cursor: 'pointer',
+      display : 'inline-flex',
+      gap: token.paddingSM - 6
     }
   };
 });

@@ -510,17 +510,13 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const bnAmount = new BN(amount);
     const bnRemainingStake = bnActiveStake.sub(bnAmount);
     const minStake = new BN(poolInfo.statistic.earningThreshold.join || '0');
-    const minUnstake = new BN(poolInfo.statistic.earningThreshold.defaultUnstake || '0');
+    const minUnstake = new BN((fastLeave ? poolInfo.statistic.earningThreshold.fastUnstake : poolInfo.statistic.earningThreshold.defaultUnstake) || '0');
     const maxUnstakeRequest = poolInfo.statistic.maxWithdrawalRequestPerFarmer;
 
     const derivativeTokenInfo = this.state.getAssetBySlug(this.derivativeAssets[0]);
 
     if (bnAmount.lte(BN_ZERO)) {
-      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Amount must be greater than 0')));
-    }
-
-    if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
-      errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE)); // TODO
+      return [new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Amount must be greater than 0'))];
     }
 
     if (bnAmount.lt(minUnstake)) {
@@ -529,8 +525,14 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_UNSTAKE, t('You need to unstake at least {{amount}} {{token}}', { replace: { amount: parsedMinUnstake.toString(), token: derivativeTokenInfo.symbol } })));
     }
 
-    if (poolPosition.unstakings.length > maxUnstakeRequest) {
-      errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_UNSTAKING, t('You cannot unstake more than {{number}} times', { replace: { number: maxUnstakeRequest } })));
+    if (!fastLeave) {
+      if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
+        errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE)); // TODO
+      }
+
+      if (poolPosition.unstakings.length > maxUnstakeRequest) {
+        errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_UNSTAKING, t('You cannot unstake more than {{number}} times', { replace: { number: maxUnstakeRequest } })));
+      }
     }
 
     return Promise.resolve(errors);

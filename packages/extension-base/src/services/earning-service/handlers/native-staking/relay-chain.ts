@@ -574,9 +574,6 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
   /* Leave pool action */
 
-  /**
-   * @todo Recheck
-   * */
   async validateYieldLeave (amount: string, address: string, fastLeave: boolean, selectedTarget?: string): Promise<TransactionError[]> {
     const errors: TransactionError[] = [];
 

@@ -10,6 +10,7 @@ import { DEFAULT_YIELD_FIRST_STEP } from '@subwallet/extension-base/services/ear
 import { BasePoolInfo, BaseYieldPoolMetadata, EarningRewardHistoryItem, EarningRewardItem, GenStepFunction, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, StakeCancelWithdrawalParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolMethodInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
 import { BN, BN_TEN } from '@polkadot/util';
+import {ALL_ACCOUNT_KEY} from "@subwallet/extension-base/constants";
 
 /**
  * @class BasePoolHandler
@@ -155,6 +156,12 @@ export default abstract class BasePoolHandler {
       return {
         passed: false,
         errorMessage: 'There\'s a trouble fetching data, please check your internet connection and try again'
+      };
+    }
+
+    if (request.address === ALL_ACCOUNT_KEY) {
+      return {
+        passed: true
       };
     }
 

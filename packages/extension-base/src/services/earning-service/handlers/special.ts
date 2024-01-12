@@ -13,6 +13,7 @@ import { t } from 'i18next';
 import { BN, BN_ZERO, noop } from '@polkadot/util';
 
 import BasePoolHandler from './base';
+import {ALL_ACCOUNT_KEY} from "@subwallet/extension-base/constants";
 
 export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHandler {
   protected abstract altInputAsset: string;
@@ -51,6 +52,12 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       return {
         passed: false,
         errorMessage: 'There\'s a trouble fetching data, please check your internet connection and try again'
+      };
+    }
+
+    if (request.address === ALL_ACCOUNT_KEY) {
+      return {
+        passed: true
       };
     }
 

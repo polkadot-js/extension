@@ -116,7 +116,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     if (this.feeAssets.length === 1) {
       const bnFeeAssetBalance = new BN(feeAssetBalance.value);
-      const minFeeAssetBalance = new BN(feeAssetInfo.minAmount || '0');
+      const minFeeAssetBalance = new BN(this.maintainBalance || '0');
       const feeAssetDiv = BN_TEN.pow(new BN(feeAssetInfo.decimals || 0));
       const parsedMinFeeAssetBalance = minFeeAssetBalance.div(feeAssetDiv).mul(new BN(12)).div(BN_TEN);
 

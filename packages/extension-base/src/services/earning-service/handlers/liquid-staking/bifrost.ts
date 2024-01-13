@@ -121,7 +121,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
       stakingMetaPromise,
       exchangeRatePromise,
       substrateApi.api.query.vtokenMinting.minimumRedeem(_getTokenOnChainInfo(derivativeTokenInfo)),
-      substrateApi.api.query.vtokenMinting.minimumRedeem(_getTokenOnChainInfo(inputTokenInfo))
+      substrateApi.api.query.vtokenMinting.minimumMint(_getTokenOnChainInfo(inputTokenInfo))
     ]);
 
     const minimumRedeem = _minimumRedeem.toString();

@@ -197,7 +197,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
           totalStake: totalBalance.toString(),
           activeStake: activeBalance.toString(),
           unstakeBalance: unlockingBalance.toString(),
-          status: EarningStatus.EARNING_REWARD,
+          status: activeBalance.gt(BN_ZERO) ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING,
           derivativeToken: derivativeTokenSlug,
           isBondedBefore: totalBalance.gt(BN_ZERO),
           nominations: [],

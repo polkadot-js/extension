@@ -299,7 +299,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
           totalStake: totalBalance.toString(),
           activeStake: bnActiveBalance.toString(),
           unstakeBalance: unlockBalance.toString(),
-          status: bnActiveBalance.eq(BN_ZERO) ? EarningStatus.NOT_EARNING : EarningStatus.EARNING_REWARD,
+          status: bnActiveBalance.gt(BN_ZERO) ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING,
           isBondedBefore: totalBalance.gt(BN_ZERO.toString()),
           nominations: [],
           unstakings: unstakingList

@@ -198,7 +198,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
           totalStake: totalBalance.toString(),
           activeStake: activeTotalBalance.toString(),
           unstakeBalance: unlockingBalance.toString(),
-          status: EarningStatus.EARNING_REWARD,
+          status: activeTotalBalance.gt(BN_ZERO) ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING,
           derivativeToken: derivativeTokenSlug,
           isBondedBefore: totalBalance.gt(BN_ZERO),
           nominations: [],

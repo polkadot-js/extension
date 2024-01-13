@@ -188,7 +188,8 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
             });
           }
 
-          const acviteToTotal = new BN(balance).mul(exchangeRate).div(decimals);
+          const activeBalance = new BN(balance);
+          const acviteToTotal = activeBalance.mul(exchangeRate).div(decimals);
           const totalBalance = acviteToTotal.add(unlockBalance);
 
           const result: YieldPositionInfo = {
@@ -201,7 +202,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
             unstakeBalance: unlockBalance.toString(),
             isBondedBefore: totalBalance.gt(BN_ZERO),
             derivativeToken: derivativeTokenSlug,
-            status: EarningStatus.EARNING_REWARD,
+            status: activeBalance.gt(BN_ZERO) ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING,
             nominations: [],
             unstakings
           };

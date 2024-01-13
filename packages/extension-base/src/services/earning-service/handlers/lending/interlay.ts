@@ -128,7 +128,7 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
           totalStake: bnTotalBalance.toString(),
           activeStake: bnActiveBalance.toString(),
           unstakeBalance: '0',
-          status: EarningStatus.EARNING_REWARD,
+          status: bnActiveBalance.gt(BN_ZERO) ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING,
           derivativeToken: derivativeTokenSlug,
           isBondedBefore: bnTotalBalance.gt(BN_ZERO),
           nominations: [],

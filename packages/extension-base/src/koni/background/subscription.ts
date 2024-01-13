@@ -409,9 +409,9 @@ export class KoniSubscription {
   }
 
   async reloadStaking () {
-    // const currentAddress = this.state.keyringService.currentAccount?.address;
+    const currentAddress = this.state.keyringService.currentAccount?.address;
 
-    // this.subscribeYieldPools(this.state.getSubstrateApiMap());
+    this.subscribeYieldPools(this.state.getChainInfoMap(), this.state.getAssetRegistry(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap(), currentAddress);
 
     await waitTimeout(1800);
   }

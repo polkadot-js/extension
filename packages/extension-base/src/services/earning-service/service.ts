@@ -28,7 +28,14 @@ export default class EarningService {
 
   private async initHandlers () {
     await this.state.eventService.waitChainReady;
-    const chains = Object.keys(this.state.getChainInfoMap());
+    const chains: string[] = [];
+
+    for (const chain of Object.values(this.state.getChainInfoMap())) {
+      if (chain.chainStatus === 'ACTIVE') {
+        chains.push(chain.slug);
+      }
+    }
+
     const minAmountPercent: Record<string, number> = {};
 
     for (const chain of chains) {

@@ -282,8 +282,15 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
       const depositCall = stakingContract.methods.deposit(params.amount);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      const estimatedDepositGas = (await depositCall.estimateGas()) as number;
+      let estimatedDepositGas = 0;
+
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        estimatedDepositGas = (await depositCall.estimateGas({ from: params.address })) as number;
+      } catch (e) {
+        console.error(e);
+      }
+
       const gasPrice = await evmApi.api.eth.getGasPrice();
 
       return {

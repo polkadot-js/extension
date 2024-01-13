@@ -46,6 +46,11 @@ export interface HandleYieldStepParams extends BaseRequestSign {
   currentStep: number;
 }
 
+export interface TokenApproveData {
+  inputTokenSlug: string;
+  spenderTokenSlug: string;
+}
+
 export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
 
 export interface StakePoolingBondingParams extends BaseRequestSign {

@@ -17,7 +17,7 @@ import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEm
 import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
-import { RequestStakePoolingBonding, RequestYieldStepSubmit, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { LeavePoolAdditionalData, RequestStakePoolingBonding, RequestYieldStepSubmit, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { anyNumberToBN, recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
@@ -562,10 +562,14 @@ export default class TransactionService {
         const isFeePaidWithInputAsset = params.feeTokenSlug === params.inputTokenSlug;
 
         historyItem.amount = { value: params.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
-        historyItem.additionalInfo = {
+
+        const additionalInfo: TransactionAdditionalInfo[ExtrinsicType.MINT_VDOT] = {
+          slug: params.slug,
           derivativeTokenSlug: params.derivativeTokenSlug,
           exchangeRate: params.exchangeRate
-        } as TransactionAdditionalInfo[ExtrinsicType.MINT_VDOT];
+        };
+
+        historyItem.additionalInfo = additionalInfo;
         eventLogs && !_isChainEvmCompatible(chainInfo) && parseLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
 
         break;
@@ -590,6 +594,7 @@ export default class TransactionService {
       case ExtrinsicType.UNSTAKE_VDOT:
       case ExtrinsicType.UNSTAKE_LDOT:
       case ExtrinsicType.UNSTAKE_SDOT:
+      case ExtrinsicType.UNSTAKE_STDOT:
       case ExtrinsicType.REDEEM_STDOT:
       case ExtrinsicType.REDEEM_LDOT:
       case ExtrinsicType.REDEEM_SDOT:
@@ -598,6 +603,7 @@ export default class TransactionService {
       case ExtrinsicType.REDEEM_VDOT: {
         const data = parseTransactionData<ExtrinsicType.REDEEM_VDOT>(transaction.data);
         const yieldPoolInfo = data.poolInfo as SpecialYieldPoolInfo;
+        const minAmountPercents = this.state.earningService.getMinAmountPercent();
 
         if (yieldPoolInfo.metadata.derivativeAssets) {
           const derivativeTokenSlug = yieldPoolInfo.metadata.derivativeAssets[0];
@@ -606,7 +612,33 @@ export default class TransactionService {
 
           historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(derivativeTokenInfo), decimals: _getAssetDecimals(derivativeTokenInfo) };
           eventLogs && !_isChainEvmCompatible(chainInfo) && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
+
+          const minAmountPercent = minAmountPercents[yieldPoolInfo.slug] || 1;
+          const inputTokenSlug = yieldPoolInfo.metadata.inputAsset;
+          const inputTokenInfo = this.state.chainService.getAssetBySlug(inputTokenSlug);
+          const additionalInfo: LeavePoolAdditionalData = {
+            minAmountPercent,
+            symbol: inputTokenInfo.symbol,
+            decimals: inputTokenInfo.decimals || 0,
+            exchangeRate: yieldPoolInfo.statistic?.assetEarning[0].exchangeRate || 1,
+            slug: yieldPoolInfo.slug,
+            type: yieldPoolInfo.type,
+            chain: yieldPoolInfo.chain,
+            group: yieldPoolInfo.group,
+            isFast: data.fastLeave
+          };
+
+          historyItem.additionalInfo = additionalInfo;
         }
+
+        break;
+      }
+
+      case ExtrinsicType.TOKEN_APPROVE: {
+        const data = parseTransactionData<ExtrinsicType.TOKEN_APPROVE>(transaction.data);
+        const inputAsset = this.state.chainService.getAssetBySlug(data.inputTokenSlug);
+
+        historyItem.amount = { value: '0', symbol: _getAssetSymbol(inputAsset), decimals: _getAssetDecimals(inputAsset) };
 
         break;
       }

@@ -188,19 +188,21 @@ export const BLOCK_MINT_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_SDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_VDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_MINT_STDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_MINT_STDOT_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_REDEEM_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_SDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_VDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_REDEEM_STDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_REDEEM_STDOT_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_UNSTAKE_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_UNSTAKE_VDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_UNSTAKE_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_UNSTAKE_SDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_UNSTAKE_STDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_UNSTAKE_STDOT_LEDGER_NETWORKS: string[] = [];
+
+export const BLOCK_APPROVE_LEDGER_NETWORKS: string[] = [];
 /* EARNING */
 
 /// OTHER
@@ -232,7 +234,7 @@ export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: BLOCK_STAKING_CANCEL_COMPOUNDING_LEDGER_NETWORKS,
   /* STAKING */
 
-  /* STAKING */
+  /* EARNING */
   [ExtrinsicType.JOIN_YIELD_POOL]: BLOCK_JOIN_YIELD_POOL_LEDGER_NETWORKS,
   [ExtrinsicType.MINT_LDOT]: BLOCK_MINT_LDOT_LEDGER_NETWORKS,
   [ExtrinsicType.MINT_QDOT]: BLOCK_MINT_QDOT_LEDGER_NETWORKS,
@@ -251,6 +253,8 @@ export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {
   [ExtrinsicType.UNSTAKE_LDOT]: BLOCK_UNSTAKE_LDOT_LEDGER_NETWORKS,
   [ExtrinsicType.UNSTAKE_SDOT]: BLOCK_UNSTAKE_SDOT_LEDGER_NETWORKS,
   [ExtrinsicType.UNSTAKE_STDOT]: BLOCK_UNSTAKE_STDOT_LEDGER_NETWORKS,
+
+  [ExtrinsicType.TOKEN_APPROVE]: BLOCK_APPROVE_LEDGER_NETWORKS,
   /* STAKING */
 
   [ExtrinsicType.CROWDLOAN]: BLOCK_CROWDLOAN_LEDGER_NETWORKS,

@@ -10,7 +10,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, EarningStatus, HandleYieldStepParams, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, ResponseGetYieldPoolTargets, SubmitYieldStepData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, EarningStatus, HandleYieldStepParams, LeavePoolAdditionalData, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, ResponseGetYieldPoolTargets, SubmitYieldStepData, TokenApproveData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -497,6 +497,8 @@ export enum ExtrinsicType {
   UNSTAKE_SDOT = 'earn.unstake_sdot',
   UNSTAKE_STDOT = 'earn.unstake_stdot',
 
+  TOKEN_APPROVE = 'evm.token_approve',
+
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }
@@ -542,6 +544,8 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.REDEEM_LDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_SDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_STDOT]: RequestYieldLeave,
+
+  [ExtrinsicType.TOKEN_APPROVE]: TokenApproveData,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
@@ -610,6 +614,16 @@ export type TransactionAdditionalInfo = {
   [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_STDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
+  [ExtrinsicType.REDEEM_VDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_QDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_SDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_LDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_STDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_VDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_QDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_SDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_LDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_STDOT]: LeavePoolAdditionalData,
   [ExtrinsicType.STAKING_UNBOND]: Pick<SubmitYieldStepData, 'inputTokenSlug' | 'exchangeRate'>
 }
 

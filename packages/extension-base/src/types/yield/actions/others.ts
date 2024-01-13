@@ -3,7 +3,7 @@
 
 import { BaseRequestSign, InternalRequestSign } from '@subwallet/extension-base/background/KoniTypes';
 
-import { UnstakingInfo, YieldPoolInfo } from '../info';
+import { BasePoolInfo, UnstakingInfo, YieldPoolInfo } from '../info';
 
 /**
  * @interface YieldLeaveParams
@@ -53,6 +53,29 @@ export interface YieldWithdrawalParams extends BaseRequestSign {
    * </p>
    * */
   unstakingInfo: UnstakingInfo;
+}
+
+/**
+ * @interface LeavePoolAdditionalData
+ * @extends BasePoolInfo
+ * @description Additional data for history for unstake from liquid staking pool
+ * @prop {number} minAmountPercent - The rate will be min received from estimated
+ * @prop {number} exchangeRate - Rate convert amount to estimate received token
+ * @prop {string} symbol - Receiver token's symbol
+ * @prop {number} decimals - Receiver token's decimals
+ * @prop {boolean} isFast - Is fast unstake
+ * */
+export interface LeavePoolAdditionalData extends BasePoolInfo {
+  /** The rate will be min received from estimated */
+  minAmountPercent: number;
+  /** Rate convert amount to estimate received token */
+  exchangeRate: number;
+  /** Receiver token's symbol */
+  symbol: string;
+  /** Receiver token's decimals */
+  decimals: number;
+  /** Is fast unstake */
+  isFast: boolean;
 }
 
 export type RequestYieldWithdrawal = InternalRequestSign<YieldWithdrawalParams>;

@@ -7,7 +7,7 @@ import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TokenApproveData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
@@ -328,11 +328,16 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
       gas: gasLimit
     } as TransactionConfig;
 
+    const _data: TokenApproveData = {
+      inputTokenSlug: inputTokenSlug,
+      spenderTokenSlug: this.derivativeAssets[0]
+    };
+
     return Promise.resolve({
       txChain: this.chain,
-      extrinsicType: ExtrinsicType.EVM_EXECUTE,
+      extrinsicType: ExtrinsicType.TOKEN_APPROVE,
       extrinsic: transactionObject,
-      txData: transactionObject,
+      txData: _data,
       transferNativeAmount: '0'
     });
   }

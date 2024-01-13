@@ -39,6 +39,7 @@ export const TxTypeNameMap: Record<ExtrinsicType, string> = {
   [ExtrinsicType.UNSTAKE_LDOT]: detectTranslate('Unstake LDOT'),
   [ExtrinsicType.UNSTAKE_SDOT]: detectTranslate('Unstake sDOT'),
   [ExtrinsicType.UNSTAKE_STDOT]: detectTranslate('Unstake stDOT'),
+  [ExtrinsicType.TOKEN_APPROVE]: detectTranslate('Token approve'),
   [ExtrinsicType.UNKNOWN]: detectTranslate('Unknown')
 };
 

@@ -101,16 +101,15 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     const inputTokenInfo = this.state.chainService.getAssetBySlug(this.inputAsset);
     const altInputTokenInfo = this.state.chainService.getAssetBySlug(this.altInputAsset);
-    const minJoinDiv = BN_TEN.pow(new BN(inputAssetInfo.decimals || 0));
-    const parsedMinJoinPool = bnMinJoinPool.div(minJoinDiv);
 
     if (bnInputAssetBalance.add(bnAltInputAssetBalance).lt(bnMinJoinPool)) {
       const originChain = this.state.getChainInfo(inputTokenInfo.originChain);
       const altChain = this.state.getChainInfo(altInputTokenInfo.originChain);
+      const parsedMinJoinPool = formatNumber(bnMinJoinPool.toString(), inputAssetInfo.decimals || 0);
 
       return {
         passed: false,
-        errorMessage: `You need at least ${parsedMinJoinPool.toString()} ${inputTokenInfo.symbol} (${originChain.name}) or ${altInputTokenInfo.symbol} (${altChain.name}) to start earning`
+        errorMessage: `You need at least ${parsedMinJoinPool} ${inputTokenInfo.symbol} (${originChain.name}) or ${altInputTokenInfo.symbol} (${altChain.name}) to start earning`
       };
     }
 

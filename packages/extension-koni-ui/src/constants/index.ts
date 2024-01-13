@@ -18,3 +18,4 @@ export * from './stakingStatusUi';
 export * from './strings';
 export * from './transaction';
 export * from './wallet';
+export * from './banner';

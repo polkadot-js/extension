@@ -1,0 +1,5 @@
+adjust DEFAULT_SNAP_ORIGIN in packages/extension-dapp/snap/defaults.ts
+yarn build
+adjust version and name in packages/extension-dapp/build/package.json
+cd packages/extension-dapp/build
+npm publish

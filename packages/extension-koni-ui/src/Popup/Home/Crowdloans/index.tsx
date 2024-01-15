@@ -9,6 +9,7 @@ import { useFilterModal, useGetBannerByScreen, useGetCrowdloanList, useSelector,
 import { _CrowdloanItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Icon, Image, ModalContext, SwList } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
@@ -133,7 +134,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   return (
     <PageWrapper
-      className={`crowdloans ${className}`}
+      className={CN(`crowdloans ${className}`, {
+        '-has-banner': !!banners.length
+      })}
       resolve={dataContext.awaitStores(['crowdloan', 'price', 'chainStore'])}
     >
       <Layout.Base
@@ -144,23 +147,27 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t<string>('Crowdloans')}
       >
         <div className='content-container'>
-          <div className='banner-container hidden'>
-            {banners.map((item) => {
-              return (
-                <div
-                  className='image-container'
-                  key={item.slug}
-                >
-                  <Image
-                    className='banner-image'
-                    onClick={onClickBanner(item)}
-                    src={item.data.media}
-                    width='100%'
-                  />
-                </div>
-              );
-            })}
-          </div>
+          {
+            !!banners.length && (
+              <div className='banner-container'>
+                {banners.map((item) => {
+                  return (
+                    <div
+                      className='image-container'
+                      key={item.slug}
+                    >
+                      <Image
+                        className='banner-image'
+                        onClick={onClickBanner(item)}
+                        src={item.data.media}
+                        width='100%'
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          }
 
           <SwList.Section
             actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
@@ -209,7 +216,14 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.ant-sw-sub-header-container': {
       paddingBottom: token.paddingXS,
       paddingTop: token.paddingXS,
-      minHeight: 64
+      minHeight: 56,
+      marginBottom: token.marginXS
+    },
+
+    '&.-has-banner': {
+      '.ant-sw-sub-header-container': {
+        marginBottom: 0
+      }
     },
 
     '.empty-list': {
@@ -217,8 +231,9 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.banner-container': {
-      margin: token.margin,
-      marginTop: token.marginXXS,
+      marginLeft: token.margin,
+      marginRight: token.margin,
+      marginBottom: token.marginSM,
       display: 'flex',
       flexDirection: 'column',
       gap: token.sizeXS

@@ -242,7 +242,8 @@ export function getBifrostLiquidStakingPosition (substrateApi: _SubstrateApi, us
           address,
           activeStake: bnActiveBalance.toString(),
           nominations: [],
-          unstakings: unstakingList
+          // unstakings: unstakingList
+          unstakings: [] // TODO: Migrate with new code
         } as NominatorMetadata
       } as YieldPositionInfo);
     });

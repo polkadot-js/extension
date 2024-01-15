@@ -3,11 +3,12 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, RequestYieldStepSubmit, SubmitYieldStepData, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, LeavePoolAdditionalData, NotificationType, RequestYieldStepSubmit, SubmitYieldStepData, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
+import { YIELD_POOL_MIN_AMOUNT_PERCENT } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -589,6 +590,11 @@ export default class TransactionService {
         break;
       }
 
+      case ExtrinsicType.UNSTAKE_QDOT:
+      case ExtrinsicType.UNSTAKE_VDOT:
+      case ExtrinsicType.UNSTAKE_LDOT:
+      case ExtrinsicType.UNSTAKE_SDOT:
+      case ExtrinsicType.UNSTAKE_STDOT:
       case ExtrinsicType.REDEEM_STDOT:
       case ExtrinsicType.REDEEM_LDOT:
       case ExtrinsicType.REDEEM_SDOT:
@@ -596,6 +602,7 @@ export default class TransactionService {
       // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.REDEEM_VDOT: {
         const data = parseTransactionData<ExtrinsicType.REDEEM_VDOT>(transaction.data);
+        const yieldPoolInfo = data.yieldPoolInfo;
 
         if (data.yieldPoolInfo.derivativeAssets) {
           const derivativeTokenSlug = data.yieldPoolInfo.derivativeAssets[0];
@@ -604,6 +611,23 @@ export default class TransactionService {
 
           historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(derivativeTokenInfo), decimals: _getAssetDecimals(derivativeTokenInfo) };
           eventLogs && !_isChainEvmCompatible(chainInfo) && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
+
+          const minAmountPercent = YIELD_POOL_MIN_AMOUNT_PERCENT[yieldPoolInfo.slug] || 1;
+          const inputTokenSlug = yieldPoolInfo.inputAssets[0];
+          const inputTokenInfo = this.chainService.getAssetBySlug(inputTokenSlug);
+
+          const additionalInfo: LeavePoolAdditionalData = {
+            minAmountPercent,
+            symbol: inputTokenInfo.symbol,
+            decimals: inputTokenInfo.decimals || 0,
+            exchangeRate: yieldPoolInfo?.stats?.assetEarning?.[0].exchangeRate || 1,
+            slug: yieldPoolInfo.slug,
+            type: yieldPoolInfo.type,
+            chain: yieldPoolInfo.chain,
+            isFast: yieldPoolInfo.slug !== 'xcDOT___stellaswap_liquid_staking'
+          };
+
+          historyItem.additionalInfo = additionalInfo;
         }
 
         break;

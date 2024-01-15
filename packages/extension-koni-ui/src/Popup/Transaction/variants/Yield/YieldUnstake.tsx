@@ -170,6 +170,8 @@ const Component: React.FC = () => {
     }
   }, [chainStakingMetadata, t, yieldPoolInfo]);
 
+  const showCheckbox = useMemo(() => type === StakingType.LIQUID_STAKING && yieldPoolInfo?.slug !== 'xcDOT___stellaswap_liquid_staking', [type, yieldPoolInfo?.slug]);
+
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
@@ -214,10 +216,8 @@ const Component: React.FC = () => {
   }, [form, mustChooseValidator, persistData]);
 
   const onSubmit: FormCallbacks<UnYieldParams>['onFinish'] = useCallback((values: UnYieldParams) => {
-    const { fastUnstake, validator: selectedValidator, value } = values;
+    const { validator: selectedValidator, value } = values;
     // const selectedValidator = nominatorMetadata.nominations[0].validatorAddress;
-
-    console.log('fastUnstake', fastUnstake);
 
     let unbondingPromise: Promise<SWTransactionResponse>;
 
@@ -274,6 +274,12 @@ const Component: React.FC = () => {
       form.validateFields(['value']).finally(noop);
     }
   }, [form, amountChange, minValue, bondedValue, decimals]);
+
+  useEffect(() => {
+    if (showCheckbox) {
+      form.setFieldValue('fastUnstake', true);
+    }
+  }, [form, showCheckbox]);
 
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);
@@ -348,7 +354,7 @@ const Component: React.FC = () => {
           {!mustChooseValidator && renderBounded()}
 
           <Form.Item
-            hidden={type !== StakingType.LIQUID_STAKING}
+            hidden={true}
             name={'fastUnstake'}
             valuePropName='checked'
           >

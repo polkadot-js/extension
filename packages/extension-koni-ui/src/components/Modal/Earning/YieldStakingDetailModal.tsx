@@ -232,11 +232,9 @@ const Component: React.FC<Props> = (props: Props) => {
               value={unstakingData.claimable}
             />
 
-            {unstakingData.status === UnstakingStatus.UNLOCKING.valueOf() && unstakingData.waitingTime !== undefined &&
-              <div className={'sm-text text-light-4'}>
-                {getWaitingTime(unstakingData.waitingTime, unstakingData.status, t)}
-              </div>
-            }
+            <div className={'sm-text text-light-4'}>
+              {getWaitingTime(unstakingData.status, t, unstakingData.waitingTime)}
+            </div>
           </div>
         </MetaInfo.Default>}
 
@@ -455,8 +453,8 @@ const Component: React.FC<Props> = (props: Props) => {
               <>
                 {unstakings.map((item) => {
                   const waitingLabel = item.waitingTime !== undefined
-                    ? getWaitingTime(item.waitingTime, item.status, t)
-                      ? getWaitingTime(item.waitingTime, item.status, t)
+                    ? getWaitingTime(item.status, t, item.waitingTime)
+                      ? getWaitingTime(item.status, t, item.waitingTime)
                       : t('Withdraw')
                     : '';
 

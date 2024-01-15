@@ -188,18 +188,19 @@ export const BLOCK_MINT_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_SDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_VDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_MINT_STDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_MINT_STDOT_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_REDEEM_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_SDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_VDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_REDEEM_STDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_REDEEM_STDOT_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_UNSTAKE_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_UNSTAKE_VDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_UNSTAKE_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_UNSTAKE_SDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_UNSTAKE_STDOT_LEDGER_NETWORKS: string[] = [];
 /* EARNING */
 
 /// OTHER
@@ -249,6 +250,7 @@ export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {
   [ExtrinsicType.UNSTAKE_VDOT]: BLOCK_UNSTAKE_VDOT_LEDGER_NETWORKS,
   [ExtrinsicType.UNSTAKE_LDOT]: BLOCK_UNSTAKE_LDOT_LEDGER_NETWORKS,
   [ExtrinsicType.UNSTAKE_SDOT]: BLOCK_UNSTAKE_SDOT_LEDGER_NETWORKS,
+  [ExtrinsicType.UNSTAKE_STDOT]: BLOCK_UNSTAKE_STDOT_LEDGER_NETWORKS,
   /* STAKING */
 
   [ExtrinsicType.CROWDLOAN]: BLOCK_CROWDLOAN_LEDGER_NETWORKS,

@@ -488,6 +488,7 @@ export enum ExtrinsicType {
   UNSTAKE_VDOT = 'earn.unstake_vdot',
   UNSTAKE_LDOT = 'earn.unstake_ldot',
   UNSTAKE_SDOT = 'earn.unstake_sdot',
+  UNSTAKE_STDOT = 'earn.unstake_stdot',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -533,6 +534,7 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.UNSTAKE_VDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_STDOT]: RequestYieldFastWithdrawal,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
@@ -601,6 +603,16 @@ export type TransactionAdditionalInfo = {
   [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_STDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
+  [ExtrinsicType.REDEEM_VDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_QDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_SDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_LDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_STDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_VDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_QDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_SDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_LDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_STDOT]: LeavePoolAdditionalData,
   [ExtrinsicType.STAKING_UNBOND]: Pick<SubmitYieldStepData, 'inputTokenSlug' | 'exchangeRate'>
 }
 
@@ -1580,7 +1592,7 @@ export interface UnstakingInfo {
   chain: string;
   status: UnstakingStatus;
   claimable: string; // amount to be withdrawn
-  waitingTime: number; // in hours
+  waitingTime?: number; // in hours
   validatorAddress?: string; // might unstake from a validator or not
 }
 
@@ -2319,6 +2331,17 @@ export interface SubmitJoinNominationPool {
   amount: string,
   selectedPool: NominationPoolInfo,
   nominatorMetadata?: NominatorMetadata
+}
+
+export interface LeavePoolAdditionalData {
+  slug: string;
+  chain: string;
+  type: YieldPoolType;
+  minAmountPercent: number;
+  exchangeRate: number;
+  symbol: string;
+  decimals: number;
+  isFast: boolean;
 }
 
 /* Campaign */

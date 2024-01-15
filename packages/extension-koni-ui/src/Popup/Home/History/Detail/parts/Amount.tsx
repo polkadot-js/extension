@@ -6,11 +6,13 @@ import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { isTypeMint, isTypeStaking } from '@subwallet/extension-koni-ui/utils';
+import { isPoolLeave, isTypeMint, isTypeStaking } from '@subwallet/extension-koni-ui/utils';
 import BigN from 'bignumber.js';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import PoolLeaveAmount from './PoolLeaveAmount';
 
 interface Props extends ThemeProps {
   data: TransactionHistoryDisplayItem;
@@ -31,6 +33,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const isCrowdloan = data.type === ExtrinsicType.CROWDLOAN;
   const isNft = data.type === ExtrinsicType.SEND_NFT;
   const isMint = isTypeMint(data.type);
+  const isLeavePool = isPoolLeave(data.type);
 
   const derivativeTokenSlug = useMemo((): string | undefined => {
     if (isMint) {
@@ -78,6 +81,10 @@ const Component: React.FC<Props> = (props: Props) => {
         return t('Amount');
     }
   }, [t, transactionType]);
+
+  if (isLeavePool && data.additionalInfo) {
+    return <PoolLeaveAmount data={data} />;
+  }
 
   return (
     <>

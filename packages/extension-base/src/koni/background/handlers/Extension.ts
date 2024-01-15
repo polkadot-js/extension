@@ -4114,12 +4114,39 @@ export default class KoniExtension {
       extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
     }
 
+    const extrinsicType = (): ExtrinsicType => {
+      if (isLiquidStaking) {
+        switch (inputData.chain) {
+          case 'acala':
+            return ExtrinsicType.UNSTAKE_LDOT;
+          case 'parallel':
+            return ExtrinsicType.UNSTAKE_SDOT;
+
+          case 'moonbeam': {
+            if (yieldPoolInfo?.slug === 'xcDOT___stellaswap_liquid_staking') {
+              return ExtrinsicType.UNSTAKE_STDOT;
+            }
+
+            break;
+          }
+
+          case 'bifrost':
+            return ExtrinsicType.UNSTAKE_VDOT;
+        }
+      }
+
+      return ExtrinsicType.STAKING_UNBOND;
+    };
+
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
       chain: chain,
       transaction: extrinsic,
-      data: inputData,
-      extrinsicType: ExtrinsicType.STAKING_UNBOND,
+      data: {
+        ...inputData,
+        yieldPoolInfo // use for unstake liquid staking
+      },
+      extrinsicType: extrinsicType(),
       chainType: _isChainEvmCompatible(chainInfo) ? ChainType.EVM : ChainType.SUBSTRATE
     });
   }

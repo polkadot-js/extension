@@ -427,7 +427,11 @@ export function getYieldAvailableActionsByType (yieldPoolInfo: YieldPoolInfo): Y
   if (yieldPoolInfo.type === YieldPoolType.LENDING) {
     return [YieldAction.START_EARNING, YieldAction.WITHDRAW_EARNING];
   } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
-    return [YieldAction.START_EARNING, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
+    if (yieldPoolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+      return [YieldAction.START_EARNING, YieldAction.UNSTAKE];
+    }
+
+    return [YieldAction.START_EARNING, YieldAction.WITHDRAW];
   }
 
   return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CANCEL_UNSTAKE];

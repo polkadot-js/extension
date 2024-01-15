@@ -10,7 +10,6 @@ import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-base/ko
 import { subscribeYieldPoolStats, subscribeYieldPosition } from '@subwallet/extension-base/koni/api/yield';
 import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { subscribeBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/balance';
-import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import { COMMON_RELOAD_EVENTS, EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
@@ -99,8 +98,7 @@ export class KoniSubscription {
 
       const address = serviceInfo.currentAccountInfo?.address;
 
-      // @ts-ignore
-      this.subscribeYieldPools(serviceInfo.chainInfoMap, serviceInfo.assetRegistry, serviceInfo.chainApiMap.substrate, address);
+      this.subscribeYieldPools(serviceInfo.chainInfoMap, serviceInfo.assetRegistry, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm, address);
 
       if (!address) {
         return;
@@ -149,7 +147,7 @@ export class KoniSubscription {
     }).catch(console.error);
   }
 
-  subscribeYieldPools (chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, substrateApiMap: Record<string, SubstrateApi>, evmApiMap: Record<string, _EvmApi>, address?: string, onlyRunOnFirstTime?: boolean) {
+  subscribeYieldPools (chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, address?: string, onlyRunOnFirstTime?: boolean) {
     this.updateSubscription('yieldPoolStats', this.initYieldPoolStatsSubscription(substrateApiMap, evmApiMap, onlyRunOnFirstTime));
 
     if (address) {
@@ -163,7 +161,7 @@ export class KoniSubscription {
     }
   }
 
-  initYieldPositionSubscription (addresses: string[], substrateApiMap: Record<string, SubstrateApi>, evmApiMap: Record<string, _EvmApi>, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, onlyRunOnFirstTime?: boolean) {
+  initYieldPositionSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, onlyRunOnFirstTime?: boolean) {
     const updateYieldPoolStats = (data: YieldPositionInfo) => {
       this.state.updateYieldPosition(data);
     };

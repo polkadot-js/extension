@@ -195,6 +195,16 @@ const Component = function ({ className }: Props) {
           return t('Redeem vDOT confirmation');
         case ExtrinsicType.REDEEM_STDOT:
           return t('Redeem stDOT confirmation');
+        case ExtrinsicType.UNSTAKE_QDOT:
+          return t('Unstake qDOT confirmation');
+        case ExtrinsicType.UNSTAKE_SDOT:
+          return t('Unstake sDOT confirmation');
+        case ExtrinsicType.UNSTAKE_LDOT:
+          return t('Unstake LDOT confirmation');
+        case ExtrinsicType.UNSTAKE_VDOT:
+          return t('Unstake vDOT confirmation');
+        case ExtrinsicType.UNSTAKE_STDOT:
+          return t('Unstake stDOT confirmation');
         default:
           return t('Transaction confirmation');
       }

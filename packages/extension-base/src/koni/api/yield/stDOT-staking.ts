@@ -6,8 +6,9 @@ import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathPar
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import { DEFAULT_YIELD_FIRST_STEP, getStellaswapLiquidStakingContract, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
-import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
 
@@ -119,8 +120,7 @@ export function getStellaswapLiquidStakingPosition (evmApiMap: Record<string, _E
         unstakings.push({
           chain: poolInfo.chain,
           claimable: unbondedObject.waiting,
-          status: UnstakingStatus.UNLOCKING,
-          waitingTime: 20 // TODO: Recheck
+          status: UnstakingStatus.UNLOCKING
         });
       }
 
@@ -235,25 +235,30 @@ export async function generatePathForStellaswapLiquidStaking (params: OptimalYie
   }
 }
 
-export function getStellaswapLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): HandleYieldStepData {
+export async function getStellaswapLiquidStakingExtrinsic (address: string, params: OptimalYieldPathParams, path: OptimalYieldPath, currentStep: number, requestData: RequestYieldStepSubmit): Promise<HandleYieldStepData> {
   const derivativeTokenSlug = params.poolInfo.derivativeAssets?.[0] || '';
   const derivativeTokenInfo = params.assetInfoMap[derivativeTokenSlug];
-
   const inputTokenSlug = params.poolInfo.inputAssets[0];
   const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
+  const chain = params.poolInfo.chain;
+  const evmApi = params.evmApiMap[params.poolInfo.chain];
 
   if (path.steps[currentStep].type === YieldStepType.TOKEN_APPROVAL) {
-    const inputTokenContract = getERC20Contract(params.poolInfo.chain, _getContractAddressOfToken(inputTokenInfo), params.evmApiMap);
-
+    const inputTokenContract = getERC20Contract(chain, _getContractAddressOfToken(inputTokenInfo), params.evmApiMap);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const approveCall = inputTokenContract.methods.approve(address, MAX_INT);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const approveEncodedCall = approveCall.encodeABI() as string;
-
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const gasLimit = await approveCall.estimateGas({ from: address }) as number;
+    const _price = await evmApi.api.eth.getGasPrice();
+    const gasPrice = recalculateGasPrice(_price, chain);
     const transactionObject = {
       from: address,
       to: _getContractAddressOfToken(inputTokenInfo),
-      data: approveEncodedCall
+      data: approveEncodedCall,
+      gasPrice: gasPrice,
+      gas: gasLimit
     } as TransactionConfig;
 
     return {
@@ -265,18 +270,24 @@ export function getStellaswapLiquidStakingExtrinsic (address: string, params: Op
     };
   }
 
-  const stakingContract = getStellaswapLiquidStakingContract(params.poolInfo.chain, _getContractAddressOfToken(derivativeTokenInfo), params.evmApiMap);
+  const stakingContract = getStellaswapLiquidStakingContract(chain, _getContractAddressOfToken(derivativeTokenInfo), params.evmApiMap);
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
   const depositCall = stakingContract.methods.deposit(params.amount); // TODO: referral
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
   const depositEncodedCall = depositCall.encodeABI() as string;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const gasLimit = await depositCall.estimateGas({ from: address }) as number;
+  const _price = await evmApi.api.eth.getGasPrice();
+  const gasPrice = recalculateGasPrice(_price, chain);
 
   const transactionObject = {
     from: address,
     to: _getContractAddressOfToken(derivativeTokenInfo),
-    data: depositEncodedCall
+    data: depositEncodedCall,
+    gasPrice: gasPrice,
+    gas: gasLimit
   } as TransactionConfig;
 
   return {
@@ -288,9 +299,11 @@ export function getStellaswapLiquidStakingExtrinsic (address: string, params: Op
   };
 }
 
-export function getStellaswapLiquidStakingDefaultUnstake (params: UnbondingSubmitParams, evmApiMap: Record<string, _EvmApi>, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>): TransactionConfig {
+export async function getStellaswapLiquidStakingDefaultUnstake (params: UnbondingSubmitParams, evmApiMap: Record<string, _EvmApi>, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>): Promise<TransactionConfig> {
   const derivativeTokenSlug = poolInfo.derivativeAssets?.[0] || '';
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
+  const address = params.nominatorMetadata.address;
+  const evmApi = evmApiMap[poolInfo.chain];
 
   const stakingContract = getStellaswapLiquidStakingContract(poolInfo.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApiMap);
 
@@ -300,16 +313,25 @@ export function getStellaswapLiquidStakingDefaultUnstake (params: UnbondingSubmi
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
   const redeemEncodedCall = redeemCall.encodeABI() as string;
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const gasLimit = await redeemCall.estimateGas({ from: address }) as number;
+  const _price = await evmApi.api.eth.getGasPrice();
+  const gasPrice = recalculateGasPrice(_price, poolInfo.chain);
+
   return {
     from: params.nominatorMetadata.address,
     to: _getContractAddressOfToken(derivativeTokenInfo),
-    data: redeemEncodedCall
+    data: redeemEncodedCall,
+    gasPrice: gasPrice,
+    gas: gasLimit
   } as TransactionConfig;
 }
 
-export function getStellaswapLiquidStakingDefaultWithdraw (poolInfo: YieldPoolInfo, evmApiMap: Record<string, _EvmApi>, nominatorMetadata: NominatorMetadata, assetInfoMap: Record<string, _ChainAsset>) {
+export async function getStellaswapLiquidStakingDefaultWithdraw (poolInfo: YieldPoolInfo, evmApiMap: Record<string, _EvmApi>, nominatorMetadata: NominatorMetadata, assetInfoMap: Record<string, _ChainAsset>) {
   const derivativeTokenSlug = poolInfo.derivativeAssets?.[0] || '';
   const derivativeTokenInfo = assetInfoMap[derivativeTokenSlug];
+  const address = nominatorMetadata.address;
+  const evmApi = evmApiMap[poolInfo.chain];
 
   const stakingContract = getStellaswapLiquidStakingContract(poolInfo.chain, _getContractAddressOfToken(derivativeTokenInfo), evmApiMap);
 
@@ -319,9 +341,16 @@ export function getStellaswapLiquidStakingDefaultWithdraw (poolInfo: YieldPoolIn
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
   const claimUnbondedEncodedCall = claimUnbondedCall.encodeABI() as string;
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  const gasLimit = await claimUnbondedCall.estimateGas({ from: address }) as number;
+  const _price = await evmApi.api.eth.getGasPrice();
+  const gasPrice = recalculateGasPrice(_price, poolInfo.chain);
+
   return {
     from: nominatorMetadata.address,
     to: _getContractAddressOfToken(derivativeTokenInfo),
-    data: claimUnbondedEncodedCall
+    data: claimUnbondedEncodedCall,
+    gasPrice: gasPrice,
+    gas: gasLimit
   } as TransactionConfig;
 }

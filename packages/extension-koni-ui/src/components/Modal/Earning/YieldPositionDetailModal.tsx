@@ -168,6 +168,10 @@ const Component: React.FC<Props> = (props: Props) => {
     return yearlyEarnings;
   }, [assetRegistry, yieldPoolInfo.stats?.assetEarning]);
 
+  const hiddenTotalBalance = useMemo(() => {
+    return slug === 'xcDOT___stellaswap_liquid_staking';
+  }, [slug]);
+
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
 
@@ -288,12 +292,16 @@ const Component: React.FC<Props> = (props: Props) => {
           valueColorSchema={StakingStatusUi.active.schema}
         />
 
-        <MetaInfo.Number
-          decimals={_getAssetDecimals(inputTokenInfo)}
-          label={t('Total balance')}
-          suffix={_getAssetSymbol(inputTokenInfo)}
-          value={yieldPositionInfoBalance.totalBalance}
-        />
+        {
+          !hiddenTotalBalance && (
+            <MetaInfo.Number
+              decimals={_getAssetDecimals(inputTokenInfo)}
+              label={t('Total balance')}
+              suffix={_getAssetSymbol(inputTokenInfo)}
+              value={yieldPositionInfoBalance.totalBalance}
+            />
+          )
+        }
 
         <MetaInfo.Number
           decimals={_getAssetDecimals(inputTokenInfo)}
@@ -384,12 +392,16 @@ const Component: React.FC<Props> = (props: Props) => {
                 />
               )
             }
-            <MetaInfo.Default
-              label={t('Reward distribution')}
-              valueColorSchema={'gray'}
-            >
-              {t('Every {{number}} hours', { replace: { number: 24 } })}
-            </MetaInfo.Default>
+            {
+              yieldPoolInfo.slug !== 'xcDOT___stellaswap_liquid_staking' && (
+                <MetaInfo.Default
+                  label={t('Reward distribution')}
+                  valueColorSchema={'gray'}
+                >
+                  {t('Every {{number}} hours', { replace: { number: 24 } })}
+                </MetaInfo.Default>
+              )
+            }
           </MetaInfo>
           {(unstakings && unstakings.length > 0) && currentAccount?.address !== ALL_ACCOUNT_KEY && (
             <>
@@ -408,11 +420,7 @@ const Component: React.FC<Props> = (props: Props) => {
               >
                 <>
                   {unstakings.map((item) => {
-                    const waitingLabel = item.waitingTime !== undefined
-                      ? getWaitingTime(item.waitingTime, item.status, t)
-                        ? getWaitingTime(item.waitingTime, item.status, t)
-                        : t('Withdraw')
-                      : t('Withdraw');
+                    const waitingLabel = getWaitingTime(item.status, t, item.waitingTime);
 
                     const claimable = new BigN(item.claimable).multipliedBy(exchangeRate).integerValue();
 

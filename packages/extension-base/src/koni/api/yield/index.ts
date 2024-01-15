@@ -16,7 +16,6 @@ import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeS
 import { getParallelLiquidStakingDefaultUnstake, getParallelLiquidStakingDefaultWithdraw, getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallel-liquid-staking';
 import { generatePathForStellaswapLiquidStaking, getStellaswapLiquidStakingDefaultUnstake, getStellaswapLiquidStakingDefaultWithdraw, getStellaswapLiquidStakingExtrinsic, getStellaswapLiquidStakingPosition, subscribeStellaswapLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
-import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getTokenOnChainInfo, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
@@ -70,6 +69,11 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
         }
       } else {
         if (poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+          console.debug('chainInfoMap', chainInfoMap);
+          console.debug('assetInfoMap', assetInfoMap);
+          console.debug('evmApiMap', evmApiMap);
+          console.debug('poolInfo', poolInfo);
+          console.debug('callback', callback);
           const unsub = subscribeStellaswapLiquidStakingStats(chainInfoMap, assetInfoMap, evmApiMap, poolInfo, callback);
 
           unsubList.push(unsub);
@@ -85,7 +89,7 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
   };
 }
 
-export function subscribeYieldPosition (substrateApiMap: Record<string, SubstrateApi>, evmApiMap: Record<string, _EvmApi>, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPositionInfo) => void) {
+export function subscribeYieldPosition (substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPositionInfo) => void) {
   const unsubList: VoidFunction[] = [];
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 

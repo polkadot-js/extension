@@ -91,8 +91,7 @@ export const getEvmLedgerCanYield = (methodSlug?: string): boolean => {
   switch (methodSlug) {
     case 'xcDOT___stellaswap_liquid_staking':
     case 'xcDOT___moonwell_lending':
-      // return true;
-    // eslint-disable-next-line no-fallthrough
+      return true;
     default:
       return false;
   }
@@ -119,6 +118,8 @@ export const getUnstakeExtrinsicType = (methodSlug?: string): ExtrinsicType => {
       return ExtrinsicType.UNSTAKE_SDOT;
     case 'DOT___interlay_lending':
       return ExtrinsicType.UNSTAKE_QDOT;
+    case 'xcDOT___stellaswap_liquid_staking':
+      return ExtrinsicType.UNSTAKE_STDOT;
     case 'WND___nomination_pool':
     case 'DOT___nomination_pool':
       return ExtrinsicType.STAKING_LEAVE_POOL;

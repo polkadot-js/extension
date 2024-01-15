@@ -74,7 +74,7 @@ export async function getNominationPoolsInfo (chain: string, substrateApi: _Subs
 }
 
 export async function getBondingExtrinsic (chainInfo: _ChainInfo, amount: string, selectedValidators: ValidatorInfo[], substrateApi: _SubstrateApi, address: string, nominatorMetadata?: NominatorMetadata) {
-  if (_STAKING_CHAIN_GROUP.para.includes(chainInfo.slug)) {   
+  if (_STAKING_CHAIN_GROUP.para.includes(chainInfo.slug)) {
     return getParaBondingExtrinsic(chainInfo, substrateApi, amount, selectedValidators[0], nominatorMetadata); // only select 1 validator at a time
   } else if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
     return getAstarBondingExtrinsic(substrateApi, amount, selectedValidators[0]);

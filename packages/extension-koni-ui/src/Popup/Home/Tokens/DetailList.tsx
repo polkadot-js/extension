@@ -8,11 +8,12 @@ import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/Receiv
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
-import { DEFAULT_TRANSFER_PARAMS, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_TRANSFER_PARAMS, SHOW_BANNER_TOKEN_GROUPS, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useDefaultNavigate, useNavigateOnChangeAccount, useNotification, useReceiveQR, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import Banner from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Banner';
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -476,6 +477,13 @@ function Component (): React.ReactElement {
               onClick={onClickRow}
             />
           )}
+      {tokenGroupSlug && SHOW_BANNER_TOKEN_GROUPS.includes(tokenGroupSlug) &&
+        <Banner
+          className={'__banner-area'}
+          content={t('There are multiple ways to earn with your {{symbol}}, such as native staking, liquid staking, or lending. Check out Earning for curated options with competitive APY to earn yield on your DOT.', { replace: { symbol: symbol } })}
+          title={t('Earn yield on your {{symbol}}', { replace: { symbol: symbol } })}
+        />
+      }
 
       <DetailModal
         currentTokenInfo={currentTokenInfo}
@@ -514,14 +522,15 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
     overflow: 'hidden',
 
     '.__table': {
+      flex: 1,
+
       '.ant-table-row': {
         cursor: 'pointer'
       }
     },
 
     '.token-detail-container': {
-      height: '100%',
-      overflow: 'auto',
+      minHeight: '100%',
       color: token.colorTextLight1,
       fontSize: token.fontSizeLG,
       position: 'relative',
@@ -568,6 +577,19 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
 
     '.token-balance-detail-item': {
       marginBottom: token.sizeXS
+    },
+    '.__banner-area': {
+      marginTop: 24
+    },
+    '@media (max-width: 991px)': {
+      '.token-detail-container': {
+        overflow: 'auto',
+        height: '100%'
+      },
+      '.__banner-area': {
+        paddingLeft: token.padding,
+        paddingRight: token.padding
+      }
     }
   });
 });

@@ -575,6 +575,9 @@ export default class TransactionService {
         break;
       }
 
+      case ExtrinsicType.UNSTAKE_QDOT:
+
+      // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.REDEEM_QDOT: {
         const data = parseTransactionData<ExtrinsicType.REDEEM_QDOT>(transaction.data);
         const yieldPoolInfo = data.poolInfo as SpecialYieldPoolInfo;
@@ -585,12 +588,25 @@ export default class TransactionService {
 
           historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
           eventLogs && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
+
+          const additionalInfo: LeavePoolAdditionalData = {
+            minAmountPercent: 1,
+            symbol: inputTokenInfo.symbol,
+            decimals: inputTokenInfo.decimals || 0,
+            exchangeRate: 1,
+            slug: yieldPoolInfo.slug,
+            type: yieldPoolInfo.type,
+            chain: yieldPoolInfo.chain,
+            group: yieldPoolInfo.group,
+            isFast: data.fastLeave
+          };
+
+          historyItem.additionalInfo = additionalInfo;
         }
 
         break;
       }
 
-      case ExtrinsicType.UNSTAKE_QDOT:
       case ExtrinsicType.UNSTAKE_VDOT:
       case ExtrinsicType.UNSTAKE_LDOT:
       case ExtrinsicType.UNSTAKE_SDOT:

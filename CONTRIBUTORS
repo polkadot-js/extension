@@ -1,8 +1,8 @@
     1879	Nam Phạm                      	[Issue 2313] fix eslint
-    1835	AnhMTV                        	Release version 1.1.31
-    1518	S2kael                        	[Issue-2412] Rollback hot fix case max transfer
+    1839	AnhMTV                        	
+    1519	S2kael                        	[Issue-2489] Update chain-list
      465	Jaco                          	0.42.5 (#969)
-     303	lw-cdm                        	[Issue-2373] Fix issue related to history after sending NFT
+     305	lw-cdm                        	[Issue-2467] Support "Request a feature" feature
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       98	lw-cdm                        	
@@ -12,8 +12,8 @@
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
       24	S2kael                        	
+      21	bluedot                       	update logo parallel
       21	nguyentiendung                	[Issue-2452] Show custom network on the token list when nominate
-      16	bluedot                       	build chainlist
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

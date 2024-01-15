@@ -77,7 +77,8 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
                 address: address,
                 group: this.group,
                 blockTimestamp: timeStamp,
-                amount: item.amount
+                amount: item.amount,
+                eventIndex: item.event_index
               };
 
               callBack(data);

@@ -284,7 +284,7 @@ export default class EarningService {
   public updateEarningRewardHistory (earningRewardHistory: EarningRewardHistoryItem): void {
     const earningRewardHistoryState = this.earningRewardHistorySubject.getValue();
 
-    const key = `${earningRewardHistory.slug}---${earningRewardHistory.address}---${earningRewardHistory.blockTimestamp}`;
+    const key = `${earningRewardHistory.slug}---${earningRewardHistory.address}---${earningRewardHistory.eventIndex}`;
 
     earningRewardHistoryState[key] = earningRewardHistory;
 

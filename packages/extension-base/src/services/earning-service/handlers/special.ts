@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer, StakingTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
@@ -328,6 +328,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     const altInputTokenSlug = this.altInputAsset || '';
     const altInputTokenInfo = this.state.getAssetBySlug(altInputTokenSlug);
+    const inputTokenInfo = this.state.getAssetBySlug(this.inputAsset);
     const altInputTokenBalance = await this.state.balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug);
 
     const missingAmount = bnAmount.sub(bnInputTokenBalance); // TODO: what if input token is not LOCAL ??
@@ -341,6 +342,32 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       processValidation.failedStep = path.steps[1];
       processValidation.ok = false;
       processValidation.status = YieldValidationStatus.NOT_ENOUGH_BALANCE;
+
+      const maxBn = bnInputTokenBalance.add(new BN(altInputTokenBalance.value)).sub(xcmFee).sub(altInputTokenMinAmount);
+      const maxValue = formatNumber(maxBn.toString(), inputTokenInfo.decimals || 0);
+
+      const altInputTokenInfo = this.state.getAssetBySlug(altInputTokenSlug);
+      const symbol = altInputTokenInfo.symbol;
+      const altNetwork = this.state.getChainInfo(altInputTokenInfo.originChain);
+      const inputNetworkName = this.chainInfo.name;
+      const altNetworkName = altNetwork.name;
+      const currentValue = formatNumber(bnInputTokenBalance.toString(), inputTokenInfo.decimals || 0);
+      const bnMaxXCM = new BN(altInputTokenBalance.value).sub(xcmFee).sub(altInputTokenMinAmount);
+      const maxXCMValue = formatNumber(bnMaxXCM.toString(), inputTokenInfo.decimals || 0);
+
+      processValidation.message = t(
+        'You can only enter a maximum of {{maxValue}} {{symbol}}, which is {{currentValue}} {{symbol}} ({{inputNetworkName}}) and {{maxXCMValue}} {{symbol}} ({{altNetworkName}}). Lower your amount and try again.',
+        {
+          replace: {
+            symbol,
+            maxValue,
+            inputNetworkName,
+            altNetworkName,
+            currentValue,
+            maxXCMValue
+          }
+        }
+      );
 
       return [new TransactionError(YieldValidationStatus.NOT_ENOUGH_BALANCE, processValidation.message, processValidation)];
     }
@@ -367,6 +394,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     };
     const feeTokenSlug = path.totalFee[id].slug;
     const feeTokenInfo = this.state.getAssetBySlug(feeTokenSlug);
+    const inputTokenInfo = this.state.getAssetBySlug(this.inputAsset);
     const defaultFeeTokenSlug = this.feeAssets[0];
     const bnAmount = new BN(params.amount);
 
@@ -397,6 +425,9 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       processValidation.failedStep = path.steps[id];
       processValidation.ok = false;
       processValidation.status = YieldValidationStatus.NOT_ENOUGH_BALANCE;
+      const maxString = formatNumber(bnInputTokenBalance.toString(), inputTokenInfo.decimals || 0);
+
+      processValidation.message = t('Amount must be equal or less than {{number}}', { replace: { number: maxString } });
 
       return [new TransactionError(YieldValidationStatus.NOT_ENOUGH_BALANCE, processValidation.message, processValidation)];
     }
@@ -525,55 +556,6 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   /* Join pool action */
 
   /* Leave pool action */
-
-  async validateYieldLeave (amount: string, address: string, fastLeave: boolean, selectedTarget?: string): Promise<TransactionError[]> {
-    const poolInfo = await this.getPoolInfo();
-    const poolPosition = await this.getPoolPosition(address);
-
-    if (!poolInfo || !poolInfo.statistic || !poolPosition) {
-      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
-    }
-
-    if (!this.availableMethod.defaultUnstake && !fastLeave) {
-      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
-    }
-
-    if (!this.availableMethod.fastUnstake && fastLeave) {
-      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
-    }
-
-    const errors: TransactionError[] = [];
-    const bnActiveStake = new BN(poolPosition.activeStake);
-    const bnAmount = new BN(amount);
-    const bnRemainingStake = bnActiveStake.sub(bnAmount);
-    const minStake = new BN(poolInfo.statistic.earningThreshold.join || '0');
-    const minUnstake = new BN((fastLeave ? poolInfo.statistic.earningThreshold.fastUnstake : poolInfo.statistic.earningThreshold.defaultUnstake) || '0');
-    const maxUnstakeRequest = poolInfo.statistic.maxWithdrawalRequestPerFarmer;
-
-    const derivativeTokenInfo = this.state.getAssetBySlug(this.derivativeAssets[0]);
-
-    if (bnAmount.lte(BN_ZERO)) {
-      return [new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Amount must be greater than 0'))];
-    }
-
-    if (bnAmount.lt(minUnstake)) {
-      const minUnstakeStr = formatNumber(minUnstake.toString(), derivativeTokenInfo.decimals || 0);
-
-      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_UNSTAKE, t('You need to unstake at least {{amount}} {{token}}', { replace: { amount: minUnstakeStr, token: derivativeTokenInfo.symbol } })));
-    }
-
-    if (!fastLeave) {
-      if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
-        errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE)); // TODO
-      }
-
-      if (poolPosition.unstakings.length > maxUnstakeRequest) {
-        errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_UNSTAKING, t('You cannot unstake more than {{number}} times', { replace: { number: maxUnstakeRequest } })));
-      }
-    }
-
-    return Promise.resolve(errors);
-  }
 
   handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));

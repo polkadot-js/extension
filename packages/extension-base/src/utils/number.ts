@@ -3,6 +3,7 @@
 
 import BigNumber from 'bignumber.js';
 
+export const BN_ZERO = new BigNumber(0);
 export const BN_TEN = new BigNumber(10);
 export interface NumberFormatter {
   (input: string, metadata?: Record<string, number>): string;

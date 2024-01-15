@@ -94,6 +94,10 @@ export default abstract class BasePoolHandler {
     };
   }
 
+  protected getAssetBySlug (slug: string) {
+    return this.state.getAssetBySlug(slug);
+  }
+
   protected abstract getDescription (amount?: string): string;
 
   protected get maintainBalance () {

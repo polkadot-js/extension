@@ -56,6 +56,8 @@ export interface EarningRewardHistoryItem extends BasePoolInfo {
   address: string;
   /** Reward history's block timestamp */
   blockTimestamp: number;
+  /** Reward history's extrinsic index */
+  eventIndex: string;
   /** Reward history's amount */
   amount: string;
 }

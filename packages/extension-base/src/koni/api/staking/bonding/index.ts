@@ -29,6 +29,7 @@ export function validateBondingCondition (chainInfo: _ChainInfo, amount: string,
   return validateParaChainBondingCondition(chainInfo, amount, selectedValidators, address, chainStakingMetadata, nominatorMetadata);
 }
 
+/** Deprecated */
 export async function getChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
     return getAstarStakingMetadata(chainInfo.slug, substrateApi);
@@ -73,7 +74,7 @@ export async function getNominationPoolsInfo (chain: string, substrateApi: _Subs
 }
 
 export async function getBondingExtrinsic (chainInfo: _ChainInfo, amount: string, selectedValidators: ValidatorInfo[], substrateApi: _SubstrateApi, address: string, nominatorMetadata?: NominatorMetadata) {
-  if (_STAKING_CHAIN_GROUP.para.includes(chainInfo.slug)) {
+  if (_STAKING_CHAIN_GROUP.para.includes(chainInfo.slug)) {   
     return getParaBondingExtrinsic(chainInfo, substrateApi, amount, selectedValidators[0], nominatorMetadata); // only select 1 validator at a time
   } else if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
     return getAstarBondingExtrinsic(substrateApi, amount, selectedValidators[0]);

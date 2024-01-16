@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { migrateLocalStorage } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowCircleRight, CheckCircle, X } from 'phosphor-react';
-import React, { useEffect } from 'react';
+import { ArrowCircleRight, CheckCircle, X, XCircle } from 'phosphor-react';
+import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -17,7 +16,13 @@ type Props = ThemeProps;
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
-  const { goHome } = useDefaultNavigate();
+  const learnMore = useCallback(() => {
+    window.open('https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3');
+  }, []);
+
+  const dismiss = useCallback(() => {
+    window.close();
+  }, []);
 
   const { t } = useTranslation();
 
@@ -33,22 +38,31 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <Layout.WithSubHeaderOnly
+      leftFooterButton={{
+        children: t('Dismiss'),
+        onClick: dismiss,
+        schema: 'secondary',
+        icon: <Icon
+          phosphorIcon={XCircle}
+          weight={'fill'}
+        />
+      }}
       rightFooterButton={{
-        children: t('Go to home'),
-        onClick: goHome,
+        children: t('Learn more'),
+        onClick: learnMore,
         icon: <Icon
           phosphorIcon={ArrowCircleRight}
           weight={'fill'}
         />
       }}
-      showBackButton={true}
+      showBackButton={false}
       subHeaderLeft={(
         <Icon
           phosphorIcon={X}
           size='md'
         />
       )}
-      title={t('Successful')}
+      title={t('Update successful')}
     >
       <div className={CN(className)}>
         <div className='page-icon'>
@@ -61,10 +75,10 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         </div>
         <div className='title'>
-          {t('SubWallet MV3 is updated successfully!')}
+          {t('Your SubWallet extension is updated to Manifest V3!')}
         </div>
         <div className='description'>
-          {t('Follow along with product updates or reach out if you have any questions.')}
+          {t('This update is required by Google, and helps improve the privacy, security, and performance of SubWallet extension.\n You can learn more details on Chrome for Developers, or safely dismiss this message.')}
         </div>
       </div>
     </Layout.WithSubHeaderOnly>

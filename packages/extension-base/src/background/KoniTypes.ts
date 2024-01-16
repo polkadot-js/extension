@@ -135,6 +135,7 @@ export interface RejectResolver {
 export enum StakingType {
   NOMINATED = 'nominated',
   POOLED = 'pooled',
+  LIQUID_STAKING = 'liquid_staking'
 }
 
 export interface StakingRewardItem {
@@ -441,6 +442,11 @@ export interface RandomTestRequest {
   end: number;
 }
 
+export interface TokenApproveData {
+  inputTokenSlug: string;
+  spenderTokenSlug: string;
+}
+
 export enum TransactionDirection {
   SEND = 'send',
   RECEIVED = 'received'
@@ -475,11 +481,21 @@ export enum ExtrinsicType {
   MINT_LDOT = 'earn.mint_ldot',
   MINT_SDOT = 'earn.mint_sdot',
   MINT_QDOT = 'earn.mint_qdot',
+  MINT_STDOT = 'earn.mint_stdot',
 
   REDEEM_QDOT = 'earn.redeem_qdot',
   REDEEM_VDOT = 'earn.redeem_vdot',
   REDEEM_LDOT = 'earn.redeem_ldot',
   REDEEM_SDOT = 'earn.redeem_sdot',
+  REDEEM_STDOT = 'earn.redeem_stdot',
+
+  UNSTAKE_QDOT = 'earn.unstake_qdot',
+  UNSTAKE_VDOT = 'earn.unstake_vdot',
+  UNSTAKE_LDOT = 'earn.unstake_ldot',
+  UNSTAKE_SDOT = 'earn.unstake_sdot',
+  UNSTAKE_STDOT = 'earn.unstake_stdot',
+
+  TOKEN_APPROVE = 'evm.token_approve',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -512,11 +528,22 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.MINT_LDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_SDOT]: RequestYieldStepSubmit,
   [ExtrinsicType.MINT_QDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_STDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_STDOT]: RequestYieldStepSubmit,
 
   [ExtrinsicType.REDEEM_VDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.REDEEM_QDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.REDEEM_LDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.REDEEM_SDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.REDEEM_STDOT]: RequestYieldFastWithdrawal,
+
+  [ExtrinsicType.UNSTAKE_QDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_VDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_STDOT]: RequestYieldFastWithdrawal,
+
+  [ExtrinsicType.TOKEN_APPROVE]: TokenApproveData,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
@@ -583,7 +610,19 @@ export type TransactionAdditionalInfo = {
   [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_QDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
-  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>
+  [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
+  [ExtrinsicType.MINT_STDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
+  [ExtrinsicType.REDEEM_VDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_QDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_SDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_LDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_STDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_VDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_QDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_SDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_LDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_STDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.STAKING_UNBOND]: Pick<SubmitYieldStepData, 'inputTokenSlug' | 'exchangeRate'>
 }
 
 // export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
@@ -1562,7 +1601,7 @@ export interface UnstakingInfo {
   chain: string;
   status: UnstakingStatus;
   claimable: string; // amount to be withdrawn
-  waitingTime: number; // in hours
+  waitingTime?: number; // in hours
   validatorAddress?: string; // might unstake from a validator or not
 }
 
@@ -1623,9 +1662,15 @@ export type RequestBondingSubmit = InternalRequestSign<BondingSubmitParams>;
 export interface UnbondingSubmitParams extends BaseRequestSign {
   amount: string,
   chain: string,
+
   nominatorMetadata: NominatorMetadata,
   // for some chains
   validatorAddress?: string
+
+  isLiquidStaking?: boolean,
+  derivativeTokenInfo?: _ChainAsset,
+  exchangeRate?: number,
+  inputTokenInfo?: _ChainAsset
 }
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
@@ -1636,7 +1681,8 @@ export interface StakeWithdrawalParams extends BaseRequestSign {
   nominatorMetadata: NominatorMetadata,
   unstakingInfo: UnstakingInfo,
   chain: string,
-  validatorAddress?: string
+  validatorAddress?: string,
+  isLiquidStaking?: boolean
 }
 
 export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;
@@ -2116,13 +2162,13 @@ export interface YieldPoolInfo {
 
 export interface YieldAssetBalance {
   slug: string, // token slug
-  totalBalance: string,
   activeBalance: string,
   exchangeRate?: number
 }
 
 export interface YieldPositionInfo {
   slug: string,
+  type: YieldPoolType,
   chain: string,
   address: string,
   balance: YieldAssetBalance[],
@@ -2135,8 +2181,7 @@ export type YieldPoolMetadata = ChainStakingMetadata;
 export type YieldPositionMetadata = NominatorMetadata | YieldPositionStats;
 
 export interface YieldPositionStats {
-  rewards: YieldTokenBaseInfo[],
-  initialExchangeRate?: number
+  rewards: YieldTokenBaseInfo[]
 }
 
 export interface OptimalYieldPathRequest {
@@ -2153,6 +2198,7 @@ export interface OptimalYieldPathParams {
   assetInfoMap: Record<string, _ChainAsset>,
   chainInfoMap: Record<string, _ChainInfo>
   substrateApiMap: Record<string, _SubstrateApi>,
+  evmApiMap: Record<string, _EvmApi>,
   balanceMap: BalanceMap,
 
   hasPosition?: boolean
@@ -2182,7 +2228,11 @@ export enum YieldStepType {
   // interlay
   MINT_QDOT = 'MINT_QDOT',
 
-  MINT_SDOT = 'MINT_SDOT'
+  MINT_SDOT = 'MINT_SDOT',
+
+  MINT_STDOT = 'MINT_STDOT',
+
+  TOKEN_APPROVAL = 'TOKEN_APPROVAL'
 }
 
 export interface YieldStepDetail {
@@ -2290,6 +2340,17 @@ export interface SubmitJoinNominationPool {
   amount: string,
   selectedPool: NominationPoolInfo,
   nominatorMetadata?: NominatorMetadata
+}
+
+export interface LeavePoolAdditionalData {
+  slug: string;
+  chain: string;
+  type: YieldPoolType;
+  minAmountPercent: number;
+  exchangeRate: number;
+  symbol: string;
+  decimals: number;
+  isFast: boolean;
 }
 
 /* Campaign */

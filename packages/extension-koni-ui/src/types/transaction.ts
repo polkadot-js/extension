@@ -61,6 +61,7 @@ export interface UnYieldParams extends TransactionFormBaseProps {
   value: string;
   validator: string;
   method: string;
+  fastUnstake?: boolean;
 }
 
 export interface YieldStakingWithdrawParams extends TransactionFormBaseProps {

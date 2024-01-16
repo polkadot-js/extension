@@ -2,18 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, ExtrinsicType, NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, ExtrinsicType, NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { getValidatorLabel, isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector, AmountInput, HiddenInput, NominationSelector } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useGetNativeTokenBasicInfo, useGetYieldMetadata, useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetYieldMetadata, useGetYieldPositionInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitNominationPoolUnstaking, yieldSubmitUnstaking } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams, UnYieldParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon } from '@subwallet/react-ui';
+import { Button, Checkbox, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { MinusCircle } from 'phosphor-react';
@@ -51,6 +52,7 @@ const Component: React.FC = () => {
 
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const isAll = isAccountAll(currentAccount?.address || '');
 
   const [form] = Form.useForm<UnYieldParams>();
@@ -64,13 +66,38 @@ const Component: React.FC = () => {
   const from = useWatchTransaction('from', form, defaultData);
   const currentValidator = useWatchTransaction('validator', form, defaultData);
 
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(chain || '');
   const yieldPoolInfo = useGetYieldMetadata(method);
   const chainStakingMetadata = yieldPoolInfo?.metadata as ChainStakingMetadata;
   const allNominatorInfo = useGetYieldPositionInfo(method);
   const nominatorInfo = useGetYieldPositionInfo(method, from);
   const nominatorMetadata = nominatorInfo[0].metadata as NominatorMetadata;
   const type = nominatorMetadata.type;
+
+  const { decimals, symbol } = useMemo(() => {
+    if (!yieldPoolInfo) {
+      return {
+        decimals: 0,
+        symbol: ''
+      };
+    }
+
+    if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
+      const derivativeTokenSlug = yieldPoolInfo?.derivativeAssets?.[0] as string;
+      const derivativeTokenInfo = assetRegistry[derivativeTokenSlug];
+
+      return {
+        decimals: _getAssetDecimals(derivativeTokenInfo),
+        symbol: _getAssetSymbol(derivativeTokenInfo)
+      };
+    }
+
+    const inputAssetInfo = assetRegistry[yieldPoolInfo.inputAssets[0]];
+
+    return {
+      decimals: _getAssetDecimals(inputAssetInfo),
+      symbol: _getAssetSymbol(inputAssetInfo)
+    };
+  }, [assetRegistry, yieldPoolInfo]);
 
   const selectedValidator = useMemo((): NominationInfo | undefined => {
     if (nominatorMetadata) {
@@ -114,6 +141,19 @@ const Component: React.FC = () => {
   }, [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, selectedValidator?.validatorMinStake, type]);
 
   const unBondedTime = useMemo((): string => {
+    if (yieldPoolInfo) {
+      const defaultWaitingTime = yieldPoolInfo.withdrawalMethods[0].waitingTime;
+
+      if (defaultWaitingTime >= 24) {
+        const days = Math.floor(defaultWaitingTime / 24);
+        const hours = defaultWaitingTime - days * 24;
+
+        return `${days} ${t('days')}${hours ? ` ${hours} ${t('hours')}` : ''}`;
+      } else {
+        return `${defaultWaitingTime} ${t('hours')}`;
+      }
+    }
+
     if (chainStakingMetadata) {
       const time = chainStakingMetadata?.unstakingPeriod || 0;
 
@@ -128,7 +168,9 @@ const Component: React.FC = () => {
     } else {
       return t('unknown time');
     }
-  }, [chainStakingMetadata, t]);
+  }, [chainStakingMetadata, t, yieldPoolInfo]);
+
+  const showCheckbox = useMemo(() => type === StakingType.LIQUID_STAKING && yieldPoolInfo?.slug !== 'xcDOT___stellaswap_liquid_staking', [type, yieldPoolInfo?.slug]);
 
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
@@ -163,6 +205,7 @@ const Component: React.FC = () => {
     }
 
     checkEmpty.asset = true;
+    checkEmpty.fastUnstake = true;
 
     if (!mustChooseValidator) {
       checkEmpty.validator = true;
@@ -190,7 +233,8 @@ const Component: React.FC = () => {
       const params: RequestUnbondingSubmit = {
         amount: value,
         chain: nominatorMetadata.chain,
-        nominatorMetadata: nominatorMetadata
+        nominatorMetadata: nominatorMetadata,
+        isLiquidStaking: nominatorMetadata.type === StakingType.LIQUID_STAKING
       };
 
       if (mustChooseValidator) {
@@ -231,6 +275,12 @@ const Component: React.FC = () => {
     }
   }, [form, amountChange, minValue, bondedValue, decimals]);
 
+  useEffect(() => {
+    if (showCheckbox) {
+      form.setFieldValue('fastUnstake', true);
+    }
+  }, [form, showCheckbox]);
+
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);
 
@@ -262,6 +312,7 @@ const Component: React.FC = () => {
             className={'free-balance'}
             label={t('Available balance:')}
             onBalanceReady={setIsBalanceReady}
+            tokenSlug={yieldPoolInfo && yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING ? yieldPoolInfo?.derivativeAssets?.[0] : yieldPoolInfo?.inputAssets?.[0]}
           />
 
           <Form.Item
@@ -301,6 +352,16 @@ const Component: React.FC = () => {
           </Form.Item>
 
           {!mustChooseValidator && renderBounded()}
+
+          <Form.Item
+            hidden={true}
+            name={'fastUnstake'}
+            valuePropName='checked'
+          >
+            <Checkbox>
+              <span className={'__option-label'}>{t('Fast unstake')}</span>
+            </Checkbox>
+          </Form.Item>
 
           <div className={CN('text-light-4', { mt: mustChooseValidator })}>
             {
@@ -379,6 +440,15 @@ const YieldUnstake = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.mt': {
       marginTop: token.marginSM
+    },
+
+    '.ant-checkbox-wrapper': {
+      display: 'flex',
+      alignItems: 'center',
+
+      '.ant-checkbox': {
+        top: 0
+      }
     }
   };
 });

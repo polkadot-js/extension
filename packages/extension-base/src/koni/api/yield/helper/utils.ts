@@ -3,7 +3,9 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ExtrinsicType, YieldPoolInfo, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
+import { Contract } from 'web3-eth-contract';
 
 export interface RuntimeDispatchInfo {
   weight: {
@@ -50,10 +52,12 @@ export const YIELD_EXTRINSIC_TYPES = [
   ExtrinsicType.MINT_LDOT,
   ExtrinsicType.MINT_SDOT,
   ExtrinsicType.MINT_QDOT,
+  ExtrinsicType.MINT_STDOT,
   ExtrinsicType.REDEEM_QDOT,
   ExtrinsicType.REDEEM_SDOT,
   ExtrinsicType.REDEEM_VDOT,
   ExtrinsicType.REDEEM_LDOT,
+  ExtrinsicType.REDEEM_STDOT,
   ExtrinsicType.STAKING_JOIN_POOL,
   ExtrinsicType.STAKING_CLAIM_REWARD,
   ExtrinsicType.STAKING_LEAVE_POOL,
@@ -79,3 +83,12 @@ export function convertDerivativeToOriginToken (amount: string, poolInfo: YieldP
 
   return Math.floor(minAmount * (10 ** originDecimals));
 }
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
+export const ST_LIQUID_TOKEN_ABI: Record<string, any> = require('./st_liquid_token_abi.json');
+
+export const getStellaswapLiquidStakingContract = (networkKey: string, assetAddress: string, evmApiMap: Record<string, _EvmApi>, options = {}): Contract => {
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+  return new evmApiMap[networkKey].api.eth.Contract(ST_LIQUID_TOKEN_ABI, assetAddress, options);
+};

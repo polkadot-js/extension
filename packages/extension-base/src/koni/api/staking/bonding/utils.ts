@@ -424,7 +424,13 @@ export function getYieldAvailableActionsByType (yieldPoolInfo: YieldPoolInfo): Y
     }
   }
 
-  if ([YieldPoolType.LIQUID_STAKING, YieldPoolType.LENDING].includes(yieldPoolInfo.type)) {
+  if (yieldPoolInfo.type === YieldPoolType.LENDING) {
+    return [YieldAction.START_EARNING, YieldAction.WITHDRAW_EARNING];
+  } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
+    if (yieldPoolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+      return [YieldAction.START_EARNING, YieldAction.UNSTAKE];
+    }
+
     return [YieldAction.START_EARNING, YieldAction.WITHDRAW_EARNING];
   }
 
@@ -464,6 +470,27 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
         result.push(YieldAction.WITHDRAW);
       }
     }
+  } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
+    result.push(YieldAction.START_EARNING);
+
+    const activeBalance = new BN(yieldPosition.balance[0].activeBalance || '0');
+
+    if (activeBalance.gt(BN_ZERO)) {
+      if (yieldPoolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+        result.push(YieldAction.UNSTAKE);
+      } else {
+        result.push(YieldAction.WITHDRAW_EARNING); // TODO
+      }
+    }
+    //
+    // const metadata = yieldPosition.metadata as NominatorMetadata;
+    // const hasWithdrawal = metadata.unstakings.some((unstakingInfo) => unstakingInfo.status === UnstakingStatus.CLAIMABLE);
+    //
+    // if (hasWithdrawal) {
+    //   result.push(YieldAction.WITHDRAW);
+    // }
+
+    // TODO: check has unstakings to withdraw
   } else {
     result.push(YieldAction.START_EARNING);
     result.push(YieldAction.WITHDRAW_EARNING); // TODO
@@ -529,7 +556,7 @@ export function getStakingAvailableActionsByNominator (nominatorMetadata: Nomina
 }
 
 export function isActionFromValidator (stakingType: StakingType, chain: string) {
-  if (stakingType === StakingType.POOLED) {
+  if (stakingType === StakingType.POOLED || stakingType === StakingType.LIQUID_STAKING) {
     return false;
   }
 

@@ -17,7 +17,7 @@ import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/ca
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, FormFieldData, FormRule, Theme, ThemeProps, YieldParams } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, findNetworkJsonByGenesisHash, getEarnExtrinsicType, isAccountAll, parseNominations, simpleCheckForm, transactionDefaultFilterAccount } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, findNetworkJsonByGenesisHash, getEarnExtrinsicType, getEvmLedgerCanYield, isAccountAll, parseNominations, simpleCheckForm, transactionDefaultFilterAccount } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Divider, Form, Icon, Logo, Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -46,8 +46,6 @@ const loadingStepPromiseKey = 'earning.step.loading';
 interface _YieldAssetExpectedEarning extends YieldAssetExpectedEarning {
   symbol: string;
 }
-
-const dotPolkadotSlug = 'polkadot-NATIVE-DOT';
 
 const Component = () => {
   const { t } = useTranslation();
@@ -96,8 +94,6 @@ const Component = () => {
   const chainState = useFetchChainState(currentPoolInfo.chain);
   const chainNetworkPrefix = useGetChainPrefixBySlug(currentPoolInfo.chain);
   const preCheckAction = usePreCheckAction(currentFrom);
-
-  const hasXcm = !['westend', 'polkadot'].includes(currentPoolInfo.chain);
 
   const extrinsicType = useMemo(() => getEarnExtrinsicType(methodSlug), [methodSlug]);
 
@@ -230,14 +226,14 @@ const Component = () => {
 
     if (isLedger) {
       if (isEvmAddress) {
-        return false;
+        return getEvmLedgerCanYield(currentPoolInfo?.slug);
       } else {
         return validLedgerNetwork.includes(currentPoolInfo?.chain);
       }
     }
 
     return isEvmChain === isEvmAddress;
-  }, [chainInfoMap, currentPoolInfo.chain]);
+  }, [chainInfoMap, currentPoolInfo.chain, currentPoolInfo?.slug]);
 
   const onFieldsChange: FormCallbacks<YieldParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
@@ -391,6 +387,7 @@ const Component = () => {
     const result: Array<{ chain: string, token: string }> = [];
 
     const chain = currentPoolInfo.chain;
+    const altInputAssets = currentPoolInfo.altInputAssets || [];
 
     for (const inputAsset of currentPoolInfo.inputAssets) {
       result.push({
@@ -399,15 +396,19 @@ const Component = () => {
       });
     }
 
-    if (hasXcm) {
-      result.push({
-        token: dotPolkadotSlug,
-        chain: 'polkadot'
-      });
+    if (altInputAssets) {
+      for (const altInputAsset of altInputAssets) {
+        if (chainAsset[altInputAsset]) {
+          result.push({
+            token: altInputAsset,
+            chain: chainAsset[altInputAsset].originChain
+          });
+        }
+      }
     }
 
     return result;
-  }, [currentPoolInfo.chain, currentPoolInfo.inputAssets, hasXcm]);
+  }, [chainAsset, currentPoolInfo.altInputAssets, currentPoolInfo.chain, currentPoolInfo.inputAssets]);
 
   const onClick = useCallback(() => {
     setSubmitLoading(true);

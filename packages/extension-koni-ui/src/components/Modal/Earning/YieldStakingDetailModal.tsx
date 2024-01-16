@@ -232,11 +232,9 @@ const Component: React.FC<Props> = (props: Props) => {
               value={unstakingData.claimable}
             />
 
-            {unstakingData.status === UnstakingStatus.UNLOCKING.valueOf() &&
-              <div className={'sm-text text-light-4'}>
-                {getWaitingTime(unstakingData.waitingTime, unstakingData.status, t)}
-              </div>
-            }
+            <div className={'sm-text text-light-4'}>
+              {getWaitingTime(unstakingData.status, t, unstakingData.waitingTime)}
+            </div>
           </div>
         </MetaInfo.Default>}
 
@@ -453,16 +451,24 @@ const Component: React.FC<Props> = (props: Props) => {
               valueColorScheme={'light'}
             >
               <>
-                {unstakings.map((item) => (
-                  <MetaInfo.Number
-                    decimals={decimals}
-                    key={`${item.validatorAddress || item.chain}-${item.status}-${item.claimable}`}
-                    label={getWaitingTime(item.waitingTime, item.status, t) ? t(getWaitingTime(item.waitingTime, item.status, t)) : t('Withdraw')}
-                    suffix={symbol}
-                    value={item.claimable || ''}
-                    valueColorSchema={'gray'}
-                  />
-                ))}
+                {unstakings.map((item) => {
+                  const waitingLabel = item.waitingTime !== undefined
+                    ? getWaitingTime(item.status, t, item.waitingTime)
+                      ? getWaitingTime(item.status, t, item.waitingTime)
+                      : t('Withdraw')
+                    : '';
+
+                  return (
+                    <MetaInfo.Number
+                      decimals={decimals}
+                      key={`${item.validatorAddress || item.chain}-${item.status}-${item.claimable}`}
+                      label={waitingLabel}
+                      suffix={symbol}
+                      value={item.claimable || ''}
+                      valueColorSchema={'gray'}
+                    />
+                  );
+                })}
               </>
             </MetaInfo>
           </>

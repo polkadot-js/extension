@@ -3,73 +3,78 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainStakingMetadata, ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, RequestStakePoolingBonding, RequestYieldStepSubmit, StakingType, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, UnbondingSubmitParams, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldProcessValidation, YieldStepType, YieldValidationStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { validatePoolBondingCondition, validateRelayBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
-import { getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLcDOTLiquidStakingStats, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acala-liquid-staking';
-import { getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingPosition, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrost-liquid-staking';
+import { getAcalaLiquidStakingDefaultUnstake, getAcalaLiquidStakingDefaultWithdraw, getAcalaLiquidStakingExtrinsic, getAcalaLiquidStakingPosition, getAcalaLiquidStakingRedeem, subscribeAcalaLcDOTLiquidStakingStats, subscribeAcalaLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/acala-liquid-staking';
+import { getBifrostLiquidStakingDefaultUnstake, getBifrostLiquidStakingExtrinsic, getBifrostLiquidStakingPosition, getBifrostLiquidStakingRedeem, subscribeBifrostLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/bifrost-liquid-staking';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
 import { DEFAULT_YIELD_FIRST_STEP, fakeAddress, RuntimeDispatchInfo } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { getInterlayLendingExtrinsic, getInterlayLendingPosition, getInterlayLendingRedeem, subscribeInterlayLendingStats } from '@subwallet/extension-base/koni/api/yield/interlay-lending';
 import { subscribeMoonwellLendingStats } from '@subwallet/extension-base/koni/api/yield/moonwell-lending';
 import { generatePathForNativeStaking, getNativeStakingBondExtrinsic, getNativeStakingPosition, getNominationPoolJoinExtrinsic, getNominationPoolPosition, subscribeNativeStakingYieldStats } from '@subwallet/extension-base/koni/api/yield/native-staking';
-import { getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallel-liquid-staking';
-import { subscribestDOTLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
+import { getParallelLiquidStakingDefaultUnstake, getParallelLiquidStakingDefaultWithdraw, getParallelLiquidStakingExtrinsic, getParallelLiquidStakingPosition, getParallelLiquidStakingRedeem, subscribeParallelLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/parallel-liquid-staking';
+import { generatePathForStellaswapLiquidStaking, getStellaswapLiquidStakingDefaultUnstake, getStellaswapLiquidStakingDefaultWithdraw, getStellaswapLiquidStakingExtrinsic, getStellaswapLiquidStakingPosition, subscribeStellaswapLiquidStakingStats } from '@subwallet/extension-base/koni/api/yield/stDOT-staking';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
-import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
-import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getTokenOnChainInfo, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
+import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
 // only apply for DOT right now, will need to scale up
-
-// TODO: add exchange rate
-export function subscribeYieldPoolStats (substrateApiMap: Record<string, _SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPoolInfo) => void) {
+export function subscribeYieldPoolStats (substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPoolInfo) => void) {
   const unsubList: VoidFunction[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   Object.values(YIELD_POOLS_INFO).forEach(async (poolInfo) => {
-    if (substrateApiMap[poolInfo.chain]) {
-      const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
+    if (substrateApiMap[poolInfo.chain] || evmApiMap[poolInfo.chain]) {
       const chainInfo = chainInfoMap[poolInfo.chain];
 
-      if (YieldPoolType.NOMINATION_POOL === poolInfo.type) {
-        const unsub = await subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
+      if (!_isChainEvmCompatible(chainInfo)) {
+        const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
 
-        // @ts-ignore
-        unsubList.push(unsub);
-      } else if (poolInfo.slug === 'DOT___bifrost_liquid_staking') {
-        const unsub = subscribeBifrostLiquidStakingStats(poolInfo, assetInfoMap, callback);
+        if (YieldPoolType.NOMINATION_POOL === poolInfo.type) {
+          const unsub = await subscribeNativeStakingYieldStats(poolInfo, substrateApi, chainInfo, callback);
 
-        // @ts-ignore
-        unsubList.push(unsub);
-      } else if (poolInfo.slug === 'DOT___acala_liquid_staking') {
-        const unsub = subscribeAcalaLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
+          // @ts-ignore
+          unsubList.push(unsub);
+        } else if (poolInfo.slug === 'DOT___bifrost_liquid_staking') {
+          const unsub = subscribeBifrostLiquidStakingStats(poolInfo, substrateApi, assetInfoMap, callback);
 
-        unsubList.push(unsub);
-      } else if (poolInfo.slug === 'DOT___interlay_lending') {
-        const unsub = subscribeInterlayLendingStats(substrateApi, chainInfoMap, poolInfo, assetInfoMap, callback);
+          // @ts-ignore
+          unsubList.push(unsub);
+        } else if (poolInfo.slug === 'DOT___acala_liquid_staking') {
+          const unsub = subscribeAcalaLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
 
-        unsubList.push(unsub);
-      } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
-        const unsub = subscribeParallelLiquidStakingStats(substrateApi, poolInfo, callback);
+          unsubList.push(unsub);
+        } else if (poolInfo.slug === 'DOT___interlay_lending') {
+          const unsub = subscribeInterlayLendingStats(substrateApi, chainInfoMap, poolInfo, assetInfoMap, callback);
 
-        unsubList.push(unsub);
-      } else if (poolInfo.slug === 'LcDOT___acala_euphrates_liquid_staking') {
-        const unsub = subscribeAcalaLcDOTLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
+          unsubList.push(unsub);
+        } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
+          const unsub = subscribeParallelLiquidStakingStats(substrateApi, poolInfo, callback);
 
-        unsubList.push(unsub);
-      } else if (poolInfo.slug === 'xcDOT___moonwell_lending') {
-        const unsub = subscribeMoonwellLendingStats(substrateApi, chainInfoMap, poolInfo, callback);
+          unsubList.push(unsub);
+        } else if (poolInfo.slug === 'LcDOT___acala_euphrates_liquid_staking') {
+          const unsub = subscribeAcalaLcDOTLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
 
-        unsubList.push(unsub);
-      } else if (poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
-        const unsub = subscribestDOTLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
+          unsubList.push(unsub);
+        }
+      } else {
+        if (poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+          const unsub = subscribeStellaswapLiquidStakingStats(chainInfoMap, assetInfoMap, evmApiMap, poolInfo, callback);
 
-        unsubList.push(unsub);
+          unsubList.push(unsub);
+        } else if (poolInfo.slug === 'xcDOT___moonwell_lending') {
+          const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
+
+          const unsub = subscribeMoonwellLendingStats(substrateApi, chainInfoMap, poolInfo, callback);
+
+          unsubList.push(unsub);
+        }
       }
     }
   });
@@ -81,18 +86,21 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
   };
 }
 
-export function subscribeYieldPosition (substrateApiMap: Record<string, SubstrateApi>, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPositionInfo) => void) {
+export function subscribeYieldPosition (substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, addresses: string[], chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPositionInfo) => void) {
   const unsubList: VoidFunction[] = [];
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   Object.values(YIELD_POOLS_INFO).forEach(async (poolInfo) => {
-    if (!substrateApiMap[poolInfo.chain]) {
+    const chainInfo = chainInfoMap[poolInfo.chain];
+
+    if (_isChainEvmCompatible(chainInfo) && !evmApiMap[poolInfo.chain]) {
+      return;
+    } else if (!substrateApiMap[poolInfo.chain]) {
       return;
     }
 
     const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
-    const chainInfo = chainInfoMap[poolInfo.chain];
 
     const useAddresses = _isChainEvmCompatible(chainInfo) ? evmAddresses : substrateAddresses;
 
@@ -118,6 +126,10 @@ export function subscribeYieldPosition (substrateApiMap: Record<string, Substrat
       unsubList.push(unsub);
     } else if (poolInfo.slug === 'DOT___parallel_liquid_staking') {
       const unsub = await getParallelLiquidStakingPosition(substrateApi, useAddresses, chainInfo, poolInfo, assetInfoMap, callback);
+
+      unsubList.push(unsub);
+    } else if (poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+      const unsub = getStellaswapLiquidStakingPosition(evmApiMap, useAddresses, poolInfo, assetInfoMap, callback);
 
       unsubList.push(unsub);
     }
@@ -171,6 +183,8 @@ export async function generateNaiveOptimalPath (params: OptimalYieldPathParams, 
     return generatePathForLiquidStaking(params, balanceService);
   } else if (params.poolInfo.slug === 'DOT___parallel_liquid_staking') {
     return generatePathForLiquidStaking(params, balanceService);
+  } else if (params.poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+    return await generatePathForStellaswapLiquidStaking(params);
   }
 
   return generatePathForNativeStaking(params);
@@ -343,52 +357,58 @@ export async function validateEarningProcess (address: string, params: OptimalYi
     status: YieldValidationStatus.OK
   };
 
+  // xcm
   const bnAmount = new BN(params.amount);
   const inputTokenSlug = params.poolInfo.inputAssets[0];
   const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
 
-  const altInputTokenSlug = params.poolInfo.altInputAssets ? params.poolInfo?.altInputAssets[0] : '';
-  const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
+  // submit
+  const submitStep = path.steps[1].type === YieldStepType.XCM ? path.steps[2] : path.steps[1];
+  const defaultFeeTokenSlug = params.poolInfo.feeAssets[0];
+  const feeTokenSlug = path.totalFee[submitStep.id].slug;
+  const feeTokenInfo = params.assetInfoMap[feeTokenSlug];
 
-  const [inputTokenBalance, altInputTokenBalance] = await Promise.all([
-    balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug),
-    balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug)
+  const [feeTokenBalance, inputTokenBalance] = await Promise.all([
+    balanceService.getTokenFreeBalance(params.address, feeTokenInfo.originChain, feeTokenSlug),
+    balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug)
   ]);
 
+  const bnFeeTokenBalance = new BN(feeTokenBalance.value || '0');
   const bnInputTokenBalance = new BN(inputTokenBalance.value || '0');
+
+  const altInputTokenSlug = params.poolInfo?.altInputAssets?.[0];
 
   let isXcmOk = false;
 
-  if (path.steps[1].type === YieldStepType.XCM && params.poolInfo.altInputAssets) { // if xcm
-    const missingAmount = bnAmount.sub(bnInputTokenBalance); // TODO: what if input token is not LOCAL ??
-    const xcmFee = new BN(path.totalFee[1].amount || '0');
-    const xcmAmount = missingAmount.add(xcmFee);
+  if (altInputTokenSlug) {
+    const altInputTokenInfo = params.assetInfoMap[altInputTokenSlug];
 
-    const bnAltInputTokenBalance = new BN(altInputTokenBalance.value || '0');
-    const altInputTokenMinAmount = new BN(params.assetInfoMap[altInputTokenSlug].minAmount || '0');
+    if (path.steps[1].type === YieldStepType.XCM && params.poolInfo.altInputAssets) { // if xcm
+      const altInputTokenBalance = await balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug);
 
-    if (!bnAltInputTokenBalance.sub(xcmAmount).gte(altInputTokenMinAmount)) {
-      processValidation.failedStep = path.steps[1];
-      processValidation.ok = false;
-      processValidation.status = YieldValidationStatus.NOT_ENOUGH_BALANCE;
+      const missingAmount = bnAmount.sub(bnInputTokenBalance); // TODO: what if input token is not LOCAL ??
+      const xcmFee = new BN(path.totalFee[1].amount || '0');
+      const xcmAmount = missingAmount.add(xcmFee);
 
-      errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_BALANCE, processValidation.message, processValidation));
+      const bnAltInputTokenBalance = new BN(altInputTokenBalance.value || '0');
+      const altInputTokenMinAmount = new BN(params.assetInfoMap[altInputTokenSlug].minAmount || '0');
 
-      return errors;
+      if (!bnAltInputTokenBalance.sub(xcmAmount).gte(altInputTokenMinAmount)) {
+        processValidation.failedStep = path.steps[1];
+        processValidation.ok = false;
+        processValidation.status = YieldValidationStatus.NOT_ENOUGH_BALANCE;
+
+        errors.push(new TransactionError(YieldValidationStatus.NOT_ENOUGH_BALANCE, processValidation.message, processValidation));
+
+        return errors;
+      }
+
+      isXcmOk = true;
     }
-
-    isXcmOk = true;
   }
-
-  const submitStep = path.steps[1].type === YieldStepType.XCM ? path.steps[2] : path.steps[1];
-  const feeTokenSlug = path.totalFee[submitStep.id].slug;
-  const feeTokenInfo = params.assetInfoMap[feeTokenSlug];
-  const defaultFeeTokenSlug = params.poolInfo.feeAssets[0];
 
   if (params.poolInfo.feeAssets.length === 1 && feeTokenSlug === defaultFeeTokenSlug) {
     const bnFeeAmount = new BN(path.totalFee[submitStep.id]?.amount || '0');
-    const feeTokenBalance = await balanceService.getTokenFreeBalance(params.address, feeTokenInfo.originChain, feeTokenSlug);
-    const bnFeeTokenBalance = new BN(feeTokenBalance.value || '0');
     const bnFeeTokenMinAmount = new BN(params.assetInfoMap[feeTokenSlug]?.minAmount || '0');
 
     if (!bnFeeTokenBalance.sub(bnFeeAmount).gte(bnFeeTokenMinAmount)) {
@@ -453,7 +473,7 @@ export async function validateYieldProcess (address: string, params: OptimalYiel
 export interface HandleYieldStepData {
   txChain: string,
   extrinsicType: ExtrinsicType,
-  extrinsic: SubmittableExtrinsic<'promise'>,
+  extrinsic: SubmittableExtrinsic<'promise'> | TransactionConfig,
   txData: any,
   transferNativeAmount: string
 }
@@ -487,6 +507,8 @@ export async function handleYieldStep (address: string, yieldPoolInfo: YieldPool
     return getParallelLiquidStakingExtrinsic(address, params, path, currentStep, requestData, balanceService);
   } else if (yieldPoolInfo.slug === 'DOT___interlay_lending') {
     return getInterlayLendingExtrinsic(address, params, path, currentStep, requestData, balanceService);
+  } else if (yieldPoolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+    return getStellaswapLiquidStakingExtrinsic(address, params, path, currentStep, requestData);
   }
 
   const _data = requestData.data as SubmitJoinNominationPool;
@@ -520,4 +542,26 @@ export async function handleYieldRedeem (params: OptimalYieldPathParams, address
   }
 
   return getBifrostLiquidStakingRedeem(params, amount);
+}
+
+export async function handleLiquidStakingDefaultUnstake (params: UnbondingSubmitParams, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
+  if (params.chain === 'acala') {
+    return getAcalaLiquidStakingDefaultUnstake(params, substrateApiMap[params.chain]);
+  } else if (params.chain === 'parallel') {
+    return getParallelLiquidStakingDefaultUnstake(params, substrateApiMap[params.chain]);
+  } else if (params.chain === 'moonbeam' && poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+    return getStellaswapLiquidStakingDefaultUnstake(params, evmApiMap, poolInfo, assetInfoMap);
+  }
+
+  return getBifrostLiquidStakingDefaultUnstake(params, substrateApiMap[params.chain], poolInfo, assetInfoMap);
+}
+
+export async function handleLiquidStakingDefaultWithdraw (poolInfo: YieldPoolInfo, substrateApi: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, nominatorMetadata: NominatorMetadata, assetInfoMap: Record<string, _ChainAsset>): Promise<SubmittableExtrinsic<'promise'> | TransactionConfig> {
+  if (poolInfo.chain === 'parallel') {
+    return getParallelLiquidStakingDefaultWithdraw(nominatorMetadata, substrateApi);
+  } else if (poolInfo.chain === 'moonbeam' && poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
+    return getStellaswapLiquidStakingDefaultWithdraw(poolInfo, evmApiMap, nominatorMetadata, assetInfoMap);
+  }
+
+  return getAcalaLiquidStakingDefaultWithdraw(nominatorMetadata, substrateApi);
 }

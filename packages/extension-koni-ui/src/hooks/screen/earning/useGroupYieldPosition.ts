@@ -20,13 +20,15 @@ const combineYieldPositionStats = (array: YieldPositionStats[]): YieldPositionSt
   };
 
   for (const info of array) {
-    for (const reward of info.rewards) {
-      const slug = reward.slug;
+    if (info.rewards) {
+      for (const reward of info.rewards) {
+        const slug = reward.slug;
 
-      if (rewardMap[slug]) {
-        rewardMap[slug].push(reward);
-      } else {
-        rewardMap[slug] = [reward];
+        if (rewardMap[slug]) {
+          rewardMap[slug].push(reward);
+        } else {
+          rewardMap[slug] = [reward];
+        }
       }
     }
   }
@@ -88,13 +90,14 @@ const useGroupYieldPosition = (): YieldPositionInfo[] => {
         continue;
       }
 
-      const isStaking = [YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolInfo[slug].type);
+      const isStaking = [YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL, YieldPoolType.LIQUID_STAKING].includes(poolInfo[slug].type);
 
       if (isAll) {
         const base: Omit<YieldPositionInfo, 'balance' | 'metadata'> = {
           address: ALL_ACCOUNT_KEY,
           slug: slug,
-          chain: positionInfo.chain
+          chain: positionInfo.chain,
+          type: positionInfo.type
         };
 
         const rawBalance: Record<string, YieldAssetBalance[]> = {};
@@ -128,13 +131,11 @@ const useGroupYieldPosition = (): YieldPositionInfo[] => {
           const tmp: YieldAssetBalance = {
             slug: _first.slug,
             activeBalance: '0',
-            exchangeRate: exchangeRate,
-            totalBalance: '0'
+            exchangeRate: exchangeRate
           };
 
           for (const value of values) {
             tmp.activeBalance = new BigN(tmp.activeBalance).plus(value.activeBalance).toString();
-            tmp.totalBalance = new BigN(tmp.totalBalance).plus(value.totalBalance).toString();
           }
 
           resultBalance.push(tmp);

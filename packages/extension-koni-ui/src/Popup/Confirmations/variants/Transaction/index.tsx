@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { EvmSignArea, SubstrateSignArea } from '../../parts/Sign';
-import { BaseTransactionConfirmation, BondTransactionConfirmation, CancelUnstakeTransactionConfirmation, ClaimRewardTransactionConfirmation, FastWithdrawTransactionConfirmation, JoinPoolTransactionConfirmation, JoinYieldPoolConfirmation, LeavePoolTransactionConfirmation, SendNftTransactionConfirmation, TransferBlock, UnbondTransactionConfirmation, WithdrawTransactionConfirmation } from './variants';
+import { BaseTransactionConfirmation, BondTransactionConfirmation, CancelUnstakeTransactionConfirmation, ClaimRewardTransactionConfirmation, FastWithdrawTransactionConfirmation, JoinPoolTransactionConfirmation, JoinYieldPoolConfirmation, LeavePoolTransactionConfirmation, SendNftTransactionConfirmation, TokenApproveConfirmation, TransferBlock, UnbondTransactionConfirmation, WithdrawTransactionConfirmation, YieldPoolLeaveTransactionConfirmation } from './variants';
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;
@@ -44,13 +44,23 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
     case ExtrinsicType.MINT_QDOT:
     case ExtrinsicType.MINT_LDOT:
     case ExtrinsicType.MINT_SDOT:
+    case ExtrinsicType.MINT_STDOT:
     case ExtrinsicType.MINT_VDOT:
       return JoinYieldPoolConfirmation;
     case ExtrinsicType.REDEEM_QDOT:
     case ExtrinsicType.REDEEM_LDOT:
     case ExtrinsicType.REDEEM_SDOT:
+    case ExtrinsicType.REDEEM_STDOT:
     case ExtrinsicType.REDEEM_VDOT:
       return FastWithdrawTransactionConfirmation;
+    case ExtrinsicType.UNSTAKE_QDOT:
+    case ExtrinsicType.UNSTAKE_LDOT:
+    case ExtrinsicType.UNSTAKE_SDOT:
+    case ExtrinsicType.UNSTAKE_STDOT:
+    case ExtrinsicType.UNSTAKE_VDOT:
+      return YieldPoolLeaveTransactionConfirmation;
+    case ExtrinsicType.TOKEN_APPROVE:
+      return TokenApproveConfirmation;
     default:
       return BaseTransactionConfirmation;
   }

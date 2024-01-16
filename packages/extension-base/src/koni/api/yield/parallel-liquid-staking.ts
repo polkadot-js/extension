@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, StakingStatus, StakingType, SubmitYieldStepData, UnbondingSubmitParams, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { convertDerivativeToOriginToken, YIELD_POOL_MIN_AMOUNT_PERCENT, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
@@ -51,6 +51,8 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, po
       substrateApi.api.query.liquidStaking.exchangeRate.at(beginBlockHash)
     ]);
 
+    const minStake = substrateApi.api.consts.liquidStaking.minStake.toString();
+
     const beginTimestamp = _beginTimestamp.toPrimitive() as number;
     const beginExchangeRate = _beginExchangeRate.toPrimitive() as number;
     const decimals = 10 ** 18;
@@ -70,8 +72,8 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, po
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '10000000000',
-        minWithdrawal: '5000000000',
+        minJoinPool: minStake,
+        minWithdrawal: '0',
         totalApy: apy * 100,
         tvl: tvl.toString()
       }
@@ -111,18 +113,25 @@ export function getParallelLiquidStakingPosition (substrateApi: _SubstrateApi, u
       positionCallback({
         slug: poolInfo.slug,
         chain: chainInfo.slug,
+        type: YieldPoolType.LIQUID_STAKING,
         address,
         balance: [
           {
             slug: derivativeTokenSlug, // token slug
-            totalBalance: addressBalance.toString(),
             activeBalance: addressBalance.toString()
           }
         ],
 
         metadata: {
-          rewards: []
-        } as YieldPositionStats
+          chain: chainInfo.slug,
+          type: StakingType.LIQUID_STAKING,
+
+          status: StakingStatus.EARNING_REWARD,
+          address,
+          activeStake: addressBalance.toString(),
+          nominations: [],
+          unstakings: []
+        } as NominatorMetadata
       } as YieldPositionInfo);
     }
   });
@@ -203,4 +212,16 @@ export async function getParallelLiquidStakingRedeem (params: OptimalYieldPathPa
   const extrinsic = substrateApi.api.tx.ammRoute.swapExactTokensForTokens(['1001', '101'], amount, weightedMinAmount);
 
   return [ExtrinsicType.REDEEM_SDOT, extrinsic];
+}
+
+export async function getParallelLiquidStakingDefaultUnstake (params: UnbondingSubmitParams, substrateApi: _SubstrateApi): Promise<SubmittableExtrinsic<'promise'>> {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.liquidStaking.unstake(params.amount, 'RelayChain');
+}
+
+export async function getParallelLiquidStakingDefaultWithdraw (nominatorMetadata: NominatorMetadata, substrateApi: _SubstrateApi): Promise<SubmittableExtrinsic<'promise'>> {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.liquidStaking.unstake({ Id: nominatorMetadata.address });
 }

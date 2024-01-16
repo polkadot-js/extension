@@ -345,10 +345,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.MINT_SDOT]: t('Mint sDOT'),
     [ExtrinsicType.MINT_LDOT]: t('Mint LDOT'),
     [ExtrinsicType.MINT_VDOT]: t('Mint vDOT'),
+    [ExtrinsicType.MINT_STDOT]: t('Mint stDOT'),
     [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT'),
     [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT'),
     [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT'),
     [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT'),
+    [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT'),
+    [ExtrinsicType.UNSTAKE_QDOT]: t('Unstake qDOT'),
+    [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT'),
+    [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT'),
+    [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT'),
+    [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT'),
+    [ExtrinsicType.TOKEN_APPROVE]: t('Token approve'),
     [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
 
@@ -377,10 +385,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.MINT_SDOT]: t('Mint sDOT transaction'),
     [ExtrinsicType.MINT_LDOT]: t('Mint LDOT transaction'),
     [ExtrinsicType.MINT_VDOT]: t('Mint vDOT transaction'),
+    [ExtrinsicType.MINT_STDOT]: t('Mint stDOT transaction'),
     [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT transaction'),
     [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT transaction'),
     [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT transaction'),
     [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT transaction'),
+    [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT transaction'),
+    [ExtrinsicType.UNSTAKE_QDOT]: t('Unstake qDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT tranasction'),
+    [ExtrinsicType.TOKEN_APPROVE]: t('Token approve transaction'),
     [ExtrinsicType.UNKNOWN]: t('Unknown transaction')
   }), [t]);
 

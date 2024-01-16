@@ -428,13 +428,13 @@ const Component: React.FC<Props> = (props: Props) => {
         const bInputDecimals = bInputAsset.decimals || 0;
 
         const aValue = a.balance.reduce((previousValue, currentValue) => {
-          const value = new BigN(currentValue.totalBalance).multipliedBy(currentValue.exchangeRate || 1);
+          const value = new BigN(currentValue.activeBalance).multipliedBy(currentValue.exchangeRate || 1);
 
           return previousValue.plus(value);
         }, BN_ZERO).div(BN_TEN.pow(aInputDecimals));
 
         const bValue = b.balance.reduce((previousValue, currentValue) => {
-          const value = new BigN(currentValue.totalBalance).multipliedBy(currentValue.exchangeRate || 1);
+          const value = new BigN(currentValue.activeBalance).multipliedBy(currentValue.exchangeRate || 1);
 
           return previousValue.plus(value);
         }, BN_ZERO).div(BN_TEN.pow(bInputDecimals));

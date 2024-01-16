@@ -275,7 +275,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
   xcDOT___stellaswap_liquid_staking: {
     slug: 'xcDOT___stellaswap_liquid_staking',
     chain: 'moonbeam',
-    name: 'stDOT Staking',
+    name: 'StellaSwap Liquid Staking',
     logo: 'stellaswap',
     description: 'Earn rewards by staking xcDOT for stDOT',
     type: YieldPoolType.LIQUID_STAKING,
@@ -283,7 +283,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
       'moonbeam-LOCAL-xcDOT'
     ],
     derivativeAssets: [
-      'moonbeam-LOCAL-stDOT' // TODO: add to chain-list
+      'moonbeam-ERC20-stDOT-0xbc7E02c4178a7dF7d3E564323a5c359dc96C4db4'
     ],
     rewardAssets: [
       'moonbeam-LOCAL-xcDOT'

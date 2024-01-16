@@ -3,14 +3,15 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, RequestYieldStepSubmit, SubmitYieldStepData, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, LeavePoolAdditionalData, NotificationType, RequestYieldStepSubmit, SubmitYieldStepData, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { YIELD_POOLS_INFO } from '@subwallet/extension-base/koni/api/yield/data';
+import { YIELD_POOL_MIN_AMOUNT_PERCENT } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import MintCampaignService from '@subwallet/extension-base/services/mint-campaign-service';
@@ -163,7 +164,9 @@ export default class TransactionService {
         } catch (e) {
           const error = e as Error;
 
-          if (error.message.includes('gas required exceeds allowance') && error.message.includes('insufficient funds')) {
+          console.log('Fail to get fee', e);
+
+          if (error.message.includes('gas required exceeds allowance') || error.message.includes('insufficient funds')) {
             validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
           }
 
@@ -494,8 +497,21 @@ export default class TransactionService {
         {
           const data = parseTransactionData<ExtrinsicType.STAKING_UNBOND>(transaction.data);
 
-          historyItem.to = data.validatorAddress || '';
-          historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
+          if (data.isLiquidStaking && data.derivativeTokenInfo && data.exchangeRate && data.inputTokenInfo) {
+            historyItem.amount = {
+              decimals: _getAssetDecimals(data.derivativeTokenInfo),
+              symbol: _getAssetSymbol(data.derivativeTokenInfo),
+              value: data.amount
+            };
+
+            historyItem.additionalInfo = {
+              inputTokenSlug: data.inputTokenInfo.slug,
+              exchangeRate: data.exchangeRate
+            } as TransactionAdditionalInfo[ExtrinsicType.STAKING_UNBOND];
+          } else {
+            historyItem.to = data.validatorAddress || '';
+            historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
+          }
         }
 
         break;
@@ -540,6 +556,7 @@ export default class TransactionService {
         break;
       }
 
+      case ExtrinsicType.MINT_STDOT:
       case ExtrinsicType.MINT_QDOT:
       case ExtrinsicType.MINT_LDOT:
       case ExtrinsicType.MINT_SDOT:
@@ -556,7 +573,7 @@ export default class TransactionService {
           derivativeTokenSlug: params.derivativeTokenSlug,
           exchangeRate: params.exchangeRate
         } as TransactionAdditionalInfo[ExtrinsicType.MINT_VDOT];
-        eventLogs && parseLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
+        eventLogs && !_isChainEvmCompatible(chainInfo) && parseLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
 
         break;
       }
@@ -575,20 +592,54 @@ export default class TransactionService {
         break;
       }
 
+      case ExtrinsicType.UNSTAKE_QDOT:
+      case ExtrinsicType.UNSTAKE_VDOT:
+      case ExtrinsicType.UNSTAKE_LDOT:
+      case ExtrinsicType.UNSTAKE_SDOT:
+      case ExtrinsicType.UNSTAKE_STDOT:
+      case ExtrinsicType.REDEEM_STDOT:
       case ExtrinsicType.REDEEM_LDOT:
       case ExtrinsicType.REDEEM_SDOT:
 
       // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.REDEEM_VDOT: {
         const data = parseTransactionData<ExtrinsicType.REDEEM_VDOT>(transaction.data);
+        const yieldPoolInfo = data.yieldPoolInfo;
 
         if (data.yieldPoolInfo.derivativeAssets) {
           const derivativeTokenSlug = data.yieldPoolInfo.derivativeAssets[0];
           const derivativeTokenInfo = this.chainService.getAssetBySlug(derivativeTokenSlug);
+          const chainInfo = this.chainService.getChainInfoByKey(data.yieldPoolInfo.chain);
 
           historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(derivativeTokenInfo), decimals: _getAssetDecimals(derivativeTokenInfo) };
-          eventLogs && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
+          eventLogs && !_isChainEvmCompatible(chainInfo) && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
+
+          const minAmountPercent = YIELD_POOL_MIN_AMOUNT_PERCENT[yieldPoolInfo.slug] || 1;
+          const inputTokenSlug = yieldPoolInfo.inputAssets[0];
+          const inputTokenInfo = this.chainService.getAssetBySlug(inputTokenSlug);
+
+          const additionalInfo: LeavePoolAdditionalData = {
+            minAmountPercent,
+            symbol: inputTokenInfo.symbol,
+            decimals: inputTokenInfo.decimals || 0,
+            exchangeRate: yieldPoolInfo?.stats?.assetEarning?.[0].exchangeRate || 1,
+            slug: yieldPoolInfo.slug,
+            type: yieldPoolInfo.type,
+            chain: yieldPoolInfo.chain,
+            isFast: yieldPoolInfo.slug !== 'xcDOT___stellaswap_liquid_staking'
+          };
+
+          historyItem.additionalInfo = additionalInfo;
         }
+
+        break;
+      }
+
+      case ExtrinsicType.TOKEN_APPROVE: {
+        const data = parseTransactionData<ExtrinsicType.TOKEN_APPROVE>(transaction.data);
+        const inputAsset = this.chainService.getAssetBySlug(data.inputTokenSlug);
+
+        historyItem.amount = { value: '0', symbol: _getAssetSymbol(inputAsset), decimals: _getAssetDecimals(inputAsset) };
 
         break;
       }

@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, YieldPoolInfo, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, OptimalYieldPath, OptimalYieldPathParams, RequestCrossChainTransfer, RequestYieldStepSubmit, SubmitYieldStepData, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldPositionStats, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
@@ -76,11 +76,11 @@ export function getInterlayLendingPosition (substrateApi: _SubstrateApi, useAddr
       positionCallback({
         slug: poolInfo.slug,
         chain: chainInfo.slug,
+        type: YieldPoolType.LENDING,
         address,
         balance: [
           {
             slug: derivativeTokenSlug, // token slug
-            totalBalance: totalBalance.toString(),
             activeBalance: totalBalance.toString()
           }
         ],
@@ -162,7 +162,7 @@ export async function getInterlayLendingRedeem (params: OptimalYieldPathParams, 
   const inputTokenInfo = params.assetInfoMap[inputTokenSlug];
 
   const bnAmount = new BN(amount);
-  const bnActiveBalance = new BN(yieldPositionInfo.balance[0].totalBalance);
+  const bnActiveBalance = new BN(yieldPositionInfo.balance[0].activeBalance);
 
   const redeemAll = bnAmount.eq(bnActiveBalance);
 

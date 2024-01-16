@@ -205,6 +205,8 @@ const Component = function ({ className }: Props) {
           return t('Unstake vDOT confirmation');
         case ExtrinsicType.UNSTAKE_STDOT:
           return t('Unstake stDOT confirmation');
+        case ExtrinsicType.TOKEN_APPROVE:
+          return t('Token approve transaction');
         default:
           return t('Transaction confirmation');
       }

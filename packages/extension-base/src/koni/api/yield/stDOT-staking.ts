@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestYieldStepSubmit, StakingStatus, StakingType, UnbondingSubmitParams, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominatorMetadata, OptimalYieldPath, OptimalYieldPathParams, RequestYieldStepSubmit, StakingStatus, StakingType, TokenApproveData, UnbondingSubmitParams, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import { DEFAULT_YIELD_FIRST_STEP, getStellaswapLiquidStakingContract, YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { HandleYieldStepData } from '@subwallet/extension-base/koni/api/yield/index';
@@ -245,8 +245,9 @@ export async function getStellaswapLiquidStakingExtrinsic (address: string, para
 
   if (path.steps[currentStep].type === YieldStepType.TOKEN_APPROVAL) {
     const inputTokenContract = getERC20Contract(chain, _getContractAddressOfToken(inputTokenInfo), params.evmApiMap);
+    const spenderAddress = _getContractAddressOfToken(derivativeTokenInfo);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const approveCall = inputTokenContract.methods.approve(address, MAX_INT);
+    const approveCall = inputTokenContract.methods.approve(spenderAddress, MAX_INT);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const approveEncodedCall = approveCall.encodeABI() as string;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -261,11 +262,16 @@ export async function getStellaswapLiquidStakingExtrinsic (address: string, para
       gas: gasLimit
     } as TransactionConfig;
 
+    const _data: TokenApproveData = {
+      inputTokenSlug: inputTokenSlug,
+      spenderTokenSlug: derivativeTokenSlug
+    };
+
     return {
       txChain: params.poolInfo.chain,
-      extrinsicType: ExtrinsicType.EVM_EXECUTE,
+      extrinsicType: ExtrinsicType.TOKEN_APPROVE,
       extrinsic: transactionObject,
-      txData: transactionObject,
+      txData: _data,
       transferNativeAmount: '0'
     };
   }

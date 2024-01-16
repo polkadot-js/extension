@@ -275,7 +275,7 @@ export const YIELD_POOLS_INFO: Record<string, YieldPoolInfo> = {
   xcDOT___stellaswap_liquid_staking: {
     slug: 'xcDOT___stellaswap_liquid_staking',
     chain: 'moonbeam',
-    name: 'Stellaswap Liquid Staking',
+    name: 'StellaSwap Liquid Staking',
     logo: 'stellaswap',
     description: 'Earn rewards by staking xcDOT for stDOT',
     type: YieldPoolType.LIQUID_STAKING,

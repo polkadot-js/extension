@@ -442,6 +442,11 @@ export interface RandomTestRequest {
   end: number;
 }
 
+export interface TokenApproveData {
+  inputTokenSlug: string;
+  spenderTokenSlug: string;
+}
+
 export enum TransactionDirection {
   SEND = 'send',
   RECEIVED = 'received'
@@ -490,6 +495,8 @@ export enum ExtrinsicType {
   UNSTAKE_SDOT = 'earn.unstake_sdot',
   UNSTAKE_STDOT = 'earn.unstake_stdot',
 
+  TOKEN_APPROVE = 'evm.token_approve',
+
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }
@@ -535,6 +542,8 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldFastWithdrawal,
   [ExtrinsicType.UNSTAKE_STDOT]: RequestYieldFastWithdrawal,
+
+  [ExtrinsicType.TOKEN_APPROVE]: TokenApproveData,
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,

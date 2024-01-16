@@ -43,7 +43,9 @@ export const TRANSACTION_TITLE_MAP: Record<ExtrinsicType, string> = {
   [ExtrinsicType.UNSTAKE_VDOT]: detectTranslate('Unstake vDOT'),
   [ExtrinsicType.UNSTAKE_LDOT]: detectTranslate('Unstake LDOT'),
   [ExtrinsicType.UNSTAKE_SDOT]: detectTranslate('Unstake sDOT'),
-  [ExtrinsicType.UNSTAKE_STDOT]: detectTranslate('Unstake stDOT')
+  [ExtrinsicType.UNSTAKE_STDOT]: detectTranslate('Unstake stDOT'),
+
+  [ExtrinsicType.TOKEN_APPROVE]: detectTranslate('Token approve')
 };
 
 export const ALL_STAKING_ACTIONS: ExtrinsicType[] = [

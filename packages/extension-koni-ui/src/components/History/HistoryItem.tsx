@@ -15,7 +15,7 @@ import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwall
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { ArrowSquareOut, CaretRight } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -55,6 +55,8 @@ function Component (
 
   const time = customFormatDate(item.time, '#hhhh#:#mm#');
   const link = getLink(item, chainInfoMap);
+
+  const showAmount = useMemo(() => item.type !== ExtrinsicType.TOKEN_APPROVE, [item.type]);
 
   const handleOnClick = useCallback(
     (e?: SyntheticEvent) => {
@@ -96,8 +98,9 @@ function Component (
               <Number
                 className={'__value'}
                 decimal={item?.amount?.decimals || 0}
-                decimalOpacity={0.45}
+                decimalOpacity={showAmount ? 0.45 : 0}
                 hide={!isShowBalance}
+                intOpacity={showAmount ? 1 : 0}
                 suffix={item?.amount?.symbol}
                 value={item?.amount?.value || '0'}
               />

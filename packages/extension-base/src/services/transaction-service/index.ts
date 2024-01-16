@@ -164,7 +164,9 @@ export default class TransactionService {
         } catch (e) {
           const error = e as Error;
 
-          if (error.message.includes('gas required exceeds allowance') && error.message.includes('insufficient funds')) {
+          console.log('Fail to get fee', e);
+
+          if (error.message.includes('gas required exceeds allowance') || error.message.includes('insufficient funds')) {
             validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
           }
 
@@ -629,6 +631,15 @@ export default class TransactionService {
 
           historyItem.additionalInfo = additionalInfo;
         }
+
+        break;
+      }
+
+      case ExtrinsicType.TOKEN_APPROVE: {
+        const data = parseTransactionData<ExtrinsicType.TOKEN_APPROVE>(transaction.data);
+        const inputAsset = this.chainService.getAssetBySlug(data.inputTokenSlug);
+
+        historyItem.amount = { value: '0', symbol: _getAssetSymbol(inputAsset), decimals: _getAssetDecimals(inputAsset) };
 
         break;
       }

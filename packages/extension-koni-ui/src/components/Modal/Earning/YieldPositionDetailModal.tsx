@@ -8,13 +8,13 @@ import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, StakingStatusUi, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, StakingStatusUi, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, UN_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetAccountsByYield, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { createEarningTagTypes, getEarnExtrinsicType, getWithdrawExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { createEarningTagTypes, getEarnExtrinsicType, getUnstakeExtrinsicType, getWithdrawExtrinsicType, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
@@ -174,6 +174,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [, setYieldStorage] = useLocalStorage(YIELD_TRANSACTION, DEFAULT_YIELD_PARAMS);
   const [, setFastWithdrawStorage] = useLocalStorage(FAST_WITHDRAW_YIELD_TRANSACTION, DEFAULT_FAST_WITHDRAW_YIELD_PARAMS);
+  const [, setUnYieldStorage] = useLocalStorage(UN_YIELD_TRANSACTION, DEFAULT_UN_YIELD_PARAMS);
 
   const tagTypes = useMemo(() => createEarningTagTypes(t), [t]);
 
@@ -214,6 +215,33 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [activeModal, currentAccount, inactiveModal, isWebUI, navigate, setFastWithdrawStorage, yieldPoolInfo]);
 
+  const onClickUnstakeBtn = useCallback(() => {
+    inactiveModal(modalId);
+    const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+    setFastWithdrawStorage({
+      ...DEFAULT_FAST_WITHDRAW_YIELD_PARAMS,
+      from: address,
+      chain: yieldPoolInfo.chain,
+      method: yieldPoolInfo.slug,
+      asset: yieldPoolInfo.inputAssets[0]
+    });
+
+    setUnYieldStorage({
+      ...DEFAULT_UN_YIELD_PARAMS,
+      from: address,
+      chain: yieldPoolInfo.chain,
+      method: yieldPoolInfo.slug,
+      asset: yieldPoolInfo.inputAssets[0]
+    });
+
+    if (isWebUI) {
+      activeModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
+    } else {
+      navigate('/transaction/un-yield');
+    }
+  }, [activeModal, currentAccount, inactiveModal, isWebUI, navigate, setFastWithdrawStorage, setUnYieldStorage, yieldPoolInfo.chain, yieldPoolInfo.inputAssets, yieldPoolInfo.slug]);
+
   const onClickMoreAction = useCallback(() => {
     inactiveModal(modalId);
     activeModal(EARNING_MORE_ACTION_MODAL);
@@ -230,15 +258,31 @@ const Component: React.FC<Props> = (props: Props) => {
           onClick={onClickMoreAction}
           schema='secondary'
         />
-        <Button
-          className='__action-btn'
-          disabled={!availableActions.includes(YieldAction.WITHDRAW_EARNING) || isPoolUnavailable}
-          onClick={onClickFooterButton(
-            onClickWithdrawBtn,
-            getWithdrawExtrinsicType(slug)
-          )}
-          schema='secondary'
-        >{t('Withdraw')}</Button>
+        {
+          yieldPoolInfo.slug === 'xcDOT___stellaswap_liquid_staking'
+            ? (
+              <Button
+                className='__action-btn'
+                disabled={!availableActions.includes(YieldAction.UNSTAKE) || isPoolUnavailable}
+                onClick={onClickFooterButton(
+                  onClickUnstakeBtn,
+                  getUnstakeExtrinsicType(slug)
+                )}
+                schema='secondary'
+              >{t('Unstake')}</Button>
+            )
+            : (
+              <Button
+                className='__action-btn'
+                disabled={!availableActions.includes(YieldAction.WITHDRAW_EARNING) || isPoolUnavailable}
+                onClick={onClickFooterButton(
+                  onClickWithdrawBtn,
+                  getWithdrawExtrinsicType(slug)
+                )}
+                schema='secondary'
+              >{t('Withdraw')}</Button>
+            )
+        }
         <Button
           className='__action-btn'
           disabled={!availableActions.includes(YieldAction.START_EARNING) || isPoolUnavailable}
@@ -249,7 +293,7 @@ const Component: React.FC<Props> = (props: Props) => {
         >{t(yieldPoolInfo.slug === 'DOT___interlay_lending' ? t('Supply now') : t('Stake now'))}</Button>
       </div>
     );
-  }, [availableActions, onClickFooterButton, onClickMoreAction, onClickStakeMoreBtn, onClickWithdrawBtn, slug, t, yieldPoolInfo.slug, yieldPoolInfo.stats?.isAvailable]);
+  }, [availableActions, onClickFooterButton, onClickMoreAction, onClickStakeMoreBtn, onClickWithdrawBtn, slug, t, yieldPoolInfo.slug, yieldPoolInfo.stats?.isAvailable, onClickUnstakeBtn]);
 
   const onClickSeeMoreBtn = useCallback(() => {
     setSeeMore(true);

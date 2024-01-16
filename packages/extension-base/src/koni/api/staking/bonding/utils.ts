@@ -476,7 +476,7 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
     const activeBalance = new BN(yieldPosition.balance[0].activeBalance || '0');
 
     if (activeBalance.gt(BN_ZERO)) {
-      if (yieldPoolInfo.slug === '') {
+      if (yieldPoolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
         result.push(YieldAction.UNSTAKE);
       } else {
         result.push(YieldAction.WITHDRAW_EARNING); // TODO

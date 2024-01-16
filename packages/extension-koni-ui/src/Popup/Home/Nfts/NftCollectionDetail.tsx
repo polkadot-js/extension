@@ -177,6 +177,13 @@ const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Prop
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
 
+    '.ant-sw-sub-header-container': {
+      paddingBottom: token.paddingXS,
+      paddingTop: token.paddingXS,
+      minHeight: 56,
+      marginBottom: token.marginXS
+    },
+
     '.header-content': {
       color: token.colorTextBase,
       fontWeight: token.fontWeightStrong,
@@ -193,7 +200,6 @@ const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Prop
     },
 
     '.nft_item_list__container': {
-      paddingTop: 14,
       flex: 1,
       height: '100%',
 

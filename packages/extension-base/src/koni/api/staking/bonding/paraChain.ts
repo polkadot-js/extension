@@ -123,12 +123,13 @@ export function subscribeParaChainStakingMetadata (chain: string, substrateApi: 
     const maxDelegations = substrateApi.api.consts?.parachainStaking?.maxDelegationsPerDelegator?.toString();
     const unstakingDelay = substrateApi.api.consts.parachainStaking.delegationBondLessDelay.toString();
     const unstakingPeriod = parseInt(unstakingDelay) * (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default);
+    const minDelegatorStake = substrateApi.api.consts?.parachainStaking?.minDelegatorStk?.toString();
 
     callback(chain, {
       chain,
       type: StakingType.NOMINATED,
       era: round,
-      minStake: '0',
+      minStake: minDelegatorStake || '0',
       maxValidatorPerNominator: parseInt(maxDelegations),
       maxWithdrawalRequestPerValidator: 1, // by default
       allowCancelUnstaking: true,
@@ -144,6 +145,7 @@ export async function getParaChainStakingMetadata (chain: string, substrateApi: 
   const round = parseRawNumber(_round.current);
   const maxDelegations = chainApi.api.consts.parachainStaking.maxDelegationsPerDelegator.toString();
   const unstakingDelay = chainApi.api.consts.parachainStaking.delegationBondLessDelay.toString();
+  const minDelegatorStake = chainApi.api.consts.parachainStaking?.minDelegatorStk?.toString();
 
   let _unvestedAllocation;
 
@@ -181,7 +183,7 @@ export async function getParaChainStakingMetadata (chain: string, substrateApi: 
     type: StakingType.NOMINATED,
     era: round,
     inflation,
-    minStake: '0',
+    minStake: minDelegatorStake || '0',
     maxValidatorPerNominator: parseInt(maxDelegations),
     maxWithdrawalRequestPerValidator: 1, // by default
     allowCancelUnstaking: true,

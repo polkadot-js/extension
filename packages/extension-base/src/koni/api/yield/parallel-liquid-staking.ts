@@ -51,6 +51,8 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, po
       substrateApi.api.query.liquidStaking.exchangeRate.at(beginBlockHash)
     ]);
 
+    const minStake = substrateApi.api.consts.liquidStaking.minStake.toString();
+
     const beginTimestamp = _beginTimestamp.toPrimitive() as number;
     const beginExchangeRate = _beginExchangeRate.toPrimitive() as number;
     const decimals = 10 ** 18;
@@ -70,8 +72,8 @@ export function subscribeParallelLiquidStakingStats (chainApi: _SubstrateApi, po
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '10000000000',
-        minWithdrawal: '5000000000',
+        minJoinPool: minStake,
+        minWithdrawal: '0',
         totalApy: apy * 100,
         tvl: tvl.toString()
       }

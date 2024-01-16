@@ -58,6 +58,8 @@ export function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi, chain
       stakingMetaPromise
     ]);
 
+    const mintThreshold = substrateApi.api.consts.homa.mintThreshold.toString();
+
     const stakingMeta = _stakingMeta as BifrostLiquidStakingMeta;
     const stakingMetaList = stakingMeta.data.dailySummaries.nodes;
     const latestExchangeRate = parseInt(stakingMetaList[0].exchangeRate);
@@ -85,8 +87,8 @@ export function subscribeAcalaLiquidStakingStats (chainApi: _SubstrateApi, chain
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '50000000000',
-        minWithdrawal: '50000000000',
+        minJoinPool: mintThreshold,
+        minWithdrawal: '0',
         totalApy: apy * 100,
         tvl: totalStakingBonded.add(toBondPool).toString()
       }

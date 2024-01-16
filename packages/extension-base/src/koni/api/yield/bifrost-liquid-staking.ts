@@ -55,7 +55,7 @@ interface BifrostUnlockInfo {
   era: number
 }
 
-export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPoolInfo) => void) {
+export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, substrateApi: _SubstrateApi, assetInfoMap: Record<string, _ChainAsset>, callback: (rs: YieldPoolInfo) => void) {
   async function getPoolStat () {
     const stakingMetaPromise = new Promise(function (resolve) {
       fetch(STATS_URL, {
@@ -79,16 +79,19 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
       }).catch(console.error);
     });
 
-    const [_stakingMeta, _exchangeRate] = await Promise.all([
+    const assetInfo = assetInfoMap[poolInfo.inputAssets[0]];
+
+    const [_stakingMeta, _exchangeRate, _minimumMint] = await Promise.all([
       stakingMetaPromise,
-      exchangeRatePromise
+      exchangeRatePromise,
+      substrateApi.api.query.vtokenMinting.minimumMint(_getTokenOnChainInfo(assetInfo))
     ]);
 
     const stakingMeta = _stakingMeta as Record<string, BifrostLiquidStakingMeta>;
     const exchangeRate = _exchangeRate as BifrostVtokenExchangeRateResp;
+    const minimumMint = _minimumMint.toString();
 
     const vDOTStats = stakingMeta.vDOT;
-    const assetInfo = assetInfoMap[poolInfo.inputAssets[0]];
     const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
 
     // eslint-disable-next-line node/no-callback-literal
@@ -104,8 +107,8 @@ export function subscribeBifrostLiquidStakingStats (poolInfo: YieldPoolInfo, ass
         ],
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
-        minJoinPool: '5000000000',
-        minWithdrawal: '4000000000',
+        minJoinPool: minimumMint,
+        minWithdrawal: '0',
         totalApy: parseFloat(vDOTStats.apyBase),
         tvl: (vDOTStats.tvm * assetDecimals).toString()
       }

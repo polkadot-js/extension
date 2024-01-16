@@ -42,7 +42,7 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
           // @ts-ignore
           unsubList.push(unsub);
         } else if (poolInfo.slug === 'DOT___bifrost_liquid_staking') {
-          const unsub = subscribeBifrostLiquidStakingStats(poolInfo, assetInfoMap, callback);
+          const unsub = subscribeBifrostLiquidStakingStats(poolInfo, substrateApi, assetInfoMap, callback);
 
           // @ts-ignore
           unsubList.push(unsub);
@@ -62,19 +62,16 @@ export function subscribeYieldPoolStats (substrateApiMap: Record<string, _Substr
           const unsub = subscribeAcalaLcDOTLiquidStakingStats(substrateApi, chainInfoMap, poolInfo, callback);
 
           unsubList.push(unsub);
-        } else if (poolInfo.slug === 'xcDOT___moonwell_lending') {
-          const unsub = subscribeMoonwellLendingStats(substrateApi, chainInfoMap, poolInfo, callback);
-
-          unsubList.push(unsub);
         }
       } else {
         if (poolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
-          console.debug('chainInfoMap', chainInfoMap);
-          console.debug('assetInfoMap', assetInfoMap);
-          console.debug('evmApiMap', evmApiMap);
-          console.debug('poolInfo', poolInfo);
-          console.debug('callback', callback);
           const unsub = subscribeStellaswapLiquidStakingStats(chainInfoMap, assetInfoMap, evmApiMap, poolInfo, callback);
+
+          unsubList.push(unsub);
+        } else if (poolInfo.slug === 'xcDOT___moonwell_lending') {
+          const substrateApi = await substrateApiMap[poolInfo.chain].isReady;
+
+          const unsub = subscribeMoonwellLendingStats(substrateApi, chainInfoMap, poolInfo, callback);
 
           unsubList.push(unsub);
         }

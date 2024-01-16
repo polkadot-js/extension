@@ -4,7 +4,7 @@
 import { TokenApproveData } from '@subwallet/extension-base/background/KoniTypes';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { useGetChainAssetInfo } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainAssetInfo, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -15,6 +15,8 @@ type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
+
+  const { t } = useTranslation();
 
   const txParams = useMemo((): TokenApproveData => transaction.data as TokenApproveData, [transaction.data]);
 
@@ -32,7 +34,7 @@ const Component: React.FC<Props> = (props: Props) => {
           inputAsset && (
             <MetaInfo.Account
               address={_getContractAddressOfToken(inputAsset)}
-              label={'Contract'}
+              label={t('Contract')}
             />
           )
         }
@@ -41,10 +43,16 @@ const Component: React.FC<Props> = (props: Props) => {
           spenderAsset && (
             <MetaInfo.Account
               address={_getContractAddressOfToken(spenderAsset)}
-              label={'Spender contract'}
+              label={t('Spender contract')}
             />
           )
         }
+        <MetaInfo.Number
+          decimals={transaction.estimateFee?.decimals || 0}
+          label={t('Estimated fee')}
+          suffix={transaction.estimateFee?.symbol}
+          value={transaction.estimateFee?.value || 0}
+        />
       </MetaInfo>
     </div>
   );

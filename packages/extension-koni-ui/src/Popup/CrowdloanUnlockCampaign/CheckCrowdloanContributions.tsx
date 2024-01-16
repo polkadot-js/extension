@@ -262,7 +262,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
             schema={'secondary'}
           >
             <div className={'__footer-button-content'}>
-              <div className={'__footer-button-title'}>{t('Rewards: 18% - 24%')}</div>
+              <div className={'__footer-button-title'}>{t('Rewards: 14.8% - 18.5 %')}</div>
 
               <div className={'__footer-button-subtitle'}>{t('Earn with SubWallet Dashboard')}</div>
             </div>

@@ -38,6 +38,10 @@ const Component: React.FC<Props> = (props: Props) => {
     return account?.name;
   }, [account?.name]);
 
+  if (!account) {
+    return (<></>);
+  }
+
   const decimals = tokenInfo?.decimals || 0;
   const symbol = tokenInfo?.symbol || '';
 

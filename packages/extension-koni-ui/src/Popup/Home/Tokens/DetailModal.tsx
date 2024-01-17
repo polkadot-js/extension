@@ -11,7 +11,7 @@ import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -58,7 +58,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
   const isActive = checkActive(id);
   const { isWebUI } = useContext(ScreenContext);
 
-  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
+  const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const { balanceMap } = useSelector((state) => state.balance);
 
   const [form] = Form.useForm<FormState>();
@@ -116,7 +116,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
       if (isAllAccount) {
         return !isAccountAll(address);
       } else {
-        return isSameAddress(address, currentAccount?.address || '');
+        return isSameAddress(address, currentAccount?.address || '') && !!findAccountByAddress(accounts, address);
       }
     };
 
@@ -136,7 +136,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
 
       return bTotal.minus(aTotal).toNumber();
     });
-  }, [balanceMap, currentAccount?.address, currentTokenInfo?.slug, isAllAccount]);
+  }, [accounts, balanceMap, currentAccount?.address, currentTokenInfo?.slug, isAllAccount]);
 
   const symbol = currentTokenInfo?.symbol || '';
 

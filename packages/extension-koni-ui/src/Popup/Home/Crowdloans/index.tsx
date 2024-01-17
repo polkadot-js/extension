@@ -271,7 +271,10 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
         paddingRight: token.padding,
 
         '.web-list-tool-area': {
-          paddingBottom: token.padding
+          paddingBottom: token.padding,
+          top: -10,
+          paddingTop: 10,
+          marginTop: -10
         }
       }
     }

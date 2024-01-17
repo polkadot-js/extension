@@ -371,7 +371,9 @@ const EarningOverviewContent = styled(Component)<Props>(({ theme: { token } }: P
       '.__toolbar-area': {
         position: 'sticky',
         zIndex: 10,
-        top: 0,
+        top: -10,
+        paddingTop: 10,
+        marginTop: -10,
         backgroundColor: token.colorBgDefault
       },
 

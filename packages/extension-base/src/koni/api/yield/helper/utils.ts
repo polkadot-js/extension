@@ -2,19 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { ExtrinsicType, YieldPoolInfo, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
-import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { Contract } from 'web3-eth-contract';
-
-export interface RuntimeDispatchInfo {
-  weight: {
-    refTime: number,
-    proofSize: number
-  },
-  class: string,
-  partialFee: number
-}
+import { RuntimeDispatchInfo, SpecialYieldPoolInfo, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/types';
 
 export const syntheticSelectedValidators = [
   '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',
@@ -34,8 +24,6 @@ export const syntheticSelectedValidators = [
   '15tfUt4iQNjMyhZiJGBf4EpETE2KqtW1nfJwbBT1MvWjvcK9',
   '12RXTLiaYh59PokjZVhQvKzcfBEB5CvDnjKKUmDUotzcTH3S'
 ];
-
-export const fakeAddress = '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6';
 
 export function calculateAlternativeFee (feeInfo: RuntimeDispatchInfo) {
   return feeInfo.partialFee;
@@ -73,22 +61,13 @@ export const YIELD_POOL_MIN_AMOUNT_PERCENT: Record<string, number> = {
   default: 0.98
 };
 
-export function convertDerivativeToOriginToken (amount: string, poolInfo: YieldPoolInfo, derivativeTokenInfo: _ChainAsset, originTokenInfo: _ChainAsset) {
+export function convertDerivativeToOriginToken (amount: string, poolInfo: SpecialYieldPoolInfo, derivativeTokenInfo: _ChainAsset, originTokenInfo: _ChainAsset) {
   const derivativeDecimals = _getAssetDecimals(derivativeTokenInfo);
   const originDecimals = _getAssetDecimals(originTokenInfo);
 
-  const exchangeRate = poolInfo.stats?.assetEarning?.[0].exchangeRate || 1;
+  const exchangeRate = poolInfo.statistic?.assetEarning?.[0].exchangeRate || 1;
   const formattedAmount = parseInt(amount) / (10 ** derivativeDecimals); // TODO: decimals
   const minAmount = formattedAmount * exchangeRate;
 
   return Math.floor(minAmount * (10 ** originDecimals));
 }
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
-export const ST_LIQUID_TOKEN_ABI: Record<string, any> = require('./st_liquid_token_abi.json');
-
-export const getStellaswapLiquidStakingContract = (networkKey: string, assetAddress: string, evmApiMap: Record<string, _EvmApi>, options = {}): Contract => {
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-  return new evmApiMap[networkKey].api.eth.Contract(ST_LIQUID_TOKEN_ABI, assetAddress, options);
-};

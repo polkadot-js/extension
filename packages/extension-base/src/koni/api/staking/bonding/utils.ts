@@ -2,24 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
-import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
-import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { detectTranslate, isSameAddress, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { EarningStatus, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { t } from 'i18next';
 
 import { ApiPromise } from '@polkadot/api';
-import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, hexToString, isHex, stringToU8a, u8aConcat } from '@polkadot/util';
-
-export interface PalletNominationPoolsPoolMember {
-  poolId: number,
-  points: number,
-  lasRecordedRewardCounter: number,
-  unbondingEras: Record<string, number>
-}
+import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
 
 export interface PalletDappsStakingDappInfo {
   address: string,
@@ -87,17 +81,6 @@ export interface PalletParachainStakingDelegator {
   status: number
 }
 
-export interface PalletStakingExposureItem {
-  who: string,
-  value: number
-}
-
-export interface PalletStakingExposure {
-  total: number,
-  own: number,
-  others: PalletStakingExposureItem[]
-}
-
 export interface PalletIdentityRegistration {
   judgements: any[],
   deposit: number,
@@ -119,21 +102,9 @@ export interface PalletIdentityRegistration {
 
 export type PalletIdentitySuper = [string, { Raw: string }]
 
-export interface ValidatorExtraInfo {
-  commission: string,
-  blocked: false,
-  identity?: string,
-  isVerified: boolean
-}
-
 export interface Unlocking {
   remainingEras: BN;
   value: BN;
-}
-
-export interface TernoaStakingRewardsStakingRewardsData {
-  sessionEraPayout: string,
-  sessionExtraRewardPayout: string
 }
 
 export function parsePoolStashAddress (api: ApiPromise, index: number, poolId: number, poolsPalletId: string) {
@@ -157,75 +128,6 @@ export function parsePoolStashAddress (api: ApiPromise, index: number, poolId: n
 
 export function transformPoolName (input: string): string {
   return input.replace(/[^\x20-\x7E]/g, '');
-}
-
-/**
-  * @returns
-  * <p>
-  * [0] - identity
-  * </p>
-  * <p>
-  * [1] - isReasonable (isVerified)
-  * </p>
-  *  */
-export async function parseIdentity (substrateApi: _SubstrateApi, address: string, children?: string): Promise<[string | undefined, boolean]> {
-  const compactResult = (rs?: string) => {
-    const result: string[] = [];
-
-    if (rs) {
-      result.push(rs);
-    }
-
-    if (children) {
-      result.push(children);
-    }
-
-    if (result.length > 0) {
-      return result.join('/');
-    } else {
-      return undefined;
-    }
-  };
-
-  if (substrateApi.api.query.identity) {
-    let identity;
-
-    const _parent = await substrateApi.api.query.identity.superOf(address);
-
-    const parentInfo = _parent.toHuman() as unknown as PalletIdentitySuper;
-
-    if (parentInfo) {
-      const [parentAddress, { Raw: data }] = parentInfo;
-      const child = isHex(data) ? hexToString(data) : data;
-
-      if (!isSameAddress(address, parentAddress)) {
-        const [rs, isReasonable] = await parseIdentity(substrateApi, parentAddress, child);
-
-        return [compactResult(rs), isReasonable];
-      }
-    }
-
-    const _identity = await substrateApi.api.query.identity.identityOf(address);
-    const identityInfo = _identity.toHuman() as unknown as PalletIdentityRegistration;
-
-    if (identityInfo) {
-      const displayName = identityInfo.info?.display?.Raw;
-      const web = identityInfo.info?.web?.Raw;
-      const riot = identityInfo.info?.riot?.Raw;
-      const twitter = identityInfo.info?.twitter?.Raw;
-      const isReasonable = identityInfo.judgements.length > 0;
-
-      if (displayName) {
-        identity = isHex(displayName) ? hexToString(displayName) : displayName;
-      } else {
-        identity = twitter || web || riot;
-      }
-
-      return [compactResult(identity), isReasonable];
-    }
-  }
-
-  return [undefined, false];
 }
 
 export function getInflationParams (networkKey: string): _SubstrateInflationParams {
@@ -427,11 +329,7 @@ export function getYieldAvailableActionsByType (yieldPoolInfo: YieldPoolInfo): Y
   if (yieldPoolInfo.type === YieldPoolType.LENDING) {
     return [YieldAction.START_EARNING, YieldAction.WITHDRAW_EARNING];
   } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
-    if (yieldPoolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
-      return [YieldAction.START_EARNING, YieldAction.UNSTAKE];
-    }
-
-    return [YieldAction.START_EARNING, YieldAction.WITHDRAW_EARNING];
+    return [YieldAction.START_EARNING, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
   }
 
   return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CANCEL_UNSTAKE];
@@ -441,30 +339,28 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
   const result: YieldAction[] = [];
 
   if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(yieldPoolInfo.type)) {
-    const nominatorMetadata = yieldPosition.metadata as NominatorMetadata;
-
     result.push(YieldAction.STAKE);
 
-    const bnActiveStake = new BN(nominatorMetadata.activeStake);
+    const bnActiveStake = new BN(yieldPosition.activeStake);
 
-    if (nominatorMetadata.activeStake && bnActiveStake.gt(BN_ZERO)) {
+    if (yieldPosition.activeStake && bnActiveStake.gt(BN_ZERO)) {
       result.push(YieldAction.UNSTAKE);
 
-      const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
-      const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain);
+      const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(yieldPosition.chain);
+      const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(yieldPosition.chain);
       const bnUnclaimedReward = new BN(unclaimedReward || '0');
 
       if (
-        ((nominatorMetadata.type === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
+        ((yieldPosition.type === YieldPoolType.NOMINATION_POOL || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
         isAstarNetwork
       ) {
         result.push(YieldAction.CLAIM_REWARD);
       }
     }
 
-    if (nominatorMetadata.unstakings.length > 0) {
+    if (yieldPosition.unstakings.length > 0) {
       result.push(YieldAction.CANCEL_UNSTAKE);
-      const hasClaimable = nominatorMetadata.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
+      const hasClaimable = yieldPosition.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
 
       if (hasClaimable) {
         result.push(YieldAction.WITHDRAW);
@@ -473,22 +369,17 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
   } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
     result.push(YieldAction.START_EARNING);
 
-    const activeBalance = new BN(yieldPosition.balance[0].activeBalance || '0');
+    const activeBalance = new BN(yieldPosition.activeStake || '0');
 
     if (activeBalance.gt(BN_ZERO)) {
-      if (yieldPoolInfo.slug === 'xcDOT___stellaswap_liquid_staking') {
-        result.push(YieldAction.UNSTAKE);
-      } else {
-        result.push(YieldAction.WITHDRAW_EARNING); // TODO
-      }
+      result.push(YieldAction.UNSTAKE);
     }
-    //
-    // const metadata = yieldPosition.metadata as NominatorMetadata;
-    // const hasWithdrawal = metadata.unstakings.some((unstakingInfo) => unstakingInfo.status === UnstakingStatus.CLAIMABLE);
-    //
-    // if (hasWithdrawal) {
-    //   result.push(YieldAction.WITHDRAW);
-    // }
+
+    const hasWithdrawal = yieldPosition.unstakings.some((unstakingInfo) => unstakingInfo.status === UnstakingStatus.CLAIMABLE);
+
+    if (hasWithdrawal) {
+      result.push(YieldAction.WITHDRAW);
+    }
 
     // TODO: check has unstakings to withdraw
   } else {
@@ -590,24 +481,24 @@ export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
   return result;
 }
 
-export function getStakingStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): StakingStatus {
-  let stakingStatus: StakingStatus = StakingStatus.EARNING_REWARD;
+export function getEarningStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): EarningStatus {
+  let stakingStatus: EarningStatus = EarningStatus.EARNING_REWARD;
 
   if (bnTotalActiveStake.isZero()) {
-    stakingStatus = StakingStatus.NOT_EARNING;
+    stakingStatus = EarningStatus.NOT_EARNING;
   } else {
     let invalidDelegationCount = 0;
 
     for (const nomination of nominationList) {
-      if (nomination.status === StakingStatus.NOT_EARNING) {
+      if (nomination.status === EarningStatus.NOT_EARNING) {
         invalidDelegationCount += 1;
       }
     }
 
     if (invalidDelegationCount > 0 && invalidDelegationCount < nominationList.length) {
-      stakingStatus = StakingStatus.PARTIALLY_EARNING;
+      stakingStatus = EarningStatus.PARTIALLY_EARNING;
     } else if (invalidDelegationCount === nominationList.length) {
-      stakingStatus = StakingStatus.NOT_EARNING;
+      stakingStatus = EarningStatus.NOT_EARNING;
     }
   }
 

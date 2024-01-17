@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, YieldCompoundingPeriod, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { getYieldAvailableActionsByPosition, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
+import { YieldCompoundingPeriod, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils';
 import { BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
 import { DEFAULT_FAST_WITHDRAW_YIELD_PARAMS, DEFAULT_UN_YIELD_PARAMS, DEFAULT_YIELD_PARAMS, EARNING_MORE_ACTION_MODAL, FAST_WITHDRAW_YIELD_TRANSACTION, StakingStatusUi, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, UN_YIELD_TRANSACTION, YIELD_POSITION_DETAIL_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-web-ui/constants';

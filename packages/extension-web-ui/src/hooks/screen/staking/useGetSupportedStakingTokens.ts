@@ -4,8 +4,8 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenSlug, _getSubstrateGenesisHash, _isChainEvmCompatible, _isChainSupportSubstrateStaking, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { ALL_KEY } from '@subwallet/extension-web-ui/constants/common';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { AccountAddressType } from '@subwallet/extension-web-ui/types/account';

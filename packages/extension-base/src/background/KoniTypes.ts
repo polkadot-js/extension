@@ -10,7 +10,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BalanceMap, BuyServiceInfo, BuyTokenInfo, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, EarningStatus, HandleYieldStepParams, LeavePoolAdditionalData, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, ResponseGetYieldPoolTargets, SubmitYieldStepData, TokenApproveData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -70,7 +70,7 @@ export interface AuthRequestV2 extends Resolver<ResultResolver> {
   idStr: string;
   request: RequestAuthorizeTab;
   url: string;
-  accountAuthType: AccountAuthType
+  accountAuthType: AccountAuthType;
 }
 
 /// Manage Auth
@@ -150,6 +150,7 @@ export interface StakingRewardItem {
   totalSlash?: string,
   unclaimedReward?: string
 }
+
 export interface UnlockingStakeInfo {
   chain: string,
   address: string,
@@ -280,7 +281,13 @@ export interface CrowdloanJson {
   details: Record<string, CrowdloanItem>
 }
 
-export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN' | 'KUSAMA_PARACHAIN' | 'MAIN_NET' | 'TEST_NET' | 'UNKNOWN';
+export type NetWorkGroup =
+  'RELAY_CHAIN'
+  | 'POLKADOT_PARACHAIN'
+  | 'KUSAMA_PARACHAIN'
+  | 'MAIN_NET'
+  | 'TEST_NET'
+  | 'UNKNOWN';
 
 export enum ContractType {
   wasm = 'wasm',
@@ -384,22 +391,22 @@ export interface CurrentAccountInfo {
 }
 
 export type LanguageType = 'en'
-|'zh'
-|'fr'
-|'tr'
-|'pl'
-|'th'
-|'ur'
-|'vi'
-|'ja'
-|'ru';
+| 'zh'
+| 'fr'
+| 'tr'
+| 'pl'
+| 'th'
+| 'ur'
+| 'vi'
+| 'ja'
+| 'ru';
 
 export type LanguageOptionType = {
   text: string;
   value: LanguageType;
 }
 
-export type BrowserConfirmationType = 'extension'|'popup'|'window';
+export type BrowserConfirmationType = 'extension' | 'popup' | 'window';
 
 export enum WalletUnlockType {
   ALWAYS_REQUIRED = 'always_required',
@@ -440,11 +447,6 @@ export type RequestChangeShowBalance = { enable: boolean };
 export interface RandomTestRequest {
   start: number;
   end: number;
-}
-
-export interface TokenApproveData {
-  inputTokenSlug: string;
-  spenderTokenSlug: string;
 }
 
 export enum TransactionDirection {
@@ -512,11 +514,11 @@ export interface ExtrinsicDataTypeMap {
 
   // Staking
   [ExtrinsicType.STAKING_JOIN_POOL]: RequestStakePoolingBonding,
-  [ExtrinsicType.STAKING_LEAVE_POOL]: RequestStakePoolingUnbonding,
+  [ExtrinsicType.STAKING_LEAVE_POOL]: RequestYieldLeave,
   [ExtrinsicType.STAKING_BOND]: RequestStakePoolingBonding,
   [ExtrinsicType.STAKING_UNBOND]: RequestUnbondingSubmit,
   [ExtrinsicType.STAKING_CLAIM_REWARD]: RequestStakeClaimReward,
-  [ExtrinsicType.STAKING_WITHDRAW]: RequestStakeWithdrawal,
+  [ExtrinsicType.STAKING_WITHDRAW]: RequestYieldWithdrawal,
   [ExtrinsicType.STAKING_COMPOUNDING]: RequestTuringStakeCompound,
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: RequestTuringCancelStakeCompound,
   [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: RequestStakeCancelWithdrawal,
@@ -524,24 +526,24 @@ export interface ExtrinsicDataTypeMap {
 
   // Yield
   [ExtrinsicType.JOIN_YIELD_POOL]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_VDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_LDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_SDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_QDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_STDOT]: RequestYieldStepSubmit,
-  [ExtrinsicType.MINT_STDOT]: RequestYieldStepSubmit,
+  [ExtrinsicType.MINT_VDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_LDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_SDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_QDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_STDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_STDOT]: SubmitYieldStepData,
 
-  [ExtrinsicType.REDEEM_VDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.REDEEM_QDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.REDEEM_LDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.REDEEM_SDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.REDEEM_STDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.UNSTAKE_VDOT]: RequestYieldLeave,
+  [ExtrinsicType.UNSTAKE_QDOT]: RequestYieldLeave,
+  [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldLeave,
+  [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldLeave,
+  [ExtrinsicType.UNSTAKE_STDOT]: RequestYieldLeave,
 
-  [ExtrinsicType.UNSTAKE_QDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.UNSTAKE_VDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldFastWithdrawal,
-  [ExtrinsicType.UNSTAKE_STDOT]: RequestYieldFastWithdrawal,
+  [ExtrinsicType.REDEEM_VDOT]: RequestYieldLeave,
+  [ExtrinsicType.REDEEM_QDOT]: RequestYieldLeave,
+  [ExtrinsicType.REDEEM_LDOT]: RequestYieldLeave,
+  [ExtrinsicType.REDEEM_SDOT]: RequestYieldLeave,
+  [ExtrinsicType.REDEEM_STDOT]: RequestYieldLeave,
 
   [ExtrinsicType.TOKEN_APPROVE]: TokenApproveData,
 
@@ -601,7 +603,7 @@ export interface XCMTransactionAdditionalInfo {
 }
 
 export interface NFTTransactionAdditionalInfo {
-  collectionName: string
+  collectionName: string;
 }
 
 export type TransactionAdditionalInfo = {
@@ -697,7 +699,8 @@ export enum StakingTxErrorType {
   INVALID_ACTIVE_STAKE = 'INVALID_ACTIVE_STAKE',
   EXCEED_MAX_UNSTAKING = 'EXCEED_MAX_UNSTAKING',
   INACTIVE_NOMINATION_POOL = 'INACTIVE_NOMINATION_POOL',
-  CAN_NOT_GET_METADATA = 'CAN_NOT_GET_METADATA'
+  CAN_NOT_GET_METADATA = 'CAN_NOT_GET_METADATA',
+  NOT_ENOUGH_MIN_UNSTAKE = 'NOT_ENOUGH_MIN_UNSTAKE'
 }
 
 export enum TransferTxErrorType {
@@ -709,6 +712,7 @@ export enum TransferTxErrorType {
 }
 
 export type TransactionErrorType = BasicTxErrorType | TransferTxErrorType | StakingTxErrorType | YieldValidationStatus
+
 export enum BasicTxWarningCode {
   NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'notEnoughExistentialDeposit'
 }
@@ -730,7 +734,7 @@ export interface TransactionResponse {
   txError?: boolean;
   errors?: TransactionError[];
   status?: boolean;
-  txResult?: TxResultType
+  txResult?: TxResultType;
   passwordError?: string | null;
 }
 
@@ -855,6 +859,7 @@ export interface RequestDeriveValidateV2 {
 }
 
 export type ResponseDeriveValidateV2 = DeriveAccountInfo;
+
 export interface RequestGetDeriveAccounts {
   page: number;
   limit: number;
@@ -899,7 +904,7 @@ export enum AccountExternalErrorCode {
   UNKNOWN_ERROR = 'unknownError'
 }
 
-export interface AccountExternalError{
+export interface AccountExternalError {
   code: AccountExternalErrorCode;
   message: string;
 }
@@ -959,7 +964,7 @@ export interface ResponseAccountCreateWithSecretKey {
 // Subscribe Address Book
 
 export interface AddressBookInfo {
-  addresses: AddressJson[]
+  addresses: AddressJson[];
 }
 
 export interface RequestEditContactAccount {
@@ -1051,6 +1056,7 @@ export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
 export type RequestSubscribeStakingReward = null
+
 export enum ThemeNames {
   LIGHT = 'light',
   DARK = 'dark',
@@ -1101,7 +1107,7 @@ export interface NftTransactionRequest {
 }
 
 export interface EvmNftTransaction extends ValidateTransactionResponse {
-  tx: Record<string, any> | null
+  tx: Record<string, any> | null;
 }
 
 export interface EvmNftSubmitTransaction extends BaseRequestSign {
@@ -1170,7 +1176,7 @@ export interface RequestTransferCheckSupporting {
 }
 
 export interface RequestTransferExistentialDeposit {
-  tokenSlug: string
+  tokenSlug: string;
 }
 
 export interface RequestSaveRecentAccount {
@@ -1193,16 +1199,24 @@ export interface SubstrateNftSubmitTransaction extends BaseRequestSign {
 export type RequestSubstrateNftSubmitTransaction = InternalRequestSign<SubstrateNftSubmitTransaction>;
 export type RequestEvmNftSubmitTransaction = InternalRequestSign<EvmNftSubmitTransaction>;
 
-export interface RequestAccountMeta{
+export interface RequestAccountMeta {
   address: string | Uint8Array;
 }
 
-export interface ResponseAccountMeta{
+export interface ResponseAccountMeta {
   meta: KeyringPair$Meta;
 }
 
 export type RequestEvmEvents = null;
-export type EvmEventType = 'connect' | 'disconnect' | 'accountsChanged' | 'chainChanged' | 'message' | 'data' | 'reconnect' | 'error';
+export type EvmEventType =
+  'connect'
+  | 'disconnect'
+  | 'accountsChanged'
+  | 'chainChanged'
+  | 'message'
+  | 'data'
+  | 'reconnect'
+  | 'error';
 export type EvmAccountsChangedPayload = string [];
 export type EvmChainChangedPayload = string;
 export type EvmConnectPayload = { chainId: EvmChainChangedPayload }
@@ -1246,7 +1260,7 @@ export interface EvmSendTransactionParams {
   maxPriorityFeePerGas?: string | number;
   maxFeePerGas?: string | number;
   gasPrice?: string | number;
-  data?: string
+  data?: string;
 }
 
 export interface SwitchNetworkRequest {
@@ -1295,9 +1309,11 @@ export interface EvmRequestExternal {
   canSign: boolean;
 }
 
-export interface EvmSendTransactionRequestExternal extends EvmSendTransactionRequest, EvmRequestExternal {}
+export interface EvmSendTransactionRequestExternal extends EvmSendTransactionRequest, EvmRequestExternal {
+}
 
-export interface EvmSignatureRequestExternal extends EvmSignatureRequest, EvmRequestExternal {}
+export interface EvmSignatureRequestExternal extends EvmSignatureRequest, EvmRequestExternal {
+}
 
 export interface AddNetworkRequestExternal { // currently only support adding pure Evm network
   chainId: string;
@@ -1415,6 +1431,7 @@ export interface LedgerNetwork {
   isDevMode: boolean; // Dev mode on Ledger
   isEthereum: boolean; // Use for evm account
 }
+
 /// On-ramp
 
 export interface TransakNetwork {
@@ -1436,7 +1453,7 @@ export interface ArgInfo {
   argValue: string | string[];
 }
 
-export interface EraInfo{
+export interface EraInfo {
   period: number;
   phase: number;
 }
@@ -1499,7 +1516,7 @@ export interface ResponseQrSignSubstrate {
 export interface RequestQrSignEvm {
   address: string;
   message: string;
-  type: 'message' | 'transaction'
+  type: 'message' | 'transaction';
   chainId?: number;
 }
 
@@ -1541,7 +1558,6 @@ export type RequestCrossChainTransfer = InternalRequestSign<RequestCheckCrossCha
 
 /// Stake
 
-// Staking & Bonding
 export interface ChainStakingMetadata {
   chain: string;
   type: StakingType;
@@ -1559,7 +1575,7 @@ export interface ChainStakingMetadata {
   expectedReturn?: number; // in %, annually
   inflation?: number; // in %, annually
   nominatorCount?: number;
-}
+}// Staking & Bonding
 
 export interface NominationInfo {
   chain: string;
@@ -1569,55 +1585,23 @@ export interface NominationInfo {
 
   hasUnstaking?: boolean;
   validatorMinStake?: string;
-  status: StakingStatus;
-}
-
-export interface PalletNominationPoolsBondedPoolInner {
-  points: number,
-  state: 'Open' | 'Destroying' | 'Locked',
-  memberCounter: number,
-  roles: {
-    depositor: string,
-    root: string,
-    nominator: string,
-    bouncer: string
-  }
-}
-
-export interface NominationPoolInfo extends Pick<PalletNominationPoolsBondedPoolInner, 'roles' | 'memberCounter' | 'state'> {
-  id: number,
-  address: string,
-  name?: string,
-  bondedAmount: string,
-  isProfitable: boolean
-}
-
-export enum UnstakingStatus {
-  CLAIMABLE = 'CLAIMABLE',
-  UNLOCKING = 'UNLOCKING'
+  status: EarningStatus;
 }
 
 export interface UnstakingInfo {
   chain: string;
   status: UnstakingStatus;
   claimable: string; // amount to be withdrawn
-  waitingTime?: number; // in hours
+  waitingTime: number; // in hours
   validatorAddress?: string; // might unstake from a validator or not
 }
 
-export enum StakingStatus {
-  EARNING_REWARD = 'EARNING_REWARD',
-  PARTIALLY_EARNING = 'PARTIALLY_EARNING',
-  NOT_EARNING = 'NOT_EARNING',
-  WAITING = 'WAITING',
-  NOT_STAKING = 'NOT_STAKING'
-}
-
+// Migrated
 export interface NominatorMetadata {
   chain: string,
   type: StakingType,
 
-  status: StakingStatus,
+  status: EarningStatus,
   address: string,
   activeStake: string,
   nominations: NominationInfo[],
@@ -1625,6 +1609,7 @@ export interface NominatorMetadata {
   isBondedBefore?: boolean
 }
 
+// Migrated
 export interface ValidatorInfo {
   address: string;
   chain: string;
@@ -1660,52 +1645,23 @@ export type RequestBondingSubmit = InternalRequestSign<BondingSubmitParams>;
 // UnBonding
 
 export interface UnbondingSubmitParams extends BaseRequestSign {
-  amount: string,
-  chain: string,
+  amount: string;
+  chain: string;
 
-  nominatorMetadata: NominatorMetadata,
+  nominatorMetadata: NominatorMetadata;
   // for some chains
-  validatorAddress?: string
+  validatorAddress?: string;
 
-  isLiquidStaking?: boolean,
-  derivativeTokenInfo?: _ChainAsset,
-  exchangeRate?: number,
-  inputTokenInfo?: _ChainAsset
+  isLiquidStaking?: boolean;
+  derivativeTokenInfo?: _ChainAsset;
+  exchangeRate?: number;
+  inputTokenInfo?: _ChainAsset;
+  isFastUnbond: boolean;
 }
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
 
-// WithdrawStake
-
-export interface StakeWithdrawalParams extends BaseRequestSign {
-  nominatorMetadata: NominatorMetadata,
-  unstakingInfo: UnstakingInfo,
-  chain: string,
-  validatorAddress?: string,
-  isLiquidStaking?: boolean
-}
-
-export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;
-
 // Claim
-
-export interface StakeClaimRewardParams extends BaseRequestSign {
-  address: string,
-  chain: string,
-  stakingType: StakingType,
-  unclaimedReward?: string,
-  bondReward?: boolean
-}
-
-export type RequestStakeClaimReward = InternalRequestSign<StakeClaimRewardParams>;
-
-export interface StakeCancelWithdrawalParams extends BaseRequestSign {
-  address: string,
-  chain: string,
-  selectedUnstaking: UnstakingInfo
-}
-
-export type RequestStakeCancelWithdrawal = InternalRequestSign<StakeCancelWithdrawalParams>;
 
 // Compound
 
@@ -1795,20 +1751,6 @@ export type RequestCrossChainTransferExternal = InternalRequestSign<RequestCheck
 export type RequestNftTransferExternalSubstrate = InternalRequestSign<SubstrateNftSubmitTransaction>;
 
 export type RequestNftTransferExternalEvm = InternalRequestSign<EvmNftSubmitTransaction>;
-
-// Stake
-
-export type RequestStakeExternal = InternalRequestSign<BondingSubmitParams>;
-
-export type RequestUnStakeExternal = InternalRequestSign<UnbondingSubmitParams>;
-
-export type RequestWithdrawStakeExternal = InternalRequestSign<StakeWithdrawalParams>;
-
-export type RequestClaimRewardExternal = InternalRequestSign<StakeClaimRewardParams>;
-
-export type RequestCreateCompoundStakeExternal = InternalRequestSign<TuringStakeCompoundParams>;
-
-export type RequestCancelCompoundStakeExternal = InternalRequestSign<TuringCancelStakeCompoundParams>;
 
 export enum ChainEditStandard {
   EVM = 'EVM',
@@ -2007,8 +1949,8 @@ export interface CronReloadRequest {
 }
 
 export interface AllLogoMap {
-  chainLogoMap: Record<string, string>
-  assetLogoMap: Record<string, string>
+  chainLogoMap: Record<string, string>;
+  assetLogoMap: Record<string, string>;
 }
 
 // Phishing detect
@@ -2056,7 +1998,7 @@ export interface RequestReconnectConnectWalletSession {
 }
 
 export interface RequestDisconnectWalletConnectSession {
-  topic: string
+  topic: string;
 }
 
 // Not support
@@ -2105,7 +2047,7 @@ export enum MantaPayEnableMessage {
 
 export interface MantaPayEnableResponse {
   success: boolean;
-  message: MantaPayEnableMessage
+  message: MantaPayEnableMessage;
 }
 
 /// Metadata
@@ -2128,229 +2070,11 @@ export interface ResolveAddressToDomainRequest {
   address: string
 }
 
-export enum YieldPoolType {
-  LIQUID_STAKING = 'LIQUID_STAKING',
-  LENDING = 'LENDING',
-  SINGLE_FARMING = 'SINGLE_FARMING',
-  NOMINATION_POOL = 'NOMINATION_POOL',
-  NATIVE_STAKING = 'NATIVE_STAKING',
-  PARACHAIN_STAKING = 'PARACHAIN_STAKING'
-}
-
-export interface YieldWithdrawalMethod {
-  name: string,
-  description: string,
-  waitingTime: number, // 0 means immediately (in hours)
-}
-
-export interface YieldPoolInfo {
-  slug: string,
-  chain: string,
-  logo?: string,
-  derivativeAssets?: string[],
-  inputAssets: string[], // slug
-  rewardAssets: string[], // slug
-  altInputAssets?: string[], // TODO
-  feeAssets: string[],
-  withdrawalMethods: YieldWithdrawalMethod[],
-  description: string,
-  name: string,
-  type: YieldPoolType,
-  stats?: YieldPoolStats,
-  metadata?: YieldPoolMetadata
-}
-
-export interface YieldAssetBalance {
-  slug: string, // token slug
-  activeBalance: string,
-  exchangeRate?: number
-}
-
-export interface YieldPositionInfo {
-  slug: string,
-  type: YieldPoolType,
-  chain: string,
-  address: string,
-  balance: YieldAssetBalance[],
-
-  metadata: YieldPositionMetadata
-}
-
-export type YieldPoolMetadata = ChainStakingMetadata;
-
-export type YieldPositionMetadata = NominatorMetadata | YieldPositionStats;
-
-export interface YieldPositionStats {
-  rewards: YieldTokenBaseInfo[]
-}
-
-export interface OptimalYieldPathRequest {
-  address: string,
-  amount: string,
-  poolInfo: YieldPoolInfo
-}
-
-export interface OptimalYieldPathParams {
-  address: string,
-  amount: string,
-  poolInfo: YieldPoolInfo,
-
-  assetInfoMap: Record<string, _ChainAsset>,
-  chainInfoMap: Record<string, _ChainInfo>
-  substrateApiMap: Record<string, _SubstrateApi>,
-  evmApiMap: Record<string, _EvmApi>,
-  balanceMap: BalanceMap,
-
-  hasPosition?: boolean
-}
-
-export interface YieldTokenBaseInfo {
-  slug: string,
-  amount?: string,
-}
-
-export enum YieldStepType {
-  DEFAULT = 'DEFAULT',
-  XCM = 'XCM',
-
-  // native staking
-  NOMINATE = 'NOMINATE',
-
-  // nomination pool
-  JOIN_NOMINATION_POOL = 'JOIN_NOMINATION_POOL',
-
-  // bifrost
-  MINT_VDOT = 'MINT_VDOT',
-
-  // acala
-  MINT_LDOT = 'MINT_LDOT',
-
-  // interlay
-  MINT_QDOT = 'MINT_QDOT',
-
-  MINT_SDOT = 'MINT_SDOT',
-
-  MINT_STDOT = 'MINT_STDOT',
-
-  TOKEN_APPROVAL = 'TOKEN_APPROVAL'
-}
-
-export interface YieldStepDetail {
-  id: number,
-  name: string,
-  type: YieldStepType,
-  metadata?: Record<string, unknown>; // for generating extrinsic
-}
-
-export interface OptimalYieldPath {
-  totalFee: YieldTokenBaseInfo[],
-  steps: YieldStepDetail[],
-  connectionError?: string
-}
-
-export enum YieldValidationStatus {
-  NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
-  NOT_ENOUGH_BALANCE = 'NOT_ENOUGH_BALANCE',
-  NOT_ENOUGH_MIN_JOIN_POOL = 'NOT_ENOUGH_MIN_JOIN_POOL',
-  OK = 'OK'
-}
-
-export interface YieldProcessValidation {
-  ok: boolean,
-  status: YieldValidationStatus,
-  failedStep?: YieldStepDetail,
-  message?: string
-}
-
-export interface YieldAssetExpectedEarning {
-  apy?: number,
-  rewardInToken?: number
-}
-
-export enum YieldCompoundingPeriod {
-  DAILY = 1,
-  WEEKLY = 7,
-  MONTHLY = 30,
-  YEARLY = 365
-}
-
-export interface YieldAssetEarningStats {
-  slug: string
-  apr?: number,
-  apy?: number,
-  exchangeRate?: number // input token amount = reward token amount * exchange rate
-}
-
-export interface YieldPoolStats {
-  minJoinPool: string,
-  minWithdrawal: string,
-  maxCandidatePerFarmer: number,
-  maxWithdrawalRequestPerFarmer: number,
-
-  isAvailable?: boolean,
-  assetEarning?: YieldAssetEarningStats[],
-  farmerCount?: number,
-  totalApr?: number,
-  totalApy?: number,
-  tvl?: string // in token
-}
-
-export interface HandleYieldStepParams extends BaseRequestSign {
-  address: string;
-  yieldPoolInfo: YieldPoolInfo;
-  path: OptimalYieldPath;
-  data: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool;
-  currentStep: number;
-}
-
-export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;
-
-export interface ValidateYieldProcessParams {
-  yieldPoolInfo: YieldPoolInfo,
-  path: OptimalYieldPath;
-  address: string;
-  amount: string;
-  data?: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool;
-}
-
 export interface RequestYieldFastWithdrawal extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;
   yieldPositionInfo: YieldPositionInfo;
   amount: string;
-}
-
-export type SubmitYieldStepData = { // TODO
-  slug: string,
-  exchangeRate: number, // reward token amount = input token amount * exchange rate
-  inputTokenSlug: string,
-  derivativeTokenSlug?: string,
-  rewardTokenSlug: string,
-  amount: string,
-  feeTokenSlug: string
-};
-
-export interface SubmitJoinNativeStaking {
-  amount: string,
-  selectedValidators: ValidatorInfo[],
-  nominatorMetadata?: NominatorMetadata
-}
-
-export interface SubmitJoinNominationPool {
-  amount: string,
-  selectedPool: NominationPoolInfo,
-  nominatorMetadata?: NominatorMetadata
-}
-
-export interface LeavePoolAdditionalData {
-  slug: string;
-  chain: string;
-  type: YieldPoolType;
-  minAmountPercent: number;
-  exchangeRate: number;
-  symbol: string;
-  decimals: number;
-  isFast: boolean;
 }
 
 /* Campaign */
@@ -2368,7 +2092,7 @@ export interface CampaignButton {
 
 export enum CampaignDataType {
   NOTIFICATION = 'notification',
-  BANNER ='banner'
+  BANNER = 'banner'
 }
 
 export interface BaseCampaignData {
@@ -2392,7 +2116,7 @@ export interface CampaignBanner extends BaseCampaignData {
     metadata: Record<string, any> | null;
     environments: string[];
     position: string[];
-  }
+  };
 }
 
 export interface CampaignNotification extends BaseCampaignData {
@@ -2404,7 +2128,7 @@ export interface CampaignNotification extends BaseCampaignData {
     repeatAfter: number;
     action: CampaignAction;
     metadata: Record<string, any> | null;
-  }
+  };
 }
 
 export type CampaignData = CampaignBanner | CampaignNotification;
@@ -2432,7 +2156,6 @@ export interface KoniRequestSignatures {
   'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, SWTransactionResponse];
   'pri(staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
   'pri(staking.submitCancelWithdrawal)': [RequestStakeCancelWithdrawal, SWTransactionResponse];
-  'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, SWTransactionResponse];
   'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, SWTransactionResponse];
   'pri(bonding.submitBondingTransaction)': [RequestBondingSubmit, SWTransactionResponse];
   'pri(bonding.subscribeChainStakingMetadata)': [null, ChainStakingMetadata[], ChainStakingMetadata[]];
@@ -2463,7 +2186,7 @@ export interface KoniRequestSignatures {
   'pri(chainService.validateCustomChain)': [ValidateNetworkRequest, ValidateNetworkResponse];
   'pri(chainService.recoverSubstrateApi)': [string, boolean];
   'pri(chainService.disableAllChains)': [null, boolean];
-  'pri(assetSetting.getSubscription)': [null, Record<string, AssetSetting>, Record<string, AssetSetting>]
+  'pri(assetSetting.getSubscription)': [null, Record<string, AssetSetting>, Record<string, AssetSetting>];
   'pri(assetSetting.update)': [AssetSettingUpdateReq, boolean];
 
   // NFT functions
@@ -2581,22 +2304,56 @@ export interface KoniRequestSignatures {
   'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
   'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
 
-  // yield
-  'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
-  'pri(yield.getOptimalPath)': [OptimalYieldPathRequest, OptimalYieldPath];
-  'pri(yield.handleStep)': [HandleYieldStepParams, SWTransactionResponse];
-  'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
-  'pri(yield.submitRedeem)': [RequestYieldFastWithdrawal, SWTransactionResponse];
-  'pri(yield.validateProcess)': [ValidateYieldProcessParams, TransactionError[]];
+  /* Earning */
 
+  /* Info */
+
+  'pri(yield.subscribePoolInfo)': [null, YieldPoolInfo[], YieldPoolInfo[]];
+  'pri(yield.subscribeYieldPosition)': [null, YieldPositionInfo[], YieldPositionInfo[]];
+  'pri(yield.subscribeYieldReward)': [null, EarningRewardJson, EarningRewardJson];
+  'pri(yield.subscribeRewardHistory)': [null, Record<string, EarningRewardHistoryItem>, Record<string, EarningRewardHistoryItem>];
+  'pri(yield.getTargets)': [RequestGetYieldPoolTargets, ResponseGetYieldPoolTargets];
+  'pri(yield.minAmountPercent)': [null, Record<string, number>, Record<string, number>];
+
+  // Deprecated
   'pri(yield.getNativeStakingValidators)': [YieldPoolInfo, ValidatorInfo[]];
   'pri(yield.getStakingNominationPools)': [YieldPoolInfo, NominationPoolInfo[]];
 
+  /* Info */
+
+  /* Actions */
+
+  /* Join */
+
+  'pri(yield.join.earlyValidate)': [RequestEarlyValidateYield, ResponseEarlyValidateYield];
+  'pri(yield.join.getOptimalPath)': [OptimalYieldPathParams, OptimalYieldPath];
+  'pri(yield.join.handleStep)': [HandleYieldStepParams, SWTransactionResponse];
+  'pri(yield.join.validateProcess)': [ValidateYieldProcessParams, TransactionError[]];
+
+  /* Join */
+
+  /* Leave */
+
+  'pri(yield.leave.submit)': [RequestYieldLeave, SWTransactionResponse];
+
+  // Deprecated
+  'pri(yield.submitRedeem)': [RequestYieldFastWithdrawal, SWTransactionResponse];
   'pri(yield.staking.submitUnstaking)': [RequestUnbondingSubmit, SWTransactionResponse];
-  'pri(yield.staking.submitWithdraw)': [RequestStakeWithdrawal, SWTransactionResponse];
-  'pri(yield.staking.submitCancelWithdrawal)': [RequestStakeCancelWithdrawal, SWTransactionResponse];
-  'pri(yield.staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
   'pri(yield.nominationPool.submitUnstaking)': [RequestStakePoolingUnbonding, SWTransactionResponse];
+
+  /* Leave */
+
+  /* Other */
+
+  'pri(yield.withdraw.submit)': [RequestYieldWithdrawal, SWTransactionResponse];
+  'pri(yield.cancelWithdrawal.submit)': [RequestStakeCancelWithdrawal, SWTransactionResponse];
+  'pri(yield.claimReward.submit)': [RequestStakeClaimReward, SWTransactionResponse];
+
+  /* Other */
+
+  /* Actions */
+
+  /* Earning */
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];
@@ -2640,7 +2397,7 @@ export interface KoniRequestSignatures {
   // Evm
   'evm(events.subscribe)': [RequestEvmEvents, boolean, EvmEvent];
   'evm(request)': [RequestArguments, unknown];
-  'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
+  'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend];
 
   // Evm Transaction
   'pri(evm.transaction.parse.input)': [RequestParseEvmContractInput, ResponseParseEvmContractInput];
@@ -2713,8 +2470,8 @@ export interface KoniRequestSignatures {
 
   /* Campaign */
 
-  'pri(campaign.unlockDot.canMint)': [RequestUnlockDotCheckCanMint, boolean]
-  'pri(campaign.unlockDot.subscribe)': [RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft, UnlockDotTransactionNft]
+  'pri(campaign.unlockDot.canMint)': [RequestUnlockDotCheckCanMint, boolean];
+  'pri(campaign.unlockDot.subscribe)': [RequestUnlockDotSubscribeMintedData, UnlockDotTransactionNft, UnlockDotTransactionNft];
 
   /* Campaign */
 

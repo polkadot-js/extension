@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
 import { CREATE_RETURN, DEFAULT_ROUTER_PATH, DEFAULT_YIELD_PARAMS, EARNING_INFO_MODAL, YIELD_TRANSACTION } from '@subwallet/extension-web-ui/constants';
@@ -29,6 +27,8 @@ import { EarningTokenItem, EarningTokenList } from '../../Earning';
 import { EarningMethodSelector } from '../../Field';
 import { MetaInfo } from '../../MetaInfo';
 import { BaseModal } from '../BaseModal';
+import {YieldCompoundingPeriod, YieldPoolInfo} from '@subwallet/extension-base/types';
+import {calculateReward} from "@subwallet/extension-base/services/earning-service/utils";
 
 interface Props extends ThemeProps {
   defaultItem: YieldPoolInfo;

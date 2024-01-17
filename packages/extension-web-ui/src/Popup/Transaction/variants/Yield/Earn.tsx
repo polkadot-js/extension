@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, OptimalYieldPathRequest, SubmitJoinNativeStaking, SubmitJoinNominationPool, ValidatorInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { AccountSelector, AmountInput, EarningProcessItem, HiddenInput, MetaInfo, StakingProcessModal, YieldMultiValidatorSelector, YieldPoolSelector } from '@subwallet/extension-web-ui/components';

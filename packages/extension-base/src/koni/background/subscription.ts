@@ -2,21 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { NominatorMetadata, StakingItem, StakingRewardItem, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
-import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
+import { getNominationStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
 import { subscribeEssentialChainStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
-import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-base/koni/api/staking/paraChain';
-import { subscribeYieldPoolStats, subscribeYieldPosition } from '@subwallet/extension-base/koni/api/yield';
 import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { subscribeBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/balance';
+import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import { COMMON_RELOAD_EVENTS, EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import { EarningRewardHistoryItem, EarningRewardItem, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { waitTimeout } from '@subwallet/extension-base/utils';
 
-import { logger as createLogger } from '@polkadot/util';
+import { logger as createLogger, noop } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
 import KoniState from './handlers/State';
@@ -98,6 +98,7 @@ export class KoniSubscription {
 
       const address = serviceInfo.currentAccountInfo?.address;
 
+      // @ts-ignore
       this.subscribeYieldPools(serviceInfo.chainInfoMap, serviceInfo.assetRegistry, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm, address);
 
       if (!address) {
@@ -147,7 +148,7 @@ export class KoniSubscription {
     }).catch(console.error);
   }
 
-  subscribeYieldPools (chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, address?: string, onlyRunOnFirstTime?: boolean) {
+  subscribeYieldPools (chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, substrateApiMap: Record<string, SubstrateApi>, evmApiMap: Record<string, _EvmApi>, address?: string, onlyRunOnFirstTime?: boolean) {
     this.updateSubscription('yieldPoolStats', this.initYieldPoolStatsSubscription(substrateApiMap, evmApiMap, onlyRunOnFirstTime));
 
     if (address) {
@@ -161,40 +162,67 @@ export class KoniSubscription {
     }
   }
 
-  initYieldPositionSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, onlyRunOnFirstTime?: boolean) {
+  initYieldPositionSubscription (addresses: string[], substrateApiMap: Record<string, SubstrateApi>, evmApiMap: Record<string, _EvmApi>, chainInfoMap: Record<string, _ChainInfo>, assetInfoMap: Record<string, _ChainAsset>, onlyRunOnFirstTime?: boolean) {
+    let cancel = false;
+
     const updateYieldPoolStats = (data: YieldPositionInfo) => {
       this.state.updateYieldPosition(data);
     };
 
-    const unsub = subscribeYieldPosition(substrateApiMap, evmApiMap, addresses, chainInfoMap, assetInfoMap, updateYieldPoolStats);
+    let unsub: VoidFunction = noop;
 
-    if (onlyRunOnFirstTime) {
-      unsub && unsub();
-
-      return;
-    }
+    this.state.earningService.subscribePoolPositions(addresses, updateYieldPoolStats).then((rs) => {
+      if (cancel) {
+        rs();
+      } else {
+        if (onlyRunOnFirstTime) {
+          rs && rs();
+        } else {
+          unsub = rs;
+        }
+      }
+    }).catch(console.error);
 
     return () => {
+      cancel = true;
       unsub && unsub();
     };
   }
 
   initYieldPoolStatsSubscription (substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
-    this.state.resetYieldPoolInfo(Object.keys(this.state.getActiveChainInfoMap()));
+    let cancel = false;
+
+    this.state.resetYieldPoolInfo(Object.keys(this.state.getChainInfoMap()));
 
     const updateYieldPoolStats = (data: YieldPoolInfo) => {
       this.state.updateYieldPoolInfo(data);
     };
 
-    const unsub = subscribeYieldPoolStats(substrateApiMap, evmApiMap, this.state.getActiveChainInfoMap(), this.state.getAssetRegistry(), updateYieldPoolStats);
+    // const unsub = subscribeYieldPoolStats(substrateApiMap, evmApiMap, this.state.getActiveChainInfoMap(), this.state.getAssetRegistry(), updateYieldPoolStats);
+    let unsub: VoidFunction = noop;
 
-    if (onlyRunOnFirstTime) {
-      unsub && unsub();
+    this.state.earningService.subscribePoolsInfo(updateYieldPoolStats).then((rs) => {
+      if (cancel) {
+        rs();
+      } else {
+        if (onlyRunOnFirstTime) {
+          rs && rs();
+        } else {
+          unsub = rs;
+        }
+      }
+    }).catch(console.error);
 
-      return;
-    }
+    //
+    // if (onlyRunOnFirstTime) {
+    //   unsub && unsub();
+    //
+    //   return;
+    // }
 
     return () => {
+      cancel = true;
+      // unsub && unsub();
       unsub && unsub();
     };
   }
@@ -355,47 +383,35 @@ export class KoniSubscription {
       return;
     }
 
-    const pooledStakingItems = await this.state.getPooledPositionByAddress(addresses);
-
-    const pooledAddresses: string[] = [];
-
-    pooledStakingItems.forEach((pooledItem) => {
-      if (!pooledAddresses.includes(pooledItem.address)) {
-        pooledAddresses.push(pooledItem.address);
-      }
-    });
-
-    const chainInfoMap = this.state.getChainInfoMap();
-    const targetChainMap: Record<string, _ChainInfo> = {};
-
-    Object.entries(chainInfoMap).forEach(([key, network]) => {
-      const chainState = this.state.getChainStateByKey(key);
-
-      if (_isChainEnabled(chainState) && _isChainSupportSubstrateStaking(network)) {
-        targetChainMap[key] = network;
-      }
-    });
-
-    const activeNetworks: string[] = [];
-
-    Object.keys(targetChainMap).forEach((key) => {
-      activeNetworks.push(key);
-    });
-
-    const updateState = (result: StakingRewardItem) => {
-      this.state.updateStakingReward(result);
+    const updateState = (result: EarningRewardItem) => {
+      this.state.earningService.updateEarningReward(result);
     };
 
     await Promise.all([
-      getPoolingStakingRewardData(pooledAddresses, targetChainMap, this.state.getSubstrateApiMap(), updateState),
-      getAmplitudeUnclaimedStakingReward(this.state.getSubstrateApiMap(), addresses, chainInfoMap, activeNetworks, updateState)
+      this.state.earningService.getPoolReward(addresses, updateState)
+    ]);
+  }
+
+  async subscribeEarningRewardHistoryInterval (address: string) {
+    const addresses = this.state.getDecodedAddresses(address);
+
+    if (!addresses.length) {
+      return;
+    }
+
+    const updateState = (result: EarningRewardHistoryItem) => {
+      this.state.earningService.updateEarningRewardHistory(result);
+    };
+
+    await Promise.all([
+      this.state.earningService.fetchPoolRewardHistory(addresses, updateState)
     ]);
   }
 
   async reloadStaking () {
-    // const currentAddress = this.state.keyringService.currentAccount?.address;
+    const currentAddress = this.state.keyringService.currentAccount?.address;
 
-    // this.subscribeYieldPools(this.state.getSubstrateApiMap());
+    this.subscribeYieldPools(this.state.getChainInfoMap(), this.state.getAssetRegistry(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap(), currentAddress);
 
     await waitTimeout(1800);
   }

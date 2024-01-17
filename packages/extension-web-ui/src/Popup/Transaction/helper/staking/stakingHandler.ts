@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { ALL_KEY } from '@subwallet/extension-web-ui/constants/common';
 import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-web-ui/messaging';
 import { store } from '@subwallet/extension-web-ui/stores';
 // @ts-ignore
 import humanizeDuration from 'humanize-duration';
 import { TFunction } from 'react-i18next';
+import {_STAKING_CHAIN_GROUP} from "@subwallet/extension-base/services/earning-service/constants";
 
 export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
   if (unstakingPeriod) {

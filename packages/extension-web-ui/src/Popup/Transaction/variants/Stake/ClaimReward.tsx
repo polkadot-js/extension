@@ -3,8 +3,8 @@
 
 import { ExtrinsicType, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-web-ui/components';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';

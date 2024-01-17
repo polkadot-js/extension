@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateReward } from '@subwallet/extension-base/koni/api/yield';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningCalculatorModal, EarningItem, EarningToolbar, EmptyList } from '@subwallet/extension-web-ui/components';
 import EarningInfoModal from '@subwallet/extension-web-ui/components/Modal/Earning/EarningInfoModal';
 import Search from '@subwallet/extension-web-ui/components/Search';
@@ -44,7 +43,7 @@ interface SortOption {
 const searchFunction = (item: YieldPoolInfo, searchText: string) => {
   const searchTextLowerCase = searchText.toLowerCase();
 
-  if (!item.name && !searchTextLowerCase) {
+  if (!item.group && !searchTextLowerCase) {
     return true;
   }
 

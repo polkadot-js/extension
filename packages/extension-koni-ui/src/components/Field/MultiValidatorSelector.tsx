@@ -3,7 +3,7 @@
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';

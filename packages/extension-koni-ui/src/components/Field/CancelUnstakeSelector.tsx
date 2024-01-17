@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { GeneralEmptyList, StakingUnstakeItem } from '@subwallet/extension-koni-ui/components';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
@@ -13,6 +13,7 @@ import { CheckCircle, Spinner } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
+import {UnstakingStatus} from "@subwallet/extension-base/types";
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;

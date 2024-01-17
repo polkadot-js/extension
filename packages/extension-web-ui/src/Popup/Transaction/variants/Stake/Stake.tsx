@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType, NominationPoolInfo, NominatorMetadata, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
@@ -28,6 +27,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { accountFilterFunc, fetchChainValidators } from '../../helper';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../../parts';
+import {_STAKING_CHAIN_GROUP} from "@subwallet/extension-base/services/earning-service/constants";
 
 type Props = ThemeProps;
 

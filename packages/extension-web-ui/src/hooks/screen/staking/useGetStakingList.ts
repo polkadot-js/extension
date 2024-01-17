@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { EarningStatus } from '@subwallet/extension-base/types';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { StakingData, StakingDataType } from '@subwallet/extension-web-ui/types/staking';
 import { isAccountAll } from '@subwallet/extension-web-ui/utils';
@@ -143,18 +144,18 @@ const groupStakingRewardItems = (stakingRewardItems: StakingRewardItem[]): Staki
   return groupedStakingRewardItems;
 };
 
-const getGroupStatus = (earnMapping: Record<string, StakingStatus> = {}): StakingStatus => {
+const getGroupStatus = (earnMapping: Record<string, EarningStatus> = {}): EarningStatus => {
   const list = Object.values(earnMapping);
 
-  if (list.every((value) => value === StakingStatus.NOT_EARNING)) {
-    return StakingStatus.NOT_EARNING;
+  if (list.every((value) => value === EarningStatus.NOT_EARNING)) {
+    return EarningStatus.NOT_EARNING;
   }
 
-  if (list.every((value) => value === StakingStatus.EARNING_REWARD)) {
-    return StakingStatus.EARNING_REWARD;
+  if (list.every((value) => value === EarningStatus.EARNING_REWARD)) {
+    return EarningStatus.EARNING_REWARD;
   }
 
-  return StakingStatus.PARTIALLY_EARNING;
+  return EarningStatus.PARTIALLY_EARNING;
 };
 
 export const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): NominatorMetadata[] => {
@@ -180,11 +181,11 @@ export const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata
       activeStake: '',
       nominations: [],
       unstakings: [],
-      status: StakingStatus.NOT_EARNING
+      status: EarningStatus.NOT_EARNING
     };
 
     let groupedActiveStake = BN_ZERO;
-    const earnMapping: Record<string, StakingStatus> = {};
+    const earnMapping: Record<string, EarningStatus> = {};
 
     for (const nominatorMetadata of nominatorMetadataList) {
       if (nominatorMetadata.chain === chain && nominatorMetadata.type === type) {

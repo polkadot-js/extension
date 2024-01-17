@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestStakeClaimReward } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestStakeClaimReward } from '@subwallet/extension-base/types';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-web-ui/components';
 import { useGetNativeTokenBasicInfo } from '@subwallet/extension-web-ui/hooks';
 import CN from 'classnames';
@@ -18,7 +18,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const data = transaction.data as RequestStakeClaimReward;
 
   const { t } = useTranslation();
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(data.chain);
+  // Todo: Fix this after merge
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(data.slug);
 
   return (
     <div className={CN(className)}>

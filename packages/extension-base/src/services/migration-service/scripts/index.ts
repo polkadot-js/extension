@@ -5,6 +5,7 @@ import DeleteEarningData from '@subwallet/extension-base/services/migration-serv
 import EnableEarningChains from '@subwallet/extension-base/services/migration-service/scripts/EnableEarningChains';
 
 import BaseMigrationJob from '../Base';
+import MigrateEarningVersion from './databases/MigrateEarningVersion';
 import MigrateEthProvider from './providers/MigrateEthProvider';
 import MigratePioneerProvider from './providers/MigratePioneerProvider';
 import MigrateProvidersV1M1P24 from './providers/MigrateProvidersV1M1P24';
@@ -44,6 +45,7 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.17-01': MigratePioneerProvider,
   '1.1.17-03': EnableVaraChain,
   '1.1.24-01': MigrateProvidersV1M1P24,
-  '1.1.26-01': MigratePolygonUSDCProvider
+  '1.1.26-01': MigratePolygonUSDCProvider,
+  '1.1.28-01': MigrateEarningVersion
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

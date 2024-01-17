@@ -33,6 +33,7 @@ export function validateBondingCondition (chainInfo: _ChainInfo, amount: string,
   return validateParaChainBondingCondition(chainInfo, amount, selectedValidators, address, chainStakingMetadata, nominatorMetadata);
 }
 
+/** Deprecated */
 export async function getChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
     return getAstarStakingMetadata(chainInfo.slug, substrateApi);

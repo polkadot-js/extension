@@ -18,25 +18,3 @@ export const isTypeStaking = (txType: ExtrinsicType) => [
   ExtrinsicType.STAKING_COMPOUNDING,
   ExtrinsicType.STAKING_CANCEL_UNSTAKE
 ].includes(txType);
-
-export const isTypeMint = (txType: ExtrinsicType) => [
-  ExtrinsicType.MINT_LDOT,
-  ExtrinsicType.MINT_QDOT,
-  ExtrinsicType.MINT_SDOT,
-  ExtrinsicType.MINT_VDOT,
-  ExtrinsicType.MINT_STDOT
-].includes(txType);
-
-export const isPoolLeave = (txType: ExtrinsicType) =>
-  [
-    ExtrinsicType.REDEEM_LDOT,
-    ExtrinsicType.REDEEM_QDOT,
-    ExtrinsicType.REDEEM_SDOT,
-    ExtrinsicType.REDEEM_STDOT,
-    ExtrinsicType.REDEEM_VDOT,
-    ExtrinsicType.UNSTAKE_LDOT,
-    ExtrinsicType.UNSTAKE_QDOT,
-    ExtrinsicType.UNSTAKE_SDOT,
-    ExtrinsicType.UNSTAKE_STDOT,
-    ExtrinsicType.UNSTAKE_VDOT,
-  ].includes(txType);

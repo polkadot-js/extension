@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -9,7 +8,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { CaretLeft, CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -36,7 +35,6 @@ function Component (
     symbol }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state: RootState) => state.settings);
-  const { isWebUI } = useContext(ScreenContext);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -87,7 +85,7 @@ function Component (
             onClick={onOpenReceive}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
-            tooltip={isWebUI ? t('Get address') : undefined}
+            tooltip={t('Get address')}
           />
           <div className={'__button-space'} />
           <Button
@@ -101,7 +99,7 @@ function Component (
             onClick={onOpenSendFund}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
-            tooltip={isWebUI ? t('Send tokens') : undefined}
+            tooltip={t('Send tokens')}
           />
           <div className={'__button-space'} />
           <Button
@@ -116,7 +114,7 @@ function Component (
             onClick={onOpenBuyTokens}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
-            tooltip={isWebUI ? t('Buy token') : undefined}
+            tooltip={t('Buy token')}
           />
         </div>
       </div>

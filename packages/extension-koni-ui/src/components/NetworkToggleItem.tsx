@@ -13,12 +13,10 @@ import styled from 'styled-components';
 type Props = ThemeProps & {
   chainInfo: ChainInfoWithState;
   isShowSubLogo?: boolean;
-  withDivider?: boolean;
-  showDetailNavigation?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chainInfo, className, isShowSubLogo = false, showDetailNavigation = false, withDivider = false } = props;
+  const { chainInfo, className, isShowSubLogo = false } = props;
   const navigate = useNavigate();
   const connectSymbol = `__${chainInfo.connectionStatus}__`;
 
@@ -31,16 +29,14 @@ const Component: React.FC<Props> = (props: Props) => {
       name={chainInfo.name}
       networkKey={chainInfo.slug}
       networkMainLogoSize={36}
-      rightItem={(
-        <ChainItemFooter
-          chainInfo={chainInfo}
-          className={'__toggle-area'}
-          navigate={navigate}
-          showDetailNavigation={showDetailNavigation}
-        />
-      )}
+      rightItem={<ChainItemFooter
+        chainInfo={chainInfo}
+        className={'__toggle-area'}
+        navigate={navigate}
+        showDetailNavigation={true}
+      />}
       subSymbol={connectSymbol}
-      withDivider={withDivider}
+      withDivider={true}
     />
   );
 };

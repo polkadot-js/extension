@@ -14,10 +14,6 @@ export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeReques
   return sendMessage('pri(authorize.requests)', null, cb);
 }
 
-export async function subscribeAuthorizeRequestsV2 (cb: (accounts: AuthorizeRequest[]) => void): Promise<AuthorizeRequest[]> {
-  return sendMessage('pri(authorize.requestsV2)', null, cb);
-}
-
 export async function approveAuthRequest (id: string): Promise<boolean> {
   return sendMessage('pri(authorize.approve)', { id });
 }

@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Avatar } from '@subwallet/extension-koni-ui/components';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { ADD_ADDRESS_BOOK_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useNotification, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { editContactAddress } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { simpleCheckForm, toShort } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon, Input, ModalContext } from '@subwallet/react-ui';
+import { Button, Form, Icon, Input, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
@@ -122,7 +121,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [form, isActive]);
 
   return (
-    <BaseModal
+    <SwModal
       className={CN(className)}
       id={modalId}
       maskClosable={!loading}
@@ -199,7 +198,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </Button>
         </Form.Item>
       </Form>
-    </BaseModal>
+    </SwModal>
   );
 };
 
@@ -238,7 +237,6 @@ const AddContactModal = styled(Component)<Props>(({ theme: { token } }: Props) =
     },
 
     '.ant-form-item.submit-item': {
-      marginTop: token.margin,
       marginBottom: 0
     }
   };

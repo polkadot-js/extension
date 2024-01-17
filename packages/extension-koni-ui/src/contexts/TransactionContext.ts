@@ -12,7 +12,6 @@ export interface TransactionContextProps{
   onClickRightBtn: () => void;
   setShowRightBtn: Dispatch<SetStateAction<boolean>>;
   setDisabledRightBtn: Dispatch<SetStateAction<boolean>>;
-  modalId?: string;
 }
 
 export const TransactionContext = React.createContext<TransactionContextProps>({

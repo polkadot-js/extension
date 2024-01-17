@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { ActionItemType, ActionModal, EmptyList, FilterModal, Layout, PageWrapper, WebsiteAccessItem } from '@subwallet/extension-koni-ui/components';
+import { ActionItemType, ActionModal, EmptyList, FilterModal, PageWrapper, WebsiteAccessItem } from '@subwallet/extension-koni-ui/components';
 import { useDefaultNavigate, useFilterModal } from '@subwallet/extension-koni-ui/hooks';
 import { changeAuthorizationAll, forgetAllSite } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -193,60 +193,58 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   return (
     <PageWrapper className={`manage-website-access ${className}`}>
-      <Layout.Base>
-        <SwSubHeader
-          background={'transparent'}
-          center
-          onBack={goBack}
-          paddingVertical
-          rightButtons={[
-            {
-              icon: (
-                <Icon
-                  customSize={'24px'}
-                  phosphorIcon={GearSix}
-                  type='phosphor'
-                  weight={'bold'}
-                />
-              ),
-              onClick: onOpenActionModal
-            }
-          ]}
-          showBackButton
-          title={t('Manage website access')}
-        />
+      <SwSubHeader
+        background={'transparent'}
+        center
+        onBack={goBack}
+        paddingVertical
+        rightButtons={[
+          {
+            icon: (
+              <Icon
+                customSize={'24px'}
+                phosphorIcon={GearSix}
+                type='phosphor'
+                weight={'bold'}
+              />
+            ),
+            onClick: onOpenActionModal
+          }
+        ]}
+        showBackButton
+        title={t('Manage website access')}
+      />
 
-        <SwList.Section
-          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          enableSearchInput
-          filterBy={filterFunction}
-          list={websiteAccessItems}
-          onClickActionBtn={onClickActionBtn}
-          renderItem={renderItem}
-          renderWhenEmpty={renderEmptyList}
-          searchFunction={searchFunc}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search or enter a website')}
-          showActionBtn
-        />
+      <SwList.Section
+        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+        enableSearchInput
+        filterBy={filterFunction}
+        list={websiteAccessItems}
+        onClickActionBtn={onClickActionBtn}
+        renderItem={renderItem}
+        renderWhenEmpty={renderEmptyList}
+        searchFunction={searchFunc}
+        searchMinCharactersCount={2}
+        searchPlaceholder={t<string>('Search or enter a website')}
+        showActionBtn
+      />
 
-        <ActionModal
-          actions={actions}
-          id={ACTION_MODAL_ID}
-          onCancel={onCloseActionModal}
-          title={t('Access configuration')}
-        />
+      <ActionModal
+        actions={actions}
+        id={ACTION_MODAL_ID}
+        onCancel={onCloseActionModal}
+        title={t('Access configuration')}
+      />
 
-        <FilterModal
-          id={FILTER_MODAL_ID}
-          onApplyFilter={onApplyFilter}
-          onCancel={onCloseFilterModal}
-          onChangeOption={onChangeFilterOption}
-          optionSelectionMap={filterSelectionMap}
-          options={filterOptions}
-          title={t('Filter')}
-        />
-      </Layout.Base>
+      <FilterModal
+        id={FILTER_MODAL_ID}
+        onApplyFilter={onApplyFilter}
+        onCancel={onCloseFilterModal}
+        onChangeOption={onChangeFilterOption}
+        optionSelectionMap={filterSelectionMap}
+        options={filterOptions}
+        title={t('Filter')}
+      />
     </PageWrapper>
   );
 }

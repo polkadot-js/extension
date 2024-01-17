@@ -7,7 +7,6 @@ import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
@@ -46,7 +45,6 @@ const modalId = 'attach-qr-signer-scanner-modal';
 
 const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
-  const { isWebUI } = useContext(ScreenContext);
 
   const { className, deviceName, instructionUrl, logoUrl, subTitle, title } = props;
   const { t } = useTranslation();
@@ -106,7 +104,6 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
-        className={'web-single-column web-cancel-fill-height'}
         onBack={onBack}
         rightFooterButton={{
           children: loading ? t('Creating') : t('Scan QR code'),
@@ -181,7 +178,6 @@ const Component: React.FC<Props> = (props: Props) => {
             onError={onError}
             onSuccess={onSuccess}
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
-            selectCameraMotion={isWebUI ? 'move-right' : undefined}
           />
         </div>
       </Layout.WithSubHeaderOnly>
@@ -192,11 +188,7 @@ const Component: React.FC<Props> = (props: Props) => {
 const ConnectQrSigner = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      padding: token.padding,
-
-      '.web-ui-enable &': {
-        paddingTop: 0
-      }
+      padding: token.padding
     },
 
     '.sub-title': {

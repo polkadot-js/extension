@@ -165,50 +165,18 @@ const Component = function ({ className }: Props) {
           return t('Transfer confirmation');
         case ExtrinsicType.STAKING_JOIN_POOL:
         case ExtrinsicType.STAKING_BOND:
-          return t('Staking confirmation');
+          return t('Add to bond confirm');
         case ExtrinsicType.STAKING_LEAVE_POOL:
         case ExtrinsicType.STAKING_UNBOND:
-          return t('Unstaking confirmation');
+          return t('Unbond confirm');
         case ExtrinsicType.STAKING_WITHDRAW:
           return t('Withdrawal confirm');
         case ExtrinsicType.STAKING_CLAIM_REWARD:
-          return t('Reward claiming confirmation');
+          return t('Claim rewards confirm');
         case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
           return t('Cancel unstake confirm');
-        case ExtrinsicType.MINT_QDOT:
-          return t('Mint qDOT confirmation');
-        case ExtrinsicType.MINT_SDOT:
-          return t('Mint sDOT confirmation');
-        case ExtrinsicType.MINT_LDOT:
-          return t('Mint LDOT confirmation');
-        case ExtrinsicType.MINT_VDOT:
-          return t('Mint vDOT confirmation');
-        case ExtrinsicType.MINT_STDOT:
-          return t('Mint stDOT confirmation');
-        case ExtrinsicType.REDEEM_QDOT:
-          return t('Redeem qDOT confirmation');
-        case ExtrinsicType.REDEEM_SDOT:
-          return t('Redeem sDOT confirmation');
-        case ExtrinsicType.REDEEM_LDOT:
-          return t('Redeem LDOT confirmation');
-        case ExtrinsicType.REDEEM_VDOT:
-          return t('Redeem vDOT confirmation');
-        case ExtrinsicType.REDEEM_STDOT:
-          return t('Redeem stDOT confirmation');
-        case ExtrinsicType.UNSTAKE_QDOT:
-          return t('Unstake qDOT confirmation');
-        case ExtrinsicType.UNSTAKE_SDOT:
-          return t('Unstake sDOT confirmation');
-        case ExtrinsicType.UNSTAKE_LDOT:
-          return t('Unstake LDOT confirmation');
-        case ExtrinsicType.UNSTAKE_VDOT:
-          return t('Unstake vDOT confirmation');
-        case ExtrinsicType.UNSTAKE_STDOT:
-          return t('Unstake stDOT confirmation');
-        case ExtrinsicType.TOKEN_APPROVE:
-          return t('Token approve transaction');
         default:
-          return t('Transaction confirmation');
+          return t('Transaction confirm');
       }
     } else {
       return t(titleMap[confirmation.type] || '');

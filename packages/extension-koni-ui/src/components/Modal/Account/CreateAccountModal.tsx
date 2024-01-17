@@ -4,11 +4,9 @@
 import { canDerive } from '@subwallet/extension-base/utils';
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { CREATE_ACCOUNT_MODAL, DERIVE_ACCOUNT_MODAL, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useGoBackSelectAccount from '@subwallet/extension-koni-ui/hooks/modal/useGoBackSelectAccount';
@@ -16,7 +14,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
-import { BackgroundIcon, ModalContext } from '@subwallet/react-ui';
+import { BackgroundIcon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Leaf, ShareNetwork } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -39,7 +37,6 @@ const modalId = CREATE_ACCOUNT_MODAL;
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
 
   const { token } = useTheme() as Theme;
   const { accounts } = useSelector((state: RootState) => state.accountState);
@@ -98,18 +95,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   ]), [activeModal, inactiveModal, disableDerive, t, token]);
 
   return (
-    <BaseModal
+    <SwModal
       className={CN(className)}
-      closeIcon={isWebUI ? undefined : (<BackIcon />)}
+      closeIcon={(<BackIcon />)}
       id={modalId}
       maskClosable={false}
-      onCancel={isWebUI ? onCancel : onBack}
-      rightIconProps={isWebUI
-        ? undefined
-        : ({
-          icon: <CloseIcon />,
-          onClick: onCancel
-        })}
+      onCancel={onBack}
+      rightIconProps={{
+        icon: <CloseIcon />,
+        onClick: onCancel
+      }}
       title={t<string>('Create a new account')}
     >
       <div className='items-container'>
@@ -128,7 +123,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           );
         })}
       </div>
-    </BaseModal>
+    </SwModal>
   );
 };
 

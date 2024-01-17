@@ -3,15 +3,14 @@
 
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getNftTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
-import { isValidSubstrateAddress, reformatAddress } from '@subwallet/extension-base/utils';
+import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, Layout, PageWrapper, TokenTypeSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useChainChecker, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToError, convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { Form, Icon, Input, SwSubHeader } from '@subwallet/react-ui';
+import { convertFieldToError, convertFieldToObject, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { Form, Icon, Input } from '@subwallet/react-ui';
 import { PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -20,10 +19,7 @@ import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ThemeProps & {
-  modalContent?: boolean,
-  onSubmitCallback?: () => void,
-};
+type Props = ThemeProps;
 
 interface NftImportFormType {
   contractAddress: string;
@@ -56,11 +52,10 @@ function getNftTypeSupported (chainInfo: _ChainInfo) {
   return result;
 }
 
-function Component ({ className = '', modalContent, onSubmitCallback }: Props): React.ReactElement<Props> {
+function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const showNotification = useNotification();
   const navigate = useNavigate();
-  const { isWebUI } = useContext(ScreenContext);
 
   const dataContext = useContext(DataContext);
 
@@ -85,12 +80,8 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
   const checkChain = useChainChecker();
 
   const goBack = useCallback(() => {
-    if (modalContent) {
-      onSubmitCallback?.();
-    } else {
-      navigate('/home/nfts/collections');
-    }
-  }, [modalContent, navigate, onSubmitCallback]);
+    navigate('/home/nfts/collections');
+  }, [navigate]);
 
   const onFieldsChange: FormCallbacks<NftImportFormType>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
@@ -237,7 +228,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
       className={className}
       resolve={dataContext.awaitStores(['nft'])}
     >
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={goBack}
         rightFooterButton={{
           disabled: isDisabled,
@@ -253,15 +244,6 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
         }}
         title={t<string>('Import NFT')}
       >
-        {!modalContent && <SwSubHeader
-          background={'transparent'}
-          center
-          className={'transaction-header'}
-          onBack={goBack}
-          paddingVertical
-          showBackButton
-          title={t('Import NFT')}
-        />}
         <div className={'nft_import__container'}>
           <Form
             className='form-space-xs'
@@ -303,7 +285,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
             <Form.Item
               name='contractAddress'
               rules={[{ validator: contractAddressValidator }]}
-              statusHelpAsTooltip={isWebUI}
+              statusHelpAsTooltip={true}
             >
               <AddressInput
                 addressPrefix={chainNetworkPrefix}
@@ -318,7 +300,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
               name='collectionName'
               required={true}
               rules={[{ validator: collectionNameValidator }]}
-              statusHelpAsTooltip={isWebUI}
+              statusHelpAsTooltip={true}
             >
               <Input
                 disabled={nameDisabled}
@@ -327,7 +309,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
             </Form.Item>
           </Form>
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }

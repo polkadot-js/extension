@@ -4,11 +4,10 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import { useFormatAddress, useSelectModalInputHelper, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { funcSortByName, toShort } from '@subwallet/extension-koni-ui/utils';
-import { InputRef } from '@subwallet/react-ui';
+import { InputRef, SelectModal } from '@subwallet/react-ui';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -85,7 +84,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
 
   return (
     <>
-      <BaseSelectModal
+      <SelectModal
         className={`${className} account-selector-modal`}
         disabled={disabled || readOnly}
         id={id}

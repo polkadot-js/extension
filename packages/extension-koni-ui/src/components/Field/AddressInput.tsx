@@ -5,7 +5,6 @@ import { AbstractAddressJson } from '@subwallet/extension-base/background/types'
 import { CHAINS_SUPPORTED_DOMAIN, isAzeroDomain } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { AddressBookModal } from '@subwallet/extension-koni-ui/components';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { resolveAddressToDomain, resolveDomainToAddress, saveRecentAccount } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -31,22 +30,17 @@ interface Props extends BasicInputWrapper, ThemeProps {
   networkGenesisHash?: string;
   chain?: string;
   allowDomain?: boolean;
-  prefix?: React.ReactNode;
-  showPlainAddressOnly?: boolean;
-  showDisplayOverlay?: boolean; // default: true
-  showLabel?: boolean; // default: true
 }
 
 const defaultScannerModalId = 'input-account-address-scanner-modal';
 const defaultAddressBookModalId = 'input-account-address-book-modal';
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { addressPrefix, allowDomain, chain,
-    className = '', disabled, id, label, networkGenesisHash, onBlur, onChange, onFocus,
-    placeholder, prefix, readOnly, saveAddress, showAddressBook, showDisplayOverlay = true, showLabel = true, showPlainAddressOnly,
-    showScanner, status, statusHelp, value } = props;
+  const { addressPrefix,
+    allowDomain, chain, className = '', disabled, id, label, networkGenesisHash, onBlur,
+    onChange, onFocus, placeholder, readOnly, saveAddress, showAddressBook, showScanner, status,
+    statusHelp, value } = props;
   const { t } = useTranslation();
-  const { isWebUI } = useContext(ScreenContext);
 
   const [domainName, setDomainName] = useState<string | undefined>(undefined);
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -116,18 +110,18 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   }, []);
 
   const onSuccess = useCallback((result: ScannerResult) => {
+    inputRef?.current?.focus();
     setScanError('');
     inactiveModal(scannerId);
     parseAndChangeValue(result.text);
-    // @ts-ignore
-    onBlur?.({});
-  }, [inactiveModal, scannerId, parseAndChangeValue, onBlur]);
+    inputRef?.current?.blur();
+  }, [inactiveModal, scannerId, parseAndChangeValue, inputRef]);
 
   const onCloseScan = useCallback(() => {
+    inputRef?.current?.focus();
     setScanError('');
-    // @ts-ignore
-    onBlur?.({});
-  }, [onBlur]);
+    inputRef?.current?.blur();
+  }, [inputRef]);
 
   const onOpenAddressBook = useCallback((e?: SyntheticEvent) => {
     e && e.stopPropagation();
@@ -135,10 +129,10 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   }, [activeModal, addressBookId]);
 
   const onSelectAddressBook = useCallback((value: string) => {
+    inputRef?.current?.focus();
     parseAndChangeValue(value);
-    // @ts-ignore
-    onBlur?.({});
-  }, [onBlur, parseAndChangeValue]);
+    inputRef?.current?.blur();
+  }, [inputRef, parseAndChangeValue]);
 
   useEffect(() => {
     if (allowDomain && chain && value && CHAINS_SUPPORTED_DOMAIN.includes(chain)) {
@@ -182,7 +176,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         })}
         disabled={disabled}
         id={id}
-        label={showLabel ? (label || t('Account address')) : undefined}
+        label={label || t('Account address')}
         onBlur={onBlur}
         onChange={_onChange}
         onFocus={onFocus}
@@ -190,40 +184,26 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         prefix={
           <>
             {
-              showDisplayOverlay && value && isAddress(value) && (
+              value && isAddress(value) && (
                 <div className={'__overlay'}>
-                  {showPlainAddressOnly
-                    ? (
-                      <div className={'__name common-text'}>
-                        {toShort(value, 9, 9)}
+                  <div className={CN('__name common-text', { 'limit-width': !!accountName })}>
+                    {accountName || toShort(value, 9, 9)}
+                  </div>
+                  {(accountName || addressPrefix !== undefined) &&
+                    (
+                      <div className={'__address common-text'}>
+                        ({toShort(formattedAddress, 4, 4)})
                       </div>
                     )
-                    : (
-                      <>
-                        <div className={CN('__name common-text', { 'limit-width': !!accountName })}>
-                          {accountName || toShort(value, 9, 9)}
-                        </div>
-                        {(accountName || addressPrefix !== undefined) &&
-                        (
-                          <div className={'__address common-text'}>
-                            ({toShort(formattedAddress, 4, 4)})
-                          </div>
-                        )
-                        }
-                      </>
-                    )}
+                  }
                 </div>
               )
             }
-            {
-              prefix || (
-                <Avatar
-                  size={20}
-                  theme={value ? isEthereumAddress(value) ? 'ethereum' : 'polkadot' : undefined}
-                  value={value}
-                />
-              )
-            }
+            <Avatar
+              size={20}
+              theme={value ? isEthereumAddress(value) ? 'ethereum' : 'polkadot' : undefined}
+              value={value}
+            />
           </>
         }
         readOnly={readOnly}
@@ -281,7 +261,6 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
             onError={onScanError}
             onSuccess={onSuccess}
             overlay={scanError && <QrScannerErrorNotice message={scanError} />}
-            selectCameraMotion={isWebUI ? 'move-right' : undefined}
           />
         )
       }

@@ -157,7 +157,7 @@ const getGroupStatus = (earnMapping: Record<string, StakingStatus> = {}): Stakin
   return StakingStatus.PARTIALLY_EARNING;
 };
 
-export const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): NominatorMetadata[] => {
+const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): NominatorMetadata[] => {
   const itemGroups: string[] = [];
 
   for (const nominatorMetadata of nominatorMetadataList) {
@@ -223,17 +223,8 @@ export default function useGetStakingList () {
 
     stakingMap.forEach((stakingItem) => {
       const chainInfo = chainInfoMap[stakingItem.chain];
-
-      if (!chainInfo) {
-        return;
-      }
-
       const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
       const chainAsset = assetRegistry[nativeTokenSlug];
-
-      if (!chainAsset) {
-        return;
-      }
 
       if (stakingItem.state === APIItemState.READY) {
         if (
@@ -255,11 +246,6 @@ export default function useGetStakingList () {
 
     for (const stakingItem of readyStakingItems) {
       const chainInfo = chainInfoMap[stakingItem.chain];
-
-      if (!chainInfo) {
-        continue;
-      }
-
       const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
       const stakingDataType: StakingDataType = {
         staking: stakingItem,

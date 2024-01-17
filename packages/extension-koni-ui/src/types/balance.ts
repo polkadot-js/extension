@@ -27,5 +27,4 @@ export interface TokenBalanceItemType extends SubstrateBalance {
   locked: BalanceValueInfo;
   total: BalanceValueInfo;
   isReady: boolean;
-  relatedChains: string[];
 }

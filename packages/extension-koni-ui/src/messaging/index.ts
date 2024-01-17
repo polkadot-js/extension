@@ -4,7 +4,6 @@
 import type { WindowOpenParams } from '@subwallet/extension-base/background/types';
 
 import { CronReloadRequest, Notification, RequestGetTransaction, RequestParseEvmContractInput, ResponseParseEvmContractInput, ResponseSubscribeHistory, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
 
@@ -31,12 +30,6 @@ export async function reloadCron (request: CronReloadRequest): Promise<boolean> 
 // Phishing page
 export async function passPhishingPage (url: string): Promise<boolean> {
   return sendMessage('pri(phishing.pass)', { url });
-}
-
-export async function getCrowdloanContributions (relayChain: string, address: string, page?: number): Promise<CrowdloanContributionsResponse> {
-  return sendMessage('pri(crowdloan.getCrowdloanContributions)', { relayChain,
-    address,
-    page });
 }
 
 export async function cancelSubscription (request: string): Promise<boolean> {

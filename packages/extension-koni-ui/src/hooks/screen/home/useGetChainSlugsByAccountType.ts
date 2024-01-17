@@ -16,7 +16,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<string, _ChainInfo>, accountNetworks?: string[]): string[] {
   const result: string[] = [];
 
-  Object.keys(chainInfoMap || {}).forEach((chain) => {
+  Object.keys(chainInfoMap).forEach((chain) => {
     if (accountNetworks) {
       if (accountNetworks.includes(chain)) {
         result.push(chain);

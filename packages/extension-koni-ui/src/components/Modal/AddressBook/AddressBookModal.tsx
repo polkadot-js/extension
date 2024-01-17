@@ -4,11 +4,10 @@
 import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BackIcon } from '@subwallet/extension-koni-ui/components';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { funcSortByName, isAccountAll, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
-import { Badge, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Badge, Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
@@ -216,9 +215,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <BaseModal
+      <SwModal
         className={CN(className)}
-        fullSizeOnMobile
         id={id}
         onCancel={onClose}
         title={t('Address book')}
@@ -249,7 +247,7 @@ const Component: React.FC<Props> = (props: Props) => {
           searchPlaceholder={t<string>('Account name')}
           showActionBtn={true}
         />
-      </BaseModal>
+      </SwModal>
       <FilterModal
         closeIcon={<BackIcon />}
         id={filterModal}

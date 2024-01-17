@@ -4,11 +4,8 @@
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
-import { ACCOUNT_EXPORT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
@@ -17,22 +14,18 @@ import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, PageIcon, SettingItem, SwQRCode } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, PageIcon, SettingItem, SwQRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { saveAs } from 'file-saver';
 import { CheckCircle, CopySimple, DownloadSimple, FileJs, Leaf, QrCode, Wallet } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ThemeProps & {
-  isModalMode?: boolean;
-  onCancelModal?: () => void;
-  accountAddress?: string;
-};
+type Props = ThemeProps;
 
 enum ExportType {
   JSON_FILE = 'json-file',
@@ -79,18 +72,14 @@ const FinishIcon = (
 const formName = 'account-export-form';
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { accountAddress, className, isModalMode, onCancelModal } = props;
+  const { className } = props;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
-  const { accountAddress: address } = useParams();
+  const { accountAddress } = useParams();
 
-  const { inactiveModal } = useContext(ModalContext);
-
-  const currentAddress = useMemo(() => accountAddress && isModalMode ? accountAddress : address, [accountAddress, address, isModalMode]);
-
-  const account = useGetAccountByAddress(currentAddress);
+  const account = useGetAccountByAddress(accountAddress);
 
   const [form] = Form.useForm<ExportFormState>();
 
@@ -106,7 +95,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const [publicKey, setPublicKey] = useState<string>('');
   const [jsonData, setJsonData] = useState<null | KeyringPair$Json>(null);
   const [seedPhrase, setSeedPhrase] = useState<string>('');
-  const { isWebUI } = useContext(ScreenContext);
 
   const titleMap = useMemo((): Record<ExportType, string> => ({
     [ExportType.JSON_FILE]: t('Successful'),
@@ -286,20 +274,13 @@ const Component: React.FC<Props> = (props: Props) => {
     ];
   }, [account, t]);
 
-  const onCancel = useCallback(() => {
-    if (!loading) {
-      inactiveModal(ACCOUNT_EXPORT_MODAL);
-      onCancelModal?.();
-    }
-  }, [inactiveModal, loading, onCancelModal]);
-
   const onBack = useCallback(() => {
-    if (currentAddress) {
-      navigate(`/accounts/detail/${currentAddress}`);
+    if (accountAddress) {
+      navigate(`/accounts/detail/${accountAddress}`);
     } else {
       navigate(DEFAULT_ROUTER_PATH);
     }
-  }, [currentAddress, navigate]);
+  }, [accountAddress, navigate]);
 
   useEffect(() => {
     if (!account) {
@@ -319,11 +300,11 @@ const Component: React.FC<Props> = (props: Props) => {
     return null;
   }
 
-  const contentBlock = (
-    <PageWrapper className={isModalMode ? 'modal-content' : CN(className)}>
+  return (
+    <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         disableBack={loading}
-        onBack={isModalMode ? onCancel : onBack}
+        onBack={onBack}
         rightFooterButton={{
           children: firstStep ? t('Confirm') : t('Finish'),
           icon: firstStep ? undefined : FinishIcon,
@@ -331,20 +312,13 @@ const Component: React.FC<Props> = (props: Props) => {
           loading: loading,
           onClick: firstStep ? form.submit : goHome
         }}
-        subHeaderIcons={isModalMode
-          ? undefined
-          : [
-            {
-              icon: <CloseIcon />,
-              onClick: goHome,
-              disabled: loading
-            }
-          ]}
-        subHeaderLeft={isModalMode
-          ? (
-            <CloseIcon />
-          )
-          : undefined}
+        subHeaderIcons={[
+          {
+            icon: <CloseIcon />,
+            onClick: goHome,
+            disabled: loading
+          }
+        ]}
         title={
           firstStep
             ? t('Export account')
@@ -381,7 +355,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       required: true
                     }
                   ]}
-                  statusHelpAsTooltip={isWebUI}
+                  statusHelpAsTooltip={true}
                 >
                   <Input
                     disabled={loading}
@@ -554,21 +528,6 @@ const Component: React.FC<Props> = (props: Props) => {
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
-
-  if (isModalMode) {
-    return (
-      <BaseModal
-        className={CN(className, '-modal-container')}
-        closable={false}
-        id={ACCOUNT_EXPORT_MODAL}
-        onCancel={onCancel}
-      >
-        {contentBlock}
-      </BaseModal>
-    );
-  }
-
-  return contentBlock;
 };
 
 const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => {
@@ -705,38 +664,6 @@ const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => 
       textAlign: 'center',
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5
-    },
-
-    '&.-modal-container': {
-      '.notice.notice': {
-        marginTop: 0
-      },
-
-      '.ant-sw-screen-layout-header': {
-        paddingTop: token.paddingSM,
-        paddingBottom: token.paddingSM,
-        borderBottom: `2px solid ${token.colorBgSecondary}`
-      },
-
-      '.ant-sw-modal-content': {
-        overflow: 'hidden',
-        paddingTop: 0,
-        maxHeight: '100%'
-      },
-
-      '.ant-sw-modal-body': {
-        padding: 0
-      },
-
-      '.ant-sw-screen-layout-body': {
-        marginTop: token.margin,
-        paddingTop: token.paddingXS,
-        paddingBottom: token.margin
-      },
-
-      '.ant-sw-screen-layout-container .ant-sw-screen-layout-footer-button-container-alone': {
-        marginBottom: token.margin
-      }
     }
   };
 });

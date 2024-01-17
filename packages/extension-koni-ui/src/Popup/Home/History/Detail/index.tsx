@@ -4,11 +4,10 @@
 import { ExtrinsicType, TransactionAdditionalInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { InfoItemBase } from '@subwallet/extension-koni-ui/components';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, SwIconProps } from '@subwallet/react-ui';
+import { Button, Icon, SwIconProps, SwModal } from '@subwallet/react-ui';
 import { ArrowSquareUpRight } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -51,7 +50,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
     let originChainInfo = chainInfo;
 
     if (extrinsicType === ExtrinsicType.TRANSFER_XCM && data.additionalInfo) {
-      const additionalInfo = data.additionalInfo as TransactionAdditionalInfo[ExtrinsicType.TRANSFER_XCM];
+      const additionalInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.TRANSFER_XCM>;
 
       originChainInfo = chainInfoMap[additionalInfo.originalChain] || chainInfo;
     }
@@ -76,7 +75,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
   }, [chainInfoMap, data, openBlockExplorer, t]);
 
   return (
-    <BaseModal
+    <SwModal
       className={className}
       footer={modalFooter}
       id={HISTORY_DETAIL_MODAL}
@@ -86,7 +85,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
       <div className={'__layout-container'}>
         {data && <HistoryDetailLayout data={data} />}
       </div>
-    </BaseModal>
+    </SwModal>
   );
 }
 

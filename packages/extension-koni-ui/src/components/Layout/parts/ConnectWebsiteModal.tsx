@@ -3,13 +3,12 @@
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { isAccountAll } from '@subwallet/extension-base/utils';
-import { BaseModal } from '@subwallet/extension-koni-ui/components';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
 import { changeAuthorizationBlock, changeAuthorizationPerSite } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, GlobeHemisphereWest, ShieldCheck, ShieldSlash, XCircle } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -297,8 +296,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
   };
 
   return (
-    <BaseModal
-      center={true}
+    <SwModal
       className={className}
       footer={actionButtons}
       id={id}
@@ -313,7 +311,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
         {...connectIconProps}
       />
       {renderContent()}
-    </BaseModal>
+    </SwModal>
   );
 }
 

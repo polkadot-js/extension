@@ -3,14 +3,12 @@
 
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AddressBookState, AllLogoMap, AssetSetting, CampaignBanner, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, MantaPayConfig, NftCollection, NftItem, NominationPoolInfo, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AddressBookState, AllLogoMap, AssetSetting, CampaignBanner, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, MantaPayConfig, NftCollection, NftItem, NominationPoolInfo, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceMap, BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
-import { DAppCategory, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
-import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
 import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
@@ -88,9 +86,9 @@ export interface AppSettings extends LocalUiSettings, UiSettings, Omit<SettingsS
 }
 
 export interface AccountState extends AccountsContext, KeyringState, AddressBookState, BaseReduxStore {
-  currentAccount: AccountJson | null;
-  isAllAccount: boolean;
-  isNoAccount: boolean;
+  currentAccount: AccountJson | null
+
+  isAllAccount: boolean
 }
 
 export interface RequestState extends ConfirmationsQueue, BaseReduxStore {
@@ -178,19 +176,4 @@ export interface MantaPayStore {
   progress: number,
   needManualSync?: boolean,
   reduxStatus: ReduxStatus
-}
-
-export interface YieldPoolStore extends BaseReduxStore {
-  poolInfo: Record<string, YieldPoolInfo>,
-  yieldPosition: YieldPositionInfo[]
-}
-
-export interface DAppStore extends BaseReduxStore {
-  categories: DAppCategory[];
-  featureDApps: DAppInfo[];
-  dApps: DAppInfo[];
-}
-
-export interface MissionPoolStore extends BaseReduxStore {
-  missions: MissionInfo[];
 }

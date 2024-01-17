@@ -5,7 +5,6 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
@@ -21,7 +20,7 @@ import { Form, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Eye } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -62,7 +61,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [loading, setLoading] = useState(false);
   const [isEthereum, setIsEthereum] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
-  const { isWebUI } = useContext(ScreenContext);
 
   const handleResult = useCallback((val: string) => {
     const result = readOnlyScan(val);
@@ -143,7 +141,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
-        className='web-single-column web-cancel-fill-height'
         onBack={onBack}
         rightFooterButton={{
           children: t('Attach watch-only account'),
@@ -191,7 +188,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   validator: accountAddressValidator
                 }
               ]}
-              statusHelpAsTooltip={isWebUI}
+              statusHelpAsTooltip={true}
             >
               <AddressInput
                 id={modalId}
@@ -209,13 +206,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const AttachReadOnly = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      padding: token.padding,
-
-      '.web-ui-enable &': {
-        paddingTop: 0,
-        paddingBottom: 0,
-        marginBottom: -16
-      }
+      padding: token.padding
     },
 
     '.description': {

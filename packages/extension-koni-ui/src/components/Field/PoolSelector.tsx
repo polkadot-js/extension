@@ -4,11 +4,17 @@
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { POOL_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { NominationPoolDataType, useFilterModal, useGetNominatorInfo, useGetValidatorList } from '@subwallet/extension-koni-ui/hooks';
+import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
+import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
+import { PoolDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal';
+import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
+import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
+import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
+import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Badge, Button, Icon, InputRef, ModalContext, useExcludeModal } from '@subwallet/react-ui';
+import { Badge, Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { Book, CaretLeft, FadersHorizontal, Lightning, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -18,9 +24,6 @@ import styled from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import EmptyValidator from '../Account/EmptyValidator';
-import { Avatar } from '../Avatar';
-import { BaseSelectModal, FilterModal, PoolDetailModal, SortingModal } from '../Modal';
-import StakingPoolItem from '../StakingItem/StakingPoolItem';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
@@ -154,7 +157,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return (e: SyntheticEvent) => {
       e.stopPropagation();
       setViewDetailItem(item);
-      activeModal(POOL_DETAIL_MODAL);
+      activeModal(PoolDetailModalId);
     };
   }, [activeModal]);
 
@@ -209,7 +212,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal]);
 
   const onCloseDetail = useCallback(() => {
-    inactiveModal(POOL_DETAIL_MODAL);
+    inactiveModal(PoolDetailModalId);
   }, [inactiveModal]);
 
   useEffect(() => {
@@ -233,13 +236,13 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   return (
     <>
-      <BaseSelectModal
+      <SelectModal
         actionBtnIcon={(
           <Badge dot={!!selectedFilters.length}>
             <Icon phosphorIcon={FadersHorizontal} />
           </Badge>
         )}
-        className={className}
+        className={`${className} modal-full`}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}
@@ -345,16 +348,13 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
 const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
-    '&.ant-sw-modal': {
-      '.ant-sw-modal-header': {
-        paddingTop: 0,
-        paddingBottom: token.padding
-      },
+    '.ant-sw-modal-header': {
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingLG
+    },
 
-      '.ant-sw-modal-body': {
-        paddingLeft: 0,
-        paddingRight: 0
-      }
+    '.ant-sw-modal-content': {
+      paddingBottom: token.padding
     },
 
     '&.pool-selector-input': {

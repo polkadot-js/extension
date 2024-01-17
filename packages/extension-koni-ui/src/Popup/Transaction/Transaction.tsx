@@ -3,10 +3,10 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_TRANSACTION_PARAMS, STAKING_NETWORK_DETAIL_MODAL, TRANSACTION_TITLE_MAP, TRANSACTION_TRANSFER_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, TRANSFER_NFT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
+import { DEFAULT_TRANSACTION_PARAMS, TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { TransactionContext, TransactionContextProps } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
+import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
 import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
 import { detectTransactionPersistKey } from '@subwallet/extension-koni-ui/utils';
@@ -18,70 +18,43 @@ import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
-  title?: string;
-  children?: React.ReactElement;
-  transactionType?: string;
-  modalContent?: boolean;
-  modalId?: string;
+  title: string,
+
+  transactionType: string
 }
 
-function Component ({ children, className, modalContent, modalId }: Props) {
+function Component ({ className }: Props) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { activeModal, checkActive } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
+  const { activeModal } = useContext(ModalContext);
   const dataContext = useContext(DataContext);
 
   const transactionType = useMemo((): ExtrinsicType => {
     const pathName = location.pathname;
     const action = pathName.split('/')[2] || '';
 
-    if (checkActive(TRANSACTION_TRANSFER_MODAL)) {
-      return ExtrinsicType.TRANSFER_BALANCE;
-    } else if (checkActive(TRANSFER_NFT_MODAL)) {
-      return ExtrinsicType.SEND_NFT;
-    } else if (checkActive(TRANSACTION_YIELD_UNSTAKE_MODAL)) {
-      return ExtrinsicType.STAKING_LEAVE_POOL;
-    } else if (checkActive(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL)) {
-      return ExtrinsicType.STAKING_CANCEL_UNSTAKE;
-    } else if (checkActive(TRANSACTION_YIELD_WITHDRAW_MODAL)) {
-      return ExtrinsicType.STAKING_WITHDRAW;
-    } else if (checkActive(TRANSACTION_YIELD_FAST_WITHDRAW_MODAL)) {
-      return ExtrinsicType.REDEEM_LDOT;
-    } else if (checkActive(TRANSACTION_YIELD_CLAIM_MODAL)) {
-      return ExtrinsicType.STAKING_CLAIM_REWARD;
-    }
-
     switch (action) {
       case 'stake':
         return ExtrinsicType.STAKING_JOIN_POOL;
-      case 'un-yield':
       case 'unstake':
         return ExtrinsicType.STAKING_LEAVE_POOL;
       case 'cancel-unstake':
-      case 'cancel-un-yield':
         return ExtrinsicType.STAKING_CANCEL_UNSTAKE;
       case 'claim-reward':
-      case 'yield-claim':
         return ExtrinsicType.STAKING_CLAIM_REWARD;
       case 'withdraw':
-      case 'withdraw-yield':
         return ExtrinsicType.STAKING_WITHDRAW;
-      case 'yield-withdraw-position':
-        return ExtrinsicType.REDEEM_VDOT;
       case 'compound':
         return ExtrinsicType.STAKING_COMPOUNDING;
       case 'send-nft':
         return ExtrinsicType.SEND_NFT;
-      case 'earn':
-        return ExtrinsicType.JOIN_YIELD_POOL; // TODO: change this
       case 'send-fund':
       default:
         return ExtrinsicType.TRANSFER_BALANCE;
     }
-  }, [checkActive, location.pathname]);
+  }, [location.pathname]);
 
   const storageKey = useMemo((): string => detectTransactionPersistKey(transactionType), [transactionType]);
 
@@ -110,13 +83,6 @@ function Component ({ children, className, modalContent, modalId }: Props) {
         return '/home/staking';
       case 'send-nft':
         return '/home/nfts/collections';
-      case 'earn':
-      case 'un-yield':
-      case 'withdraw-yield':
-      case 'cancel-un-yield':
-      case 'yield-withdraw-position':
-      case 'yield-claim':
-        return '/home/earning/';
       case 'send-fund':
       default:
         return '/home/tokens';
@@ -133,7 +99,7 @@ function Component ({ children, className, modalContent, modalId }: Props) {
     return result;
   }, [t]);
 
-  useNavigateOnChangeAccount(homePath, !modalContent);
+  useNavigateOnChangeAccount(homePath);
 
   const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
   const [disabledRightBtn, setDisabledRightBtn] = useState<boolean>(false);
@@ -158,12 +124,8 @@ function Component ({ children, className, modalContent, modalId }: Props) {
 
   const onClickRightBtn = useCallback(() => {
     if (transactionType === ExtrinsicType.STAKING_JOIN_POOL) {
-      activeModal(STAKING_NETWORK_DETAIL_MODAL);
+      activeModal(StakingNetworkDetailModalId);
     }
-
-    // if (transactionType === ExtrinsicType.EARN) {
-    //   activeModal(STAKING_PROCESS_MODAL);
-    // }
   }, [activeModal, transactionType]);
 
   const subHeaderButton: ButtonProps[] = useMemo(() => {
@@ -178,57 +140,16 @@ function Component ({ children, className, modalContent, modalId }: Props) {
       : [];
   }, [disabledRightBtn, onClickRightBtn, showRightBtn]);
 
-  const contextValues = useMemo((): TransactionContextProps => ({
-    defaultData,
-    needPersistData,
-    persistData,
-    onDone,
-    onClickRightBtn,
-    setShowRightBtn,
-    setDisabledRightBtn,
-    modalId
-  }), [defaultData, modalId, needPersistData, onClickRightBtn, onDone, persistData]);
-
   useEffect(() => {
     chain !== '' && chainChecker(chain);
   }, [chain, chainChecker]);
-
-  if (modalContent) {
-    return (
-      <TransactionContext.Provider value={contextValues}>
-        <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
-          <div className={CN(className, 'transaction-wrapper __modal-content')}>
-            {children}
-          </div>
-        </PageWrapper>
-      </TransactionContext.Provider>
-    );
-  }
-
-  if (isWebUI) {
-    return (
-      <Layout.WithSubHeaderOnly
-        onBack={goBack}
-        showBackButton
-        title={titleMap[transactionType]}
-      >
-        <TransactionContext.Provider value={contextValues}>
-          <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
-            <div className={CN(className, 'transaction-wrapper')}>
-              <Outlet />
-            </div>
-          </PageWrapper>
-        </TransactionContext.Provider>
-      </Layout.WithSubHeaderOnly>
-    );
-  }
 
   return (
     <Layout.Home
       showFilterIcon
       showTabBar={false}
     >
-      <TransactionContext.Provider value={contextValues}>
+      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader
@@ -255,29 +176,6 @@ const Transaction = styled(Component)(({ theme }) => {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-
-    '.content': {
-      '&.__web-ui': {
-        display: 'flex',
-        gap: 16,
-        justifyContent: 'center',
-        width: '80%',
-        margin: '0 auto',
-
-        '& > *': {
-          maxWidth: '50%',
-          flex: 1
-        }
-      }
-    },
-
-    '&.__modal-content': {
-      margin: `0 -${token.margin}px`,
-
-      '.transaction-content': {
-        flex: '1 1 auto'
-      }
-    },
 
     '.transaction-header': {
       paddingTop: token.paddingSM,

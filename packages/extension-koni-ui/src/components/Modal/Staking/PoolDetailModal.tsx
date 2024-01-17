@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
-import { NominationPoolsEarningStatusUi, POOL_DETAIL_MODAL, StakingStatusType, StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
-import { NominationPoolDataType, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { NominationPoolsEarningStatusUi, StakingStatusType, StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { SwModal } from '@subwallet/react-ui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-
-import { BaseModal } from '../BaseModal';
 
 type Props = ThemeProps & {
   decimals: number,
@@ -16,7 +16,7 @@ type Props = ThemeProps & {
   selectedNominationPool?: NominationPoolDataType
 };
 
-const modalId = POOL_DETAIL_MODAL;
+export const PoolDetailModalId = 'poolDetailModalId';
 
 function Component ({ className, decimals, onCancel, selectedNominationPool }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -27,9 +27,9 @@ function Component ({ className, decimals, onCancel, selectedNominationPool }: P
   }, [isProfitable]);
 
   return (
-    <BaseModal
+    <SwModal
       className={className}
-      id={modalId}
+      id={PoolDetailModalId}
       onCancel={onCancel}
       title={t('Pool details')}
     >
@@ -89,7 +89,7 @@ function Component ({ className, decimals, onCancel, selectedNominationPool }: P
           valueColorSchema={'even-odd'}
         />
       </MetaInfo>
-    </BaseModal>
+    </SwModal>
   );
 }
 

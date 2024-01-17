@@ -1,13 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseModal } from '@subwallet/extension-koni-ui/components';
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { resetWallet } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, ModalContext, PageIcon } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCounterClockwise, Trash, WarningCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
@@ -72,8 +71,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [disableInject, notify, onClose, unlock]);
 
   return (
-    <BaseModal
-      center={true}
+    <SwModal
       className={CN(className)}
       id={modalId}
       onCancel={onClose}
@@ -124,7 +122,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </Button>
         </div>
       </div>
-    </BaseModal>
+    </SwModal>
   );
 };
 

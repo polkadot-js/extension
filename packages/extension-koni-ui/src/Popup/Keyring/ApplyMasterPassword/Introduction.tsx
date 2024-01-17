@@ -38,11 +38,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const IntroductionMigratePassword = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    padding: `0 ${token.padding}px`,
     textAlign: 'center',
 
     '.page-icon': {
       display: 'flex',
       justifyContent: 'center',
+      marginTop: token.margin,
       '--page-icon-color': token.colorSecondary
     },
 

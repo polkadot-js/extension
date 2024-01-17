@@ -16,15 +16,12 @@ import CampaignReducer from './feature/Campaign';
 import AssetRegistryReducer from './feature/common/AssetRegistry';
 import ChainStoreReducer from './feature/common/ChainStore';
 import CrowdloanReducer from './feature/Crowdloan';
-import DAppReducer from './feature/DApp';
 import MantaPayReducer from './feature/MantaPay';
-import MissionPoolReducer from './feature/MissionPool';
 import NftReducer from './feature/Nft';
 import PriceReducer from './feature/Price';
 import StakingReducer from './feature/Staking';
 import TransactionHistoryReducer from './feature/TransactionHistory';
 import WalletConnectReducer from './feature/WalletConnect';
-import YieldPoolInfoReducer from './feature/YieldPoolInfo';
 
 const persistConfig = {
   key: 'root',
@@ -56,9 +53,6 @@ const rootReducers = combineReducers({
   chainStore: ChainStoreReducer,
   assetRegistry: AssetRegistryReducer,
 
-  // yield
-  yieldPool: YieldPoolInfoReducer,
-
   // base
   requestState: RequestStateReducer,
   settings: SettingsReducer,
@@ -66,13 +60,7 @@ const rootReducers = combineReducers({
   uiViewState: UIViewStateReducer,
 
   // wallet connect
-  walletConnect: WalletConnectReducer,
-
-  // dApp
-  dApp: DAppReducer,
-
-  // mission pool
-  missionPool: MissionPoolReducer
+  walletConnect: WalletConnectReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducers);

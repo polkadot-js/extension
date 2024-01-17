@@ -4,12 +4,10 @@
 import { AmountData, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { STAKING_NETWORK_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ModalContext, Number, SwNumberProps } from '@subwallet/react-ui';
+import { ModalContext, Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
 import { BigNumber } from 'bignumber.js';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
@@ -24,7 +22,7 @@ type Props = ThemeProps & {
   stakingType: StakingType;
 };
 
-const modalId = STAKING_NETWORK_DETAIL_MODAL;
+export const StakingNetworkDetailModalId = 'stakingNetworkDetailModalId';
 
 function Component ({ activeNominators,
   className,
@@ -38,13 +36,13 @@ function Component ({ activeNominators,
   const { inactiveModal } = useContext(ModalContext);
 
   const onCancel = useCallback(() => {
-    inactiveModal(modalId);
+    inactiveModal(StakingNetworkDetailModalId);
   }, [inactiveModal]);
 
   return (
-    <BaseModal
+    <SwModal
       className={className}
-      id={modalId}
+      id={StakingNetworkDetailModalId}
       onCancel={onCancel}
       rightIconProps={{
         icon: <InfoIcon />
@@ -128,7 +126,7 @@ function Component ({ activeNominators,
           <span>{getUnstakingPeriod(t, unstakingPeriod)}</span>
         </MetaInfo.Default>}
       </MetaInfo>
-    </BaseModal>
+    </SwModal>
   );
 }
 

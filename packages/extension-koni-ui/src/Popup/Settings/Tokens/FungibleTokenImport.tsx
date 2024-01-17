@@ -6,7 +6,6 @@ import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmart
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, Layout, PageWrapper, TokenTypeSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useChainChecker, useDefaultNavigate, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormRule, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -61,7 +60,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
-  const { isWebUI } = useContext(ScreenContext);
 
   const chainInfoMap = useGetContractSupportedChains();
 
@@ -303,7 +301,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name={'contractAddress'}
               rules={contractRules}
-              statusHelpAsTooltip={isWebUI}
+              statusHelpAsTooltip={true}
             >
               <AddressInput
                 addressPrefix={chainNetworkPrefix}
@@ -325,7 +323,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     content={symbol}
                     placeholder={t<string>('Symbol')}
                     prefix={tokenDecimalsPrefix()}
-                    tooltip={isWebUI ? t('Symbol') : undefined}
+                    tooltip={t('Symbol')}
                     tooltipPlacement={'topLeft'}
                   />
                 </Form.Item>
@@ -337,7 +335,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Field
                     content={decimals === -1 ? '' : decimals}
                     placeholder={t<string>('Decimals')}
-                    tooltip={isWebUI ? t('Decimals') : undefined}
+                    tooltip={t('Decimals')}
                     tooltipPlacement={'topLeft'}
                   />
                 </Form.Item>
@@ -352,24 +350,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   message: t('Token name is required')
                 }
               ]}
-              statusHelpAsTooltip={isWebUI}
+              statusHelpAsTooltip={true}
             >
               <Field
                 content={tokenName}
                 placeholder={t<string>('Token name')}
-                tooltip={isWebUI ? t('Token name') : undefined}
+                tooltip={t('Token name')}
                 tooltipPlacement={'topLeft'}
               />
             </Form.Item>
 
             <Form.Item
               name={'priceId'}
-              statusHelpAsTooltip={isWebUI}
+              statusHelpAsTooltip={true}
             >
               <Input
                 disabled={fieldDisabled}
                 placeholder={t('Price ID')}
-                tooltip={isWebUI ? t('Price ID') : undefined}
+                tooltip={t('Price ID')}
               />
             </Form.Item>
           </Form>
@@ -399,22 +397,6 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
       color: token.colorText
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-body': {
-        paddingTop: token.paddingSM,
-        flex: '0 0 auto',
-        marginBottom: token.marginXS
-      },
-
-      '.ant-form .ant-form-item:last-of-type': {
-        marginBottom: 0
-      },
-
-      '.ant-form .ant-row .ant-form-item': {
-        marginBottom: token.marginSM
-      }
     }
   });
 });

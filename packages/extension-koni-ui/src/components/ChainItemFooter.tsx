@@ -9,7 +9,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Switch } from '@subwallet/react-ui';
 import { PencilSimpleLine } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
-import { NavigateFunction } from 'react-router-dom';
+import { NavigateFunction } from 'react-router';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -23,8 +23,7 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
   const showNotification = useNotification();
   const [loading, setLoading] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onSwitchChainState = useCallback((checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
+  const onSwitchChainState = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
     if (!loading) {
       setLoading(true);
       updateChainActiveState(chainInfo.slug, checked)
@@ -60,26 +59,22 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
         onClick={onSwitchChainState}
       />
       {
-        showDetailNavigation && (
-          <Button
-            icon={(
-              <Icon
-                phosphorIcon={PencilSimpleLine}
-                size='sm'
-                type='phosphor'
-              />
-            )}
-            onClick={onClick}
-            size={'xs'}
-            type={'ghost'}
-          />
-        )
+        showDetailNavigation && <Button
+          icon={<Icon
+            phosphorIcon={PencilSimpleLine}
+            size='sm'
+            type='phosphor'
+          />}
+          onClick={onClick}
+          size={'xs'}
+          type={'ghost'}
+        />
       }
     </div>
   );
 }
 
-const ChainItemFooter = styled(Component)<Props>(() => {
+const ChainItemFooter = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     alignItems: 'center'

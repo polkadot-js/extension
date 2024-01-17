@@ -10,7 +10,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Switch } from '@subwallet/react-ui';
 import { PencilSimpleLine } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
-import { NavigateFunction } from 'react-router-dom';
+import { NavigateFunction } from 'react-router';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {

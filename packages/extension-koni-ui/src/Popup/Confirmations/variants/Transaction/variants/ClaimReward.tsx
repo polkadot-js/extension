@@ -50,7 +50,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <span className={CN('text-light-4')}>
         {
           data.bondReward
-            ? t('Your rewards will be staked into the pool after claiming')
+            ? t('Your rewards will be bonded back into the pool after claiming')
             : t('Your rewards will be added to your transferable balance after claiming')
         }
       </span>

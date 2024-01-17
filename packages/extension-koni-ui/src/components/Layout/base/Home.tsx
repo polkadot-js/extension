@@ -3,7 +3,6 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
 import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -23,7 +22,6 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { activeModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
 
   const onOpenCustomizeModal = useCallback(() => {
     activeModal(CUSTOMIZE_MODAL);
@@ -41,7 +39,7 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
           />
         ),
         onClick: onClickFilterIcon || onOpenCustomizeModal,
-        tooltip: isWebUI ? t('Customize your asset display') : undefined,
+        tooltip: t('Customize your asset display'),
         tooltipPlacement: 'bottomRight'
       });
     }
@@ -55,13 +53,13 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
           />
         ),
         onClick: onClickSearchIcon,
-        tooltip: isWebUI ? t('Search a token') : undefined,
+        tooltip: t('Search a token'),
         tooltipPlacement: 'bottomRight'
       });
     }
 
     return icons;
-  }, [isWebUI, onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon, t]);
+  }, [onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon, t]);
 
   const onClickListIcon = useCallback(() => {
     navigate('/settings/list');
@@ -74,7 +72,6 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
       headerLeft={'default'}
       headerOnClickLeft={onClickListIcon}
       headerPaddingVertical={true}
-      isSetTitleContext={false}
       showHeader={true}
       showLeftButton={true}
       showTabBar={showTabBar ?? true}

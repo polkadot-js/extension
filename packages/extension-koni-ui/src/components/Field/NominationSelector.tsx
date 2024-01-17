@@ -6,11 +6,10 @@ import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bo
 import { StakingNominationItem } from '@subwallet/extension-koni-ui/components';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
-import { InputRef } from '@subwallet/react-ui';
+import { InputRef, SelectModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
@@ -84,7 +83,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   return (
     <>
-      <BaseSelectModal
+      <SelectModal
         className={className}
         disabled={disabled}
         id={id}

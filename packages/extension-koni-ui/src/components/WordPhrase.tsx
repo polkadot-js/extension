@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useCopy } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps, WordItem } from '@subwallet/extension-koni-ui/types';
 import { convertToWords } from '@subwallet/extension-koni-ui/utils';
@@ -9,7 +8,7 @@ import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { saveAs } from 'file-saver';
 import { CopySimple, EyeSlash } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 
@@ -20,7 +19,6 @@ interface Props extends ThemeProps {
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, enableDownload, seedPhrase } = props;
-  const { isWebUI } = useContext(ScreenContext);
 
   const { t } = useTranslation();
 
@@ -46,10 +44,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [backupMnemonicSeed, enableDownload]);
 
   return (
-    <div className={CN(className, {
-      '-web-ui': isWebUI
-    })}
-    >
+    <div className={CN(className)}>
       <div className='content-container'>
         <div className='word-container'>
           {
@@ -57,7 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
               return (
                 <div
                   className='word-item'
-                  key={`${item.label}-${item.index}`}
+                  key={item.label}
                 >
                   <div className='word-index'>{item.index}</div>
                   <div className='word-content'>{item.label}</div>
@@ -75,7 +70,6 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
       </div>
       <Button
-        className={'__copy-button'}
         icon={(
           <Icon phosphorIcon={CopySimple} />
         )}
@@ -85,22 +79,17 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         {t('Copy to the clipboard')}
       </Button>
-      { !isWebUI &&
-        <>
-          <span style={{ color: token.colorTextLight5, marginTop: '-4px', marginBottom: '-4px' }}>{t('or')}</span>
-          <Button
-            disabled={!enableDownload}
-            icon={(<></>)}
-            onClick={onClickToSave}
-            size='xs'
-            style={{ textDecoration: 'underline' }}
-            type='ghost'
-          >
-            {t('Download seed phrase')}
-          </Button>
-        </>
-
-      }
+      <span style={{ color: token.colorTextLight5, marginTop: '-4px', marginBottom: '-4px' }}>{t('or')}</span>
+      <Button
+        disabled={!enableDownload}
+        icon={(<></>)}
+        onClick={onClickToSave}
+        size='xs'
+        style={{ textDecoration: 'underline' }}
+        type='ghost'
+      >
+        {t('Download seed phrase')}
+      </Button>
     </div>
   );
 };
@@ -179,12 +168,6 @@ const WordPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
       gap: token.sizeXS,
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6
-    },
-
-    '&.-web-ui': {
-      '.__copy-button .ant-btn-content-wrapper': {
-        fontSize: token.fontSize
-      }
     }
   };
 });

@@ -18,7 +18,6 @@ interface Props extends ThemeProps, BasicInputWrapper {
   onSetMax?: (value: boolean) => void;
   showMaxButton?: boolean;
   forceUpdateMaxValue?: object;
-  prefix?: React.ReactNode;
 }
 
 const isValidInput = (input: string) => {
@@ -69,7 +68,7 @@ const isControlKey = (keycode: number) => {
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, decimals, disabled, forceUpdateMaxValue, maxValue, onChange, onSetMax, prefix, showMaxButton, statusHelp, tooltip, value } = props;
+  const { className, decimals, disabled, forceUpdateMaxValue, maxValue, onChange, onSetMax, showMaxButton, statusHelp, tooltip, value } = props;
 
   const { t } = useTranslation();
 
@@ -104,7 +103,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     showMaxButton
       ? (
         <Button
-          disabled={disabled}
           onClick={_onClickMaxBtn}
           size='xs'
           type='ghost'
@@ -115,7 +113,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       : (
         <span />
       )
-  ), [disabled, showMaxButton, _onClickMaxBtn, t]);
+  ), [showMaxButton, _onClickMaxBtn, t]);
 
   const onChangeInput: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     let value = event.target.value;
@@ -224,7 +222,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       onPaste={onPaste}
       // onCopy={onPaste}
       placeholder={props.placeholder || t('Amount')}
-      prefix={prefix}
       readOnly={props.readOnly}
       ref={inputRef}
       statusHelp={statusHelp}

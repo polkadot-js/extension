@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PREDEFINED_WALLETS } from '@subwallet/extension-koni-ui/constants';
 import useAccountAvatarInfo from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarInfo';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
@@ -11,7 +10,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
-import { Button, Icon, Image, Logo } from '@subwallet/react-ui';
+import { Button, Icon, Logo } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { CheckCircle, CopySimple, Eye, PencilSimpleLine, PuzzlePiece, QrCode, ShieldCheck, Swatches } from 'phosphor-react';
@@ -32,9 +31,7 @@ export interface _AccountCardItem {
   genesisHash?: string | null;
   preventPrefix?: boolean;
   type?: KeypairType;
-  moreIcon?: PhosphorIcon;
 }
-
 interface AbstractIcon {
   type: 'icon' | 'node',
   value: PhosphorIcon | React.ReactNode
@@ -57,11 +54,9 @@ function Component (props: _AccountCardItem): React.ReactElement<_AccountCardIte
     address,
     genesisHash,
     isSelected,
-    moreIcon,
     onClickQrButton,
     onPressMoreButton,
     preventPrefix,
-    source,
     type: givenType } = props;
 
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
@@ -92,24 +87,25 @@ function Component (props: _AccountCardItem): React.ReactElement<_AccountCardIte
           type: 'icon',
           value: Eye
         };
-
       case AccountSignMode.INJECTED:
-        if (source && PREDEFINED_WALLETS[source]) {
-          return {
-            type: 'node',
-            value: <Image
-              className='logo-image'
-              height='var(--height)'
-              shape='square'
-              src={PREDEFINED_WALLETS[source].mcicon}
-            />
-          };
-        } else {
-          return {
-            type: 'icon',
-            value: PuzzlePiece
-          };
-        }
+        // if (source === 'SubWallet') {
+        //   return {
+        //     type: 'node',
+        //     value: (
+        //       <Image
+        //         className='logo-image'
+        //         height='var(--height)'
+        //         shape='square'
+        //         src={'/images/subwallet/gradient-logo.png'}
+        //       />
+        //     )
+        //   };
+        // }
+
+        return {
+          type: 'icon',
+          value: PuzzlePiece
+        };
     }
 
     if (isMantaPayEnabled) {
@@ -120,7 +116,7 @@ function Component (props: _AccountCardItem): React.ReactElement<_AccountCardIte
     }
 
     return undefined;
-  }, [isMantaPayEnabled, signMode, source]);
+  }, [isMantaPayEnabled, signMode]);
 
   const _onClickMore: React.MouseEventHandler<HTMLAnchorElement | HTMLButtonElement> = React.useCallback((event) => {
     event.stopPropagation();
@@ -196,7 +192,7 @@ function Component (props: _AccountCardItem): React.ReactElement<_AccountCardIte
             <Button
               icon={
                 <Icon
-                  phosphorIcon={moreIcon || PencilSimpleLine}
+                  phosphorIcon={PencilSimpleLine}
                   size='sm'
                 />
               }

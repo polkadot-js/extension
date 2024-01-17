@@ -20,14 +20,14 @@ const logoList = Object.entries(ChainLogoMap).map(([key, value]) => {
     key,
     value,
     type: 'network',
-    isNew: value?.startsWith('/images/projects')
+    isNew: value?.startsWith('./images/projects')
   } as LogoItem;
 }).concat(Object.entries(AssetLogoMap).map(([key, value]) => {
   return {
     key,
     value,
     type: 'token',
-    isNew: value?.startsWith('/images/projects')
+    isNew: value?.startsWith('./images/projects')
   } as LogoItem;
 }));
 

@@ -5,11 +5,10 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountItemWithName, AlertBox } from '@subwallet/extension-koni-ui/components';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
@@ -122,7 +121,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   onClick={onOpenModal}
                   selected={appliedAccounts}
                 />
-                <BaseModal
+                <SwModal
                   className={CN(className, 'account-modal')}
                   footer={(
                     <Button
@@ -156,7 +155,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     searchMinCharactersCount={2}
                     searchPlaceholder={t<string>('Search account')}
                   />
-                </BaseModal>
+                </SwModal>
               </>
             )
             : (

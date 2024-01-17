@@ -7,7 +7,6 @@ import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ProviderSelector } from '@subwallet/extension-koni-ui/components/Field/ProviderSelector';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
@@ -32,7 +31,6 @@ interface ChainDetailForm {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
@@ -159,7 +157,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         type='phosphor'
         weight={'light'}
       />,
-      tooltip: isWebUI ? t('Delete network') : undefined,
       onClick: handleDeleteCustomChain,
       disabled: !(_isCustomChain(chainInfo.slug) && !chainState.active)
     }
@@ -339,7 +336,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       type={'phosphor'}
                       weight={'bold'}
                     />}
-                    tooltip={isWebUI ? t('Network name') : undefined}
+                    tooltip={t('Network name')}
                     tooltipPlacement={'topLeft'}
                   />
                 </Col>
@@ -347,7 +344,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Field
                     content={symbol}
                     placeholder={t('Symbol')}
-                    tooltip={isWebUI ? t('Symbol') : undefined}
+                    tooltip={t('Symbol')}
                     tooltipPlacement={'topLeft'}
                   />
                 </Col>
@@ -358,7 +355,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Field
                     content={decimals}
                     placeholder={t('Decimals')}
-                    tooltip={isWebUI ? t('Decimals') : undefined}
+                    tooltip={t('Decimals')}
                     tooltipPlacement={'topLeft'}
                   />
                 </Col>
@@ -369,7 +366,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         <Field
                           content={paraId > -1 ? paraId : undefined}
                           placeholder={t('ParaId')}
-                          tooltip={isWebUI ? t('ParaId') : undefined}
+                          tooltip={t('ParaId')}
                           tooltipPlacement={'topLeft'}
                         />
                       )
@@ -377,7 +374,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         <Field
                           content={chainId > -1 ? chainId : 'None'}
                           placeholder={t('Chain ID')}
-                          tooltip={isWebUI ? t('Chain ID') : undefined}
+                          tooltip={t('Chain ID')}
                           tooltipPlacement={'topLeft'}
                         />
                       )
@@ -392,7 +389,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <Field
                       content={addressPrefix.toString()}
                       placeholder={t('Address prefix')}
-                      tooltip={isWebUI ? t('Address prefix') : undefined}
+                      tooltip={t('Address prefix')}
                       tooltipPlacement={'topLeft'}
                     />
                   </Col>
@@ -402,7 +399,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Field
                     content={chainTypeString()}
                     placeholder={t('Network type')}
-                    tooltip={isWebUI ? t('Network type') : undefined}
+                    tooltip={t('Network type')}
                     tooltipPlacement={'topLeft'}
                   />
                 </Col>
@@ -411,11 +408,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'blockExplorer'}
                 rules={[{ validator: blockExplorerValidator }]}
-                statusHelpAsTooltip={isWebUI}
+                statusHelpAsTooltip={true}
               >
                 <Input
                   placeholder={t('Block explorer')}
-                  tooltip={isWebUI ? t('Block explorer') : undefined}
+                  tooltip={t('Block explorer')}
                   tooltipPlacement={'topLeft'}
                 />
               </Form.Item>
@@ -424,11 +421,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 !_isPureEvmChain(chainInfo) && <Form.Item
                   name={'crowdloanUrl'}
                   rules={[{ validator: crowdloanUrlValidator }]}
-                  statusHelpAsTooltip={isWebUI}
+                  statusHelpAsTooltip={true}
                 >
                   <Input
                     placeholder={t('Crowdloan URL')}
-                    tooltip={isWebUI ? t('Crowdloan URL') : undefined}
+                    tooltip={t('Crowdloan URL')}
                     tooltipPlacement={'topLeft'}
                   />
                 </Form.Item>
@@ -444,7 +441,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 const ChainDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.chain_detail__container': {
-      marginTop: 24,
+      marginTop: 22,
       marginRight: token.margin,
       marginLeft: token.margin
     },
@@ -473,13 +470,6 @@ const ChainDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.chain_detail__provider_url .ant-field-wrapper .ant-field-content-wrapper .ant-field-content': {
       color: token.colorTextLight1
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-body': {
-        flex: '0 0 auto',
-        marginBottom: token.marginXS
-      }
     }
   });
 });

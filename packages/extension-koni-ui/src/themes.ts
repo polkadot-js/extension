@@ -16,9 +16,6 @@ export type AliasToken = _AliasToken;
 export type GlobalToken = _GlobalToken;
 
 export interface ExtraToken {
-  oneColumnWidth: number,
-  bigOneColumnWidth: number,
-  twoColumnWidth: number,
   bodyBackgroundColor: string,
   logo: string,
   defaultImagePlaceholder: string
@@ -49,15 +46,12 @@ export interface SwThemeConfig extends ThemeConfig {
 
 function genDefaultExtraTokens (token: AliasToken): ExtraToken {
   return {
-    oneColumnWidth: 400,
-    bigOneColumnWidth: 600,
-    twoColumnWidth: 820,
     bodyBackgroundColor: token.colorBgDefault,
     logo: subWalletLogo,
     defaultImagePlaceholder,
-    tokensScreenSuccessBackgroundColor: 'linear-gradient(180deg, rgba(76, 234, 172, 0.10) 5%, rgba(217, 217, 217, 0.00) 33%)',
-    tokensScreenDangerBackgroundColor: 'linear-gradient(180deg, rgba(234, 76, 76, 0.10) 5%, rgba(217, 217, 217, 0.00) 33%)',
-    tokensScreenInfoBackgroundColor: 'linear-gradient(rgba(0, 75, 255, 0.1) 5%, rgba(217, 217, 217, 0) 33%)'
+    tokensScreenSuccessBackgroundColor: 'linear-gradient(180deg, rgba(76, 234, 172, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+    tokensScreenDangerBackgroundColor: 'linear-gradient(180deg, rgba(234, 76, 76, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+    tokensScreenInfoBackgroundColor: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)'
   };
 }
 

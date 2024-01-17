@@ -9,7 +9,6 @@ import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { DEFAULT_STAKE_PARAMS, DEFAULT_UN_STAKE_PARAMS, STAKE_TRANSACTION, UN_STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
 import { useGetAccountByAddress, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -19,7 +18,7 @@ import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staki
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, ModalContext, Number } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
@@ -212,7 +211,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
             {unstakingData.status === UnstakingStatus.UNLOCKING.valueOf() &&
               <div className={'sm-text text-light-4'}>
-                {getWaitingTime(unstakingData.status, t, unstakingData.waitingTime)}
+                {getWaitingTime(unstakingData.waitingTime, unstakingData.status, t)}
               </div>
             }
           </div>
@@ -229,7 +228,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   }, [decimals, getStakingStatus, networkPrefix, showingOption, staking.nativeToken, t, unstakings]);
 
   return (
-    <BaseModal
+    <SwModal
       className={className}
       closable={true}
       footer={footer()}
@@ -436,7 +435,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                   <MetaInfo.Number
                     decimals={decimals}
                     key={`${item.validatorAddress || item.chain}-${item.status}-${item.claimable}`}
-                    label={getWaitingTime(item.status, t, item.waitingTime) ? t(getWaitingTime(item.status, t, item.waitingTime)) : t('Withdraw')}
+                    label={getWaitingTime(item.waitingTime, item.status, t) ? t(getWaitingTime(item.waitingTime, item.status, t)) : t('Withdraw')}
                     suffix={staking.nativeToken}
                     value={item.claimable || ''}
                     valueColorSchema={'gray'}
@@ -455,7 +454,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </>
         }
       </>}
-    </BaseModal>
+    </SwModal>
   );
 };
 

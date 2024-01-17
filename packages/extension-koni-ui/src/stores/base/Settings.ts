@@ -99,20 +99,9 @@ const settingsSlice = createSlice({
       };
     },
     updateLogoMaps (state, action: PayloadAction<AppSettings['logoMaps']>) {
-      const { assetLogoMap, chainLogoMap } = action.payload;
-
       return {
         ...state,
-        logoMaps: {
-          chainLogoMap: {
-            ...state.logoMaps.chainLogoMap,
-            ...chainLogoMap
-          },
-          assetLogoMap: {
-            ...state.logoMaps.assetLogoMap,
-            ...assetLogoMap
-          }
-        }
+        logoMaps: action.payload
       };
     }
   }

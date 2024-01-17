@@ -3,21 +3,18 @@
 
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected } from '@subwallet/extension-koni-ui/components';
-import SeedPhraseModal from '@subwallet/extension-koni-ui/components/Modal/Account/SeedPhraseModal';
-import WCNetworkSupported from '@subwallet/extension-koni-ui/components/WalletConnect/Network/WCNetworkSupported';
-import { DEFAULT_ACCOUNT_TYPES, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
-import { useNotification, useSelectWalletConnectAccount } from '@subwallet/extension-koni-ui/hooks';
+import { AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected, WCNetworkSupported } from '@subwallet/extension-koni-ui/components';
+import { useNotification, useSelectWalletConnectAccount, useSetSelectedAccountTypes } from '@subwallet/extension-koni-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertKeyTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, ModalContext } from '@subwallet/react-ui';
+import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
   request: WalletConnectSessionRequest
@@ -36,15 +33,13 @@ async function handleCancel ({ id }: WalletConnectSessionRequest) {
   });
 }
 
-const createMissingAccountModalId = 'createMissingAccountModalId';
-
 function Component ({ className, request }: Props) {
   const { params } = request.request;
 
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const notification = useNotification();
-  const { activeModal } = useContext(ModalContext);
-  const [, setMissingAccountTypes] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
+  const setSelectedAccountTypes = useSetSelectedAccountTypes(true);
 
   const nameSpaceNameMap = useMemo((): Record<string, string> => ({
     [WALLET_CONNECT_EIP155_NAMESPACE]: t('EVM networks'),
@@ -102,9 +97,9 @@ function Component ({ className, request }: Props) {
   }, [namespaceAccounts, notification, request]);
 
   const onAddAccount = useCallback(() => {
-    setMissingAccountTypes(convertKeyTypes(missingType));
-    activeModal(createMissingAccountModalId);
-  }, [setMissingAccountTypes, missingType, activeModal]);
+    setSelectedAccountTypes(convertKeyTypes(missingType));
+    navigate('/accounts/new-seed-phrase', { state: { useGoBack: true } });
+  }, [setSelectedAccountTypes, missingType, navigate]);
 
   const onApplyModal = useCallback((namespace: string) => {
     return () => {
@@ -293,10 +288,6 @@ function Component ({ className, request }: Props) {
               </>
             )
         }
-
-        <SeedPhraseModal
-          modalId={createMissingAccountModalId}
-        />
       </div>
     </>
   );

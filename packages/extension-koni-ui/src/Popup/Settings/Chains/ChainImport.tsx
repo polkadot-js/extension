@@ -7,7 +7,6 @@ import { _generateCustomProviderKey } from '@subwallet/extension-base/services/c
 import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
@@ -16,7 +15,7 @@ import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/
 import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -43,11 +42,11 @@ interface ValidationInfo {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
   const [form] = Form.useForm<ChainImportForm>();
+
   const [loading, setLoading] = useState(false);
   const [isPureEvmChain, setIsPureEvmChain] = useState(false);
   const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
@@ -315,7 +314,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'provider'}
                 rules={[{ validator: providerValidator }]}
-                statusHelpAsTooltip={isWebUI}
+                statusHelpAsTooltip={true}
                 validateTrigger={['onBlur']}
               >
                 <Input
@@ -331,7 +330,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     />
                   )}
                   suffix={providerSuffix()}
-                  tooltip={isWebUI ? t('Provider URL') : undefined}
+                  tooltip={t('Provider URL')}
                   tooltipPlacement={'topLeft'}
                 />
               </Form.Item>
@@ -349,7 +348,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         type={'phosphor'}
                         weight={'bold'}
                       />}
-                      tooltip={isWebUI ? t('Network name') : undefined}
+                      tooltip={t('Network name')}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
@@ -359,7 +358,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <Input
                       disabled={true}
                       placeholder={t('Symbol')}
-                      tooltip={isWebUI ? t('Symbol') : undefined}
+                      tooltip={t('Symbol')}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
@@ -371,7 +370,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Form.Item name={'priceId'}>
                     <Input
                       placeholder={t('Price ID')}
-                      tooltip={isWebUI ? t('Price ID') : undefined}
+                      tooltip={t('Price ID')}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
@@ -382,7 +381,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <Input
                       disabled={true}
                       placeholder={t('Network type')}
-                      tooltip={isWebUI ? t('Network type') : undefined}
+                      tooltip={t('Network type')}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
@@ -392,11 +391,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'blockExplorer'}
                 rules={[{ validator: blockExplorerValidator }]}
-                statusHelpAsTooltip={isWebUI}
+                statusHelpAsTooltip={true}
               >
                 <Input
                   placeholder={t('Block explorer')}
-                  tooltip={isWebUI ? t('Block explorer') : undefined}
+                  tooltip={t('Block explorer')}
                   tooltipPlacement={'topLeft'}
                 />
               </Form.Item>
@@ -404,11 +403,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'crowdloanUrl'}
                 rules={[{ validator: crowdloanUrlValidator }]}
-                statusHelpAsTooltip={isWebUI}
+                statusHelpAsTooltip={true}
               >
                 <Input
                   placeholder={t('Crowdloan URL')}
-                  tooltip={isWebUI ? t('Crowdloan URL') : undefined}
+                  tooltip={t('Crowdloan URL')}
                   tooltipPlacement={'topLeft'}
                 />
               </Form.Item>
@@ -430,7 +429,7 @@ const ChainImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
       width: '100%',
       textAlign: 'center',
       marginBottom: token.margin,
-      marginTop: 24
+      marginTop: 22
     },
 
     '.chain_import__container': {
@@ -466,19 +465,6 @@ const ChainImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-input-container .ant-input-suffix': {
       marginRight: 0
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-body': {
-        flex: '0 0 auto',
-        marginBottom: token.marginXS
-      },
-
-      '.chain_import__header_info': {
-        maxWidth: 384,
-        marginLeft: 'auto',
-        marginRight: 'auto'
-      }
     }
   });
 });

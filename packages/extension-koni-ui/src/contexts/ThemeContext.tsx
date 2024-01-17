@@ -42,12 +42,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
     },
 
     '.main-page-container': {
-      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`,
-      boxSizing: 'border-box'
-    },
-
-    '.main-page-container.web-ui-enable': {
-      border: 0
+      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`
     },
 
     '.ant-sw-modal .ant-sw-modal-header': {
@@ -71,14 +66,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         }
       }
     },
-    '.web-confirmation': {
-      '.ant-sw-modal-content': {
-        padding: 0,
-        '.ant-sw-modal-header': {
-          borderRadius: 0
-        }
-      }
-    },
+
     '.modal-full': {
       '.ant-sw-modal-content': {
         '.ant-sw-modal-header': {
@@ -86,13 +74,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         }
       }
     },
-    '.general-modal.-mobile': {
-      justifyContent: 'flex-end',
-      '.ant-sw-modal-content': {
-        maxHeight: '95%',
-        width: '100%'
-      }
-    },
+
     '.text-secondary': {
       color: token.colorTextSecondary
     },
@@ -119,21 +101,12 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       lineHeight: token.lineHeightSM
     },
 
-    '.lg-text': {
-      fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG
-    },
-
     '.mono-text': {
       fontFamily: token.monoSpaceFontFamily
     },
 
     '.ml-xs': {
       marginLeft: token.marginXS
-    },
-
-    '.mr-xs': {
-      marginRight: token.marginXS
     },
 
     '.ml-xxs': {
@@ -234,35 +207,6 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         overflow: 'hidden',
         display: 'block',
         'white-space': 'nowrap'
-      }
-    },
-
-    '.ant-sw-header-left-part + .ant-sw-header-center-part .ant-sw-sub-header-title': {
-      display: 'block',
-      textAlign: 'center'
-    },
-
-    '.ant-sw-qr-scanner-camera-items-container.ant-select-modal': {
-      maxWidth: 404,
-      width: '100% !important',
-
-      '@media (min-width: 992px)': {
-        left: 'auto',
-        right: token.paddingLG,
-        bottom: token.paddingLG,
-        top: token.paddingLG,
-
-        '.ant-sw-modal-content': {
-          height: '100%',
-          maxHeight: '100%',
-          width: '100%',
-          paddingLeft: token.paddingLG,
-          paddingRight: token.paddingLG
-        },
-
-        '.ant-sw-list-section .ant-sw-list-wrapper': {
-          flexBasis: 'auto'
-        }
       }
     }
   });

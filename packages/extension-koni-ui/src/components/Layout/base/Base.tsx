@@ -4,15 +4,13 @@
 import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
 import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { HeaderType, WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
-import { Aperture, Clock, Globe, Parachute, Rocket, Vault, Wallet } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Aperture, Clock, Database, Rocket, Wallet } from 'phosphor-react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,24 +20,19 @@ import SelectAccount from '../parts/SelectAccount';
 
 export interface LayoutBaseProps extends Omit<
 SwScreenLayoutProps,
-'tabBarItems' | 'headerContent' | 'selectedTabBarItem'
+'tabBarItems' | 'footer' | 'headerContent' | 'selectedTabBarItem'
 >, ThemeProps {
   children: React.ReactNode | React.ReactNode[];
   showFooter?: boolean;
-  isSetTitleContext?: boolean;
 }
 
 const specialLanguages: Array<LanguageType> = ['ja', 'ru'];
 
-const Component = ({ children, className, footer, headerIcons, isSetTitleContext = true, onBack, showFooter, ...props }: LayoutBaseProps) => {
-  const { isWebUI } = useContext(ScreenContext);
+const Component = ({ children, className, headerIcons, onBack, showFooter, ...props }: LayoutBaseProps) => {
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
   const { pathname } = useLocation();
   const { t } = useTranslation();
-  const { setTitle } = useContext(WebUIContext);
-  const { headerType, isSettingPage, setShowBackButtonOnHeader } = useContext(WebUIContext);
-  const [customClassName, setCustomClassName] = useState('');
   const { language } = useSelector((state) => state.settings);
 
   const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
@@ -76,32 +69,12 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
     {
       icon: {
         type: 'phosphor',
-        phosphorIcon: Vault,
+        phosphorIcon: Database,
         weight: 'fill'
       },
-      label: t('Earning'),
-      key: 'earning',
-      url: '/home/earning'
-    },
-    {
-      icon: {
-        type: 'phosphor',
-        phosphorIcon: Globe,
-        weight: 'fill'
-      },
-      label: t('DApps'),
-      key: 'dapps',
-      url: '/home/dapps'
-    },
-    {
-      icon: {
-        type: 'phosphor',
-        phosphorIcon: Parachute,
-        weight: 'fill'
-      },
-      label: t('Mission Pools'),
-      key: 'mission-pools',
-      url: '/home/mission-pools'
+      label: t('Staking'),
+      key: 'staking',
+      url: '/home/staking'
     },
     {
       icon: {
@@ -139,30 +112,15 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
     goHome();
   }, [goHome]);
 
-  useEffect(() => {
-    setCustomClassName('common-pages');
-
-    if (isSetTitleContext) {
-      setTitle(props.title);
-    }
-  }, [isSetTitleContext, isSettingPage, pathname, props.title, setTitle, t]);
-
-  useEffect(() => {
-    setShowBackButtonOnHeader(props.showBackButton);
-  }, [props.showBackButton, setShowBackButtonOnHeader]);
-
   return (
     <SwScreenLayout
       {...props}
-      className={CN(className, customClassName, { 'special-language': specialLanguages.includes(language) })}
-      footer={showFooter && (footer || <Footer />)}
+      className={CN(className, { 'special-language': specialLanguages.includes(language) })}
+      footer={showFooter && <Footer />}
       headerContent={props.showHeader && <SelectAccount />}
       headerIcons={headerIcons}
       onBack={onBack || defaultOnBack}
       selectedTabBarItem={selectedTab}
-      showHeader={(!isWebUI || headerType === HeaderType.NONE) && props.showHeader}
-      showSubHeader={(!isWebUI || headerType === HeaderType.NONE || (isSettingPage && headerType !== HeaderType.SIMPLE)) && props.showSubHeader}
-      showTabBar={!isWebUI && props.showTabBar}
       tabBarItems={tabBarItems.map((item) => ({
         ...item,
         onClick: onSelectTab(item.url)
@@ -175,16 +133,8 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
 
 const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBaseProps) => ({
   '.ant-sw-tab-bar-container': {
-    'white-space': 'nowrap',
-    overflowX: 'auto',
-
     padding: `${token.paddingXS}px ${token.paddingSM}px ${token.paddingSM}px`,
     alignItems: 'flex-start',
-
-    '.ant-sw-tab-bar-item': {
-      paddingLeft: token.paddingXS,
-      paddingRight: token.paddingXS
-    },
 
     '.ant-sw-tab-bar-item-label': {
       textAlign: 'center'
@@ -205,17 +155,6 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
           overflowWrap: 'break-word'
         }
       }
-    }
-  },
-
-  '@media (max-width: 600px)': {
-    '.ant-sw-tab-bar-item': {
-      paddingBottom: token.sizeXS,
-      paddingTop: token.sizeXS
-    },
-
-    '.ant-sw-tab-bar-item-label': {
-      display: 'none'
     }
   }
 }));

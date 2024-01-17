@@ -3,13 +3,12 @@
 
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ModalContext } from '@subwallet/react-ui';
+import { ModalContext, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -57,7 +56,7 @@ function Component (props: Props): React.ReactElement<Props> {
   }, [inactiveModal, onCancel]);
 
   return (
-    <BaseModal
+    <SwModal
       className={className}
       id={VALIDATOR_DETAIL_MODAL}
       onCancel={_onCancel}
@@ -136,7 +135,7 @@ function Component (props: Props): React.ReactElement<Props> {
           valueColorSchema={'even-odd'}
         />
       </MetaInfo>
-    </BaseModal>
+    </SwModal>
   );
 }
 

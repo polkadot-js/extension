@@ -3,14 +3,13 @@
 
 import { ChainStakingMetadata, ExtrinsicType, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_STAKE_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, STAKE_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, BackgroundIcon, ModalContext, SettingItem } from '@subwallet/react-ui';
+import { ActivityIndicator, BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowArcLeft, ArrowCircleDown, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -22,9 +21,8 @@ import { useLocalStorage } from 'usehooks-ts';
 type Props = ThemeProps & {
   staking: StakingItem;
   reward?: StakingRewardItem;
-  chainStakingMetadata?: ChainStakingMetadata;
-  nominatorMetadata?: NominatorMetadata;
-  showContentOnly?: boolean;
+  chainStakingMetadata: ChainStakingMetadata;
+  nominatorMetadata: NominatorMetadata;
 }
 
 export const MORE_ACTION_MODAL = 'more-action-modal';
@@ -38,7 +36,7 @@ type ActionListType = {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chainStakingMetadata, className, nominatorMetadata, reward, showContentOnly } = props;
+  const { chainStakingMetadata, className, nominatorMetadata, reward } = props;
 
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
@@ -278,8 +276,15 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [convertStakingActionToExtrinsicType, onPreCheck]);
 
-  const modalContent = (
-    <div className={CN(className, 'action-more-container')}>
+  return (
+    <SwModal
+      className={className}
+      closable={true}
+      id={MORE_ACTION_MODAL}
+      maskClosable={true}
+      onCancel={!selected ? onCancel : undefined}
+      title={t('Actions')}
+    >
       {actionList.map((item) => {
         const actionDisable = !availableActions.includes(item.action);
         const hasAnAction = !!selected;
@@ -316,32 +321,14 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         );
       })}
-    </div>
-  );
-
-  if (showContentOnly) {
-    return modalContent;
-  }
-
-  return (
-    <BaseModal
-      closable={true}
-      id={MORE_ACTION_MODAL}
-      maskClosable={true}
-      onCancel={!selected ? onCancel : undefined}
-      title={t('Actions')}
-    >
-      {modalContent}
-    </BaseModal>
+    </SwModal>
   );
 };
 
 const MoreActionModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '&.action-more-container': {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: token.sizeXS
+    '.action-more-item:not(:last-child)': {
+      marginBottom: token.marginXS
     },
 
     '.ant-web3-block-right-item': {

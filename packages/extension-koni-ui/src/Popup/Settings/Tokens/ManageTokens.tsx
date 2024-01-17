@@ -5,7 +5,6 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { FilterModal, Layout, OptionType, PageWrapper, TokenEmptyList, TokenToggleItem } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useDefaultNavigate, useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useChainAssets } from '@subwallet/extension-koni-ui/hooks/assets';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -31,7 +30,6 @@ const renderEmpty = () => <TokenEmptyList />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const goBack = useDefaultNavigate().goBack;
   const dataContext = useContext(DataContext);
@@ -104,11 +102,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         ),
         onClick: () => {
           navigate('/settings/tokens/import-token', { state: { isExternalRequest: false } });
-        },
-        tooltip: isWebUI ? t('Import token') : undefined
+        }
       }
     ];
-  }, [isWebUI, navigate, t]);
+  }, [navigate]);
 
   const openFilterModal = useCallback((e?: SyntheticEvent) => {
     e && e.stopPropagation();

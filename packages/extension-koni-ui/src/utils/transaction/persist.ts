@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { CANCEL_UN_YIELD_TRANSACTION, CLAIM_YIELD_TRANSACTION, CURRENT_PAGE, FAST_WITHDRAW_YIELD_TRANSACTION, NFT_TRANSACTION, TRANSFER_TRANSACTION, UN_YIELD_TRANSACTION, WITHDRAW_YIELD_TRANSACTION, YIELD_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, CURRENT_PAGE, NFT_TRANSACTION, STAKE_TRANSACTION, TRANSFER_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 
 import { removeStorage } from '../common';
 
@@ -16,27 +16,17 @@ export const detectTransactionPersistKey = (type?: ExtrinsicType): string => {
       return TRANSFER_TRANSACTION;
     case ExtrinsicType.STAKING_BOND:
     case ExtrinsicType.STAKING_JOIN_POOL:
-    case ExtrinsicType.JOIN_YIELD_POOL:
-    case ExtrinsicType.MINT_LDOT:
-    case ExtrinsicType.MINT_QDOT:
-    case ExtrinsicType.MINT_SDOT:
-    case ExtrinsicType.MINT_VDOT:
-      return YIELD_TRANSACTION;
+      return STAKE_TRANSACTION;
     case ExtrinsicType.STAKING_UNBOND:
     case ExtrinsicType.STAKING_LEAVE_POOL:
-      return UN_YIELD_TRANSACTION;
+      return UN_STAKE_TRANSACTION;
     case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
-      return CANCEL_UN_YIELD_TRANSACTION;
+      return CANCEL_UN_STAKE_TRANSACTION;
     case ExtrinsicType.STAKING_WITHDRAW:
     case ExtrinsicType.STAKING_POOL_WITHDRAW:
-      return WITHDRAW_YIELD_TRANSACTION;
+      return WITHDRAW_TRANSACTION;
     case ExtrinsicType.STAKING_CLAIM_REWARD:
-      return CLAIM_YIELD_TRANSACTION;
-    case ExtrinsicType.REDEEM_LDOT:
-    case ExtrinsicType.REDEEM_QDOT:
-    case ExtrinsicType.REDEEM_SDOT:
-    case ExtrinsicType.REDEEM_VDOT:
-      return FAST_WITHDRAW_YIELD_TRANSACTION;
+      return CLAIM_REWARD_TRANSACTION;
     default:
       return '';
   }

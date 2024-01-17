@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, Layout, PageWrapper, PhraseNumberSelector, SeedPhraseInput } from '@subwallet/extension-koni-ui/components';
-import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
-import { DEFAULT_ACCOUNT_TYPES, IMPORT_ACCOUNT_MODAL, IMPORT_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { DEFAULT_ACCOUNT_TYPES, IMPORT_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useFocusFormItem, useGetDefaultAccountName, useGoBackFromCreateAccount, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,13 +11,9 @@ import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { wordlists } from 'bip39';
 import CN from 'classnames';
 import { Eye, EyeSlash, FileArrowDown } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
-
-import { KeypairType } from '@polkadot/util-crypto/types';
-
-import SelectAccountType from '../../components/Account/SelectAccountType';
 
 type Props = ThemeProps;
 
@@ -40,29 +34,15 @@ interface FormState extends Record<`seed-phrase-${number}`, string> {
 
 const words = wordlists.english;
 
-const instructionContent: InstructionContentType[] = [
-  {
-    title: 'What is a seed phrase?',
-    description: 'Seed phrase is a 12- or 24-word phrase that can be used to restore your wallet.',
-    type: 'warning'
-  },
-  {
-    title: 'Is it safe to enter it into SubWallet?',
-    description: 'Yes. It will be stored locally and never leave your device without your explicit permission.',
-    type: 'warning'
-  }
-];
-
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
-  const { isWebUI } = useContext(ScreenContext);
   const notification = useNotification();
 
   const onComplete = useCompleteCreateAccount();
-  const onBack = useGoBackFromCreateAccount(isWebUI ? IMPORT_ACCOUNT_MODAL : IMPORT_SEED_MODAL);
+  const onBack = useGoBackFromCreateAccount(IMPORT_SEED_MODAL);
 
   const accountName = useGetDefaultAccountName();
 
@@ -73,11 +53,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [submitting, setSubmitting] = useState(false);
   const [storage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
 
-  const [outerKeyTypes] = useState(storage);
-
-  const [localKeyTypes, setLocalKeyTypes] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
-
-  const keyTypes = isWebUI ? localKeyTypes : outerKeyTypes;
+  const [keyTypes] = useState(storage);
 
   const [disabled, setDisabled] = useState(true);
   const [showSeed, setShowSeed] = useState(false);
@@ -178,33 +154,28 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   useFocusFormItem(form, `${fieldNamePrefix}0`);
 
-  const buttonProps = {
-    children: t('Import account'),
-    icon: FooterIcon,
-    onClick: form.submit,
-    disabled: disabled,
-    loading: submitting
-  };
-
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         onBack={onBack}
-        rightFooterButton={isWebUI ? undefined : buttonProps}
-        subHeaderIcons={isWebUI
-          ? undefined
-          : ([
-            {
-              icon: <CloseIcon />,
-              onClick: goHome
-            }
-          ])}
+        rightFooterButton={{
+          children: t('Import account'),
+          icon: FooterIcon,
+          onClick: form.submit,
+          disabled: disabled,
+          loading: submitting
+        }}
+        subHeaderIcons={[
+          {
+            icon: <CloseIcon />,
+            onClick: goHome
+          }
+        ]}
         title={t<string>('Import from seed phrase')}
       >
         <div className='container'>
           <div className='description'>
-            {!isWebUI && t('To import an existing account,\n please enter seed phrase.')}
-            { isWebUI && t('To import an existing existing account, please select account type and enter the recovery seed phrase here:')}
+            {t('To import an existing account, please enter seed phrase.')}
           </div>
           <Form
             className='form-container form-space-xs'
@@ -230,7 +201,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 <Button
                   icon={(
                     <Icon
-                      customSize={isWebUI ? '28px' : undefined}
                       phosphorIcon={showSeed ? EyeSlash : Eye}
                       size='sm'
                     />
@@ -254,7 +224,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                         rules={[{
                           validator: seedValidator
                         }]}
-                        statusHelpAsTooltip={isWebUI}
+                        statusHelpAsTooltip={true}
                         validateTrigger={['onChange']}
                       >
                         <SeedPhraseInput
@@ -271,29 +241,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               </div>
             </div>
           </Form>
-
-          {isWebUI && (
-            <>
-              <div className='__select-account-type'>
-                <SelectAccountType
-                  selectedItems={localKeyTypes}
-                  setSelectedItems={setLocalKeyTypes}
-                />
-              </div>
-
-              <Button
-                {...buttonProps}
-                block={true}
-                className='__submit-button'
-                disabled={disabled || !keyTypes.length}
-              />
-            </>
-          )}
         </div>
-
-        {isWebUI && (
-          <InstructionContainer contents={instructionContent} />
-        )}
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
@@ -342,53 +290,10 @@ const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) 
       display: 'grid',
       gridTemplateColumns: 'repeat(3, 1fr)',
       gap: token.sizeXS,
-      marginLeft: token.marginSM,
-      marginRight: token.marginSM,
 
       '.ant-form-item': {
         minWidth: 0,
         marginBottom: 0
-      }
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-sub-header-container': {
-        marginBottom: 24
-      },
-
-      '.ant-sw-screen-layout-body': {
-        maxWidth: 784,
-        gap: token.size,
-        width: '100%',
-        flexDirection: 'row',
-        marginLeft: 'auto',
-        marginRight: 'auto'
-      },
-
-      '.container': {
-        paddingTop: 0,
-        paddingLeft: 0,
-        paddingRight: 0,
-        flex: 1
-      },
-
-      '.form-container': {
-        marginBottom: token.margin
-      },
-
-      '.description': {
-        paddingLeft: 0,
-        paddingRight: 0,
-        textAlign: 'left'
-      },
-
-      '.__submit-button': {
-        marginTop: token.margin,
-        marginBottom: token.margin
-      },
-
-      '.instruction-container': {
-        flex: 1
       }
     }
   };

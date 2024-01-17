@@ -39,20 +39,3 @@ export const CMD = {
     SIGN_MSG: 3
   }
 };
-
-export const SUPPORT_WALLETS = [{
-  name: 'SubWallet',
-  substrate: 'subwallet-js',
-  evm: 'SubWallet',
-  icon: '/images/subwallet.png'
-}, {
-  name: 'Polkadot{.js}',
-  substrate: 'polkadot-js',
-  evm: null,
-  icon: '/images/subwallet.png'
-}, {
-  name: 'Talisman',
-  substrate: 'talisman',
-  evm: null,
-  icon: '/images/subwallet.png'
-}];

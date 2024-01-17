@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BackIcon, BaseModal } from '@subwallet/extension-koni-ui/components';
+import { BackIcon } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, SwQRCode } from '@subwallet/react-ui';
+import { Button, Icon, SwModal, SwQRCode } from '@subwallet/react-ui';
 import AccountItem from '@subwallet/react-ui/es/web3-block/account-item';
 import CN from 'classnames';
 import { CopySimple } from 'phosphor-react';
@@ -29,8 +29,7 @@ const Component: React.FC<Props> = ({ address, className, id: modalId, onBack }:
   const isEvmAddress = isEthereumAddress(address);
 
   return (
-    <BaseModal
-      center={true}
+    <SwModal
       className={CN(className)}
       closeIcon={(<BackIcon />)}
       id={modalId}
@@ -77,7 +76,7 @@ const Component: React.FC<Props> = ({ address, className, id: modalId, onBack }:
           }
         />
       </div>
-    </BaseModal>
+    </SwModal>
   );
 };
 

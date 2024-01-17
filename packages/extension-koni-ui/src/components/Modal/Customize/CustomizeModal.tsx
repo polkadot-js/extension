@@ -1,13 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { saveShowZeroBalance } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, ModalContext, SettingItem, Switch } from '@subwallet/react-ui';
+import { BackgroundIcon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import { Wallet } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
@@ -32,10 +31,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [inactiveModal]);
 
   return (
-    <BaseModal
+    <SwModal
       className={className}
       destroyOnClose={true}
-      fullSizeOnMobile
       id={CUSTOMIZE_MODAL}
       onCancel={onCancel}
       title={t('Customize asset display')}
@@ -67,25 +65,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <div className={'__group-label'}>{t('Networks')}</div>
 
       <CustomizeModalContent />
-    </BaseModal>
+    </SwModal>
   );
 }
 
 export const CustomizeModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-modal-content': {
-      display: 'flex',
-      flexDirection: 'column',
+      maxHeight: 586,
+      height: 586,
       overflow: 'hidden'
     },
 
     '.ant-sw-modal-body': {
       paddingLeft: 0,
       paddingRight: 0,
+      paddingBottom: 0,
       display: 'flex',
-      flexDirection: 'column',
-      flex: 1,
-      paddingBottom: token.size
+      flexDirection: 'column'
     },
 
     '.__group-label': {
@@ -115,18 +112,8 @@ export const CustomizeModal = styled(Component)<Props>(({ theme: { token } }: Pr
       flex: 1
     },
 
-    '.ant-sw-list-section .ant-sw-list-wrapper.ant-sw-list-wrapper': {
-      flexBasis: '100vh'
-    },
-
     '.network_item__container .ant-web3-block-right-item': {
       marginRight: 0
-    },
-
-    '.ant-sw-list': {
-      height: '100vh',
-      maxHeight: '100%',
-      display: 'block'
     }
   });
 });

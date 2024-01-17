@@ -4,7 +4,6 @@
 import { ChainLogoMap } from '@subwallet/chain-list';
 import { ConfirmationDefinitions, ConfirmationResult } from '@subwallet/extension-base/background/KoniTypes';
 import { ConfirmationGeneralInfo } from '@subwallet/extension-koni-ui/components';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useCopy } from '@subwallet/extension-koni-ui/hooks';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -14,7 +13,7 @@ import { ActivityIndicator, Button, Col, Field, Icon, Image, Row } from '@subwal
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { CheckCircle, CopySimple, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -33,7 +32,6 @@ const handleCancel = async ({ id }: ConfirmationDefinitions['addTokenRequest'][0
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, request } = props;
-  const { isWebUI } = useContext(ScreenContext);
   const { payload: { contractAddress, contractError, decimals, name, originChain, slug, symbol, type, validated } } = request;
 
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
@@ -103,7 +101,7 @@ const Component: React.FC<Props> = (props: Props) => {
         />
         <Field
           content={type}
-          tooltip={isWebUI ? t<string>('Token type') : undefined}
+          tooltip={t<string>('Token type')}
         />
         <Field
           content={toShort(contractAddress)}
@@ -133,7 +131,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   value={contractAddress}
                 />
               }
-              tooltip={isWebUI ? t<string>('Symbol') : undefined}
+              tooltip={t<string>('Symbol')}
               tooltipPlacement='topLeft'
             />
           </Col>
@@ -141,7 +139,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <Field
               content={decimals === -1 ? '' : decimals}
               placeholder={t<string>('Decimals')}
-              tooltip={isWebUI ? t<string>('Decimals') : undefined}
+              tooltip={t<string>('Decimals')}
               tooltipPlacement='topLeft'
             />
           </Col>
@@ -185,7 +183,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AddTokenConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--content-gap': `${token.size}px`,
+    '--content-gap': `${token.sizeSM}px`,
 
     '.ant-field-container': {
       textAlign: 'left',

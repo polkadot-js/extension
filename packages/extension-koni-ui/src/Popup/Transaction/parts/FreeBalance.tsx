@@ -12,17 +12,15 @@ import styled, { useTheme } from 'styled-components';
 type Props = ThemeProps & {
   address?: string,
   tokenSlug?: string;
-  customTokenBalance?: string; // TODO: used only for earning
   label?: string;
   chain?: string;
   onBalanceReady?: (rs: boolean) => void;
-  isSubscribe?: boolean;
 }
 
-const Component = ({ address, chain, className, customTokenBalance, isSubscribe, label, onBalanceReady, tokenSlug }: Props) => {
+const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug, isSubscribe);
+  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug);
 
   useEffect(() => {
     onBalanceReady?.(!isLoading && !error);
@@ -61,7 +59,7 @@ const Component = ({ address, chain, className, customTokenBalance, isSubscribe,
               size={14}
               suffix={tokenBalance?.symbol}
               unitColor={token.colorTextTertiary}
-              value={customTokenBalance || tokenBalance.value}
+              value={tokenBalance.value}
             />
           </>
         )

@@ -24,14 +24,10 @@ export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
   return '';
 }
 
-export function getWaitingTime (status: UnstakingStatus, t: TFunction, waitingTime?: number) {
+export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t: TFunction) {
   if (status === UnstakingStatus.CLAIMABLE) {
     return t('Available for withdrawal');
   } else {
-    if (waitingTime === undefined) {
-      return t('Waiting for withdrawal');
-    }
-
     const waitingTimeInMs = waitingTime * 60 * 60 * 1000;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
     const formattedWaitingTime = humanizeDuration(waitingTimeInMs, {
@@ -57,7 +53,7 @@ export function getWaitingTime (status: UnstakingStatus, t: TFunction, waitingTi
   }
 }
 
-export const fetchChainValidator = (chain: string, unmount: boolean, setValidatorLoading: (value: boolean) => void, setForceFetchValidator: (value: boolean) => void) => {
+const fetchChainValidator = (chain: string, unmount: boolean, setValidatorLoading: (value: boolean) => void, setForceFetchValidator: (value: boolean) => void) => {
   if (!unmount) {
     setValidatorLoading(true);
     getBondingOptions(chain, StakingType.NOMINATED)
@@ -74,7 +70,7 @@ export const fetchChainValidator = (chain: string, unmount: boolean, setValidato
   }
 };
 
-export const fetchChainPool = (chain: string, unmount: boolean, setPoolLoading: (value: boolean) => void, setForceFetchValidator: (value: boolean) => void) => {
+const fetchChainPool = (chain: string, unmount: boolean, setPoolLoading: (value: boolean) => void, setForceFetchValidator: (value: boolean) => void) => {
   if (!unmount && _STAKING_CHAIN_GROUP.nominationPool.includes(chain)) {
     setPoolLoading(true);
     getNominationPoolOptions(chain)

@@ -11,7 +11,7 @@ import styled, { useTheme } from 'styled-components';
 interface Props extends ThemeProps {
   phosphorIcon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,
   emptyTitle?: string,
-  emptyMessage?: string | React.ReactNode,
+  emptyMessage?: string,
   buttonProps?: ButtonProps;
 }
 
@@ -21,61 +21,43 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div className={CN(className, 'empty-list')}>
-      <div className={'empty-list-inner'}>
-        <div className={'empty_icon_wrapper'}>
-          <PageIcon
-            color={token['gray-4']}
-            iconProps={{
-              phosphorIcon,
-              weight: 'fill'
-            }}
-          />
-        </div>
-
-        <div className={'empty_text_container'}>
-          <div className={'empty_title'}>{emptyTitle}</div>
-          <div className={'empty_subtitle'}>{emptyMessage}</div>
-        </div>
-
-        {
-          buttonProps && (
-            <div className='button-container'>
-              <Button {...buttonProps} />
-            </div>
-          )
-        }
+      <div className={'empty_icon_wrapper'}>
+        <PageIcon
+          color={token['gray-4']}
+          iconProps={{
+            phosphorIcon,
+            weight: 'fill'
+          }}
+        />
       </div>
+
+      <div className={'empty_text_container'}>
+        <div className={'empty_title'}>{emptyTitle}</div>
+        <div className={'empty_subtitle'}>{emptyMessage}</div>
+      </div>
+
+      {
+        buttonProps && (
+          <div className='button-container'>
+            <Button {...buttonProps} />
+          </div>
+        )
+      }
     </div>
   );
 };
 
 const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    overflow: 'auto',
-    marginTop: 32,
-    marginBottom: 32,
+    overflow: 'hidden',
+    marginTop: 48,
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: token.padding,
+    flexDirection: 'column',
+    alignContent: 'center',
     position: 'relative',
     zIndex: 2,
-    display: 'flex',
-    flexDirection: 'column',
-
-    '&:before, &:after': {
-      content: '""',
-      display: 'block',
-      flex: '1 1 0'
-    },
-
-    '.empty-list-inner': {
-      maxWidth: 358,
-      width: '100%',
-      display: 'flex',
-      gap: token.padding,
-      flexDirection: 'column',
-      alignContent: 'center',
-      padding: token.padding,
-      marginLeft: 'auto',
-      marginRight: 'auto'
-    },
 
     '.empty_text_container': {
       display: 'flex',

@@ -29,8 +29,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const isShowFooter = useMemo(() => {
     const pathName = location.pathname;
 
-    console.log(pathName);
-
     return !['/create-done'].includes(pathName);
   }, [location.pathname]);
 

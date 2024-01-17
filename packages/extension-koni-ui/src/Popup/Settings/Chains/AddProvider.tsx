@@ -8,7 +8,6 @@ import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
@@ -57,7 +56,6 @@ function parseProviders (newProvider: string, existingProviders: Record<string, 
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
@@ -286,7 +284,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'provider'}
                 rules={[{ validator: providerValidator }]}
-                statusHelpAsTooltip={isWebUI}
+                statusHelpAsTooltip={true}
                 validateTrigger={['onBlur']}
               >
                 <Input
@@ -318,7 +316,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                           weight={'bold'}
                         />
                       )}
-                      tooltip={isWebUI ? t('Network name') : undefined}
+                      tooltip={t('Network name')}
                       tooltipPlacement='topLeft'
                       value={chainInfo.name}
                     />
@@ -332,7 +330,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <Input
                       disabled={true}
                       placeholder={t('Symbol')}
-                      tooltip={isWebUI ? t('Symbol') : undefined}
+                      tooltip={t('Symbol')}
                       tooltipPlacement='topLeft'
                       value={chainInfo.slug}
                     />
@@ -344,7 +342,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <Input
                   disabled={true}
                   placeholder={t('Network type')}
-                  tooltip={isWebUI ? t('Network type') : undefined}
+                  tooltip={t('Network type')}
                   tooltipPlacement='topLeft'
                   value={chainInfo.slug}
                 />
@@ -397,23 +395,6 @@ const AddProvider = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-form-item-with-help .ant-form-item-explain': {
       paddingBottom: 0
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-body': {
-        flex: '0 0 auto'
-      },
-
-      '.add_provider__container': {
-        paddingTop: 24,
-        paddingBottom: 8
-      },
-
-      '.description': {
-        maxWidth: 416,
-        marginLeft: 'auto',
-        marginRight: 'auto'
-      }
     }
   });
 });

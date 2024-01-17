@@ -5,7 +5,6 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getContractAddressOfToken, _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
@@ -27,7 +26,6 @@ type Props = ThemeProps
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const goBack = useDefaultNavigate().goBack;
@@ -45,9 +43,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [goBack, tokenInfo]);
 
-  const originChainInfo = useFetchChainInfo(tokenInfo?.originChain || '');
+  const originChainInfo = useFetchChainInfo(tokenInfo.originChain);
 
-  const [priceId, setPriceId] = useState(tokenInfo?.priceId || '');
+  const [priceId, setPriceId] = useState(tokenInfo.priceId || '');
   const [loading, setLoading] = useState(false);
 
   const { handleSimpleConfirmModal } = useConfirmModal({
@@ -61,10 +59,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   });
 
   const handleDeleteToken = useCallback(() => {
-    if (!tokenInfo?.slug) {
-      return;
-    }
-
     handleSimpleConfirmModal().then(() => {
       deleteCustomAssets(tokenInfo.slug)
         .then((result) => {
@@ -85,7 +79,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           });
         });
     }).catch(console.log);
-  }, [goBack, handleSimpleConfirmModal, showNotification, t, tokenInfo?.slug]);
+  }, [goBack, handleSimpleConfirmModal, showNotification, t, tokenInfo.slug]);
 
   const subHeaderButton: ButtonProps[] = useMemo(() => {
     return [
@@ -97,11 +91,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           weight={'light'}
         />,
         onClick: handleDeleteToken,
-        disabled: !(_isCustomAsset(tokenInfo.slug) && _isSmartContractToken(tokenInfo)),
-        tooltip: isWebUI ? t('Delete token') : undefined
+        disabled: !(_isCustomAsset(tokenInfo.slug) && _isSmartContractToken(tokenInfo))
       }
     ];
-  }, [handleDeleteToken, isWebUI, t, token.fontSizeHeading3, tokenInfo]);
+  }, [handleDeleteToken, token.fontSizeHeading3, tokenInfo]);
 
   const contractAddressIcon = useCallback(() => {
     const contractAddress = _getContractAddressOfToken(tokenInfo);
@@ -128,7 +121,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const handleCopyContractAddress = useCallback(() => {
     const contractAddress = _getContractAddressOfToken(tokenInfo);
 
-    navigator?.clipboard?.writeText(contractAddress).then().catch(console.error);
+    navigator.clipboard.writeText(contractAddress).then().catch(console.error);
 
     showNotification({
       message: t('Copied to clipboard')
@@ -157,14 +150,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const isSubmitDisabled = useCallback(() => {
-    return tokenInfo?.priceId === priceId || priceId.length === 0;
-  }, [priceId, tokenInfo?.priceId]);
+    return tokenInfo.priceId === priceId || priceId.length === 0;
+  }, [priceId, tokenInfo.priceId]);
 
   const onSubmit = useCallback(() => {
-    if (!tokenInfo) {
-      return;
-    }
-
     setLoading(true);
 
     upsertCustomToken({
@@ -191,23 +180,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [goBack, priceId, showNotification, t, tokenInfo]);
 
   const leftFooterButtonProps = useCallback(() => {
-    if (!tokenInfo?.slug) {
-      return;
-    }
-
     return _isCustomAsset(tokenInfo.slug)
       ? {
         onClick: goBack,
         children: t('Cancel')
       }
       : undefined;
-  }, [goBack, tokenInfo?.slug, t]);
+  }, [goBack, tokenInfo.slug, t]);
 
   const rightFooterButtonProps = useCallback(() => {
-    if (!tokenInfo?.slug) {
-      return;
-    }
-
     return _isCustomAsset(tokenInfo.slug)
       ? {
         block: true,
@@ -223,11 +204,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         children: t('Save')
       }
       : undefined;
-  }, [isSubmitDisabled, loading, onSubmit, t, tokenInfo?.slug]);
-
-  if (!tokenInfo || !originChainInfo) {
-    return (<></>);
-  }
+  }, [isSubmitDisabled, loading, onSubmit, t, tokenInfo.slug]);
 
   return (
     <PageWrapper
@@ -283,7 +260,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Row gutter={token.marginSM}>
               <Col span={12}>
                 <Tooltip
-                  open={isWebUI ? undefined : false}
                   placement={'topLeft'}
                   title={t('Symbol')}
                 >
@@ -303,7 +279,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               </Col>
               <Col span={12}>
                 <Tooltip
-                  open={isWebUI ? undefined : false}
                   placement={'topLeft'}
                   title={t('Token name')}
                 >
@@ -319,7 +294,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Row gutter={token.marginSM}>
               <Col span={12}>
                 <Tooltip
-                  open={isWebUI ? undefined : false}
                   placement={'topLeft'}
                   title={t('Price ID')}
                 >
@@ -335,7 +309,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               </Col>
               <Col span={12}>
                 <Tooltip
-                  open={isWebUI ? undefined : false}
                   placement={'topLeft'}
                   title={t('Decimals')}
                 >
@@ -393,13 +366,6 @@ const TokenDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.ant-field-wrapper .ant-btn': {
       margin: -token.marginXS,
       height: 'auto'
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-body': {
-        flex: '0 0 auto',
-        marginBottom: token.marginSM
-      }
     }
   });
 });

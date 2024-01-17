@@ -5,9 +5,9 @@ import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import ErrorFallback from '@subwallet/extension-koni-ui/Popup/ErrorFallback';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
-import { i18nPromise } from '@subwallet/extension-koni-ui/utils';
+import { i18nPromise } from '@subwallet/extension-koni-ui/utils/common/i18n';
 import React, { ComponentType } from 'react';
-import { createBrowserRouter, IndexRouteObject, Outlet, useLocation, useOutletContext } from 'react-router-dom';
+import { createHashRouter, IndexRouteObject, Outlet, useLocation } from 'react-router-dom';
 
 export const lazyLoaderMap: Record<string, LazyLoader> = {};
 
@@ -64,13 +64,9 @@ const NftCollections = new LazyLoader('NftCollections', () => import('@subwallet
 const NftCollectionDetail = new LazyLoader('NftCollectionDetail', () => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
 const NftImport = new LazyLoader('NftImport', () => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftImport'));
 
-const InscriptionItems = new LazyLoader('InscriptionItems', () => import('@subwallet/extension-koni-ui/Popup/Home/Inscriptions/InscriptionItemList'));
-const InscriptionItemDetail = new LazyLoader('InscriptionItemDetail', () => import('@subwallet/extension-koni-ui/Popup/Home/Inscriptions/InscriptionItemDetail'));
-
 const History = new LazyLoader('History', () => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = new LazyLoader('Crowdloans', () => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = new LazyLoader('Home', () => import('@subwallet/extension-koni-ui/Popup/Home'));
-const Statistics = new LazyLoader('Statistics', () => import('@subwallet/extension-koni-ui/Popup/Home/Statistics'));
 
 const Settings = new LazyLoader('Settings', () => import('@subwallet/extension-koni-ui/Popup/Settings'));
 const GeneralSetting = new LazyLoader('GeneralSetting', () => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
@@ -111,48 +107,18 @@ const Transaction = new LazyLoader('Transaction', () => import('@subwallet/exten
 const TransactionDone = new LazyLoader('TransactionDone', () => import('@subwallet/extension-koni-ui/Popup/TransactionDone'));
 const SendFund = new LazyLoader('SendFund', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund'));
 const SendNFT = new LazyLoader('SendNFT', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendNFT'));
-const Stake = new LazyLoader('Stake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/Stake'));
-const Unstake = new LazyLoader('Unstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/Unbond'));
-const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/CancelUnstake'));
-const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/ClaimReward'));
-const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/Withdraw'));
-const Earn = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/Earn'));
-const UnYield = new LazyLoader('YieldUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldUnstake'));
-const WithdrawYield = new LazyLoader('YieldWithdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldWithdraw'));
-const CancelUnYield = new LazyLoader('YieldCancelUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldCancelUnstake'));
-const YieldWithdrawPosition = new LazyLoader('YieldWithdrawPosition', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldWithdrawPosition'));
-const YieldClaimReward = new LazyLoader('YieldClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldClaimReward'));
+const Stake = new LazyLoader('Stake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake'));
+const Unstake = new LazyLoader('Unstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Unbond'));
+const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/CancelUnstake'));
+const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/ClaimReward'));
+const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Withdraw'));
 
 // Wallet Connect
 const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
 const ConnectionList = new LazyLoader('ConnectionList', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
 const ConnectionDetail = new LazyLoader('ConnectionDetail', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
-// DApps
-
-const DApps = new LazyLoader('DApps', () => import('@subwallet/extension-koni-ui/Popup/DApps'));
-
-const EarningOutlet = new LazyLoader('EarningOutlet', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/Outlet'));
-const EarningOverview = new LazyLoader('EarningOverview', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningOverview'));
-const EarningDemo = new LazyLoader('EarningDemo', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningDemo'));
-const EarningManagement = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
-const EarningNoRouter = new LazyLoader('EarningNoRouter', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/NoRouter'));
-
-const EarningDoneOutlet = new LazyLoader('EarningDoneOutlet', () => import('@subwallet/extension-koni-ui/Popup/EarningDone/Outlet'));
-const EarningDoneContent = new LazyLoader('EarningDoneContent', () => import('@subwallet/extension-koni-ui/Popup/EarningDone/Content'));
-
-const CrowdloanUnlockCampaign = new LazyLoader('CrowdloanUnlockCampaign', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign'));
-const CheckCrowdloanContributions = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CheckCrowdloanContributions'));
-const CrowdloanContributionsResult = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CrowdloanContributionsResult'));
-
-const MissionPool = new LazyLoader('MissionPool', () => import('@subwallet/extension-koni-ui/Popup/MissionPool'));
-
-/* 404 */
-
-const NotFoundContent = new LazyLoader('NotFoundContent', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Content'));
-const NotFoundRedirect = new LazyLoader('NotFoundRedirect', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Redirect'));
-const UnsafeAccess = new LazyLoader('UnsafeAccess', () => import('@subwallet/extension-koni-ui/Popup/NotFound/Access'));
-/* 404 */
+const NotFound = new LazyLoader('NotFound', () => import('@subwallet/extension-koni-ui/Popup/NotFound'));
 
 // A Placeholder page
 export function Example () {
@@ -163,61 +129,35 @@ export function Example () {
   </PageWrapper>;
 }
 
-export function NestedOutlet () {
-  return <Outlet context={useOutletContext()} />;
-}
-
-export const router = createBrowserRouter([
+// Todo: Create error page
+export const router = createHashRouter([
   {
     path: '/',
     loader: () => i18nPromise,
     element: <Root />,
     errorElement: <ErrorFallback />,
     children: [
-      {
-        path: '/wc',
-        element: <div />
-      },
-      Welcome.generateRouterObject('/welcome', true),
+      Welcome.generateRouterObject('/welcome'),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
       {
         ...Home.generateRouterObject('/home'),
         children: [
           Tokens.generateRouterObject('tokens'),
-          Statistics.generateRouterObject('statistics'),
           TokenDetailList.generateRouterObject('tokens/detail/:slug'),
           {
             path: 'nfts',
-            element: <NestedOutlet />,
+            element: <Outlet />,
             children: [
               NftCollections.generateRouterObject('collections'),
               NftCollectionDetail.generateRouterObject('collection-detail'),
               NftItemDetail.generateRouterObject('item-detail')
             ]
           },
-          {
-            path: 'inscriptions',
-            element: <NestedOutlet />,
-            children: [
-              InscriptionItems.generateRouterObject(''),
-              InscriptionItemDetail.generateRouterObject('item-detail')
-            ]
-          },
           Crowdloans.generateRouterObject('crowdloans'),
           Staking.generateRouterObject('staking'),
-          {
-            ...EarningOutlet.generateRouterObject('earning'),
-            children: [
-              EarningOverview.generateRouterObject('overview'),
-              EarningManagement.generateRouterObject('detail'),
-              EarningNoRouter.generateRouterObject('')
-            ]
-          },
-          MissionPool.generateRouterObject('mission-pools'),
           History.generateRouterObject('history'),
-          History.generateRouterObject('history/:address/:chain/:extrinsicHashOrId'),
-          DApps.generateRouterObject('dapps')
+          History.generateRouterObject('history/:address/:chain/:extrinsicHashOrId')
         ]
       },
       {
@@ -230,12 +170,6 @@ export const router = createBrowserRouter([
           CancelUnstake.generateRouterObject('cancel-unstake'),
           ClaimReward.generateRouterObject('claim-reward'),
           Withdraw.generateRouterObject('withdraw'),
-          Earn.generateRouterObject('earn'),
-          UnYield.generateRouterObject('un-yield'),
-          WithdrawYield.generateRouterObject('withdraw-yield'),
-          CancelUnYield.generateRouterObject('cancel-un-yield'),
-          YieldWithdrawPosition.generateRouterObject('yield-withdraw-position'),
-          YieldClaimReward.generateRouterObject('yield-claim'),
           {
             path: 'compound',
             element: <Example />
@@ -246,16 +180,10 @@ export const router = createBrowserRouter([
         ...TransactionDone.generateRouterObject('transaction-done/:address/:chain/:transactionId')
       },
       {
-        ...EarningDoneOutlet.generateRouterObject('earning-done'),
-        children: [
-          EarningDoneContent.generateRouterObject(':address/:chain/:transactionId')
-        ]
-      },
-      {
         path: '/keyring',
         element: <Outlet />,
         children: [
-          Login.generateRouterObject('login', true),
+          Login.generateRouterObject('login'),
           CreatePassword.generateRouterObject('create-password'),
           ChangePassword.generateRouterObject('change-password'),
           ApplyMasterPassword.generateRouterObject('migrate-password')
@@ -263,8 +191,8 @@ export const router = createBrowserRouter([
       },
       {
         path: '/settings',
+        element: <Outlet />,
         children: [
-          Settings.generateRouterObject('/settings'),
           Settings.generateRouterObject('list'),
           GeneralSetting.generateRouterObject('general'),
           ManageAddressBook.generateRouterObject('address-book'),
@@ -319,22 +247,7 @@ export const router = createBrowserRouter([
           ConnectionDetail.generateRouterObject('detail/:topic')
         ]
       },
-      {
-        ...EarningOutlet.generateRouterObject('earning-demo'),
-        children: [
-          EarningDemo.generateRouterObject('')
-        ]
-      },
-      {
-        ...CrowdloanUnlockCampaign.generateRouterObject('/crowdloan-unlock-campaign'),
-        children: [
-          CheckCrowdloanContributions.generateRouterObject('check-contributions'),
-          CrowdloanContributionsResult.generateRouterObject('contributions-result')
-        ]
-      },
-      NotFoundContent.generateRouterObject('not-found'),
-      NotFoundRedirect.generateRouterObject('*'),
-      UnsafeAccess.generateRouterObject('unsafe-access'),
+      NotFound.generateRouterObject('*'),
       PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)
     ]
   }

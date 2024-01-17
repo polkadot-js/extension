@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
-import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEB_BUILD_NUMBER, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
+import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, SUPPORT_MAIL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
@@ -14,9 +12,9 @@ import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
-import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, ChatTeardropText, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps
@@ -72,12 +70,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const isPopup = useIsPopup();
   const notify = useNotification();
-  const location = useLocation();
   const { goHome } = useDefaultNavigate();
   const { t } = useTranslation();
   const [locking, setLocking] = useState(false);
-  const { isWebUI } = useContext(ScreenContext);
-  const { setTitle } = useContext(WebUIContext);
 
   const { isUILocked, lock, unlock } = useUILock();
 
@@ -161,8 +156,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           title: t('WalletConnect'),
           onClick: () => {
             navigate('/wallet-connect/list');
-          },
-          isHidden: isWebUI
+          }
         }
       ]
     },
@@ -196,6 +190,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       key: 'community-&-support',
       label: t('Community & support'),
       items: [
+        {
+          key: 'request-a-feature',
+          leftIcon: ChatTeardropText,
+          leftIconBgColor: token['magenta-7'],
+          rightIcon: ArrowSquareOut,
+          title: t('Request a feature'),
+          onClick: () => {
+            window.open(`${SUPPORT_MAIL}?subject=[SubWallet In-app Feedback]`, '_self');
+          }
+        },
         {
           key: 'twitter',
           leftIcon: TwitterLogo,
@@ -260,7 +264,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       ]
     }
-  ]), [isPopup, isWebUI, navigate, t, token]);
+  ]), [isPopup, navigate, t, token]);
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
     return [
@@ -278,28 +282,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [goHome]);
 
-  useEffect(() => {
-    if (location.pathname === '/settings' || location.pathname === '/settings/list') {
-      setTitle(t('Settings'));
-    }
-  }, [location.pathname, setTitle, t]);
-
   return (
     <PageWrapper className={`settings ${className}`}>
       <>
-        {!isWebUI && (
-          <SwHeader
-            left='logo'
-            onClickLeft={goHome}
-            paddingVertical
-            rightButtons={headerIcons}
-            showLeftButton={true}
-          >
-            {t('Settings')}
-          </SwHeader>
-        )}
+        <SwHeader
+          left='logo'
+          onClickLeft={goHome}
+          rightButtons={headerIcons}
+          showLeftButton={true}
+        >
+          {t('Settings')}
+        </SwHeader>
 
-        <div className={'__content-container'}>
+        <div className={'__scroll-container'}>
           {
             SettingGroupItemType.map((group) => {
               return (
@@ -345,7 +340,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           </Button>
 
           <div className={'__version'}>
-          SubWallet v {EXTENSION_VERSION} - {WEB_BUILD_NUMBER}
+          SubWallet v {EXTENSION_VERSION}
           </div>
         </div>
 
@@ -355,23 +350,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export const Settings = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
+export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     height: '100%',
     backgroundColor: token.colorBgDefault,
     display: 'flex',
     flexDirection: 'column',
+    overflow: 'hidden',
 
     '.ant-sw-header-container': {
-      backgroundColor: token.colorBgDefault,
-      minHeight: 'auto',
-      position: 'sticky',
-      top: 0,
-      zIndex: 10
-    },
-
-    '.web-ui-enable &, .web-ui-enable & .ant-sw-header-container': {
-      backgroundColor: 'transparent'
+      paddingTop: token.padding,
+      paddingBottom: token.padding,
+      backgroundColor: token.colorBgDefault
     },
 
     '.ant-sw-header-center-part': {
@@ -381,24 +371,12 @@ export const Settings = styled(Component)<Props>(({ theme: { extendToken, token 
       fontWeight: token.headingFontWeight
     },
 
-    '.custom-header': {
-      paddingTop: token.paddingLG,
-      paddingBottom: token.paddingLG
-    },
-
-    '.__content-container': {
+    '.__scroll-container': {
+      overflow: 'auto',
       paddingTop: token.padding,
       paddingRight: token.padding,
       paddingLeft: token.padding,
-      paddingBottom: token.paddingLG,
-
-      '.web-ui-enable &': {
-        paddingTop: 0,
-        paddingBottom: token.paddingLG,
-        margin: '0 auto',
-        width: extendToken.bigOneColumnWidth,
-        maxWidth: '100%'
-      }
+      paddingBottom: token.paddingLG
     },
 
     '.__group-label': {

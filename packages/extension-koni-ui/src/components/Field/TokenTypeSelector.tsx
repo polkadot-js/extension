@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { ThemeProps, TokenTypeItem } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Icon, InputRef, SettingItem } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, InputRef, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { CheckCircle, Coin } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback } from 'react';
 import styled from 'styled-components';
@@ -60,7 +59,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   }, []);
 
   return (
-    <BaseSelectModal
+    <SelectModal
       className={`${className} token-type-selector-modal`}
       disabled={disabled}
       id={id}

@@ -10,13 +10,13 @@ import styled from 'styled-components';
 import { InfoItemBase } from './types';
 
 export interface NumberInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
-  value: string | number | BigN
-  suffix?: string
-  prefix?: string
-  decimals?: number
-  valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd'
-  decimalOpacity?: number
-  size?: number
+  value: string | number | BigN,
+  suffix?: string,
+  prefix?: string,
+  decimals?: number,
+  valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd',
+  decimalOpacity?: number,
+  size?: number,
   subFloatNumber?: boolean
 }
 
@@ -26,8 +26,8 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
     decimals = 0,
     label,
     prefix,
-    size = 30,
-    subFloatNumber = false,
+    size,
+    subFloatNumber,
     suffix,
     value,
     valueColorSchema = 'default' } = props;
@@ -61,10 +61,8 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
   );
 };
 
-const NumberItem = styled(Component)<NumberInfoItem>(
-  ({ theme: { token } }: NumberInfoItem) => {
-    return {};
-  }
-);
+const NumberItem = styled(Component)<NumberInfoItem>(({ theme: { token } }: NumberInfoItem) => {
+  return {};
+});
 
 export default NumberItem;

@@ -13,20 +13,19 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, formatBalance, noop, transactionDefaultFilterAccount } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PaperPlaneRight, PaperPlaneTilt } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useIsFirstRender } from 'usehooks-ts';
@@ -36,10 +35,7 @@ import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 
-type Props = ThemeProps & {
-  modalContent?: boolean;
-  tokenGroupSlug?: string;
-};
+type Props = ThemeProps;
 
 function isAssetTypeValid (
   chainAsset: _ChainAsset,
@@ -162,6 +158,8 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
   return result;
 }
 
+const defaultFilterAccount = (account: AccountJson): boolean => !(isAccountAll(account.address) || account.isReadOnly);
+
 const filterAccountFunc = (
   chainInfoMap: Record<string, _ChainInfo>,
   assetRegistry: Record<string, _ChainAsset>,
@@ -172,7 +170,7 @@ const filterAccountFunc = (
   const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
 
   if (!tokenGroupSlug) {
-    return transactionDefaultFilterAccount;
+    return defaultFilterAccount;
   }
 
   const chainAssets = Object.values(assetRegistry).filter((chainAsset) => {
@@ -199,7 +197,7 @@ const filterAccountFunc = (
     const validGen: string[] = account.availableGenesisHashes || [];
     const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
 
-    if (!transactionDefaultFilterAccount(account)) {
+    if (!defaultFilterAccount(account)) {
       return false;
     }
 
@@ -214,7 +212,7 @@ const filterAccountFunc = (
 const hiddenFields: Array<keyof TransferParams> = ['chain'];
 const validateFields: Array<keyof TransferParams> = ['value', 'to'];
 
-const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<Props> => {
+const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   useSetCurrentPage('/transaction/send-fund');
   const { t } = useTranslation();
   const notification = useNotification();
@@ -222,10 +220,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const { defaultData, onDone, persistData } = useTransactionContext<TransferParams>();
   const { defaultSlug: sendFundSlug } = defaultData;
   const isFirstRender = useIsFirstRender();
-  const { isWebUI } = useContext(ScreenContext);
 
   const [form] = Form.useForm<TransferParams>();
-
   const formDefault = useMemo((): TransferParams => {
     return {
       ...defaultData
@@ -621,10 +617,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
 
   return (
     <>
-      <TransactionContent className={CN(`${className} -transaction-content`, {
-        '__modal-content': modalContent
-      })}
-      >
+      <TransactionContent className={CN(`${className} -transaction-content`)}>
         <div className={'__brief common-text text-light-4 text-center'}>
           {t('You are performing a transfer of a fungible token')}
         </div>
@@ -655,7 +648,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
                 items={tokenItems}
                 placeholder={t('Select token')}
                 showChainInSelected
-                tooltip={isWebUI ? t('Select token') : undefined}
+                tooltip={t('Select token')}
               />
             </Form.Item>
 
@@ -670,7 +663,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
                 disabled={!destChainItems.length}
                 items={destChainItems}
                 title={t('Select destination chain')}
-                tooltip={isWebUI ? t('Select destination chain') : undefined}
+                tooltip={t('Select destination chain')}
               />
             </Form.Item>
           </div>
@@ -684,7 +677,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
                 validator: validateRecipientAddress
               }
             ]}
-            statusHelpAsTooltip={isWebUI}
+            statusHelpAsTooltip={true}
             validateTrigger='onBlur'
           >
             <AddressInput
@@ -707,7 +700,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
                 validator: validateAmount
               }
             ]}
-            statusHelpAsTooltip={isWebUI}
+            statusHelpAsTooltip={true}
             validateTrigger='onBlur'
           >
             <AmountInput
@@ -716,7 +709,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
               maxValue={maxTransfer}
               onSetMax={onSetMaxTransferable}
               showMaxButton={true}
-              tooltip={isWebUI ? t('Amount') : undefined}
+              tooltip={t('Amount')}
             />
           </Form.Item>
         </Form>
@@ -724,15 +717,12 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         <FreeBalance
           address={from}
           chain={chain}
-          className='balance'
           onBalanceReady={setIsBalanceReady}
           tokenSlug={asset}
         />
       </TransactionContent>
       <TransactionFooter
-        className={CN(`${className} -transaction-footer`, {
-          '__modal-footer': modalContent
-        })}
+        className={`${className} -transaction-footer`}
         errors={[]}
         warnings={[]}
       >
@@ -763,10 +753,6 @@ const SendFund = styled(_SendFund)(({ theme }) => {
       paddingLeft: token.padding,
       paddingRight: token.padding,
       marginBottom: token.marginMD
-    },
-
-    '.balance': {
-      marginBottom: 16
     },
 
     '.form-row': {

@@ -3,7 +3,6 @@
 
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
 import { CONFIRMATION_SCAN_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
 import { ModalContext, SwQrScanner } from '@subwallet/react-ui';
@@ -25,7 +24,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const { inactiveModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
 
   const [error, setError] = useState('');
 
@@ -58,7 +56,6 @@ const Component: React.FC<Props> = (props: Props) => {
       onError={onError}
       onSuccess={onSuccess}
       overlay={error && <QrScannerErrorNotice message={error} />}
-      selectCameraMotion={isWebUI ? 'move-right' : undefined}
       title={t('Scan signature')}
     />
   );

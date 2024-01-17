@@ -38,14 +38,6 @@ export default function useHistorySelection () {
     }
   }, [accounts, currentAccount?.address]);
 
-  useEffect(() => {
-    const isSelectedAccountExist = accounts.some((account) => account.address === selectedAddress);
-
-    if (!isSelectedAccountExist) {
-      setSelectedAddress((accounts.find((a) => !isAccountAll(a.address)))?.address || '');
-    }
-  }, [accounts, selectedAddress]);
-
   return {
     selectedAddress,
     setSelectedAddress,

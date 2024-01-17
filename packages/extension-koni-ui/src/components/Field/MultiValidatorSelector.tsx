@@ -5,11 +5,21 @@ import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { detectTranslate } from '@subwallet/extension-base/utils';
+import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
+import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
+import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
+import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
+import { ValidatorDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Staking/ValidatorDetailModal';
+import StakingValidatorItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingValidatorItem';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useFilterModal, useGetChainStakingMetadata, useGetNominatorInfo, useGetValidatorList, useSelectValidators, ValidatorDataType } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
+import { useSelectValidators } from '@subwallet/extension-koni-ui/hooks/modal/useSelectValidators';
+import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetChainStakingMetadata';
+import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
+import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getValidatorKey } from '@subwallet/extension-koni-ui/utils';
-import { Badge, Button, Icon, InputRef, ModalContext, SwList, useExcludeModal } from '@subwallet/react-ui';
+import { getValidatorKey } from '@subwallet/extension-koni-ui/utils/transaction/stake';
+import { Badge, Button, Icon, InputRef, ModalContext, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import BigN from 'bignumber.js';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
@@ -17,12 +27,7 @@ import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContex
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { EmptyValidator } from '../Account';
-import { FilterModal, SortingModal, ValidatorDetailModal } from '../Modal';
-import { BaseModal } from '../Modal/BaseModal';
 import SelectValidatorInput from '../SelectValidatorInput';
-import { StakingValidatorItem } from '../StakingItem';
-import { BasicInputWrapper } from './Base';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
@@ -72,7 +77,7 @@ const filterOptions = [
 const defaultModalId = 'multi-validator-selector';
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', defaultValue, disabled, from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, loading, onChange, setForceFetchValidator, value } = props;
+  const { chain, className = '', defaultValue, from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, loading, onChange, setForceFetchValidator, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
 
@@ -305,14 +310,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     <>
       <SelectValidatorInput
         chain={chain}
-        disabled={!chain || !from || disabled}
+        disabled={!chain || !from}
         label={t('Select') + ' ' + t(handleValidatorLabel)}
         loading={loading}
         onClick={onActiveValidatorSelector}
         value={value || ''}
       />
-      <BaseModal
-        className={className}
+      <SwModal
+        className={`${className} modal-full`}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}
@@ -362,7 +367,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           searchPlaceholder={t<string>(`Search ${handleValidatorLabel}`)}
           // showActionBtn
         />
-      </BaseModal>
+      </SwModal>
 
       <FilterModal
         id={FILTER_MODAL_ID}
@@ -393,36 +398,26 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
 const MultiValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
-    '&.ant-sw-modal': {
-      '.ant-sw-modal-header': {
-        paddingTop: 0,
-        paddingBottom: token.padding
-      },
-
-      '.ant-sw-modal-body': {
-        paddingLeft: 0,
-        paddingRight: 0
-      },
-
-      '.ant-sw-modal-footer': {
-        borderTop: 0
-      }
+    '.ant-sw-modal-header': {
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingLG
     },
 
-    '.ant-sw-list, .ant-sw-modal-body': {
-      paddingBottom: 0
+    '.ant-sw-modal-body': {
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column'
     },
 
-    '.pool-item:not(:first-of-type)': {
-      marginTop: token.marginXS
+    '.ant-sw-modal-footer': {
+      margin: 0,
+      marginTop: token.marginXS,
+      borderTop: 0,
+      marginBottom: token.margin
     },
 
-    '.ant-sw-list-section': {
-      height: '100%'
-    },
-
-    '.ant-sw-list-section .ant-sw-list-wrapper': {
-      flexBasis: 'auto'
+    '.pool-item:not(:last-child)': {
+      marginBottom: token.marginXS
     }
   };
 });

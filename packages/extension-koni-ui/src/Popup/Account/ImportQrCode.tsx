@@ -8,7 +8,6 @@ import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
@@ -20,7 +19,7 @@ import { checkPublicAndPrivateKey, createAccountWithSecret } from '@subwallet/ex
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
 import { importQrScan } from '@subwallet/extension-koni-ui/utils/scanner/attach';
-import { Button, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
+import { Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { QrCode, Scan, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
@@ -67,7 +66,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const checkUnlock = useUnlockChecker();
 
   const { inactiveModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
 
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [loading, setLoading] = useState(false);
@@ -131,25 +129,16 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, [checkUnlock, openCamera]);
 
-  const buttonProps = {
-    children: loading ? t('Creating') : t('Scan the QR code'),
-    icon: FooterIcon,
-    onClick: onScan,
-    loading: loading
-  };
-
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         onBack={onBack}
-        rightFooterButton={!isWebUI
-          ? {
-            children: loading ? t('Creating') : t('Scan QR'),
-            icon: FooterIcon,
-            onClick: openCamera,
-            loading: loading
-          }
-          : undefined}
+        rightFooterButton={{
+          children: loading ? t('Creating') : t('Scan QR'),
+          icon: FooterIcon,
+          onClick: onScan,
+          loading: loading
+        }}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -158,10 +147,7 @@ const Component: React.FC<Props> = (props: Props) => {
         ]}
         title={t('Import by QR code')}
       >
-        <div className={CN('container', {
-          '__web-ui': isWebUI
-        })}
-        >
+        <div className={CN('container')}>
           <div className='sub-title'>
             {t("Make sure that you have granted SubWallet the access to your device's camera")}
           </div>
@@ -228,35 +214,18 @@ const Component: React.FC<Props> = (props: Props) => {
             onError={onError}
             onSuccess={onSuccess}
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
-            selectCameraMotion={isWebUI ? 'move-right' : undefined}
             title={t('Scan QR')}
           />
-          {isWebUI && (
-            <Button
-              {...buttonProps}
-              className='action'
-            />
-          )}
         </div>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 };
 
-const ImportQrCode = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
+const ImportQrCode = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.__web-ui': {
-      width: extendToken.oneColumnWidth,
-      maxWidth: '100%',
-      margin: '0 auto'
-    },
     '.container': {
-      padding: token.padding,
-
-      '& .ant-btn': {
-        width: '100%',
-        marginTop: 36
-      }
+      padding: token.padding
     },
 
     '.sub-title': {

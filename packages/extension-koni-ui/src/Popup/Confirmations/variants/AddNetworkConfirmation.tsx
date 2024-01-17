@@ -4,13 +4,12 @@
 import { ConfirmationDefinitions, ConfirmationResult } from '@subwallet/extension-base/background/KoniTypes';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { ConfirmationGeneralInfo } from '@subwallet/extension-koni-ui/components';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Button, Col, Field, Icon, Row } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, Globe, ShareNetwork, WifiHigh, WifiSlash, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 
@@ -31,7 +30,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { payload: { chainEditInfo, chainSpec, mode, providerError, unconfirmed } } = request;
 
   const { t } = useTranslation();
-  const { isWebUI } = useContext(ScreenContext);
 
   const { token } = useTheme() as Theme;
 
@@ -117,7 +115,7 @@ const Component: React.FC<Props> = (props: Props) => {
           status={providerError ? 'error' : ''}
           statusHelp={handleErrorMessage(providerError)}
           suffix={providerSuffix}
-          tooltip={isWebUI ? t<string>('Provider URL') : undefined}
+          tooltip={t<string>('Provider URL')}
           tooltipPlacement='topLeft'
         />
         <Row gutter={token.paddingSM}>
@@ -134,7 +132,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   weight={'bold'}
                 />
               )}
-              tooltip={isWebUI ? t<string>('Network name') : undefined}
+              tooltip={t<string>('Network name')}
               tooltipPlacement='topLeft'
             />
           </Col>
@@ -142,7 +140,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <Field
               content={chainEditInfo.symbol || ''}
               placeholder={t('Symbol')}
-              tooltip={isWebUI ? t<string>('Symbol') : undefined}
+              tooltip={t<string>('Symbol')}
               tooltipPlacement='topLeft'
             />
           </Col>
@@ -152,7 +150,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <Field
               content={chainSpec?.decimals || 0}
               placeholder={t('Decimals')}
-              tooltip={isWebUI ? t<string>('Decimals') : undefined}
+              tooltip={t<string>('Decimals')}
               tooltipPlacement='topLeft'
             />
           </Col>
@@ -160,7 +158,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <Field
               content={chainSpec?.evmChainId || 0}
               placeholder={t('Chain ID')}
-              tooltip={isWebUI ? t<string>('Chain ID') : undefined}
+              tooltip={t<string>('Chain ID')}
               tooltipPlacement='topLeft'
             />
           </Col>
@@ -168,19 +166,19 @@ const Component: React.FC<Props> = (props: Props) => {
         <Field
           content={chainEditInfo.chainType}
           placeholder={t('Network type')}
-          tooltip={isWebUI ? t<string>('Network type') : undefined}
+          tooltip={t<string>('Network type')}
           tooltipPlacement='topLeft'
         />
         <Field
           content={chainEditInfo.blockExplorer}
           placeholder={t('Block explorer')}
-          tooltip={isWebUI ? t<string>('Block explorer') : undefined}
+          tooltip={t<string>('Block explorer')}
           tooltipPlacement='topLeft'
         />
         <Field
           content={chainEditInfo.crowdloanUrl}
           placeholder={t('Crowdloan URL')}
-          tooltip={isWebUI ? t<string>('Crowdloan URL') : undefined}
+          tooltip={t<string>('Crowdloan URL')}
           tooltipPlacement='topLeft'
         />
       </div>

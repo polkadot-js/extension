@@ -10,7 +10,7 @@
     },
     { "path": "../extension-inject/tsconfig.build.json"
     },
-    { "path": "../extension-koni-ui/tsconfig.build.json"
+    { "path": "../extension-web-ui/tsconfig.build.json"
     }
   ]
 }

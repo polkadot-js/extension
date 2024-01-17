@@ -64,7 +64,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
     const chainInfo = this.chainInfo;
     const nativeToken = this.nativeToken;
 
-    if (!this.isActive) {
+    const defaultCallback = async () => {
       const data: NominationYieldPoolInfo = {
         ...this.baseInfo,
         type: this.type,
@@ -74,12 +74,20 @@ export default class NominationPoolHandler extends BasePoolHandler {
         }
       };
 
-      callback(data);
+      const poolInfo = await this.getPoolInfo();
+
+      !poolInfo && callback(data);
+    };
+
+    if (!this.isActive) {
+      await defaultCallback();
 
       return () => {
         cancel = true;
       };
     }
+
+    await defaultCallback();
 
     await substrateApi.isReady;
 

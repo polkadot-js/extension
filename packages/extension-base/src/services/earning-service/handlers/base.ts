@@ -160,7 +160,7 @@ export default abstract class BasePoolHandler {
     if (!poolInfo || !poolInfo.statistic?.earningThreshold.join) {
       return {
         passed: false,
-        errorMessage: 'There\'s a trouble fetching data, please check your internet connection and try again'
+        errorMessage: 'There is a problem fetching your data. Check your Internet connection or change the network endpoint and try again.'
       };
     }
 

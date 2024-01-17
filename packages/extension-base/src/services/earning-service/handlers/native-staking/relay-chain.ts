@@ -31,7 +31,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const chainInfo = this.chainInfo;
     const nativeToken = this.nativeToken;
 
-    if (!this.isActive) {
+    const defaultCallback = async () => {
       const data: NativeYieldPoolInfo = {
         ...this.baseInfo,
         type: this.type,
@@ -41,12 +41,20 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
         }
       };
 
-      callback(data);
+      const poolInfo = await this.getPoolInfo();
+
+      !poolInfo && callback(data);
+    };
+
+    if (!this.isActive) {
+      await defaultCallback();
 
       return () => {
         cancel = true;
       };
     }
+
+    await defaultCallback();
 
     await substrateApi.isReady;
 

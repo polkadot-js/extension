@@ -4,7 +4,7 @@
 import { ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { StatusType } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
-import { CheckCircle, PaperPlaneTilt, ProhibitInset, Queue, Spinner, StopCircle } from 'phosphor-react';
+import { CheckCircle, ClockCounterClockwise, PaperPlaneTilt, ProhibitInset, Queue, Spinner, StopCircle } from 'phosphor-react';
 
 export const TxTypeNameMap: Record<string, string> = {
   [ExtrinsicType.TRANSFER_BALANCE]: detectTranslate('Transfer'),
@@ -70,7 +70,7 @@ export const HistoryStatusMap: Record<ExtrinsicStatus, StatusType> = {
   },
   [ExtrinsicStatus.TIMEOUT]: {
     schema: 'gold',
-    icon: Spinner,
-    name: detectTranslate('Timeout')
+    icon: ClockCounterClockwise,
+    name: detectTranslate('Time-out')
   }
 };

@@ -693,8 +693,8 @@ export default class TransactionService {
 
       this.notificationService.notify({
         type: NotificationType.ERROR,
-        title: t('Transaction timeout'),
-        message: t('Transaction {{info}} timeout', { replace: { info } }),
+        title: t('Transaction timed out'),
+        message: t('Transaction {{info}} timed out', { replace: { info } }),
         action: { url: this.getTransactionLink(id) },
         notifyViaBrowser: true
       });

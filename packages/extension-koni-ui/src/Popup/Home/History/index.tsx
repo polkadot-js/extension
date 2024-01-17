@@ -33,12 +33,17 @@ const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
   crowdloan: Rocket,
   nft: Aperture,
   processing: Spinner,
-  default: ClockCounterClockwise
+  default: ClockCounterClockwise,
+  timeout: ClockCounterClockwise
 };
 
 function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
-  if (item.status === ExtrinsicStatus.PROCESSING || item.status === ExtrinsicStatus.TIMEOUT || item.status === ExtrinsicStatus.SUBMITTING) {
+  if (item.status === ExtrinsicStatus.PROCESSING || item.status === ExtrinsicStatus.SUBMITTING) {
     return IconMap.processing;
+  }
+
+  if (item.status === ExtrinsicStatus.TIMEOUT) {
+    return IconMap.timeout;
   }
 
   if (item.type === ExtrinsicType.SEND_NFT) {
@@ -282,7 +287,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     default: t('Transaction'),
     submitting: t('Submitting...'),
     processing: t('Processing...'),
-    timeout: t('Timeout'),
+    timeout: t('Time-out'),
     send: t('Send'),
     received: t('Receive'),
     [ExtrinsicType.SEND_NFT]: t('NFT'),

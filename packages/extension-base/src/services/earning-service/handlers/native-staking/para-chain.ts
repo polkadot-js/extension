@@ -7,7 +7,6 @@ import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '
 import { getBondedValidators, getEarningStatusByNominations, getParaCurrentInflation, InflationConfig, isUnstakeAll } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
 import { BaseYieldPositionInfo, CollatorExtraInfo, EarningStatus, NativeYieldPoolInfo, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
@@ -27,7 +26,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
     const chainApi = this.substrateApi;
     const nativeToken = this.nativeToken;
 
-    if (!this.isActive) {
+    const defaultCallback = async () => {
       const data: NativeYieldPoolInfo = {
         ...this.baseInfo,
         type: this.type,
@@ -37,12 +36,20 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
         }
       };
 
-      callback(data);
+      const poolInfo = await this.getPoolInfo();
+
+      !poolInfo && callback(data);
+    };
+
+    if (!this.isActive) {
+      await defaultCallback();
 
       return () => {
         cancel = true;
       };
     }
+
+    await defaultCallback();
 
     await chainApi.isReady;
 

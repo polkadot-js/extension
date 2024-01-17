@@ -56,7 +56,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
     let cancel = false;
     const nativeToken = this.nativeToken;
 
-    if (!this.isActive) {
+    const defaultCallback = async () => {
       const data: NativeYieldPoolInfo = {
         ...this.baseInfo,
         type: this.type,
@@ -66,12 +66,20 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         }
       };
 
-      callback(data);
+      const poolInfo = await this.getPoolInfo();
+
+      !poolInfo && callback(data);
+    };
+
+    if (!this.isActive) {
+      await defaultCallback();
 
       return () => {
         cancel = true;
       };
     }
+
+    await defaultCallback();
 
     const substrateApi = await this.substrateApi.isReady;
 

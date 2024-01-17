@@ -64,7 +64,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
     let cancel = false;
     const nativeToken = this.nativeToken;
 
-    if (!this.isActive) {
+    const defaultCallback = async () => {
       const data: NativeYieldPoolInfo = {
         ...this.baseInfo,
         type: this.type,
@@ -74,12 +74,20 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
         }
       };
 
-      callback(data);
+      const poolInfo = await this.getPoolInfo();
+
+      !poolInfo && callback(data);
+    };
+
+    if (!this.isActive) {
+      await defaultCallback();
 
       return () => {
         cancel = true;
       };
     }
+
+    await defaultCallback();
 
     const apyPromise = new Promise((resolve) => {
       fetch(`https://api.astar.network/api/v1/${this.chain}/dapps-staking/apy`, {

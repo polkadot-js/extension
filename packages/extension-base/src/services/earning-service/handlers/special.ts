@@ -148,26 +148,35 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
   async subscribePoolInfo (callback: (data: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
 
+    const _callback = (data: YieldPoolInfo) => {
+      !cancel && callback(data);
+    };
+
+    const defaultCallback = async () => {
+      const data: SpecialYieldPoolInfo = {
+        ...this.baseInfo,
+        type: this.type,
+        metadata: {
+          ...this.metadataInfo,
+          description: this.getDescription()
+        }
+      };
+
+      const poolInfo = await this.getPoolInfo();
+
+      !poolInfo && _callback(data);
+    };
+
     const getStatInterval = () => {
       if (!this.isActive) {
-        if (!cancel) {
-          const rs: SpecialYieldPoolInfo = {
-            ...this.baseInfo,
-            type: this.type,
-            metadata: {
-              ...this.metadataInfo,
-              description: this.getDescription()
-            }
-          };
-
-          callback(rs);
-        }
+        defaultCallback().catch(console.error);
       } else {
-        this.getPoolStat()
+        defaultCallback()
+          .then(() => {
+            return this.getPoolStat();
+          })
           .then((rs) => {
-            if (!cancel) {
-              callback(rs);
-            }
+            _callback(rs);
           })
           .catch(console.error);
       }

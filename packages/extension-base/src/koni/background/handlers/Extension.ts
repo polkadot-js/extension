@@ -4153,7 +4153,7 @@ export default class KoniExtension {
 
   private async yieldSubmitWithdrawal (inputData: RequestStakeWithdrawal): Promise<SWTransactionResponse> {
     const { chain, isLiquidStaking, nominatorMetadata, validatorAddress } = inputData;
-    const yieldPoolInfo = await this.#koniState.getYieldPoolStakingInfo(chain, isLiquidStaking ? YieldPoolType.LIQUID_STAKING : YieldPoolType.NATIVE_STAKING);
+    const yieldPoolInfo = await this.#koniState.getYieldPoolStakingInfo(chain, isLiquidStaking ? YieldPoolType.LIQUID_STAKING : YieldPoolType.NOMINATION_POOL);
     const chainInfo = this.#koniState.getChainInfo(chain);
 
     if (!nominatorMetadata || !yieldPoolInfo) {

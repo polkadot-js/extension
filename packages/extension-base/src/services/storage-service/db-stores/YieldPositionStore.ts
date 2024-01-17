@@ -14,7 +14,6 @@ export default class YieldPositionStore extends BaseStore<YieldPositionInfo> {
         const nominatorMetadata = item.metadata as NominatorMetadata;
 
         if (nominatorMetadata.unstakings.length > 0) {
-          console.log('true', item);
           isValidLiquidStaking = true;
         }
       }
@@ -37,9 +36,13 @@ export default class YieldPositionStore extends BaseStore<YieldPositionInfo> {
         if (nominatorMetadata && nominatorMetadata?.unstakings?.length > 0) {
           isValidLiquidStaking = true;
         }
+
+        return isValidLiquidStaking;
+      } else if (item.type === YieldPoolType.NATIVE_STAKING || item.type === YieldPoolType.NOMINATION_POOL) {
+        return true;
       }
 
-      return parseInt(item.balance[0].activeBalance) > 0 || isValidLiquidStaking;
+      return parseInt(item.balance[0].activeBalance) > 0;
     }).toArray();
   }
 

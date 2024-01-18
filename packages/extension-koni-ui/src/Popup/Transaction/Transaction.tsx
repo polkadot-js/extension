@@ -34,8 +34,8 @@ function Component ({ className }: Props) {
     const action = pathName.split('/')[2] || '';
 
     switch (action) {
-      case 'stake':
-        return ExtrinsicType.STAKING_JOIN_POOL;
+      case 'earn':
+        return ExtrinsicType.JOIN_YIELD_POOL;
       case 'unstake':
         return ExtrinsicType.STAKING_LEAVE_POOL;
       case 'cancel-unstake':
@@ -72,13 +72,13 @@ function Component ({ className }: Props) {
     const action = pathName.split('/')[2] || '';
 
     switch (action) {
-      case 'stake':
+      case 'earn':
       case 'unstake':
       case 'cancel-unstake':
       case 'claim-reward':
       case 'withdraw':
       case 'compound':
-        return '/home/staking';
+        return '/home/earning';
       case 'send-nft':
         return '/home/nfts/collections';
       case 'send-fund':

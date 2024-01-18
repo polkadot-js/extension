@@ -6,16 +6,14 @@ import { TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
 import { useContext } from 'react';
 
 const useTransactionContext = <T extends TransactionFormBaseProps>() => {
-  const { defaultData, needPersistData, onClickRightBtn, onDone, persistData, setDisabledRightBtn, setShowRightBtn } = useContext(TransactionContext);
+  const { defaultData, needPersistData, onDone, persistData, setSubHeaderRightButtons } = useContext(TransactionContext);
 
   return {
     defaultData: defaultData as T,
     needPersistData,
     onDone,
     persistData,
-    setDisabledRightBtn,
-    setShowRightBtn,
-    onClickRightBtn
+    setSubHeaderRightButtons
   };
 };
 

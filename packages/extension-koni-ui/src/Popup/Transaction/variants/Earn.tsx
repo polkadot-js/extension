@@ -5,7 +5,7 @@ import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/se
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
-import { AlertBox, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AlertBox, AmountInput, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
@@ -18,7 +18,7 @@ import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwa
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, ButtonProps, Form } from '@subwallet/react-ui';
+import { ActivityIndicator, ButtonProps, Form, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
@@ -666,7 +666,36 @@ const Component = () => {
           onFinish={onSubmit}
         >
           <HiddenInput fields={hideFields} />
+
+          <Form.Item
+            name={'from'}
+          >
+            <AccountSelector
+              disabled={!isAllAccount}
+              doFilter={false}
+              externalAccounts={accountSelectorList}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name={'value'}
+          >
+            <AmountInput
+              decimals={assetDecimals}
+              disabled={processState.currentStep !== 0}
+              maxValue={'1'} // todo: no maxValue, this is just temporary solution
+              showMaxButton={false}
+            />
+          </Form.Item>
+
+          <Number
+            decimal={0}
+            prefix={'$'}
+            value={transformAmount}
+          />
         </Form>
+
+        {renderMetaInfo()}
 
         <AlertBox
           description={STAKE_ALERT_DATA.description.replace('{tokenAmount}', maintainString)}

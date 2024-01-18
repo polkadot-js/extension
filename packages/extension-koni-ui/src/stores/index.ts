@@ -22,6 +22,7 @@ import PriceReducer from './feature/Price';
 import StakingReducer from './feature/Staking';
 import TransactionHistoryReducer from './feature/TransactionHistory';
 import WalletConnectReducer from './feature/WalletConnect';
+import EarningReducer from './feature/Earning';
 
 const persistConfig = {
   key: 'root',
@@ -48,6 +49,7 @@ const rootReducers = combineReducers({
   mantaPay: MantaPayReducer,
   campaign: CampaignReducer,
   buyService: BuyServiceReducer,
+  earning: EarningReducer,
 
   // common
   chainStore: ChainStoreReducer,

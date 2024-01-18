@@ -6,6 +6,8 @@ import { useCallback, useMemo } from 'react';
 
 import { useNotification, useTranslation } from '../common';
 
+export const insufficientMessages = ['残高不足', 'Недостаточный баланс', 'Insufficient balance'];
+
 const useHandleSubmitTransaction = (onDone: (extrinsicHash: string) => void, setIgnoreWarnings?: (value: boolean) => void) => {
   const notify = useNotification();
   const { t } = useTranslation();

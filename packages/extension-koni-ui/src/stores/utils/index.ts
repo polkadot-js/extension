@@ -8,8 +8,8 @@ import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
-import { canDerive } from '@subwallet/extension-base/utils';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { addLazy, canDerive } from '@subwallet/extension-base/utils';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
@@ -315,3 +315,70 @@ export const updateBuyServices = (data: Record<string, BuyServiceInfo>) => {
 
 export const subscribeBuyServices = lazySubscribeMessage('pri(buyService.services.subscribe)', null, updateBuyServices, updateBuyServices);
 /* Buy service */
+
+/* Earning */
+
+export const updateYieldPoolInfo = (data: YieldPoolInfo[]) => {
+  store.dispatch({ type: 'earning/updateYieldPoolInfo', payload: data });
+};
+
+export const subscribeYieldPoolInfo = lazySubscribeMessage(
+  'pri(yield.subscribePoolInfo)',
+  null,
+  updateYieldPoolInfo,
+  updateYieldPoolInfo
+);
+
+export const updateYieldPositionInfo = (data: YieldPositionInfo[]) => {
+  store.dispatch({ type: 'earning/updateYieldPositionInfo', payload: data });
+};
+
+export const subscribeYieldPositionInfo = lazySubscribeMessage(
+  'pri(yield.subscribeYieldPosition)',
+  null,
+  updateYieldPositionInfo,
+  updateYieldPositionInfo
+);
+
+export const updateYieldReward = (data: EarningRewardJson) => {
+  store.dispatch({ type: 'earning/updateYieldReward', payload: Object.values(data.data) });
+};
+
+export const subscribeYieldReward = lazySubscribeMessage(
+  'pri(yield.subscribeYieldReward)',
+  null,
+  updateYieldReward,
+  updateYieldReward
+);
+
+export const updateRewardHistory = (data: Record<string, EarningRewardHistoryItem>) => {
+  if (Object.keys(data).length > 0) {
+    addLazy(
+      'updateRewardHistory',
+      () => {
+        store.dispatch({ type: 'earning/updateRewardHistory', payload: Object.values(data) });
+      },
+      900
+    );
+  }
+};
+
+export const subscribeRewardHistory = lazySubscribeMessage(
+  'pri(yield.subscribeRewardHistory)',
+  null,
+  updateRewardHistory,
+  updateRewardHistory
+);
+
+export const updateMinAmountPercent = (data: Record<string, number>) => {
+  store.dispatch({ type: 'earning/updateMinAmountPercent', payload: data });
+};
+
+export const subscribeYieldMinAmountPercent = lazySubscribeMessage(
+  'pri(yield.minAmountPercent)',
+  null,
+  updateMinAmountPercent,
+  updateMinAmountPercent
+);
+
+/* Earning */

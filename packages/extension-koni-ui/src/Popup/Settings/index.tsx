@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
-import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, SUPPORT_MAIL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
@@ -12,7 +12,7 @@ import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
-import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, ChatTeardropText, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -190,16 +190,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       key: 'community-&-support',
       label: t('Community & support'),
       items: [
-        {
-          key: 'request-a-feature',
-          leftIcon: ChatTeardropText,
-          leftIconBgColor: token['magenta-7'],
-          rightIcon: ArrowSquareOut,
-          title: t('Request a feature'),
-          onClick: () => {
-            window.open(`${SUPPORT_MAIL}?subject=[SubWallet In-app Feedback]`, '_self');
-          }
-        },
         {
           key: 'twitter',
           leftIcon: TwitterLogo,

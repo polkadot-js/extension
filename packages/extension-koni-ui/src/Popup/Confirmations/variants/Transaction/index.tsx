@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { EvmSignArea, SubstrateSignArea } from '../../parts/Sign';
-import { BaseTransactionConfirmation, BondTransactionConfirmation, CancelUnstakeTransactionConfirmation, ClaimRewardTransactionConfirmation, JoinPoolTransactionConfirmation, LeavePoolTransactionConfirmation, SendNftTransactionConfirmation, TransferBlock, UnbondTransactionConfirmation, WithdrawTransactionConfirmation } from './variants';
+import { BaseTransactionConfirmation, BondTransactionConfirmation, CancelUnstakeTransactionConfirmation, ClaimRewardTransactionConfirmation, DefaultWithdrawTransactionConfirmation, FastWithdrawTransactionConfirmation, JoinPoolTransactionConfirmation, JoinYieldPoolConfirmation, LeavePoolTransactionConfirmation, SendNftTransactionConfirmation, TokenApproveConfirmation, TransferBlock, UnbondTransactionConfirmation, WithdrawTransactionConfirmation } from './variants';
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;
@@ -41,6 +41,26 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
       return ClaimRewardTransactionConfirmation;
     case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
       return CancelUnstakeTransactionConfirmation;
+    case ExtrinsicType.MINT_QDOT:
+    case ExtrinsicType.MINT_VDOT:
+    case ExtrinsicType.MINT_LDOT:
+    case ExtrinsicType.MINT_SDOT:
+    case ExtrinsicType.MINT_STDOT:
+      return JoinYieldPoolConfirmation;
+    case ExtrinsicType.REDEEM_QDOT:
+    case ExtrinsicType.REDEEM_VDOT:
+    case ExtrinsicType.REDEEM_LDOT:
+    case ExtrinsicType.REDEEM_SDOT:
+    case ExtrinsicType.REDEEM_STDOT:
+      return FastWithdrawTransactionConfirmation;
+    case ExtrinsicType.UNSTAKE_QDOT:
+    case ExtrinsicType.UNSTAKE_VDOT:
+    case ExtrinsicType.UNSTAKE_LDOT:
+    case ExtrinsicType.UNSTAKE_SDOT:
+    case ExtrinsicType.UNSTAKE_STDOT:
+      return DefaultWithdrawTransactionConfirmation;
+    case ExtrinsicType.TOKEN_APPROVE:
+      return TokenApproveConfirmation;
     default:
       return BaseTransactionConfirmation;
   }

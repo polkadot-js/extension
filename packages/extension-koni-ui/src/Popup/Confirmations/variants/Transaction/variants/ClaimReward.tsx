@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestStakeClaimReward } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestStakeClaimReward } from '@subwallet/extension-base/types';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNativeTokenBasicInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,10 +15,15 @@ type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
+  const { t } = useTranslation();
   const data = transaction.data as RequestStakeClaimReward;
 
-  const { t } = useTranslation();
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(data.chain);
+  const { poolInfoMap } = useSelector((state) => state.earning);
+  const poolInfo = poolInfoMap[data.slug];
+
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(poolInfo.chain);
+
+  // todo: show alert about reward
 
   return (
     <div className={CN(className)}>

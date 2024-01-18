@@ -2,16 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
+import { ButtonProps } from '@subwallet/react-ui';
 import React, { Dispatch, SetStateAction } from 'react';
 
 export interface TransactionContextProps{
   defaultData: TransactionFormBaseProps;
-  persistData: (value: TransactionFormBaseProps) => void;
+  persistData: Dispatch<SetStateAction<TransactionFormBaseProps>>;
   needPersistData: boolean;
   onDone: (extrinsicHash: string) => void;
-  onClickRightBtn: () => void;
-  setShowRightBtn: Dispatch<SetStateAction<boolean>>;
-  setDisabledRightBtn: Dispatch<SetStateAction<boolean>>;
+  setSubHeaderRightButtons: Dispatch<SetStateAction<ButtonProps[] | undefined>>;
 }
 
 export const TransactionContext = React.createContext<TransactionContextProps>({
@@ -22,9 +21,5 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   onDone: (extrinsicHash) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onClickRightBtn: () => {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setShowRightBtn: (value) => {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setDisabledRightBtn: (value) => {}
+  setSubHeaderRightButtons: (value) => {}
 });

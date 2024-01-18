@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, ExtrinsicType, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, ExtrinsicType, NominatorMetadata, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_STAKE_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, STAKE_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -97,13 +97,14 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
-    const params: RequestStakeWithdrawal = {
+    const params = {
       unstakingInfo,
       chain: nominatorMetadata.chain,
       nominatorMetadata
     };
 
     if (isActionFromValidator(nominatorMetadata.type, nominatorMetadata.chain)) {
+      // @ts-ignore
       params.validatorAddress = unstakingInfo.validatorAddress;
     }
 

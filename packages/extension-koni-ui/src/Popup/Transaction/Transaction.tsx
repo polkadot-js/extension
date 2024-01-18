@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_TRANSACTION_PARAMS, TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
 import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
 import { detectTransactionPersistKey } from '@subwallet/extension-koni-ui/utils';
-import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
+import { ButtonProps, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -28,7 +27,6 @@ function Component ({ className }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { activeModal } = useContext(ModalContext);
   const dataContext = useContext(DataContext);
 
   const transactionType = useMemo((): ExtrinsicType => {
@@ -101,18 +99,13 @@ function Component ({ className }: Props) {
 
   useNavigateOnChangeAccount(homePath);
 
-  const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
-  const [disabledRightBtn, setDisabledRightBtn] = useState<boolean>(false);
+  const [subHeaderRightButtons, setSubHeaderRightButtons] = useState<ButtonProps[] | undefined>();
 
   const chainChecker = useChainChecker();
 
   const goBack = useCallback(() => {
     navigate(homePath);
   }, [homePath, navigate]);
-
-  const persistData = useCallback((value: TransactionFormBaseProps) => {
-    setStorage(value);
-  }, [setStorage]);
 
   // Navigate to finish page
   const onDone = useCallback(
@@ -121,24 +114,6 @@ function Component ({ className }: Props) {
     },
     [from, chain, navigate]
   );
-
-  const onClickRightBtn = useCallback(() => {
-    if (transactionType === ExtrinsicType.STAKING_JOIN_POOL) {
-      activeModal(StakingNetworkDetailModalId);
-    }
-  }, [activeModal, transactionType]);
-
-  const subHeaderButton: ButtonProps[] = useMemo(() => {
-    return showRightBtn
-      ? [
-        {
-          disabled: disabledRightBtn,
-          icon: <InfoIcon />,
-          onClick: () => onClickRightBtn()
-        }
-      ]
-      : [];
-  }, [disabledRightBtn, onClickRightBtn, showRightBtn]);
 
   useEffect(() => {
     chain !== '' && chainChecker(chain);
@@ -149,7 +124,7 @@ function Component ({ className }: Props) {
       showFilterIcon
       showTabBar={false}
     >
-      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
+      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData: setStorage, onDone, setSubHeaderRightButtons }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader
@@ -157,7 +132,7 @@ function Component ({ className }: Props) {
               center
               className={'transaction-header'}
               onBack={goBack}
-              rightButtons={subHeaderButton}
+              rightButtons={subHeaderRightButtons}
               showBackButton
               title={titleMap[transactionType]}
             />

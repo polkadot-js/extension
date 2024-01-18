@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { CommonTransactionInfo } from '@subwallet/extension-koni-ui/components';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React from 'react';
@@ -16,7 +17,10 @@ const Component: React.FC<BaseTransactionConfirmationProps> = (props: BaseTransa
 
   return (
     <div className={CN(className)}>
-      {transaction.extrinsicType}
+      <CommonTransactionInfo
+        address={transaction.address}
+        network={transaction.chain}
+      />
     </div>
   );
 };

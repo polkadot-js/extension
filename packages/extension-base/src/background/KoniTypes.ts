@@ -2050,6 +2050,7 @@ export interface BaseCampaignData {
   slug: string;
   campaignId: number;
   isDone: boolean;
+  isArchive: boolean;
   type: CampaignDataType;
   data: Record<string, any>;
   buttons: CampaignButton[];

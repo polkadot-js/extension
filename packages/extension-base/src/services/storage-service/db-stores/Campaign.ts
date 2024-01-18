@@ -9,7 +9,15 @@ const filterProcessing = (campaign: ICampaign): boolean => {
   const now = new Date().getTime();
   const isExpired = now <= campaign.startTime || now >= campaign.endTime;
 
-  return !(campaign.isDone || isExpired);
+  return !(campaign.isArchive || campaign.isDone || isExpired);
+};
+
+const getId = (campaign: ICampaign): number => {
+  return campaign.campaignId;
+};
+
+const sortById = (a: ICampaign, b: ICampaign): number => {
+  return getId(a) - getId(b);
 };
 
 export default class CampaignStore extends BaseStore<ICampaign> {
@@ -22,12 +30,12 @@ export default class CampaignStore extends BaseStore<ICampaign> {
   }
 
   async getProcessingCampaign () {
-    return (await this.table.toArray()).filter(filterProcessing);
+    return (await this.table.toArray()).filter(filterProcessing).sort(sortById);
   }
 
   subscribeProcessingCampaign () {
     return liveQuery(
-      () => this.table.filter(filterProcessing).toArray()
+      async () => (await this.table.filter(filterProcessing).toArray()).sort(sortById)
     );
   }
 

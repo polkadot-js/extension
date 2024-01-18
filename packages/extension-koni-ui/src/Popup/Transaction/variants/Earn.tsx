@@ -5,9 +5,10 @@ import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/se
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
-import { HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AlertBox, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
 import { useFetchChainState, useGetBalance, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
@@ -17,10 +18,10 @@ import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwa
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { Form } from '@subwallet/react-ui';
+import { ActivityIndicator, ButtonProps, Form } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -39,8 +40,8 @@ const Component = () => {
   // @ts-ignore
   const navigate = useNavigate();
 
-  const dataContext = useContext(DataContext);
-  const { defaultData, onDone, persistData } = useTransactionContext<EarnParams>();
+  const { defaultData, onDone, persistData, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
+
   const { slug } = defaultData;
 
   // @ts-ignore
@@ -611,20 +612,67 @@ const Component = () => {
     };
   }, [chainState?.active, forceFetchValidator, slug, chainValue, fromValue]);
 
+  const subHeaderButtons: ButtonProps[] = useMemo(() => {
+    return [
+      {
+        icon: <InfoIcon />,
+        onClick: () => {
+          //
+        }
+      }
+    ];
+  }, []);
+
+  useEffect(() => {
+    setSubHeaderRightButtons(subHeaderButtons);
+
+    return () => {
+      setSubHeaderRightButtons(undefined);
+    };
+  }, [setSubHeaderRightButtons, subHeaderButtons]);
+
   return (
     <>
       <TransactionContent>
-        <PageWrapper resolve={dataContext.awaitStores(['earning'])}>
-          <Form
-            className={'form-container form-space-sm'}
-            form={form}
-            initialValues={formDefault}
-            onFieldsChange={onFieldsChange}
-            onFinish={onSubmit}
-          >
-            <HiddenInput fields={hideFields} />
-          </Form>
-        </PageWrapper>
+        {/* FreeBalanceToYield */}
+        {/* EarningPoolSelector */}
+        {/* EarningValidatorSelector */}
+
+        {processState.steps && (
+          <>
+            <div>
+              {stepLoading
+                ? (
+                  <div>
+                    <ActivityIndicator size={24} />
+                  </div>
+                )
+                : (
+                  <EarningProcessItem
+                    index={processState.currentStep}
+                    stepName={processState.steps[processState.currentStep]?.name}
+                    stepStatus={processState.stepResults[processState.currentStep]?.status}
+                  />
+                )}
+            </div>
+          </>
+        )}
+
+        <Form
+          className={'form-container form-space-sm'}
+          form={form}
+          initialValues={formDefault}
+          onFieldsChange={onFieldsChange}
+          onFinish={onSubmit}
+        >
+          <HiddenInput fields={hideFields} />
+        </Form>
+
+        <AlertBox
+          description={STAKE_ALERT_DATA.description.replace('{tokenAmount}', maintainString)}
+          title={STAKE_ALERT_DATA.title}
+          type={'warning'}
+        />
       </TransactionContent>
       <TransactionFooter
         errors={[]}
@@ -643,7 +691,7 @@ const Wrapper: React.FC<Props> = (props: Props) => {
     <EarnOutlet
       className={CN(className)}
       path={'/transaction/earn'}
-      stores={['price', 'chainStore', 'assetRegistry']}
+      stores={['price', 'chainStore', 'assetRegistry', 'earning']}
     >
       <Component />
     </EarnOutlet>

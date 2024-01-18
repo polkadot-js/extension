@@ -3,14 +3,12 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import {ThemeProps, YieldGroupInfo} from '@subwallet/extension-koni-ui/types';
 import { Icon, Logo, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CaretRight } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
-
-import { YieldGroupInfo } from '../../../build/types';
 
 type Props = ThemeProps & {
   poolGroup: YieldGroupInfo;

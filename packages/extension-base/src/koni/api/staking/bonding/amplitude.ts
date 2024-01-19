@@ -93,18 +93,23 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
   const nominationList: NominationInfo[] = [];
   const unstakingList: UnstakingInfo[] = [];
   const minDelegatorStake = substrateApi.api.consts.parachainStaking.minDelegatorStake.toString();
+  const hasUnstakingInfo = unstakingInfo && Object.values(unstakingInfo).length > 0;
 
   let activeStake = '0';
 
   if (delegatorState) { // delegatorState can be null while unstaking all
-    for (const delegate of delegatorState) {
-      const [identity] = await parseIdentity(substrateApi, delegate.owner);
+    const identityPromises = delegatorState.map((delegate) => parseIdentity(substrateApi, delegate.owner));
+    const identities = await Promise.all(identityPromises);
+
+    for (let i = 0; i < delegatorState.length; i++) {
+      const delegate = delegatorState[i];
+      const [identity] = identities[i];
 
       activeStake = delegate.amount.toString();
       const bnActiveStake = new BN(activeStake);
-      let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
+      let delegationStatus = StakingStatus.NOT_EARNING;
 
-      if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
+      if (bnActiveStake.gte(new BN(minDelegatorStake))) {
         delegationStatus = StakingStatus.EARNING_REWARD;
       }
 
@@ -114,11 +119,11 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
         validatorAddress: delegate.owner,
         activeStake: delegate.amount.toString(),
         validatorMinStake: '0',
-        hasUnstaking: !!unstakingInfo && Object.values(unstakingInfo).length > 0,
+        hasUnstaking: hasUnstakingInfo,
         validatorIdentity: identity
       });
 
-      if (unstakingInfo && Object.values(unstakingInfo).length > 0) {
+      if (hasUnstakingInfo) {
         const _currentBlockInfo = await substrateApi.api.rpc.chain.getHeader();
 
         const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;

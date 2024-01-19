@@ -202,16 +202,21 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
 
   // Insert history with check override origin 'app'
   async addHistoryItems (historyItems: TransactionHistoryItem[]) {
-    // Prevent override record with original is 'app'
-    const appRecords = this.historySubject.value.filter((item) => item.origin === 'app');
-    const excludeKeys = appRecords.map((item) => {
-      return `${item.chain}-${item.extrinsicHash}`;
-    });
+    const updateRecords: TransactionHistoryItem[] = [];
 
-    const updateRecords = historyItems.filter((item) => {
-      const key = `${item.chain}-${item.extrinsicHash}`;
+    const appItems = this.historySubject.value.filter((i) => i.origin === 'app');
 
-      return item.origin === 'app' || !excludeKeys.includes(key);
+    historyItems.forEach((item) => {
+      const needUpdateItem = appItems.find(
+        (item_) => item_.extrinsicHash === item.extrinsicHash && item.chain === item_.chain && item.address === item_.address);
+
+      if (needUpdateItem) {
+        updateRecords.push({ ...needUpdateItem, status: item.status });
+
+        return;
+      }
+
+      updateRecords.push(item);
     });
 
     await this.dbService.upsertHistory(updateRecords);

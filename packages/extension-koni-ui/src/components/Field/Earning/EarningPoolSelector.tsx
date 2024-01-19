@@ -1,20 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
+import { EarningPoolDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
+import { EarningPoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningPoolDetailModal';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
-import { PoolDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal';
+import { PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal';
 import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
+import { useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
-import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
-import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Badge, Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
+import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { Book, CaretLeft, FadersHorizontal, Lightning, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -23,12 +24,12 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import EmptyValidator from '../Account/EmptyValidator';
-
 interface Props extends ThemeProps, BasicInputWrapper {
+  slug: string;
   chain: string;
   from: string;
-  onClickBookBtn?: (e: SyntheticEvent) => void;
+  targetPool: string;
+  onClickBookButton?: (e: SyntheticEvent) => void;
   setForceFetchValidator: (val: boolean) => void;
 }
 
@@ -52,11 +53,18 @@ interface FilterOption {
 const SORTING_MODAL_ID = 'pool-sorting-modal';
 const FILTER_MODAL_ID = 'pool-filter-modal';
 
-/** Deprecated */
-/** Will remove */
-// todo: update filter for this component, after updating filter for SelectModal
+const defaultPoolMap = Object.assign({}, PREDEFINED_STAKING_POOL, { vara_network: 29 });
+
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', defaultValue, disabled, from, id = 'pool-selector', label, loading, onChange, onClickBookBtn, placeholder, setForceFetchValidator, statusHelp, value } = props;
+  const { chain, className = '', defaultValue, disabled,
+    from,
+    id = 'pool-selector',
+    label, loading, onChange,
+    onClickBookButton,
+    placeholder,
+    setForceFetchValidator,
+    slug, statusHelp,
+    value } = props;
 
   useExcludeModal(id);
 
@@ -66,20 +74,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const isActive = checkActive(id);
 
-  const nominatorMetadata = useGetNominatorInfo(chain, StakingType.POOLED, from);
-  const items = useGetValidatorList(chain, StakingType.POOLED) as NominationPoolDataType[];
+  const items = useGetPoolTargetList(slug) as NominationPoolDataType[];
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
-
-  const nominationPoolValueList = useMemo((): string[] => {
-    return nominatorMetadata[0]?.nominations.map((item) => item.validatorAddress) || [];
-  }, [nominatorMetadata]);
-
-  const isDisabled = useMemo(() =>
-    disabled ||
-    !!nominationPoolValueList.length ||
-    !items.length
-  , [disabled, items.length, nominationPoolValueList.length]
-  );
+  const { compound } = useYieldPositionDetail(slug, from);
 
   const sortingOptions: SortOption[] = useMemo(() => {
     return [
@@ -114,6 +111,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.DEFAULT);
 
+  const nominationPoolValueList = useMemo((): string[] => {
+    return compound?.nominations.map((item) => item.validatorAddress) || [];
+  }, [compound?.nominations]);
+
+  const defaultSelectPool = defaultPoolMap[chain];
+
   const resultList = useMemo((): NominationPoolDataType[] => {
     return [...items]
       .filter((value) => {
@@ -138,7 +141,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       });
   }, [items, selectedFilters, sortSelection]);
 
-  const havePredefinedPool = useMemo(() => PREDEFINED_STAKING_POOL[chain] !== undefined, [chain]);
+  const isDisabled = useMemo(() =>
+    disabled ||
+      !!nominationPoolValueList.length ||
+      !items.length
+  , [disabled, items.length, nominationPoolValueList.length]
+  );
 
   const _onSelectItem = useCallback((value: string) => {
     onChange && onChange({ target: { value } });
@@ -159,17 +167,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return (e: SyntheticEvent) => {
       e.stopPropagation();
       setViewDetailItem(item);
-      activeModal(PoolDetailModalId);
+      activeModal(EarningPoolDetailModalId);
     };
   }, [activeModal]);
-
-  const onClickLightningBtn = useCallback((e: SyntheticEvent) => {
-    e.stopPropagation();
-    const poolId = PREDEFINED_STAKING_POOL[chain];
-
-    poolId !== undefined && onChange && onChange({ target: { value: String(poolId) } });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chain]);
 
   const renderItem = useCallback((item: NominationPoolDataType) => {
     return (
@@ -217,12 +217,23 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     inactiveModal(PoolDetailModalId);
   }, [inactiveModal]);
 
-  useEffect(() => {
-    const selectedPool = defaultValue || nominationPoolValueList[0] || String(PREDEFINED_STAKING_POOL[chain] || '');
+  const onClickLightningButton = useCallback((e: SyntheticEvent) => {
+    e.stopPropagation();
+    const poolId = defaultSelectPool;
 
-    onChange && onChange({ target: { value: selectedPool } });
+    if (poolId !== undefined) {
+      onChange?.({ target: { value: `${poolId}` } });
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nominationPoolValueList]);
+  }, [slug]);
+
+  useEffect(() => {
+    const defaultSelectedPool = defaultValue || nominationPoolValueList[0] || `${defaultSelectPool || ''}`;
+
+    onChange && onChange({ target: { value: defaultSelectedPool } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nominationPoolValueList, items]);
 
   useEffect(() => {
     if (!isActive) {
@@ -287,38 +298,44 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         selected={value || ''}
         showActionBtn
         statusHelp={statusHelp}
-        suffix={(
-          <div className='select-pool-suffix'>
-            <Button
-              disabled={isDisabled}
-              icon={(
-                <Icon
-                  phosphorIcon={Book}
-                  size='sm'
-                />
-              )}
-              onClick={onClickBookBtn}
-              size='xs'
-              type='ghost'
-            />
-            {
-              havePredefinedPool && (
-                <Button
-                  disabled={isDisabled}
-                  icon={(
-                    <Icon
-                      phosphorIcon={Lightning}
-                      size='sm'
-                    />
-                  )}
-                  onClick={onClickLightningBtn}
-                  size='xs'
-                  type='ghost'
-                />
-              )
-            }
-          </div>
-        )}
+        suffix={loading
+          ? (
+            <div>
+              <ActivityIndicator size={20} />
+            </div>
+          )
+          : (
+            <div className='select-pool-suffix'>
+              <Button
+                disabled={isDisabled}
+                icon={(
+                  <Icon
+                    phosphorIcon={Book}
+                    size='sm'
+                  />
+                )}
+                onClick={onClickBookButton}
+                size='xs'
+                type='ghost'
+              />
+              {
+                !!defaultSelectPool && (
+                  <Button
+                    disabled={isDisabled}
+                    icon={(
+                      <Icon
+                        phosphorIcon={Lightning}
+                        size='sm'
+                      />
+                    )}
+                    onClick={onClickLightningButton}
+                    size='xs'
+                    type='ghost'
+                  />
+                )
+              }
+            </div>
+          )}
         title={label || placeholder || t('Select pool')}
       />
 
@@ -339,16 +356,15 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         options={sortingOptions}
       />
 
-      <PoolDetailModal
-        decimals={viewDetailItem?.decimals || 0}
+      <EarningPoolDetailModal
+        detailItem={viewDetailItem}
         onCancel={onCloseDetail}
-        selectedNominationPool={viewDetailItem}
       />
     </>
   );
 };
 
-const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
+const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
     '.ant-sw-modal-header': {
       paddingTop: token.paddingXS,
@@ -389,4 +405,4 @@ const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }:
   };
 });
 
-export default PoolSelector;
+export default EarningPoolSelector;

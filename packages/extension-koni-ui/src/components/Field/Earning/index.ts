@@ -2,4 +2,4 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export { default as EarningPoolSelector } from './EarningPoolSelector';
-// export { default as EarningValidatorSelector } from './EarningValidatorSelector';
+export { default as EarningValidatorSelector } from './EarningValidatorSelector';

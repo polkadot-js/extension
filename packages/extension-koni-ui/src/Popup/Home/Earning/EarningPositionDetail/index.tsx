@@ -8,6 +8,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { EarningEntryParam, EarningEntryView, EarningPositionDetailParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -92,6 +93,14 @@ function Component ({ compound,
     return BN_ZERO.eq(activeStake);
   }, [activeStake]);
 
+  const transactionFromValue = useMemo(() => {
+    return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+  }, [currentAccount?.address]);
+
+  const transactionChainValue = useMemo(() => {
+    return compound.chain || poolInfo.chain || '';
+  }, [compound.chain, poolInfo.chain]);
+
   const onLeavePool = useCallback(() => {
     if (isActiveStakeZero) {
       // todo: alert here
@@ -100,42 +109,52 @@ function Component ({ compound,
 
     setUnStakeStorage({
       ...DEFAULT_UN_STAKE_PARAMS,
-      slug: poolInfo.slug
+      slug: poolInfo.slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
     });
     navigate('/transaction/unstake');
-  }, [isActiveStakeZero, navigate, poolInfo.slug, setUnStakeStorage]);
+  }, [isActiveStakeZero, navigate, poolInfo.slug, setUnStakeStorage, transactionChainValue, transactionFromValue]);
 
   const onEarnMore = useCallback(() => {
     setEarnStorage({
       ...DEFAULT_EARN_PARAMS,
-      slug: compound.slug
+      slug: compound.slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
     });
     navigate('/transaction/earn');
-  }, [compound.slug, navigate, setEarnStorage]);
+  }, [compound.slug, navigate, setEarnStorage, transactionChainValue, transactionFromValue]);
 
   const onWithDraw = useCallback(() => {
     setWithdrawStorage({
       ...DEFAULT_WITHDRAW_PARAMS,
-      slug: poolInfo.slug
+      slug: poolInfo.slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
     });
     navigate('/transaction/withdraw');
-  }, [navigate, poolInfo.slug, setWithdrawStorage]);
+  }, [navigate, poolInfo.slug, setWithdrawStorage, transactionChainValue, transactionFromValue]);
 
   const onCancelWithDraw = useCallback(() => {
     setCancelUnStakeStorage({
       ...DEFAULT_CANCEL_UN_STAKE_PARAMS,
-      slug: poolInfo.slug
+      slug: poolInfo.slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
     });
     navigate('/transaction/cancel-unstake');
-  }, [navigate, poolInfo.slug, setCancelUnStakeStorage]);
+  }, [navigate, poolInfo.slug, setCancelUnStakeStorage, transactionChainValue, transactionFromValue]);
 
   const onClaimReward = useCallback(() => {
     setClaimRewardStorage({
       ...DEFAULT_CLAIM_REWARD_PARAMS,
-      slug: compound.slug
+      slug: compound.slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
     });
     navigate('/transaction/claim-reward');
-  }, [compound.slug, navigate, setClaimRewardStorage]);
+  }, [compound.slug, navigate, setClaimRewardStorage, transactionChainValue, transactionFromValue]);
 
   const onBack = useCallback(() => {
     navigate('/home/earning', { state: {
@@ -153,12 +172,10 @@ function Component ({ compound,
             type='phosphor'
           />
         ),
-        onClick: () => {
-          //
-        }
+        onClick: onEarnMore
       }
     ];
-  }, []);
+  }, [onEarnMore]);
 
   return (
     <Layout.Base

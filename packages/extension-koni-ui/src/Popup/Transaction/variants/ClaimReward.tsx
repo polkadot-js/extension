@@ -123,7 +123,7 @@ const Component = () => {
   }, [earningRewards, slug]);
 
   const goHome = useCallback(() => {
-    navigate('/home/staking');
+    navigate('/home/earning');
   }, [navigate]);
 
   const onFieldsChange: FormCallbacks<ClaimRewardParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {

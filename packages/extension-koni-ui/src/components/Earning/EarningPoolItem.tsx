@@ -67,8 +67,6 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [asset, priceMap, tvl]);
 
-  console.log('poolInfo', poolInfo);
-
   return (
     <div
       className={CN(className)}

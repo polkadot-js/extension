@@ -3,14 +3,17 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningOptionItem } from '@subwallet/extension-koni-ui/components/Earning';
+import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldGroupInfo } from '@subwallet/extension-koni-ui/hooks/earning';
 import { EarningEntryView, EarningPoolsParam, ThemeProps, YieldGroupInfo } from '@subwallet/extension-koni-ui/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps & {
   hasEarningPositions: boolean;
@@ -47,8 +50,11 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
   // @ts-ignore
   const { poolInfoMap } = useSelector((state) => state.earning);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const { currentAccount } = useSelector((state) => state.accountState);
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
+
+  const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
 
   const items = useMemo(() => {
     return [...data].sort((a, b) => {
@@ -69,10 +75,20 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
           symbol: item.symbol
         } as EarningPoolsParam });
       } else if (item.poolListLength === 1) {
-        // todo: navigate to earning transaction
+        const slug = Object.values(poolInfoMap).find(
+          (i) => i.group === item.group && i.chain === item.chain
+        )?.slug || '';
+
+        setEarnStorage({
+          ...DEFAULT_EARN_PARAMS,
+          slug,
+          chain: item.chain,
+          from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
+        });
+        navigate('/transaction/earn');
       }
     };
-  }, [navigate]);
+  }, [currentAccount?.address, navigate, poolInfoMap, setEarnStorage]);
 
   const renderItem = useCallback(
     (item: YieldGroupInfo) => {

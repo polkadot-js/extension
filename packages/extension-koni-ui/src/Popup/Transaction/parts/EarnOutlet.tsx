@@ -31,7 +31,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { chainStateMap } = useSelector((state) => state.chainStore);
 
-  const isChainActive = chainStateMap[defaultData.chain].active;
+  const isChainActive = !!chainStateMap[defaultData.chain]?.active;
 
   useEffect(() => {
     if (!isChainActive) {

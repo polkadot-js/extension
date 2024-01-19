@@ -4,16 +4,19 @@
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { EarningPoolItem } from '@subwallet/extension-koni-ui/components/Earning';
+import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPoolInfoByGroup } from '@subwallet/extension-koni-ui/hooks/earning';
 import { EarningEntryParam, EarningEntryView, EarningPoolsParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps;
 type ComponentProps = {
@@ -28,6 +31,9 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const pools = useYieldPoolInfoByGroup(poolGroup);
 
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const { currentAccount } = useSelector((state) => state.accountState);
+
+  const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
 
   const items: YieldPoolInfo[] = useMemo(() => {
     if (!pools.length) {
@@ -57,11 +63,17 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     return result;
   }, [pools]);
 
-  const onClickItem = useCallback((chainSlug: string, item: YieldPoolInfo) => {
+  const onClickItem = useCallback((chain: string, item: YieldPoolInfo) => {
     return () => {
-      //
+      setEarnStorage({
+        ...DEFAULT_EARN_PARAMS,
+        slug: item.slug,
+        chain,
+        from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
+      });
+      navigate('/transaction/earn');
     };
-  }, []);
+  }, [currentAccount?.address, navigate, setEarnStorage]);
 
   const renderItem = useCallback(
     (item: YieldPoolInfo) => {

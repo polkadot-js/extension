@@ -2,25 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { EarningPoolItem } from '@subwallet/extension-koni-ui/components/Earning';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPoolInfoByGroup } from '@subwallet/extension-koni-ui/hooks/earning';
 import { EarningEntryParam, EarningEntryView, EarningPoolsParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-type WrapperProps = ThemeProps;
-type Props = WrapperProps & {
+type Props = ThemeProps;
+type ComponentProps = {
   poolGroup: string,
   symbol: string,
 };
 
-function Component ({ className, poolGroup, symbol }: Props) {
+function Component ({ poolGroup, symbol }: ComponentProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -97,7 +98,7 @@ function Component ({ className, poolGroup, symbol }: Props) {
 
   return (
     <Layout.Base
-      className={CN(className)}
+      className={'__screen-container'}
       onBack={onBack}
       showBackButton={true}
       showSubHeader={true}
@@ -120,7 +121,7 @@ function Component ({ className, poolGroup, symbol }: Props) {
   );
 }
 
-const WrapperComponent = (props: WrapperProps) => {
+const ComponentGate = () => {
   const locationState = useLocation().state as EarningPoolsParam;
 
   if (!locationState?.poolGroup || !locationState?.symbol) {
@@ -140,14 +141,26 @@ const WrapperComponent = (props: WrapperProps) => {
 
   return (
     <Component
-      {...props}
       poolGroup={locationState.poolGroup}
       symbol={locationState.symbol}
     />
   );
 };
 
-const EarningPools = styled(WrapperComponent)<Props>(({ theme: { token } }: ThemeProps) => ({
+const Wrapper = ({ className }: Props) => {
+  const dataContext = useContext(DataContext);
+
+  return (
+    <PageWrapper
+      className={CN(className)}
+      resolve={dataContext.awaitStores(['earning', 'price'])}
+    >
+      <ComponentGate />
+    </PageWrapper>
+  );
+};
+
+const EarningPools = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
   '.__section-list-container': {
     height: '100%',
     flex: 1

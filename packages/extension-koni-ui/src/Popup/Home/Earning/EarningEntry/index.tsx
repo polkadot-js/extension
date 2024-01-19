@@ -14,39 +14,41 @@ import styled from 'styled-components';
 
 type Props = ThemeProps;
 
-function Component ({ className }: Props) {
+function Component () {
   const locationState = useLocation().state as EarningEntryParam;
   const [entryView, setEntryView] = useState<EarningEntryView>(locationState?.view || EarningEntryView.POSITIONS);
 
   const earningPositions = useGroupYieldPosition();
+
+  return earningPositions.length && entryView === EarningEntryView.POSITIONS
+    ? (
+      <EarningPositions
+        earningPositions={earningPositions}
+        setEntryView={setEntryView}
+      />
+    )
+    : (
+      <EarningOptions
+        hasEarningPositions={!!earningPositions.length}
+        setEntryView={setEntryView}
+      />
+    );
+}
+
+const Wrapper = ({ className }: Props) => {
   const dataContext = useContext(DataContext);
 
   return (
     <PageWrapper
       className={CN(className)}
-      resolve={dataContext.awaitStores(['earning', 'balance', 'price'])}
+      resolve={dataContext.awaitStores(['earning', 'price', 'balance'])}
     >
-      {
-        earningPositions.length && entryView === EarningEntryView.POSITIONS
-          ? (
-            <EarningPositions
-              earningPositions={earningPositions}
-              setEntryView={setEntryView}
-            />
-          )
-          : (
-            <EarningOptions
-              hasEarningPositions={!!earningPositions.length}
-              setEntryView={setEntryView}
-            />
-          )
-      }
-
+      <Component />
     </PageWrapper>
   );
-}
+};
 
-const EarningEntry = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+const EarningEntry = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
 
 }));
 

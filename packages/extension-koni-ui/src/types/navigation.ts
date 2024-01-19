@@ -41,3 +41,7 @@ export type EarningPoolsParam = {
   poolGroup: string,
   symbol: string,
 };
+
+export type EarningPositionDetailParam = {
+  earningSlug: string,
+};

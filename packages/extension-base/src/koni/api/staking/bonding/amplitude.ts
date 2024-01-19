@@ -293,8 +293,7 @@ export async function getAmplitudeCollatorsInfo (chain: string, substrateApi: _S
     }
 
     return allCollators;
-  }
-  else {
+  } else {
     const [_allCollators, _inflationConfig] = await Promise.all([
       chainApi.api.query.parachainStaking.candidatePool.entries(),
       chainApi.api.query.parachainStaking.inflationConfig()

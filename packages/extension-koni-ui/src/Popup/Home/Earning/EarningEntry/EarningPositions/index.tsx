@@ -6,7 +6,7 @@ import { Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningPositionItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { EarningEntryView, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -62,7 +62,9 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
 
   const onClickItem = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
-      navigate('/home/earning/position-detail');
+      navigate('/home/earning/position-detail', { state: {
+        earningSlug: item.slug
+      } as EarningPositionDetailParam });
     };
   }, [navigate]);
 

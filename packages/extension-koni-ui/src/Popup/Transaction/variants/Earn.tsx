@@ -5,7 +5,7 @@ import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/se
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AlertBox, AmountInput, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
@@ -635,8 +635,6 @@ const Component = () => {
     <>
       <TransactionContent>
         {/* FreeBalanceToYield */}
-        {/* EarningPoolSelector */}
-        {/* EarningValidatorSelector */}
 
         {processState.steps && (
           <>
@@ -693,6 +691,37 @@ const Component = () => {
             prefix={'$'}
             value={transformAmount}
           />
+
+          {poolType === YieldPoolType.NOMINATION_POOL && (
+            <Form.Item
+              name={'target'}
+            >
+              <EarningPoolSelector
+                chain={poolChain}
+                disabled={submitLoading}
+                from={fromValue}
+                label={t('Select pool')}
+                loading={targetLoading}
+                setForceFetchValidator={setForceFetchValidator}
+                slug={slug}
+              />
+            </Form.Item>
+          )}
+
+          {poolType === YieldPoolType.NATIVE_STAKING && (
+            <Form.Item
+              name={'target'}
+            >
+              <EarningValidatorSelector
+                chain={chainValue}
+                disabled={submitLoading}
+                from={fromValue}
+                loading={targetLoading}
+                setForceFetchValidator={setForceFetchValidator}
+                slug={slug}
+              />
+            </Form.Item>
+          )}
         </Form>
 
         {renderMetaInfo()}

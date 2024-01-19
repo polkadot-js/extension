@@ -10,7 +10,6 @@ import { EarningPoolDetailModal } from '@subwallet/extension-koni-ui/components/
 import { EarningPoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningPoolDetailModal';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
-import { PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal';
 import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
 import { useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
@@ -28,7 +27,6 @@ interface Props extends ThemeProps, BasicInputWrapper {
   slug: string;
   chain: string;
   from: string;
-  targetPool: string;
   onClickBookButton?: (e: SyntheticEvent) => void;
   setForceFetchValidator: (val: boolean) => void;
 }
@@ -214,7 +212,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal]);
 
   const onCloseDetail = useCallback(() => {
-    inactiveModal(PoolDetailModalId);
+    inactiveModal(EarningPoolDetailModalId);
   }, [inactiveModal]);
 
   const onClickLightningButton = useCallback((e: SyntheticEvent) => {

@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BlockHeader, getBondedValidators, getStakingStatusByNominations, isUnstakeAll, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
@@ -47,7 +47,7 @@ export function subscribeAmplitudeStakingMetadata (chain: string, substrateApi: 
     const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
     const blockPerRound = parseFloat(_blockPerRound);
 
-    const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+    const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound;
     const unstakingPeriod = blockDuration * parseInt(unstakingDelay);
 
     callback(chain, {
@@ -264,42 +264,73 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
 export async function getAmplitudeCollatorsInfo (chain: string, substrateApi: _SubstrateApi): Promise<ValidatorInfo[]> {
   const chainApi = await substrateApi.isReady;
 
-  const [_allCollators, _inflationConfig] = await Promise.all([
-    chainApi.api.query.parachainStaking.candidatePool.entries(),
-    chainApi.api.query.parachainStaking.inflationConfig()
-  ]);
+  // Noted: Krest do not have reward
+  if (_STAKING_CHAIN_GROUP.krest_network.includes(chain)) {
+    const _allCollators = await chainApi.api.query.parachainStaking.candidatePool.entries();
+    const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
+    const allCollators: ValidatorInfo[] = [];
 
-  const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
-  const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
-  const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
-  const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
+    for (const _collator of _allCollators) {
+      const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
 
-  const allCollators: ValidatorInfo[] = [];
+      const bnTotalStake = new BN(collatorInfo.total);
+      const bnOwnStake = new BN(collatorInfo.stake);
+      const bnOtherStake = bnTotalStake.sub(bnOwnStake);
 
-  for (const _collator of _allCollators) {
-    const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
+      allCollators.push({
+        address: collatorInfo.id,
+        totalStake: bnTotalStake.toString(),
+        ownStake: bnOwnStake.toString(),
+        otherStake: bnOtherStake.toString(),
+        nominatorCount: collatorInfo.delegators.length,
+        commission: 0,
+        blocked: false,
+        isVerified: false,
+        minBond: '0',
+        chain,
+        isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
+      });
+    }
 
-    const bnTotalStake = new BN(collatorInfo.total);
-    const bnOwnStake = new BN(collatorInfo.stake);
-    const bnOtherStake = bnTotalStake.sub(bnOwnStake);
-
-    allCollators.push({
-      address: collatorInfo.id,
-      totalStake: bnTotalStake.toString(),
-      ownStake: bnOwnStake.toString(),
-      otherStake: bnOtherStake.toString(),
-      nominatorCount: collatorInfo.delegators.length,
-      commission: 0,
-      expectedReturn: delegatorReturn,
-      blocked: false,
-      isVerified: false,
-      minBond: '0',
-      chain,
-      isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
-    });
+    return allCollators;
   }
+  else {
+    const [_allCollators, _inflationConfig] = await Promise.all([
+      chainApi.api.query.parachainStaking.candidatePool.entries(),
+      chainApi.api.query.parachainStaking.inflationConfig()
+    ]);
 
-  return allCollators;
+    const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
+    const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
+    const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
+    const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
+    const allCollators: ValidatorInfo[] = [];
+
+    for (const _collator of _allCollators) {
+      const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
+
+      const bnTotalStake = new BN(collatorInfo.total);
+      const bnOwnStake = new BN(collatorInfo.stake);
+      const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+
+      allCollators.push({
+        address: collatorInfo.id,
+        totalStake: bnTotalStake.toString(),
+        ownStake: bnOwnStake.toString(),
+        otherStake: bnOtherStake.toString(),
+        nominatorCount: collatorInfo.delegators.length,
+        commission: 0,
+        expectedReturn: delegatorReturn,
+        blocked: false,
+        isVerified: false,
+        minBond: '0',
+        chain,
+        isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
+      });
+    }
+
+    return allCollators;
+  }
 }
 
 export async function getAmplitudeBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, selectedValidatorInfo: ValidatorInfo, nominatorMetadata?: NominatorMetadata) {

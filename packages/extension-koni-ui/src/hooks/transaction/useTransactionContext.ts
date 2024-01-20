@@ -8,8 +8,7 @@ import { useContext } from 'react';
 const useTransactionContext = <T extends TransactionFormBaseProps>() => {
   const { defaultData,
     goBack, needPersistData, onDone,
-    persistData, setDisableBack,
-    setOnBack, setSubHeaderRightButtons } = useContext(TransactionContext);
+    persistData, setBackProps, setSubHeaderRightButtons } = useContext(TransactionContext);
 
   return {
     defaultData: defaultData as T,
@@ -18,8 +17,7 @@ const useTransactionContext = <T extends TransactionFormBaseProps>() => {
     persistData,
     setSubHeaderRightButtons,
     goBack,
-    setDisableBack,
-    setOnBack
+    setBackProps
   };
 };
 

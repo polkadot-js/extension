@@ -104,8 +104,10 @@ function Component ({ className }: Props) {
   }, [homePath, navigate]);
 
   const [subHeaderRightButtons, setSubHeaderRightButtons] = useState<ButtonProps[] | undefined>();
-  const [onBack, setOnBack] = useState<VoidFunction>(goBack);
-  const [disableBack, setDisableBack] = useState<boolean>(false);
+  const [{ disabled: disableBack, onClick: onClickBack }, setBackProps] = useState<{
+    disabled: boolean,
+    onClick: null | VoidFunction
+  }>({ disabled: false, onClick: null });
 
   const chainChecker = useChainChecker();
 
@@ -126,7 +128,7 @@ function Component ({ className }: Props) {
       showFilterIcon
       showTabBar={false}
     >
-      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData: setStorage, onDone, setSubHeaderRightButtons, goBack, setOnBack, setDisableBack }}>
+      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData: setStorage, onDone, setSubHeaderRightButtons, goBack, setBackProps }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader
@@ -134,7 +136,7 @@ function Component ({ className }: Props) {
               center
               className={'transaction-header'}
               disableBack={disableBack}
-              onBack={onBack}
+              onBack={onClickBack || goBack}
               rightButtons={subHeaderRightButtons}
               showBackButton
               title={titleMap[transactionType]}

@@ -5,15 +5,17 @@ import { TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps } from '@subwallet/react-ui';
 import React, { Dispatch, SetStateAction } from 'react';
 
-export interface TransactionContextProps{
+export interface TransactionContextProps {
   defaultData: TransactionFormBaseProps;
   persistData: Dispatch<SetStateAction<TransactionFormBaseProps>>;
   needPersistData: boolean;
   onDone: (extrinsicHash: string) => void;
   setSubHeaderRightButtons: Dispatch<SetStateAction<ButtonProps[] | undefined>>;
   goBack: () => void;
-  setOnBack: Dispatch<SetStateAction<VoidFunction>>;
-  setDisableBack: Dispatch<SetStateAction<boolean>>;
+  setBackProps: Dispatch<SetStateAction<{
+    disabled: boolean,
+    onClick: null | VoidFunction
+  }>>;
 }
 
 export const TransactionContext = React.createContext<TransactionContextProps>({
@@ -28,7 +30,5 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   goBack: () => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setOnBack: () => {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setDisableBack: () => {}
+  setBackProps: () => {}
 });

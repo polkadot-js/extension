@@ -196,10 +196,7 @@ const Component = () => {
           </Form.Item>
         </Form>
       </TransactionContent>
-      <TransactionFooter
-        errors={[]}
-        warnings={[]}
-      >
+      <TransactionFooter>
         <Button
           disabled={loading}
           icon={(

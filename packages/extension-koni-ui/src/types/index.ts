@@ -9,6 +9,8 @@ import { Theme as _Theme } from '../themes';
 export type Theme = _Theme;
 export type PhosphorIcon = _PhosphorIcon;
 
+export type VoidFunction = () => void;
+
 export type AccountType = 'ALL' | 'ETHEREUM' | 'SUBSTRATE';
 
 export interface ThemeProps {

@@ -371,10 +371,7 @@ const Component: React.FC = () => {
           </div>
         </Form>
       </TransactionContent>
-      <TransactionFooter
-        errors={[]}
-        warnings={[]}
-      >
+      <TransactionFooter>
         {/* todo: recheck action type, it may not work as expected any more */}
         <Button
           disabled={isDisable || !isBalanceReady}

@@ -99,13 +99,15 @@ function Component ({ className }: Props) {
 
   useNavigateOnChangeAccount(homePath);
 
-  const [subHeaderRightButtons, setSubHeaderRightButtons] = useState<ButtonProps[] | undefined>();
-
-  const chainChecker = useChainChecker();
-
   const goBack = useCallback(() => {
     navigate(homePath);
   }, [homePath, navigate]);
+
+  const [subHeaderRightButtons, setSubHeaderRightButtons] = useState<ButtonProps[] | undefined>();
+  const [onBack, setOnBack] = useState<VoidFunction>(goBack);
+  const [disableBack, setDisableBack] = useState<boolean>(false);
+
+  const chainChecker = useChainChecker();
 
   // Navigate to finish page
   const onDone = useCallback(
@@ -124,14 +126,15 @@ function Component ({ className }: Props) {
       showFilterIcon
       showTabBar={false}
     >
-      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData: setStorage, onDone, setSubHeaderRightButtons }}>
+      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData: setStorage, onDone, setSubHeaderRightButtons, goBack, setOnBack, setDisableBack }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader
               background={'transparent'}
               center
               className={'transaction-header'}
-              onBack={goBack}
+              disableBack={disableBack}
+              onBack={onBack}
               rightButtons={subHeaderRightButtons}
               showBackButton
               title={titleMap[transactionType]}

@@ -723,8 +723,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       </TransactionContent>
       <TransactionFooter
         className={`${className} -transaction-footer`}
-        errors={[]}
-        warnings={[]}
       >
         <Button
           disabled={!isBalanceReady}

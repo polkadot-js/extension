@@ -270,8 +270,6 @@ const Component: React.FC = () => {
       </TransactionContent>
       <TransactionFooter
         className={'send-nft-transaction-footer'}
-        errors={[]}
-        warnings={[]}
       >
         <Button
           disabled={isDisable || !isBalanceReady}

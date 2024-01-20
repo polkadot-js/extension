@@ -1,52 +1,50 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AlertDialogProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, SwModal } from '@subwallet/react-ui';
+import CN from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
-import CN from 'classnames';
 
-type Props = ThemeProps & {
-  modalId: string,
-  title: string,
-  content: React.ReactNode
-  onCancel?: () => void;
-  onOk: () => void;
+type Props = ThemeProps & AlertDialogProps & {
+  modalId: string
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { modalId, content, title, className, onCancel, onOk} = props;
+  const { cancelButton, className, content, modalId, okButton, title } = props;
 
   return (
     <>
       <SwModal
         className={CN(className)}
-        id={modalId}
-        title={title}
         closable={false}
         footer={
-          <div className={'modal_btn'}>
-            {!!onCancel &&
+          <div className={'__modal-button'}>
+            {!!cancelButton &&
               <Button
-                schema={'secondary'}
-                className={'__left-btn'}
                 block={true}
-                onClick={onCancel}>
-                Cancel
+                className={'__left-btn'}
+                onClick={cancelButton.onClick}
+                schema={cancelButton.schema || 'secondary'}
+              >
+                {cancelButton.text}
               </Button>
             }
             <Button
-              schema={'warning'}
               block={true}
               className={'__right-btn'}
-              onClick={onOk}>
-              Ok
+              onClick={okButton?.onClick}
+              schema={okButton.schema}
+            >
+              {okButton.text}
             </Button>
           </div>
         }
+        id={modalId}
+        title={title}
       >
-        <div className='modal_content'>
+        <div className='__modal-content'>
           {content}
         </div>
       </SwModal>
@@ -54,9 +52,9 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const AlertModal = styled(Component)<Props>(({ theme: {token}}: Props) => {
+const AlertModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.modal_content': {
+    '.__modal-content': {
       fontSize: token.fontSize,
       lineHeight: token.lineHeightHeading6,
       textAlign: 'center',
@@ -64,10 +62,8 @@ const AlertModal = styled(Component)<Props>(({ theme: {token}}: Props) => {
       paddingLeft: token.padding,
       paddingRight: token.padding
     },
-    '.modal_btn': {
-      display: 'flex',
-      justifyContent: 'row',
-      gap: token.sizeSM
+    '.__modal-button': {
+      display: 'flex'
     }
   };
 });

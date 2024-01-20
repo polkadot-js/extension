@@ -5,6 +5,7 @@ export { default as DisconnectExtensionModal } from './DisconnectExtensionModal'
 export { default as RequestCameraAccessModal } from './RequestCameraAccessModal';
 export { default as RequestCreatePasswordModal } from './RequestCreatePasswordModal';
 export { default as ResetWalletModal } from './ResetWalletModal';
+export { default as AlertModal } from './AlertModal';
 export { SortingModal } from './SortingModal';
 
 export * from './Account';

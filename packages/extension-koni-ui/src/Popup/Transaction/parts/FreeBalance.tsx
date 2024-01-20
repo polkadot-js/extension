@@ -15,12 +15,15 @@ type Props = ThemeProps & {
   label?: string;
   chain?: string;
   onBalanceReady?: (rs: boolean) => void;
+  hidden?: boolean;
+  isSubscribe?: boolean;
 }
 
-const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug }: Props) => {
+const Component = ({ address, chain, className, hidden, isSubscribe, label, onBalanceReady,
+  tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug);
+  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug, isSubscribe);
 
   useEffect(() => {
     onBalanceReady?.(!isLoading && !error);
@@ -31,7 +34,10 @@ const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug
   }
 
   return (
-    <Typography.Paragraph className={CN(className, 'free-balance')}>
+    <Typography.Paragraph className={CN(className, 'free-balance', {
+      hidden: hidden
+    })}
+    >
       {!error && <span className='__label'>{label || t('Sender available balance:')}</span>}
       {isLoading && <ActivityIndicator size={14} />}
       {error && <Typography.Text className={'error-message'}>{error}</Typography.Text>}

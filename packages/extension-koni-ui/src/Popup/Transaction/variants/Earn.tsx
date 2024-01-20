@@ -3,7 +3,7 @@
 
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
@@ -27,7 +27,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { accountFilterFunc, getJoinYieldParams } from '../helper';
-import { EarnOutlet, TransactionContent, TransactionFooter } from '../parts';
+import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '../parts';
 
 type Props = ThemeProps;
 
@@ -634,8 +634,6 @@ const Component = () => {
   return (
     <>
       <TransactionContent>
-        {/* FreeBalanceToYield */}
-
         {processState.steps && (
           <>
             <div>
@@ -674,6 +672,23 @@ const Component = () => {
               externalAccounts={accountSelectorList}
             />
           </Form.Item>
+
+          <FreeBalanceToEarn
+            address={fromValue}
+            hidden={submitStepType !== YieldStepType.XCM}
+            label={`${t('Available balance')}:`}
+            onBalanceReady={setIsBalanceReady}
+            tokens={balanceTokens}
+          />
+
+          <FreeBalance
+            address={fromValue}
+            chain={poolInfo.chain}
+            hidden={[YieldStepType.XCM].includes(submitStepType)}
+            isSubscribe={true}
+            label={`${t('Available balance')}:`}
+            tokenSlug={inputAsset.slug}
+          />
 
           <Form.Item
             name={'value'}
@@ -732,10 +747,7 @@ const Component = () => {
           type={'warning'}
         />
       </TransactionContent>
-      <TransactionFooter
-        errors={[]}
-        warnings={[]}
-      >
+      <TransactionFooter>
         <div></div>
       </TransactionFooter>
     </>

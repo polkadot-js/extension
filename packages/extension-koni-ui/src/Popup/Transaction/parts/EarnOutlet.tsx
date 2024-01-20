@@ -55,7 +55,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const EarnOutlet = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-
+    height: 'auto',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden'
   };
 });
 

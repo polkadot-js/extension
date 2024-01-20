@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AlertBox, AlertModal, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import { STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
+import { EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
 import { useFetchChainState, useGetBalance, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
@@ -16,16 +17,17 @@ import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYiel
 import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
-import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { ActivityIndicator, ButtonProps, Form, Number } from '@subwallet/react-ui';
+import { AlertDialogProps, EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertFieldToObject, formatBalance, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { PlusCircle } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import useNotification from '../../../hooks/common/useNotification';
 import { accountFilterFunc, getJoinYieldParams } from '../helper';
 import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '../parts';
 
@@ -35,22 +37,23 @@ const hideFields: Array<keyof EarnParams> = ['slug', 'chain', 'asset'];
 const validateFields: Array<keyof EarnParams> = ['from'];
 const loadingStepPromiseKey = 'earning.step.loading';
 
+const alertModalId = 'earn-transaction-alert-modal';
+const instructionModalId = EARNING_INSTRUCTION_MODAL;
+
 const Component = () => {
   const { t } = useTranslation();
-  // @ts-ignore
-  const navigate = useNavigate();
+  const notify = useNotification();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const { defaultData, onDone, persistData, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
+  const { defaultData, goBack, onDone, persistData, setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
 
   const { slug } = defaultData;
 
-  // @ts-ignore
   const { accounts, isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { poolInfoMap, poolTargetsMap } = useSelector((state) => state.earning);
   const { assetRegistry: chainAsset } = useSelector((state) => state.assetRegistry);
   const { priceMap } = useSelector((state) => state.price);
-  // @ts-ignore
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
 
   const [form] = Form.useForm<EarnParams>();
@@ -64,23 +67,17 @@ const Component = () => {
   const [processState, dispatchProcessState] = useReducer(earningReducer, DEFAULT_YIELD_PROCESS);
 
   const currentStep = processState.currentStep;
-  // @ts-ignore
   const firstStep = currentStep === 0;
-  // @ts-ignore
   const submitStepType = processState.steps?.[!currentStep ? currentStep + 1 : currentStep]?.type;
-  // @ts-ignore
+
   const { compound } = useYieldPositionDetail(slug);
-  // @ts-ignore
   const { nativeTokenBalance } = useGetBalance(chainValue, fromValue);
 
   const poolInfo = poolInfoMap[slug];
   const poolType = poolInfo.type;
   const poolChain = poolInfo.chain;
 
-  // @ts-ignore
   const [isBalanceReady, setIsBalanceReady] = useState<boolean>(true);
-  // @ts-ignore
-  const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
   const [forceFetchValidator, setForceFetchValidator] = useState(false);
   const [targetLoading, setTargetLoading] = useState(false);
   const [stepLoading, setStepLoading] = useState<boolean>(true);
@@ -89,10 +86,7 @@ const Component = () => {
   const [, setCanMint] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [checkMintLoading, setCheckMintLoading] = useState(false);
-  // @ts-ignore
-  const [isTransactionDone, setTransactionDone] = useState(false);
-  // @ts-ignore
-  const [loading, setLoading] = useState(true);
+  const [alertProps, setAlertProps] = useState<AlertDialogProps | undefined>();
   const [isFormInvalid, setIsFormInvalid] = useState(true);
 
   const chainState = useFetchChainState(poolInfo.chain);
@@ -102,7 +96,6 @@ const Component = () => {
     [poolType]
   );
 
-  // @ts-ignore
   const balanceTokens = useMemo(() => {
     const result: Array<{ chain: string; token: string }> = [];
 
@@ -128,7 +121,6 @@ const Component = () => {
     return result;
   }, [chainAsset, poolInfo]);
 
-  // @ts-ignore
   const isDisabledButton = useMemo(
     () =>
       checkMintLoading ||
@@ -150,7 +142,6 @@ const Component = () => {
   const assetDecimals = inputAsset ? _getAssetDecimals(inputAsset) : 0;
   const priceValue = priceMap[inputAsset.priceId || ''] || 0;
   const convertValue = amountValue ? parseFloat(amountValue) / 10 ** assetDecimals : 0;
-  // @ts-ignore
   const transformAmount = convertValue * priceValue;
 
   const estimatedFee = useMemo(() => {
@@ -172,7 +163,6 @@ const Component = () => {
     return _totalFee;
   }, [chainAsset, priceMap, processState.feeStructure]);
 
-  // @ts-ignore
   const maintainString = useMemo(() => {
     const maintainAsset = chainAsset[poolInfo.metadata.maintainAsset];
     const maintainBalance = poolInfo.metadata.maintainBalance;
@@ -237,10 +227,45 @@ const Component = () => {
     persistData(values);
   }, [persistData]);
 
+  const existentialDeposit = useMemo(() => {
+    const assetInfo = Object.values(assetRegistry).find((v) => v.originChain === chainValue);
+
+    if (assetInfo) {
+      return assetInfo.minAmount || '0';
+    }
+
+    return '0';
+  }, [assetRegistry, chainValue]);
+
+  const handleDataForInsufficientAlert = useCallback(() => {
+    return {
+      existentialDeposit: formatBalance(existentialDeposit, assetDecimals),
+      availableBalance: formatBalance(nativeTokenBalance.value, assetDecimals),
+      maintainBalance: formatBalance(poolInfo.metadata.maintainBalance || '0', assetDecimals) || '0',
+      symbol: inputAsset.symbol
+    };
+  }, [
+    assetDecimals,
+    existentialDeposit,
+    inputAsset.symbol,
+    nativeTokenBalance.value,
+    poolInfo.metadata.maintainBalance
+  ]);
+
   const onError = useCallback(
     (error: Error) => {
       if (insufficientMessages.some((v) => error.message.includes(v))) {
-        // todo: alert here
+        setAlertProps({
+          title: t('Insufficient balance'),
+          content: t('Your available balance is {{availableBalance}} {{symbol}}, you need to leave {{existentialDeposit}} {{symbol}} as minimal balance (existential deposit) and pay network fees. Make sure you have at least {{maintainBalance}} {{symbol}} in your transferable balance to proceed.', { replace: { ...handleDataForInsufficientAlert() } }),
+          okButton: {
+            text: t('I understand'),
+            onClick: () => {
+              inactiveModal(alertModalId);
+            }
+          }
+        });
+        activeModal(alertModalId);
 
         dispatchProcessState({
           type: EarningActionType.STEP_ERROR_ROLLBACK,
@@ -250,15 +275,18 @@ const Component = () => {
         return;
       }
 
-      setTransactionDone(false);
-      // hideAll();
-      // show(error.message, { type: 'danger', duration: 8000 });
+      notify({
+        message: error.message,
+        type: 'error',
+        duration: 8
+      });
+
       dispatchProcessState({
         type: EarningActionType.STEP_ERROR_ROLLBACK,
         payload: error
       });
     },
-    []
+    [activeModal, handleDataForInsufficientAlert, inactiveModal, notify, t]
   );
 
   const onSuccess = useCallback(
@@ -273,11 +301,11 @@ const Component = () => {
               _errors[0]?.message.startsWith('Provided address is invalid, the capitalization checksum test failed') ||
               _errors[0]?.message.startsWith('connection not open on send()')
             ) {
-              // hideAll();
-              // show(
-              //   'Your selected network has lost connection. Update it by re-enabling it or changing network provider',
-              //   { type: 'danger', duration: 8000 },
-              // );
+              notify({
+                message: t('Your selected network has lost connection. Update it by re-enabling it or changing network provider'),
+                type: 'error',
+                duration: 8
+              });
 
               return false;
             }
@@ -291,7 +319,6 @@ const Component = () => {
               type: needRollback ? EarningActionType.STEP_ERROR_ROLLBACK : EarningActionType.STEP_ERROR,
               payload: _errors[0]
             });
-            setTransactionDone(false);
 
             return false;
           }
@@ -303,7 +330,6 @@ const Component = () => {
 
           if (lastStep) {
             onDone(id);
-            setTransactionDone(true);
 
             return false;
           }
@@ -314,7 +340,7 @@ const Component = () => {
         }
       };
     },
-    [onDone, onError]
+    [notify, onDone, onError, t]
   );
 
   const onSubmit: FormCallbacks<EarnParams>['onFinish'] = useCallback((values: EarnParams) => {
@@ -419,7 +445,6 @@ const Component = () => {
     }, 300);
   }, [currentStep, getTargetedPool, onError, onSuccess, poolInfo, processState.feeStructure, processState.steps]);
 
-  // @ts-ignore
   const renderMetaInfo = useCallback(() => {
     const value = amountValue ? parseFloat(amountValue) / 10 ** assetDecimals : 0;
     const assetSymbol = inputAsset.symbol;
@@ -499,11 +524,33 @@ const Component = () => {
     );
   }, [amountValue, assetDecimals, inputAsset.symbol, poolInfo.statistic, poolInfo.metadata, poolInfo.type, t, chainInfoMap, chainValue, estimatedFee, getTargetedPool, poolTarget, chainAsset]);
 
-  // @ts-ignore
   const onPreCheck = usePreCheckAction(fromValue);
 
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);
+
+  const onBack = useCallback(() => {
+    if (firstStep) {
+      goBack();
+    } else {
+      setAlertProps({
+        title: t('Cancel earning process?'),
+        content: t('Going back will cancel the current earning process. Do you wish to cancel?'),
+        okButton: {
+          text: t('Cancel earning'),
+          onClick: goBack,
+          schema: 'error'
+        },
+        cancelButton: {
+          text: t('Not now'),
+          onClick: () => {
+            inactiveModal(alertModalId);
+          }
+        }
+      });
+      activeModal(alertModalId);
+    }
+  }, [activeModal, firstStep, goBack, inactiveModal, t]);
 
   useEffect(() => {
     form.setFieldValue('asset', inputAsset.slug || '');
@@ -550,10 +597,11 @@ const Component = () => {
                   const networkName = chainInfoMap[errorNetwork].name;
                   const text = 'Please enable {{networkName}} network'.replace('{{networkName}}', networkName);
 
-                  // todo: toast here
-                  console.log(text);
-                  // hideAll();
-                  // show(text, { type: 'danger', duration: 8000 });
+                  notify({
+                    message: text,
+                    type: 'error',
+                    duration: 8
+                  });
                 }
 
                 setConnectionError(errorNetwork);
@@ -567,7 +615,7 @@ const Component = () => {
         );
       }
     }
-  }, [submitString, currentStep, chainInfoMap, slug, poolTarget, getTargetedPool, fromValue, amountValue]);
+  }, [submitString, currentStep, chainInfoMap, slug, poolTarget, getTargetedPool, fromValue, amountValue, notify]);
 
   useEffect(() => {
     setCheckMintLoading(true);
@@ -612,6 +660,12 @@ const Component = () => {
     };
   }, [chainState?.active, forceFetchValidator, slug, chainValue, fromValue]);
 
+  useEffect(() => {
+    if (!compound) {
+      activeModal(instructionModalId);
+    }
+  }, [activeModal, compound]);
+
   const subHeaderButtons: ButtonProps[] = useMemo(() => {
     return [
       {
@@ -631,15 +685,29 @@ const Component = () => {
     };
   }, [setSubHeaderRightButtons, subHeaderButtons]);
 
+  useEffect(() => {
+    setBackProps((prev) => ({
+      ...prev,
+      disabled: submitLoading
+    }));
+  }, [setBackProps, submitLoading]);
+
+  useEffect(() => {
+    setBackProps((prev) => ({
+      ...prev,
+      onClick: onBack
+    }));
+  }, [onBack, setBackProps]);
+
   return (
     <>
       <TransactionContent>
         {processState.steps && (
           <>
-            <div>
+            <div className={'__process-item-wrapper'}>
               {stepLoading
                 ? (
-                  <div>
+                  <div className={'__process-item-loading'}>
                     <ActivityIndicator size={24} />
                   </div>
                 )
@@ -673,22 +741,24 @@ const Component = () => {
             />
           </Form.Item>
 
-          <FreeBalanceToEarn
-            address={fromValue}
-            hidden={submitStepType !== YieldStepType.XCM}
-            label={`${t('Available balance')}:`}
-            onBalanceReady={setIsBalanceReady}
-            tokens={balanceTokens}
-          />
+          <div className={'__balance-display-area'}>
+            <FreeBalanceToEarn
+              address={fromValue}
+              hidden={submitStepType !== YieldStepType.XCM}
+              label={`${t('Available balance')}:`}
+              onBalanceReady={setIsBalanceReady}
+              tokens={balanceTokens}
+            />
 
-          <FreeBalance
-            address={fromValue}
-            chain={poolInfo.chain}
-            hidden={[YieldStepType.XCM].includes(submitStepType)}
-            isSubscribe={true}
-            label={`${t('Available balance')}:`}
-            tokenSlug={inputAsset.slug}
-          />
+            <FreeBalance
+              address={fromValue}
+              chain={poolInfo.chain}
+              hidden={[YieldStepType.XCM].includes(submitStepType)}
+              isSubscribe={true}
+              label={`${t('Available balance')}:`}
+              tokenSlug={inputAsset.slug}
+            />
+          </div>
 
           <Form.Item
             name={'value'}
@@ -701,11 +771,13 @@ const Component = () => {
             />
           </Form.Item>
 
-          <Number
-            decimal={0}
-            prefix={'$'}
-            value={transformAmount}
-          />
+          <div className={'__transformed-amount-value'}>
+            <Number
+              decimal={0}
+              prefix={'$'}
+              value={transformAmount}
+            />
+          </div>
 
           {poolType === YieldPoolType.NOMINATION_POOL && (
             <Form.Item
@@ -742,14 +814,36 @@ const Component = () => {
         {renderMetaInfo()}
 
         <AlertBox
+          className={'__alert-box'}
           description={STAKE_ALERT_DATA.description.replace('{tokenAmount}', maintainString)}
           title={STAKE_ALERT_DATA.title}
           type={'warning'}
         />
       </TransactionContent>
       <TransactionFooter>
-        <div></div>
+        <Button
+          disabled={isDisabledButton}
+          icon={(
+            <Icon
+              phosphorIcon={PlusCircle}
+              weight={'fill'}
+            />
+          )}
+          loading={submitLoading}
+          onClick={onPreCheck(form.submit, ExtrinsicType.JOIN_YIELD_POOL)}
+        >
+          {t('Stake')}
+        </Button>
       </TransactionFooter>
+
+      {
+        !!alertProps && (
+          <AlertModal
+            modalId={alertModalId}
+            {...alertProps}
+          />
+        )
+      }
     </>
   );
 };
@@ -770,7 +864,40 @@ const Wrapper: React.FC<Props> = (props: Props) => {
 
 const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.__process-item-wrapper': {
+      paddingBottom: token.paddingSM,
+      borderBottom: '2px solid',
+      borderBottomColor: 'rgba(33, 33, 33, 0.80)',
+      marginBottom: token.marginSM
+    },
 
+    '.__process-item-loading': {
+      height: 32,
+      display: 'flex',
+      alignItems: 'center'
+    },
+
+    '.__balance-display-area': {
+      marginBottom: token.marginSM
+    },
+
+    '.__transformed-amount-value': {
+      color: token.colorTextLight4,
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
+      marginBottom: token.marginSM,
+
+      '.ant-number, .ant-typography': {
+        color: 'inherit !important',
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      }
+    },
+
+    '.__alert-box': {
+      marginTop: token.marginSM
+    }
   };
 });
 

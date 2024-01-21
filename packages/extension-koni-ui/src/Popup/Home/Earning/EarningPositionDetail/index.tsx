@@ -245,7 +245,12 @@ function Component ({ compound,
           transactionFromValue={transactionFromValue}
           unstakings={compound.unstakings}
         />
-        <AccountAndNominationInfoPart />
+        <AccountAndNominationInfoPart
+          compound={compound}
+          inputAsset={inputAsset}
+          list={list}
+          poolInfo={poolInfo}
+        />
         <EarningInfoPart
           inputAsset={inputAsset}
           poolInfo={poolInfo}

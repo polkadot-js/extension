@@ -15,14 +15,14 @@ import styled from 'styled-components';
 
 type Props = ThemeProps & {
   onCancel: () => void,
-  item: YieldPositionInfo;
+  item: YieldPositionInfo | undefined;
   inputAsset: _ChainAsset;
 };
 
 function Component ({ className, inputAsset, item, onCancel }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
-  const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(item.chain), [item.chain]);
+  const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(item?.chain || ''), [item?.chain]);
 
   return (
     <SwModal
@@ -31,7 +31,7 @@ function Component ({ className, inputAsset, item, onCancel }: Props): React.Rea
       onCancel={onCancel}
       title={t('Nomination info')}
     >
-      {item.nominations.map((nomination) => {
+      {item?.nominations.map((nomination) => {
         return (
           <div key={nomination.validatorAddress}>
             <div>

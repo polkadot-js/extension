@@ -102,8 +102,8 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
     (item: UnstakingInfo) => {
       if (item.waitingTime === undefined) {
         return (
-          <div>
-            <div>{t('Waiting for withdrawal')}</div>
+          <>
+            <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
             {item.status === UnstakingStatus.CLAIMABLE && (
               <Icon
                 iconColor={token.colorSecondary}
@@ -112,12 +112,12 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
                 weight='fill'
               />
             )}
-          </div>
+          </>
         );
       } else {
         return (
-          <div>
-            <div>{getWaitingTime(item.waitingTime, item.status, t)}</div>
+          <>
+            <div className={'__withdraw-time-label'}>{getWaitingTime(item.waitingTime, item.status, t)}</div>
             {item.status === UnstakingStatus.CLAIMABLE && (
               <Icon
                 iconColor={token.colorSecondary}
@@ -126,7 +126,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
                 weight='fill'
               />
             )}
-          </div>
+          </>
         );
       }
     },
@@ -142,7 +142,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
       className={CN(className)}
     >
       <CollapsiblePanel
-        initOpen={true}
+        className={'__collapsible-panel'}
         title={t('Withdraw info')}
       >
         <MetaInfo
@@ -153,6 +153,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
           {items.map((item, index) => {
             return (
               <MetaInfo.Number
+                className={'__withdraw-time-item'}
                 decimals={inputAsset?.decimals || 0}
                 key={index}
                 label={renderWithdrawTime(item)}
@@ -165,12 +166,12 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
         </MetaInfo>
 
         {canCancelWithdraw && (
-          <div>
+          <div className={'__cancel-unstake-button-wrapper'}>
             <Button
+              block={true}
               icon={(
                 <Icon
                   phosphorIcon={ProhibitInset}
-                  size='sm'
                   weight='fill'
                 />
               )}
@@ -185,27 +186,104 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
       </CollapsiblePanel>
 
       {canWithdraw && (
-        <div>
-          <Number
-            decimal={inputAsset.decimals || 0}
-            decimalOpacity={0.45}
-            subFloatNumber={true}
-            suffix={inputAsset.symbol}
-            unitOpacity={0.45}
-            value={totalWithdrawable}
-          />
-          <Button
-            onClick={onWithDraw}
-            size='xs'
-          >
-            {t('Withdraw')}
-          </Button>
-        </div>
+        <>
+          <div className={'__separator'}></div>
+
+          <div className={'__withdraw-area'}>
+            <Number
+              className={'__withdraw-value'}
+              decimal={inputAsset.decimals || 0}
+              decimalOpacity={0.45}
+              subFloatNumber={true}
+              suffix={inputAsset.symbol}
+              unitOpacity={0.45}
+              value={totalWithdrawable}
+            />
+            <Button
+              onClick={onWithDraw}
+              size='xs'
+            >
+              {t('Withdraw')}
+            </Button>
+          </div>
+        </>
       )}
     </div>
   );
 }
 
 export const WithdrawInfoPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  borderRadius: token.borderRadiusLG,
+  backgroundColor: token.colorBgSecondary,
 
+  '.__withdraw-time-item': {
+    gap: token.sizeSM,
+
+    '.__label': {
+      'white-space': 'nowrap',
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: token.sizeXXS,
+      overflow: 'hidden'
+    },
+
+    '.__value-col': {
+      flex: '0 1 auto'
+    }
+  },
+
+  '.__withdraw-time-label': {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden'
+  },
+
+  '.__separator': {
+    height: 2,
+    backgroundColor: 'rgba(33, 33, 33, 0.80)',
+    marginLeft: token.margin,
+    marginRight: token.margin,
+    marginBottom: token.marginXS,
+    marginTop: -token.marginXXS
+  },
+
+  '.__cancel-unstake-button-wrapper': {
+    marginTop: token.marginSM
+  },
+
+  '.__collapsible-panel.-close + .__separator': {
+    display: 'none'
+  },
+
+  '.__withdraw-area': {
+    display: 'flex',
+    gap: token.sizeSM,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: token.paddingSM,
+    paddingTop: token.paddingXXS,
+    paddingLeft: token.padding,
+    paddingRight: token.padding
+  },
+
+  '.__withdraw-value': {
+    fontSize: token.fontSizeHeading4,
+    lineHeight: token.lineHeightHeading4,
+    fontWeight: token.headingFontWeight,
+    color: token.colorTextLight1,
+
+    '.ant-number-integer': {
+      color: 'inherit !important',
+      fontSize: 'inherit !important',
+      fontWeight: 'inherit !important',
+      lineHeight: 'inherit'
+    },
+
+    '.ant-number-decimal, .ant-number-suffix': {
+      color: `${token.colorTextLight3} !important`,
+      fontSize: `${token.fontSizeHeading5}px !important`,
+      fontWeight: 'inherit !important',
+      lineHeight: token.lineHeightHeading5
+    }
+  }
 }));

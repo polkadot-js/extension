@@ -25,7 +25,8 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <>
       <div className={CN(className, {
-        '-collapsed': !isOpen
+        '-open': isOpen,
+        '-close': !isOpen
       })}
       >
         <div
@@ -86,7 +87,8 @@ const CollapsiblePanel = styled(Component)<Props>(({ theme: { token } }: Props) 
 
     '.__panel-body': {
       padding: token.padding,
-      paddingTop: token.paddingXXS
+      paddingTop: token.paddingXXS,
+      paddingLeft: 24
     }
   });
 });

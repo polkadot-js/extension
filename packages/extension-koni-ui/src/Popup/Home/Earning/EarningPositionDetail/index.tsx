@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EarningRewardHistoryItem, SpecialYieldPoolInfo, SpecialYieldPositionInfo, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardHistoryItem, SpecialYieldPoolInfo, SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { AlertModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_TEN, BN_ZERO, CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, EARN_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -16,7 +16,7 @@ import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { Plus } from 'phosphor-react';
+import { MinusCircle, Plus, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -110,10 +110,27 @@ function Component ({ compound,
     return compound.chain || poolInfo.chain || '';
   }, [compound.chain, poolInfo.chain]);
 
+  const showAlert = useCallback((alertProps: AlertDialogProps) => {
+    setAlertProps(alertProps);
+    activeModal(alertModalId);
+  }, [activeModal]);
+
+  const closeAlert = useCallback(() => {
+    inactiveModal(alertModalId);
+  }, [inactiveModal]);
+
   const onLeavePool = useCallback(() => {
     if (isActiveStakeZero) {
-      // todo: alert here
+      showAlert({
+        title: t('Unstaking not available'),
+        content: t("You don't have any staked funds left to unstake. Check withdrawal status (how long left until the unstaking period ends) by checking the Withdraw info. Keep in mind that you need to withdraw manually."),
+        okButton: {
+          text: t('OK'),
+          onClick: closeAlert
+        }
+      });
 
+      return;
     }
 
     setUnStakeStorage({
@@ -123,7 +140,7 @@ function Component ({ compound,
       from: transactionFromValue
     });
     navigate('/transaction/unstake');
-  }, [isActiveStakeZero, navigate, poolInfo.slug, setUnStakeStorage, transactionChainValue, transactionFromValue]);
+  }, [closeAlert, isActiveStakeZero, navigate, poolInfo.slug, setUnStakeStorage, showAlert, t, transactionChainValue, transactionFromValue]);
 
   const onEarnMore = useCallback(() => {
     setEarnStorage({
@@ -165,15 +182,6 @@ function Component ({ compound,
     navigate('/transaction/claim-reward');
   }, [compound.slug, navigate, setClaimRewardStorage, transactionChainValue, transactionFromValue]);
 
-  const showAlert = useCallback((alertProps: AlertDialogProps) => {
-    setAlertProps(alertProps);
-    activeModal(alertModalId);
-  }, [activeModal]);
-
-  const closeAlert = useCallback(() => {
-    inactiveModal(alertModalId);
-  }, [inactiveModal]);
-
   const onBack = useCallback(() => {
     navigate('/home/earning', { state: {
       view: EarningEntryView.POSITIONS
@@ -208,19 +216,19 @@ function Component ({ compound,
         subHeaderPaddingVertical={true}
         title={t<string>('Earning position detail')}
       >
-        <div>
-          <div>{t('Active stake')}</div>
+        <div className={'__active-stake-info-area'}>
+          <div className={'__active-stake-title'}>{t('Active stake')}</div>
           <Number
+            className={'__active-stake-value'}
             decimal={inputAsset?.decimals || 0}
-            decimalOpacity={0.65}
             hide={!isShowBalance}
             subFloatNumber={true}
             suffix={inputAsset?.symbol}
-            unitOpacity={0.65}
             value={activeStake}
           />
 
           <Number
+            className={'__active-stake-converted-value'}
             decimal={0}
             hide={!isShowBalance}
             prefix={'$'}
@@ -229,6 +237,7 @@ function Component ({ compound,
         </div>
 
         <RewardInfoPart
+          className={'__reward-info-part'}
           closeAlert={closeAlert}
           compound={compound}
           inputAsset={inputAsset}
@@ -238,20 +247,56 @@ function Component ({ compound,
           transactionChainValue={transactionChainValue}
           transactionFromValue={transactionFromValue}
         />
+
+        <div className={'__transaction-buttons'}>
+          <Button
+            block={true}
+            icon={(
+              <Icon
+                phosphorIcon={MinusCircle}
+                weight='fill'
+              />
+            )}
+            onClick={onLeavePool}
+            schema='secondary'
+          >
+            {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unstake')}
+          </Button>
+
+          <Button
+            block={true}
+            icon={(
+              <Icon
+                phosphorIcon={PlusCircle}
+                weight='fill'
+              />
+            )}
+            onClick={onEarnMore}
+            schema='secondary'
+          >
+            {poolInfo.type === YieldPoolType.LENDING ? t('Supply more') : t('Stake more')}
+          </Button>
+        </div>
+
         <WithdrawInfoPart
+          className={'__withdraw-info-part'}
           inputAsset={inputAsset}
           poolInfo={poolInfo}
           transactionChainValue={transactionChainValue}
           transactionFromValue={transactionFromValue}
           unstakings={compound.unstakings}
         />
+
         <AccountAndNominationInfoPart
+          className={'__account-and-nomination-info-part'}
           compound={compound}
           inputAsset={inputAsset}
           list={list}
           poolInfo={poolInfo}
         />
+
         <EarningInfoPart
+          className={'__earning-info-part'}
           inputAsset={inputAsset}
           poolInfo={poolInfo}
         />
@@ -353,7 +398,67 @@ const Wrapper = ({ className }: Props) => {
 const EarningPositionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
   '.ant-sw-screen-layout-body': {
     paddingLeft: token.padding,
-    paddingRight: token.padding
+    paddingRight: token.padding,
+    paddingBottom: token.padding
+  },
+
+  '.__reward-info-part, .__withdraw-info-part, .__account-and-nomination-info-part, .__transaction-buttons': {
+    marginBottom: token.marginSM
+  },
+
+  '.__active-stake-info-area': {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: token.sizeXXS,
+    paddingTop: 24,
+    paddingBottom: 24
+  },
+
+  '.__active-stake-title': {
+    fontSize: token.sizeSM,
+    lineHeight: token.lineHeightSM,
+    color: token.colorTextLight4
+  },
+
+  '.__active-stake-value': {
+    fontSize: token.fontSizeHeading2,
+    lineHeight: token.lineHeightHeading2,
+    fontWeight: token.headingFontWeight,
+    color: token.colorTextLight1,
+
+    '.ant-number-integer': {
+      color: 'inherit !important',
+      fontSize: 'inherit !important',
+      fontWeight: 'inherit !important',
+      lineHeight: 'inherit'
+    },
+
+    '.ant-number-decimal, .ant-number-suffix': {
+      color: `${token.colorTextLight3} !important`,
+      fontSize: `${token.fontSizeHeading3}px !important`,
+      fontWeight: 'inherit !important',
+      lineHeight: token.lineHeightHeading3
+    }
+  },
+
+  '.__active-stake-converted-value': {
+    fontSize: token.fontSizeLG,
+    lineHeight: token.lineHeightLG,
+    fontWeight: token.bodyFontWeight,
+    color: token.colorTextLight4,
+
+    '.ant-typography': {
+      color: 'inherit !important',
+      fontSize: 'inherit !important',
+      fontWeight: 'inherit !important',
+      lineHeight: 'inherit'
+    }
+  },
+
+  '.__transaction-buttons': {
+    display: 'flex',
+    gap: token.sizeSM
   }
 }));
 

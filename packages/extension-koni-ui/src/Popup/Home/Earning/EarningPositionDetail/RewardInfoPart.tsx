@@ -116,7 +116,7 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
     <div
       className={CN(className)}
     >
-      <div>
+      <div className={'__part-title'}>
         <MetaInfo>
           <MetaInfo.Status
             label={title}
@@ -131,10 +131,11 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
         <>
           <div className={'__separator'}></div>
 
-          <div>
+          <div className={'__claim-reward-area'}>
             { total
               ? (
                 <Number
+                  className={'__claim-reward-value'}
                   decimal={inputAsset.decimals || 0}
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
@@ -164,7 +165,7 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
           <div className={'__separator'}></div>
 
           <CollapsiblePanel
-            initOpen={true}
+            className={'__reward-history-panel'}
             title={t('Reward history')}
           >
             <MetaInfo
@@ -182,16 +183,18 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
                   value={item.amount}
                 />
               ))}
-
             </MetaInfo>
+
             <Button
+              block={true}
+              className={'__view-explorer-button'}
               icon={(
                 <Icon
                   phosphorIcon={ArrowSquareOut}
                 />
               )}
               onClick={onClickViewExplore}
-              size={'sm'}
+              size={'xs'}
               type={'ghost'}
             >
               {t('View on explorer')}
@@ -204,5 +207,61 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
 }
 
 export const RewardInfoPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  borderRadius: token.borderRadiusLG,
+  backgroundColor: token.colorBgSecondary,
+  minHeight: 54,
 
+  '.__part-title': {
+    paddingTop: token.padding,
+    paddingLeft: token.padding,
+    paddingRight: token.padding
+  },
+
+  '.__separator': {
+    height: 2,
+    backgroundColor: 'rgba(33, 33, 33, 0.80)',
+    marginTop: token.marginSM,
+    marginBottom: token.marginSM,
+    marginLeft: token.margin,
+    marginRight: token.margin
+  },
+
+  '.__claim-reward-area': {
+    display: 'flex',
+    gap: token.sizeSM,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: token.paddingSM,
+    paddingLeft: token.padding,
+    paddingRight: token.padding
+  },
+
+  '.__claim-reward-value': {
+    fontSize: token.fontSizeHeading4,
+    lineHeight: token.lineHeightHeading4,
+    fontWeight: token.headingFontWeight,
+    color: token.colorTextLight1,
+
+    '.ant-number-integer': {
+      color: 'inherit !important',
+      fontSize: 'inherit !important',
+      fontWeight: 'inherit !important',
+      lineHeight: 'inherit'
+    },
+
+    '.ant-number-decimal, .ant-number-suffix': {
+      color: `${token.colorTextLight3} !important`,
+      fontSize: `${token.fontSizeHeading5}px !important`,
+      fontWeight: 'inherit !important',
+      lineHeight: token.lineHeightHeading5
+    }
+  },
+
+  '.__separator + .__reward-history-panel': {
+    marginTop: -13
+  },
+
+  '.__view-explorer-button': {
+    marginTop: token.marginSM
+  }
 }));

@@ -6,7 +6,7 @@ import { EarningStatus, SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType, 
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { Avatar, CollapsiblePanel, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { EarningNominationModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
-import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
+import { EARNING_NOMINATION_MODAL, StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { EarningTagType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTypeTags, findAccountByAddress, isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
@@ -102,13 +102,13 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
   );
 
   const onCloseNominationModal = useCallback(() => {
-    inactiveModal(EarningNominationModal);
+    inactiveModal(EARNING_NOMINATION_MODAL);
   }, [inactiveModal]);
 
   const createOpenNomination = useCallback((item: YieldPositionInfo) => {
     return () => {
       setSelectedAddress(item.address);
-      activeModal(EarningNominationModal);
+      activeModal(EARNING_NOMINATION_MODAL);
     };
   }, [activeModal]);
 
@@ -220,13 +220,11 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
         })}
       </CollapsiblePanel>
 
-      {selectedItem && (
-        <EarningNominationModal
-          inputAsset={inputAsset}
-          item={selectedItem}
-          onCancel={onCloseNominationModal}
-        />
-      )}
+      <EarningNominationModal
+        inputAsset={inputAsset}
+        item={selectedItem}
+        onCancel={onCloseNominationModal}
+      />
     </>
   );
 }

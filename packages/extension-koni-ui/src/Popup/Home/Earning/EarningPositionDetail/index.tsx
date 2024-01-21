@@ -238,7 +238,13 @@ function Component ({ compound,
           transactionChainValue={transactionChainValue}
           transactionFromValue={transactionFromValue}
         />
-        <WithdrawInfoPart />
+        <WithdrawInfoPart
+          inputAsset={inputAsset}
+          poolInfo={poolInfo}
+          transactionChainValue={transactionChainValue}
+          transactionFromValue={transactionFromValue}
+          unstakings={compound.unstakings}
+        />
         <AccountAndNominationInfoPart />
         <EarningInfoPart
           inputAsset={inputAsset}
@@ -340,7 +346,10 @@ const Wrapper = ({ className }: Props) => {
 };
 
 const EarningPositionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
-
+  '.ant-sw-screen-layout-body': {
+    paddingLeft: token.padding,
+    paddingRight: token.padding
+  }
 }));
 
 export default EarningPositionDetail;

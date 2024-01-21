@@ -1,18 +1,207 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { UnstakingInfo, UnstakingStatus, YieldPoolInfo } from '@subwallet/extension-base/types';
+import { BN_ZERO } from '@subwallet/extension-base/utils';
+import { CollapsiblePanel, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
+import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Button, Icon, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React from 'react';
-import styled from 'styled-components';
+import { CheckCircle, ProhibitInset } from 'phosphor-react';
+import React, { Context, useCallback, useContext, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styled, { ThemeContext } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  unstakings: UnstakingInfo[];
+  poolInfo: YieldPoolInfo;
+  inputAsset: _ChainAsset;
+  transactionFromValue: string;
+  transactionChainValue: string;
+};
 
-function Component ({ className }: Props) {
+function Component ({ className, inputAsset, poolInfo, transactionChainValue, transactionFromValue,
+  unstakings }: Props) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { slug } = poolInfo;
+
+  const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
+
+  const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
+  const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
+
+  const items = useMemo(() => {
+    return [...unstakings].sort((a, b) => {
+      if (a.waitingTime === undefined && b.waitingTime === undefined) {
+        return 0;
+      }
+
+      if (a.waitingTime === undefined) {
+        return -1;
+      }
+
+      if (b.waitingTime === undefined) {
+        return 1;
+      }
+
+      return a.waitingTime - b.waitingTime;
+    });
+  }, [unstakings]);
+
+  const totalWithdrawable = useMemo(() => {
+    let result = BN_ZERO;
+
+    unstakings.forEach((value) => {
+      if (value.status === UnstakingStatus.CLAIMABLE) {
+        result = result.plus(value.claimable);
+      }
+    });
+
+    return result;
+  }, [unstakings]);
+
+  const haveUnlocking = useMemo(() => unstakings.some((i) => i.status === UnstakingStatus.UNLOCKING), [unstakings]);
+
+  const canCancelWithdraw = useMemo(
+    () => haveUnlocking && poolInfo.metadata.availableMethod.cancelUnstake,
+    [haveUnlocking, poolInfo.metadata.availableMethod.cancelUnstake]
+  );
+
+  const canWithdraw = useMemo(() => {
+    return totalWithdrawable.gt(BN_ZERO);
+  }, [totalWithdrawable]);
+
+  const onWithDraw = useCallback(() => {
+    setWithdrawStorage({
+      ...DEFAULT_WITHDRAW_PARAMS,
+      slug: slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
+    });
+    navigate('/transaction/withdraw');
+  }, [navigate, setWithdrawStorage, slug, transactionChainValue, transactionFromValue]);
+
+  const onCancelWithDraw = useCallback(() => {
+    setCancelUnStakeStorage({
+      ...DEFAULT_CANCEL_UN_STAKE_PARAMS,
+      slug: slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
+    });
+    navigate('/transaction/cancel-unstake');
+  }, [navigate, setCancelUnStakeStorage, slug, transactionChainValue, transactionFromValue]);
+
+  const renderWithdrawTime = useCallback(
+    (item: UnstakingInfo) => {
+      if (item.waitingTime === undefined) {
+        return (
+          <div>
+            <div>{t('Waiting for withdrawal')}</div>
+            {item.status === UnstakingStatus.CLAIMABLE && (
+              <Icon
+                iconColor={token.colorSecondary}
+                phosphorIcon={CheckCircle}
+                size='sm'
+                weight='fill'
+              />
+            )}
+          </div>
+        );
+      } else {
+        return (
+          <div>
+            <div>{getWaitingTime(item.waitingTime, item.status, t)}</div>
+            {item.status === UnstakingStatus.CLAIMABLE && (
+              <Icon
+                iconColor={token.colorSecondary}
+                phosphorIcon={CheckCircle}
+                size='sm'
+                weight='fill'
+              />
+            )}
+          </div>
+        );
+      }
+    },
+    [t, token.colorSecondary]
+  );
+
+  if (!unstakings.length) {
+    return null;
+  }
+
   return (
     <div
       className={CN(className)}
     >
+      <CollapsiblePanel
+        initOpen={true}
+        title={t('Withdraw info')}
+      >
+        <MetaInfo
+          labelColorScheme='gray'
+          labelFontWeight='regular'
+          spaceSize='ms'
+        >
+          {items.map((item, index) => {
+            return (
+              <MetaInfo.Number
+                decimals={inputAsset?.decimals || 0}
+                key={index}
+                label={renderWithdrawTime(item)}
+                suffix={inputAsset?.symbol}
+                value={item.claimable}
+                valueColorSchema='even-odd'
+              />
+            );
+          })}
+        </MetaInfo>
+
+        {canCancelWithdraw && (
+          <div>
+            <Button
+              icon={(
+                <Icon
+                  phosphorIcon={ProhibitInset}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+              onClick={onCancelWithDraw}
+              size='xs'
+              type='ghost'
+            >
+              {t('Cancel unstaking')}
+            </Button>
+          </div>
+        )}
+      </CollapsiblePanel>
+
+      {canWithdraw && (
+        <div>
+          <Number
+            decimal={inputAsset.decimals || 0}
+            decimalOpacity={0.45}
+            subFloatNumber={true}
+            suffix={inputAsset.symbol}
+            unitOpacity={0.45}
+            value={totalWithdrawable}
+          />
+          <Button
+            onClick={onWithDraw}
+            size='xs'
+          >
+            {t('Withdraw')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

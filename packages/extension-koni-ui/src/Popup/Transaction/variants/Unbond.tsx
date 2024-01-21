@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, ExtrinsicType, NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { isActionFromValidator } from '@subwallet/extension-base/services/earning-service/utils';
 import { RequestYieldLeave, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { AccountSelector, AmountInput, HiddenInput, NominationSelector } from '@subwallet/extension-koni-ui/components';
+import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
-import { useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useGetBalance, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { yieldSubmitLeavePool } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams } from '@subwallet/extension-koni-ui/types';
@@ -55,6 +56,7 @@ const Component: React.FC = () => {
 
   const { accounts, isAllAccount } = useSelector((state) => state.accountState);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { poolInfoMap } = useSelector((state) => state.earning);
   const poolInfo = poolInfoMap[slug];
   const poolType = poolInfo.type;
@@ -98,6 +100,17 @@ const Component: React.FC = () => {
       return undefined;
     }
   }, [currentValidator, positionInfo]);
+
+  const { nativeTokenBalance } = useGetBalance(chainValue, fromValue);
+  const existentialDeposit = useMemo(() => {
+    const assetInfo = Object.values(assetRegistry).find((v) => v.originChain === chainValue);
+
+    if (assetInfo) {
+      return assetInfo.minAmount || '0';
+    }
+
+    return '0';
+  }, [assetRegistry, chainValue]);
 
   // @ts-ignore
   const showFastLeave = useMemo(() => {
@@ -161,6 +174,19 @@ const Component: React.FC = () => {
       return t('unknown time');
     }
   }, [poolInfo.statistic, t]);
+
+  // @ts-ignore
+  const handleDataForInsufficientAlert = useCallback(
+    (estimateFee: AmountData) => {
+      return {
+        existentialDeposit: getInputValuesFromString(existentialDeposit, estimateFee.decimals),
+        availableBalance: getInputValuesFromString(nativeTokenBalance.value, estimateFee.decimals),
+        maintainBalance: getInputValuesFromString(poolInfo.metadata.maintainBalance || '0', estimateFee.decimals),
+        symbol: estimateFee.symbol
+      };
+    },
+    [existentialDeposit, nativeTokenBalance.value, poolInfo.metadata.maintainBalance]
+  );
 
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);

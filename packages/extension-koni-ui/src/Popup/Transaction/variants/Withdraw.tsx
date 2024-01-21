@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { getAstarWithdrawable } from '@subwallet/extension-base/services/earning-service/handlers/native-staking/astar';
 import { RequestYieldWithdrawal, UnstakingInfo, UnstakingStatus, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, HiddenInput, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { useGetChainAssetInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
+import { useGetBalance, useGetChainAssetInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { yieldSubmitStakingWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { accountFilterFunc } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
@@ -59,6 +60,7 @@ const Component = () => {
 
   const { isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { poolInfoMap } = useSelector((state) => state.earning);
 
   const [isDisable, setIsDisable] = useState(true);
@@ -80,18 +82,6 @@ const Component = () => {
   const decimals = inputAsset?.decimals || 0;
   const symbol = inputAsset?.symbol || '';
 
-  const unstakingInfo = useMemo((): UnstakingInfo | undefined => {
-    if (fromValue && !isAccountAll(fromValue) && !!yieldPosition) {
-      if (_STAKING_CHAIN_GROUP.astar.includes(yieldPosition.chain)) {
-        return getAstarWithdrawable(yieldPosition);
-      }
-
-      return yieldPosition.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE)[0];
-    }
-
-    return undefined;
-  }, [fromValue, yieldPosition]);
-
   const goHome = useCallback(() => {
     navigate('/home/earning');
   }, [navigate]);
@@ -106,7 +96,43 @@ const Component = () => {
     persistData(values);
   }, [persistData]);
 
+  const { nativeTokenBalance } = useGetBalance(chainValue, fromValue);
+  const existentialDeposit = useMemo(() => {
+    const assetInfo = Object.values(assetRegistry).find((v) => v.originChain === chainValue);
+
+    if (assetInfo) {
+      return assetInfo.minAmount || '0';
+    }
+
+    return '0';
+  }, [assetRegistry, chainValue]);
+
+  // @ts-ignore
+  const handleDataForInsufficientAlert = useCallback(
+    (estimateFee: AmountData) => {
+      return {
+        existentialDeposit: getInputValuesFromString(existentialDeposit, estimateFee.decimals),
+        availableBalance: getInputValuesFromString(nativeTokenBalance.value, estimateFee.decimals),
+        maintainBalance: getInputValuesFromString(poolInfo.metadata.maintainBalance || '0', estimateFee.decimals),
+        symbol: estimateFee.symbol
+      };
+    },
+    [existentialDeposit, nativeTokenBalance.value, poolInfo.metadata.maintainBalance]
+  );
+
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+
+  const unstakingInfo = useMemo((): UnstakingInfo | undefined => {
+    if (fromValue && !isAccountAll(fromValue) && !!yieldPosition) {
+      if (_STAKING_CHAIN_GROUP.astar.includes(yieldPosition.chain)) {
+        return getAstarWithdrawable(yieldPosition);
+      }
+
+      return yieldPosition.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE)[0];
+    }
+
+    return undefined;
+  }, [fromValue, yieldPosition]);
 
   const onSubmit: FormCallbacks<WithdrawParams>['onFinish'] = useCallback((values: WithdrawParams) => {
     setLoading(true);

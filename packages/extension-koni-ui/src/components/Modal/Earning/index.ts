@@ -2,3 +2,4 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export { default as EarningPoolDetailModal } from './EarningPoolDetailModal';
+export { default as EarningNominationModal } from './EarningNominationModal';

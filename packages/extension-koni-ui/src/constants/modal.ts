@@ -37,3 +37,4 @@ export const TERM_AND_CONDITION_SEED_PHRASE_MODAL = 'term-and-condition-seed-phr
 /* Terms and Conditions */
 
 export const EARNING_INSTRUCTION_MODAL = 'earning-instruction-modal';
+export const EARNING_NOMINATION_MODAL = 'earning-nomination-modal';

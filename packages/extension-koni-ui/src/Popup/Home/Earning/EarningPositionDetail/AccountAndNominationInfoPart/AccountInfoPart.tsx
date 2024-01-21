@@ -2,10 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { EarningStatus, SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { isSameAddress } from '@subwallet/extension-base/utils';
+import { Avatar, CollapsiblePanel, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { EarningNominationModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
+import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
+import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { EarningTagType, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { createEarningTypeTags, findAccountByAddress, isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React from 'react';
+import { ArrowSquareOut } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -15,12 +24,210 @@ type Props = ThemeProps & {
   poolInfo: YieldPoolInfo;
 };
 
-function Component ({ className }: Props) {
+function Component ({ className, compound, inputAsset, list, poolInfo }: Props) {
+  const { t } = useTranslation();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  const { type } = compound;
+
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+  const { accounts } = useSelector((state) => state.accountState);
+
+  const deriveAsset = useMemo(() => {
+    if ('derivativeToken' in compound) {
+      const position = compound as SpecialYieldPositionInfo;
+
+      return assetRegistry[position.derivativeToken];
+    } else {
+      return undefined;
+    }
+  }, [assetRegistry, compound]);
+
+  const earningTagType: EarningTagType = useMemo(() => {
+    return createEarningTypeTags(compound.chain)[compound.type];
+  }, [compound.chain, compound.type]);
+
+  const isAllAccount = useMemo(() => isAccountAll(compound.address), [compound.address]);
+  const isSpecial = useMemo(() => [YieldPoolType.LENDING, YieldPoolType.LIQUID_STAKING].includes(type), [type]);
+  const haveNomination = useMemo(() => {
+    return [YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(poolInfo.type);
+  }, [poolInfo.type]);
+  const noNomination = useMemo(
+    () => !haveNomination || isAllAccount || !compound.nominations.length,
+    [compound.nominations.length, haveNomination, isAllAccount]
+  );
+
+  const [selectedAddress, setSelectedAddress] = useState('');
+
+  const selectedItem = useMemo((): YieldPositionInfo | undefined => {
+    return list.find((item) => isSameAddress(item.address, selectedAddress));
+  }, [list, selectedAddress]);
+
+  const getEarningStatus = useCallback((item: YieldPositionInfo) => {
+    const stakingStatusUi = StakingStatusUi;
+    const status = item.status;
+
+    if (status === EarningStatus.EARNING_REWARD) {
+      return stakingStatusUi.active;
+    }
+
+    if (status === EarningStatus.PARTIALLY_EARNING) {
+      return stakingStatusUi.partialEarning;
+    }
+
+    if (status === EarningStatus.WAITING) {
+      return stakingStatusUi.waiting;
+    }
+
+    return stakingStatusUi.inactive;
+  }, []);
+
+  const renderAccount = useCallback(
+    (item: YieldPositionInfo) => {
+      const account = findAccountByAddress(accounts, item.address);
+
+      return (
+        <div>
+          <Avatar
+            size={24}
+            value={item.address}
+          />
+          <div>
+            {account?.name || toShort(item.address)}
+          </div>
+        </div>
+      );
+    },
+    [accounts]
+  );
+
+  const onCloseNominationModal = useCallback(() => {
+    inactiveModal(EarningNominationModal);
+  }, [inactiveModal]);
+
+  const createOpenNomination = useCallback((item: YieldPositionInfo) => {
+    return () => {
+      setSelectedAddress(item.address);
+      activeModal(EarningNominationModal);
+    };
+  }, [activeModal]);
+
   return (
-    <div
-      className={CN(className)}
-    >
-    </div>
+    <>
+      <CollapsiblePanel
+        className={CN(className, {
+          '-no-nomination': noNomination
+        })}
+        initOpen={true}
+        title={t('Account info')}
+      >
+        {list.map((item) => {
+          const earningStatus = getEarningStatus(item);
+          const disableButton = !item.nominations.length;
+
+          return (
+            <MetaInfo
+              hasBackgroundWrapper={isAllAccount}
+              key={item.address}
+              labelColorScheme='gray'
+              labelFontWeight='regular'
+              spaceSize='sm'
+              valueColorScheme='light'
+            >
+              {!isAllAccount
+                ? (
+                  <MetaInfo.Account
+                    address={item.address}
+                    label={t('Account')}
+                  />
+                )
+                : (
+                  <MetaInfo.Status
+                    label={renderAccount(item)}
+                    statusIcon={earningStatus.icon}
+                    statusName={earningStatus.name}
+                    valueColorSchema={earningStatus.schema}
+                  />
+                )}
+              <div>
+                <div>{t('Staking type')}</div>
+                <div>
+                  {earningTagType.label}
+                </div>
+              </div>
+              {!isSpecial
+                ? (
+                  <>
+                    <MetaInfo.Number
+                      decimals={inputAsset?.decimals || 0}
+                      label={t('Total stake')}
+                      suffix={inputAsset?.symbol}
+                      value={new BigN(item.totalStake)}
+                      valueColorSchema='even-odd'
+                    />
+                    <MetaInfo.Number
+                      decimals={inputAsset?.decimals || 0}
+                      label={t('Active staked')}
+                      suffix={inputAsset?.symbol}
+                      value={item.activeStake}
+                      valueColorSchema='even-odd'
+                    />
+                    <MetaInfo.Number
+                      decimals={inputAsset?.decimals || 0}
+                      label={t('Unstaked')}
+                      suffix={inputAsset?.symbol}
+                      value={item.unstakeBalance}
+                      valueColorSchema='even-odd'
+                    />
+                  </>
+                )
+                : (
+                  <>
+                    <MetaInfo.Number
+                      decimals={inputAsset?.decimals || 0}
+                      label={t('Total stake')}
+                      suffix={inputAsset?.symbol}
+                      value={new BigN(item.totalStake)}
+                      valueColorSchema='even-odd'
+                    />
+                    <MetaInfo.Number
+                      decimals={deriveAsset?.decimals || 0}
+                      label={t('Derivative token balance')}
+                      suffix={deriveAsset?.symbol}
+                      value={item.activeStake}
+                      valueColorSchema='even-odd'
+                    />
+                  </>
+                )}
+              {isAllAccount && haveNomination && (
+                <>
+                  <Button
+                    disabled={disableButton}
+                    onClick={createOpenNomination(item)}
+                  >
+                    <div>
+                      {t('Nomination info')}
+                    </div>
+
+                    <Icon
+                      phosphorIcon={ArrowSquareOut}
+                    />
+                  </Button>
+                </>
+              )}
+            </MetaInfo>
+          );
+        })}
+      </CollapsiblePanel>
+
+      {selectedItem && (
+        <EarningNominationModal
+          inputAsset={inputAsset}
+          item={selectedItem}
+          onCancel={onCloseNominationModal}
+        />
+      )}
+    </>
   );
 }
 

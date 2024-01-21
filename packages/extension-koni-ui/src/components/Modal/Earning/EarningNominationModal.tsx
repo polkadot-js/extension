@@ -4,12 +4,13 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { YieldPositionInfo } from '@subwallet/extension-base/types';
-import { Avatar } from '@subwallet/extension-koni-ui/components';
+import { Avatar, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { EARNING_NOMINATION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
-import { Number, SwModal } from '@subwallet/react-ui';
+import { SwModal } from '@subwallet/react-ui';
+import CN from 'classnames';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -31,36 +32,75 @@ function Component ({ className, inputAsset, item, onCancel }: Props): React.Rea
       onCancel={onCancel}
       title={t('Nomination info')}
     >
-      {item?.nominations.map((nomination) => {
-        return (
-          <div key={nomination.validatorAddress}>
-            <div>
-              <Avatar
-                size={24}
-                value={nomination.validatorAddress}
-              />
-              <div>
-                {nomination.validatorIdentity || toShort(nomination.validatorAddress)}
-              </div>
-            </div>
-            {!isRelayChain && (
-              <Number
-                decimal={inputAsset?.decimals || 0}
-                decimalOpacity={0.45}
-                suffix={inputAsset?.symbol}
-                value={nomination.activeStake}
-              />
-            )}
-          </div>
-        );
-      })}
+      {
+        !!item?.nominations?.length && (
+          <MetaInfo
+            hasBackgroundWrapper={true}
+            labelColorScheme='gray'
+            labelFontWeight='regular'
+            spaceSize='ms'
+          >
+            {item?.nominations.map((nomination) => {
+              return (
+                <MetaInfo.Number
+                  className={CN('__nomination-item', {
+                    '-hide-number': isRelayChain
+                  })}
+                  decimals={inputAsset?.decimals || 0}
+                  key={nomination.validatorAddress}
+                  label={(
+                    <>
+                      <Avatar
+                        size={24}
+                        value={nomination.validatorAddress}
+                      />
+                      <div className={'__nomination-name'}>
+                        {nomination.validatorIdentity || toShort(nomination.validatorAddress)}
+                      </div>
+                    </>
+                  )}
+                  suffix={inputAsset?.symbol}
+                  value={nomination.activeStake}
+                  valueColorSchema='even-odd'
+                />
+              );
+            })}
+          </MetaInfo>
+        )
+      }
     </SwModal>
   );
 }
 
 const EarningPoolDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '.__nomination-item': {
+      gap: token.sizeSM,
 
+      '.__label': {
+        'white-space': 'nowrap',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: token.sizeXS,
+        overflow: 'hidden'
+      },
+
+      '.__value-col': {
+        flex: '0 1 auto'
+      }
+    },
+
+    '.__nomination-item.-hide-number': {
+      '.__value-col': {
+        display: 'none'
+      }
+    },
+
+    '.__nomination-name': {
+      textOverflow: 'ellipsis',
+      overflow: 'hidden'
+    }
   });
 });
 

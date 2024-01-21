@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EarningRewardHistoryItem, SpecialYieldPoolInfo, SpecialYieldPositionInfo, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AlertModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_TEN, BN_ZERO, CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, EARN_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -10,9 +10,9 @@ import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earni
 import { AccountAndNominationInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/AccountAndNominationInfoPart';
 import { EarningInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/EarningInfoPart';
 import { RewardInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/RewardInfoPart';
-import { EarningEntryParam, EarningEntryView, EarningPositionDetailParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AlertDialogProps, EarningEntryParam, EarningEntryView, EarningPositionDetailParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Button, ButtonProps, Icon } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { Plus } from 'phosphor-react';
@@ -30,12 +30,15 @@ type ComponentProp = {
   rewardHistories: EarningRewardHistoryItem[];
 }
 
+const alertModalId = 'earn-position-detail-alert-modal';
+
 function Component ({ compound,
   list,
   poolInfo,
   rewardHistories }: ComponentProp) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   // @ts-ignore
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
@@ -48,6 +51,8 @@ function Component ({ compound,
   const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
   const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
   const [, setClaimRewardStorage] = useLocalStorage(CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS);
+
+  const [alertProps, setAlertProps] = useState<AlertDialogProps | undefined>();
 
   const inputAsset = useMemo(() => {
     const inputSlug = poolInfo.metadata.inputAsset;
@@ -159,6 +164,15 @@ function Component ({ compound,
     navigate('/transaction/claim-reward');
   }, [compound.slug, navigate, setClaimRewardStorage, transactionChainValue, transactionFromValue]);
 
+  const showAlert = useCallback((alertProps: AlertDialogProps) => {
+    setAlertProps(alertProps);
+    activeModal(alertModalId);
+  }, [activeModal]);
+
+  const closeAlert = useCallback(() => {
+    inactiveModal(alertModalId);
+  }, [inactiveModal]);
+
   const onBack = useCallback(() => {
     navigate('/home/earning', { state: {
       view: EarningEntryView.POSITIONS
@@ -181,58 +195,98 @@ function Component ({ compound,
   }, [onEarnMore]);
 
   return (
-    <Layout.Base
-      className={'__screen-container'}
-      onBack={onBack}
-      showBackButton={true}
-      showSubHeader={true}
-      subHeaderBackground={'transparent'}
-      subHeaderCenter={false}
-      subHeaderIcons={subHeaderButtons}
-      subHeaderPaddingVertical={true}
-      title={t<string>('Earning position detail')}
-    >
-      <RewardInfoPart />
-      <AccountAndNominationInfoPart />
-      <EarningInfoPart />
+    <>
+      <Layout.Base
+        className={'__screen-container'}
+        onBack={onBack}
+        showBackButton={true}
+        showSubHeader={true}
+        subHeaderBackground={'transparent'}
+        subHeaderCenter={false}
+        subHeaderIcons={subHeaderButtons}
+        subHeaderPaddingVertical={true}
+        title={t<string>('Earning position detail')}
+      >
+        <div>
+          <div>{t('Active stake')}</div>
+          <Number
+            decimal={inputAsset?.decimals || 0}
+            decimalOpacity={0.65}
+            hide={!isShowBalance}
+            subFloatNumber={true}
+            suffix={inputAsset?.symbol}
+            unitOpacity={0.65}
+            value={activeStake}
+          />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <Button
-          block={true}
-          onClick={onEarnMore}
-        >
-          Earn
-        </Button>
+          <Number
+            decimal={0}
+            hide={!isShowBalance}
+            prefix={'$'}
+            value={convertActiveStake}
+          />
+        </div>
 
-        <Button
-          block={true}
-          onClick={onWithDraw}
-        >
-          Withdraw
-        </Button>
+        <RewardInfoPart
+          closeAlert={closeAlert}
+          compound={compound}
+          inputAsset={inputAsset}
+          isShowBalance={isShowBalance}
+          rewardHistories={filteredRewardHistories}
+          showAlert={showAlert}
+          transactionChainValue={transactionChainValue}
+          transactionFromValue={transactionFromValue}
+        />
+        <AccountAndNominationInfoPart />
+        <EarningInfoPart />
 
-        <Button
-          block={true}
-          onClick={onClaimReward}
-        >
-          Claim reward
-        </Button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Button
+            block={true}
+            onClick={onEarnMore}
+          >
+            Earn
+          </Button>
 
-        <Button
-          block={true}
-          onClick={onLeavePool}
-        >
-          Unearn
-        </Button>
+          <Button
+            block={true}
+            onClick={onWithDraw}
+          >
+            Withdraw
+          </Button>
 
-        <Button
-          block={true}
-          onClick={onCancelWithDraw}
-        >
-          Cancel withdraw
-        </Button>
-      </div>
-    </Layout.Base>
+          <Button
+            block={true}
+            onClick={onClaimReward}
+          >
+            Claim reward
+          </Button>
+
+          <Button
+            block={true}
+            onClick={onLeavePool}
+          >
+            Unearn
+          </Button>
+
+          <Button
+            block={true}
+            onClick={onCancelWithDraw}
+          >
+            Cancel withdraw
+          </Button>
+        </div>
+      </Layout.Base>
+
+      {
+        !!alertProps && (
+          <AlertModal
+            modalId={alertModalId}
+            {...alertProps}
+          />
+        )
+      }
+    </>
   );
 }
 

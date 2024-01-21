@@ -2,62 +2,49 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CaretDown, CaretUp } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps{
-  open?: boolean;
+  initOpen?: boolean;
   title: string;
-  children: React.ReactNode | React.ReactNode[]
+  children?: React.ReactNode | React.ReactNode[]
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { children, className, open, title } = props;
-  const [isOpen, setIsOpen] = useState(open);
+  const { children, className, initOpen, title } = props;
+  const [isOpen, setIsOpen] = useState(!!initOpen);
 
   const handleFilterOpening = useCallback(() => {
     setIsOpen((prev) => !prev);
   }, []);
 
-  console.log('isOpen', isOpen);
-
   return (
     <>
       <div className={CN(className, {
-        '-colapsible': !isOpen
+        '-collapsed': !isOpen
       })}
       >
-        <div>
-          <div className='item-panel-container'>
-            <div className={'item-panel'}>
-              <div className='item-panel-title'>{title}</div>
-              <Button
-                className='btn'
-                onClick={handleFilterOpening}
-                type={'ghost'}
-              >
-                {!isOpen
-                  ? (
-                    <Icon
-                      phosphorIcon={CaretDown}
-                      size='sm'
-                    />
-                  )
-                  : (
-                    <Icon
-                      phosphorIcon={CaretUp}
-                      size='sm'
-                    />
-                  )}
-              </Button>
-            </div>
+        <div
+          className={'__panel-header'}
+          onClick={handleFilterOpening}
+        >
+          <div className='__panel-title'>{title}</div>
+          <div className='__panel-icon'>
+            <Icon
+              phosphorIcon={isOpen ? CaretUp : CaretDown}
+              size='sm'
+            />
           </div>
         </div>
-        <div className='content-inner'>
-          <div>{isOpen && <div className='p-3'>{children}</div>}</div>
+        <div className={CN('__panel-body', {
+          hidden: !isOpen
+        })}
+        >
+          {children}
         </div>
       </div>
     </>
@@ -66,34 +53,41 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const CollapsiblePanel = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: token.fontSize,
-    flexDirection: 'column',
-    paddingLeft: token.padding,
-    paddingRight: token.padding,
-    '.item-panel': {
-      display: 'flex',
-      justifyContent: 'space-between',
-      paddingLeft: token.paddingSM,
-      alignItems: 'center',
-      borderTopRightRadius: token.borderRadiusLG,
-      borderTopLeftRadius: token.borderRadiusLG,
-      backgroundColor: 'var(--Background-Secondary-background, #1A1A1A)'
-    },
-    '.item-panel-title': {
-      fontSize: 14
-    },
-    '.content-inner': {
-      backgroundColor: 'var(--Background-Secondary-background, #1A1A1A)',
-      paddingRight: token.paddingSM,
-      paddingLeft: 24
-    },
-    '&.-colapsible .item-panel': {
-      borderBottomLeftRadius: token.borderRadiusLG,
-      borderBottomRightRadius: token.borderRadiusLG
-    }
+    borderRadius: token.borderRadiusLG,
+    backgroundColor: token.colorBgSecondary,
 
+    '.__panel-header': {
+      display: 'flex',
+      alignItems: 'center',
+      gap: token.sizeXS,
+      cursor: 'pointer',
+      padding: token.paddingXXS,
+      paddingLeft: token.padding
+    },
+
+    '.__panel-title': {
+      'white-space': 'nowrap',
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
+      flex: 1,
+      color: token.colorTextLight2
+    },
+
+    '.__panel-icon': {
+      minWidth: 40,
+      height: 40,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: token.colorTextLight3
+    },
+
+    '.__panel-body': {
+      padding: token.padding,
+      paddingTop: token.paddingXXS
+    }
   });
 });
 

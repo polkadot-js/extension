@@ -10,6 +10,7 @@ import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earni
 import { AccountAndNominationInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/AccountAndNominationInfoPart';
 import { EarningInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/EarningInfoPart';
 import { RewardInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/RewardInfoPart';
+import { WithdrawInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/WithdrawInfoPart';
 import { AlertDialogProps, EarningEntryParam, EarningEntryView, EarningPositionDetailParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, ModalContext, Number } from '@subwallet/react-ui';
@@ -237,6 +238,7 @@ function Component ({ compound,
           transactionChainValue={transactionChainValue}
           transactionFromValue={transactionFromValue}
         />
+        <WithdrawInfoPart />
         <AccountAndNominationInfoPart />
         <EarningInfoPart
           inputAsset={inputAsset}

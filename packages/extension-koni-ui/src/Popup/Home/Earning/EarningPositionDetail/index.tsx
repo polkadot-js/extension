@@ -7,6 +7,9 @@ import { BN_TEN, BN_ZERO, CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION,
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
+import { AccountAndNominationInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/AccountAndNominationInfoPart';
+import { EarningInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/EarningInfoPart';
+import { RewardInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/RewardInfoPart';
 import { EarningEntryParam, EarningEntryView, EarningPositionDetailParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon } from '@subwallet/react-ui';
@@ -189,6 +192,10 @@ function Component ({ compound,
       subHeaderPaddingVertical={true}
       title={t<string>('Earning position detail')}
     >
+      <RewardInfoPart />
+      <AccountAndNominationInfoPart />
+      <EarningInfoPart />
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <Button
           block={true}

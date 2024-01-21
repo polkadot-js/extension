@@ -238,7 +238,10 @@ function Component ({ compound,
           transactionFromValue={transactionFromValue}
         />
         <AccountAndNominationInfoPart />
-        <EarningInfoPart />
+        <EarningInfoPart
+          inputAsset={inputAsset}
+          poolInfo={poolInfo}
+        />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Button

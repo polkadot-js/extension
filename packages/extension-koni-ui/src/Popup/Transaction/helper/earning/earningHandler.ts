@@ -2,6 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SpecialYieldPoolInfo, SubmitYieldStepData, YieldPoolInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { TFunction } from 'react-i18next';
+
+export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
+  if (unstakingPeriod) {
+    const days = unstakingPeriod / 24;
+
+    if (days < 1) {
+      return t('{{time}} hours', { replace: { time: unstakingPeriod } });
+    } else {
+      return t('{{time}} days', { replace: { time: days } });
+    }
+  }
+
+  return '';
+}
 
 export function getJoinYieldParams (
   _poolInfo: YieldPoolInfo,

@@ -95,7 +95,7 @@ const Component = () => {
   const [form] = Form.useForm<ClaimRewardParams>();
   const formDefault = useMemo((): ClaimRewardParams => ({ ...defaultData }), [defaultData]);
 
-  const { isAllAccount } = useSelector((state) => state.accountState);
+  const { accounts, isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { earningRewards, poolInfoMap } = useSelector((state) => state.earning);
@@ -186,16 +186,16 @@ const Component = () => {
 
   const checkAction = usePreCheckAction(fromValue);
 
-  const accountSelectorFilter = useCallback((account: AccountJson): boolean => {
-    return filterAccount(chainInfoMap, allPositions, rewardList, poolType, poolChain)(account);
-  }, [chainInfoMap, allPositions, rewardList, poolType, poolChain]);
-
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);
 
   useEffect(() => {
     form.setFieldValue('chain', poolChain);
   }, [form, poolChain]);
+
+  const accountList = useMemo(() => {
+    return accounts.filter(filterAccount(chainInfoMap, allPositions, rewardList, poolType, poolChain));
+  }, [accounts, allPositions, chainInfoMap, poolChain, poolType, rewardList]);
 
   return (
     <>
@@ -213,7 +213,8 @@ const Component = () => {
           >
             <AccountSelector
               disabled={!isAllAccount}
-              filter={accountSelectorFilter}
+              doFilter={false}
+              externalAccounts={accountList}
             />
           </Form.Item>
           <FreeBalance

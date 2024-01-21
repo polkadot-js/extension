@@ -58,7 +58,7 @@ const Component = () => {
   const [form] = Form.useForm<WithdrawParams>();
   const formDefault = useMemo((): WithdrawParams => ({ ...defaultData }), [defaultData]);
 
-  const { isAllAccount } = useSelector((state) => state.accountState);
+  const { accounts, isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { poolInfoMap } = useSelector((state) => state.earning);
@@ -161,16 +161,22 @@ const Component = () => {
 
   const onPreCheck = usePreCheckAction(fromValue);
 
-  const accountSelectorFilter = useCallback((account: AccountJson): boolean => {
-    return filterAccount(chainInfoMap, allPositionInfos, poolInfo.type)(account);
-  }, [allPositionInfos, chainInfoMap, poolInfo.type]);
-
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);
 
   useEffect(() => {
     form.setFieldValue('chain', stakingChain);
   }, [form, stakingChain]);
+
+  const accountList = useMemo(() => {
+    return accounts.filter(filterAccount(chainInfoMap, allPositionInfos, poolInfo.type));
+  }, [accounts, allPositionInfos, chainInfoMap, poolInfo.type]);
+
+  useEffect(() => {
+    if (!fromValue && accountList.length === 1) {
+      form.setFieldValue('from', accountList[0].address);
+    }
+  }, [accountList, form, fromValue]);
 
   return (
     <>
@@ -189,7 +195,8 @@ const Component = () => {
           >
             <AccountSelector
               disabled={!isAllAccount}
-              filter={accountSelectorFilter}
+              doFilter={false}
+              externalAccounts={accountList}
             />
           </Form.Item>
           <FreeBalance

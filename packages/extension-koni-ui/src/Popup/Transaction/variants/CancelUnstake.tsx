@@ -54,7 +54,7 @@ const Component = () => {
   const [form] = Form.useForm<CancelUnStakeParams>();
   const formDefault = useMemo((): CancelUnStakeParams => ({ ...defaultData }), [defaultData]);
 
-  const { isAllAccount } = useSelector((state) => state.accountState);
+  const { accounts, isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { poolInfoMap } = useSelector((state) => state.earning);
 
@@ -127,10 +127,6 @@ const Component = () => {
     }, 300);
   }, [onError, onSuccess, positionInfo]);
 
-  const accountSelectorFilter = useCallback((account: AccountJson): boolean => {
-    return filterAccount(chainInfoMap, allPositionInfos, poolType, poolChain)(account);
-  }, [allPositionInfos, chainInfoMap, poolChain, poolType]);
-
   const onPreCheck = usePreCheckAction(fromValue);
 
   useRestoreTransaction(form);
@@ -139,6 +135,10 @@ const Component = () => {
   useEffect(() => {
     form.setFieldValue('chain', poolChain || '');
   }, [poolChain, form]);
+
+  const accountList = useMemo(() => {
+    return accounts.filter(filterAccount(chainInfoMap, allPositionInfos, poolType, poolChain));
+  }, [accounts, allPositionInfos, chainInfoMap, poolChain, poolType]);
 
   return (
     <>
@@ -156,7 +156,8 @@ const Component = () => {
           >
             <AccountSelector
               disabled={!isAllAccount}
-              filter={accountSelectorFilter}
+              doFilter={false}
+              externalAccounts={accountList}
             />
           </Form.Item>
           <FreeBalance

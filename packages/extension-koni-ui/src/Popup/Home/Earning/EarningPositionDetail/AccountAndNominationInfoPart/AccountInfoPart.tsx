@@ -87,15 +87,15 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
       const account = findAccountByAddress(accounts, item.address);
 
       return (
-        <div>
+        <>
           <Avatar
             size={24}
             value={item.address}
           />
-          <div>
+          <div className={'__account-name'}>
             {account?.name || toShort(item.address)}
           </div>
-        </div>
+        </>
       );
     },
     [accounts]
@@ -116,9 +116,9 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
     <>
       <CollapsiblePanel
         className={CN(className, {
-          '-no-nomination': noNomination
+          '-no-nomination': noNomination,
+          '-horizontal-mode': isAllAccount
         })}
-        initOpen={true}
         title={t('Account info')}
       >
         {list.map((item) => {
@@ -127,6 +127,9 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
 
           return (
             <MetaInfo
+              className={CN('__account-info-item', {
+                '-box-mode': isAllAccount
+              })}
               hasBackgroundWrapper={isAllAccount}
               key={item.address}
               labelColorScheme='gray'
@@ -143,18 +146,19 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
                 )
                 : (
                   <MetaInfo.Status
+                    className={'__meta-earning-status-item'}
                     label={renderAccount(item)}
                     statusIcon={earningStatus.icon}
                     statusName={earningStatus.name}
                     valueColorSchema={earningStatus.schema}
                   />
                 )}
-              <div>
-                <div>{t('Staking type')}</div>
-                <div>
-                  {earningTagType.label}
-                </div>
-              </div>
+
+              <MetaInfo.DisplayType
+                label={t('Staking type')}
+                typeName={earningTagType.label}
+              />
+
               {!isSpecial
                 ? (
                   <>
@@ -201,18 +205,27 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
                 )}
               {isAllAccount && haveNomination && (
                 <>
-                  <Button
-                    disabled={disableButton}
-                    onClick={createOpenNomination(item)}
-                  >
-                    <div>
-                      {t('Nomination info')}
-                    </div>
+                  <div className='__separator'></div>
 
-                    <Icon
-                      phosphorIcon={ArrowSquareOut}
-                    />
-                  </Button>
+                  <div className={'__nomination-button-wrapper'}>
+                    <Button
+                      block={true}
+                      className={'__nomination-button'}
+                      disabled={disableButton}
+                      onClick={createOpenNomination(item)}
+                      size={'xs'}
+                      type={'ghost'}
+                    >
+                      <div className={'__nomination-button-label'}>
+                        {t('Nomination info')}
+                      </div>
+
+                      <Icon
+                        phosphorIcon={ArrowSquareOut}
+                        size={'sm'}
+                      />
+                    </Button>
+                  </div>
                 </>
               )}
             </MetaInfo>
@@ -230,5 +243,73 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
 }
 
 export const AccountInfoPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  '&.-horizontal-mode': {
+    '.__panel-body': {
+      overflowX: 'auto',
+      display: 'flex',
+      gap: token.sizeSM
+    }
+  },
 
+  '.__separator': {
+    height: 2,
+    backgroundColor: 'rgba(33, 33, 33, 0.80)'
+  },
+
+  '.meta-info-block + .meta-info-block': {
+    marginTop: 0
+  },
+
+  '.__account-info-item': {
+    '.__separator': {
+      marginTop: token.marginSM
+    }
+  },
+
+  '.__account-info-item.-box-mode': {
+    backgroundColor: token.colorBgDefault,
+    minWidth: 300
+  },
+
+  '.__meta-earning-status-item': {
+    '.__label': {
+      'white-space': 'nowrap',
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: token.sizeXS,
+      overflow: 'hidden'
+    },
+
+    '.__value-col': {
+      flex: '0 1 auto'
+    },
+
+    '.__account-name': {
+      textOverflow: 'ellipsis',
+      overflow: 'hidden'
+    }
+  },
+
+  '.__nomination-button-wrapper': {
+    marginLeft: -token.marginSM,
+    marginRight: -token.marginSM
+  },
+
+  '.__nomination-button': {
+    paddingLeft: token.paddingSM,
+    paddingRight: token.paddingSM,
+    justifyContent: 'space-between',
+    gap: token.sizeSM
+  },
+
+  '.__nomination-button-label': {
+    color: token.colorTextLight4
+  },
+
+  '.__nomination-button:hover': {
+    '.__nomination-button-label': {
+      color: 'inherit'
+    }
+  }
 }));

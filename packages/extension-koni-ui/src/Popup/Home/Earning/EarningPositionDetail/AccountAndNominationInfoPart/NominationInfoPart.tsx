@@ -5,11 +5,10 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { isAccountAll } from '@subwallet/extension-base/utils';
-import { Avatar, CollapsiblePanel } from '@subwallet/extension-koni-ui/components';
+import { Avatar, CollapsiblePanel, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
-import { Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -45,36 +44,69 @@ function Component ({ className, compound,
   return (
     <CollapsiblePanel
       className={CN(className)}
-      initOpen={true}
       title={t('Nomination info')}
     >
-      {compound.nominations.map((item) => {
-        return (
-          <div key={item.validatorAddress}>
-            <div>
-              <Avatar
-                size={24}
-                value={item.validatorAddress}
-              />
-              <div>
-                {item.validatorIdentity || toShort(item.validatorAddress)}
-              </div>
-            </div>
-            {!isRelayChain && (
-              <Number
-                decimal={inputAsset?.decimals || 0}
-                decimalOpacity={0.45}
-                suffix={inputAsset?.symbol}
-                value={item.activeStake}
-              />
-            )}
-          </div>
-        );
-      })}
+      <MetaInfo
+        labelColorScheme='gray'
+        labelFontWeight='regular'
+        spaceSize='ms'
+      >
+        {compound.nominations.map((item) => {
+          return (
+            <MetaInfo.Number
+              className={CN('__nomination-item', {
+                '-hide-number': isRelayChain
+              })}
+              decimals={inputAsset?.decimals || 0}
+              key={item.validatorAddress}
+              label={(
+                <>
+                  <Avatar
+                    size={24}
+                    value={item.validatorAddress}
+                  />
+                  <div className={'__nomination-name'}>
+                    {item.validatorIdentity || toShort(item.validatorAddress)}
+                  </div>
+                </>
+              )}
+              suffix={inputAsset?.symbol}
+              value={item.activeStake}
+              valueColorSchema='even-odd'
+            />
+          );
+        })}
+      </MetaInfo>
     </CollapsiblePanel>
   );
 }
 
 export const NominationInfoPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  '.__nomination-item': {
+    gap: token.sizeSM,
 
+    '.__label': {
+      'white-space': 'nowrap',
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: token.sizeXS,
+      overflow: 'hidden'
+    },
+
+    '.__value-col': {
+      flex: '0 1 auto'
+    }
+  },
+
+  '.__nomination-item.-hide-number': {
+    '.__value-col': {
+      display: 'none'
+    }
+  },
+
+  '.__nomination-name': {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden'
+  }
 }));

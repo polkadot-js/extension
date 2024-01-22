@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainStakingMetadata, ExtrinsicType, NominatorMetadata, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_STAKE_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, STAKE_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
-import { useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { DEFAULT_STAKE_PARAMS, STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
@@ -44,14 +43,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { inactiveModal } = useContext(ModalContext);
 
+  // @ts-ignore
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
 
   const [selected, setSelected] = useState<StakingAction | undefined>();
   const [, setStakeStorage] = useLocalStorage(STAKE_TRANSACTION, DEFAULT_STAKE_PARAMS);
-  const [, setUnStakeStorage] = useLocalStorage(UN_STAKE_TRANSACTION, DEFAULT_UN_STAKE_PARAMS);
-  const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
-  const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
-  const [, setClaimRewardStorage] = useLocalStorage(CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS);
+  // const [, setUnStakeStorage] = useLocalStorage(UN_STAKE_TRANSACTION, DEFAULT_UN_STAKE_PARAMS);
+  // const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
+  // const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
+  // const [, setClaimRewardStorage] = useLocalStorage(CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS);
 
   const onCancel = useCallback(
     () => {
@@ -60,96 +60,96 @@ const Component: React.FC<Props> = (props: Props) => {
     [inactiveModal]
   );
 
-  const onDoneTransaction = useCallback((extrinsicHash: string) => {
-    if (nominatorMetadata) {
-      navigate(`/transaction-done/${nominatorMetadata.address}/${nominatorMetadata.chain}/${extrinsicHash}`);
-    }
-  }, [navigate, nominatorMetadata]);
+  // const onDoneTransaction = useCallback((extrinsicHash: string) => {
+  //   if (nominatorMetadata) {
+  //     navigate(`/transaction-done/${nominatorMetadata.address}/${nominatorMetadata.chain}/${extrinsicHash}`);
+  //   }
+  // }, [navigate, nominatorMetadata]);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDoneTransaction);
+  // const { onError, onSuccess } = useHandleSubmitTransaction(onDoneTransaction);
 
   const handleWithdrawalAction = useCallback(() => {
-    if (!nominatorMetadata) {
-      setSelected(undefined);
-
-      return;
-    }
-
-    if (isAllAccount) {
-      setSelected(undefined);
-
-      setWithdrawStorage({
-        ...DEFAULT_WITHDRAW_PARAMS,
-        type: nominatorMetadata.type,
-        chain: nominatorMetadata.chain
-      });
-
-      navigate('/transaction/withdraw');
-
-      return;
-    }
-
-    const unstakingInfo = getWithdrawalInfo(nominatorMetadata);
-
-    if (!unstakingInfo) {
-      setSelected(undefined);
-
-      return;
-    }
-
-    const params = {
-      unstakingInfo,
-      chain: nominatorMetadata.chain,
-      nominatorMetadata
-    };
-
-    if (isActionFromValidator(nominatorMetadata.type, nominatorMetadata.chain)) {
-      // @ts-ignore
-      params.validatorAddress = unstakingInfo.validatorAddress;
-    }
-
-    submitStakeWithdrawal(params)
-      .then(onSuccess)
-      .catch(onError)
-      .finally(() => {
-        setSelected(undefined);
-      });
-  }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess, setWithdrawStorage]);
+    // if (!nominatorMetadata) {
+    //   setSelected(undefined);
+    //
+    //   return;
+    // }
+    //
+    // if (isAllAccount) {
+    //   setSelected(undefined);
+    //
+    //   setWithdrawStorage({
+    //     ...DEFAULT_WITHDRAW_PARAMS,
+    //     type: nominatorMetadata.type,
+    //     chain: nominatorMetadata.chain
+    //   });
+    //
+    //   navigate('/transaction/withdraw');
+    //
+    //   return;
+    // }
+    //
+    // const unstakingInfo = getWithdrawalInfo(nominatorMetadata);
+    //
+    // if (!unstakingInfo) {
+    //   setSelected(undefined);
+    //
+    //   return;
+    // }
+    //
+    // const params = {
+    //   unstakingInfo,
+    //   chain: nominatorMetadata.chain,
+    //   nominatorMetadata
+    // };
+    //
+    // if (isActionFromValidator(nominatorMetadata.type, nominatorMetadata.chain)) {
+    //   // @ts-ignore
+    //   params.validatorAddress = unstakingInfo.validatorAddress;
+    // }
+    //
+    // submitStakeWithdrawal(params)
+    //   .then(onSuccess)
+    //   .catch(onError)
+    //   .finally(() => {
+    //     setSelected(undefined);
+    //   });
+  }, []);
 
   const handleClaimRewardAction = useCallback(() => {
-    if (!nominatorMetadata) {
-      setSelected(undefined);
-
-      return;
-    }
-
-    if (nominatorMetadata.type === StakingType.POOLED || isAllAccount) {
-      setSelected(undefined);
-      const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
-
-      setClaimRewardStorage({
-        ...DEFAULT_CLAIM_REWARD_PARAMS,
-        from: address,
-        type: nominatorMetadata.type,
-        chain: nominatorMetadata.chain
-      });
-      navigate('/transaction/claim-reward');
-
-      return;
-    }
-
-    submitStakeClaimReward({
-      address: nominatorMetadata.address,
-      chain: nominatorMetadata.chain,
-      stakingType: nominatorMetadata.type,
-      unclaimedReward: reward?.unclaimedReward
-    })
-      .then(onSuccess)
-      .catch(onError)
-      .finally(() => {
-        setSelected(undefined);
-      });
-  }, [currentAccount, isAllAccount, navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward, setClaimRewardStorage]);
+    // if (!nominatorMetadata) {
+    //   setSelected(undefined);
+    //
+    //   return;
+    // }
+    //
+    // if (nominatorMetadata.type === StakingType.POOLED || isAllAccount) {
+    //   setSelected(undefined);
+    //   const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+    //
+    //   setClaimRewardStorage({
+    //     ...DEFAULT_CLAIM_REWARD_PARAMS,
+    //     from: address,
+    //     type: nominatorMetadata.type,
+    //     chain: nominatorMetadata.chain
+    //   });
+    //   navigate('/transaction/claim-reward');
+    //
+    //   return;
+    // }
+    //
+    // submitStakeClaimReward({
+    //   address: nominatorMetadata.address,
+    //   chain: nominatorMetadata.chain,
+    //   stakingType: nominatorMetadata.type,
+    //   unclaimedReward: reward?.unclaimedReward
+    // })
+    //   .then(onSuccess)
+    //   .catch(onError)
+    //   .finally(() => {
+    //     setSelected(undefined);
+    //   });
+  }, []);
 
   const availableActions = useMemo(() => {
     if (!nominatorMetadata) {
@@ -182,12 +182,12 @@ const Component: React.FC<Props> = (props: Props) => {
           icon: MinusCircle,
           label: t('Unstake'),
           onClick: () => {
-            setUnStakeStorage({
-              ...DEFAULT_UN_STAKE_PARAMS,
-              from: address,
-              type: chainStakingMetadata.type,
-              chain: chainStakingMetadata.chain
-            });
+            // setUnStakeStorage({
+            //   ...DEFAULT_UN_STAKE_PARAMS,
+            //   from: address,
+            //   type: chainStakingMetadata.type,
+            //   chain: chainStakingMetadata.chain
+            // });
             onNavigate('/transaction/unstake')();
           }
         };
@@ -214,12 +214,12 @@ const Component: React.FC<Props> = (props: Props) => {
           icon: ArrowArcLeft,
           label: t('Cancel unstaking'),
           onClick: () => {
-            setCancelUnStakeStorage({
-              ...DEFAULT_CANCEL_UN_STAKE_PARAMS,
-              from: address,
-              type: chainStakingMetadata.type,
-              chain: chainStakingMetadata.chain
-            });
+            // setCancelUnStakeStorage({
+            //   ...DEFAULT_CANCEL_UN_STAKE_PARAMS,
+            //   from: address,
+            //   type: chainStakingMetadata.type,
+            //   chain: chainStakingMetadata.chain
+            // });
             onNavigate('/transaction/cancel-unstake')();
           }
         };
@@ -243,7 +243,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }
       };
     });
-  }, [chainStakingMetadata, currentAccount, handleClaimRewardAction, handleWithdrawalAction, onNavigate, setCancelUnStakeStorage, setStakeStorage, setUnStakeStorage, t]);
+  }, [chainStakingMetadata, currentAccount, handleClaimRewardAction, handleWithdrawalAction, onNavigate, setStakeStorage, t]);
 
   const onPreCheck = usePreCheckAction(currentAccount?.address, false);
 

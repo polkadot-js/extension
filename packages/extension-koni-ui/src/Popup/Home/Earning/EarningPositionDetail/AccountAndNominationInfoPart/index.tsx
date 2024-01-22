@@ -40,5 +40,5 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
 
 export const AccountAndNominationInfoPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   borderRadius: token.borderRadiusLG,
-  backgroundColor: token.colorBgSecondary,
+  backgroundColor: token.colorBgSecondary
 }));

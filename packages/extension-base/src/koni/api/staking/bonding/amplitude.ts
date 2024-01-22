@@ -109,7 +109,7 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
       const bnActiveStake = new BN(activeStake);
       let delegationStatus = StakingStatus.NOT_EARNING;
 
-      if (bnActiveStake.gte(new BN(minDelegatorStake))) {
+      if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
         delegationStatus = StakingStatus.EARNING_REWARD;
       }
 

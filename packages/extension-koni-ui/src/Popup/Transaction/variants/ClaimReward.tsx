@@ -197,6 +197,12 @@ const Component = () => {
     return accounts.filter(filterAccount(chainInfoMap, allPositions, rewardList, poolType, poolChain));
   }, [accounts, allPositions, chainInfoMap, poolChain, poolType, rewardList]);
 
+  useEffect(() => {
+    if (!fromValue && accountList.length === 1) {
+      form.setFieldValue('from', accountList[0].address);
+    }
+  }, [accountList, form, fromValue]);
+
   return (
     <>
       <TransactionContent>

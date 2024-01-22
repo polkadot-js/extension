@@ -7,15 +7,17 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { isActionFromValidator } from '@subwallet/extension-base/services/earning-service/utils';
 import { RequestYieldLeave, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { AccountSelector, AmountInput, HiddenInput, NominationSelector } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AlertBox, AmountInput, HiddenInput, NominationSelector } from '@subwallet/extension-koni-ui/components';
+import InstructionItem from '@subwallet/extension-koni-ui/components/Common/InstructionItem';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
+import { BN_ZERO, UNSTAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
 import { useGetBalance, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { yieldSubmitLeavePool } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon } from '@subwallet/react-ui';
+import { convertFieldToObject, getBannerButtonIcon, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { BackgroundIcon, Button, Checkbox, Form, Icon } from '@subwallet/react-ui';
+import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { MinusCircle } from 'phosphor-react';
@@ -73,6 +75,7 @@ const Component: React.FC = () => {
   const fromValue = useWatchTransaction('from', form, defaultData);
   const currentValidator = useWatchTransaction('validator', form, defaultData);
   const chainValue = useWatchTransaction('chain', form, defaultData);
+  const fastLeaveValue = useWatchTransaction('fastLeave', form, defaultData);
 
   const { list: allPositions } = useYieldPositionDetail(slug);
   const { compound: positionInfo } = useYieldPositionDetail(slug, fromValue);
@@ -210,14 +213,14 @@ const Component: React.FC = () => {
 
   const onFieldsChange: FormCallbacks<UnStakeParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
-    const { error } = simpleCheckForm(allFields);
+    const { error } = simpleCheckForm(allFields, ['--asset']);
 
     const allMap = convertFieldToObject<UnStakeParams>(allFields);
 
     const checkEmpty: Record<string, boolean> = {};
 
     for (const [key, value] of Object.entries(allMap)) {
-      checkEmpty[key] = !!value;
+      checkEmpty[key] = !(value === '' || value === undefined || value === null);
     }
 
     checkEmpty.asset = true;
@@ -378,23 +381,64 @@ const Component: React.FC = () => {
 
           {!mustChooseValidator && renderBounded()}
 
-          {/* todo: fast Lease checkbox */}
-          {/* todo: instruction items here */}
-          {/* todo: clear unused code in this area */}
+          <Form.Item
+            hidden={!showFastLeave}
+            name={'fastLeave'}
+            valuePropName='checked'
+          >
+            <Checkbox>
+              <span className={'__option-label'}>{t('Fast Unstake')}</span>
+            </Checkbox>
+          </Form.Item>
 
-          <div className={CN('text-light-4', { mt: mustChooseValidator })}>
-            {
-              t(
-                'Once unbonded, your funds would be available for withdrawal after {{time}}.',
-                {
-                  replace:
-                      {
-                        time: unBondedTime
-                      }
-                }
-              )
-            }
-          </div>
+          {!fastLeaveValue || !showFastLeave
+            ? (
+              poolInfo.type !== YieldPoolType.LENDING
+                ? (
+                  <>
+                    {!!UNSTAKE_ALERT_DATA.length && (
+                      <div className={'__instruction-items-container'}>
+                        {UNSTAKE_ALERT_DATA.map((_props, index) => {
+                          return (
+                            <InstructionItem
+                              className={'__instruction-item'}
+                              description={(
+                                <div dangerouslySetInnerHTML={{ __html: (_props.description)?.replace('{unBondedTime}', unBondedTime) }}></div>
+                              )}
+                              iconInstruction={
+                                <BackgroundIcon
+                                  backgroundColor={getAlphaColor(_props.iconColor, 0.1)}
+                                  iconColor={_props.iconColor}
+                                  phosphorIcon={getBannerButtonIcon(_props.icon)}
+                                  size='lg'
+                                  weight='fill'
+                                />
+                              }
+                              key={`${_props.icon}-${index}`}
+                              title={_props.title}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                )
+                : (
+                  <AlertBox
+                    description={t('You can withdraw your supplied funds immediately')}
+                    title={t('Withdraw')}
+                    type={'info'}
+                  />
+                )
+            )
+            : (
+              <AlertBox
+                description={t('With fast unstake, you will receive your funds immediately with a higher fee')}
+                title={t('Fast unstake')}
+                type={'info'}
+              />
+            )}
+
         </Form>
       </TransactionContent>
       <TransactionFooter>
@@ -447,6 +491,10 @@ const Unbond = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.mt': {
+      marginTop: token.marginSM
+    },
+
+    '.__instruction-items-container, .__instruction-item + .__instruction-item': {
       marginTop: token.marginSM
     }
   };

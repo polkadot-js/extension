@@ -5,11 +5,12 @@ import { EarningRewardItem, YieldPoolType } from '@subwallet/extension-base/type
 import { isAccountAll, isSameAddress } from '@subwallet/extension-base/utils';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { useGetChainSlugsByAccountType, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/utils';
 import { useMemo } from 'react';
 
 const useYieldRewardTotal = (slug: string): string | undefined => {
   const { earningRewards, poolInfoMap } = useSelector((state) => state.earning);
-  const { currentAccount } = useSelector((state) => state.accountState);
+  const { accounts, currentAccount } = useSelector((state) => state.accountState);
   const chainsByAccountType = useGetChainSlugsByAccountType();
 
   return useMemo(() => {
@@ -18,7 +19,9 @@ const useYieldRewardTotal = (slug: string): string | undefined => {
 
     const checkAddress = (item: EarningRewardItem) => {
       if (isAll) {
-        return true;
+        const account = findAccountByAddress(accounts, item.address);
+
+        return !!account;
       } else {
         return isSameAddress(address, item.address);
       }
@@ -51,7 +54,7 @@ const useYieldRewardTotal = (slug: string): string | undefined => {
     } else {
       return undefined;
     }
-  }, [chainsByAccountType, currentAccount?.address, earningRewards, poolInfoMap, slug]);
+  }, [accounts, chainsByAccountType, currentAccount?.address, earningRewards, poolInfoMap, slug]);
 };
 
 export default useYieldRewardTotal;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPositionInfo } from '@subwallet/extension-base/types';
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningPositionItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -10,7 +10,7 @@ import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, T
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { Plus } from 'phosphor-react';
+import { Database, Plus } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -83,6 +83,16 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
     [isShowBalance, onClickItem]
   );
 
+  const emptyList = useCallback(() => {
+    return (
+      <EmptyList
+        emptyMessage={t('You can stake in-app easily')}
+        emptyTitle={t('No staking found')}
+        phosphorIcon={Database}
+      />
+    );
+  }, [t]);
+
   const searchFunction = useCallback(({ balanceToken, chain: _chain }: ExtraYieldPositionInfo, searchText: string) => {
     const chainInfo = chainInfoMap[_chain];
     const assetInfo = assetInfoMap[balanceToken];
@@ -133,10 +143,11 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
         enableSearchInput
         list={items}
         renderItem={renderItem}
+        renderWhenEmpty={emptyList}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Search token')}
-        showActionBtn
+        showActionBtn={false}
       />
     </Layout.Base>
   );

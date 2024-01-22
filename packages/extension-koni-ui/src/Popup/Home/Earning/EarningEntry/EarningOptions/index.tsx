@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningOptionItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -10,6 +10,7 @@ import { EarningEntryView, EarningPoolsParam, ThemeProps, YieldGroupInfo } from 
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
+import { Database } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -106,6 +107,16 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
     [chainInfoMap, isShowBalance, onClickItem]
   );
 
+  const emptyList = useCallback(() => {
+    return (
+      <EmptyList
+        emptyMessage={t('You can stake in-app easily')}
+        emptyTitle={t('No staking found')}
+        phosphorIcon={Database}
+      />
+    );
+  }, [t]);
+
   const onBack = useCallback(() => {
     setEntryView(EarningEntryView.POSITIONS);
   }, [setEntryView]);
@@ -133,10 +144,11 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
         enableSearchInput
         list={items}
         renderItem={renderItem}
+        renderWhenEmpty={emptyList}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Search token')}
-        showActionBtn
+        showActionBtn={false}
       />
     </Layout.Base>
   );

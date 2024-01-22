@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { EarningPoolItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -13,6 +13,7 @@ import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
+import { Database } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -90,6 +91,16 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     [chainInfoMap, onClickItem]
   );
 
+  const emptyList = useCallback(() => {
+    return (
+      <EmptyList
+        emptyMessage={t('You can stake in-app easily')}
+        emptyTitle={t('No staking found')}
+        phosphorIcon={Database}
+      />
+    );
+  }, [t]);
+
   const searchFunction = useCallback(
     ({ chain, metadata: { shortName } }: YieldPoolInfo, searchText: string) => {
       const chainInfo = chainInfoMap[chain];
@@ -124,10 +135,11 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         enableSearchInput
         list={items}
         renderItem={renderItem}
+        renderWhenEmpty={emptyList}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Search token')}
-        showActionBtn
+        showActionBtn={false}
       />
     </Layout.Base>
   );

@@ -5,15 +5,15 @@ import { EarningRewardHistoryItem, SpecialYieldPoolInfo, SpecialYieldPositionInf
 import { AlertModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_TEN, BN_ZERO, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, EARN_TRANSACTION, UN_STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useAlert, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { AccountAndNominationInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/AccountAndNominationInfoPart';
 import { EarningInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/EarningInfoPart';
 import { RewardInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/RewardInfoPart';
 import { WithdrawInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/WithdrawInfoPart';
-import { AlertDialogProps, EarningEntryParam, EarningEntryView, EarningPositionDetailParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { EarningEntryParam, EarningEntryView, EarningPositionDetailParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Button, ButtonProps, Icon, ModalContext, Number } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { MinusCircle, Plus, PlusCircle } from 'phosphor-react';
@@ -39,7 +39,6 @@ function Component ({ compound,
   rewardHistories }: ComponentProp) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   // @ts-ignore
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
@@ -50,7 +49,7 @@ function Component ({ compound,
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
   const [, setUnStakeStorage] = useLocalStorage(UN_STAKE_TRANSACTION, DEFAULT_UN_STAKE_PARAMS);
 
-  const [alertProps, setAlertProps] = useState<AlertDialogProps | undefined>();
+  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
 
   const inputAsset = useMemo(() => {
     const inputSlug = poolInfo.metadata.inputAsset;
@@ -107,18 +106,9 @@ function Component ({ compound,
     return compound.chain || poolInfo.chain || '';
   }, [compound.chain, poolInfo.chain]);
 
-  const showAlert = useCallback((alertProps: AlertDialogProps) => {
-    setAlertProps(alertProps);
-    activeModal(alertModalId);
-  }, [activeModal]);
-
-  const closeAlert = useCallback(() => {
-    inactiveModal(alertModalId);
-  }, [inactiveModal]);
-
   const onLeavePool = useCallback(() => {
     if (isActiveStakeZero) {
-      showAlert({
+      openAlert({
         title: t('Unstaking not available'),
         content: t("You don't have any staked funds left to unstake. Check withdrawal status (how long left until the unstaking period ends) by checking the Withdraw info. Keep in mind that you need to withdraw manually."),
         okButton: {
@@ -137,7 +127,7 @@ function Component ({ compound,
       from: transactionFromValue
     });
     navigate('/transaction/unstake');
-  }, [closeAlert, isActiveStakeZero, navigate, poolInfo.slug, setUnStakeStorage, showAlert, t, transactionChainValue, transactionFromValue]);
+  }, [closeAlert, isActiveStakeZero, navigate, poolInfo.slug, setUnStakeStorage, openAlert, t, transactionChainValue, transactionFromValue]);
 
   const onEarnMore = useCallback(() => {
     setEarnStorage({
@@ -209,8 +199,8 @@ function Component ({ compound,
           compound={compound}
           inputAsset={inputAsset}
           isShowBalance={isShowBalance}
+          openAlert={openAlert}
           rewardHistories={filteredRewardHistories}
-          showAlert={showAlert}
           transactionChainValue={transactionChainValue}
           transactionFromValue={transactionFromValue}
         />

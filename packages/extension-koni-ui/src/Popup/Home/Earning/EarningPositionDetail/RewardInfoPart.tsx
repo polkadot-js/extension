@@ -23,13 +23,13 @@ type Props = ThemeProps & {
   inputAsset: _ChainAsset;
   isShowBalance: boolean;
   rewardHistories: EarningRewardHistoryItem[];
-  showAlert: (alertProps: AlertDialogProps) => void;
+  openAlert: (alertProps: AlertDialogProps) => void;
   closeAlert: VoidFunction;
   transactionFromValue: string;
   transactionChainValue: string;
 };
 
-function Component ({ className, closeAlert, compound, inputAsset, isShowBalance, rewardHistories, showAlert, transactionChainValue,
+function Component ({ className, closeAlert, compound, inputAsset, isShowBalance, openAlert, rewardHistories, transactionChainValue,
   transactionFromValue }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -91,7 +91,7 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
       });
       navigate('/transaction/claim-reward');
     } else {
-      showAlert({
+      openAlert({
         title: t('Rewards unavailable'),
         content: t("You don't have any rewards to claim at the moment. Try again later."),
         okButton: {
@@ -100,7 +100,7 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
         }
       });
     }
-  }, [closeAlert, navigate, setClaimRewardStorage, showAlert, slug, t, total, transactionChainValue, transactionFromValue]);
+  }, [closeAlert, navigate, setClaimRewardStorage, openAlert, slug, t, total, transactionChainValue, transactionFromValue]);
 
   const onClickViewExplore = useCallback(() => {
     if (currentAccount) {

@@ -1,28 +1,24 @@
-
-// [object Object]
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
-import { _ChainAsset } from '@subwallet/chain-list/types';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
-import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import {balanceFormatter, detectTranslate, formatNumber} from '@subwallet/extension-base/utils';
+import { YieldPoolType } from '@subwallet/extension-base/types';
+import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
 import ContentBoxIcon from '@subwallet/extension-koni-ui/components/Common/ContentBoxIcon';
 import InstructionItem from '@subwallet/extension-koni-ui/components/Common/InstructionItem';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import {EARNING_DATA_RAW, EARNING_INSTRUCTION_MODAL} from '@subwallet/extension-koni-ui/constants';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { EARNING_DATA_RAW, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {getBannerButtonIcon} from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, ModalContext, SwIconProps, SwModal, Tag } from '@subwallet/react-ui';
+import { getBannerButtonIcon } from '@subwallet/extension-koni-ui/utils';
+import { Button, Icon, SwIconProps, SwModal, Tag } from '@subwallet/react-ui';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
-import { CaretDown, Coins, PlusCircle, X } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { CaretDown, Coins, PlusCircle } from 'phosphor-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 import styled from 'styled-components';
-import {Trans} from "react-i18next";
 
 interface Props extends ThemeProps{
   slug: string;
@@ -38,11 +34,6 @@ export interface BoxProps {
   iconColor: string;
   icon: PhosphorIcon;
 }
-export type SWModalRefProps = {
-  scrollTo: (destination: number) => void;
-  isActive: () => boolean;
-  close: () => void;
-};
 
 const modalId = EARNING_INSTRUCTION_MODAL;
 
@@ -50,25 +41,14 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, isShowStakeMoreBtn = true, onCancel, onPressBack, onStakeMore, slug } = props;
   const checkRef = useRef<number>(Date.now());
 
-  const { poolInfoMap } = useSelector((state: RootState) => state.earning);
-  const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
+  const { poolInfoMap } = useSelector((state) => state.earning);
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+  const { currentAccount } = useSelector((state) => state.accountState);
   const [scrollHeight, setScrollHeight] = useState<number>(0);
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
-  const poolInfoMapRef = useRef<Record<string, YieldPoolInfo>>(poolInfoMap);
-  const assetRegistryRef = useRef<Record<string, _ChainAsset>>(assetRegistry);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [showScrollEnd, setShowScrollEnd] = useState(false);
-  const [isScrollEnd, setIsScrollEnd] = useState(false);
-  const { inactiveModal } = useContext(ModalContext);
-
-  useEffect(() => {
-    poolInfoMapRef.current = poolInfoMap;
-    assetRegistryRef.current = assetRegistry;
-  }, [assetRegistry, poolInfoMap]);
-
-  const poolInfo = useMemo(() => poolInfoMapRef.current[slug], [slug]);
+  const poolInfo = useMemo(() => poolInfoMap[slug], [poolInfoMap, slug]);
   const title = useMemo(() => {
     if (!poolInfo) {
       return '';
@@ -107,7 +87,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     let result = getOrigin();
     const apy = getApy();
-    const asset = assetRegistryRef.current[inputAsset];
+    const asset = assetRegistry[inputAsset];
     const shortName = poolInfo.metadata.shortName;
 
     if (asset) {
@@ -145,7 +125,8 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return result;
-  }, [poolInfo]);
+  }, [assetRegistry, poolInfo]);
+
   const buttonTitle = useMemo(() => {
     if (!poolInfo) {
       return '';
@@ -162,8 +143,9 @@ const Component: React.FC<Props> = (props: Props) => {
         return 'Supply to earn';
     }
   }, [poolInfo]);
+
   const tags = useMemo(() => {
-    const asset = assetRegistryRef.current[poolInfo.metadata.inputAsset];
+    const asset = assetRegistry[poolInfo.metadata.inputAsset];
     const symbol = asset.symbol;
 
     if (poolInfo.statistic && 'assetEarning' in poolInfo.statistic && poolInfo.statistic?.assetEarning) {
@@ -188,7 +170,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return [];
-  }, [poolInfo.metadata.inputAsset, poolInfo.statistic]);
+  }, [assetRegistry, poolInfo.metadata.inputAsset, poolInfo.statistic]);
 
   const replaceEarningValue = useCallback((target: BoxProps, searchString: string, replaceValue: string) => {
     if (target.title.includes(searchString)) {
@@ -233,8 +215,8 @@ const Component: React.FC<Props> = (props: Props) => {
         const _label = getValidatorLabel(poolInfo.chain);
         const label = _label.slice(0, 1).toLowerCase().concat(_label.slice(1)).concat('s');
         const maxCandidatePerFarmer = poolInfo.statistic?.maxCandidatePerFarmer || 0;
-        const inputAsset = assetRegistryRef.current[poolInfo.metadata.inputAsset];
-        const maintainAsset = assetRegistryRef.current[poolInfo.metadata.maintainAsset];
+        const inputAsset = assetRegistry[poolInfo.metadata.inputAsset];
+        const maintainAsset = assetRegistry[poolInfo.metadata.maintainAsset];
         const paidOut = poolInfo.statistic?.eraTime;
 
         if (inputAsset && maintainAsset) {
@@ -268,8 +250,8 @@ const Component: React.FC<Props> = (props: Props) => {
         const _label = getValidatorLabel(poolInfo.chain);
         const label = _label.slice(0, 1).toLowerCase().concat(_label.slice(1)).concat('s');
         const maxCandidatePerFarmer = poolInfo.statistic?.maxCandidatePerFarmer || 0;
-        const inputAsset = assetRegistryRef.current[poolInfo.metadata.inputAsset];
-        const maintainAsset = assetRegistryRef.current[poolInfo.metadata.maintainAsset];
+        const inputAsset = assetRegistry[poolInfo.metadata.inputAsset];
+        const maintainAsset = assetRegistry[poolInfo.metadata.maintainAsset];
         const paidOut = poolInfo.statistic?.eraTime;
 
         if (inputAsset && maintainAsset) {
@@ -318,9 +300,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
       case YieldPoolType.LIQUID_STAKING: {
         const derivativeSlug = poolInfo.metadata.derivativeAssets?.[0] || '';
-        const derivative = assetRegistryRef.current[derivativeSlug];
-        const inputAsset = assetRegistryRef.current[poolInfo.metadata.inputAsset];
-        const maintainAsset = assetRegistryRef.current[poolInfo.metadata.maintainAsset];
+        const derivative = assetRegistry[derivativeSlug];
+        const inputAsset = assetRegistry[poolInfo.metadata.inputAsset];
+        const maintainAsset = assetRegistry[poolInfo.metadata.maintainAsset];
 
         if (derivative && inputAsset && maintainAsset) {
           const { decimals: maintainDecimals, symbol: maintainSymbol } = maintainAsset;
@@ -347,9 +329,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
       case YieldPoolType.LENDING: {
         const derivativeSlug = poolInfo.metadata.derivativeAssets?.[0] || '';
-        const derivative = assetRegistryRef.current[derivativeSlug];
-        const inputAsset = assetRegistryRef.current[poolInfo.metadata.inputAsset];
-        const maintainAsset = assetRegistryRef.current[poolInfo.metadata.maintainAsset];
+        const derivative = assetRegistry[derivativeSlug];
+        const inputAsset = assetRegistry[poolInfo.metadata.inputAsset];
+        const maintainAsset = assetRegistry[poolInfo.metadata.maintainAsset];
 
         if (derivative && inputAsset && maintainAsset) {
           const { decimals: maintainDecimals, symbol: maintainSymbol } = maintainAsset;
@@ -373,7 +355,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }
       }
     }
-  }, [poolInfo, replaceEarningValue, unBondedTime]);
+  }, [assetRegistry, poolInfo, replaceEarningValue, unBondedTime]);
 
   useEffect(() => {
     setShowScrollEnd(contentHeight > scrollHeight);
@@ -396,7 +378,6 @@ const Component: React.FC<Props> = (props: Props) => {
   // );
 
   const onClickFaq = useCallback(() => {
-    console.log('dung nguyen');
     let urlParam = '';
 
     switch (poolInfo.metadata.shortName) {
@@ -437,48 +418,54 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [poolInfo.metadata.shortName]);
 
   const onPress = useCallback(() => {
-    alert('Say hello !!!');
-  }, []);
+    const time = Date.now();
 
-  // const onError = (message: string) => {
-  //   Alert.alert('Pay attention!', message, [
-  //     {
-  //       text: 'I understand'
-  //     }
-  //   ]);
-  // };
+    checkRef.current = time;
+    setLoading(true);
 
-  //   earlyValidateJoin({
-  //     slug: slug,
-  //     address: currentAccount?.address || ''
-  //   })
-  //     .then((rs) => {
-  //       if (isValid()) {
-  //         if (rs.passed) {
-  //           setVisible(false);
-  //           setTimeout(() => {
-  //             onStakeMore?.(slug);
-  //           }, 300);
-  //         } else {
-  //           const message = rs.errorMessage || '';
-  //
-  //           onError(message);
-  //         }
-  //       }
-  //     })
-  //     .catch((e) => {
-  //       if (isValid()) {
-  //         const message = (e as Error).message || '';
-  //
-  //         onError(message);
-  //       }
-  //     })
-  //     .finally(() => {
-  //       if (isValid()) {
-  //         setLoading(false);
-  //       }
-  //     });
-  // }, [currentAccount?.address, onStakeMore, setVisible, slug]);
+    const isValid = () => {
+      return time === checkRef.current;
+    };
+
+    const onError = (message: string) => {
+      Alert.alert('Pay attention!', message, [
+        {
+          text: 'I understand'
+        }
+      ]);
+    };
+
+    earlyValidateJoin({
+      slug: slug,
+      address: currentAccount?.address || ''
+    })
+      .then((rs) => {
+        if (isValid()) {
+          if (rs.passed) {
+            setVisible(false);
+            setTimeout(() => {
+              onStakeMore?.(slug);
+            }, 300);
+          } else {
+            const message = rs.errorMessage || '';
+
+            onError(message);
+          }
+        }
+      })
+      .catch((e) => {
+        if (isValid()) {
+          const message = (e as Error).message || '';
+
+          onError(message);
+        }
+      })
+      .finally(() => {
+        if (isValid()) {
+          setLoading(false);
+        }
+      });
+  }, [currentAccount?.address, onStakeMore, setVisible, slug]);
 
   // const scrollBottom = useCallback(() => {
   //   scrollRef?.current?.scrollToEnd();
@@ -532,39 +519,39 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <div className={'earning-header'}>
           <div className={'earning-header-title'}>{title}</div>
-            <div className={'earning-instruction-tag'}>
-              {!!(tags && tags.length) && (
-                <div style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'center'}}>
-                  {tags.map(({ apy, slug: tagSlug, symbol}) => (
-                    <Tag
-                      bgType={'gray'}
-                      // icon={getTokenLogo(tagSlug, undefined, 16)}
-                      icon={(
-                        <Icon
-                          phosphorIcon={Coins}
-                          weight={'fill'}
-                        />
-                      )}
-                      key={tagSlug}
-                      shape={'round'}
-                    >
-                      <div>
-                        {`${formatNumber(apy, 0, balanceFormatter)}% ${symbol}`}
-                      </div>
-                    </Tag>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className={'earning-body-static-data'}>
-              {!isScrollEnd && <Button
-                className={'earning-body-caret-button'}
-                icon={<Icon phosphorIcon={CaretDown} />}
-                onClick={onScrollContent}
-                schema={'secondary'}
-                shape={'circle'}
-                size={'xs'}
-              />}
+          <div className={'earning-instruction-tag'}>
+            {!!(tags && tags.length) && (
+              <div style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
+                {tags.map(({ apy, slug: tagSlug, symbol }) => (
+                  <Tag
+                    bgType={'gray'}
+                    // icon={getTokenLogo(tagSlug, undefined, 16)}
+                    icon={(
+                      <Icon
+                        phosphorIcon={Coins}
+                        weight={'fill'}
+                      />
+                    )}
+                    key={tagSlug}
+                    shape={'round'}
+                  >
+                    <div>
+                      {`${formatNumber(apy, 0, balanceFormatter)}% ${symbol}`}
+                    </div>
+                  </Tag>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className={'earning-body-static-data'}>
+            {!isScrollEnd && <Button
+              className={'earning-body-caret-button'}
+              icon={<Icon phosphorIcon={CaretDown} />}
+              onClick={onScrollContent}
+              schema={'secondary'}
+              shape={'circle'}
+              size={'xs'}
+                             />}
             {data.map((item, index) => {
               const myIconProps: SwIconProps = {
                 type: 'phosphor',
@@ -573,9 +560,11 @@ const Component: React.FC<Props> = (props: Props) => {
               };
 
               return (
-                <div className={'item-earning-row'} key={`${item.title}-${index}`}>
+                <div
+                  className={'item-earning-row'}
+                  key={`${item.title}-${index}`}
+                >
                   <InstructionItem
-                    key={`${item.title}-${index}`}
                     description={item.description}
                     iconInstruction={
                       <ContentBoxIcon
@@ -583,23 +572,24 @@ const Component: React.FC<Props> = (props: Props) => {
                         iconProps={myIconProps}
                       />
                     }
+                    key={`${item.title}-${index}`}
                     title={item.title}
                   />
                 </div>
               );
             })}
-              </div>
           </div>
-          <div className={'earning-footer'}>
+        </div>
+        <div className={'earning-footer'}>
           <div className='instruction'>
             <Trans
               components={{
                 highlight: (
                   <a
                     className='link'
+                    onClick={onClickFaq}
                     rel='noopener noreferrer'
                     target='_blank'
-                    onClick={onClickFaq}
                   />
                 )
               }}
@@ -623,13 +613,13 @@ const Component: React.FC<Props> = (props: Props) => {
               {buttonTitle}
             </Button>
           )}
-          </div>
+        </div>
       </div>
     </SwModal>
   );
 };
 
-const EarningInstructionModal = styled(Component)<Props>(({theme: {token}}: Props) => {
+const EarningInstructionModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     justifyContent: 'center',

@@ -758,6 +758,35 @@ export class ChainService {
     // }
   }
 
+  private randomizeProvider (providers: Record<string, string>, excludedKeys?: string[]) {
+    if (Object.keys(providers).length === 0) {
+      return {
+        providerKey: '',
+        providerValue: ''
+      };
+    }
+
+    let isValid = false;
+    let selectedProviderKey = '';
+    let selectedProviderValue = '';
+
+    while (!isValid) {
+      const randomProvider = Math.floor(Math.random() * (Object.keys(providers).length));
+
+      selectedProviderKey = Object.keys(providers)[randomProvider];
+      selectedProviderValue = providers[selectedProviderKey];
+
+      if (!selectedProviderValue?.startsWith('light') && !excludedKeys?.includes(selectedProviderKey)) { // if it's light client, then re-randomize
+        isValid = true;
+      }
+    }
+
+    return {
+      providerKey: selectedProviderKey,
+      providerValue: selectedProviderValue
+    };
+  }
+
   private async initChains () {
     const storedChainSettings = await this.dbService.getAllChainStore();
     const latestChainInfoMap = await this.fetchLatestData(_CHAIN_INFO_SRC, ChainInfoMap) as Record<string, _ChainInfo>;
@@ -774,8 +803,10 @@ export class ChainService {
     if (storedChainSettings.length === 0) {
       this.dataMap.chainInfoMap = latestChainInfoMap;
       Object.values(latestChainInfoMap).forEach((chainInfo) => {
+        const { providerKey } = this.randomizeProvider(chainInfo.providers);
+
         this.dataMap.chainStateMap[chainInfo.slug] = {
-          currentProvider: Object.keys(chainInfo.providers)[0],
+          currentProvider: providerKey,
           slug: chainInfo.slug,
           connectionStatus: _ChainConnectionStatus.DISCONNECTED,
           active: _DEFAULT_ACTIVE_CHAINS.includes(chainInfo.slug)
@@ -785,7 +816,7 @@ export class ChainService {
         newStorageData.push({
           ...chainInfo,
           active: _DEFAULT_ACTIVE_CHAINS.includes(chainInfo.slug),
-          currentProvider: Object.keys(chainInfo.providers)[0]
+          currentProvider: providerKey
         });
       });
     } else {
@@ -810,20 +841,23 @@ export class ChainService {
 
           mergedChainInfoMap[storedSlug].providers = providers;
 
+          const { providerKey } = this.randomizeProvider(providers);
+          const currentProvider = providerKey;
+
           // Merge current provider
-          let currentProvider = storedChainInfo.currentProvider;
-          const providerValue = storedChainInfo.providers[currentProvider] || '';
-
-          if (!providers[currentProvider]) {
-            currentProvider = Object.keys(providers)[0];
-
-            for (const [key, value] of Object.entries(providers)) {
-              if (providerValue === value) {
-                currentProvider = key;
-                break;
-              }
-            }
-          }
+          // let currentProvider = storedChainInfo.currentProvider;
+          // const providerValue = storedChainInfo.providers[currentProvider] || '';
+          //
+          // if (!providers[currentProvider]) {
+          //   currentProvider = Object.keys(providers)[0];
+          //
+          //   for (const [key, value] of Object.entries(providers)) {
+          //     if (providerValue === value) {
+          //       currentProvider = key;
+          //       break;
+          //     }
+          //   }
+          // }
 
           const hasProvider = Object.values(providers).length > 0;
           const canActive = hasProvider && chainInfo.chainStatus === _ChainStatus.ACTIVE;

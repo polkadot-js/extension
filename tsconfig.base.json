@@ -20,9 +20,7 @@
         "@subwallet/extension-web-ui": ["extension-web-ui/src"],
         "@subwallet/extension-web-ui/*": ["extension-web-ui/src/*"],
         "@subwallet/web-runner": ["web-runner/src"],
-        "@subwallet/web-runner/*": ["web-runner/src/*"],
-        "@subwallet/webapp": ["webapp/src"],
-        "@subwallet/webapp/*": ["webapp/src/*"]
+        "@subwallet/web-runner/*": ["web-runner/src/*"]
     },
     "skipLibCheck": true
 	}

@@ -65,6 +65,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
   const stakingAccounts = useGetAccountsByStaking(chain, type);
   const [, setStakeStorage] = useLocalStorage(STAKE_TRANSACTION, DEFAULT_STAKE_PARAMS);
+  // @ts-ignore
   const [, setUnStakeStorage] = useLocalStorage(UN_STAKE_TRANSACTION, DEFAULT_UN_STAKE_PARAMS);
 
   const stakingTypeNameMap: Record<string, string> = {
@@ -92,17 +93,18 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const onClickUnstakeBtn = useCallback(() => {
     inactiveModal(STAKING_DETAIL_MODAL_ID);
     setTimeout(() => {
+      // @ts-ignore
       const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
-      setUnStakeStorage({
-        ...DEFAULT_UN_STAKE_PARAMS,
-        from: address,
-        type: nominatorMetadata.type,
-        chain: nominatorMetadata.chain
-      });
-      navigate('/transaction/unstake');
+      // setUnStakeStorage({
+      //   ...DEFAULT_UN_STAKE_PARAMS,
+      //   from: address,
+      //   type: nominatorMetadata.type,
+      //   chain: nominatorMetadata.chain
+      // });
+      // navigate('/transaction/unstake');
     }, 300);
-  }, [currentAccount, inactiveModal, navigate, nominatorMetadata, setUnStakeStorage]);
+  }, [currentAccount, inactiveModal]);
 
   const onClickMoreAction = useCallback(() => {
     activeModal(MORE_ACTION_MODAL);

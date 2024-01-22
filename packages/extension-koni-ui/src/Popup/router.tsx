@@ -54,7 +54,7 @@ const PhishingDetected = new LazyLoader('PhishingDetected', () => import('@subwa
 const Welcome = new LazyLoader('Welcome', () => import('@subwallet/extension-koni-ui/Popup/Welcome'));
 const CreateDone = new LazyLoader('CreateDone', () => import('@subwallet/extension-koni-ui/Popup/CreateDone'));
 const BuyTokens = new LazyLoader('BuyTokens', () => import('@subwallet/extension-koni-ui/Popup/BuyTokens'));
-const Staking = new LazyLoader('Staking', () => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
+// const Staking = new LazyLoader('Staking', () => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
 
 const Tokens = new LazyLoader('Tokens', () => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
 const TokenDetailList = new LazyLoader('TokenDetailList', () => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
@@ -161,7 +161,7 @@ export const router = createHashRouter([
             ]
           },
           Crowdloans.generateRouterObject('crowdloans'),
-          Staking.generateRouterObject('staking'),
+          // Staking.generateRouterObject('staking'),
           {
             path: 'earning',
             element: <Outlet />,

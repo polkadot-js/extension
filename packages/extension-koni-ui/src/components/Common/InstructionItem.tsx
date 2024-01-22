@@ -17,11 +17,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <div className={CN(className, 'item-instruction-container')}>
-        <div className='item-left-part'>{iconInstruction}</div>
-        <div className='item-right-part'>
-          <div className={'item-title'}>{title}</div>
-          <div className={'item-description'}>{description}</div>
+      <div className={CN(className)}>
+        <div className='__item-left-part'>{iconInstruction}</div>
+        <div className='__item-right-part'>
+          <div className={'__item-title'}>{title}</div>
+          <div className={'__item-description'}>{description}</div>
         </div>
       </div>
     </>
@@ -37,20 +37,22 @@ const InstructionItem = styled(Component)<Props>(({ theme: { token } }: Props) =
     paddingTop: 14,
     paddingBottom: 14,
     borderRadius: token.borderRadiusLG,
-    backgroundColor: 'var(--Background-Secondary-background, #1A1A1A)',
-    '.item-right-part': {
+    backgroundColor: token.colorBgSecondary,
+
+    '.__item-right-part': {
       paddingLeft: 10
     },
-    '.item-title': {
+
+    '.__item-title': {
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG,
       paddingBottom: token.paddingXXS
     },
-    '.item-description': {
-      color: 'var(--white-text-white-45-secondary-text, rgba(255, 255, 255, 0.45))',
+
+    '.__item-description': {
+      color: token.colorTextLight4,
       fontSize: token.fontSize,
       lineHeight: token.lineHeight
-
     }
   });
 });

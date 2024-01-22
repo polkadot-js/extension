@@ -9,21 +9,22 @@ import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AlertBox, AlertModal, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
+import { EarningInstructionModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
 import { EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
-import { useFetchChainState, useGetBalance, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useAlert, useFetchChainState, useGetBalance, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
-import { AlertDialogProps, EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, formatBalance, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PlusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -43,7 +44,7 @@ const instructionModalId = EARNING_INSTRUCTION_MODAL;
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal } = useContext(ModalContext);
 
   const { defaultData, goBack, onDone, persistData, setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
 
@@ -63,6 +64,8 @@ const Component = () => {
   const amountValue = useWatchTransaction('value', form, defaultData);
   const chainValue = useWatchTransaction('chain', form, defaultData);
   const poolTarget = useWatchTransaction('target', form, defaultData);
+
+  const isClickInfoButtonRef = useRef<boolean>(false);
 
   const [processState, dispatchProcessState] = useReducer(earningReducer, DEFAULT_YIELD_PROCESS);
 
@@ -86,7 +89,7 @@ const Component = () => {
   const [, setCanMint] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [checkMintLoading, setCheckMintLoading] = useState(false);
-  const [alertProps, setAlertProps] = useState<AlertDialogProps | undefined>();
+  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
   const [isFormInvalid, setIsFormInvalid] = useState(true);
 
   const chainState = useFetchChainState(poolInfo.chain);
@@ -255,17 +258,16 @@ const Component = () => {
   const onError = useCallback(
     (error: Error) => {
       if (insufficientMessages.some((v) => error.message.includes(v))) {
-        setAlertProps({
+        openAlert({
           title: t('Insufficient balance'),
           content: t('Your available balance is {{availableBalance}} {{symbol}}, you need to leave {{existentialDeposit}} {{symbol}} as minimal balance (existential deposit) and pay network fees. Make sure you have at least {{maintainBalance}} {{symbol}} in your transferable balance to proceed.', { replace: { ...handleDataForInsufficientAlert() } }),
           okButton: {
             text: t('I understand'),
             onClick: () => {
-              inactiveModal(alertModalId);
+              closeAlert();
             }
           }
         });
-        activeModal(alertModalId);
 
         dispatchProcessState({
           type: EarningActionType.STEP_ERROR_ROLLBACK,
@@ -286,7 +288,7 @@ const Component = () => {
         payload: error
       });
     },
-    [activeModal, handleDataForInsufficientAlert, inactiveModal, notify, t]
+    [closeAlert, handleDataForInsufficientAlert, notify, openAlert, t]
   );
 
   const onSuccess = useCallback(
@@ -533,7 +535,7 @@ const Component = () => {
     if (firstStep) {
       goBack();
     } else {
-      setAlertProps({
+      openAlert({
         title: t('Cancel earning process?'),
         content: t('Going back will cancel the current earning process. Do you wish to cancel?'),
         okButton: {
@@ -544,13 +546,18 @@ const Component = () => {
         cancelButton: {
           text: t('Not now'),
           onClick: () => {
-            inactiveModal(alertModalId);
+            closeAlert();
           }
         }
       });
-      activeModal(alertModalId);
     }
-  }, [activeModal, firstStep, goBack, inactiveModal, t]);
+  }, [closeAlert, firstStep, goBack, openAlert, t]);
+
+  const onCancelInstructionModal = useCallback(() => {
+    if (!isClickInfoButtonRef.current) {
+      goBack();
+    }
+  }, [goBack]);
 
   useEffect(() => {
     form.setFieldValue('asset', inputAsset.slug || '');
@@ -662,6 +669,7 @@ const Component = () => {
 
   useEffect(() => {
     if (!compound) {
+      isClickInfoButtonRef.current = false;
       activeModal(instructionModalId);
     }
   }, [activeModal, compound]);
@@ -671,11 +679,12 @@ const Component = () => {
       {
         icon: <InfoIcon />,
         onClick: () => {
-          //
+          isClickInfoButtonRef.current = true;
+          activeModal(EARNING_INSTRUCTION_MODAL);
         }
       }
     ];
-  }, []);
+  }, [activeModal]);
 
   useEffect(() => {
     setSubHeaderRightButtons(subHeaderButtons);
@@ -835,6 +844,14 @@ const Component = () => {
           {t('Stake')}
         </Button>
       </TransactionFooter>
+
+      <EarningInstructionModal
+        closeAlert={closeAlert}
+        isShowStakeMoreButton={!isClickInfoButtonRef.current}
+        onCancel={onCancelInstructionModal}
+        openAlert={openAlert}
+        slug={slug}
+      />
 
       {
         !!alertProps && (

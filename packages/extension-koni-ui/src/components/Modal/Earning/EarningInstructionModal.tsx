@@ -5,32 +5,34 @@ import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bo
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolType } from '@subwallet/extension-base/types';
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
-import ContentBoxIcon from '@subwallet/extension-koni-ui/components/Common/ContentBoxIcon';
 import InstructionItem from '@subwallet/extension-koni-ui/components/Common/InstructionItem';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EARNING_DATA_RAW, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { earlyValidateJoin } from '@subwallet/extension-koni-ui/messaging';
+import { AlertDialogProps, PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getBannerButtonIcon } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, SwIconProps, SwModal, Tag } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Icon, Logo, ModalContext, SwModal, Tag } from '@subwallet/react-ui';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
-import { CaretDown, Coins, PlusCircle } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { CaretDown, PlusCircle } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps{
   slug: string;
-  onCancel?: () => void;
+  onCancel?: VoidFunction;
   onStakeMore?: (value: string) => void;
-  isShowStakeMoreBtn?: boolean;
-  onPressBack?: () => void;
+  isShowStakeMoreButton?: boolean;
+  openAlert: (alertProps: AlertDialogProps) => void;
+  closeAlert: VoidFunction;
 }
 
 export interface BoxProps {
+  id: string;
   title: string;
-  description: React.ReactNode;
+  description: string;
   iconColor: string;
   icon: PhosphorIcon;
 }
@@ -38,14 +40,16 @@ export interface BoxProps {
 const modalId = EARNING_INSTRUCTION_MODAL;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, isShowStakeMoreBtn = true, onCancel, onPressBack, onStakeMore, slug } = props;
+  const { className, closeAlert, isShowStakeMoreButton = true, onCancel, onStakeMore, openAlert, slug } = props;
   const checkRef = useRef<number>(Date.now());
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { poolInfoMap } = useSelector((state) => state.earning);
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { currentAccount } = useSelector((state) => state.accountState);
-  const [scrollHeight, setScrollHeight] = useState<number>(0);
-  const [contentHeight, setContentHeight] = useState<number>(0);
   const [loading, setLoading] = useState(false);
 
   const poolInfo = useMemo(() => poolInfoMap[slug], [poolInfoMap, slug]);
@@ -172,13 +176,25 @@ const Component: React.FC<Props> = (props: Props) => {
     return [];
   }, [assetRegistry, poolInfo.metadata.inputAsset, poolInfo.statistic]);
 
+  const setVisible = useCallback(
+    (show: boolean) => {
+      checkRef.current = Date.now();
+
+      if (show) {
+        activeModal(modalId);
+      } else {
+        inactiveModal(modalId);
+      }
+    },
+    [activeModal, inactiveModal]
+  );
+
   const replaceEarningValue = useCallback((target: BoxProps, searchString: string, replaceValue: string) => {
     if (target.title.includes(searchString)) {
       target.title = target.title.replace(searchString, replaceValue);
     }
 
-    if (typeof target.description === 'string' && target.description?.includes(searchString)) {
-      // @ts-ignore
+    if (target.description?.includes(searchString)) {
       target.description = target.description.replaceAll(searchString, replaceValue);
     }
   }, []);
@@ -227,7 +243,7 @@ const Component: React.FC<Props> = (props: Props) => {
           );
 
           return EARNING_DATA_RAW[YieldPoolType.NOMINATION_POOL].map((item) => {
-            const _item: BoxProps = { ...item, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
+            const _item: BoxProps = { ...item, icon: getBannerButtonIcon(item.icon) as PhosphorIcon, id: item.icon };
 
             replaceEarningValue(_item, '{validatorNumber}', maxCandidatePerFarmer.toString());
             replaceEarningValue(_item, '{validatorType}', label);
@@ -263,7 +279,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
           if (poolInfo.slug === 'ASTR___native_staking___astar') {
             return EARNING_DATA_RAW.DAPP_STAKING.map((item) => {
-              const _item: BoxProps = { ...item, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
+              const _item: BoxProps = { ...item, id: item.icon, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
 
               replaceEarningValue(_item, '{validatorNumber}', maxCandidatePerFarmer.toString());
               replaceEarningValue(_item, '{periodNumb}', unBondedTime);
@@ -279,7 +295,7 @@ const Component: React.FC<Props> = (props: Props) => {
           }
 
           return EARNING_DATA_RAW[YieldPoolType.NATIVE_STAKING].map((item) => {
-            const _item: BoxProps = { ...item, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
+            const _item: BoxProps = { ...item, id: item.icon, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
 
             replaceEarningValue(_item, '{validatorNumber}', maxCandidatePerFarmer.toString());
             replaceEarningValue(_item, '{validatorType}', label);
@@ -312,7 +328,7 @@ const Component: React.FC<Props> = (props: Props) => {
           );
 
           return EARNING_DATA_RAW[YieldPoolType.LIQUID_STAKING].map((item) => {
-            const _item: BoxProps = { ...item, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
+            const _item: BoxProps = { ...item, id: item.icon, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
 
             replaceEarningValue(_item, '{derivative}', derivative.symbol);
             replaceEarningValue(_item, '{periodNumb}', unBondedTime);
@@ -341,7 +357,7 @@ const Component: React.FC<Props> = (props: Props) => {
           );
 
           return EARNING_DATA_RAW[YieldPoolType.LENDING].map((item) => {
-            const _item: BoxProps = { ...item, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
+            const _item: BoxProps = { ...item, id: item.icon, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
 
             replaceEarningValue(_item, '{derivative}', derivative.symbol);
             replaceEarningValue(_item, '{inputToken}', inputAsset.symbol);
@@ -356,26 +372,6 @@ const Component: React.FC<Props> = (props: Props) => {
       }
     }
   }, [assetRegistry, poolInfo, replaceEarningValue, unBondedTime]);
-
-  useEffect(() => {
-    setShowScrollEnd(contentHeight > scrollHeight);
-    setIsScrollEnd(contentHeight < scrollHeight);
-  }, [contentHeight, scrollHeight]);
-
-  // const isCloseToBottom = useCallback(({ contentOffset, contentSize, layoutMeasurement }: NativeScrollEvent) => {
-  //   const paddingToBottom = 20;
-  //
-  //   return layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom;
-  // }, []);
-
-  // const onScroll = useCallback(
-  //   ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
-  //     if (isCloseToBottom(nativeEvent)) {
-  //       setIsScrollEnd(true);
-  //     }
-  //   },
-  //   [isCloseToBottom]
-  // );
 
   const onClickFaq = useCallback(() => {
     let urlParam = '';
@@ -417,7 +413,7 @@ const Component: React.FC<Props> = (props: Props) => {
     open(url);
   }, [poolInfo.metadata.shortName]);
 
-  const onPress = useCallback(() => {
+  const onClickButton = useCallback(() => {
     const time = Date.now();
 
     checkRef.current = time;
@@ -428,11 +424,16 @@ const Component: React.FC<Props> = (props: Props) => {
     };
 
     const onError = (message: string) => {
-      Alert.alert('Pay attention!', message, [
-        {
-          text: 'I understand'
+      openAlert({
+        title: t('Pay attention!'),
+        content: message,
+        okButton: {
+          text: t('I understand'),
+          onClick: () => {
+            closeAlert();
+          }
         }
-      ]);
+      });
     };
 
     earlyValidateJoin({
@@ -465,41 +466,62 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         }
       });
-  }, [currentAccount?.address, onStakeMore, setVisible, slug]);
-
-  // const scrollBottom = useCallback(() => {
-  //   scrollRef?.current?.scrollToEnd();
-  // }, []);
+  }, [closeAlert, currentAccount?.address, onStakeMore, openAlert, setVisible, slug, t]);
 
   const onScrollContent = useCallback(() => {
     scrollRef?.current?.scroll({ top: scrollRef?.current?.scrollHeight, left: 0 });
   }, [scrollRef]);
 
   const onScrollToAcceptButton = useCallback(() => {
-    if (!scrollRef?.current) {
-      return;
-    }
-
-    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 500);
+    //
   }, []);
 
   const closeModal = useCallback(() => {
-    inactiveModal(modalId);
-    setIsScrollEnd(false);
-    setShowScrollEnd(false);
-  }, [inactiveModal]);
-
-  const goBack = useCallback(() => {
-    inactiveModal(modalId);
-    setIsScrollEnd(false);
-    !!onPressBack && onPressBack();
-  }, [inactiveModal, onPressBack]);
+    setVisible(false);
+    onCancel?.();
+  }, [onCancel, setVisible]);
 
   useEffect(() => {
     if (!poolInfo) {
       inactiveModal(modalId);
     }
   }, [inactiveModal, poolInfo]);
+
+  const footerNode = (
+    <>
+      <div className='__footer-more-information-text'>
+        <Trans
+          components={{
+            highlight: (
+              <a
+                className='__link'
+                onClick={onClickFaq}
+                rel='noopener noreferrer'
+                target='_blank'
+              />
+            )
+          }}
+          i18nKey={detectTranslate('Scroll down to continue. For more information and staking instructions, read <highlight>this FAQ</highlight>')}
+        />
+      </div>
+      {isShowStakeMoreButton && (
+        <Button
+          block={true}
+          className={'__stake-more-button'}
+          icon={
+            <Icon
+              phosphorIcon={PlusCircle}
+              weight='fill'
+            />
+          }
+          loading={loading}
+          onClick={onClickButton}
+        >
+          {buttonTitle}
+        </Button>
+      )}
+    </>
+  );
 
   if (!poolInfo) {
     return null;
@@ -508,112 +530,76 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <SwModal
       className={CN(className)}
+      footer={footerNode}
       id={modalId}
-      onCancel={goBack}
-      title={' '}
+      onCancel={closeModal}
+      title={t('Instruction')}
     >
       <div
-        className={'earning-instruction'}
+        className={'__scroll-container'}
         onScroll={onScrollToAcceptButton}
         ref={scrollRef}
       >
-        <div className={'earning-header'}>
-          <div className={'earning-header-title'}>{title}</div>
-          <div className={'earning-instruction-tag'}>
-            {!!(tags && tags.length) && (
-              <div style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
-                {tags.map(({ apy, slug: tagSlug, symbol }) => (
-                  <Tag
-                    bgType={'gray'}
-                    // icon={getTokenLogo(tagSlug, undefined, 16)}
-                    icon={(
-                      <Icon
-                        phosphorIcon={Coins}
-                        weight={'fill'}
-                      />
-                    )}
-                    key={tagSlug}
-                    shape={'round'}
-                  >
-                    <div>
-                      {`${formatNumber(apy, 0, balanceFormatter)}% ${symbol}`}
-                    </div>
-                  </Tag>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className={'earning-body-static-data'}>
-            {!isScrollEnd && <Button
-              className={'earning-body-caret-button'}
-              icon={<Icon phosphorIcon={CaretDown} />}
-              onClick={onScrollContent}
-              schema={'secondary'}
-              shape={'circle'}
-              size={'xs'}
-                             />}
-            {data.map((item, index) => {
-              const myIconProps: SwIconProps = {
-                type: 'phosphor',
-                phosphorIcon: item.icon,
-                iconColor: item.iconColor
-              };
+        <div className={'__main-title-area'}>
+          <div className={'__main-title'}>{title}</div>
 
-              return (
-                <div
-                  className={'item-earning-row'}
-                  key={`${item.title}-${index}`}
-                >
-                  <InstructionItem
-                    description={item.description}
-                    iconInstruction={
-                      <ContentBoxIcon
-                        backgroundColor={getAlphaColor(item.iconColor, 0.1)}
-                        iconProps={myIconProps}
-                      />
-                    }
-                    key={`${item.title}-${index}`}
-                    title={item.title}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        <div className={'earning-footer'}>
-          <div className='instruction'>
-            <Trans
-              components={{
-                highlight: (
-                  <a
-                    className='link'
-                    onClick={onClickFaq}
-                    rel='noopener noreferrer'
-                    target='_blank'
-                  />
-                )
-              }}
-              i18nKey={detectTranslate('Scroll down to continue. For more information and staking instructions, read <highlight>this FAQ</highlight>')}
-            />
-          </div>
-          {isShowStakeMoreBtn && (
-            <Button
-              disabled={!isScrollEnd && showScrollEnd}
-              icon={
-                <Icon
-                  iconColor={isScrollEnd || !showScrollEnd ? '#fff' : 'rgba(255, 255, 255, 0.3)'}
-                  phosphorIcon={PlusCircle}
-                  weight='fill'
-                />
-              }
-              loading={loading}
-              onClick={onPress}
-              size='sm'
+          {!!(tags && tags.length) && (
+            <div
+              className={'__tags-container'}
             >
-              {buttonTitle}
-            </Button>
+              {tags.map(({ apy, slug: tagSlug, symbol }) => (
+                <Tag
+                  bgType={'gray'}
+                  className={'__tag-item'}
+                  icon={(
+                    <Logo
+                      size={16}
+                      token={tagSlug.toLowerCase()}
+                    />
+                  )}
+                  key={tagSlug}
+                  shape={'round'}
+                >
+                  {`${formatNumber(apy, 0, balanceFormatter)}% ${symbol}`}
+                </Tag>
+              ))}
+            </div>
           )}
         </div>
+
+        <div className={'__instruction-items-container'}>
+          {data.map((item, index) => {
+            return (
+              <InstructionItem
+                className={'__instruction-item'}
+                description={(
+                  <div dangerouslySetInnerHTML={{ __html: item.description }}></div>
+                )}
+                iconInstruction={
+                  <BackgroundIcon
+                    backgroundColor={getAlphaColor(item.iconColor, 0.1)}
+                    iconColor={item.iconColor}
+                    phosphorIcon={item.icon}
+                    size='lg'
+                    weight='fill'
+                  />
+                }
+                key={`${item.title}-${index}`}
+                title={item.title}
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      <div className={'__scroll-to-end-button-wrapper hidden'}>
+        <Button
+          className={'__scroll-to-end-button'}
+          icon={<Icon phosphorIcon={CaretDown} />}
+          onClick={onScrollContent}
+          shape={'circle'}
+          size={'xs'}
+        />
       </div>
     </SwModal>
   );
@@ -621,33 +607,97 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const EarningInstructionModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    display: 'flex',
-    justifyContent: 'center',
-    '.item-earning-row': {
-      marginBottom: 8
+    height: '100%',
+
+    '.ant-sw-modal-content.ant-sw-modal-content': {
+      maxHeight: 'none',
+      height: '100%',
+      borderRadius: 0
     },
-    '.earning-header': {
+
+    '.ant-sw-modal-body.ant-sw-modal-body': {
+      padding: 0
     },
-    '.earning-header-title': {
-      fontSize: 20,
+
+    '.ant-sw-modal-footer': {
+      borderTop: 0
+    },
+
+    '.__main-title': {
+      fontSize: token.fontSizeHeading4,
       lineHeight: token.lineHeightHeading4,
+      color: token.colorTextLight1,
+      fontWeight: token.headingFontWeight,
       textAlign: 'center'
     },
-    '.earning-body-caret-button': {
-      position: 'absolute',
-      top: '60%',
-      right: '5%'
+
+    '.__footer-more-information-text': {
+      color: token.colorTextLight4,
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
+      textAlign: 'center',
+
+      '.__link': {
+        textDecoration: 'underline',
+        color: token.colorPrimary
+      }
     },
-    '.earning-footer': {
+
+    '.__stake-more-button': {
+      marginTop: token.margin
+    },
+
+    '.__instruction-item': {
+      '.__item-description strong': {
+        fontWeight: 'inherit',
+        color: token.colorTextLight2
+      }
+    },
+
+    '.__instruction-item + .__instruction-item': {
+      marginTop: token.marginXS
+    },
+
+    '.__scroll-container': {
+      overflow: 'auto',
+      height: '100%',
+      paddingLeft: token.padding,
+      paddingTop: token.padding,
+      paddingRight: token.padding
+    },
+
+    '.__main-title-area': {
+      marginBottom: token.margin
+    },
+
+    '.__tags-container': {
       display: 'flex',
-      alignItems: 'center',
-      flexDirection: 'column',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: token.sizeXS,
       marginTop: token.marginXS,
-      gap: token.margin
+
+      '.ant-image-img, .ant-logo, .ant-image': {
+        display: 'block'
+      }
     },
-    '.earning-instruction-tag': {
-      display: 'flex',
-      justifyContent: 'center'
+
+    '.__tag-item': {
+      display: 'inline-flex',
+      alignItems: 'center',
+      marginRight: 0,
+      gap: token.sizeXXS,
+      color: token.colorSecondary
+    },
+
+    '.__scroll-to-end-button-wrapper': {
+      position: 'relative'
+    },
+
+    '.__scroll-to-end-button': {
+      position: 'absolute',
+      bottom: token.sizeXXS,
+      right: token.size
     }
   });
 });

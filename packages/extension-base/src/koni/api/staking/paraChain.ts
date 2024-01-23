@@ -6,7 +6,7 @@ import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, Stakin
 import { subscribeAmplitudeNominatorMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/amplitude';
 import { subscribeAstarNominatorMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { subscribeParaChainNominatorMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
-import { PalletDappsStakingAccountLedger, PalletParachainStakingDelegator, ParachainStakingStakeOption } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { KrestDelegateState, PalletDappsStakingAccountLedger, PalletParachainStakingDelegator, ParachainStakingStakeOption } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -21,8 +21,21 @@ function getSingleStakingAmplitude (substrateApi: _SubstrateApi, address: string
     [substrateApi.api.query.parachainStaking.delegatorState, address],
     [substrateApi.api.query.parachainStaking.unstaking, address]
   ], async ([_delegatorState, _unstaking]) => {
-    const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
-    const unstakingInfo = _unstaking.toPrimitive() as unknown as Record<string, number>;
+    let delegatorState: ParachainStakingStakeOption[] = [];
+
+    if (_STAKING_CHAIN_GROUP.krest_network.includes(chain)) {
+      const krestDelegatorState = _delegatorState.toPrimitive() as unknown as KrestDelegateState;
+
+      const delegates = krestDelegatorState?.delegations as unknown as ParachainStakingStakeOption;
+
+      delegatorState = delegatorState.concat(delegates);
+    } else {
+      const delegate = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
+
+      delegatorState.push(delegate);
+    }
+
+    const unstakingInfo = _unstaking.toPrimitive() as Record<string, number>;
     const { symbol } = _getChainNativeTokenBasicInfo(chainInfoMap[chain]);
     const owner = reformatAddress(address, 42);
 
@@ -50,8 +63,14 @@ function getSingleStakingAmplitude (substrateApi: _SubstrateApi, address: string
         unstakings: []
       } as NominatorMetadata);
     } else {
-      const activeBalance = delegatorState ? new BN(delegatorState.amount.toString()) : BN_ZERO;
+      let activeBalance = BN_ZERO;
       let unstakingBalance = BN_ZERO;
+
+      for (const delegate of delegatorState) {
+        const amount = new BN(delegate.amount?.toString());
+
+        activeBalance = activeBalance.add(amount);
+      }
 
       if (unstakingInfo) {
         Object.values(unstakingInfo).forEach((unstakingAmount) => {
@@ -93,7 +112,20 @@ function getMultiStakingAmplitude (substrateApi: _SubstrateApi, useAddresses: st
 
       await Promise.all(ledgers.map(async (_delegatorState, i) => {
         const owner = reformatAddress(useAddresses[i], 42);
-        const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
+        let delegatorState: ParachainStakingStakeOption[] = [];
+
+        if (_STAKING_CHAIN_GROUP.krest_network.includes(chain)) {
+          const krestDelegatorState = _delegatorState.toPrimitive() as unknown as KrestDelegateState;
+
+          const delegates = krestDelegatorState?.delegations as unknown as ParachainStakingStakeOption;
+
+          delegatorState = delegatorState.concat(delegates);
+        } else {
+          const delegate = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
+
+          delegatorState.push(delegate);
+        }
+
         const unstakingInfo = _unstakingStates[i].toPrimitive() as unknown as Record<string, number>;
 
         if (!delegatorState && !unstakingInfo) {
@@ -120,8 +152,14 @@ function getMultiStakingAmplitude (substrateApi: _SubstrateApi, useAddresses: st
             unstakings: []
           } as NominatorMetadata);
         } else {
-          const activeBalance = delegatorState ? new BN(delegatorState.amount.toString()) : BN_ZERO;
+          let activeBalance = BN_ZERO;
           let unstakingBalance = BN_ZERO;
+
+          for (const delegate of delegatorState) {
+            const amount = new BN(delegate.amount?.toString());
+
+            activeBalance = activeBalance.add(amount);
+          }
 
           if (unstakingInfo) {
             Object.values(unstakingInfo).forEach((unstakingAmount) => {
@@ -181,7 +219,7 @@ export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Recor
   const unclaimedRewardList: StakingRewardItem[] = [];
 
   await Promise.all(chains.map(async (chain) => {
-    if (_STAKING_CHAIN_GROUP.amplitude.includes(chain) && !_STAKING_CHAIN_GROUP.kilt.includes(chain)) {
+    if (_STAKING_CHAIN_GROUP.amplitude.includes(chain) && !_STAKING_CHAIN_GROUP.kilt.includes(chain) && !_STAKING_CHAIN_GROUP.krest_network.includes(chain)) {
       const networkInfo = networks[chain];
       const apiProps = await substrateApiMap[chain].isReady;
 

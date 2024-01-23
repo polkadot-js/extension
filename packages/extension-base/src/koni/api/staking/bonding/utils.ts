@@ -54,6 +54,11 @@ export interface ParachainStakingStakeOption {
   amount: number
 }
 
+export interface KrestDelegateState {
+  delegations: ParachainStakingStakeOption[],
+  total: string
+}
+
 export interface ParachainStakingCandidateMetadata {
   bond: string,
   delegationCount: number,

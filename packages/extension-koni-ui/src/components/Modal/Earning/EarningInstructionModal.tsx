@@ -513,9 +513,9 @@ const Component: React.FC<Props> = (props: Props) => {
       </div>
       {isShowStakeMoreButton && (
         <Button
-          disabled={!isScrollEnd}
           block={true}
           className={'__stake-more-button'}
+          disabled={!isScrollEnd}
           icon={
             <Icon
               phosphorIcon={PlusCircle}
@@ -538,6 +538,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <SwModal
       className={CN(className)}
+      destroyOnClose={true}
       footer={footerNode}
       id={modalId}
       onCancel={closeModal}

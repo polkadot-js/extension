@@ -406,6 +406,10 @@ export default class DatabaseService {
 
   /* Campaign */
 
+  public getAllCampaign () {
+    return this.stores.campaign.getAll();
+  }
+
   public subscribeProcessingCampaign () {
     return this.stores.campaign.subscribeProcessingCampaign();
   }

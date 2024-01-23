@@ -55,6 +55,7 @@ export default class CampaignService {
             endTime,
             startTime,
             isDone: false,
+            isArchive: false,
             campaignId,
             type: CampaignDataType.BANNER,
             buttons,
@@ -74,6 +75,7 @@ export default class CampaignService {
           endTime,
           startTime,
           isDone: false,
+          isArchive: false,
           campaignId,
           type: CampaignDataType.NOTIFICATION,
           buttons,
@@ -88,6 +90,28 @@ export default class CampaignService {
 
       if (!exists) {
         await this.#state.dbService.upsertCampaign(campaign);
+      } else {
+        const data: CampaignData = {
+          ...campaign,
+          isDone: exists.isDone
+        };
+
+        await this.#state.dbService.upsertCampaign(data);
+      }
+    }
+
+    const allCampaign = await this.#state.dbService.getAllCampaign();
+
+    for (const stored of allCampaign) {
+      const exists = campaigns.find((campaign) => campaign.slug === stored.slug);
+
+      if (!exists) {
+        const data: CampaignData = {
+          ...stored,
+          isArchive: true
+        };
+
+        await this.#state.dbService.upsertCampaign(data);
       }
     }
 

@@ -5,6 +5,7 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { EarningStatus, SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { Avatar, CollapsiblePanel, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { InfoItemBase } from '@subwallet/extension-koni-ui/components/MetaInfo/parts';
 import { EarningNominationModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
 import { EARNING_NOMINATION_MODAL, StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -154,10 +155,12 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
                   />
                 )}
 
-              <MetaInfo.DisplayType
+              <MetaInfo.Default
                 label={t('Staking type')}
-                typeName={earningTagType.label}
-              />
+                valueColorSchema={earningTagType.color as InfoItemBase['valueColorSchema']}
+              >
+                {earningTagType.label}
+              </MetaInfo.Default>
 
               {!isSpecial
                 ? (

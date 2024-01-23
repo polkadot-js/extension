@@ -51,7 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { currentAccount } = useSelector((state) => state.accountState);
   const [loading, setLoading] = useState(false);
-
+  const [isScrollEnd, setIsScrollEnd] = useState(false);
   const poolInfo = useMemo(() => poolInfoMap[slug], [poolInfoMap, slug]);
   const title = useMemo(() => {
     if (!poolInfo) {
@@ -473,12 +473,19 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [scrollRef]);
 
   const onScrollToAcceptButton = useCallback(() => {
-    //
-  }, []);
+    if (!scrollRef?.current) {
+      return;
+    }
+
+    if (!isScrollEnd && scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 500) {
+      setIsScrollEnd(true);
+    }
+  }, [isScrollEnd]);
 
   const closeModal = useCallback(() => {
     setVisible(false);
     onCancel?.();
+    setIsScrollEnd(false);
   }, [onCancel, setVisible]);
 
   useEffect(() => {
@@ -506,6 +513,7 @@ const Component: React.FC<Props> = (props: Props) => {
       </div>
       {isShowStakeMoreButton && (
         <Button
+          disabled={!isScrollEnd}
           block={true}
           className={'__stake-more-button'}
           icon={
@@ -592,14 +600,14 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
       </div>
 
-      <div className={'__scroll-to-end-button-wrapper hidden'}>
-        <Button
+      <div className={'__scroll-to-end-button-wrapper'}>
+        {!isScrollEnd && <Button
           className={'__scroll-to-end-button'}
           icon={<Icon phosphorIcon={CaretDown} />}
           onClick={onScrollContent}
           shape={'circle'}
           size={'xs'}
-        />
+        />}
       </div>
     </SwModal>
   );
@@ -663,7 +671,8 @@ const EarningInstructionModal = styled(Component)<Props>(({ theme: { token } }: 
       height: '100%',
       paddingLeft: token.padding,
       paddingTop: token.padding,
-      paddingRight: token.padding
+      paddingRight: token.padding,
+      scrollBehavior: 'smooth'
     },
 
     '.__main-title-area': {

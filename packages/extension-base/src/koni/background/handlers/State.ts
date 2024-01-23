@@ -35,7 +35,7 @@ import TransactionService from '@subwallet/extension-base/services/transaction-s
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import { BalanceItem, BalanceJson, BalanceMap, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
 import { addLazy, isAccountAll, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
 import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -43,7 +43,6 @@ import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { decodePair } from '@subwallet/keyring/pair/decode';
 import { keyring } from '@subwallet/ui-keyring';
-import { Subscription } from 'dexie';
 import SimpleKeyring from 'eth-simple-keyring';
 import { t } from 'i18next';
 import { interfaces } from 'manta-extension-sdk';
@@ -109,10 +108,6 @@ export default class KoniState {
     ready: false,
     data: {}
   } as StakingRewardJson;
-
-  // earning
-  private yieldPoolInfoSubject = new Subject<YieldPoolInfo[]>();
-  private yieldPositionSubject = new Subject<YieldPositionInfo[]>();
 
   private lazyMap: Record<string, unknown> = {};
 
@@ -319,6 +314,8 @@ export default class KoniState {
     this.campaignService.init();
     this.eventService.emit('chain.ready', true);
 
+    await this.earningService.init();
+
     this.onReady();
     this.onAccountAdd();
     this.onAccountRemove();
@@ -352,16 +349,6 @@ export default class KoniState {
 
     this.dbService.subscribeMantaPayConfig(_DEFAULT_MANTA_ZK_CHAIN, (data) => {
       this.mantaPayConfigSubject.next(data);
-    });
-
-    let unsub: Subscription | undefined;
-
-    this.keyringService.accountSubject.subscribe((accounts) => { // TODO: improve this
-      unsub && unsub.unsubscribe();
-
-      unsub = this.dbService.subscribeYieldPosition(Object.keys(accounts), (data) => {
-        this.yieldPositionSubject.next(data);
-      });
     });
   }
 
@@ -472,28 +459,6 @@ export default class KoniState {
 
   public async getPooledStakingRecordsByAddress (addresses: string[]): Promise<StakingItem[]> {
     return this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
-  }
-
-  public async getPooledPositionByAddress (addresses: string[]): Promise<YieldPositionInfo[]> {
-    return this.dbService.getYieldNominationPoolPosition(addresses, this.activeChainSlugs);
-  }
-
-  public subscribeYieldPoolInfo () {
-    return this.yieldPoolInfoSubject;
-  }
-
-  public subscribeYieldPosition () {
-    return this.yieldPositionSubject;
-  }
-
-  public getYieldPoolInfo () {
-    return this.dbService.getYieldPools();
-  }
-
-  public getYieldPositionInfo () {
-    const addresses = this.getDecodedAddresses(this.keyringService.currentAccount.address);
-
-    return this.dbService.getYieldPositionByAddress(addresses);
   }
 
   public subscribeMantaPayConfig () {
@@ -1742,7 +1707,7 @@ export default class KoniState {
     // Stopping services
     await Promise.all([this.cron.stop(), this.subscription.stop()]);
     await this.pauseAllNetworks(undefined, 'IDLE mode');
-    await Promise.all([this.historyService.stop(), this.priceService.stop()]);
+    await Promise.all([this.historyService.stop(), this.priceService.stop(), this.earningService.stop()]);
 
     // Complete sleeping
     sleeping.resolve();
@@ -1778,7 +1743,7 @@ export default class KoniState {
     }
 
     // Start services
-    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start()]);
+    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start(), this.earningService.start()]);
 
     // Complete starting
     starting.resolve();
@@ -1888,7 +1853,7 @@ export default class KoniState {
   }
 
   public async reloadStaking () {
-    await this.subscription.reloadStaking();
+    await this.earningService.reloadEarning(true);
 
     return true;
   }
@@ -2124,24 +2089,6 @@ export default class KoniState {
       metadata: metadata?.hexValue || '',
       specVersion: parseInt(metadata?.specVersion || '0')
     };
-  }
-
-  public updateYieldPoolInfo (data: YieldPoolInfo) {
-    this.dbService.updateYieldPoolStore(data).catch((e) => this.logger.warn(e));
-  }
-
-  public resetYieldPoolInfo (chains: string[]) {
-    this.dbService.subscribeYieldPoolInfo(chains, (data) => { // TODO: no unsub
-      this.yieldPoolInfoSubject.next(data);
-    });
-  }
-
-  public updateYieldPosition (data: YieldPositionInfo) {
-    this.dbService.updateYieldPosition(data).catch((e) => this.logger.warn(e));
-  }
-
-  public getYieldPoolStakingInfo (chain: string, poolType: YieldPoolType) {
-    return this.dbService.getYieldPoolStakingInfo(chain, poolType);
   }
 
   public getCrowdloanContributions ({ address, page, relayChain }: RequestCrowdloanContributions) {

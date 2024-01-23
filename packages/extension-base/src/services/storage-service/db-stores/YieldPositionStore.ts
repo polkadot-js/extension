@@ -47,6 +47,14 @@ export default class YieldPositionStore extends BaseStore<YieldPositionInfo> {
       .toArray();
   }
 
+  removeByAddresses (addresses: string[]) {
+    return this.table.where('address').anyOf(addresses).delete();
+  }
+
+  removeByChains (chains: string[]) {
+    return this.table.where('chain').anyOf(chains).delete();
+  }
+
   async getByAddressAndChains (addresses: string[], chains: string[]) {
     return this.table.where('address').anyOfIgnoreCase(addresses).filter((item) => chains.includes(item.chain)).toArray();
   }

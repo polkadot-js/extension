@@ -356,6 +356,10 @@ export default class DatabaseService {
     await this.stores.yieldPoolInfo.upsert(data);
   }
 
+  async updateYieldPoolsStore (data: YieldPoolInfo[]) {
+    await this.stores.yieldPoolInfo.bulkUpsert(data);
+  }
+
   async deleteYieldPoolInfo (slugs: string[]) {
     await this.stores.yieldPoolInfo.bulkDelete(slugs);
   }
@@ -386,8 +390,20 @@ export default class DatabaseService {
     return this.yieldInfoSubscription;
   }
 
+  removeYieldPositionByAddresses (addresses: string[]) {
+    return this.stores.yieldPosition.removeByAddresses(addresses);
+  }
+
+  removeYieldPositionByChains (chains: string[]) {
+    return this.stores.yieldPosition.removeByChains(chains);
+  }
+
   async updateYieldPosition (data: YieldPositionInfo) {
     await this.stores.yieldPosition.upsert(data);
+  }
+
+  async updateYieldPositions (data: YieldPositionInfo[]) {
+    await this.stores.yieldPosition.bulkUpsert(data);
   }
 
   async getYieldPositionByAddress (addresses: string[]) {

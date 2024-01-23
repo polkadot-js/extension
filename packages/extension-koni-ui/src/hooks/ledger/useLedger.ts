@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { EVMLedger, SubstrateLedger } from '@subwallet/extension-koni-ui/connector';
+import { EVMLedger, SubstrateGenericLedger, SubstrateLegacyLedger } from '@subwallet/extension-koni-ui/connector';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
 import { Ledger } from '@subwallet/extension-koni-ui/types';
@@ -52,16 +52,20 @@ const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[], chainInfoMa
   assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
 
   const chainInfo = chainInfoMap[slug];
-  const isEthereumNetwork = _isChainEvmCompatible(chainInfo);
+  const isEthereumNetwork = chainInfo ? _isChainEvmCompatible(chainInfo) : false;
 
   const def = getNetwork(ledgerChains, slug, isEthereumNetwork);
 
   assert(def, 'There is no known Ledger app available for this chain');
 
-  if (def.isEthereum) {
-    return new EVMLedger('webusb');
+  if (def.isGeneric) {
+    if (def.isEthereum) {
+      return new EVMLedger('webusb');
+    } else {
+      return new SubstrateGenericLedger('webusb');
+    }
   } else {
-    return new SubstrateLedger('webusb', def.network);
+    return new SubstrateLegacyLedger('webusb', def.network);
   }
 };
 
@@ -113,7 +117,7 @@ export function useLedger (slug?: string, active = true): Result {
     }
 
     const chainInfo = chainInfoMap[slug];
-    const isEthereumNetwork = _isChainEvmCompatible(chainInfo);
+    const isEthereumNetwork = chainInfo ? _isChainEvmCompatible(chainInfo) : false;
     const { appName } = getNetwork(ledgerChains, slug, isEthereumNetwork) || { appName: unknownNetwork };
 
     return appName;
@@ -152,12 +156,12 @@ export function useLedger (slug?: string, active = true): Result {
     }
   }, [ledger, t]);
 
-  const signTransaction = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
+  const signTransaction = useCallback(async (message: Uint8Array, metadata: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     if (ledger) {
       return new Promise((resolve, reject) => {
         setError(null);
 
-        ledger.signTransaction(message, accountOffset, addressOffset, accountOption)
+        ledger.signTransaction(message, metadata, accountOffset, addressOffset, accountOption)
           .then((result) => {
             resolve(result);
           })
@@ -206,7 +210,8 @@ export function useLedger (slug?: string, active = true): Result {
 
     timeOutRef.current = setTimeout(() => {
       ledger.getAddress(false, 0, 0)
-        .then(() => {
+        .then((value) => {
+          console.log(value);
           setIsLoading(false);
         })
         .catch((error: Error) => {

@@ -3,12 +3,12 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
+import { SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
-import { useGetChainInfoByGenesisHash, useNotification, useParseSubstrateRequestPayload, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainInfoByGenesisHash, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountSignMode, PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isSubstrateMessage, removeTransactionPersist } from '@subwallet/extension-koni-ui/utils';
 import { getSignMode } from '@subwallet/extension-koni-ui/utils/account/account';
@@ -17,11 +17,11 @@ import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, Wallet, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { SignerResult } from '@polkadot/types/types';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
+import { u8aToU8a } from '@polkadot/util';
 
 import { DisplayPayloadModal, ScanSignature, SubstrateQr } from '../Qr';
 
@@ -38,7 +38,7 @@ const handleCancel = async (id: string) => await cancelSignRequest(id);
 
 const handleSignature = async (id: string, { signature }: SigData) => await approveSignSignature(id, signature);
 
-const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD, AccountSignMode.INJECTED];
+const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD, AccountSignMode.INJECTED, AccountSignMode.LEGACY_LEDGER, AccountSignMode.GENERIC_LEDGER];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { account, className, extrinsicType, id, request } = props;
@@ -50,7 +50,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { activeModal } = useContext(ModalContext);
   const { substrateWallet } = useContext(InjectContext);
 
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
 
   const payload = useParseSubstrateRequestPayload(request);
 
@@ -58,14 +58,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const signMode = useMemo(() => getSignMode(account), [account]);
 
-  const isLedger = useMemo(() => signMode === AccountSignMode.LEDGER, [signMode]);
+  const isLedger = useMemo(() => signMode === AccountSignMode.LEGACY_LEDGER || signMode === AccountSignMode.GENERIC_LEDGER, [signMode]);
   const isMessage = isSubstrateMessage(payload);
 
   const approveIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
       case AccountSignMode.QR:
         return QrCode;
-      case AccountSignMode.LEDGER:
+      case AccountSignMode.LEGACY_LEDGER:
+      case AccountSignMode.GENERIC_LEDGER:
         return Swatches;
       case AccountSignMode.INJECTED:
         return Wallet;
@@ -76,21 +77,30 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const genesisHash = useMemo(() => {
     if (isSubstrateMessage(payload)) {
-      return chainInfoMap.polkadot.substrateInfo?.genesisHash || '';
+      return account.originGenesisHash || chainInfoMap.polkadot.substrateInfo?.genesisHash || '';
     } else {
       return payload.genesisHash.toHex();
     }
-  }, [chainInfoMap.polkadot.substrateInfo?.genesisHash, payload]);
+  }, [account.originGenesisHash, chainInfoMap.polkadot.substrateInfo?.genesisHash, payload]);
 
   const chain = useGetChainInfoByGenesisHash(genesisHash);
+
+  const chainSlug = useMemo(() => {
+    if (signMode === AccountSignMode.GENERIC_LEDGER) {
+      return SUBSTRATE_GENERIC_KEY;
+    } else {
+      return chain?.slug || '';
+    }
+  }, [chain?.slug, signMode]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
     isLocked,
     ledger,
     refresh: refreshLedger,
-    signTransaction: ledgerSign,
-    warning: ledgerWarning } = useLedger(chain?.slug, isLedger);
+    signMessage: ledgerSignMessage,
+    signTransaction: ledgerSignTransaction,
+    warning: ledgerWarning } = useLedger(chainSlug, isLedger);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [
     isLedgerLoading,
@@ -139,7 +149,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [activeModal]);
 
   const onConfirmLedger = useCallback(() => {
-    if (!payload || typeof payload === 'string') {
+    if (!payload) {
       return;
     }
 
@@ -152,23 +162,35 @@ const Component: React.FC<Props> = (props: Props) => {
     setLoading(true);
 
     setTimeout(() => {
-      const payloadU8a = payload.toU8a(true);
+      if (typeof payload === 'string') {
+        ledgerSignMessage(u8aToU8a(payload), account.accountIndex, account.addressOffset)
+          .then(({ signature }) => {
+            onApproveSignature({ signature });
+          })
+          .catch((e: Error) => {
+            console.error(e);
+            setLoading(false);
+          });
+      } else {
+        const payloadU8a = payload.toU8a(true);
 
-      ledgerSign(payloadU8a, account.accountIndex, account.addressOffset)
-        .then(({ signature }) => {
-          onApproveSignature({ signature });
-        })
-        .catch((e: Error) => {
-          console.log(e);
-          setLoading(false);
-        });
+        ledgerSignTransaction(payloadU8a, new Uint8Array(0), account.accountIndex, account.addressOffset)
+          .then(({ signature }) => {
+            onApproveSignature({ signature });
+          })
+          .catch((e: Error) => {
+            console.error(e);
+            setLoading(false);
+          });
+      }
     });
   }, [
     account.accountIndex,
     account.addressOffset,
     isLedgerConnected,
     ledger,
-    ledgerSign,
+    ledgerSignMessage,
+    ledgerSignTransaction,
     onApproveSignature,
     payload,
     refreshLedger
@@ -213,7 +235,8 @@ const Component: React.FC<Props> = (props: Props) => {
       case AccountSignMode.QR:
         onConfirmQr();
         break;
-      case AccountSignMode.LEDGER:
+      case AccountSignMode.LEGACY_LEDGER:
+      case AccountSignMode.GENERIC_LEDGER:
         onConfirmLedger();
         break;
       case AccountSignMode.INJECTED:
@@ -269,7 +292,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onClick={onConfirm}
       >
         {
-          signMode !== AccountSignMode.LEDGER
+          !isLedger
             ? t('Approve')
             : !isLedgerConnected
               ? t('Refresh')

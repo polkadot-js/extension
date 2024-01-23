@@ -58,13 +58,17 @@ const filterAddress = (addresses: string[], chainInfo: _ChainInfo): [string[], s
 
       if (account) {
         if (account.isHardware) {
-          const availGen = account.availableGenesisHashes || [];
-          const gen = _getSubstrateGenesisHash(chainInfo);
-
-          if (availGen.includes(gen)) {
+          if (account.isGeneric) {
             fetchList.push(address);
           } else {
-            unfetchList.push(address);
+            const availGen = account.availableGenesisHashes || [];
+            const gen = _getSubstrateGenesisHash(chainInfo);
+
+            if (availGen.includes(gen)) {
+              fetchList.push(address);
+            } else {
+              unfetchList.push(address);
+            }
           }
         } else {
           fetchList.push(address);

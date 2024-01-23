@@ -14,6 +14,7 @@ import MigrateAutoLock from './MigrateAutoLock';
 import MigrateChainPatrol from './MigrateChainPatrol';
 import MigrateImportedToken from './MigrateImportedToken';
 import MigrateLedgerAccount from './MigrateLedgerAccount';
+import MigrateLedgerAccountV2 from './MigrateLedgerAccountV2';
 import MigrateNetworkSettings from './MigrateNetworkSettings';
 import MigrateSettings from './MigrateSettings';
 import MigrateTokenDecimals from './MigrateTokenDecimals';
@@ -39,6 +40,7 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.17-01': MigratePioneerProvider,
   '1.1.17-03': EnableVaraChain,
   '1.1.24-01': MigrateProvidersV1M1P24,
-  '1.1.26-01': MigratePolygonUSDCProvider
+  '1.1.26-01': MigratePolygonUSDCProvider,
+  '1.1.33-01': MigrateLedgerAccountV2
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

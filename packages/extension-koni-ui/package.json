@@ -43,6 +43,7 @@
     "@subwallet/react-ui": "5.1.2-b72",
     "@subwallet/ui-keyring": "^0.1.1",
     "@walletconnect/types": "^2.8.4",
+    "@zondax/ledger-polkadot": "^0.16.0",
     "bip39": "^3.1.0",
     "boring-avatars": "^1.7.0",
     "bowser": "^2.11.0",

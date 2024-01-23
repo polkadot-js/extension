@@ -4,60 +4,19 @@
 import { ChainInfoMap } from '@subwallet/chain-list';
 import { ExtrinsicType, LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 
+export const SUBSTRATE_GENERIC_KEY = 'substrate_generic';
+
 export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   {
-    accountName: 'Polkadot',
-    appName: 'Polkadot',
-    networkName: 'Polkadot network',
-    genesisHash: ChainInfoMap.polkadot.substrateInfo?.genesisHash || '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
-    icon: 'substrate',
+    accountName: 'Substrate',
+    appName: 'Substrate Generic',
+    networkName: 'Substrate networks',
+    genesisHash: '',
     network: 'polkadot',
-    slug: ChainInfoMap.polkadot.slug,
-    isDevMode: false,
-    isEthereum: false
-  },
-  {
-    accountName: 'Kusama',
-    appName: 'Kusama',
-    networkName: 'Kusama network',
-    genesisHash: ChainInfoMap.kusama.substrateInfo?.genesisHash || '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
     icon: 'substrate',
-    network: 'kusama',
-    slug: ChainInfoMap.kusama.slug,
+    slug: SUBSTRATE_GENERIC_KEY,
     isDevMode: false,
-    isEthereum: false
-  },
-  {
-    accountName: 'Acala',
-    appName: 'Acala',
-    networkName: 'Acala network',
-    genesisHash: ChainInfoMap.acala.substrateInfo?.genesisHash || '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
-    icon: 'substrate',
-    network: 'acala',
-    slug: ChainInfoMap.acala.slug,
-    isDevMode: false,
-    isEthereum: false
-  },
-  {
-    accountName: 'Aleph Zero',
-    appName: 'Aleph Zero',
-    networkName: 'Aleph Zero network',
-    genesisHash: ChainInfoMap.aleph.substrateInfo?.genesisHash || '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e',
-    icon: 'substrate',
-    network: 'aleph-node',
-    slug: ChainInfoMap.aleph.slug,
-    isDevMode: false,
-    isEthereum: false
-  },
-  {
-    accountName: 'Astar',
-    appName: 'Astar',
-    networkName: 'Astar network',
-    genesisHash: ChainInfoMap.astar.substrateInfo?.genesisHash || '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
-    icon: 'substrate',
-    network: 'astar',
-    slug: ChainInfoMap.astar.slug,
-    isDevMode: false,
+    isGeneric: true,
     isEthereum: false
   },
   {
@@ -69,7 +28,68 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     icon: 'ethereum',
     slug: ChainInfoMap.ethereum.slug,
     isDevMode: false,
+    isGeneric: true,
     isEthereum: true
+  },
+  {
+    accountName: 'Polkadot',
+    appName: 'Polkadot',
+    networkName: 'Polkadot network',
+    genesisHash: ChainInfoMap.polkadot.substrateInfo?.genesisHash || '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
+    icon: 'substrate',
+    network: 'polkadot',
+    slug: ChainInfoMap.polkadot.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false
+  },
+  {
+    accountName: 'Kusama',
+    appName: 'Kusama',
+    networkName: 'Kusama network',
+    genesisHash: ChainInfoMap.kusama.substrateInfo?.genesisHash || '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
+    icon: 'substrate',
+    network: 'kusama',
+    slug: ChainInfoMap.kusama.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false
+  },
+  {
+    accountName: 'Acala',
+    appName: 'Acala',
+    networkName: 'Acala network',
+    genesisHash: ChainInfoMap.acala.substrateInfo?.genesisHash || '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
+    icon: 'substrate',
+    network: 'acala',
+    slug: ChainInfoMap.acala.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false
+  },
+  {
+    accountName: 'Aleph Zero',
+    appName: 'Aleph Zero',
+    networkName: 'Aleph Zero network',
+    genesisHash: ChainInfoMap.aleph.substrateInfo?.genesisHash || '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e',
+    icon: 'substrate',
+    network: 'aleph-node',
+    slug: ChainInfoMap.aleph.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false
+  },
+  {
+    accountName: 'Astar',
+    appName: 'Astar',
+    networkName: 'Astar network',
+    genesisHash: ChainInfoMap.astar.substrateInfo?.genesisHash || '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
+    icon: 'substrate',
+    network: 'astar',
+    slug: ChainInfoMap.astar.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false
   },
   {
     accountName: 'Karura',
@@ -80,6 +100,7 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     network: 'karura',
     slug: ChainInfoMap.karura.slug,
     isDevMode: false,
+    isGeneric: false,
     isEthereum: false
   },
   {
@@ -91,6 +112,7 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     network: 'edgeware',
     slug: ChainInfoMap.edgeware.slug,
     isDevMode: true,
+    isGeneric: false,
     isEthereum: false
   },
   {
@@ -102,6 +124,7 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     network: 'xxnetwork',
     slug: ChainInfoMap.xx_network.slug,
     isDevMode: true,
+    isGeneric: false,
     isEthereum: false
   },
   {
@@ -113,6 +136,7 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     network: 'polymesh',
     slug: ChainInfoMap.polymesh.slug,
     isDevMode: true,
+    isGeneric: false,
     isEthereum: false
   }
   // {
@@ -150,12 +174,13 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   BLOCK
   *: All network,
   evm: All evm network,
-  substrate: All substrate network
+  substrate: All substrate network,
+  substrate_legacy: All substrate legacy network,
 */
 /// TRANSFER
 export const BLOCK_TRANSFER_NATIVE_LEDGER_NETWORKS: string[] = [];
 export const BLOCK_TRANSFER_TOKEN_LEDGER_NETWORKS: string[] = [];
-export const BLOCK_TRANSFER_XCM_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_TRANSFER_XCM_LEDGER_NETWORKS: string[] = ['substrate_legacy', 'evm'];
 export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['astar'];
 
 /// STAKING
@@ -177,7 +202,7 @@ export const BLOCK_STAKING_CLAIM_REWARD_LEDGER_NETWORKS: string[] = ['evm'];
 export const BLOCK_STAKING_COMPOUNDING_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_STAKING_CANCEL_COMPOUNDING_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_CROWDLOAN_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['substrate'];
 export const BLOCK_UNKNOWN_LEDGER_NETWORKS: string[] = ['*'];
 
 export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {

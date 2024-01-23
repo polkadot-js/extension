@@ -71,14 +71,18 @@ export function useGetChainSlugsByAccountType (address?: string): string[] {
     }
 
     if (account?.isHardware) {
-      const isEthereum = isEthereumAddress(account.address || '');
-
-      if (isEthereum) {
+      if (account.isGeneric) {
         return undefined;
       } else {
-        const availableGen: string[] = account.availableGenesisHashes || [];
+        const isEthereum = isEthereumAddress(account.address || '');
 
-        return availableGen.map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug || '');
+        if (isEthereum) {
+          return undefined;
+        } else {
+          const availableGen: string[] = account.availableGenesisHashes || [];
+
+          return availableGen.map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug || '');
+        }
       }
     } else {
       return undefined;

@@ -67,14 +67,18 @@ export default function useGetNftByAccount () {
 
   const accountNetwork = useMemo(() => {
     if (currentAccount?.isHardware) {
-      const isEthereum = isEthereumAddress(currentAccount.address || '');
-
-      if (isEthereum) {
+      if (currentAccount?.isGeneric) {
         return undefined;
       } else {
-        const availableGen: string[] = currentAccount.availableGenesisHashes || [];
+        const isEthereum = isEthereumAddress(currentAccount.address || '');
 
-        return availableGen.map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug || '');
+        if (isEthereum) {
+          return undefined;
+        } else {
+          const availableGen: string[] = currentAccount.availableGenesisHashes || [];
+
+          return availableGen.map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug || '');
+        }
       }
     } else {
       return undefined;

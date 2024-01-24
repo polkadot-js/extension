@@ -48,6 +48,9 @@ export interface EventRegistry {
   // Buy token
   'buy.tokens.ready': [boolean];
   'buy.services.ready': [boolean];
+
+  // Earning
+  'earning.ready': [boolean];
 }
 
 export type EventType = keyof EventRegistry;

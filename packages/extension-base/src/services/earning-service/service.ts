@@ -3,31 +3,42 @@
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { CRON_REFRESH_EARNING_REWARD_HISTORY_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { PersistDataServiceInterface, ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import BaseLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/base';
+import { EventService } from '@subwallet/extension-base/services/event-service';
+import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { EarningRewardHistoryItem, EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { categoryAddresses } from '@subwallet/extension-base/utils';
+import { addLazy, categoryAddresses, createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
 import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
 
-export default class EarningService {
+export default class EarningService implements StoppableServiceInterface, PersistDataServiceInterface {
   protected readonly state: KoniState;
   protected handlers: Record<string, BasePoolHandler> = {};
   private earningRewardSubject: BehaviorSubject<EarningRewardJson> = new BehaviorSubject<EarningRewardJson>({ ready: false, data: {} });
   private earningRewardHistorySubject: BehaviorSubject<Record<string, EarningRewardHistoryItem>> = new BehaviorSubject<Record<string, EarningRewardHistoryItem>>({});
   private minAmountPercentSubject: BehaviorSubject<Record<string, number>> = new BehaviorSubject<Record<string, number>>({});
 
+  // earning
+  public readonly yieldPoolInfoSubject = new BehaviorSubject<Record<string, YieldPoolInfo>>({});
+  public readonly yieldPositionSubject = new BehaviorSubject<Record<string, YieldPositionInfo>>({});
+
+  private dbService: DatabaseService;
+  private eventService: EventService;
+
   constructor (state: KoniState) {
     this.state = state;
-
-    this.initHandlers().catch(console.error);
+    this.dbService = state.dbService;
+    this.eventService = state.eventService;
   }
 
   private async initHandlers () {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
     const chains: string[] = [];
 
     for (const chain of Object.values(this.state.getChainInfoMap())) {
@@ -99,7 +110,142 @@ export default class EarningService {
     minAmountPercent.default = BaseLiquidStakingPoolHandler.defaultMinAmountPercent;
 
     this.minAmountPercentSubject.next(minAmountPercent);
+
+    // Emit earning ready
+    this.eventService.emit('earning.ready', true);
   }
+
+  startPromiseHandler: PromiseHandler<void> = createPromiseHandler();
+  stopPromiseHandler: PromiseHandler<void> = createPromiseHandler();
+  status: ServiceStatus = ServiceStatus.NOT_INITIALIZED;
+
+  async init (): Promise<void> {
+    this.status = ServiceStatus.INITIALIZING;
+
+    await this.initHandlers();
+
+    // Load data from db
+    await this.loadData();
+
+    this.status = ServiceStatus.INITIALIZED;
+
+    await this.start();
+
+    this.handleActions();
+  }
+
+  handleActions () {
+    this.eventService.onLazy((events, eventTypes) => {
+      (async () => {
+        const updatedChains: string[] = [];
+        const removedAddresses: string[] = [];
+
+        // Account changed or chain changed (active or inactive)
+        if (eventTypes.includes('account.updateCurrent')) {
+          await this.reloadEarning();
+        }
+
+        // Todo: Optimize performance of chain active or inactive in the future
+        // Chain changed (active or inactive)
+        events.forEach((event) => {
+          if (event.type === 'chain.updateState') {
+            updatedChains.push(event.data[0] as string);
+          }
+
+          if (event.type === 'account.remove') {
+            removedAddresses.push(event.data[0] as string);
+          }
+        });
+
+        if (updatedChains.length > 0 || removedAddresses.length > 0) {
+          await this.removeYieldPositions(updatedChains, removedAddresses);
+          await this.reloadEarning();
+        }
+      })().catch(console.error);
+    });
+  }
+
+  async loadData (): Promise<void> {
+    await this.getYieldPoolInfoFromDB();
+    await this.getYieldPositionFromDB();
+  }
+
+  persistData (): Promise<void> {
+    // Data is auto persisted with lazy queue
+    return Promise.resolve(undefined);
+  }
+
+  async start (): Promise<void> {
+    if (this.status === ServiceStatus.STOPPING) {
+      await this.waitForStopped();
+    }
+
+    if (this.status === ServiceStatus.STARTED || this.status === ServiceStatus.STARTING) {
+      return this.waitForStarted();
+    }
+
+    this.status = ServiceStatus.STARTING;
+
+    // Start subscribe pools' info
+    await this.runSubscribePoolsInfo();
+
+    // Start subscribe pools' position
+    await this.runSubscribePoolsPosition();
+
+    // Start subscribe pools' reward
+    this.runSubscribeStakingRewardInterval();
+
+    // Start subscribe pools' reward history
+    this.runSubscribeEarningRewardHistoryInterval();
+
+    // Update promise handler
+    this.startPromiseHandler.resolve();
+    this.stopPromiseHandler = createPromiseHandler();
+
+    this.status = ServiceStatus.STARTED;
+  }
+
+  async stop (): Promise<void> {
+    if (this.status === ServiceStatus.STARTING) {
+      await this.waitForStarted();
+    }
+
+    if (this.status === ServiceStatus.STOPPED || this.status === ServiceStatus.STOPPING) {
+      return this.waitForStopped();
+    }
+
+    this.status = ServiceStatus.STOPPING;
+
+    await this.persistData();
+
+    // Stop subscribe pools' info
+    this.runUnsubscribePoolsInfo();
+
+    // Stop subscribe pools' position
+    this.runUnsubscribePoolsPosition();
+
+    // Stop subscribe pools' reward
+    this.runUnsubscribeStakingRewardInterval();
+
+    // Stop subscribe pools' reward history
+    this.runUnsubscribeEarningRewardHistoryInterval();
+
+    // Update promise handler
+    this.stopPromiseHandler.resolve();
+    this.startPromiseHandler = createPromiseHandler();
+
+    this.status = ServiceStatus.STOPPED;
+  }
+
+  waitForStarted (): Promise<void> {
+    return this.startPromiseHandler.promise;
+  }
+
+  waitForStopped (): Promise<void> {
+    return this.stopPromiseHandler.promise;
+  }
+
+  /* Pools' info methods */
 
   public getPoolHandler (slug: string): BasePoolHandler | undefined {
     return this.handlers[slug];
@@ -123,12 +269,10 @@ export default class EarningService {
     return this.minAmountPercentSubject.getValue();
   }
 
-  /* Subscribe pools' info */
-
   public async subscribePoolsInfo (callback: (rs: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
 
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const unsubList: Array<VoidFunction> = [];
 
@@ -152,14 +296,76 @@ export default class EarningService {
     };
   }
 
-  /* Subscribe pools' info */
+  private async getYieldPoolInfoFromDB () {
+    const existedYieldPoolInfo = await this.dbService.getYieldPools();
 
-  /* Subscribe pools' position */
+    const yieldPoolInfo = this.yieldPoolInfoSubject.getValue();
+
+    existedYieldPoolInfo.forEach((info) => {
+      yieldPoolInfo[info.slug] = info;
+    });
+
+    this.yieldPoolInfoSubject.next(yieldPoolInfo);
+  }
+
+  public subscribeYieldPoolInfo () {
+    return this.yieldPoolInfoSubject;
+  }
+
+  public async getYieldPoolInfo () {
+    await this.eventService.waitEarningReady;
+
+    return Object.values(this.yieldPoolInfoSubject.getValue());
+  }
+
+  private yieldPoolPersistQueue: YieldPoolInfo[] = [];
+
+  public updateYieldPoolInfo (data: YieldPoolInfo) {
+    this.yieldPoolPersistQueue.push(data);
+
+    addLazy('persistYieldPoolInfo', () => {
+      const yieldPoolInfo = this.yieldPoolInfoSubject.getValue();
+
+      const queue = [...this.yieldPoolPersistQueue];
+
+      this.yieldPoolPersistQueue = [];
+
+      // Update yield pool info
+      queue.forEach((item) => {
+        yieldPoolInfo[item.slug] = item;
+      });
+      this.yieldPoolInfoSubject.next(yieldPoolInfo);
+
+      // Persist data
+      this.dbService.updateYieldPoolsStore(queue).catch(console.warn);
+    }, 300, 900);
+  }
+
+  private yieldPoolsInfoUnsub: VoidFunction | undefined;
+
+  async runSubscribePoolsInfo () {
+    await this.eventService.waitChainReady;
+    this.runUnsubscribePoolsInfo();
+
+    this.subscribePoolsInfo((data) => {
+      this.updateYieldPoolInfo(data);
+    }).then((rs) => {
+      this.yieldPoolsInfoUnsub = rs;
+    }).catch(console.error);
+  }
+
+  runUnsubscribePoolsInfo () {
+    this.yieldPoolsInfoUnsub?.();
+  }
+
+  /* Pools' info methods */
+
+  /* Pools' position methods */
 
   public async subscribePoolPositions (addresses: string[], callback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
 
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
     const activeChains = this.state.activeChainSlugs;
@@ -190,7 +396,131 @@ export default class EarningService {
     };
   }
 
-  /* Subscribe pools' position */
+  async removeYieldPositions (chains?: string[], addresses?: string[]) {
+    const removeKeys: string[] = [];
+
+    chains && chains.length > 0 && Object.entries(this.yieldPositionSubject.getValue()).forEach(([key, value]) => {
+      console.log('removeYieldPositions', key, value.chain, chains.indexOf(value.chain) > -1);
+
+      if (chains.indexOf(value.chain) > -1 && !removeKeys.includes(key)) {
+        removeKeys.push(key);
+      }
+    });
+
+    addresses && addresses.length > 0 && Object.entries(this.yieldPositionSubject.getValue()).forEach(([key, value]) => {
+      if (addresses.indexOf(value.address) > -1 && !removeKeys.includes(key)) {
+        removeKeys.push(key);
+      }
+    });
+
+    // Remove by keys
+    const yieldPositionInfo = this.yieldPositionSubject.getValue();
+
+    for (const key of removeKeys) {
+      delete yieldPositionInfo[key];
+    }
+
+    this.yieldPositionSubject.next(yieldPositionInfo);
+    addresses && addresses.length > 0 && await this.dbService.removeYieldPositionByAddresses(addresses);
+    chains && chains.length > 0 && await this.dbService.removeYieldPositionByAddresses(chains);
+  }
+
+  private async getYieldPositionFromDB () {
+    await this.eventService.waitChainReady;
+    await this.eventService.waitKeyringReady;
+
+    const addresses = this.state.getDecodedAddresses();
+
+    const existedYieldPosition = await this.dbService.getYieldNominationPoolPosition(addresses, this.state.activeChainSlugs);
+
+    const yieldPositionInfo = this.yieldPositionSubject.getValue();
+
+    existedYieldPosition.forEach((item) => {
+      yieldPositionInfo[this._getYieldPositionKey(item.slug, item.address)] = item;
+    });
+
+    this.yieldPositionSubject.next(yieldPositionInfo);
+  }
+
+  public subscribeYieldPosition () {
+    return this.yieldPositionSubject;
+  }
+
+  public async getYieldPositionInfo () {
+    await this.eventService.waitEarningReady;
+
+    return Promise.resolve(Object.values(this.yieldPositionSubject.getValue()));
+  }
+
+  yieldPositionPersistQueue: YieldPositionInfo[] = [];
+
+  public resetYieldPositionQueue () {
+    this.yieldPositionPersistQueue = [];
+  }
+
+  public resetYieldPosition () {
+    this.yieldPositionSubject.next({});
+    this.yieldPositionPersistQueue = [];
+  }
+
+  private _getYieldPositionKey (slug: string, address: string): string {
+    return `${slug}---${address}`;
+  }
+
+  public updateYieldPosition (data: YieldPositionInfo) {
+    this.yieldPositionPersistQueue.push(data);
+
+    addLazy('persistYieldPositionInfo', () => {
+      const yieldPositionInfo = this.yieldPositionSubject.getValue();
+      const queue = [...this.yieldPositionPersistQueue];
+
+      this.yieldPositionPersistQueue = [];
+
+      // Update yield position info
+      queue.forEach((item) => {
+        yieldPositionInfo[this._getYieldPositionKey(item.slug, item.address)] = item;
+      });
+      this.yieldPositionSubject.next(yieldPositionInfo);
+
+      // Persist data
+      this.dbService.updateYieldPositions(queue).catch(console.warn);
+    }, 300, 900);
+  }
+
+  async reloadEarning (reset = false): Promise<void> {
+    await this.waitForStarted();
+    this.runUnsubscribePoolsPosition();
+    this.runUnsubscribeStakingRewardInterval();
+    this.runUnsubscribeEarningRewardHistoryInterval();
+
+    reset && this.resetYieldPosition();
+
+    await this.runSubscribePoolsPosition();
+    this.runSubscribeStakingRewardInterval();
+    this.runSubscribeEarningRewardHistoryInterval();
+  }
+
+  private yieldPositionUnsub: VoidFunction | undefined;
+
+  async runSubscribePoolsPosition () {
+    await this.eventService.waitKeyringReady;
+    this.runUnsubscribePoolsPosition();
+
+    const addresses = this.state.getDecodedAddresses();
+
+    this.subscribePoolPositions(addresses, (data) => {
+      this.updateYieldPosition(data);
+    }).then((rs) => {
+      this.yieldPositionUnsub = rs;
+    }).catch(console.error);
+  }
+
+  runUnsubscribePoolsPosition () {
+    this.yieldPositionUnsub?.();
+    this.yieldPositionPersistQueue = [];
+  }
+
+  /* Pools' position methods */
 
   /* Get pools' reward */
 
@@ -208,7 +538,7 @@ export default class EarningService {
   public async getPoolReward (addresses: string[], callback: (result: EarningRewardItem) => void): Promise<VoidFunction> {
     let cancel = false;
 
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
     const activeChains = this.state.activeChainSlugs;
@@ -247,10 +577,30 @@ export default class EarningService {
     return this.earningRewardSubject.getValue();
   }
 
+  earningsRewardInterval: NodeJS.Timer | undefined;
+
+  runSubscribeStakingRewardInterval () {
+    const addresses = this.state.getDecodedAddresses();
+
+    if (!addresses.length) {
+      return;
+    }
+
+    this.earningsRewardInterval = setInterval(() => {
+      this.getPoolReward(addresses, (result: EarningRewardItem) => {
+        this.updateEarningReward(result);
+      }).catch(console.error);
+    }, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
+  }
+
+  runUnsubscribeStakingRewardInterval () {
+    this.earningsRewardInterval && clearInterval(this.earningsRewardInterval);
+  }
+
   public async fetchPoolRewardHistory (addresses: string[], callback: (result: EarningRewardHistoryItem) => void): Promise<VoidFunction> {
     let cancel = false;
 
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
     const activeChains = this.state.activeChainSlugs;
@@ -299,6 +649,27 @@ export default class EarningService {
     return this.earningRewardHistorySubject.getValue();
   }
 
+  earningsRewardHistoryInterval: NodeJS.Timer | undefined;
+
+  runSubscribeEarningRewardHistoryInterval () {
+    this.runUnsubscribeEarningRewardHistoryInterval();
+    const addresses = this.state.getDecodedAddresses();
+
+    if (!addresses.length) {
+      return;
+    }
+
+    this.earningsRewardHistoryInterval = setInterval(() => {
+      this.fetchPoolRewardHistory(addresses, (result: EarningRewardHistoryItem) => {
+        this.updateEarningRewardHistory(result);
+      }).catch(console.error);
+    }, CRON_REFRESH_EARNING_REWARD_HISTORY_INTERVAL);
+  }
+
+  runUnsubscribeEarningRewardHistoryInterval () {
+    this.earningsRewardHistoryInterval && clearInterval(this.earningsRewardHistoryInterval);
+  }
+
   /* Get pools' reward */
 
   /* Get pool's targets */
@@ -310,7 +681,7 @@ export default class EarningService {
    * @return {Promise<YieldPoolTarget[]>} List of pool's target
    * */
   public async getPoolTargets (slug: string): Promise<YieldPoolTarget[]> {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const handler = this.getPoolHandler(slug);
 
@@ -328,7 +699,7 @@ export default class EarningService {
   /* Join */
 
   public async earlyValidateJoin (request: RequestEarlyValidateYield): Promise<ResponseEarlyValidateYield> {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const { slug } = request;
     const handler = this.getPoolHandler(slug);
@@ -341,7 +712,7 @@ export default class EarningService {
   }
 
   public async generateOptimalSteps (params: OptimalYieldPathParams): Promise<OptimalYieldPath> {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const { slug } = params;
     const handler = this.getPoolHandler(slug);
@@ -354,7 +725,7 @@ export default class EarningService {
   }
 
   public async validateYieldJoin (params: ValidateYieldProcessParams): Promise<TransactionError[]> {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const { slug } = params.data;
     const handler = this.getPoolHandler(slug);
@@ -367,7 +738,7 @@ export default class EarningService {
   }
 
   public async handleYieldJoin (params: HandleYieldStepParams): Promise<HandleYieldStepData> {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const { slug } = params.data;
     const handler = this.getPoolHandler(slug);
@@ -384,7 +755,7 @@ export default class EarningService {
   /* Leave */
 
   public async validateYieldLeave (params: RequestYieldLeave): Promise<TransactionError[]> {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const { slug } = params;
     const handler = this.getPoolHandler(slug);
@@ -397,7 +768,7 @@ export default class EarningService {
   }
 
   public async handleYieldLeave (params: RequestYieldLeave): Promise<[ExtrinsicType, TransactionData]> {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const { slug } = params;
     const handler = this.getPoolHandler(slug);
@@ -414,7 +785,7 @@ export default class EarningService {
   /* Other */
 
   public async handleYieldWithdraw (params: RequestYieldWithdrawal): Promise<TransactionData> {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const { slug } = params;
     const handler = this.getPoolHandler(slug);
@@ -427,7 +798,7 @@ export default class EarningService {
   }
 
   public async handleYieldCancelUnstake (params: RequestStakeCancelWithdrawal): Promise<TransactionData> {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const { slug } = params;
     const handler = this.getPoolHandler(slug);
@@ -440,7 +811,7 @@ export default class EarningService {
   }
 
   public async handleYieldClaimReward (params: RequestStakeClaimReward): Promise<TransactionData> {
-    await this.state.eventService.waitChainReady;
+    await this.eventService.waitChainReady;
 
     const { slug } = params;
     const handler = this.getPoolHandler(slug);

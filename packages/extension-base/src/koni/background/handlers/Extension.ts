@@ -3855,9 +3855,9 @@ export default class KoniExtension {
   private subscribeYieldPoolInfo (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(yield.subscribePoolInfo)'>(id, port);
 
-    const yieldPoolSubscription = this.#koniState.subscribeYieldPoolInfo().subscribe({
+    const yieldPoolSubscription = this.#koniState.earningService.subscribeYieldPoolInfo().subscribe({
       next: (rs) => {
-        cb(rs);
+        cb(Object.values(rs));
       }
     });
 
@@ -3867,7 +3867,7 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return this.#koniState.getYieldPoolInfo();
+    return this.#koniState.earningService.getYieldPoolInfo();
   }
 
   private async earlyValidateJoin (request: RequestEarlyValidateYield) {
@@ -3952,9 +3952,9 @@ export default class KoniExtension {
   private async subscribeYieldPosition (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(yield.subscribeYieldPosition)'>(id, port);
 
-    const yieldPositionSubscription = this.#koniState.subscribeYieldPosition().subscribe({
+    const yieldPositionSubscription = this.#koniState.earningService.subscribeYieldPosition().subscribe({
       next: (rs) => {
-        cb(rs);
+        cb(Object.values(rs));
       }
     });
 
@@ -3964,7 +3964,7 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return this.#koniState.getYieldPositionInfo();
+    return await this.#koniState.earningService.getYieldPositionInfo();
   }
 
   private subscribeYieldReward (id: string, port: chrome.runtime.Port): EarningRewardJson | null {

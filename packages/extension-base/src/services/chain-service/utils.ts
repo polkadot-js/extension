@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset, _SubstrateChainType } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _MultiChainAsset, _SubstrateChainType } from '@subwallet/chain-list/types';
 import { BasicTokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
-import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _CUSTOM_PREFIX, _DataMap, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
+import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -425,4 +426,67 @@ export const findChainInfoByChainId = (chainMap: Record<string, _ChainInfo>, cha
 
 export function _isMantaZkAsset (chainAsset: _ChainAsset) {
   return _MANTA_ZK_CHAIN_GROUP.includes(chainAsset.originChain) && chainAsset.symbol.startsWith(_ZK_ASSET_PREFIX);
+}
+
+export function randomizeProvider (providers: Record<string, string>, excludedKeys?: string[]) {
+  if (Object.keys(providers).length === 0) {
+    return {
+      providerKey: '',
+      providerValue: ''
+    };
+  }
+
+  let isValid = false;
+  let selectedProviderKey = '';
+  let selectedProviderValue = '';
+
+  while (!isValid) {
+    const randomProvider = Math.floor(Math.random() * (Object.keys(providers).length));
+
+    selectedProviderKey = Object.keys(providers)[randomProvider];
+    selectedProviderValue = providers[selectedProviderKey];
+
+    if (!selectedProviderValue?.startsWith('light') && !excludedKeys?.includes(selectedProviderKey)) { // if it's light client, then re-randomize
+      isValid = true;
+    }
+  }
+
+  return {
+    providerKey: selectedProviderKey,
+    providerValue: selectedProviderValue
+  };
+}
+
+export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfoList: _ChainInfo[]) {
+  const currentChainInfoMap = currentDataMap.chainInfoMap;
+  const currentChainStateMap = currentDataMap.chainStateMap;
+  const storedChainInfoList: IChain[] = [];
+  const needUpdateChainApiList: _ChainInfo[] = [];
+
+  latestChainInfoList.forEach((latestChainInfo) => {
+    const currentChainInfo = currentChainInfoMap[latestChainInfo.slug];
+    const currentChainState = currentChainStateMap[latestChainInfo.slug];
+
+    if (currentChainInfo && currentChainState) {
+      currentChainInfo.providers = latestChainInfo.providers;
+
+      if (currentChainInfo.chainStatus === _ChainStatus.ACTIVE && !Object.keys(currentChainInfo.providers).includes(currentChainState.currentProvider)) {
+        const { providerKey } = randomizeProvider(currentChainInfo.providers);
+
+        currentChainState.currentProvider = providerKey;
+
+        needUpdateChainApiList.push(currentChainInfo);
+      }
+
+      storedChainInfoList.push({
+        ...currentChainInfo,
+        ...currentChainState
+      });
+    }
+  });
+
+  return {
+    storedChainInfoList,
+    needUpdateChainApiList
+  };
 }

@@ -346,7 +346,8 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
       extrinsicType: ExtrinsicType.TOKEN_APPROVE,
       extrinsic: transactionObject,
       txData: _data,
-      transferNativeAmount: '0'
+      transferNativeAmount: '0',
+      chainType: ChainType.EVM
     });
   }
 
@@ -380,7 +381,8 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
       extrinsicType: ExtrinsicType.MINT_STDOT,
       extrinsic: transactionObject,
       txData: data,
-      transferNativeAmount: '0'
+      transferNativeAmount: '0',
+      chainType: ChainType.EVM
     };
   }
 

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getAssetDecimals, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -359,7 +359,8 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
       extrinsicType: ExtrinsicType.MINT_VDOT,
       extrinsic,
       txData: data,
-      transferNativeAmount: '0'
+      transferNativeAmount: '0',
+      chainType: ChainType.SUBSTRATE
     };
   }
 

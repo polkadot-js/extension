@@ -3,10 +3,11 @@
 
 import { convertDerivativeToOriginToken } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { RequestYieldLeave, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { CommonTransactionInfo, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -15,7 +16,7 @@ import { BaseTransactionConfirmationProps } from './Base';
 type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, transaction } = props;
+  const { transaction } = props;
   const { t } = useTranslation();
 
   const { estimateFee } = transaction;
@@ -52,7 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [amount, assetRegistry, yieldPoolInfo]);
 
   return (
-    <div className={CN(className)}>
+    <>
       <CommonTransactionInfo
         address={transaction.address}
         network={transaction.chain}
@@ -86,11 +87,25 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         )}
       </MetaInfo>
-    </div>
+    </>
   );
 };
 
-const DefaultWithdrawTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Wrapper = (props: Props) => {
+  const dataContext = useContext(DataContext);
+
+  return (
+    <PageWrapper
+      className={CN(props.className)}
+      hideLoading={true}
+      resolve={dataContext.awaitStores(['earning'])}
+    >
+      <Component {...props} />
+    </PageWrapper>
+  );
+};
+
+const DefaultWithdrawTransactionConfirmation = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
 
   };

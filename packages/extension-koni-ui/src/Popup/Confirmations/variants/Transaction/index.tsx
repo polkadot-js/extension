@@ -6,7 +6,7 @@ import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ConfirmationQueueItem } from '@subwallet/extension-koni-ui/stores/base/RequestState';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AlertDialogProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -17,6 +17,8 @@ import { BaseTransactionConfirmation, BondTransactionConfirmation, CancelUnstake
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;
+  openAlert: (alertProps: AlertDialogProps) => void;
+  closeAlert: VoidFunction;
 }
 
 const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTransactionConfirmation => {
@@ -67,7 +69,8 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
 };
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, confirmation: { item, type } } = props;
+  const { className, closeAlert, confirmation: { item, type },
+    openAlert } = props;
   const { id } = item;
 
   const { transactionRequest } = useSelector((state: RootState) => state.requestState);
@@ -79,8 +82,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
     const Component = getTransactionComponent(extrinsicType);
 
-    return <Component transaction={transaction} />;
-  }, []);
+    return (
+      <Component
+        closeAlert={closeAlert}
+        openAlert={openAlert}
+        transaction={transaction}
+      />
+    );
+  }, [closeAlert, openAlert]);
 
   return (
     <>

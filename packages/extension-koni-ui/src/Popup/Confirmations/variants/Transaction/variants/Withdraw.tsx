@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RequestYieldWithdrawal } from '@subwallet/extension-base/types';
+import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetChainAssetInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -16,7 +18,7 @@ import { BaseTransactionConfirmationProps } from './Base';
 type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, transaction } = props;
+  const { transaction } = props;
   const { t } = useTranslation();
 
   const data = transaction.data as RequestYieldWithdrawal;
@@ -33,7 +35,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const amountSymbol = inputAsset?.symbol || '';
 
   return (
-    <div className={CN(className)}>
+    <>
       <CommonTransactionInfo
         address={transaction.address}
         network={transaction.chain}
@@ -56,11 +58,25 @@ const Component: React.FC<Props> = (props: Props) => {
           value={transaction.estimateFee?.value || 0}
         />
       </MetaInfo>
-    </div>
+    </>
   );
 };
 
-const WithdrawTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Wrapper = (props: Props) => {
+  const dataContext = useContext(DataContext);
+
+  return (
+    <PageWrapper
+      className={CN(props.className)}
+      hideLoading={true}
+      resolve={dataContext.awaitStores(['earning'])}
+    >
+      <Component {...props} />
+    </PageWrapper>
+  );
+};
+
+const WithdrawTransactionConfirmation = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {};
 });
 

@@ -19,6 +19,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <SwModal
         className={CN(className)}
         closable={false}
+        destroyOnClose={true}
         footer={
           <div className={'__modal-button'}>
             {!!cancelButton &&

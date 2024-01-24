@@ -6,12 +6,12 @@ import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/se
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AlertBox, AlertModal, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
 import { EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
-import { useAlert, useFetchChainState, useGetBalance, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
@@ -19,7 +19,7 @@ import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/ca
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, formatBalance, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -38,15 +38,19 @@ const hideFields: Array<keyof EarnParams> = ['slug', 'chain', 'asset'];
 const validateFields: Array<keyof EarnParams> = ['from'];
 const loadingStepPromiseKey = 'earning.step.loading';
 
-const alertModalId = 'earn-transaction-alert-modal';
 const instructionModalId = EARNING_INSTRUCTION_MODAL;
+
+// Not enough balance to xcm;
+export const insufficientXCMMessages = ['You can only enter a maximum'];
 
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
   const { activeModal } = useContext(ModalContext);
 
-  const { defaultData, goBack, onDone, persistData, setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
+  const { closeAlert, defaultData, goBack, onDone,
+    openAlert, persistData,
+    setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
 
   const { slug } = defaultData;
 
@@ -55,7 +59,6 @@ const Component = () => {
   const { poolInfoMap, poolTargetsMap } = useSelector((state) => state.earning);
   const { assetRegistry: chainAsset } = useSelector((state) => state.assetRegistry);
   const { priceMap } = useSelector((state) => state.price);
-  const { assetRegistry } = useSelector((state) => state.assetRegistry);
 
   const [form] = Form.useForm<EarnParams>();
   const formDefault = useMemo((): EarnParams => ({ ...defaultData }), [defaultData]);
@@ -64,6 +67,8 @@ const Component = () => {
   const amountValue = useWatchTransaction('value', form, defaultData);
   const chainValue = useWatchTransaction('chain', form, defaultData);
   const poolTarget = useWatchTransaction('target', form, defaultData);
+
+  const nativeTokenSlug = useGetNativeTokenSlug(chainValue);
 
   const isClickInfoButtonRef = useRef<boolean>(false);
 
@@ -89,7 +94,6 @@ const Component = () => {
   const [, setCanMint] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [checkMintLoading, setCheckMintLoading] = useState(false);
-  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
   const [isFormInvalid, setIsFormInvalid] = useState(true);
 
   const chainState = useFetchChainState(poolInfo.chain);
@@ -142,6 +146,9 @@ const Component = () => {
     () => chainAsset[poolInfo.metadata.inputAsset],
     [chainAsset, poolInfo.metadata.inputAsset]
   );
+
+  const nativeAsset = useMemo(() => chainAsset[nativeTokenSlug], [chainAsset, nativeTokenSlug]);
+
   const assetDecimals = inputAsset ? _getAssetDecimals(inputAsset) : 0;
   const priceValue = priceMap[inputAsset.priceId || ''] || 0;
   const convertValue = amountValue ? parseFloat(amountValue) / 10 ** assetDecimals : 0;
@@ -230,30 +237,17 @@ const Component = () => {
     persistData(values);
   }, [persistData]);
 
-  const existentialDeposit = useMemo(() => {
-    const assetInfo = Object.values(assetRegistry).find((v) => v.originChain === chainValue);
-
-    if (assetInfo) {
-      return assetInfo.minAmount || '0';
-    }
-
-    return '0';
-  }, [assetRegistry, chainValue]);
-
   const handleDataForInsufficientAlert = useCallback(() => {
+    const _assetDecimals = nativeAsset.decimals || 0;
+    const existentialDeposit = nativeAsset.minAmount || '0';
+
     return {
-      existentialDeposit: formatBalance(existentialDeposit, assetDecimals),
-      availableBalance: formatBalance(nativeTokenBalance.value, assetDecimals),
-      maintainBalance: formatBalance(poolInfo.metadata.maintainBalance || '0', assetDecimals) || '0',
-      symbol: inputAsset.symbol
+      existentialDeposit: getInputValuesFromString(existentialDeposit, _assetDecimals),
+      availableBalance: getInputValuesFromString(nativeTokenBalance.value, _assetDecimals),
+      maintainBalance: getInputValuesFromString(poolInfo.metadata.maintainBalance || '0', _assetDecimals),
+      symbol: nativeAsset.symbol
     };
-  }, [
-    assetDecimals,
-    existentialDeposit,
-    inputAsset.symbol,
-    nativeTokenBalance.value,
-    poolInfo.metadata.maintainBalance
-  ]);
+  }, [nativeAsset, nativeTokenBalance.value, poolInfo.metadata.maintainBalance]);
 
   const onError = useCallback(
     (error: Error) => {
@@ -261,6 +255,23 @@ const Component = () => {
         openAlert({
           title: t('Insufficient balance'),
           content: t('Your available balance is {{availableBalance}} {{symbol}}, you need to leave {{existentialDeposit}} {{symbol}} as minimal balance (existential deposit) and pay network fees. Make sure you have at least {{maintainBalance}} {{symbol}} in your transferable balance to proceed.', { replace: { ...handleDataForInsufficientAlert() } }),
+          okButton: {
+            text: t('I understand'),
+            onClick: () => {
+              closeAlert();
+            }
+          }
+        });
+        dispatchProcessState({
+          type: EarningActionType.STEP_ERROR_ROLLBACK,
+          payload: error
+        });
+
+        return;
+      } else if (insufficientXCMMessages.some((v) => error.message.includes(v))) {
+        openAlert({
+          title: t('Insufficient balance'),
+          content: error.message,
           okButton: {
             text: t('I understand'),
             onClick: () => {
@@ -852,15 +863,6 @@ const Component = () => {
         openAlert={openAlert}
         slug={slug}
       />
-
-      {
-        !!alertProps && (
-          <AlertModal
-            modalId={alertModalId}
-            {...alertProps}
-          />
-        )
-      }
     </>
   );
 };

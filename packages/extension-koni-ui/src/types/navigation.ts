@@ -1,14 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// token
-
 import { EarningEntryView } from '@subwallet/extension-koni-ui/types/earning';
+
+// token
 
 export type TokenDetailParam = {
   symbol: string,
   tokenGroup?: string,
   tokenSlug?: string,
+};
+
+// settings
+
+export type ManageChainsParam = {
+  defaultSearch: string,
 };
 
 // manage website access

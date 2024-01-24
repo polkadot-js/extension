@@ -52,7 +52,7 @@ const Component = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { defaultData, onDone, persistData } = useTransactionContext<WithdrawParams>();
+  const { defaultData, persistData } = useTransactionContext<WithdrawParams>();
   const { slug } = defaultData;
 
   const [form] = Form.useForm<WithdrawParams>();
@@ -107,7 +107,6 @@ const Component = () => {
     return '0';
   }, [assetRegistry, chainValue]);
 
-  // @ts-ignore
   const handleDataForInsufficientAlert = useCallback(
     (estimateFee: AmountData) => {
       return {
@@ -120,7 +119,7 @@ const Component = () => {
     [existentialDeposit, nativeTokenBalance.value, poolInfo.metadata.maintainBalance]
   );
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+  const { onError, onSuccess } = useHandleSubmitTransaction(undefined, handleDataForInsufficientAlert);
 
   const unstakingInfo = useMemo((): UnstakingInfo | undefined => {
     if (fromValue && !isAccountAll(fromValue) && !!yieldPosition) {

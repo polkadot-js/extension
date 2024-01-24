@@ -48,7 +48,7 @@ const Component = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { defaultData, onDone, persistData } = useTransactionContext<CancelUnStakeParams>();
+  const { defaultData, persistData } = useTransactionContext<CancelUnStakeParams>();
   const { slug } = defaultData;
 
   const [form] = Form.useForm<CancelUnStakeParams>();
@@ -100,7 +100,7 @@ const Component = () => {
     persistData(values);
   }, [persistData]);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+  const { onError, onSuccess } = useHandleSubmitTransaction();
 
   const onSubmit: FormCallbacks<CancelUnStakeParams>['onFinish'] = useCallback((values: CancelUnStakeParams) => {
     if (!positionInfo) {

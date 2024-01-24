@@ -46,7 +46,7 @@ const Component: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { defaultData, onDone, persistData } = useTransactionContext<SendNftParams>();
+  const { defaultData, persistData } = useTransactionContext<SendNftParams>();
 
   const { collectionId, itemId } = defaultData;
 
@@ -87,7 +87,7 @@ const Component: React.FC = () => {
   const addressPrefix = useGetChainPrefixBySlug(chain);
   const chainGenesisHash = chainInfoMap[chain]?.substrateInfo?.genesisHash || '';
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+  const { onError, onSuccess } = useHandleSubmitTransaction();
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);

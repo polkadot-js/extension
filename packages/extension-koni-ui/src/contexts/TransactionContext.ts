@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
+import { AlertDialogProps, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps } from '@subwallet/react-ui';
 import React, { Dispatch, SetStateAction } from 'react';
 
@@ -16,6 +16,10 @@ export interface TransactionContextProps {
     disabled: boolean,
     onClick: null | VoidFunction
   }>>;
+  openAlert: (alertProps: AlertDialogProps) => void;
+  closeAlert: VoidFunction;
+  openRecheckChainConnectionModal: (chainName: string) => void;
+  closeRecheckChainConnectionModal: VoidFunction;
 }
 
 export const TransactionContext = React.createContext<TransactionContextProps>({
@@ -30,5 +34,13 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   goBack: () => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setBackProps: () => {}
+  setBackProps: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  openAlert: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  closeAlert: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  openRecheckChainConnectionModal: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  closeRecheckChainConnectionModal: () => {}
 });

@@ -53,7 +53,7 @@ const validateFields: Array<keyof UnStakeParams> = ['value'];
 const Component: React.FC = () => {
   const { t } = useTranslation();
 
-  const { defaultData, onDone, persistData } = useTransactionContext<UnStakeParams>();
+  const { defaultData, persistData } = useTransactionContext<UnStakeParams>();
   const { slug } = defaultData;
 
   const { accounts, isAllAccount } = useSelector((state) => state.accountState);
@@ -178,7 +178,6 @@ const Component: React.FC = () => {
     }
   }, [poolInfo.statistic, t]);
 
-  // @ts-ignore
   const handleDataForInsufficientAlert = useCallback(
     (estimateFee: AmountData) => {
       return {
@@ -193,7 +192,7 @@ const Component: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+  const { onError, onSuccess } = useHandleSubmitTransaction(undefined, handleDataForInsufficientAlert);
 
   const onValuesChange: FormCallbacks<UnStakeParams>['onValuesChange'] = useCallback((changes: Partial<UnStakeParams>, values: UnStakeParams) => {
     const { from, validator, value } = changes;

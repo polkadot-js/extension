@@ -43,7 +43,7 @@ const apyOrdinal = (group: YieldGroupInfo): number => {
   return !group.maxApy ? -1 : group.maxApy;
 };
 
-// todo: will more chain connection logic to a shared component
+// todo: will move chain connection logic to a shared component
 
 const connectChainModalId = 'earning-options-connect-chain-modal';
 const chainConnectionLoadingModalId = 'earning-options-chain-connection-loading-modalId';

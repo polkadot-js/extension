@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AlertModal, Layout, PageWrapper, RecheckChainConnectionModal } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_TRANSACTION_PARAMS, TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
-import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { Theme, ThemeProps, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
+import { useAlert, useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { ManageChainsParam, Theme, ThemeProps, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
 import { detectTransactionPersistKey } from '@subwallet/extension-koni-ui/utils';
-import { ButtonProps, SwSubHeader } from '@subwallet/react-ui';
+import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -18,16 +18,22 @@ import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
   title: string,
-
   transactionType: string
 }
+
+const recheckChainConnectionModalId = 'recheck-chain-connection-modal-id';
+const alertModalId = 'transaction-alert-modal-id';
 
 function Component ({ className }: Props) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const dataContext = useContext(DataContext);
+
+  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
+  const [recheckingChain, setRecheckingChain] = useState<string | undefined>();
 
   const transactionType = useMemo((): ExtrinsicType => {
     const pathName = location.pathname;
@@ -119,33 +125,78 @@ function Component ({ className }: Props) {
     [from, chain, navigate]
   );
 
+  const openRecheckChainConnectionModal = useCallback((chainName: string) => {
+    setRecheckingChain(chainName);
+    activeModal(recheckChainConnectionModalId);
+  }, [activeModal]);
+
+  const closeRecheckChainConnectionModal = useCallback(() => {
+    inactiveModal(recheckChainConnectionModalId);
+  }, [inactiveModal]);
+
+  const onClickConfirmOnRecheckChainConnectionModal = useCallback(() => {
+    if (recheckingChain) {
+      navigate('/settings/chains/manage', { state: { defaultSearch: recheckingChain } as ManageChainsParam });
+    }
+  }, [navigate, recheckingChain]);
+
   useEffect(() => {
     chain !== '' && chainChecker(chain);
   }, [chain, chainChecker]);
 
   return (
-    <Layout.Home
-      showFilterIcon
-      showTabBar={false}
-    >
-      <TransactionContext.Provider value={{ defaultData, needPersistData, persistData: setStorage, onDone, setSubHeaderRightButtons, goBack, setBackProps }}>
-        <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
-          <div className={CN(className, 'transaction-wrapper')}>
-            <SwSubHeader
-              background={'transparent'}
-              center
-              className={'transaction-header'}
-              disableBack={disableBack}
-              onBack={onClickBack || goBack}
-              rightButtons={subHeaderRightButtons}
-              showBackButton
-              title={titleMap[transactionType]}
-            />
-            <Outlet />
-          </div>
-        </PageWrapper>
-      </TransactionContext.Provider>
-    </Layout.Home>
+    <>
+      <Layout.Home
+        showFilterIcon
+        showTabBar={false}
+      >
+        <TransactionContext.Provider value={{
+          defaultData,
+          needPersistData,
+          persistData: setStorage,
+          onDone,
+          setSubHeaderRightButtons,
+          goBack,
+          setBackProps,
+          closeAlert,
+          openAlert,
+          openRecheckChainConnectionModal,
+          closeRecheckChainConnectionModal
+        }}
+        >
+          <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
+            <div className={CN(className, 'transaction-wrapper')}>
+              <SwSubHeader
+                background={'transparent'}
+                center
+                className={'transaction-header'}
+                disableBack={disableBack}
+                onBack={onClickBack || goBack}
+                rightButtons={subHeaderRightButtons}
+                showBackButton
+                title={titleMap[transactionType]}
+              />
+              <Outlet />
+            </div>
+          </PageWrapper>
+        </TransactionContext.Provider>
+      </Layout.Home>
+
+      <RecheckChainConnectionModal
+        modalId={recheckChainConnectionModalId}
+        onCancel={closeRecheckChainConnectionModal}
+        onClickConfirm={onClickConfirmOnRecheckChainConnectionModal}
+      />
+
+      {
+        !!alertProps && (
+          <AlertModal
+            modalId={alertModalId}
+            {...alertProps}
+          />
+        )
+      }
+    </>
   );
 }
 

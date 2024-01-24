@@ -89,7 +89,7 @@ const filterAccount = (
 const Component = () => {
   const navigate = useNavigate();
 
-  const { defaultData, onDone, persistData } = useTransactionContext<ClaimRewardParams>();
+  const { defaultData, persistData } = useTransactionContext<ClaimRewardParams>();
   const { slug } = defaultData;
 
   const [form] = Form.useForm<ClaimRewardParams>();
@@ -125,7 +125,6 @@ const Component = () => {
     return '0';
   }, [assetRegistry, chainValue]);
 
-  // @ts-ignore
   const handleDataForInsufficientAlert = useCallback(
     (estimateFee: AmountData) => {
       return {
@@ -138,7 +137,7 @@ const Component = () => {
     [existentialDeposit, nativeTokenBalance.value, poolInfo.metadata.maintainBalance]
   );
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+  const { onError, onSuccess } = useHandleSubmitTransaction(undefined, handleDataForInsufficientAlert);
 
   const reward = useMemo((): EarningRewardItem | undefined => {
     return earningRewards.find((item) => item.slug === slug && item.address === fromValue);

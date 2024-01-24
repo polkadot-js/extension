@@ -34,7 +34,7 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionE
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { createTransactionFromRLP, recalculateGasPrice, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -3852,9 +3852,10 @@ export default class KoniExtension {
     return true;
   }
 
-  private subscribeYieldPoolInfo (id: string, port: chrome.runtime.Port) {
+  private async subscribeYieldPoolInfo (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(yield.subscribePoolInfo)'>(id, port);
 
+    await this.#koniState.earningService.waitForStarted();
     const yieldPoolSubscription = this.#koniState.earningService.subscribeYieldPoolInfo().subscribe({
       next: (rs) => {
         cb(Object.values(rs));
@@ -3941,6 +3942,7 @@ export default class KoniExtension {
   private async getYieldPoolTargets (request: RequestGetYieldPoolTargets): Promise<ResponseGetYieldPoolTargets> {
     const { slug } = request;
 
+    await this.#koniState.earningService.waitForStarted();
     const targets = await this.#koniState.earningService.getPoolTargets(slug);
 
     return {
@@ -3952,6 +3954,7 @@ export default class KoniExtension {
   private async subscribeYieldPosition (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(yield.subscribeYieldPosition)'>(id, port);
 
+    await this.#koniState.earningService.waitForStarted();
     const yieldPositionSubscription = this.#koniState.earningService.subscribeYieldPosition().subscribe({
       next: (rs) => {
         cb(Object.values(rs));
@@ -3967,8 +3970,10 @@ export default class KoniExtension {
     return await this.#koniState.earningService.getYieldPositionInfo();
   }
 
-  private subscribeYieldReward (id: string, port: chrome.runtime.Port): EarningRewardJson | null {
+  private async subscribeYieldReward (id: string, port: chrome.runtime.Port): Promise<EarningRewardJson | null> {
     const cb = createSubscription<'pri(yield.subscribeYieldReward)'>(id, port);
+
+    await this.#koniState.earningService.waitForStarted();
     const stakingRewardSubscription = this.#koniState.earningService.subscribeEarningReward().subscribe({
       next: (rs) => {
         cb(rs);
@@ -3984,8 +3989,10 @@ export default class KoniExtension {
     return this.#koniState.earningService.getEarningRewards();
   }
 
-  private subscribeYieldRewardHistory (id: string, port: chrome.runtime.Port): Record<string, EarningRewardHistoryItem> {
+  private async subscribeYieldRewardHistory (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(yield.subscribeRewardHistory)'>(id, port);
+
+    await this.#koniState.earningService.waitForStarted();
     const rewardHistorySubscription = this.#koniState.earningService.subscribeEarningRewardHistory().subscribe({
       next: (rs) => {
         cb(rs);
@@ -4001,8 +4008,10 @@ export default class KoniExtension {
     return this.#koniState.earningService.getEarningRewardHistory();
   }
 
-  private subscribeEarningMinAmountPercent (id: string, port: chrome.runtime.Port): Record<string, number> {
+  private async subscribeEarningMinAmountPercent (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(yield.minAmountPercent)'>(id, port);
+
+    await this.#koniState.earningService.waitForStarted();
     const earningMinAmountPercentSubscription = this.#koniState.earningService.subscribeMinAmountPercent().subscribe({
       next: (rs) => {
         cb(rs);

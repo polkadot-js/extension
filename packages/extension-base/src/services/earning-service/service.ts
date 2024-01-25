@@ -422,7 +422,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
     this.yieldPositionSubject.next(yieldPositionInfo);
     addresses && addresses.length > 0 && await this.dbService.removeYieldPositionByAddresses(addresses);
-    chains && chains.length > 0 && await this.dbService.removeYieldPositionByAddresses(chains);
+    chains && chains.length > 0 && await this.dbService.removeYieldPositionByChains(chains);
   }
 
   private async getYieldPositionFromDB () {
@@ -586,6 +586,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
       return;
     }
 
+    this.getPoolReward(addresses, (result: EarningRewardItem) => {
+      this.updateEarningReward(result);
+    }).catch(console.error);
+
     this.earningsRewardInterval = setInterval(() => {
       this.getPoolReward(addresses, (result: EarningRewardItem) => {
         this.updateEarningReward(result);
@@ -658,6 +662,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
     if (!addresses.length) {
       return;
     }
+
+    this.fetchPoolRewardHistory(addresses, (result: EarningRewardHistoryItem) => {
+      this.updateEarningRewardHistory(result);
+    }).catch(console.error);
 
     this.earningsRewardHistoryInterval = setInterval(() => {
       this.fetchPoolRewardHistory(addresses, (result: EarningRewardHistoryItem) => {

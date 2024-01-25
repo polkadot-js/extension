@@ -13,9 +13,24 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { EarningRewardHistoryItem, EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { addLazy, categoryAddresses, createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
+import fetch from 'cross-fetch';
 import { BehaviorSubject } from 'rxjs';
 
 import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
+
+const POOLS_DATA_URLS = 'https://sw-static-cache.pages.dev/earning/yield-pools.json';
+
+const fetchPoolsData = async () => {
+  const res = await fetch(POOLS_DATA_URLS);
+
+  if (res.status !== 200) {
+    return {};
+  }
+
+  const fetchData = (await res.json()) as {data: Record<string, YieldPoolInfo>};
+
+  return fetchData.data;
+};
 
 export default class EarningService implements StoppableServiceInterface, PersistDataServiceInterface {
   protected readonly state: KoniState;
@@ -173,7 +188,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
   }
 
   async loadData (): Promise<void> {
-    await this.getYieldPoolInfoFromDB();
+    // await this.getYieldPoolInfoFromDB();
     await this.getYieldPositionFromDB();
   }
 
@@ -287,18 +302,33 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
     await this.eventService.waitChainReady;
 
+    // Get online pool data
+    const onlinePoolData = await Promise.race([fetchPoolsData(), new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({});
+      }, 3000);
+    })]) as Record<string, YieldPoolInfo>;
+
+    console.log('onlinePoolData', onlinePoolData);
+
+    this.yieldPoolInfoSubject.next(onlinePoolData);
+
     const unsubList: Array<VoidFunction> = [];
 
     for (const handler of Object.values(this.handlers)) {
-      handler.subscribePoolInfo(callback)
-        .then((unsub) => {
-          if (cancel) {
-            unsub();
-          } else {
-            unsubList.push(unsub);
-          }
-        })
-        .catch(console.error);
+      if (!onlinePoolData[handler.slug]) {
+        console.log('Fetch Direct', onlinePoolData);
+
+        handler.subscribePoolInfo(callback)
+          .then((unsub) => {
+            if (cancel) {
+              unsub();
+            } else {
+              unsubList.push(unsub);
+            }
+          })
+          .catch(console.error);
+      }
     }
 
     return () => {
@@ -309,17 +339,17 @@ export default class EarningService implements StoppableServiceInterface, Persis
     };
   }
 
-  private async getYieldPoolInfoFromDB () {
-    const existedYieldPoolInfo = await this.dbService.getYieldPools();
-
-    const yieldPoolInfo = this.yieldPoolInfoSubject.getValue();
-
-    existedYieldPoolInfo.forEach((info) => {
-      yieldPoolInfo[info.slug] = info;
-    });
-
-    this.yieldPoolInfoSubject.next(yieldPoolInfo);
-  }
+  // private async getYieldPoolInfoFromDB () {
+  //   const existedYieldPoolInfo = await this.dbService.getYieldPools();
+  //
+  //   const yieldPoolInfo = this.yieldPoolInfoSubject.getValue();
+  //
+  //   existedYieldPoolInfo.forEach((info) => {
+  //     yieldPoolInfo[info.slug] = info;
+  //   });
+  //
+  //   this.yieldPoolInfoSubject.next(yieldPoolInfo);
+  // }
 
   public subscribeYieldPoolInfo () {
     return this.yieldPoolInfoSubject;

@@ -188,7 +188,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
   }
 
   async loadData (): Promise<void> {
-    // await this.getYieldPoolInfoFromDB();
+    await this.getYieldPoolInfoFromDBAndOnline();
     await this.getYieldPositionFromDB();
   }
 
@@ -302,33 +302,18 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
     await this.eventService.waitChainReady;
 
-    // Get online pool data
-    const onlinePoolData = await Promise.race([fetchPoolsData(), new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({});
-      }, 3000);
-    })]) as Record<string, YieldPoolInfo>;
-
-    console.log('onlinePoolData', onlinePoolData);
-
-    this.yieldPoolInfoSubject.next(onlinePoolData);
-
     const unsubList: Array<VoidFunction> = [];
 
     for (const handler of Object.values(this.handlers)) {
-      if (!onlinePoolData[handler.slug]) {
-        console.log('Fetch Direct', onlinePoolData);
-
-        handler.subscribePoolInfo(callback)
-          .then((unsub) => {
-            if (cancel) {
-              unsub();
-            } else {
-              unsubList.push(unsub);
-            }
-          })
-          .catch(console.error);
-      }
+      handler.subscribePoolInfo(callback)
+        .then((unsub) => {
+          if (!cancel) {
+            unsubList.push(unsub);
+          } else {
+            unsub();
+          }
+        })
+        .catch(console.error);
     }
 
     return () => {
@@ -339,17 +324,24 @@ export default class EarningService implements StoppableServiceInterface, Persis
     };
   }
 
-  // private async getYieldPoolInfoFromDB () {
-  //   const existedYieldPoolInfo = await this.dbService.getYieldPools();
-  //
-  //   const yieldPoolInfo = this.yieldPoolInfoSubject.getValue();
-  //
-  //   existedYieldPoolInfo.forEach((info) => {
-  //     yieldPoolInfo[info.slug] = info;
-  //   });
-  //
-  //   this.yieldPoolInfoSubject.next(yieldPoolInfo);
-  // }
+  private async getYieldPoolInfoFromDBAndOnline () {
+    // Get online pool data
+    const yieldPoolInfo = await Promise.race([fetchPoolsData(), new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({});
+      }, 1200);
+    })]) as Record<string, YieldPoolInfo>;
+
+    const existedYieldPoolInfo = await this.dbService.getYieldPools();
+
+    existedYieldPoolInfo.forEach((info) => {
+      if (!yieldPoolInfo[info.slug]) {
+        yieldPoolInfo[info.slug] = info;
+      }
+    });
+
+    this.yieldPoolInfoSubject.next(yieldPoolInfo);
+  }
 
   public subscribeYieldPoolInfo () {
     return this.yieldPoolInfoSubject;

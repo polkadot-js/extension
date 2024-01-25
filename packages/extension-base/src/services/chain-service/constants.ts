@@ -232,11 +232,7 @@ export const _XCM_TYPE = {
 
 export const _DEFAULT_ACTIVE_CHAINS = [
   ..._DEFAULT_CHAINS,
-  'vara_network',
-  'bifrost_dot',
-  'parallel',
-  'acala',
-  'interlay'
+  'vara_network'
 ];
 
 export const EVM_PASS_CONNECT_STATUS: Record<string, string[]> = {

@@ -2,19 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { AlertModal, ConnectChainModal, EmptyList, Layout, LoadingModal, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { EarningPoolItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useAlert, useChainConnection, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useHandleChainConnection, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPoolInfoByGroup } from '@subwallet/extension-koni-ui/hooks/earning';
+import { ChainConnectionWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { EarningEntryParam, EarningEntryView, EarningPoolsParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { ModalContext, SwList } from '@subwallet/react-ui';
+import { SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { Database } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -32,7 +33,6 @@ const alertModalId = 'earning-pools-alert-modal';
 function Component ({ poolGroup, symbol }: ComponentProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const pools = useYieldPoolInfoByGroup(poolGroup);
 
@@ -41,37 +41,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
 
-  // check chain connection
-  const { checkChainConnected, turnOnChain } = useChainConnection();
-  const [connectingChain, setConnectingChain] = useState<string| undefined>();
-  const [isLoadingChainConnection, setIsLoadingChainConnection] = useState<boolean>(false);
-  const [isConnectingChainSuccess, setIsConnectingChainSuccess] = useState<boolean>(false);
   const [selectedPool, setSelectedPool] = React.useState<YieldPoolInfo | undefined>(undefined);
-  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
-
-  const openConnectChainModal = useCallback((chain: string) => {
-    setConnectingChain(chain);
-    activeModal(connectChainModalId);
-  }, [activeModal]);
-
-  const closeConnectChainModal = useCallback(() => {
-    inactiveModal(connectChainModalId);
-  }, [inactiveModal]);
-
-  const openLoadingModal = useCallback(() => {
-    activeModal(chainConnectionLoadingModalId);
-  }, [activeModal]);
-
-  const closeLoadingModal = useCallback(() => {
-    inactiveModal(chainConnectionLoadingModalId);
-  }, [inactiveModal]);
-
-  const onConnectChain = useCallback((chain: string) => {
-    turnOnChain(chain);
-    setIsLoadingChainConnection(true);
-    closeConnectChainModal();
-    openLoadingModal();
-  }, [closeConnectChainModal, openLoadingModal, turnOnChain]);
 
   const items: YieldPoolInfo[] = useMemo(() => {
     if (!pools.length) {
@@ -113,6 +83,23 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     },
     [currentAccount?.address, navigate, setEarnStorage]
   );
+
+  const onConnectChainSuccess = useCallback(() => {
+    if (selectedPool) {
+      navigateToEarnTransaction(selectedPool);
+    }
+  }, [navigateToEarnTransaction, selectedPool]);
+
+  const { alertProps,
+    checkChainConnected,
+    closeConnectChainModal,
+    connectingChain,
+    onConnectChain,
+    openConnectChainModal } = useHandleChainConnection({
+    alertModalId,
+    chainConnectionLoadingModalId,
+    connectChainModalId
+  }, onConnectChainSuccess);
 
   const onClickItem = useCallback((item: YieldPoolInfo) => {
     return () => {
@@ -169,52 +156,16 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     } as EarningEntryParam });
   }, [navigate]);
 
-  useEffect(() => {
-    let timer: NodeJS.Timer;
-    let timeout: NodeJS.Timeout;
-
-    if (isLoadingChainConnection && selectedPool) {
-      const checkConnection = () => {
-        if (checkChainConnected(chainInfoMap[selectedPool.chain].slug)) {
-          setIsConnectingChainSuccess(true);
-          closeLoadingModal();
-          setIsLoadingChainConnection(false);
-          clearInterval(timer);
-          clearTimeout(timeout);
-          navigateToEarnTransaction(selectedPool);
-        }
-      };
-
-      // Check network connection every 0.5 second
-      timer = setInterval(checkConnection, 500);
-
-      // Set timeout for 3 seconds
-      timeout = setTimeout(() => {
-        clearInterval(timer);
-
-        if (!isConnectingChainSuccess) {
-          closeLoadingModal();
-          setIsLoadingChainConnection(false);
-          openAlert({
-            title: t('Error!'),
-            content: t('Failed to get data. Please try again later.'),
-            okButton: {
-              text: t('Continue'),
-              onClick: closeAlert
-            }
-          });
-        }
-      }, 3000);
-    }
-
-    return () => {
-      clearInterval(timer);
-      clearTimeout(timeout);
-    };
-  }, [chainInfoMap, checkChainConnected, closeAlert, closeLoadingModal, isConnectingChainSuccess, isLoadingChainConnection, navigateToEarnTransaction, openAlert, selectedPool, t]);
-
   return (
-    <>
+    <ChainConnectionWrapper
+      alertModalId={alertModalId}
+      alertProps={alertProps}
+      chainConnectionLoadingModalId={chainConnectionLoadingModalId}
+      closeConnectChainModal={closeConnectChainModal}
+      connectChainModalId={connectChainModalId}
+      connectingChain={connectingChain}
+      onConnectChain={onConnectChain}
+    >
       <Layout.Base
         className={'__screen-container'}
         onBack={onBack}
@@ -237,32 +188,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
           showActionBtn={false}
         />
       </Layout.Base>
-
-      {
-        !!connectingChain && (
-          <ConnectChainModal
-            chain={connectingChain}
-            modalId={connectChainModalId}
-            onCancel={closeConnectChainModal}
-            onConnectChain={onConnectChain}
-          />
-        )
-      }
-
-      <LoadingModal
-        loadingText={t('Getting data')}
-        modalId={chainConnectionLoadingModalId}
-      />
-
-      {
-        !!alertProps && (
-          <AlertModal
-            modalId={alertModalId}
-            {...alertProps}
-          />
-        )
-      }
-    </>
+    </ChainConnectionWrapper>
   );
 }
 

@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 
 import { useSelector } from '../common/useSelector';
 
-export default function useChainChecker () {
+export default function useChainConnection () {
   const { chainStateMap } = useSelector((root) => root.chainStore);
 
   const checkChainConnected = useCallback(

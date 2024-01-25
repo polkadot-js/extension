@@ -39,7 +39,7 @@ export class ChainService {
   private evmChainHandler: EvmChainHandler;
   private mantaChainHandler: MantaPrivateHandler | undefined;
 
-  refreshLatestDataTimeOut: NodeJS.Timeout | undefined;
+  refreshLatestDataTimeOut: NodeJS.Timer | undefined;
 
   public get mantaPay () {
     return this.mantaChainHandler;
@@ -539,16 +539,17 @@ export class ChainService {
   }
 
   checkLatestData () {
-    clearTimeout(this.refreshLatestDataTimeOut);
+    clearInterval(this.refreshLatestDataTimeOut);
 
-    this.refreshLatestDataTimeOut = setTimeout(this.handleLatestData.bind(this), LATEST_CHAIN_DATA_FETCHING_INTERVAL);
+    this.refreshLatestDataTimeOut = setInterval(this.handleLatestData.bind(this), LATEST_CHAIN_DATA_FETCHING_INTERVAL);
   }
 
   stopCheckLatestChainData () {
-    clearTimeout(this.refreshLatestDataTimeOut);
+    clearInterval(this.refreshLatestDataTimeOut);
   }
 
   handleLatestData () {
+    this.logger.log('Start checking latest RPC providers');
     this.fetchLatestChainData().then((latestChainInfo) => {
       const { needUpdateChainApiList, storedChainInfoList } = updateLatestChainInfo(this.dataMap, latestChainInfo);
 
@@ -559,6 +560,8 @@ export class ChainService {
         console.log('Updating chain API for ', chainInfo.slug);
         this.initApiForChain(chainInfo).catch(console.error);
       });
+
+      this.logger.log('Finished updating latest RPC providers');
     }).catch(console.error);
   }
 

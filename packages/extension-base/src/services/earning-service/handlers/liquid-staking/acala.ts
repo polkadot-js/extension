@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
@@ -255,7 +255,8 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
       extrinsicType: ExtrinsicType.MINT_LDOT,
       extrinsic,
       txData: data,
-      transferNativeAmount: '0'
+      transferNativeAmount: '0',
+      chainType: ChainType.SUBSTRATE
     };
   }
 

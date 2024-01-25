@@ -3898,11 +3898,10 @@ export default class KoniExtension {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { extrinsic, extrinsicType, transferNativeAmount, txChain, txData } = await this.#koniState.earningService.handleYieldJoin(inputData);
+    const { chainType, extrinsic, extrinsicType, transferNativeAmount, txChain, txData } = await this.#koniState.earningService.handleYieldJoin(inputData);
     const isPoolSupportAlternativeFee = this.#koniState.earningService.isPoolSupportAlternativeFee(inputData.data.slug);
 
     const isMintingStep = YIELD_EXTRINSIC_TYPES.includes(extrinsicType);
-    const chainInfo = this.#koniState.getChainInfo(txChain);
 
     return await this.#koniState.transactionService.handleTransaction({
       address,
@@ -3911,7 +3910,7 @@ export default class KoniExtension {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: txData,
       extrinsicType, // change this depends on step
-      chainType: _isChainEvmCompatible(chainInfo) ? ChainType.EVM : ChainType.SUBSTRATE,
+      chainType,
       resolveOnDone: !isLastStep,
       transferNativeAmount,
       skipFeeValidation: isMintingStep && isPoolSupportAlternativeFee
@@ -3957,7 +3956,7 @@ export default class KoniExtension {
     await this.#koniState.earningService.waitForStarted();
     const yieldPositionSubscription = this.#koniState.earningService.subscribeYieldPosition().subscribe({
       next: (rs) => {
-        cb(Object.values(rs));
+        cb(rs);
       }
     });
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { EarningRewardHistoryItem, EarningRewardItem, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestBondingSubmit, SubmitJoinNativeStaking, SubmitYieldJoinData, TransactionData, ValidatorInfo, YieldPoolMethodInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 
@@ -151,7 +151,8 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
       extrinsicType: ExtrinsicType.STAKING_BOND,
       extrinsic,
       txData: bondingData,
-      transferNativeAmount: amount
+      transferNativeAmount: amount,
+      chainType: ChainType.SUBSTRATE
     };
   }
 

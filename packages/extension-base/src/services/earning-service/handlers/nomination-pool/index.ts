@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { APIItemState, BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BasicTxErrorType, ChainType, ExtrinsicType, NominationInfo, StakingTxErrorType, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateChainStakedReturn, calculateInflation, getExistUnstakeErrorMessage, getMinStakeErrorMessage, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
@@ -556,7 +556,8 @@ export default class NominationPoolHandler extends BasePoolHandler {
       extrinsicType: ExtrinsicType.STAKING_JOIN_POOL,
       extrinsic,
       txData: joinPoolData,
-      transferNativeAmount: amount
+      transferNativeAmount: amount,
+      chainType: ChainType.SUBSTRATE
     };
   }
 

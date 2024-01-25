@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, ExtrinsicType, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, ChainType, ExtrinsicType, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
@@ -538,7 +538,8 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       extrinsicType: ExtrinsicType.TRANSFER_XCM,
       extrinsic,
       txData: xcmData,
-      transferNativeAmount: bnTotalAmount.toString()
+      transferNativeAmount: bnTotalAmount.toString(),
+      chainType: ChainType.SUBSTRATE
     };
   }
 

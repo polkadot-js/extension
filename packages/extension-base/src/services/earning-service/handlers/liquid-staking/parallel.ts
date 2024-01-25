@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { PalletStakingStakingLedger } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
@@ -254,7 +254,8 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
       extrinsicType: ExtrinsicType.MINT_SDOT,
       extrinsic,
       txData: data,
-      transferNativeAmount: '0'
+      transferNativeAmount: '0',
+      chainType: ChainType.SUBSTRATE
     };
   }
 

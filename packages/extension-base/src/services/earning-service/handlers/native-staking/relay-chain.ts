@@ -12,6 +12,7 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
 import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 import { t } from 'i18next';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -175,9 +176,16 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           substrateApi.api.query.staking.erasStakers(currentEra, validatorAddress)
         ]);
         const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-        const topNominators = eraStaker.others.map((nominator) => {
-          return nominator.who;
-        });
+        const sortedNominators = eraStaker.others
+          .sort((a, b) => {
+            return new BigN(b.value).minus(a.value).toNumber();
+          })
+        ;
+        const topNominators = sortedNominators
+          .map((nominator) => {
+            return nominator.who;
+          })
+        ;
 
         if (!topNominators.includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if nominator has target but not in nominator list
           nominationStatus = EarningStatus.WAITING;

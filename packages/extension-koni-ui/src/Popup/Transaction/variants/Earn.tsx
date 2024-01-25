@@ -575,7 +575,7 @@ const Component = () => {
   }, [form, inputAsset.slug]);
 
   useEffect(() => {
-    if (!fromValue && accountSelectorList.length >= 1) {
+    if (!fromValue && accountSelectorList.length === 1) {
       form.setFieldValue('from', accountSelectorList[0].address);
     }
   }, [accountSelectorList, form, fromValue]);

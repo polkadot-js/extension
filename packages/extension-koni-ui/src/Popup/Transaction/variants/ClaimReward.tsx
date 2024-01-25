@@ -57,10 +57,6 @@ const filterAccount = (
       return false;
     }
 
-    if (account.isReadOnly) {
-      return false;
-    }
-
     const isEvmChain = _isChainEvmCompatible(chain);
 
     if (isEvmChain !== isEthereumAddress(account.address)) {

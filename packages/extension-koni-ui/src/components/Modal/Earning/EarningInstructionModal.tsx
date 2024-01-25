@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolType } from '@subwallet/extension-base/types';
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
@@ -277,7 +278,7 @@ const Component: React.FC<Props> = (props: Props) => {
             maintainDecimals || 0
           );
 
-          if (poolInfo.slug === 'ASTR___native_staking___astar') {
+          if (_STAKING_CHAIN_GROUP.astar.includes(poolInfo.chain)) {
             return EARNING_DATA_RAW.DAPP_STAKING.map((item) => {
               const _item: BoxProps = { ...item, id: item.icon, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
 

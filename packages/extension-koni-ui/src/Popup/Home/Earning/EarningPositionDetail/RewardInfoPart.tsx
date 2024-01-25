@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningRewardHistoryItem, EarningStatus, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { CollapsiblePanel, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO, CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS, StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
@@ -42,17 +43,19 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
 
   const total = useYieldRewardTotal(slug);
 
+  const isDAppStaking = useMemo(() => _STAKING_CHAIN_GROUP.astar.includes(compound.chain), [compound.chain]);
+
   const canClaim = useMemo((): boolean => {
     switch (type) {
       case YieldPoolType.LENDING:
       case YieldPoolType.LIQUID_STAKING:
         return false;
       case YieldPoolType.NATIVE_STAKING:
-        return false;
+        return isDAppStaking;
       case YieldPoolType.NOMINATION_POOL:
         return true;
     }
-  }, [type]);
+  }, [isDAppStaking, type]);
 
   const earningStatus = useMemo(() => {
     const stakingStatusUi = StakingStatusUi;
@@ -82,6 +85,12 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
   }, [t, type]);
 
   const onClaimReward = useCallback(() => {
+    if (type === YieldPoolType.NATIVE_STAKING && isDAppStaking) {
+      openInNewTab('https://portal.astar.network/astar/dapp-staking/discover')();
+
+      return;
+    }
+
     if (total && new BigN(total).gt(BN_ZERO)) {
       setClaimRewardStorage({
         ...DEFAULT_CLAIM_REWARD_PARAMS,
@@ -100,7 +109,7 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
         }
       });
     }
-  }, [closeAlert, navigate, setClaimRewardStorage, openAlert, slug, t, total, transactionChainValue, transactionFromValue]);
+  }, [type, isDAppStaking, total, setClaimRewardStorage, slug, transactionChainValue, transactionFromValue, navigate, openAlert, t, closeAlert]);
 
   const onClickViewExplore = useCallback(() => {
     if (currentAccount) {
@@ -127,27 +136,29 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
         </MetaInfo>
       </div>
 
-      {(type === YieldPoolType.NOMINATION_POOL || type === YieldPoolType.NATIVE_STAKING) && !rewardHistories.length && (
+      {(type === YieldPoolType.NOMINATION_POOL || (type === YieldPoolType.NATIVE_STAKING && isDAppStaking)) && (
         <>
           <div className={'__separator'}></div>
 
           <div className={'__claim-reward-area'}>
-            { total
-              ? (
-                <Number
-                  className={'__claim-reward-value'}
-                  decimal={inputAsset.decimals || 0}
-                  decimalOpacity={0.45}
-                  hide={!isShowBalance}
-                  subFloatNumber={true}
-                  suffix={inputAsset.symbol}
-                  unitOpacity={0.45}
-                  value={total}
-                />
-              )
-              : (
-                <ActivityIndicator size={20} />
-              )}
+            { type === YieldPoolType.NOMINATION_POOL
+              ? total
+                ? (
+                  <Number
+                    className={'__claim-reward-value'}
+                    decimal={inputAsset.decimals || 0}
+                    decimalOpacity={0.45}
+                    hide={!isShowBalance}
+                    subFloatNumber={true}
+                    suffix={inputAsset.symbol}
+                    unitOpacity={0.45}
+                    value={total}
+                  />
+                )
+                : (
+                  <ActivityIndicator size={20} />
+                )
+              : (<div></div>)}
             {canClaim && (
               <Button
                 onClick={onClaimReward}
@@ -255,6 +266,10 @@ export const RewardInfoPart = styled(Component)<Props>(({ theme: { token } }: Pr
       fontWeight: 'inherit !important',
       lineHeight: token.lineHeightHeading5
     }
+  },
+
+  '.__claim-reward-area + .__separator': {
+    marginTop: 0
   },
 
   '.__separator + .__reward-history-panel': {

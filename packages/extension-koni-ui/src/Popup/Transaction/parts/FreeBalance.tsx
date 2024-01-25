@@ -33,6 +33,17 @@ const Component = ({ address, chain, className, hidden, isSubscribe, label, onBa
     return <></>;
   }
 
+  if (!address) {
+    return (
+      <Typography.Paragraph className={CN(className, 'free-balance', {
+        hidden: hidden
+      })}
+      >
+        {t('Select account to view available balance')}
+      </Typography.Paragraph>
+    );
+  }
+
   return (
     <Typography.Paragraph className={CN(className, 'free-balance', {
       hidden: hidden

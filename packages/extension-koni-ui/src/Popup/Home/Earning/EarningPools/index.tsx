@@ -2,20 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { EarningPoolItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useHandleChainConnection, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useHandleChainConnection, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPoolInfoByGroup } from '@subwallet/extension-koni-ui/hooks/earning';
 import { ChainConnectionWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { EarningEntryParam, EarningEntryView, EarningPoolsParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { SwList } from '@subwallet/react-ui';
+import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { Database } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import { Database, FadersHorizontal } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -30,6 +30,8 @@ const connectChainModalId = 'earning-pools-connect-chain-modal';
 const chainConnectionLoadingModalId = 'earning-pools-chain-connection-loading-modalId';
 const alertModalId = 'earning-pools-alert-modal';
 
+const FILTER_MODAL_ID = 'earning-pool-filter-modal';
+
 function Component ({ poolGroup, symbol }: ComponentProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -43,6 +45,18 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
   const [selectedPool, setSelectedPool] = React.useState<YieldPoolInfo | undefined>(undefined);
 
+  const { activeModal } = useContext(ModalContext);
+
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const filterOptions = [
+    { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
+    { label: t('Direct nomination'), value: YieldPoolType.NATIVE_STAKING },
+    { label: t('Liquid staking'), value: YieldPoolType.LIQUID_STAKING },
+    { label: t('Lending'), value: YieldPoolType.LENDING },
+    { label: t('Parachain staking'), value: YieldPoolType.PARACHAIN_STAKING },
+    { label: t('Single farming'), value: YieldPoolType.SINGLE_FARMING }
+  ];
   const items: YieldPoolInfo[] = useMemo(() => {
     if (!pools.length) {
       return [];
@@ -70,6 +84,38 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
     return result;
   }, [pools]);
+
+  const filterFunction = useMemo<(item: YieldPoolInfo) => boolean>(() => {
+    return (item) => {
+      if (!selectedFilters.length) {
+        return true;
+      }
+
+      for (const filter of selectedFilters) {
+        if (filter === '') {
+          return true;
+        }
+
+        if (filter === YieldPoolType.NOMINATION_POOL && item.type === YieldPoolType.NOMINATION_POOL) {
+          return true;
+        } else if (filter === YieldPoolType.NATIVE_STAKING && item.type === YieldPoolType.NATIVE_STAKING) {
+          return true;
+        } else if (filter === YieldPoolType.LIQUID_STAKING && item.type === YieldPoolType.LIQUID_STAKING) {
+          return true;
+        } else if (filter === YieldPoolType.LENDING && item.type === YieldPoolType.LENDING) {
+          return true;
+        }
+        // Uncomment the following code block if needed
+        // else if (filter === YieldPoolType.PARACHAIN_STAKING && item.type === YieldPoolType.PARACHAIN_STAKING) {
+        //   return true;
+        // } else if (filter === YieldPoolType.SINGLE_FARMING && item.type === YieldPoolType.SINGLE_FARMING) {
+        //   return true;
+        // }
+      }
+
+      return false;
+    };
+  }, [selectedFilters]);
 
   const navigateToEarnTransaction = useCallback(
     (item: YieldPoolInfo) => {
@@ -131,8 +177,8 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const emptyList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('You can stake in-app easily')}
-        emptyTitle={t('No staking found')}
+        emptyMessage={t('Change your search and try again')}
+        emptyTitle={t('No earning option found')}
         phosphorIcon={Database}
       />
     );
@@ -148,6 +194,13 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
       );
     },
     [chainInfoMap]
+  );
+  const onClickFilterButton = useCallback(
+    (e?: SyntheticEvent) => {
+      e && e.stopPropagation();
+      activeModal(FILTER_MODAL_ID);
+    },
+    [activeModal]
   );
 
   const onBack = useCallback(() => {
@@ -177,15 +230,28 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         title={t<string>('{{symbol}} earning options', { replace: { symbol: symbol } })}
       >
         <SwList.Section
+          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           className={'__section-list-container'}
           enableSearchInput
+          filterBy={filterFunction}
           list={items}
+          onClickActionBtn={onClickFilterButton}
           renderItem={renderItem}
           renderWhenEmpty={emptyList}
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
           searchPlaceholder={t<string>('Search token')}
-          showActionBtn={false}
+          showActionBtn
+        />
+        <FilterModal
+          applyFilterButtonTitle={t('Apply filter')}
+          id={FILTER_MODAL_ID}
+          onApplyFilter={onApplyFilter}
+          onCancel={onCloseFilterModal}
+          onChangeOption={onChangeFilterOption}
+          optionSelectionMap={filterSelectionMap}
+          options={filterOptions}
+          title={t('Filter')}
         />
       </Layout.Base>
     </ChainConnectionWrapper>

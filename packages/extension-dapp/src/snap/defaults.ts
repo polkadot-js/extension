@@ -7,7 +7,7 @@ const NPM_SNAP_ID = `npm:${PACKAGE_NAME}`;
 
 export const DEFAULT_SNAP_ORIGIN = process.env["NODE_ENV"] === 'development' ? LOCAL_SNAP_ID : NPM_SNAP_ID;
 
-export let DEFAULT_SNAP_VERSION = '0.1.13';
+export let DEFAULT_SNAP_VERSION = '0.1.16';
 export const DEFAULT_SNAP_NAME = 'polkamask';
 
 export const SUPPORTED_SNAPS = {

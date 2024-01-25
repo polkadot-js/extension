@@ -150,28 +150,22 @@ export default class EarningService implements StoppableServiceInterface, Persis
   handleActions () {
     this.eventService.onLazy((events, eventTypes) => {
       (async () => {
-        const updatedChains: string[] = [];
         const removedAddresses: string[] = [];
 
-        // Account changed or chain changed (active or inactive)
-        if (eventTypes.includes('account.updateCurrent')) {
-          await this.reloadEarning();
-        }
-
-        // Todo: Optimize performance of chain active or inactive in the future
-        // Chain changed (active or inactive)
         events.forEach((event) => {
-          if (event.type === 'chain.updateState') {
-            updatedChains.push(event.data[0] as string);
-          }
-
           if (event.type === 'account.remove') {
             removedAddresses.push(event.data[0] as string);
           }
         });
 
-        if (updatedChains.length > 0 || removedAddresses.length > 0) {
-          await this.removeYieldPositions(updatedChains, removedAddresses);
+        if (removedAddresses.length > 0) {
+          await this.removeYieldPositions(undefined, removedAddresses);
+        }
+
+        // Account changed or chain changed (active or inactive)
+        // Chain changed (active or inactive)
+        // Todo: Optimize performance of chain active or inactive in the future
+        if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('account.remove') || eventTypes.includes('chain.updateState')) {
           await this.reloadEarning();
         }
       })().catch(console.error);

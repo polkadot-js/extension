@@ -3957,7 +3957,7 @@ export default class KoniExtension {
     await this.#koniState.earningService.waitForStarted();
     const yieldPositionSubscription = this.#koniState.earningService.subscribeYieldPosition().subscribe({
       next: (rs) => {
-        cb(Object.values(rs));
+        cb(rs);
       }
     });
 

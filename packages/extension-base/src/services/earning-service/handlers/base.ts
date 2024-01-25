@@ -128,11 +128,11 @@ export default abstract class BasePoolHandler {
   }
 
   public async getPoolInfo (): Promise<YieldPoolInfo | undefined> {
-    return this.state.dbService.getYieldPool(this.slug);
+    return await this.state.earningService.getYieldPool(this.slug);
   }
 
   public async getPoolPosition (address: string): Promise<YieldPositionInfo | undefined> {
-    return this.state.dbService.getYieldPositionByAddressAndSlug(address, this.slug);
+    return await this.state.earningService.getYieldPosition(address, this.slug);
   }
 
   /* Subscribe data */

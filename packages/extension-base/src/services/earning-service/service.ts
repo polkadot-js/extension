@@ -27,6 +27,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
   // earning
   public readonly yieldPoolInfoSubject = new BehaviorSubject<Record<string, YieldPoolInfo>>({});
   public readonly yieldPositionSubject = new BehaviorSubject<Record<string, YieldPositionInfo>>({});
+  public readonly yieldPositionListSubject = new BehaviorSubject<YieldPositionInfo[]>([]); // virtual list of yieldPositionSubject with filter values
 
   private dbService: DatabaseService;
   private eventService: EventService;
@@ -126,6 +127,18 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
     // Load data from db
     await this.loadData();
+
+    // Pin list with value from map
+    this.yieldPositionSubject.subscribe({
+      next: (data) => {
+        const activeMap = this.state.getActiveChainInfoMap();
+        const activePositions = Object.values(data).filter((item) => {
+          return !!activeMap[item.chain];
+        });
+
+        this.yieldPositionListSubject.next(Object.values(activePositions));
+      }
+    });
 
     this.status = ServiceStatus.INITIALIZED;
 
@@ -269,6 +282,12 @@ export default class EarningService implements StoppableServiceInterface, Persis
     return this.minAmountPercentSubject.getValue();
   }
 
+  public async getYieldPool (slug: string): Promise<YieldPoolInfo | undefined> {
+    await this.eventService.waitEarningReady;
+
+    return this.yieldPoolInfoSubject.getValue()[slug];
+  }
+
   public async subscribePoolsInfo (callback: (rs: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
 
@@ -362,6 +381,12 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   /* Pools' position methods */
 
+  public async getYieldPosition (address: string, slug: string): Promise<YieldPositionInfo | undefined> {
+    await this.eventService.waitEarningReady;
+
+    return this.yieldPositionSubject.getValue()[`${slug}---${address}`];
+  }
+
   public async subscribePoolPositions (addresses: string[], callback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {
     let cancel = false;
 
@@ -443,7 +468,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
   }
 
   public subscribeYieldPosition () {
-    return this.yieldPositionSubject;
+    return this.yieldPositionListSubject;
   }
 
   public async getYieldPositionInfo () {

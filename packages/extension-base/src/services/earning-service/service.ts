@@ -468,7 +468,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
   public async getYieldPositionInfo () {
     await this.eventService.waitEarningReady;
 
-    return Promise.resolve(Object.values(this.yieldPositionSubject.getValue()));
+    return Promise.resolve(this.yieldPositionListSubject.getValue());
   }
 
   yieldPositionPersistQueue: YieldPositionInfo[] = [];

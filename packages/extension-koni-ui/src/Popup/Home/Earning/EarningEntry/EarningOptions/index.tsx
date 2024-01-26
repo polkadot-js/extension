@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EmptyList, Layout } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningOptionItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
-import { useHandleChainConnection, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useHandleChainConnection, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldGroupInfo } from '@subwallet/extension-koni-ui/hooks/earning';
 import { ChainConnectionWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { EarningEntryView, EarningPoolsParam, ThemeProps, YieldGroupInfo } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { SwList } from '@subwallet/react-ui';
+import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Database } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import { Database, FadersHorizontal } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -48,6 +48,13 @@ const connectChainModalId = 'earning-options-connect-chain-modal';
 const chainConnectionLoadingModalId = 'earning-options-chain-connection-loading-modalId';
 const alertModalId = 'earning-options-alert-modal';
 
+const FILTER_MODAL_ID = 'earning-options-filter-modal';
+
+enum FilterOptionType {
+  MAIN_NETWORK = 'MAIN_NETWORK',
+  TEST_NETWORK = 'TEST_NETWORK',
+}
+
 function Component ({ className, hasEarningPositions, setEntryView }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -63,6 +70,10 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 
   const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
 
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const { activeModal } = useContext(ModalContext);
+
   const items = useMemo(() => {
     return [...data].sort((a, b) => {
       return (
@@ -73,6 +84,28 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
       );
     });
   }, [data]);
+
+  const filterFunction = useMemo<(item: YieldGroupInfo) => boolean>(() => {
+    return (item) => {
+      if (!selectedFilters.length) {
+        return true;
+      }
+
+      for (const filter of selectedFilters) {
+        if (filter === '') {
+          return true;
+        }
+
+        if (filter === FilterOptionType.MAIN_NETWORK) {
+          return !item.isTestnet;
+        } else if (filter === FilterOptionType.TEST_NETWORK) {
+          return item.isTestnet;
+        }
+      }
+
+      return false;
+    };
+  }, [selectedFilters]);
 
   const navigateToEarnTransaction = useCallback(
     (item: YieldGroupInfo) => {
@@ -90,6 +123,11 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
     },
     [currentAccount?.address, navigate, poolInfoMap, setEarnStorage]
   );
+
+  const filterOptions = useMemo(() => [
+    { label: t('Mainnet'), value: FilterOptionType.MAIN_NETWORK },
+    { label: t('Testnet'), value: FilterOptionType.TEST_NETWORK }
+  ], [t]);
 
   const onConnectChainSuccess = useCallback(() => {
     if (selectedPoolGroup) {
@@ -146,8 +184,8 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
   const emptyList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('You can stake in-app easily')}
-        emptyTitle={t('No staking found')}
+        emptyMessage={t('No earning option found')}
+        emptyTitle={t('Change your search and try again')}
         phosphorIcon={Database}
       />
     );
@@ -163,6 +201,14 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
       symbol?.toLowerCase().includes(searchText.toLowerCase())
     );
   }, []);
+
+  const onClickFilterButton = useCallback(
+    (e?: SyntheticEvent) => {
+      e && e.stopPropagation();
+      activeModal(FILTER_MODAL_ID);
+    },
+    [activeModal]
+  );
 
   return (
     <ChainConnectionWrapper
@@ -185,15 +231,28 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
         title={t<string>('Earning options')}
       >
         <SwList.Section
+          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           className={'__section-list-container'}
           enableSearchInput
+          filterBy={filterFunction}
           list={items}
+          onClickActionBtn={onClickFilterButton}
           renderItem={renderItem}
           renderWhenEmpty={emptyList}
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
           searchPlaceholder={t<string>('Search token')}
-          showActionBtn={false}
+          showActionBtn
+        />
+        <FilterModal
+          applyFilterButtonTitle={t('Apply filter')}
+          id={FILTER_MODAL_ID}
+          onApplyFilter={onApplyFilter}
+          onCancel={onCloseFilterModal}
+          onChangeOption={onChangeFilterOption}
+          optionSelectionMap={filterSelectionMap}
+          options={filterOptions}
+          title={t('Filter')}
         />
       </Layout.Base>
     </ChainConnectionWrapper>

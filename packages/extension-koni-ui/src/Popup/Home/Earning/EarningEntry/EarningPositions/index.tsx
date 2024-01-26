@@ -1,17 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPositionInfo } from '@subwallet/extension-base/types';
-import { EmptyList, Layout } from '@subwallet/extension-koni-ui/components';
+import { YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EmptyList, FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningPositionItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
-import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
+import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { Database, Plus } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { Database, FadersHorizontal, Plus, PlusCircle } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -21,16 +21,20 @@ type Props = ThemeProps & {
 }
 
 let cacheData: Record<string, boolean> = {};
+const FILTER_MODAL_ID = 'earning-positions-filter-modal';
 
 function Component ({ className, earningPositions, setEntryView }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const { activeModal } = useContext(ModalContext);
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
   const priceMap = useSelector((state) => state.price.priceMap);
   const { assetRegistry: assetInfoMap } = useSelector((state) => state.assetRegistry);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const items: ExtraYieldPositionInfo[] = useMemo(() => {
     if (!earningPositions.length) {
@@ -60,6 +64,47 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
       });
   }, [assetInfoMap, earningPositions, priceMap]);
 
+  const filterOptions = [
+    { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
+    { label: t('Direct nomination'), value: YieldPoolType.NATIVE_STAKING },
+    { label: t('Liquid staking'), value: YieldPoolType.LIQUID_STAKING },
+    { label: t('Lending'), value: YieldPoolType.LENDING },
+    { label: t('Parachain staking'), value: YieldPoolType.PARACHAIN_STAKING },
+    { label: t('Single farming'), value: YieldPoolType.SINGLE_FARMING }
+  ];
+
+  const filterFunction = useMemo<(items: ExtraYieldPositionInfo) => boolean>(() => {
+    return (item) => {
+      if (!selectedFilters.length) {
+        return true;
+      }
+
+      for (const filter of selectedFilters) {
+        if (filter === '') {
+          return true;
+        }
+
+        if (filter === YieldPoolType.NOMINATION_POOL && item.type === YieldPoolType.NOMINATION_POOL) {
+          return true;
+        } else if (filter === YieldPoolType.NATIVE_STAKING && item.type === YieldPoolType.NATIVE_STAKING) {
+          return true;
+        } else if (filter === YieldPoolType.LIQUID_STAKING && item.type === YieldPoolType.LIQUID_STAKING) {
+          return true;
+        } else if (filter === YieldPoolType.LENDING && item.type === YieldPoolType.LENDING) {
+          return true;
+        }
+        // Uncomment the following code block if needed
+        // else if (filter === YieldPoolType.PARACHAIN_STAKING && item.type === YieldPoolType.PARACHAIN_STAKING) {
+        //   return true;
+        // } else if (filter === YieldPoolType.SINGLE_FARMING && item.type === YieldPoolType.SINGLE_FARMING) {
+        //   return true;
+        // }
+      }
+
+      return false;
+    };
+  }, [selectedFilters]);
+
   const onClickItem = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
       navigate('/home/earning/position-detail', { state: {
@@ -86,12 +131,25 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   const emptyList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('You can stake in-app easily')}
-        emptyTitle={t('No staking found')}
+        buttonProps={{
+          icon: (
+            <Icon
+              phosphorIcon={PlusCircle}
+              weight={'fill'}
+            />),
+          onClick: () => {
+            setEntryView(EarningEntryView.OPTIONS);
+          },
+          size: 'xs',
+          shape: 'circle',
+          children: t('Explore earning options')
+        }}
+        emptyMessage={t('Change your search or explore other earning options')}
+        emptyTitle={t('No earning position found')}
         phosphorIcon={Database}
       />
     );
-  }, [t]);
+  }, [setEntryView, t]);
 
   const searchFunction = useCallback(({ balanceToken, chain: _chain }: ExtraYieldPositionInfo, searchText: string) => {
     const chainInfo = chainInfoMap[_chain];
@@ -128,6 +186,14 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
     }
   }, [items.length, currentAccount]);
 
+  const onClickFilterButton = useCallback(
+    (e?: SyntheticEvent) => {
+      e && e.stopPropagation();
+      activeModal(FILTER_MODAL_ID);
+    },
+    [activeModal]
+  );
+
   return (
     <Layout.Base
       className={CN(className)}
@@ -139,15 +205,28 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
       title={t<string>('Your earning positions')}
     >
       <SwList.Section
+        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
         className={'__section-list-container'}
         enableSearchInput
+        filterBy={filterFunction}
         list={items}
+        onClickActionBtn={onClickFilterButton}
         renderItem={renderItem}
         renderWhenEmpty={emptyList}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Search token')}
-        showActionBtn={false}
+        showActionBtn
+      />
+      <FilterModal
+        applyFilterButtonTitle={t('Apply filter')}
+        id={FILTER_MODAL_ID}
+        onApplyFilter={onApplyFilter}
+        onCancel={onCloseFilterModal}
+        onChangeOption={onChangeFilterOption}
+        optionSelectionMap={filterSelectionMap}
+        options={filterOptions}
+        title={t('Filter')}
       />
     </Layout.Base>
   );

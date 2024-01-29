@@ -2,29 +2,41 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {Button, Icon, PageIcon, SwModal} from '@subwallet/react-ui';
-import React from 'react';
+import {Button, Icon, ModalContext, PageIcon, SwModal} from '@subwallet/react-ui';
+import React, {useCallback, useContext} from 'react';
 import styled from 'styled-components';
 import CN from 'classnames';
 import {CheckCircle, Warning, XCircle} from "phosphor-react";
+import {Trans} from "react-i18next";
+import {detectTranslate} from "@subwallet/extension-base/utils";
+import {CLAIM_DAPP_STAKING_REWARDS_MODAL} from "@subwallet/extension-koni-ui/constants";
 
 type Props = ThemeProps & {
-  modalId: string,
-  title: string,
-  content: React.ReactNode
-  onCancel?: () => void;
-  onOk?: () => void;
 }
-
+const modalId = CLAIM_DAPP_STAKING_REWARDS_MODAL;
 const Component: React.FC<Props> = (props: Props) => {
-  const { modalId, content, title, className, onCancel, onOk} = props;
+  const {className} = props;
+    const { activeModal, inactiveModal } = useContext(ModalContext);
+
+    const onOpenModal = useCallback(() => {
+        activeModal(modalId);
+    }, [activeModal, modalId]);
+
+    const onCloseModal = useCallback(() => {
+        inactiveModal(modalId);
+    }, [inactiveModal, modalId]);
+
+    const onOpenPortal = useCallback(() => {
+        open('https://portal.astar.network/')
+    }, [])
 
   return (
     <>
       <SwModal
         className={CN(className)}
         id={modalId}
-        title={title}
+        title={'Claim ASTR staking rewards'}
+        onOk={onOpenModal}
         closable={false}
         footer={
           <div className={'modal_btn'}>
@@ -40,7 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 }
 
-                onClick={onCancel}>
+                onClick={onCloseModal}>
                 Dismiss
               </Button>
             <Button
@@ -53,7 +65,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 />
               }
               className={'__right-btn'}
-              onClick={onOk}>
+              onClick={onOpenPortal}>
               Claim now
             </Button>
           </div>
@@ -69,7 +81,19 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         </div>
         <div className='modal_content'>
-          {content}
+            <Trans
+                components={{
+                    highlight: (
+                        <a
+                            className='link'
+                            href='https://docs.astar.network/docs/learn/dapp-staking/dapp-staking-faq/#q-what-about-unclaimed-rewards'
+                            rel='noopener noreferrer'
+                            target='_blank'
+                        />
+                    )
+                }}
+                i18nKey={detectTranslate('<highlight>Astar dApp staking V3</highlight> is launching in early February. Make sure to claim any ASTR rewards before the launch or they will be lost.')}
+            />
         </div>
       </SwModal>
     </>
@@ -100,7 +124,16 @@ const ClaimDappStakingRewardsModal = styled(Component)<Props>(({ theme: {token}}
     },
     '.ant-sw-header-center-part': {
       width: 'auto'
+<<<<<<< HEAD
     }
+=======
+    },
+      '.link': {
+          color: token.colorLink,
+          textDecoration: 'underline !important',
+          backgroundColor: 'red'
+      },
+>>>>>>> origin/koni/dev/issue-2545
   };
 });
 

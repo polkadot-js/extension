@@ -4,20 +4,18 @@
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import { SelectValidatorInput } from '@subwallet/extension-koni-ui/components';
+import { SelectValidatorInput, StakingValidatorItem } from '@subwallet/extension-koni-ui/components';
 import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
+import { EarningValidatorDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
-import { ValidatorDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Staking/ValidatorDetailModal';
-import StakingValidatorItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingValidatorItem';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { useSelectValidators } from '@subwallet/extension-koni-ui/hooks/modal/useSelectValidators';
-import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps, ValidatorDataType } from '@subwallet/extension-koni-ui/types';
 import { getValidatorKey } from '@subwallet/extension-koni-ui/utils/transaction/stake';
 import { Badge, Button, Icon, InputRef, ModalContext, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
@@ -398,7 +396,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       />
 
       {viewDetailItem && (
-        <ValidatorDetailModal
+        <EarningValidatorDetailModal
           chain={chain}
           validatorItem={viewDetailItem}
         />

@@ -4,3 +4,4 @@
 export { default as EarningInstructionModal } from './EarningInstructionModal';
 export { default as EarningPoolDetailModal } from './EarningPoolDetailModal';
 export { default as EarningNominationModal } from './EarningNominationModal';
+export { default as EarningValidatorDetailModal } from './EarningValidatorDetailModal';

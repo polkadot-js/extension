@@ -6,8 +6,7 @@ import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps, ValidatorDataType } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
@@ -139,6 +138,8 @@ function Component (props: Props): React.ReactElement<Props> {
   );
 }
 
-export const ValidatorDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const EarningValidatorDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({});
 });
+
+export default EarningValidatorDetailModal;

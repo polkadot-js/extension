@@ -12,6 +12,7 @@ export const TRANSFER_TRANSACTION = 'transaction.transfer';
 export const NFT_TRANSACTION = 'transaction.nft';
 export const STAKE_TRANSACTION = 'transaction.stake';
 export const UN_STAKE_TRANSACTION = 'transaction.un-stake';
+export const CLAIM_DAPP_STAKING_REWARDS = 'transaction.claim-dapp-staking-rewards';
 export const CANCEL_UN_STAKE_TRANSACTION = 'transaction.cancel-un-stake';
 export const WITHDRAW_TRANSACTION = 'transaction.withdraw';
 export const CLAIM_REWARD_TRANSACTION = 'transaction.claim-reward';

@@ -1,75 +1,87 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {Button, Icon, ModalContext, PageIcon, SwModal} from '@subwallet/react-ui';
-import React, {useCallback, useContext} from 'react';
-import styled from 'styled-components';
+import { detectTranslate } from '@subwallet/extension-base/utils';
+import { CLAIM_DAPP_STAKING_REWARDS, CLAIM_DAPP_STAKING_REWARDS_MODAL, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_PARAMS } from '@subwallet/extension-koni-ui/constants';
+import { ClainDappStakingRewardsParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Button, Icon, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import {CheckCircle, Warning, XCircle} from "phosphor-react";
-import {Trans} from "react-i18next";
-import {detectTranslate} from "@subwallet/extension-base/utils";
-import {CLAIM_DAPP_STAKING_REWARDS_MODAL} from "@subwallet/extension-koni-ui/constants";
+import { CheckCircle, Warning, XCircle } from 'phosphor-react';
+import React, { useCallback, useContext } from 'react';
+import { Trans } from 'react-i18next';
+import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
-type Props = ThemeProps & {
-}
+type Props = ThemeProps
 const modalId = CLAIM_DAPP_STAKING_REWARDS_MODAL;
+
 const Component: React.FC<Props> = (props: Props) => {
-  const {className} = props;
-    const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { className } = props;
+  const { inactiveModal } = useContext(ModalContext);
+  const [{ isShowed }, setIsShowNotificationModal] = useLocalStorage<ClainDappStakingRewardsParams>(CLAIM_DAPP_STAKING_REWARDS, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_PARAMS);
 
-    const onOpenModal = useCallback(() => {
-        activeModal(modalId);
-    }, [activeModal, modalId]);
+  const changeValueByModeModal = useCallback(() => {
+    if (isShowed) {
+      setIsShowNotificationModal({ isShowed: true, isReminded: true });
 
-    const onCloseModal = useCallback(() => {
-        inactiveModal(modalId);
-    }, [inactiveModal, modalId]);
+      return;
+    }
 
-    const onOpenPortal = useCallback(() => {
-        open('https://portal.astar.network/')
-    }, [])
+    setIsShowNotificationModal({ isShowed: true, isReminded: false });
+  }, [isShowed, setIsShowNotificationModal]);
+
+  const onCloseModal = useCallback(() => {
+    inactiveModal(modalId);
+    changeValueByModeModal();
+  }, [changeValueByModeModal, inactiveModal]);
+
+  const onOpenPortal = useCallback(() => {
+    open('https://portal.astar.network/');
+    inactiveModal(modalId);
+    changeValueByModeModal();
+  }, [changeValueByModeModal, inactiveModal]);
 
   return (
     <>
       <SwModal
         className={CN(className)}
-        id={modalId}
-        title={'Claim ASTR staking rewards'}
-        onOk={onOpenModal}
         closable={false}
         footer={
           <div className={'modal_btn'}>
-              <Button
-                schema={'secondary'}
-                className={'__left-btn'}
-                block={true}
-                icon={
-                  <Icon
-                    customSize='28px'
-                    phosphorIcon={XCircle}
-                    weight={"fill"}
-                  />
-                }
-
-                onClick={onCloseModal}>
-                Dismiss
-              </Button>
             <Button
               block={true}
+              className={'__left-btn'}
+              icon={
+                <Icon
+                  customSize='28px'
+                  phosphorIcon={XCircle}
+                  weight={'fill'}
+                />
+              }
+              onClick={onCloseModal}
+
+              schema={'secondary'}
+            >
+                Dismiss
+            </Button>
+            <Button
+              block={true}
+              className={'__right-btn'}
               icon={
                 <Icon
                   customSize='28px'
                   phosphorIcon={CheckCircle}
-                  weight={"fill"}
+                  weight={'fill'}
                 />
               }
-              className={'__right-btn'}
-              onClick={onOpenPortal}>
+              onClick={onOpenPortal}
+            >
               Claim now
             </Button>
           </div>
         }
+        id={modalId}
+        title={'Claim ASTR staking rewards'}
       >
         <div className={'page-icon-astar-modal'}>
           <PageIcon
@@ -81,26 +93,26 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         </div>
         <div className='modal_content'>
-            <Trans
-                components={{
-                    highlight: (
-                        <a
-                            className='link'
-                            href='https://docs.astar.network/docs/learn/dapp-staking/dapp-staking-faq/#q-what-about-unclaimed-rewards'
-                            rel='noopener noreferrer'
-                            target='_blank'
-                        />
-                    )
-                }}
-                i18nKey={detectTranslate('<highlight>Astar dApp staking V3</highlight> is launching in early February. Make sure to claim any ASTR rewards before the launch or they will be lost.')}
-            />
+          <Trans
+            components={{
+              highlight: (
+                <a
+                  className='link'
+                  href='https://docs.astar.network/docs/learn/dapp-staking/dapp-staking-faq/#q-what-about-unclaimed-rewards'
+                  rel='noopener noreferrer'
+                  target='_blank'
+                />
+              )
+            }}
+            i18nKey={detectTranslate('<highlight>Astar dApp staking V3</highlight> is launching in early February. Make sure to claim any ASTR rewards before the launch or they will be lost.')}
+          />
         </div>
       </SwModal>
     </>
   );
 };
 
-const ClaimDappStakingRewardsModal = styled(Component)<Props>(({ theme: {token}}: Props) => {
+const ClaimDappStakingRewardsModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.modal_content': {
       fontSize: token.fontSize,
@@ -124,16 +136,7 @@ const ClaimDappStakingRewardsModal = styled(Component)<Props>(({ theme: {token}}
     },
     '.ant-sw-header-center-part': {
       width: 'auto'
-<<<<<<< HEAD
     }
-=======
-    },
-      '.link': {
-          color: token.colorLink,
-          textDecoration: 'underline !important',
-          backgroundColor: 'red'
-      },
->>>>>>> origin/koni/dev/issue-2545
   };
 });
 

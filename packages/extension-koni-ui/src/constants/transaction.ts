@@ -3,7 +3,7 @@
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import { CancelUnStakeParams, ClaimRewardParams, SendNftParams, StakeParams, TransactionFormBaseProps, TransferParams, UnStakeParams, WithdrawParams } from '@subwallet/extension-koni-ui/types';
+import { CancelUnStakeParams, ClaimRewardParams, ClainDappStakingRewardsParams, SendNftParams, StakeParams, TransactionFormBaseProps, TransferParams, UnStakeParams, WithdrawParams } from '@subwallet/extension-koni-ui/types';
 
 import { ALL_KEY } from './common';
 
@@ -95,4 +95,9 @@ export const DEFAULT_CLAIM_REWARD_PARAMS: ClaimRewardParams = {
   ...DEFAULT_TRANSACTION_PARAMS,
   type: '' as StakingType,
   bondReward: false
+};
+
+export const DEFAULT_CLAIM_DAPP_STAKING_REWARDS_PARAMS: ClainDappStakingRewardsParams = {
+  isReminded: false,
+  isShowed: false
 };

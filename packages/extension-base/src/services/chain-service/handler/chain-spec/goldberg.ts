@@ -22,9 +22,14 @@ const chainSpec = {
       appLookup: 'DataLookup',
       commitment: 'KateCommitment'
     },
+    V2HeaderExtension: {
+      appLookup: 'DataLookup',
+      commitment: 'KateCommitment'
+    },
     HeaderExtension: {
       _enum: {
-        V1: 'V1HeaderExtension'
+        V1: 'V1HeaderExtension',
+        V2: 'V2HeaderExtension'
       }
     },
     DaHeader: {
@@ -44,10 +49,12 @@ const chainSpec = {
       extra: 'CheckAppIdExtra',
       types: 'CheckAppIdTypes'
     },
+    BlockLengthColumns: 'Compact<u32>',
+    BlockLengthRows: 'Compact<u32>',
     BlockLength: {
       max: 'PerDispatchClass',
-      cols: 'Compact<u32>',
-      rows: 'Compact<u32>',
+      cols: 'BlockLengthColumns',
+      rows: 'BlockLengthRows',
       chunkSize: 'Compact<u32>'
     },
     PerDispatchClass: {
@@ -61,6 +68,31 @@ const chainSpec = {
       numberOfLeaves: 'Compact<u32>',
       leaf_index: 'Compact<u32>',
       leaf: 'H256'
+    },
+    DataProofV2: {
+      dataRoot: 'H256',
+      blobRoot: 'H256',
+      bridgeRoot: 'H256',
+      proof: 'Vec<H256>',
+      numberOfLeaves: 'Compact<u32>',
+      leafIndex: 'Compact<u32>',
+      leaf: 'H256'
+    },
+    ProofResponse: {
+      dataProof: 'DataProofV2',
+      message: 'Option<Message>'
+    },
+    Message: {
+      messageType: 'MessageType',
+      from: 'H256',
+      to: 'H256',
+      originDomain: 'u32',
+      destinationDomain: 'u32',
+      data: 'Vec<u8>',
+      id: 'u64'
+    },
+    MessageType: {
+      _enum: ['ArbitraryMessage', 'FungibleToken']
     },
     Cell: {
       row: 'u32',
@@ -96,10 +128,10 @@ const chainSpec = {
         type: 'Vec<u8>'
       },
       queryDataProof: {
-        description: 'Generate the data proof for the given `index`',
+        description: 'Generate the data proof for the given `transaction_index`',
         params: [
           {
-            name: 'data_index',
+            name: 'transaction_index',
             type: 'u32'
           },
           {
@@ -109,6 +141,51 @@ const chainSpec = {
           }
         ],
         type: 'DataProof'
+      },
+      queryDataProofV2: {
+        description: 'Generate the data proof for the given `transaction_index`',
+        params: [
+          {
+            name: 'transaction_index',
+            type: 'u32'
+          },
+          {
+            name: 'at',
+            type: 'Hash',
+            isOptional: true
+          }
+        ],
+        type: 'ProofResponse'
+      },
+      queryAppData: {
+        description: 'Fetches app data rows for the given app',
+        params: [
+          {
+            name: 'app_id',
+            type: 'AppId'
+          },
+          {
+            name: 'at',
+            type: 'Hash',
+            isOptional: true
+          }
+        ],
+        type: 'Vec<Option<Vec<u8>>>'
+      },
+      queryRows: {
+        description: 'Query rows based on their indices',
+        params: [
+          {
+            name: 'rows',
+            type: 'Vec<u32>'
+          },
+          {
+            name: 'at',
+            type: 'Hash',
+            isOptional: true
+          }
+        ],
+        type: 'Vec<Vec<u8>>'
       }
     }
   },

@@ -96,6 +96,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
       const minDelegatorStake = substrateApi.api.consts.parachainStaking.minDelegatorStake.toString();
       const unstakingDelay = substrateApi.api.consts.parachainStaking.stakeDuration.toString(); // in blocks
       const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
+      const maxUnstakeRequests = substrateApi.api.consts.parachainStaking.maxUnstakeRequests.toPrimitive() as number;
       const blockPerRound = parseFloat(_blockPerRound);
 
       const roundTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default; // in hours
@@ -120,7 +121,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
             }
           ],
           maxCandidatePerFarmer: parseInt(maxDelegations),
-          maxWithdrawalRequestPerFarmer: 1, // by default
+          maxWithdrawalRequestPerFarmer: maxUnstakeRequests, // by default
           earningThreshold: {
             join: minDelegatorStake,
             defaultUnstake: '0',
@@ -310,7 +311,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
     await substrateApi.isReady;
 
-    if (!_STAKING_CHAIN_GROUP.kilt.includes(this.chain)) {
+    if (!_STAKING_CHAIN_GROUP.kilt.includes(this.chain) && !_STAKING_CHAIN_GROUP.krest_network.includes(this.chain)) {
       await Promise.all(useAddresses.map(async (address) => {
         const _unclaimedReward = await substrateApi.api.query.parachainStaking.rewards(address);
 

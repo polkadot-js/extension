@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 1.1.33
+Build date: Jan 23, 2024.
+
+Features & Update:
+- Add "time-out" status for transaction history (#2387)
+- Auto import EVM network with source from online resources (#2472)
+- Add support in-app staking for KREST (#2492)
+- Update chain-list (#2508)
+- Support XCM transfer between Manta Atlantic and other networks
+  - DOT (Polkadot) <-> DOT (Manta Atlantic)
+  - DOT (Manta Atlantic) <-> DOT (Moonbeam)
+  - MANTA (Manta Atlantic) <-> MANTA (Moonbeam)
+  - Update price for MANTA
+- Update Jur default RPC
+
+Bugs fixed:
+- Improve banner campaign in app (#2038)
+
+
 ## 1.1.32
 Build date: Jan 15, 2024.
 

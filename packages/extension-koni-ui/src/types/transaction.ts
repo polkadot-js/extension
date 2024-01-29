@@ -50,8 +50,3 @@ export interface ClaimRewardParams extends TransactionFormBaseProps {
   type: StakingType;
   bondReward: boolean;
 }
-
-export interface ClainDappStakingRewardsParams {
-  isShowed: boolean;
-  isReminded: boolean;
-}

@@ -28,7 +28,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
-  const [isShowNotificationDappStaking] = useLocalStorage<ClainDappStakingRewardsParams>(CLAIM_DAPP_STAKING_REWARDS, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_PARAMS);
+  const [notificationClaimDappStakingRewardsState] = useLocalStorage<ClainDappStakingRewardsParams>(CLAIM_DAPP_STAKING_REWARDS, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_PARAMS);
   const mantaPayConfig = useGetMantaPayConfig(currentAccount?.address);
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const handleMantaPaySync = useHandleMantaPaySync();
@@ -68,10 +68,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal, isConfirmedTermGeneral, setIsConfirmedTermGeneral]);
 
   useEffect(() => {
-    if (!isShowNotificationDappStaking || !isShowNotificationDappStaking.isShowed) {
+    if (!notificationClaimDappStakingRewardsState || !notificationClaimDappStakingRewardsState.isShowed) {
       activeModal(CLAIM_DAPP_STAKING_REWARDS_MODAL);
     }
-  }, [activeModal, isShowNotificationDappStaking]);
+  }, [activeModal, notificationClaimDappStakingRewardsState]);
 
   return (
     <>

@@ -15,3 +15,8 @@ export type StakingData = {
   data: StakingDataType[];
   priceMap: Record<string, number>;
 };
+
+export interface ClainDappStakingRewardsParams {
+  isShowed: boolean;
+  isReminded: boolean;
+}

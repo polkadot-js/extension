@@ -3,6 +3,7 @@
 
 import { ChainStakingMetadata, ExtrinsicType, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_STAKE_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, STAKE_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
@@ -165,6 +166,10 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [navigate]);
 
+  const isDappStaking = useMemo(() => {
+    return _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
+  }, [nominatorMetadata.chain]);
+
   const actionList: ActionListType[] = useMemo((): ActionListType[] => {
     if (!chainStakingMetadata) {
       return [];
@@ -203,8 +208,8 @@ const Component: React.FC<Props> = (props: Props) => {
           action: StakingAction.CLAIM_REWARD,
           backgroundIconColor: 'green-7',
           icon: Wallet,
-          label: t('Claim rewards'),
-          onClick: handleClaimRewardAction
+          label: !isDappStaking ? t('Claim rewards') : t('Check rewards'),
+          onClick: isDappStaking ? () => window.open('https://portal.astar.network/astar/dapp-staking/discover') : handleClaimRewardAction
         };
       } else if (action === StakingAction.CANCEL_UNSTAKE) {
         return {
@@ -242,7 +247,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }
       };
     });
-  }, [chainStakingMetadata, currentAccount, handleClaimRewardAction, handleWithdrawalAction, onNavigate, setCancelUnStakeStorage, setStakeStorage, setUnStakeStorage, t]);
+  }, [chainStakingMetadata, currentAccount, handleClaimRewardAction, handleWithdrawalAction, isDappStaking, onNavigate, setCancelUnStakeStorage, setStakeStorage, setUnStakeStorage, t]);
 
   const onPreCheck = usePreCheckAction(currentAccount?.address, false);
 

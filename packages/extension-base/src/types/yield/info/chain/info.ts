@@ -263,6 +263,8 @@ export interface AbstractYieldPoolInfo extends BasePoolInfo {
   /** Pool's metadata */
   statistic?: YieldPoolStatistic;
 
+  lastUpdated?: number;
+
   /* Special info */
 }
 

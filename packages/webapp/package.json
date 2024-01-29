@@ -18,9 +18,9 @@
   "buildNumber": "1131001",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
-    "@subwallet/extension-base": "^1.1.32-0",
-    "@subwallet/extension-inject": "^1.1.32-0",
-    "@subwallet/extension-web-ui": "^1.1.32-0"
+    "@subwallet/extension-base": "^1.1.33-0",
+    "@subwallet/extension-inject": "^1.1.33-0",
+    "@subwallet/extension-web-ui": "^1.1.33-0"
   },
   "devDependencies": {
     "@polkadot/dev": "^0.65.23",

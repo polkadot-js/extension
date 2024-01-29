@@ -12,7 +12,8 @@ export const _STAKING_CHAIN_GROUP = {
   aleph: ['aleph', 'alephTest'], // A0 has distinct tokenomics
   ternoa: ['ternoa', 'ternoa_alphanet'],
   liquidStaking: ['bifrost_dot', 'acala', 'parallel', 'moonbeam'],
-  lending: ['interlay']
+  lending: ['interlay'],
+  krest_network: ['krest_network']
 };
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment

@@ -8,7 +8,10 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { EventService } from '@subwallet/extension-base/services/event-service';
+import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { TRANSACTION_TIMEOUT } from '@subwallet/extension-base/services/transaction-service/constants';
 import { parseLiquidStakingEvents, parseLiquidStakingFastUnstakeEvents, parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
@@ -41,10 +44,15 @@ import { isHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 
 import { _TRANSFER_CHAIN_GROUP } from '../chain-service/constants';
+import NotificationService from '../notification-service/NotificationService';
 
 export default class TransactionService {
   private readonly state: KoniState;
   private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
+  private readonly eventService: EventService;
+  private readonly historyService: HistoryService;
+  private readonly notificationService: NotificationService;
+  private readonly chainService: ChainService;
 
   private readonly watchTransactionSubscribes: Record<string, Promise<void>> = {};
 
@@ -54,6 +62,10 @@ export default class TransactionService {
 
   constructor (state: KoniState) {
     this.state = state;
+    this.eventService = state.eventService;
+    this.historyService = state.historyService;
+    this.notificationService = state.notificationService;
+    this.chainService = state.chainService;
   }
 
   private get allTransactions (): SWTransaction[] {

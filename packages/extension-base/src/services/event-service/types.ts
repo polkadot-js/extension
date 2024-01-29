@@ -36,6 +36,7 @@ export interface EventRegistry {
 
   'transaction.done': [SWTransaction];
   'transaction.failed': [SWTransaction | undefined];
+  'transaction.timeout': [SWTransaction | undefined];
   'transaction.submitStaking': [string];
   'transaction.transferNft': [SWTransaction | undefined];
   'mantaPay.initSync': [string | undefined]; // zkAddress

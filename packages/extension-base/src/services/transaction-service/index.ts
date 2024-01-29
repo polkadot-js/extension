@@ -342,6 +342,10 @@ export default class TransactionService {
       this.onFailed({ ...data, errors: [...data.errors, new TransactionError(BasicTxErrorType.INTERNAL_ERROR)] });
     });
 
+    emitter.on('timeout', (data: TransactionEventResponse) => {
+      this.onTimeOut({ ...data, errors: [...data.errors, new TransactionError(BasicTxErrorType.TIMEOUT)] });
+    });
+
     // Todo: handle any event with transaction.eventsHandler
 
     eventsHandler?.(emitter);
@@ -820,6 +824,34 @@ export default class TransactionService {
     this.state.eventService.emit('transaction.failed', transaction);
   }
 
+  private onTimeOut ({ blockHash, blockNumber, errors, extrinsicHash, id }: TransactionEventResponse) {
+    const transaction = this.getTransaction(id);
+    const nextStatus = ExtrinsicStatus.TIMEOUT;
+
+    if (transaction) {
+      this.updateTransaction(id, { status: nextStatus, errors, extrinsicHash });
+
+      this.historyService.updateHistoryByExtrinsicHash(transaction.extrinsicHash, {
+        extrinsicHash: extrinsicHash || transaction.extrinsicHash,
+        status: nextStatus,
+        blockNumber: blockNumber || 0,
+        blockHash: blockHash || ''
+      }).catch(console.error);
+
+      const info = isHex(transaction?.extrinsicHash) ? transaction?.extrinsicHash : getBaseTransactionInfo(transaction, this.chainService.getChainInfoMap());
+
+      this.notificationService.notify({
+        type: NotificationType.ERROR,
+        title: t('Transaction timed out'),
+        message: t('Transaction {{info}} timed out', { replace: { info } }),
+        action: { url: this.getTransactionLink(id) },
+        notifyViaBrowser: true
+      });
+    }
+
+    this.eventService.emit('transaction.timeout', transaction);
+  }
+
   public generateHashPayload (chain: string, transaction: TransactionConfig): HexString {
     const chainInfo = this.state.chainService.getChainInfoByKey(chain);
 
@@ -1145,7 +1177,7 @@ export default class TransactionService {
 
       if (transaction.status !== ExtrinsicStatus.SUCCESS && transaction.status !== ExtrinsicStatus.FAIL) {
         eventData.errors.push(new TransactionError(BasicTxErrorType.TIMEOUT, t('Transaction timeout')));
-        emitter.emit('error', eventData);
+        emitter.emit('timeout', eventData);
         clearTimeout(timeout);
       }
     }, TRANSACTION_TIMEOUT);

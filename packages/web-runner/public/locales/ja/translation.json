@@ -1100,5 +1100,8 @@
   "Unable to fetch staking data. Re-enable \"{{chainName}}\" and try again.": "",
   "Click the \"Scan QR\" button, or read <highlight>this instruction</highlight>, for more details": "",
   "Withdrawable in {{time}}": "",
-  "Request a feature": ""
+  "Request a feature": "",
+  "Transaction timed out": "",
+  "Transaction {{info}} timed out": "",
+  "Time-out": ""
 }

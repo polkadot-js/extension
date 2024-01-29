@@ -430,3 +430,5 @@ export * from './promise';
 export * from './registry';
 export * from './translate';
 export * from './object';
+export * from './fetchStaticData';
+export * from './fetchEvmChainInfo';

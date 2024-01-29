@@ -558,7 +558,8 @@ export enum ExtrinsicStatus {
   PROCESSING = 'processing', // Transaction is sending
   SUCCESS = 'success', // Send successfully
   FAIL = 'fail', // Send failed
-  CANCELLED = 'cancelled', // Is remove before sending
+  CANCELLED = 'cancelled', // Is remove before sending,
+  TIMEOUT = 'timeout',
   UNKNOWN = 'unknown'
 }
 

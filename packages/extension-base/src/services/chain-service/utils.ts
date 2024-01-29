@@ -468,7 +468,15 @@ export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfo
     const currentChainState = currentChainStateMap[latestChainInfo.slug];
 
     if (currentChainInfo && currentChainState) {
-      currentChainInfo.providers = latestChainInfo.providers;
+      const preservedProvider: Record<string, string> = {};
+
+      Object.entries(currentChainInfo.providers).forEach(([providerKey, providerValue]) => {
+        if (providerValue?.startsWith('light') || providerKey?.startsWith(_CUSTOM_PREFIX)) {
+          preservedProvider[providerKey] = providerValue;
+        }
+      });
+
+      currentChainInfo.providers = { ...latestChainInfo.providers, ...preservedProvider };
 
       if (currentChainInfo.chainStatus === _ChainStatus.ACTIVE && !Object.keys(currentChainInfo.providers).includes(currentChainState.currentProvider)) {
         const { providerKey } = randomizeProvider(currentChainInfo.providers);

@@ -333,7 +333,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const defaultFeeTokenSlug = this.feeAssets[0];
 
     if (new BN(params.amount).gt(BN_ZERO)) {
-      const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount, null).paymentInfo(fakeAddress);
+      const _mintFeeInfo = await poolOriginSubstrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), params.amount, undefined, undefined).paymentInfo(fakeAddress);
       const mintFeeInfo = _mintFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
       return {
@@ -352,7 +352,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const substrateApi = await this.substrateApi.isReady;
     const inputTokenSlug = this.inputAsset;
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
-    const extrinsic = substrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), data.amount, undefined);
+    const extrinsic = substrateApi.api.tx.vtokenMinting.mint(_getTokenOnChainInfo(inputTokenInfo), data.amount, undefined, undefined);
 
     return {
       txChain: this.chain,

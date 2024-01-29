@@ -844,7 +844,7 @@ export class ChainService {
           const storedProviderKey = storedChainInfo.currentProvider;
           const storedProviderValue = storedChainInfo.providers[storedProviderKey] || '';
 
-          if (storedProviderValue.startsWith('light') || storedProviderKey.startsWith(_CUSTOM_PREFIX)) {
+          if (storedProviderValue?.startsWith('light') || storedProviderKey?.startsWith(_CUSTOM_PREFIX)) {
             for (const [key, value] of Object.entries(providers)) {
               if (storedProviderValue === value) {
                 selectedProvider = key;

@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { APIItemState, BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getBondedValidators, getEarningStatusByNominations, isUnstakeAll } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getBondedValidators, getEarningStatusByNominations, isUnstakeAll, KrestDelegateState } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
@@ -148,63 +148,69 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
   /* Subscribe pool position */
 
-  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, delegatorState: ParachainStakingStakeOption, unstakingInfo: Record<string, number>): Promise<Omit<YieldPositionInfo, keyof BaseYieldPositionInfo>> {
+  async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, delegatorState: ParachainStakingStakeOption[], unstakingInfo: Record<string, number>): Promise<Omit<YieldPositionInfo, keyof BaseYieldPositionInfo>> {
     const nominationList: NominationInfo[] = [];
     const unstakingList: UnstakingInfo[] = [];
     const minDelegatorStake = substrateApi.api.consts.parachainStaking.minDelegatorStake.toString();
+    const hasUnstakingInfo = unstakingInfo && Object.values(unstakingInfo).length > 0;
 
     let activeStake = '0';
     let unstakingBalance = '0';
 
     if (delegatorState) { // delegatorState can be null while unstaking all
-      const [identity] = await parseIdentity(substrateApi, delegatorState.owner);
+      const identityPromises = delegatorState.map((delegate) => parseIdentity(substrateApi, delegate.owner));
+      const identities = await Promise.all(identityPromises);
 
-      activeStake = delegatorState.amount.toString();
-      const bnActiveStake = new BN(activeStake);
-      let delegationStatus: EarningStatus = EarningStatus.NOT_EARNING;
+      for (let i = 0; i < delegatorState.length; i++) {
+        const delegate = delegatorState[i];
+        const [identity] = identities[i];
 
-      if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
-        delegationStatus = EarningStatus.EARNING_REWARD;
+        activeStake = delegate.amount.toString();
+        const bnActiveStake = new BN(activeStake);
+        let delegationStatus = EarningStatus.NOT_EARNING;
+
+        if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
+          delegationStatus = EarningStatus.EARNING_REWARD;
+        }
+
+        nominationList.push({
+          status: delegationStatus,
+          chain: chainInfo.slug,
+          validatorAddress: delegate.owner,
+          activeStake: delegate.amount.toString(),
+          validatorMinStake: '0',
+          hasUnstaking: hasUnstakingInfo,
+          validatorIdentity: identity
+        });
       }
 
-      nominationList.push({
-        status: delegationStatus,
-        chain: chainInfo.slug,
-        validatorAddress: delegatorState.owner,
-        activeStake: delegatorState.amount.toString(),
-        validatorMinStake: '0',
-        hasUnstaking: !!unstakingInfo && Object.values(unstakingInfo).length > 0,
-        validatorIdentity: identity
-      });
-    }
+      if (hasUnstakingInfo) {
+        const _currentBlockInfo = await substrateApi.api.rpc.chain.getHeader();
 
-    if (unstakingInfo && Object.values(unstakingInfo).length > 0) {
-      const _currentBlockInfo = await substrateApi.api.rpc.chain.getHeader();
+        const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
+        const currentBlockNumber = currentBlockInfo.number;
 
-      const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
-      const currentBlockNumber = currentBlockInfo.number;
+        const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
+        const blockPerRound = parseFloat(_blockPerRound);
 
-      const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
-      const blockPerRound = parseFloat(_blockPerRound);
+        for (const [unstakingBlock, unstakingAmount] of Object.entries(unstakingInfo)) {
+          const blockDuration = (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
 
-      const nearestUnstakingBlock = Object.keys(unstakingInfo)[0];
-      const nearestUnstakingAmount = Object.values(unstakingInfo)[0];
+          const isClaimable = parseInt(unstakingBlock) - currentBlockNumber < 0;
+          const remainingBlock = parseInt(unstakingBlock) - currentBlockNumber;
+          const waitingTime = remainingBlock * blockDuration;
 
-      const blockDuration = (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+          unstakingBalance = unstakingAmount.toString();
 
-      const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber < 0;
-      const remainingBlock = parseInt(nearestUnstakingBlock) - currentBlockNumber;
-      const waitingTime = remainingBlock * blockDuration;
-
-      unstakingBalance = nearestUnstakingAmount.toString();
-
-      unstakingList.push({
-        chain: chainInfo.slug,
-        status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
-        claimable: nearestUnstakingAmount.toString(),
-        waitingTime,
-        validatorAddress: delegatorState?.owner || undefined
-      });
+          unstakingList.push({
+            chain: chainInfo.slug,
+            status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+            claimable: unstakingAmount.toString(),
+            waitingTime,
+            validatorAddress: undefined
+          });
+        }
+      }
     }
 
     const totalBalance = new BN(activeStake).add(new BN(unstakingBalance));
@@ -240,9 +246,25 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
         await Promise.all(ledgers.map(async (_delegatorState, i) => {
           const owner = reformatAddress(useAddresses[i], 42);
+          let delegatorState: ParachainStakingStakeOption[] = [];
 
-          const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
           const unstakingInfo = _unstakingStates[i].toPrimitive() as unknown as Record<string, number>;
+
+          if (_STAKING_CHAIN_GROUP.krest_network.includes(this.chain)) {
+            const krestDelegatorState = _delegatorState.toPrimitive() as unknown as KrestDelegateState;
+
+            const delegates = krestDelegatorState?.delegations as unknown as ParachainStakingStakeOption[];
+
+            if (delegates) {
+              delegatorState = delegatorState.concat(delegates);
+            }
+          } else {
+            const delegate = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
+
+            if (delegate) {
+              delegatorState.push(delegate);
+            }
+          }
 
           if (!delegatorState && !unstakingInfo) {
             resultCallback({
@@ -317,42 +339,73 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
   async getPoolTargets (): Promise<ValidatorInfo[]> {
     const chainApi = await this.substrateApi.isReady;
-    const [_allCollators, _inflationConfig] = await Promise.all([
-      chainApi.api.query.parachainStaking.candidatePool.entries(),
-      chainApi.api.query.parachainStaking.inflationConfig()
-    ]);
 
-    const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
-    const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
-    const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
-    const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
+    if (_STAKING_CHAIN_GROUP.krest_network.includes(this.chain)) {
+      const _allCollators = await chainApi.api.query.parachainStaking.candidatePool.entries();
+      const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
+      const allCollators: ValidatorInfo[] = [];
 
-    const allCollators: ValidatorInfo[] = [];
+      for (const _collator of _allCollators) {
+        const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
 
-    for (const _collator of _allCollators) {
-      const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
+        const bnTotalStake = new BN(collatorInfo.total);
+        const bnOwnStake = new BN(collatorInfo.stake);
+        const bnOtherStake = bnTotalStake.sub(bnOwnStake);
 
-      const bnTotalStake = new BN(collatorInfo.total);
-      const bnOwnStake = new BN(collatorInfo.stake);
-      const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+        allCollators.push({
+          address: collatorInfo.id,
+          totalStake: bnTotalStake.toString(),
+          ownStake: bnOwnStake.toString(),
+          otherStake: bnOtherStake.toString(),
+          nominatorCount: collatorInfo.delegators.length,
+          commission: 0,
+          blocked: false,
+          isVerified: false,
+          minBond: '0',
+          chain: this.chain,
+          isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
+        });
+      }
 
-      allCollators.push({
-        address: collatorInfo.id,
-        totalStake: bnTotalStake.toString(),
-        ownStake: bnOwnStake.toString(),
-        otherStake: bnOtherStake.toString(),
-        nominatorCount: collatorInfo.delegators.length,
-        commission: 0,
-        expectedReturn: delegatorReturn,
-        blocked: false,
-        isVerified: false,
-        minBond: '0',
-        chain: this.chain,
-        isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
-      });
+      return allCollators;
+    } else {
+      const [_allCollators, _inflationConfig] = await Promise.all([
+        chainApi.api.query.parachainStaking.candidatePool.entries(),
+        chainApi.api.query.parachainStaking.inflationConfig()
+      ]);
+
+      const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
+      const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
+      const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
+      const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
+
+      const allCollators: ValidatorInfo[] = [];
+
+      for (const _collator of _allCollators) {
+        const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
+
+        const bnTotalStake = new BN(collatorInfo.total);
+        const bnOwnStake = new BN(collatorInfo.stake);
+        const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+
+        allCollators.push({
+          address: collatorInfo.id,
+          totalStake: bnTotalStake.toString(),
+          ownStake: bnOwnStake.toString(),
+          otherStake: bnOtherStake.toString(),
+          nominatorCount: collatorInfo.delegators.length,
+          commission: 0,
+          expectedReturn: delegatorReturn,
+          blocked: false,
+          isVerified: false,
+          minBond: '0',
+          chain: this.chain,
+          isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
+        });
+      }
+
+      return allCollators;
     }
-
-    return allCollators;
   }
 
   /* Get pool targets */

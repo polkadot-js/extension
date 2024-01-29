@@ -27,7 +27,7 @@ function getSingleStakingAmplitude (substrateApi: _SubstrateApi, address: string
     if (_STAKING_CHAIN_GROUP.krest_network.includes(chain)) {
       const krestDelegatorState = _delegatorState.toPrimitive() as unknown as KrestDelegateState;
 
-      const delegates = krestDelegatorState?.delegations as unknown as ParachainStakingStakeOption;
+      const delegates = krestDelegatorState?.delegations as unknown as ParachainStakingStakeOption[];
 
       delegatorState = delegatorState.concat(delegates);
     } else {
@@ -118,7 +118,7 @@ function getMultiStakingAmplitude (substrateApi: _SubstrateApi, useAddresses: st
         if (_STAKING_CHAIN_GROUP.krest_network.includes(chain)) {
           const krestDelegatorState = _delegatorState.toPrimitive() as unknown as KrestDelegateState;
 
-          const delegates = krestDelegatorState?.delegations as unknown as ParachainStakingStakeOption;
+          const delegates = krestDelegatorState?.delegations as unknown as ParachainStakingStakeOption[];
 
           delegatorState = delegatorState.concat(delegates);
         } else {

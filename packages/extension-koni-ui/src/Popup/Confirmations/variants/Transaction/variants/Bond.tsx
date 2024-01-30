@@ -32,12 +32,6 @@ const Component: React.FC<Props> = (props: Props) => {
         className={'meta-info'}
         hasBackgroundWrapper
       >
-        {/* <MetaInfo.Account */}
-        {/*   address={'5DnokDpMdNEH8cApsZoWQnjsggADXQmGWUb6q8ZhHeEwvncL'} */}
-        {/*   label={t('Validator')} */}
-        {/*   networkPrefix={42} */}
-        {/* /> */}
-
         <MetaInfo.AccountGroup
           accounts={data.selectedValidators}
           content={t('{{number}} selected validators', { replace: { number: data.selectedValidators.length } })}

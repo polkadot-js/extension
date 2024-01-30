@@ -2,12 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
 import { NftHandler } from '@subwallet/extension-base/koni/api/nft';
-import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
-import { subscribeEssentialChainStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
-import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-base/koni/api/staking/paraChain';
+import { getNominationStakingRewardData } from '@subwallet/extension-base/koni/api/staking';
 import { subscribeBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/balance';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
@@ -20,7 +18,7 @@ import { Logger } from '@polkadot/util/types';
 
 import KoniState from './handlers/State';
 
-type SubscriptionName = 'balance' | 'crowdloan' | 'stakingOnChain' | 'essentialChainStakingMetadata';
+type SubscriptionName = 'balance' | 'crowdloan' | 'yieldPoolStats' | 'yieldPosition';
 
 const nftHandler = new NftHandler();
 
@@ -29,8 +27,8 @@ export class KoniSubscription {
   private subscriptionMap: Record<SubscriptionName, (() => void) | undefined> = {
     crowdloan: undefined,
     balance: undefined,
-    stakingOnChain: undefined,
-    essentialChainStakingMetadata: undefined
+    yieldPoolStats: undefined,
+    yieldPosition: undefined
   };
 
   public dbService: DatabaseService;
@@ -68,11 +66,6 @@ export class KoniSubscription {
       this.subscriptionMap.crowdloan();
       delete this.subscriptionMap.crowdloan;
     }
-
-    if (this.subscriptionMap.stakingOnChain) {
-      this.subscriptionMap.stakingOnChain();
-      delete this.subscriptionMap.stakingOnChain;
-    }
   }
 
   async start () {
@@ -82,7 +75,6 @@ export class KoniSubscription {
     if (currentAddress) {
       this.subscribeBalances(currentAddress, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
       this.subscribeCrowdloans(currentAddress, this.state.getSubstrateApiMap());
-      this.subscribeStakingOnChain(currentAddress, this.state.getSubstrateApiMap());
     }
 
     this.eventHandler = (events, eventTypes) => {
@@ -101,7 +93,6 @@ export class KoniSubscription {
 
       this.subscribeBalances(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
       this.subscribeCrowdloans(address, serviceInfo.chainApiMap.substrate);
-      this.subscribeStakingOnChain(address, serviceInfo.chainApiMap.substrate);
     };
 
     this.state.eventService.onLazy(this.eventHandler.bind(this));
@@ -142,65 +133,6 @@ export class KoniSubscription {
     }).catch(console.error);
   }
 
-  subscribeStakingOnChain (address: string, substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
-    this.state.resetStaking(address);
-    const addresses = this.state.getDecodedAddresses(address);
-
-    if (!addresses.length) {
-      return;
-    }
-
-    this.updateSubscription('stakingOnChain', this.initStakingOnChainSubscription(addresses, substrateApiMap, onlyRunOnFirstTime));
-    this.updateSubscription('essentialChainStakingMetadata', this.initEssentialChainStakingMetadataSubscription(substrateApiMap, onlyRunOnFirstTime)); // TODO: might not need to re-subscribe on changing account
-  }
-
-  initStakingOnChainSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
-    const stakingCallback = (networkKey: string, rs: StakingItem) => {
-      this.state.setStakingItem(networkKey, rs);
-    };
-
-    const nominatorStateCallback = (nominatorMetadata: NominatorMetadata) => {
-      this.state.updateStakingNominatorMetadata(nominatorMetadata);
-    };
-
-    const unsub = stakingOnChainApi(addresses, substrateApiMap, this.state.getActiveChainInfoMap(), stakingCallback, nominatorStateCallback);
-
-    if (onlyRunOnFirstTime) {
-      unsub && unsub();
-
-      return;
-    }
-
-    return () => {
-      unsub && unsub();
-    };
-  }
-
-  initEssentialChainStakingMetadataSubscription (substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
-    const unsub = subscribeEssentialChainStakingMetadata(substrateApiMap, this.state.getActiveChainInfoMap(), (networkKey, rs) => {
-      this.state.updateChainStakingMetadata(rs, {
-        era: rs.era,
-        minStake: rs.minStake,
-        maxValidatorPerNominator: rs.maxValidatorPerNominator, // temporary fix for Astar, there's no limit for now
-        maxWithdrawalRequestPerValidator: rs.maxWithdrawalRequestPerValidator, // by default
-        allowCancelUnstaking: rs.allowCancelUnstaking,
-        unstakingPeriod: rs.unstakingPeriod,
-        expectedReturn: rs.expectedReturn,
-        inflation: rs.inflation
-      });
-    });
-
-    if (onlyRunOnFirstTime) {
-      unsub && unsub();
-
-      return;
-    }
-
-    return () => {
-      unsub && unsub();
-    };
-  }
-
   initBalanceSubscription (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
     const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
@@ -235,17 +167,13 @@ export class KoniSubscription {
     });
 
     if (onlyRunOnFirstTime) {
-      subscriptionPromise.then((unsub) => {
-        unsub && unsub();
-      }).catch(this.logger.warn);
+      subscriptionPromise.then((unsub) => unsub?.()).catch(this.logger.warn);
 
       return;
     }
 
     return () => {
-      subscriptionPromise.then((unsub) => {
-        unsub && unsub();
-      }).catch(this.logger.warn);
+      subscriptionPromise.then((unsub) => unsub?.()).catch(this.logger.warn);
     };
   }
 
@@ -293,58 +221,6 @@ export class KoniSubscription {
     await getNominationStakingRewardData(addresses, targetNetworkMap, (rewardItem: StakingRewardItem) => {
       this.state.updateStakingReward(rewardItem);
     });
-  }
-
-  async subscribeStakingRewardFastInterval (address: string) {
-    const addresses = this.state.getDecodedAddresses(address);
-
-    if (!addresses.length) {
-      return;
-    }
-
-    const pooledStakingItems = await this.state.getPooledStakingRecordsByAddress(addresses);
-
-    const pooledAddresses: string[] = [];
-
-    pooledStakingItems.forEach((pooledItem) => {
-      if (!pooledAddresses.includes(pooledItem.address)) {
-        pooledAddresses.push(pooledItem.address);
-      }
-    });
-
-    const chainInfoMap = this.state.getChainInfoMap();
-    const targetChainMap: Record<string, _ChainInfo> = {};
-
-    Object.entries(chainInfoMap).forEach(([key, network]) => {
-      const chainState = this.state.getChainStateByKey(key);
-
-      if (_isChainEnabled(chainState) && _isChainSupportSubstrateStaking(network)) {
-        targetChainMap[key] = network;
-      }
-    });
-
-    const activeNetworks: string[] = [];
-
-    Object.keys(targetChainMap).forEach((key) => {
-      activeNetworks.push(key);
-    });
-
-    const updateState = (result: StakingRewardItem) => {
-      this.state.updateStakingReward(result);
-    };
-
-    await Promise.all([
-      getPoolingStakingRewardData(pooledAddresses, targetChainMap, this.state.getSubstrateApiMap(), updateState),
-      getAmplitudeUnclaimedStakingReward(this.state.getSubstrateApiMap(), addresses, chainInfoMap, activeNetworks, updateState)
-    ]);
-  }
-
-  async reloadStaking () {
-    const currentAddress = this.state.keyringService.currentAccount?.address;
-
-    this.subscribeStakingOnChain(currentAddress, this.state.getSubstrateApiMap());
-
-    await waitTimeout(1800);
   }
 
   async reloadBalance () {

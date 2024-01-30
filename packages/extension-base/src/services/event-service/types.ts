@@ -9,12 +9,23 @@ export interface EventRegistry {
   'general.wakeup': [boolean];
   'crypto.ready': [boolean];
   'database.ready': [boolean];
+
+  /* Keyring */
+  /** Password state ready  */
   'keyring.ready': [boolean];
+  /** Update current account  */
   'account.updateCurrent': [CurrentAccountInfo];
+  /** Account list loaded  */
   'account.ready': [boolean];
+  /** Add a new account  */
   'account.add': [string]; // address
+  /** Update account */
   'account.update': [string]; // address
+  /** Remove a account  */
   'account.remove': [string]; // address
+  /** Inject account done  */
+  'inject.ready': [boolean]; // address
+  /* Keyring */
 
   'chain.ready': [boolean]; // chain is ready and migration done
   'chain.add': [string]; // chain slug
@@ -25,6 +36,7 @@ export interface EventRegistry {
 
   'transaction.done': [SWTransaction];
   'transaction.failed': [SWTransaction | undefined];
+  'transaction.timeout': [SWTransaction | undefined];
   'transaction.submitStaking': [string];
   'transaction.transferNft': [SWTransaction | undefined];
   'mantaPay.initSync': [string | undefined]; // zkAddress
@@ -37,6 +49,9 @@ export interface EventRegistry {
   // Buy token
   'buy.tokens.ready': [boolean];
   'buy.services.ready': [boolean];
+
+  // Earning
+  'earning.ready': [boolean];
 }
 
 export type EventType = keyof EventRegistry;

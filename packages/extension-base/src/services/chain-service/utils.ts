@@ -114,7 +114,7 @@ export function _getTokenMinAmount (tokenInfo: _ChainAsset) {
 }
 
 export function _isChainEvmCompatible (chainInfo: _ChainInfo) {
-  return chainInfo.evmInfo !== undefined && chainInfo.evmInfo !== null;
+  return !!chainInfo.evmInfo;
 }
 
 export function _isNativeToken (tokenInfo: _ChainAsset) {
@@ -172,6 +172,12 @@ export function _isChainSupportEvmNft (chainInfo: _ChainInfo) {
 export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP34) || false;
 }
+
+export const _isSupportOrdinal = (chain: string) => {
+  const chains = ['polkadot', 'astar', 'bifrost_dot', 'moonbeam'];
+
+  return chains.includes(chain);
+};
 
 export function _getNftTypesSupportedByChain (chainInfo: _ChainInfo): _AssetType[] {
   const result: _AssetType[] = [];

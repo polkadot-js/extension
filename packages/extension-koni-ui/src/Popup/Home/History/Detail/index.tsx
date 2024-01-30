@@ -50,7 +50,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
     let originChainInfo = chainInfo;
 
     if (extrinsicType === ExtrinsicType.TRANSFER_XCM && data.additionalInfo) {
-      const additionalInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.TRANSFER_XCM>;
+      const additionalInfo = data.additionalInfo as TransactionAdditionalInfo[ExtrinsicType.TRANSFER_XCM];
 
       originChainInfo = chainInfoMap[additionalInfo.originalChain] || chainInfo;
     }

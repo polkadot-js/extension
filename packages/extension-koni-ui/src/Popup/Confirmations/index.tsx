@@ -5,8 +5,9 @@ import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-bas
 import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
+import { AlertModal } from '@subwallet/extension-koni-ui/components';
 import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
-import { useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useAlert, useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isRawPayload } from '@subwallet/extension-koni-ui/utils';
@@ -34,11 +35,14 @@ const titleMap: Record<ConfirmationType, string> = {
   notSupportWCRequest: detectTranslate('WalletConnect')
 } as Record<ConfirmationType, string>;
 
+const alertModalId = 'confirmation-alert-modal';
+
 const Component = function ({ className }: Props) {
   const { confirmationQueue, numberOfConfirmations } = useConfirmationsInfo();
   const [index, setIndex] = useState(0);
   const confirmation = confirmationQueue[index] || null;
   const { t } = useTranslation();
+  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
 
   const { transactionRequest } = useSelector((state) => state.requestState);
 
@@ -100,7 +104,13 @@ const Component = function ({ className }: Props) {
     }
 
     if (confirmation.item.isInternal) {
-      return <TransactionConfirmation confirmation={confirmation} />;
+      return (
+        <TransactionConfirmation
+          closeAlert={closeAlert}
+          confirmation={confirmation}
+          openAlert={openAlert}
+        />
+      );
     }
 
     switch (confirmation.type) {
@@ -143,7 +153,7 @@ const Component = function ({ className }: Props) {
     }
 
     return null;
-  }, [confirmation]);
+  }, [closeAlert, confirmation, openAlert]);
 
   const headerTitle = useMemo((): string => {
     if (!confirmation) {
@@ -192,16 +202,26 @@ const Component = function ({ className }: Props) {
   }, [index, numberOfConfirmations]);
 
   return (
-    <div className={className}>
-      <ConfirmationHeader
-        index={index}
-        numberOfConfirmations={numberOfConfirmations}
-        onClickNext={nextConfirmation}
-        onClickPrev={prevConfirmation}
-        title={headerTitle}
-      />
-      {content}
-    </div>
+    <>
+      <div className={className}>
+        <ConfirmationHeader
+          index={index}
+          numberOfConfirmations={numberOfConfirmations}
+          onClickNext={nextConfirmation}
+          onClickPrev={prevConfirmation}
+          title={headerTitle}
+        />
+        {content}
+      </div>
+      {
+        !!alertProps && (
+          <AlertModal
+            modalId={alertModalId}
+            {...alertProps}
+          />
+        )
+      }
+    </>
   );
 };
 

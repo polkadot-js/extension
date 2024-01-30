@@ -73,7 +73,7 @@ export class SWHandler {
         // the tab, in which case port will be undefined
         assert(port, 'Port has been disconnected');
 
-        port.postMessage({ id, response });
+        port.postMessage({ id, response, sender: 'BACKGROUND' });
       })
       .catch((error: ProviderError): void => {
         console.error(error);
@@ -81,7 +81,7 @@ export class SWHandler {
 
         // only send message back to port if it's still connected
         if (port) {
-          port.postMessage({ error: error.message, errorCode: error.code, errorData: error.data, id });
+          port.postMessage({ error: error.message, errorCode: error.code, errorData: error.data, id, sender: 'BACKGROUND' });
         }
       });
   }

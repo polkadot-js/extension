@@ -4,6 +4,7 @@
 import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { getRandomIpfsGateway, SUBWALLET_IPFS } from '@subwallet/extension-base/koni/api/nft/config';
 import { t } from 'i18next';
 
 import { assert, BN, hexToU8a, isHex } from '@polkadot/util';
@@ -355,6 +356,62 @@ export const stripUrl = (url: string): string => {
   return parts[2];
 };
 
+export const baseParseIPFSUrl = (input: string): string | undefined => {
+  if (!input || input.length === 0) {
+    return undefined;
+  }
+
+  if (isUrl(input)) {
+    return input;
+  }
+
+  if (isUrl(input) || input.includes('https://') || input.includes('http')) {
+    return input;
+  }
+
+  if (input.startsWith('/ipfs/')) {
+    return getRandomIpfsGateway() + input.split('/ipfs/')[1];
+  }
+
+  if (!input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // just the IPFS hash
+    return getRandomIpfsGateway() + input;
+  }
+
+  if (input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // starts with ipfs://
+    return getRandomIpfsGateway() + input.split('ipfs://')[1];
+  }
+
+  return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1]; // starts with ipfs://ipfs/
+};
+
+export const swParseIPFSUrl = (input: string): string | undefined => {
+  if (!input || input.length === 0) {
+    return undefined;
+  }
+
+  if (isUrl(input)) {
+    return input;
+  }
+
+  if (isUrl(input) || input.includes('https://') || input.includes('http')) {
+    return input;
+  }
+
+  if (input.startsWith('/ipfs/')) {
+    return SUBWALLET_IPFS + input.split('/ipfs/')[1];
+  }
+
+  if (!input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // just the IPFS hash
+    return SUBWALLET_IPFS + input;
+  }
+
+  if (input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // starts with ipfs://
+    return SUBWALLET_IPFS + input.split('ipfs://')[1];
+  }
+
+  return SUBWALLET_IPFS + input.split('ipfs://ipfs/')[1]; // starts with ipfs://ipfs/
+};
+
 export function wait (milliseconds: number) {
   return new Promise<void>((resolve) => {
     setTimeout(() => {
@@ -366,6 +423,11 @@ export function wait (milliseconds: number) {
 export * from './account';
 export * from './array';
 export * from './environment';
+export * from './number';
 export * from './lazy';
+export * from './promise';
 export * from './registry';
 export * from './translate';
+export * from './object';
+export * from './fetchStaticData';
+export * from './fetchEvmChainInfo';

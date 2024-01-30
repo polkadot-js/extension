@@ -35,7 +35,7 @@ export default class NotificationService {
       type: 'basic',
       title,
       message,
-      iconUrl: './images/icon-128.png',
+      iconUrl: '/images/icon-128.png',
       priority: 2,
       isClickable: !!link || !!onClick,
       buttons

@@ -12,7 +12,9 @@ import ChainStakingMetadataStore from '@subwallet/extension-base/services/storag
 import MantaPayStore from '@subwallet/extension-base/services/storage-service/db-stores/MantaPay';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
-import { BalanceItem } from '@subwallet/extension-base/types';
+import YieldPoolStore from '@subwallet/extension-base/services/storage-service/db-stores/YieldPoolStore';
+import YieldPositionStore from '@subwallet/extension-base/services/storage-service/db-stores/YieldPositionStore';
+import { BalanceItem, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { Subscription } from 'dexie';
 import { DexieExportJsonStructure, exportDB } from 'dexie-export-import';
@@ -29,6 +31,7 @@ export default class DatabaseService {
   // TODO: might remove this
   private nftSubscription: Subscription | undefined;
   private stakingSubscription: Subscription | undefined;
+  private yieldInfoSubscription: Subscription | undefined;
 
   constructor (private eventService: EventService) {
     this.logger = createLogger('DB-Service');
@@ -49,6 +52,10 @@ export default class DatabaseService {
       metadata: new MetadataStore(this._db.metadata),
       chain: new ChainStore(this._db.chain),
       asset: new AssetStore(this._db.asset),
+
+      // yield
+      yieldPoolInfo: new YieldPoolStore(this._db.yieldPoolInfo),
+      yieldPosition: new YieldPositionStore(this._db.yieldPosition),
 
       // staking
       chainStakingMetadata: new ChainStakingMetadataStore(this._db.chainStakingMetadata),
@@ -336,6 +343,81 @@ export default class DatabaseService {
 
   async getMantaPayFirstConfig (chain: string) {
     return this.stores.mantaPay.getFirstConfig(chain);
+  }
+
+  /* Earning */
+
+  async removeOldEarningData () {
+    await this.stores.yieldPoolInfo.clear();
+    await this.stores.yieldPosition.clear();
+  }
+
+  async updateYieldPoolStore (data: YieldPoolInfo) {
+    await this.stores.yieldPoolInfo.upsert(data);
+  }
+
+  async updateYieldPoolsStore (data: YieldPoolInfo[]) {
+    await this.stores.yieldPoolInfo.bulkUpsert(data);
+  }
+
+  async deleteYieldPoolInfo (slugs: string[]) {
+    await this.stores.yieldPoolInfo.bulkDelete(slugs);
+  }
+
+  async getYieldPools () {
+    return this.stores.yieldPoolInfo.getAll();
+  }
+
+  async getYieldPoolStakingInfo (chain: string, poolType: YieldPoolType) {
+    return this.stores.yieldPoolInfo.getByChainAndType(chain, poolType);
+  }
+
+  async getYieldPool (slug: string) {
+    return this.stores.yieldPoolInfo.getBySlug(slug);
+  }
+
+  async getYieldPositionByAddressAndSlug (address: string, slug: string) {
+    return this.stores.yieldPosition.getByAddressAndSlug(address, slug);
+  }
+
+  subscribeYieldPoolInfo (chains: string[], callback: (data: YieldPoolInfo[]) => void) {
+    this.yieldInfoSubscription && this.yieldInfoSubscription.unsubscribe();
+
+    this.yieldInfoSubscription = this.stores.yieldPoolInfo.subscribeYieldPoolInfo(chains).subscribe(({
+      next: (data) => callback && callback(data)
+    }));
+
+    return this.yieldInfoSubscription;
+  }
+
+  removeYieldPositionByAddresses (addresses: string[]) {
+    return this.stores.yieldPosition.removeByAddresses(addresses);
+  }
+
+  removeYieldPositionByChains (chains: string[]) {
+    return this.stores.yieldPosition.removeByChains(chains);
+  }
+
+  async updateYieldPosition (data: YieldPositionInfo) {
+    await this.stores.yieldPosition.upsert(data);
+  }
+
+  async updateYieldPositions (data: YieldPositionInfo[]) {
+    await this.stores.yieldPosition.bulkUpsert(data);
+  }
+
+  async getYieldPositionByAddress (addresses: string[]) {
+    return this.stores.yieldPosition.getByAddress(addresses);
+  }
+
+  subscribeYieldPosition (addresses: string[], callback: (data: YieldPositionInfo[]) => void) {
+    return this.stores.yieldPosition.subscribeYieldPositions(addresses).subscribe(({
+      next: (data) => callback && callback(data)
+    }));
+  }
+
+  async getYieldNominationPoolPosition (addresses: string[], chains: string[]) {
+    return this.stores.yieldPosition.getByAddressAndChains(addresses, chains);
   }
 
   /* Campaign */

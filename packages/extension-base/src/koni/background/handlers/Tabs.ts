@@ -20,7 +20,7 @@ import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-s
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
-import { canDerive, stripUrl } from '@subwallet/extension-base/utils';
+import { canDerive, getEVMChainInfo, stripUrl } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { KeyringPair } from '@subwallet/keyring/types';
 import keyring from '@subwallet/ui-keyring';
@@ -454,6 +454,7 @@ export default class KoniTabs {
   private async switchEvmChain (id: string, url: string, { params }: RequestArguments) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const chainId = params[0].chainId as string;
+    const chainIdDec = parseInt(chainId, 16);
 
     const evmState = await this.getEvmState(url);
 
@@ -461,12 +462,27 @@ export default class KoniTabs {
       return null;
     }
 
-    const [networkKey] = this.#koniState.findNetworkKeyByChainId(parseInt(chainId, 16));
+    const [networkKey] = this.#koniState.findNetworkKeyByChainId(chainIdDec);
 
     if (networkKey) {
       await this.#koniState.switchEvmNetworkByUrl(stripUrl(url), networkKey);
     } else {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'This network is currently not supported');
+      const onlineData = await getEVMChainInfo(chainIdDec);
+
+      if (onlineData) {
+        const chainData: AddNetworkRequestExternal = {
+          chainId: chainId,
+          rpcUrls: onlineData.rpc.filter((url) => (url.startsWith('https://'))),
+          chainName: onlineData.name,
+          blockExplorerUrls: onlineData.explorers.map((explorer) => explorer.url),
+          nativeCurrency: onlineData.nativeCurrency,
+          requestId: id
+        };
+
+        await this.addEvmChain(id, url, { method: 'wallet_addEthereumChain', params: [chainData] });
+      } else {
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'This network is currently not supported');
+      }
     }
 
     return null;

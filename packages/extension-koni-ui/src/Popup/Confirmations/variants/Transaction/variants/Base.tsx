@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { CommonTransactionInfo } from '@subwallet/extension-koni-ui/components';
+import { AlertDialogProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
 
 export interface BaseTransactionConfirmationProps extends ThemeProps {
   transaction: SWTransactionResult;
+  openAlert: (alertProps: AlertDialogProps) => void;
+  closeAlert: VoidFunction;
 }
 
 const Component: React.FC<BaseTransactionConfirmationProps> = (props: BaseTransactionConfirmationProps) => {
@@ -16,7 +19,10 @@ const Component: React.FC<BaseTransactionConfirmationProps> = (props: BaseTransa
 
   return (
     <div className={CN(className)}>
-      {transaction.extrinsicType}
+      <CommonTransactionInfo
+        address={transaction.address}
+        network={transaction.chain}
+      />
     </div>
   );
 };

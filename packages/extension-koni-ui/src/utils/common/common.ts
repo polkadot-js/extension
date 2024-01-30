@@ -19,3 +19,7 @@ export function toShort (text: string, preLength = 6, sufLength = 6): string {
 }
 
 export const capitalize = (s: string): string => s && s[0].toUpperCase() + s.slice(1);
+
+export const simpleDeepClone = <T>(s: T) => {
+  return JSON.parse(JSON.stringify(s)) as T;
+};

@@ -37,7 +37,8 @@ export default class QrSigner {
     return new Promise((resolve, reject): void => {
       const txObject: TransactionLike = {
         nonce: tx.nonce ?? 0,
-        gasPrice: addHexPrefix(tx.gasPrice.toString(16)),
+        maxPriorityFeePerGas: addHexPrefix(tx.maxPriorityFeePerGas.toString(16)),
+        maxFeePerGas: addHexPrefix(tx.maxFeePerGas.toString(16)),
         gasLimit: addHexPrefix(tx.gasLimit.toString(16)),
         to: tx.to !== undefined ? tx.to : '',
         value: addHexPrefix(tx.value.toString(16)),

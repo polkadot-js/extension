@@ -35,7 +35,7 @@ import WalletConnectService from '@subwallet/extension-base/services/wallet-conn
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
 import { addLazy, isAccountAll, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
-import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
+import { calculatePriorityFee } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
@@ -1518,12 +1518,15 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
     }
 
-    const _price = await web3.eth.getGasPrice();
-    const gasPrice = recalculateGasPrice(_price, networkKey);
+    const priority = await calculatePriorityFee(evmApi);
 
-    transaction.gasPrice = gasPrice;
+    transaction.maxPriorityFeePerGas = priority.maxPriorityFeePerGas.toString();
+    transaction.maxFeePerGas = priority.maxFeePerGas.toString();
 
-    const estimateGas = new BN(gasPrice.toString()).mul(new BN(transaction.gas)).toString();
+    const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
+    const maxFee = priority.maxFeePerGas.lte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+
+    const estimateGas = maxFee.multipliedBy(transaction.gas).toString();
 
     // Address is validated in before step
     const fromAddress = allowedAccounts.find((account) => (account.toLowerCase() === (transaction.from as string).toLowerCase()));
@@ -1543,7 +1546,7 @@ export default class KoniState {
     // Validate balance
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
 
-    if (balance.lt(new BN(gasPrice.toString()).mul(new BN(transaction.gas)).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
+    if (balance.lt(new BN(estimateGas).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Insufficient balance'));
     }
 

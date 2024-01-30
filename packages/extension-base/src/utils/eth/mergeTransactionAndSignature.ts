@@ -15,8 +15,10 @@ export const mergeTransactionAndSignature = (tx: Web3Transaction, _rawSignature:
   };
 
   const transaction: TransactionLike = {
+    type: 2,
     nonce: tx.nonce,
-    gasPrice: addHexPrefix(tx.gasPrice.toString(16)),
+    maxFeePerGas: addHexPrefix(tx.maxFeePerGas.toString(16)),
+    maxPriorityFeePerGas: addHexPrefix(tx.maxPriorityFeePerGas.toString(16)),
     gasLimit: addHexPrefix(tx.gasLimit.toString(16)),
     to: tx.to,
     value: addHexPrefix(tx.value.toString(16)),

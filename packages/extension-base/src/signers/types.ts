@@ -11,7 +11,8 @@ export interface QrState {
 
 export interface Web3TransactionBase {
   to: string;
-  gasPrice: number;
+  maxFeePerGas: number;
+  maxPriorityFeePerGas: number;
   gasLimit: number;
   nonce: number;
   chainId: number;

@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { GAS_PRICE_RATIO, NETWORK_MULTI_GAS_FEE } from '@subwallet/extension-base/constants';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import BigN from 'bignumber.js';
 import BNEther from 'bn.js';
 import { ethers } from 'ethers';
 import { SignedTransaction } from 'web3-core';
 
 import { hexStripPrefix, numberToHex } from '@polkadot/util';
+
+import { BN_TEN, BN_WEI } from './number';
 
 const hexToNumberString = (s: string): string => {
   const temp = parseInt(s, 16);
@@ -97,4 +100,28 @@ export const recalculateGasPrice = (_price: string, chain: string) => {
   const needMulti = NETWORK_MULTI_GAS_FEE.includes(chain) || NETWORK_MULTI_GAS_FEE.includes('*');
 
   return needMulti ? new BigN(_price).multipliedBy(GAS_PRICE_RATIO).toFixed(0) : _price;
+};
+
+export const calculatePriorityFee = async (web3: _EvmApi) => {
+  const block = await web3.api.eth.getBlock('latest');
+  let baseFee: number;
+
+  if (block.baseFeePerGas) {
+    baseFee = block.baseFeePerGas;
+  } else {
+    const history = await web3.api.eth.getFeeHistory(2, 'latest', [0, 25, 50, 75, 100]);
+
+    baseFee = parseInt(history.baseFeePerGas[1]);
+  }
+
+  const baseToWei = new BigN(baseFee);
+
+  const maxPriority = BN_WEI.multipliedBy(1);
+  const priorityByBase = baseToWei.dividedBy(BN_TEN);
+
+  return {
+    maxFeePerGas: BN_WEI.gte(baseToWei) ? baseToWei.multipliedBy(2) : baseToWei.multipliedBy(1.2),
+    maxPriorityFeePerGas: maxPriority.lte(priorityByBase) ? maxPriority : priorityByBase,
+    baseGasFee: baseToWei
+  };
 };

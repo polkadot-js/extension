@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import Common from '@ethereumjs/common';
+import { Common } from '@ethereumjs/common';
+import { FeeMarketEIP1559Transaction, TypedTransaction } from '@ethereumjs/tx';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, EvmProviderErrorType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
 import { ConfirmationRequestBase, Resolver } from '@subwallet/extension-base/background/types';
@@ -9,14 +10,14 @@ import RequestService from '@subwallet/extension-base/services/request-service';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { isInternalRequest } from '@subwallet/extension-base/utils/request';
 import keyring from '@subwallet/ui-keyring';
+import BigN from 'bignumber.js';
 import BN from 'bn.js';
-import { Transaction } from 'ethereumjs-tx';
 import { toBuffer } from 'ethereumjs-util';
 import { t } from 'i18next';
 import { BehaviorSubject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
-import { logger as createLogger } from '@polkadot/util';
+import { bnToHex, hexAddPrefix, logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
 export default class EvmRequestHandler {
@@ -165,46 +166,46 @@ export default class EvmRequestHandler {
     }
   }
 
-  configToTransaction (config: TransactionConfig): Transaction {
-    function formatField (input: string | number | undefined | BN): BN | number | string | undefined {
-      if (typeof input === 'string') {
-        if (input.startsWith('0x')) {
-          return input;
-        } else {
-          return new BN(input);
-        }
+  configToTransaction (config: TransactionConfig): TypedTransaction {
+    function formatField (input: string | number | undefined | BN): number | string | undefined {
+      if (typeof input === 'string' || typeof input === 'number') {
+        return hexAddPrefix(new BigN(input).toString(16));
+      } else if (typeof input === 'undefined') {
+        return undefined;
       }
 
-      return input;
+      return bnToHex(input);
     }
 
     // Convert any string, number to number with BigN exclude hex string
     const txData = {
       from: config.from,
       nonce: formatField(config.nonce),
-      gasPrice: formatField(config.gasPrice),
       gasLimit: formatField(config.gas),
       to: config.to,
       value: formatField(config.value),
-      data: toBuffer(config.data)
+      data: toBuffer(config.data),
+      maxFeePerGas: formatField(config.maxFeePerGas),
+      maxPriorityFeePerGas: formatField(config.maxPriorityFeePerGas),
+      chainId: config.chainId
     };
 
-    const common = Common.custom({ chainId: config.chainId, defaultHardfork: 'petersburg' });
+    const common = Common.custom({ chainId: config.chainId, defaultHardfork: 'london', networkId: config.chainId }, { eips: [1559] });
 
-    // @ts-ignore
-    return new Transaction(txData, { common });
+    return new FeeMarketEIP1559Transaction(txData, { common });
   }
 
   private async signTransaction (confirmation: ConfirmationDefinitions['evmSendTransactionRequest'][0]): Promise<string> {
     const transaction = confirmation.payload;
-    const { estimateGas, from, gas, gasPrice, value } = transaction;
+    const { estimateGas, from, gas, maxFeePerGas, maxPriorityFeePerGas, value } = transaction;
     const pair = keyring.getPair(from as string);
     const params = {
       ...transaction,
       gas: anyNumberToBN(gas).toNumber(),
       value: anyNumberToBN(value).toNumber(),
-      gasPrice: anyNumberToBN(gasPrice).toNumber(),
-      gasLimit: anyNumberToBN(estimateGas).toNumber()
+      gasLimit: anyNumberToBN(estimateGas).toNumber(),
+      maxFeePerGas: anyNumberToBN(maxFeePerGas).toNumber(),
+      maxPriorityFeePerGas: anyNumberToBN(maxPriorityFeePerGas).toNumber()
       // nonce: await web3.eth.getTransactionCount(from) // Todo: fill this value from transaction service
     } as TransactionConfig;
 

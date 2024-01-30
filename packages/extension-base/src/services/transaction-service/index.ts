@@ -25,7 +25,7 @@ import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { anyNumberToBN, recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
+import { anyNumberToBN, calculatePriorityFee } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import keyring from '@subwallet/ui-keyring';
@@ -148,11 +148,13 @@ export default class TransactionService {
             if (!web3) {
               validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED, undefined));
             } else {
-              const _price = await web3.api.eth.getGasPrice();
-              const gasPrice = recalculateGasPrice(_price, chainInfo.slug);
               const gasLimit = await web3.api.eth.estimateGas(transaction);
 
-              estimateFee.value = (gasLimit * parseInt(gasPrice)).toString();
+              const priority = await calculatePriorityFee(web3);
+              const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
+              const maxFee = priority.maxFeePerGas.lte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+
+              estimateFee.value = maxFee.multipliedBy(gasLimit).toString();
             }
           }
         } catch (e) {
@@ -708,12 +710,14 @@ export default class TransactionService {
 
     const txObject: TransactionLike = {
       nonce: transaction.nonce ?? 0,
-      gasPrice: addHexPrefix(anyNumberToBN(transaction.gasPrice).toString(16)),
+      maxFeePerGas: addHexPrefix(anyNumberToBN(transaction.maxFeePerGas).toString(16)),
+      maxPriorityFeePerGas: addHexPrefix(anyNumberToBN(transaction.maxPriorityFeePerGas).toString(16)),
       gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
       to: transaction.to !== undefined ? transaction.to : '',
       value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
       data: transaction.data,
-      chainId: _getEvmChainId(chainInfo)
+      chainId: _getEvmChainId(chainInfo),
+      type: 2
     };
 
     return ethers.Transaction.from(txObject).unsignedSerialized as HexString;
@@ -787,7 +791,8 @@ export default class TransactionService {
     const txObject: Web3Transaction = {
       nonce: payload.nonce ?? 0,
       from: payload.from as string,
-      gasPrice: anyNumberToBN(payload.gasPrice).toNumber(),
+      maxFeePerGas: anyNumberToBN(payload.maxFeePerGas).toNumber(),
+      maxPriorityFeePerGas: anyNumberToBN(payload.maxPriorityFeePerGas).toNumber(),
       gasLimit: anyNumberToBN(payload.gas).toNumber(),
       to: payload.to !== undefined ? payload.to : '',
       value: anyNumberToBN(payload.value).toNumber(),

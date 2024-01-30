@@ -557,7 +557,7 @@ export class ChainService {
       this.updateChainSubscription();
 
       needUpdateChainApiList.forEach((chainInfo) => {
-        console.log('Updating chain API for ', chainInfo.slug);
+        console.log('Updating chain API for', chainInfo.slug);
         this.initApiForChain(chainInfo).catch(console.error);
       });
 
@@ -845,11 +845,10 @@ export class ChainService {
           const storedProviderValue = storedChainInfo.providers[storedProviderKey] || '';
 
           if (storedProviderValue?.startsWith('light') || storedProviderKey?.startsWith(_CUSTOM_PREFIX)) {
-            for (const [key, value] of Object.entries(providers)) {
-              if (storedProviderValue === value) {
-                selectedProvider = key;
-                break;
-              }
+            const savedProviderKey = Object.keys(providers).find((key) => providers[key] === storedProviderValue);
+
+            if (savedProviderKey) {
+              selectedProvider = savedProviderKey;
             }
           }
 

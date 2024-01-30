@@ -446,7 +446,7 @@ export function randomizeProvider (providers: Record<string, string>, excludedKe
     selectedProviderKey = Object.keys(providers)[randomProvider];
     selectedProviderValue = providers[selectedProviderKey];
 
-    if (!selectedProviderValue?.startsWith('light') && !excludedKeys?.includes(selectedProviderKey)) { // if it's light client, then re-randomize
+    if (!selectedProviderValue?.startsWith('light') && !selectedProviderKey?.startsWith(_CUSTOM_PREFIX) && !excludedKeys?.includes(selectedProviderKey)) { // if it's light client, then re-randomize
       isValid = true;
     }
   }

@@ -39,7 +39,7 @@ export class ChainService {
   private evmChainHandler: EvmChainHandler;
   private mantaChainHandler: MantaPrivateHandler | undefined;
 
-  refreshLatestDataTimeOut: NodeJS.Timer | undefined;
+  refreshLatestChainDataTimeOut: NodeJS.Timer | undefined;
 
   public get mantaPay () {
     return this.mantaChainHandler;
@@ -539,16 +539,16 @@ export class ChainService {
   }
 
   checkLatestData () {
-    clearInterval(this.refreshLatestDataTimeOut);
+    clearInterval(this.refreshLatestChainDataTimeOut);
 
-    this.refreshLatestDataTimeOut = setInterval(this.handleLatestData.bind(this), LATEST_CHAIN_DATA_FETCHING_INTERVAL);
+    this.refreshLatestChainDataTimeOut = setInterval(this.handleLatestProviderData.bind(this), LATEST_CHAIN_DATA_FETCHING_INTERVAL);
   }
 
   stopCheckLatestChainData () {
-    clearInterval(this.refreshLatestDataTimeOut);
+    clearInterval(this.refreshLatestChainDataTimeOut);
   }
 
-  handleLatestData () {
+  handleLatestProviderData () {
     this.logger.log('Start checking latest RPC providers');
     this.fetchLatestChainData().then((latestChainInfo) => {
       try {
@@ -569,6 +569,10 @@ export class ChainService {
         console.error('Error fetching latest chain data');
       }
     }).catch(console.error);
+
+    // this.fetchLatestPriceIdsData().then(() => {
+    //
+    // }).catch(console.error);
   }
 
   private async initApis () {
@@ -789,6 +793,44 @@ export class ChainService {
     //   return defaultValue;
     // }
   }
+
+  // private async fetchLatestPriceIdsData () {
+  //   return await fetchStaticData<_ChainInfo[]>('chains');
+  //   // try {
+  //   //   const timeout = new Promise((resolve) => {
+  //   //     const id = setTimeout(() => {
+  //   //       clearTimeout(id);
+  //   //       resolve(null);
+  //   //     }, 1500);
+  //   //   });
+  //   //   let result = defaultValue;
+  //   //   const resp = await Promise.race([
+  //   //     timeout,
+  //   //     fetch(src)
+  //   //   ]) as Response || null;
+  //   //
+  //   //   if (!resp) {
+  //   //     console.warn('Error fetching latest data', src);
+  //   //
+  //   //     return result;
+  //   //   }
+  //   //
+  //   //   if (resp.ok) {
+  //   //     try {
+  //   //       result = await resp.json();
+  //   //       console.log('Fetched latest data', src);
+  //   //     } catch (err) {
+  //   //       console.warn('Error parsing latest data', src, err);
+  //   //     }
+  //   //   }
+  //   //
+  //   //   return result;
+  //   // } catch (e) {
+  //   //   console.warn('Error fetching latest data', src, e);
+  //   //
+  //   //   return defaultValue;
+  //   // }
+  // }
 
   private async initChains () {
     const storedChainSettings = await this.dbService.getAllChainStore();

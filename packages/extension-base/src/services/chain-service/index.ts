@@ -551,17 +551,23 @@ export class ChainService {
   handleLatestData () {
     this.logger.log('Start checking latest RPC providers');
     this.fetchLatestChainData().then((latestChainInfo) => {
-      const { needUpdateChainApiList, storedChainInfoList } = updateLatestChainInfo(this.dataMap, latestChainInfo);
+      try {
+        if (latestChainInfo && latestChainInfo.length > 0) {
+          const { needUpdateChainApiList, storedChainInfoList } = updateLatestChainInfo(this.dataMap, latestChainInfo);
 
-      this.dbService.bulkUpdateChainStore(storedChainInfoList).catch(console.error);
-      this.updateChainSubscription();
+          this.dbService.bulkUpdateChainStore(storedChainInfoList).catch(console.error);
+          this.updateChainSubscription();
 
-      needUpdateChainApiList.forEach((chainInfo) => {
-        console.log('Updating chain API for', chainInfo.slug);
-        this.initApiForChain(chainInfo).catch(console.error);
-      });
+          needUpdateChainApiList.forEach((chainInfo) => {
+            console.log('Updating chain API for', chainInfo.slug);
+            this.initApiForChain(chainInfo).catch(console.error);
+          });
 
-      this.logger.log('Finished updating latest RPC providers');
+          this.logger.log('Finished updating latest RPC providers');
+        }
+      } catch (e) {
+        console.error('Error fetching latest chain data');
+      }
     }).catch(console.error);
   }
 

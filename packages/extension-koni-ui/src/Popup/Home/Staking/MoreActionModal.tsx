@@ -277,9 +277,13 @@ const Component: React.FC<Props> = (props: Props) => {
     };
 
     return () => {
-      onPreCheck(_onClick, convertStakingActionToExtrinsicType(action))();
+      if (isDappStaking && action === StakingAction.CLAIM_REWARD) {
+        onClick();
+      } else {
+        onPreCheck(_onClick, convertStakingActionToExtrinsicType(action))();
+      }
     };
-  }, [convertStakingActionToExtrinsicType, onPreCheck]);
+  }, [convertStakingActionToExtrinsicType, isDappStaking, onPreCheck]);
 
   return (
     <SwModal

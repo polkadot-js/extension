@@ -15,7 +15,14 @@ import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useChainInfoWithState, useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } from '@subwallet/extension-web-ui/hooks';
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-web-ui/messaging';
-import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-web-ui/types';
+import EarningPositionItem from '@subwallet/extension-web-ui/Popup/Home/History/EarningPositionItem';
+import {
+  ChainItemType,
+  SuppliedTokenInfo,
+  ThemeProps,
+  TransactionHistoryDisplayData,
+  TransactionHistoryDisplayItem
+} from '@subwallet/extension-web-ui/types';
 import { customFormatDate, findAccountByAddress, findNetworkJsonByGenesisHash, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -28,6 +35,8 @@ import styled from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { HistoryDetailModal } from './Detail';
+import EarningOptionsItem from "@subwallet/extension-web-ui/Popup/Home/History/EarningOptionsItem";
+import EarningPoolItem from "@subwallet/extension-web-ui/Popup/Home/History/EarningPoolItem";
 
 type Props = ThemeProps
 
@@ -517,7 +526,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const filterTabItems = useMemo<FilterTabItemType[]>(() => {
     return [
       {
-        label: t('All'),
+        label: t('All-DUNG'),
         value: FilterValue.ALL
       },
       {
@@ -736,86 +745,201 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setHistoryItems(getHistoryItems(currentItemDisplayCount));
   }, [currentItemDisplayCount, getHistoryItems]);
 
+  const fakeData: SuppliedTokenInfo[] = [
+    {
+      holders: "0xABC123, 0xDEF456, 0xGHI789",
+      blockNumber: 123456,
+      id: "token123",
+      limit: "1000000",
+      network: "Ethereum",
+      standard: "ERC-20",
+      ticker: "TKN",
+      timestamp: "1643721600",
+      totalSales: "50000",
+      totalSupply: "1000000",
+      circulatingSupply: "950000",
+      owner: {
+        address: "0xOWNERADDRESS123",
+        id: "owner123"
+      },
+      transactions: "500"
+    },
+    {
+      holders: "0xJKL012, 0xMNO345, 0xPQR678",
+      blockNumber: 789012,
+      id: "token456",
+      limit: "500000",
+      network: "Binance Smart Chain",
+      standard: "BEP-20",
+      ticker: "BNB",
+      timestamp: "1643725200",
+      totalSales: "30000",
+      totalSupply: "500000",
+      circulatingSupply: "470000",
+      owner: {
+        address: "0xOWNERADDRESS456",
+        id: "owner456"
+      },
+      transactions: "300"
+    },
+    {
+      holders: "0xJKL012, 0xMNO345, 0xPQR678",
+      blockNumber: 789012,
+      id: "token456",
+      limit: "500000",
+      network: "Binance Smart Chain",
+      standard: "BEP-20",
+      ticker: "BNB",
+      timestamp: "1643725200",
+      totalSales: "30000",
+      totalSupply: "500000",
+      circulatingSupply: "470000",
+      owner: {
+        address: "0xOWNERADDRESS456",
+        id: "owner456"
+      },
+      transactions: "300"
+    },
+    {
+      holders: "0xJKL012, 0xMNO345, 0xPQR678",
+      blockNumber: 789012,
+      id: "token456",
+      limit: "500000",
+      network: "Binance Smart Chain",
+      standard: "BEP-20",
+      ticker: "BNB",
+      timestamp: "1643725200",
+      totalSales: "30000",
+      totalSupply: "500000",
+      circulatingSupply: "470000",
+      owner: {
+        address: "0xOWNERADDRESS456",
+        id: "owner456"
+      },
+      transactions: "300"
+    },
+    {
+      holders: "0xJKL012, 0xMNO345, 0xPQR678",
+      blockNumber: 789012,
+      id: "token456",
+      limit: "500000",
+      network: "Binance Smart Chain",
+      standard: "BEP-20",
+      ticker: "BNB",
+      timestamp: "1643725200",
+      totalSales: "30000",
+      totalSupply: "500000",
+      circulatingSupply: "470000",
+      owner: {
+        address: "0xOWNERADDRESS456",
+        id: "owner456"
+      },
+      transactions: "300"
+    },
+    {
+      holders: "0xJKL012, 0xMNO345, 0xPQR678",
+      blockNumber: 789012,
+      id: "token456",
+      limit: "500000",
+      network: "Binance Smart Chain",
+      standard: "BEP-20",
+      ticker: "BNB",
+      timestamp: "1643725200",
+      totalSales: "30000",
+      totalSupply: "500000",
+      circulatingSupply: "470000",
+      owner: {
+        address: "0xOWNERADDRESS456",
+        id: "owner456"
+      },
+      transactions: "300"
+    },
+    // Add more fake data as needed
+  ];
+
   return (
     <>
-      <PageWrapper
-        className={CN(`history ${className}`, {
-          '-desktop': isWebUI,
-          '-mobile': !isWebUI
-        })}
-        resolve={dataContext.awaitStores(['price'])}
-      >
-        <Layout.Base
-          title={t('History')}
-        >
-          {!isWebUI && (
-            <>
-              <SwSubHeader
-                background={'transparent'}
-                center={false}
-                className={'history-header'}
-                paddingVertical
-                rightButtons={headerIcons}
-                showBackButton={false}
-                title={t('History')}
-              />
+      {/* <PageWrapper */}
+      {/*  className={CN(`history ${className}`, { */}
+      {/*    '-desktop': isWebUI, */}
+      {/*    '-mobile': !isWebUI */}
+      {/*  })} */}
+      {/*  resolve={dataContext.awaitStores(['price'])} */}
+      {/* > */}
+      {/*  <Layout.Base */}
+      {/*    title={t('History')} */}
+      {/*  > */}
+      {/*    {!isWebUI && ( */}
+      {/*      <> */}
+      {/*        <SwSubHeader */}
+      {/*          background={'transparent'} */}
+      {/*          center={false} */}
+      {/*          className={'history-header'} */}
+      {/*          paddingVertical */}
+      {/*          rightButtons={headerIcons} */}
+      {/*          showBackButton={false} */}
+      {/*          title={t('History')} */}
+      {/*        /> */}
 
-              <div className={'__page-background'}></div>
-            </>
-          )}
+      {/*        <div className={'__page-background'}></div> */}
+      {/*      </> */}
+      {/*    )} */}
 
-          {
-            isWebUI && (
-              <div className={'__page-tool-area-desktop'}>
-                <FilterTabs
-                  className={'__page-filter-tabs-container'}
-                  items={filterTabItems}
-                  onSelect={onSelectFilterTab}
-                  selectedItem={selectedFilterTab}
-                />
+      {/*    { */}
+      {/*      isWebUI && ( */}
+      {/*        <div className={'__page-tool-area-desktop'}> */}
+      {/*          <FilterTabs */}
+      {/*            className={'__page-filter-tabs-container'} */}
+      {/*            items={filterTabItems} */}
+      {/*            onSelect={onSelectFilterTab} */}
+      {/*            selectedItem={selectedFilterTab} */}
+      {/*          /> */}
 
-                <div className={'__page-selection-area'}>
-                  <Button
-                    icon={(
-                      <Icon
-                        phosphorIcon={FadersHorizontal}
-                      />
-                    )}
-                    onClick={onClickFilter}
-                    size={'xs'}
-                    type={'ghost'}
-                  />
-                  {historySelectorsNode}
-                </div>
-              </div>
-            )
-          }
+      {/*          <div className={'__page-selection-area'}> */}
+      {/*            <Button */}
+      {/*              icon={( */}
+      {/*                <Icon */}
+      {/*                  phosphorIcon={FadersHorizontal} */}
+      {/*                /> */}
+      {/*              )} */}
+      {/*              onClick={onClickFilter} */}
+      {/*              size={'xs'} */}
+      {/*              type={'ghost'} */}
+      {/*            /> */}
+      {/*            {historySelectorsNode} */}
+      {/*          </div> */}
+      {/*        </div> */}
+      {/*      ) */}
+      {/*    } */}
 
-          {
-            !isWebUI && (
-              <div className={'__page-tool-area-mobile'}>
-                {historySelectorsNode}
-              </div>
-            )
-          }
+      {/*    { */}
+      {/*      !isWebUI && ( */}
+      {/*        <div className={'__page-tool-area-mobile'}> */}
+      {/*          {historySelectorsNode} */}
+      {/*        </div> */}
+      {/*      ) */}
+      {/*    } */}
 
-          {listSection}
-        </Layout.Base>
-      </PageWrapper>
+      {/*    {listSection} */}
+      {/*  </Layout.Base> */}
+      {/* </PageWrapper> */}
 
-      <HistoryDetailModal
-        data={selectedItem}
-        onCancel={onCloseDetail}
-      />
+      {/* <HistoryDetailModal */}
+      {/*  data={selectedItem} */}
+      {/*  onCancel={onCloseDetail} */}
+      {/* /> */}
 
-      <FilterModal
-        id={FILTER_MODAL_ID}
-        onApplyFilter={_onApplyFilter}
-        onCancel={onCloseFilterModal}
-        onChangeOption={onChangeFilterOption}
-        optionSelectionMap={filterSelectionMap}
-        options={filterOptions}
-      />
+      {/* <FilterModal */}
+      {/*  id={FILTER_MODAL_ID} */}
+      {/*  onApplyFilter={_onApplyFilter} */}
+      {/*  onCancel={onCloseFilterModal} */}
+      {/*  onChangeOption={onChangeFilterOption} */}
+      {/*  optionSelectionMap={filterSelectionMap} */}
+      {/*  options={filterOptions} */}
+      {/* /> */}
+      <EarningPositionItem />
+      <EarningOptionsItem />
+      <EarningPoolItem items={fakeData}/>
     </>
   );
 }

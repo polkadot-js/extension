@@ -1806,6 +1806,7 @@ export default class KoniState {
   }
 
   public async resetWallet (resetAll: boolean) {
+    this.earningService.resetYieldPosition();
     await this.balanceService.handleResetBalance(true);
     await this.keyringService.resetWallet(resetAll);
     this.requestService.resetWallet();

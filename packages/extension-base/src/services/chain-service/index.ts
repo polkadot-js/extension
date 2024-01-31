@@ -541,37 +541,53 @@ export class ChainService {
   checkLatestData () {
     clearInterval(this.refreshLatestChainDataTimeOut);
 
-    this.refreshLatestChainDataTimeOut = setInterval(this.handleLatestProviderData.bind(this), LATEST_CHAIN_DATA_FETCHING_INTERVAL);
+    this.refreshLatestChainDataTimeOut = setInterval(this.handleLatestData.bind(this), LATEST_CHAIN_DATA_FETCHING_INTERVAL);
   }
 
   stopCheckLatestChainData () {
     clearInterval(this.refreshLatestChainDataTimeOut);
   }
 
-  handleLatestProviderData () {
-    this.logger.log('Start checking latest RPC providers');
-    this.fetchLatestChainData().then((latestChainInfo) => {
-      try {
-        if (latestChainInfo && latestChainInfo.length > 0) {
-          const { needUpdateChainApiList, storedChainInfoList } = updateLatestChainInfo(this.dataMap, latestChainInfo);
+  handleLatestProviderData (latestChainInfo: _ChainInfo[]) {
+    try {
+      if (latestChainInfo && latestChainInfo.length > 0) {
+        const { needUpdateChainApiList, storedChainInfoList } = updateLatestChainInfo(this.dataMap, latestChainInfo);
 
-          this.dbService.bulkUpdateChainStore(storedChainInfoList).catch(console.error);
-          this.updateChainSubscription();
+        this.dbService.bulkUpdateChainStore(storedChainInfoList).catch(console.error);
+        this.updateChainSubscription();
 
-          needUpdateChainApiList.forEach((chainInfo) => {
-            console.log('Updating chain API for', chainInfo.slug);
-            this.initApiForChain(chainInfo).catch(console.error);
-          });
+        needUpdateChainApiList.forEach((chainInfo) => {
+          console.log('Updating chain API for', chainInfo.slug);
+          this.initApiForChain(chainInfo).catch(console.error);
+        });
 
-          this.logger.log('Finished updating latest RPC providers');
-        }
-      } catch (e) {
-        console.error('Error fetching latest chain data');
+        this.logger.log('Finished updating latest RPC providers');
       }
+    } catch (e) {
+      console.error('Error fetching latest chain data');
+    }
+  }
+
+  handleLatestPriceId (latestPriceIds: Record<string, string | null>) {
+    Object.entries(latestPriceIds).forEach(([slug, priceId]) => {
+      if (this.dataMap.assetRegistry[slug]) {
+        this.dataMap.assetRegistry[slug].priceId = priceId;
+      }
+    });
+
+    this.assetRegistrySubject.next(this.dataMap.assetRegistry);
+    this.eventService.emit('asset.updateState', '');
+
+    this.logger.log('Finished updating latest price IDs');
+  }
+
+  handleLatestData () {
+    this.fetchLatestChainData().then((latestChainInfo) => {
+      this.handleLatestProviderData(latestChainInfo);
     }).catch(console.error);
 
-    // this.fetchLatestPriceIdsData().then(() => {
-    //
+    // this.fetchLatestPriceIdsData().then((latestPriceIds) => {
+    //   this.handleLatestPriceId(latestPriceIds);
     // }).catch(console.error);
   }
 
@@ -794,43 +810,10 @@ export class ChainService {
     // }
   }
 
-  // private async fetchLatestPriceIdsData () {
-  //   return await fetchStaticData<_ChainInfo[]>('chains');
-  //   // try {
-  //   //   const timeout = new Promise((resolve) => {
-  //   //     const id = setTimeout(() => {
-  //   //       clearTimeout(id);
-  //   //       resolve(null);
-  //   //     }, 1500);
-  //   //   });
-  //   //   let result = defaultValue;
-  //   //   const resp = await Promise.race([
-  //   //     timeout,
-  //   //     fetch(src)
-  //   //   ]) as Response || null;
-  //   //
-  //   //   if (!resp) {
-  //   //     console.warn('Error fetching latest data', src);
-  //   //
-  //   //     return result;
-  //   //   }
-  //   //
-  //   //   if (resp.ok) {
-  //   //     try {
-  //   //       result = await resp.json();
-  //   //       console.log('Fetched latest data', src);
-  //   //     } catch (err) {
-  //   //       console.warn('Error parsing latest data', src, err);
-  //   //     }
-  //   //   }
-  //   //
-  //   //   return result;
-  //   // } catch (e) {
-  //   //   console.warn('Error fetching latest data', src, e);
-  //   //
-  //   //   return defaultValue;
-  //   // }
-  // }
+  // @ts-ignore
+  private async fetchLatestPriceIdsData () {
+    return await fetchStaticData<Record<string, string | null>>('chain-assets/price-map');
+  }
 
   private async initChains () {
     const storedChainSettings = await this.dbService.getAllChainStore();

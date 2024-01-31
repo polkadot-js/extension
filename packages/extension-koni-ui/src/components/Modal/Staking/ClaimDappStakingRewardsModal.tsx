@@ -47,7 +47,7 @@ const Component: React.FC<Props> = (props: Props) => {
         className={CN(className)}
         closable={false}
         footer={
-          <div className={'modal_btn'}>
+          <div className={'__modal-buttons'}>
             <Button
               block={true}
               className={'__left-btn'}
@@ -92,7 +92,7 @@ const Component: React.FC<Props> = (props: Props) => {
             }}
           />
         </div>
-        <div className='modal_content'>
+        <div className='__modal-content'>
           <Trans
             components={{
               highlight: (
@@ -114,7 +114,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const ClaimDappStakingRewardsModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.modal_content': {
+    '.__modal-content': {
       fontSize: token.fontSize,
       lineHeight: token.lineHeightHeading6,
       textAlign: 'center',
@@ -122,10 +122,10 @@ const ClaimDappStakingRewardsModal = styled(Component)<Props>(({ theme: { token 
       paddingLeft: token.padding,
       paddingRight: token.padding
     },
-    '.modal_btn': {
+    '.__modal-buttons': {
       display: 'flex',
       justifyContent: 'row',
-      gap: token.sizeSM
+      gap: token.sizeXXS
     },
     '.page-icon-astar-modal': {
       display: 'flex',
@@ -136,6 +136,10 @@ const ClaimDappStakingRewardsModal = styled(Component)<Props>(({ theme: { token 
     },
     '.ant-sw-header-center-part': {
       width: 'auto'
+    },
+    '.ant-sw-modal-footer': {
+      borderTop: 0,
+      paddingTop: 0
     }
   };
 });

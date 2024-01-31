@@ -122,31 +122,30 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
         hasUnstaking: hasUnstakingInfo,
         validatorIdentity: identity
       });
+    }
 
-      if (hasUnstakingInfo) {
-        const _currentBlockInfo = await substrateApi.api.rpc.chain.getHeader();
+    if (hasUnstakingInfo) {
+      const _currentBlockInfo = await substrateApi.api.rpc.chain.getHeader();
 
-        const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
-        const currentBlockNumber = currentBlockInfo.number;
+      const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
+      const currentBlockNumber = currentBlockInfo.number;
 
-        const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
-        const blockPerRound = parseFloat(_blockPerRound);
+      const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
+      const blockPerRound = parseFloat(_blockPerRound);
 
-        const nearestUnstakingBlock = Object.keys(unstakingInfo)[0];
-        const nearestUnstakingAmount = Object.values(unstakingInfo)[0];
-
+      for (const [unstakingBlock, unstakingAmount] of Object.entries(unstakingInfo)) {
         const blockDuration = (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
 
-        const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber < 0;
-        const remainingBlock = parseInt(nearestUnstakingBlock) - currentBlockNumber;
+        const isClaimable = parseInt(unstakingBlock) - currentBlockNumber < 0;
+        const remainingBlock = parseInt(unstakingBlock) - currentBlockNumber;
         const waitingTime = remainingBlock * blockDuration;
 
         unstakingList.push({
           chain: chainInfo.slug,
           status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
-          claimable: nearestUnstakingAmount.toString(),
+          claimable: unstakingAmount.toString(),
           waitingTime,
-          validatorAddress: delegate?.owner || undefined
+          validatorAddress: undefined
         });
       }
     }

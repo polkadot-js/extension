@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ClainDappStakingRewardsParams } from '@subwallet/extension-koni-ui/types';
+import { ClaimDAppStakingRewardsState } from '@subwallet/extension-koni-ui/types';
 
 export const EXTENSION_VERSION = chrome.runtime.getManifest().version;
 export const WIKI_URL = 'https://docs.subwallet.app/';
@@ -14,7 +14,4 @@ export const DISCORD_URL = 'https://discord.com/invite/vPCN4vdB8v';
 export const SUPPORT_MAIL = 'mailto:agent@subwallet.app';
 export const ALL_KEY = 'all';
 
-export const DEFAULT_CLAIM_DAPP_STAKING_REWARDS_PARAMS: ClainDappStakingRewardsParams = {
-  isShowed: false,
-  isReminded: false
-};
+export const DEFAULT_CLAIM_DAPP_STAKING_REWARDS_STATE = ClaimDAppStakingRewardsState.NONE;

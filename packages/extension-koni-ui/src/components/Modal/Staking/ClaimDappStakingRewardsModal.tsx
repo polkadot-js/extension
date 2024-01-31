@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import { CLAIM_DAPP_STAKING_REWARDS, CLAIM_DAPP_STAKING_REWARDS_MODAL, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_PARAMS } from '@subwallet/extension-koni-ui/constants';
-import { ClainDappStakingRewardsParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { CLAIM_DAPP_STAKING_REWARDS, CLAIM_DAPP_STAKING_REWARDS_MODAL, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_STATE } from '@subwallet/extension-koni-ui/constants';
+import { ClaimDAppStakingRewardsState, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, Warning, XCircle } from 'phosphor-react';
@@ -18,17 +18,17 @@ const modalId = CLAIM_DAPP_STAKING_REWARDS_MODAL;
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { inactiveModal } = useContext(ModalContext);
-  const [{ isShowed }, setIsShowNotificationModal] = useLocalStorage<ClainDappStakingRewardsParams>(CLAIM_DAPP_STAKING_REWARDS, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_PARAMS);
+  const [claimDAppStakingRewardsState, setClaimDAppStakingRewardsState] = useLocalStorage<ClaimDAppStakingRewardsState>(CLAIM_DAPP_STAKING_REWARDS, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_STATE);
 
   const changeValueByModeModal = useCallback(() => {
-    if (isShowed) {
-      setIsShowNotificationModal({ isShowed: true, isReminded: true });
+    if (claimDAppStakingRewardsState === ClaimDAppStakingRewardsState.NONE) {
+      setClaimDAppStakingRewardsState(ClaimDAppStakingRewardsState.FIRST);
 
       return;
     }
 
-    setIsShowNotificationModal({ isShowed: true, isReminded: false });
-  }, [isShowed, setIsShowNotificationModal]);
+    setClaimDAppStakingRewardsState(ClaimDAppStakingRewardsState.SECOND);
+  }, [claimDAppStakingRewardsState, setClaimDAppStakingRewardsState]);
 
   const onCloseModal = useCallback(() => {
     inactiveModal(modalId);

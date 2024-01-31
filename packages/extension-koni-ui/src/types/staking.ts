@@ -16,7 +16,8 @@ export type StakingData = {
   priceMap: Record<string, number>;
 };
 
-export interface ClainDappStakingRewardsParams {
-  isShowed: boolean;
-  isReminded: boolean;
+export enum ClaimDAppStakingRewardsState {
+  NONE = 0,
+  FIRST = 1,
+  SECOND = 2
 }

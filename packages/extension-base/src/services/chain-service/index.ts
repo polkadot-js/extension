@@ -524,7 +524,9 @@ export class ChainService {
 
     // TODO: reconsider the flow of initiation
     this.multiChainAssetMapSubject.next(MultiChainAssetMap);
-    this.dataMap.assetRefMap = AssetRefMap;
+    const storedAssetRefMap = await this.dbService.getAssetRefMap();
+
+    this.dataMap.assetRefMap = storedAssetRefMap && Object.values(storedAssetRefMap).length > 0 ? storedAssetRefMap : AssetRefMap;
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
@@ -568,6 +570,20 @@ export class ChainService {
     }
   }
 
+  handleLatestBlockedAssetRef (latestBlockedAssetRefList: string[]) {
+    if (latestBlockedAssetRefList.length > 0) {
+      latestBlockedAssetRefList.forEach((blockedAssetRef) => {
+        delete this.dataMap.assetRefMap[blockedAssetRef];
+      });
+    } else {
+      this.dataMap.assetRefMap = AssetRefMap;
+    }
+
+    this.dbService.setAssetRef(this.dataMap.assetRefMap).catch(console.error);
+    this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
+    this.logger.log('Finished updating latest asset ref');
+  }
+
   handleLatestPriceId (latestPriceIds: Record<string, string | null>) {
     Object.entries(latestPriceIds).forEach(([slug, priceId]) => {
       if (this.dataMap.assetRegistry[slug]) {
@@ -584,6 +600,10 @@ export class ChainService {
   handleLatestData () {
     this.fetchLatestChainData().then((latestChainInfo) => {
       this.handleLatestProviderData(latestChainInfo);
+    }).catch(console.error);
+
+    this.fetchLatestBlockedAssetRef().then((latestAssetRef) => {
+      this.handleLatestBlockedAssetRef(latestAssetRef);
     }).catch(console.error);
 
     // this.fetchLatestPriceIdsData().then((latestPriceIds) => {
@@ -813,6 +833,10 @@ export class ChainService {
   // @ts-ignore
   private async fetchLatestPriceIdsData () {
     return await fetchStaticData<Record<string, string | null>>('chain-assets/price-map');
+  }
+
+  private async fetchLatestBlockedAssetRef () {
+    return await fetchStaticData<string[]>('chain-assets/disabled-xcm-channels');
   }
 
   private async initChains () {

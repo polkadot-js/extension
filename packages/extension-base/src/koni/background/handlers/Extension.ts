@@ -1122,13 +1122,13 @@ export default class KoniExtension {
   }
 
   private async getBalance (reset?: boolean) {
-    return this.#koniState.getBalance(reset);
+    return this.#koniState.balanceService.getBalance(reset);
   }
 
   private async subscribeBalance (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(balance.getSubscription)'>(id, port);
 
-    const balanceSubscription = this.#koniState.subscribeBalance().subscribe({
+    const balanceSubscription = this.#koniState.balanceService.subscribeBalanceMap().subscribe({
       next: (rs) => {
         const data = { details: rs } as BalanceJson;
 

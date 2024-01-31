@@ -244,7 +244,7 @@ export const EVM_REFORMAT_DECIMALS = {
   acala: ['acala_evm', 'karura_evm']
 };
 
-export const LATEST_CHAIN_DATA_FETCHING_INTERVAL = 300000;
+export const LATEST_CHAIN_DATA_FETCHING_INTERVAL = 30000;
 
 // TODO: review
 const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni-dev' : 'master';

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _AssetRef, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { CampaignData, ChainStakingMetadata, CrowdloanItem, MetadataItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceItem, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
 import Dexie, { Table, Transaction } from 'dexie';
@@ -40,6 +40,10 @@ export type IMantaPayLedger = any;
 
 export type ICampaign = CampaignData;
 
+export interface IAssetRef extends _AssetRef {
+  slug: string
+}
+
 export default class KoniDatabase extends Dexie {
   public price!: Table<PriceJson, object>;
   public balances!: Table<IBalance, object>;
@@ -63,6 +67,8 @@ export default class KoniDatabase extends Dexie {
 
   public mantaPay!: Table<IMantaPayLedger, object>;
   public campaign!: Table<ICampaign, object>;
+
+  public assetRef!: Table<IAssetRef, object>;
 
   private schemaVersion: number;
 
@@ -103,6 +109,10 @@ export default class KoniDatabase extends Dexie {
 
     this.conditionalVersion(5, {
       campaign: 'slug'
+    });
+
+    this.conditionalVersion(5, {
+      assetRef: 'slug'
     });
   }
 

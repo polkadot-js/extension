@@ -4,18 +4,18 @@
 import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { _ASSET_LOGO_MAP_SRC, _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _CHAIN_LOGO_MAP_SRC, _DEFAULT_ACTIVE_CHAINS, _MANTA_ZK_CHAIN_GROUP, _MULTI_CHAIN_ASSET_SRC, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
+import { _DEFAULT_ACTIVE_CHAINS, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX, LATEST_CHAIN_DATA_FETCHING_INTERVAL } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey, randomizeProvider, updateLatestChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
-import { MODULE_SUPPORT } from '@subwallet/extension-base/utils';
+import { fetchStaticData, MODULE_SUPPORT } from '@subwallet/extension-base/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
@@ -38,6 +38,8 @@ export class ChainService {
   private substrateChainHandler: SubstrateChainHandler;
   private evmChainHandler: EvmChainHandler;
   private mantaChainHandler: MantaPrivateHandler | undefined;
+
+  refreshLatestChainDataTimeOut: NodeJS.Timer | undefined;
 
   public get mantaPay () {
     return this.mantaChainHandler;
@@ -521,13 +523,8 @@ export class ChainService {
     await this.eventService.waitDatabaseReady;
 
     // TODO: reconsider the flow of initiation
-    const [latestAssetRefMap, latestMultiChainAssetMap] = await Promise.all([
-      this.fetchLatestData(_ASSET_REF_SRC, AssetRefMap),
-      this.fetchLatestData(_MULTI_CHAIN_ASSET_SRC, MultiChainAssetMap)
-    ]);
-
-    this.multiChainAssetMapSubject.next(latestMultiChainAssetMap as Record<string, _MultiChainAsset>);
-    this.dataMap.assetRefMap = latestAssetRefMap as Record<string, _AssetRef>;
+    this.multiChainAssetMapSubject.next(MultiChainAssetMap);
+    this.dataMap.assetRefMap = AssetRefMap;
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
@@ -537,6 +534,61 @@ export class ChainService {
 
     await this.initApis();
     await this.initAssetSettings();
+
+    this.checkLatestData();
+  }
+
+  checkLatestData () {
+    clearInterval(this.refreshLatestChainDataTimeOut);
+
+    this.refreshLatestChainDataTimeOut = setInterval(this.handleLatestData.bind(this), LATEST_CHAIN_DATA_FETCHING_INTERVAL);
+  }
+
+  stopCheckLatestChainData () {
+    clearInterval(this.refreshLatestChainDataTimeOut);
+  }
+
+  handleLatestProviderData (latestChainInfo: _ChainInfo[]) {
+    try {
+      if (latestChainInfo && latestChainInfo.length > 0) {
+        const { needUpdateChainApiList, storedChainInfoList } = updateLatestChainInfo(this.dataMap, latestChainInfo);
+
+        this.dbService.bulkUpdateChainStore(storedChainInfoList).catch(console.error);
+        this.updateChainSubscription();
+
+        needUpdateChainApiList.forEach((chainInfo) => {
+          console.log('Updating chain API for', chainInfo.slug);
+          this.initApiForChain(chainInfo).catch(console.error);
+        });
+
+        this.logger.log('Finished updating latest RPC providers');
+      }
+    } catch (e) {
+      console.error('Error fetching latest chain data');
+    }
+  }
+
+  handleLatestPriceId (latestPriceIds: Record<string, string | null>) {
+    Object.entries(latestPriceIds).forEach(([slug, priceId]) => {
+      if (this.dataMap.assetRegistry[slug]) {
+        this.dataMap.assetRegistry[slug].priceId = priceId;
+      }
+    });
+
+    this.assetRegistrySubject.next(this.dataMap.assetRegistry);
+    this.eventService.emit('asset.updateState', '');
+
+    this.logger.log('Finished updating latest price IDs');
+  }
+
+  handleLatestData () {
+    this.fetchLatestChainData().then((latestChainInfo) => {
+      this.handleLatestProviderData(latestChainInfo);
+    }).catch(console.error);
+
+    // this.fetchLatestPriceIdsData().then((latestPriceIds) => {
+    //   this.handleLatestPriceId(latestPriceIds);
+    // }).catch(console.error);
   }
 
   private async initApis () {
@@ -720,8 +772,8 @@ export class ChainService {
     return duplicatedSlug;
   }
 
-  private async fetchLatestData (src: string, defaultValue: unknown) {
-    return Promise.resolve(defaultValue);
+  private async fetchLatestChainData () {
+    return await fetchStaticData<_ChainInfo[]>('chains');
     // try {
     //   const timeout = new Promise((resolve) => {
     //     const id = setTimeout(() => {
@@ -758,9 +810,14 @@ export class ChainService {
     // }
   }
 
+  // @ts-ignore
+  private async fetchLatestPriceIdsData () {
+    return await fetchStaticData<Record<string, string | null>>('chain-assets/price-map');
+  }
+
   private async initChains () {
     const storedChainSettings = await this.dbService.getAllChainStore();
-    const latestChainInfoMap = await this.fetchLatestData(_CHAIN_INFO_SRC, ChainInfoMap) as Record<string, _ChainInfo>;
+    const defaultChainInfoMap = ChainInfoMap;
     const storedChainSettingMap: Record<string, IChain> = {};
 
     storedChainSettings.forEach((chainStoredSetting) => {
@@ -772,10 +829,12 @@ export class ChainService {
     const deprecatedChainMap: Record<string, string> = {};
 
     if (storedChainSettings.length === 0) {
-      this.dataMap.chainInfoMap = latestChainInfoMap;
-      Object.values(latestChainInfoMap).forEach((chainInfo) => {
+      this.dataMap.chainInfoMap = defaultChainInfoMap;
+      Object.values(defaultChainInfoMap).forEach((chainInfo) => {
+        const { providerKey } = randomizeProvider(chainInfo.providers);
+
         this.dataMap.chainStateMap[chainInfo.slug] = {
-          currentProvider: Object.keys(chainInfo.providers)[0],
+          currentProvider: providerKey,
           slug: chainInfo.slug,
           connectionStatus: _ChainConnectionStatus.DISCONNECTED,
           active: _DEFAULT_ACTIVE_CHAINS.includes(chainInfo.slug)
@@ -785,16 +844,16 @@ export class ChainService {
         newStorageData.push({
           ...chainInfo,
           active: _DEFAULT_ACTIVE_CHAINS.includes(chainInfo.slug),
-          currentProvider: Object.keys(chainInfo.providers)[0]
+          currentProvider: providerKey
         });
       });
     } else {
-      const mergedChainInfoMap: Record<string, _ChainInfo> = latestChainInfoMap;
+      const mergedChainInfoMap: Record<string, _ChainInfo> = defaultChainInfoMap;
 
       for (const [storedSlug, storedChainInfo] of Object.entries(storedChainSettingMap)) {
-        const chainInfo = latestChainInfoMap[storedSlug];
+        const chainInfo = defaultChainInfoMap[storedSlug];
 
-        // Network is existed on change list
+        // Network existed on change list
         // check predefined chains first, keep setting for providers and currentProvider
         if (chainInfo) {
           // Keep customer provider only
@@ -810,26 +869,29 @@ export class ChainService {
 
           mergedChainInfoMap[storedSlug].providers = providers;
 
-          // Merge current provider
-          let currentProvider = storedChainInfo.currentProvider;
-          const providerValue = storedChainInfo.providers[currentProvider] || '';
+          const { providerKey } = randomizeProvider(providers);
+          let selectedProvider = providerKey;
 
-          if (!providers[currentProvider]) {
-            currentProvider = Object.keys(providers)[0];
+          const storedProviderKey = storedChainInfo.currentProvider;
+          const storedProviderValue = storedChainInfo.providers[storedProviderKey] || '';
 
-            for (const [key, value] of Object.entries(providers)) {
-              if (providerValue === value) {
-                currentProvider = key;
-                break;
-              }
+          if (storedProviderValue?.startsWith('light') || storedProviderKey?.startsWith(_CUSTOM_PREFIX)) {
+            const savedProviderKey = Object.keys(providers).find((key) => providers[key] === storedProviderValue);
+
+            if (savedProviderKey) {
+              selectedProvider = savedProviderKey;
             }
           }
+
+          // Merge current provider
+          // let currentProvider = storedChainInfo.currentProvider;
+          // const providerValue = storedChainInfo.providers[selectedProvider] || '';
 
           const hasProvider = Object.values(providers).length > 0;
           const canActive = hasProvider && chainInfo.chainStatus === _ChainStatus.ACTIVE;
 
           this.dataMap.chainStateMap[storedSlug] = {
-            currentProvider: currentProvider,
+            currentProvider: selectedProvider,
             slug: storedSlug,
             connectionStatus: _ChainConnectionStatus.DISCONNECTED,
             active: canActive && storedChainInfo.active
@@ -838,12 +900,12 @@ export class ChainService {
           newStorageData.push({
             ...mergedChainInfoMap[storedSlug],
             active: canActive && storedChainInfo.active,
-            currentProvider: currentProvider
+            currentProvider: selectedProvider
           });
         } else if (_isCustomChain(storedSlug)) {
           // only custom chains are left
           // check custom chain duplicated with predefined chain => merge into predefined chain
-          const duplicatedDefaultSlug = this.checkExistedPredefinedChain(latestChainInfoMap, storedChainInfo.substrateInfo?.genesisHash, storedChainInfo.evmInfo?.evmChainId);
+          const duplicatedDefaultSlug = this.checkExistedPredefinedChain(defaultChainInfoMap, storedChainInfo.substrateInfo?.genesisHash, storedChainInfo.evmInfo?.evmChainId);
 
           if (duplicatedDefaultSlug.length > 0) { // merge custom chain with existed chain
             mergedChainInfoMap[duplicatedDefaultSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[duplicatedDefaultSlug].providers };
@@ -867,7 +929,7 @@ export class ChainService {
             mergedChainInfoMap[storedSlug] = {
               slug: storedSlug,
               name: storedChainInfo.name,
-              providers: storedChainInfo.providers,
+              providers: storedChainInfo.providers, // TODO: review
               evmInfo: storedChainInfo.evmInfo,
               substrateInfo: storedChainInfo.substrateInfo,
               isTestnet: storedChainInfo.isTestnet,
@@ -876,7 +938,7 @@ export class ChainService {
               extraInfo: storedChainInfo.extraInfo
             };
             this.dataMap.chainStateMap[storedSlug] = {
-              currentProvider: storedChainInfo.currentProvider,
+              currentProvider: storedChainInfo.currentProvider, // TODO: review
               slug: storedSlug,
               connectionStatus: _ChainConnectionStatus.DISCONNECTED,
               active: storedChainInfo.active
@@ -885,7 +947,7 @@ export class ChainService {
             newStorageData.push({
               ...mergedChainInfoMap[storedSlug],
               active: storedChainInfo.active,
-              currentProvider: storedChainInfo.currentProvider
+              currentProvider: storedChainInfo.currentProvider // TODO: review
             });
           }
         } else {
@@ -921,7 +983,7 @@ export class ChainService {
 
   private async initAssetRegistry (deprecatedCustomChainMap: Record<string, string>) {
     const storedAssetRegistry = await this.dbService.getAllAssetStore();
-    const latestAssetRegistry = await this.fetchLatestData(_CHAIN_ASSET_SRC, ChainAssetMap) as Record<string, _ChainAsset>;
+    const latestAssetRegistry = ChainAssetMap;
     const availableChains = Object.values(this.dataMap.chainInfoMap)
       .filter((info) => (info.chainStatus === _ChainStatus.ACTIVE))
       .map((chainInfo) => chainInfo.slug);
@@ -1422,6 +1484,8 @@ export class ChainService {
       this.substrateChainHandler.sleep(),
       this.evmChainHandler.sleep()
     ]);
+
+    this.stopCheckLatestChainData();
   }
 
   public async resumeAllChainApis () {
@@ -1429,6 +1493,8 @@ export class ChainService {
       this.substrateChainHandler.wakeUp(),
       this.evmChainHandler.wakeUp()
     ]);
+
+    this.checkLatestData();
   }
 
   public checkAndUpdateStatusMapForChain (chainSlug: string) {
@@ -1593,11 +1659,11 @@ export class ChainService {
   }
 
   public async getChainLogoMap (): Promise<Record<string, string>> {
-    return await this.fetchLatestData(_CHAIN_LOGO_MAP_SRC, ChainLogoMap) as Record<string, string>;
+    return Promise.resolve(ChainLogoMap);
   }
 
   public async getAssetLogoMap (): Promise<Record<string, string>> {
-    return await this.fetchLatestData(_ASSET_LOGO_MAP_SRC, AssetLogoMap) as Record<string, string>;
+    return Promise.resolve(AssetLogoMap);
   }
 
   public resetWallet (resetAll: boolean) {

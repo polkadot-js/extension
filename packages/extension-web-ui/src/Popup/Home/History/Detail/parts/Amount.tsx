@@ -12,7 +12,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import PoolLeaveAmount from './PoolLeaveAmount';
+import { PoolLeaveAmount } from './PoolLeaveAmount';
 
 interface Props extends ThemeProps {
   data: TransactionHistoryDisplayItem;
@@ -24,9 +24,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const additionalInfo = data.additionalInfo;
-
   const { t } = useTranslation();
 
   const isStaking = isTypeStaking(data.type);
@@ -34,6 +31,28 @@ const Component: React.FC<Props> = (props: Props) => {
   const isNft = data.type === ExtrinsicType.SEND_NFT;
   const isMint = isTypeMint(data.type);
   const isLeavePool = isPoolLeave(data.type);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const additionalInfo = data.additionalInfo;
+
+  const amountLabel = useMemo((): string => {
+    switch (transactionType) {
+      case ExtrinsicType.STAKING_BOND:
+      case ExtrinsicType.STAKING_JOIN_POOL:
+        return t('Staking value');
+      case ExtrinsicType.STAKING_WITHDRAW:
+      case ExtrinsicType.STAKING_POOL_WITHDRAW:
+        return t('Withdraw value');
+      case ExtrinsicType.STAKING_UNBOND:
+        return t('Unstake value');
+      case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
+        return t('Cancel unstake value');
+      case ExtrinsicType.CROWDLOAN:
+        return t('Contribute balance');
+      default:
+        return t('Amount');
+    }
+  }, [t, transactionType]);
 
   const derivativeTokenSlug = useMemo((): string | undefined => {
     if (isMint) {
@@ -63,25 +82,6 @@ const Component: React.FC<Props> = (props: Props) => {
     return derivativeTokenSlug ? assetRegistry[derivativeTokenSlug].symbol : '';
   }, [assetRegistry, derivativeTokenSlug]);
 
-  const amountLabel = useMemo((): string => {
-    switch (transactionType) {
-      case ExtrinsicType.STAKING_BOND:
-      case ExtrinsicType.STAKING_JOIN_POOL:
-        return t('Staking value');
-      case ExtrinsicType.STAKING_WITHDRAW:
-      case ExtrinsicType.STAKING_POOL_WITHDRAW:
-        return t('Withdraw value');
-      case ExtrinsicType.STAKING_UNBOND:
-        return t('Unstake value');
-      case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
-        return t('Cancel unstake value');
-      case ExtrinsicType.CROWDLOAN:
-        return t('Contribute balance');
-      default:
-        return t('Amount');
-    }
-  }, [t, transactionType]);
-
   if (isLeavePool && data.additionalInfo) {
     return <PoolLeaveAmount data={data} />;
   }
@@ -99,17 +99,14 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )
       }
-      {
-        (isMint && amountDerivative) &&
-        (
-          <MetaInfo.Number
-            decimals={0}
-            label={t('Estimated receivables')}
-            suffix={derivativeSymbol}
-            value={amountDerivative}
-          />
-        )
-      }
+      {isMint && amountDerivative && (
+        <MetaInfo.Number
+          decimals={0}
+          label={t('Estimated receivables')}
+          suffix={derivativeSymbol}
+          value={amountDerivative}
+        />
+      )}
       {data.additionalInfo && isNft && (
         <MetaInfo.Default
           label={t('Collection Name')}

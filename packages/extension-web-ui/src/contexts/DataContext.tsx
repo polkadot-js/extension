@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { persistor, store, StoreName } from '@subwallet/extension-web-ui/stores';
-import { getDAppsData, getLogoMaps, getMissionPoolData, subscribeAccountsData, subscribeAddressBook, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeBuyServices, subscribeBuyTokens, subscribeChainInfoMap, subscribeChainStateMap, subscribeConfirmationRequests, subscribeConnectWCRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMantaPayConfig, subscribeMantaPaySyncingState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeProcessingCampaign, subscribeSigningRequests, subscribeStakingReward, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeWalletConnectSessions, subscribeWCNotSupportRequests, subscribeXcmRefMap, subscribeYieldPoolInfo, subscribeYieldPositionInfo } from '@subwallet/extension-web-ui/stores/utils';
+import { getDAppsData, getLogoMaps, getMissionPoolData, subscribeAccountsData, subscribeAddressBook, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeBuyServices, subscribeBuyTokens, subscribeChainInfoMap, subscribeChainStateMap, subscribeConfirmationRequests, subscribeConnectWCRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMantaPayConfig, subscribeMantaPaySyncingState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeProcessingCampaign, subscribeRewardHistory, subscribeSigningRequests, subscribeStakingReward, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeWalletConnectSessions, subscribeWCNotSupportRequests, subscribeXcmRefMap, subscribeYieldMinAmountPercent, subscribeYieldPoolInfo, subscribeYieldPositionInfo, subscribeYieldReward } from '@subwallet/extension-web-ui/stores/utils';
 import Bowser from 'bowser';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -229,16 +229,19 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeCrowdloan, name: 'subscribeCrowdloan', relatedStores: ['crowdloan'] });
   _DataContext.addHandler({ ...subscribeNftItems, name: 'subscribeNftItems', relatedStores: ['nft'] });
   _DataContext.addHandler({ ...subscribeNftCollections, name: 'subscribeNftCollections', relatedStores: ['nft'] });
-  // _DataContext.addHandler({ ...subscribeStaking, name: 'subscribeStaking', relatedStores: ['staking'] });
   _DataContext.addHandler({ ...subscribeStakingReward, name: 'subscribeStakingReward', relatedStores: ['staking'] });
-  // _DataContext.addHandler({ ...subscribeChainStakingMetadata, name: 'subscribeChainStakingMetadata', relatedStores: ['staking'] });
-  // _DataContext.addHandler({ ...subscribeStakingNominatorMetadata, name: 'subscribeStakingNominatorMetadata', relatedStores: ['staking'] });
   _DataContext.addHandler({ ...subscribeTxHistory, name: 'subscribeTxHistory', relatedStores: ['transactionHistory'] });
   _DataContext.addHandler({ ...subscribeWalletConnectSessions, name: 'subscribeWalletConnectSessions', relatedStores: ['walletConnect'] });
   _DataContext.addHandler({ ...getDAppsData, name: 'getDAppsData', relatedStores: ['dApp'], isStartImmediately: true });
   _DataContext.addHandler({ ...getMissionPoolData, name: 'getMissionPoolData', relatedStores: ['missionPool'], isStartImmediately: true });
-  _DataContext.addHandler({ ...subscribeYieldPoolInfo, name: 'subscribeYieldPoolInfo', relatedStores: ['yieldPool'] });
-  _DataContext.addHandler({ ...subscribeYieldPositionInfo, name: 'subscribeYieldPositionInfo', relatedStores: ['yieldPool'] });
+
+  // Earning
+
+  _DataContext.addHandler({ ...subscribeYieldPoolInfo, name: 'subscribeYieldPoolInfo', relatedStores: ['earning'] });
+  _DataContext.addHandler({ ...subscribeYieldPositionInfo, name: 'subscribeYieldPositionInfo', relatedStores: ['earning'] });
+  _DataContext.addHandler({ ...subscribeYieldReward, name: 'subscribeYieldReward', relatedStores: ['earning'] });
+  _DataContext.addHandler({ ...subscribeRewardHistory, name: 'subscribeRewardHistory', relatedStores: ['earning'] });
+  _DataContext.addHandler({ ...subscribeYieldMinAmountPercent, name: 'subscribeYieldMinAmountPercent', relatedStores: ['earning'] });
 
   return <Provider store={store}>
     <PersistGate persistor={persistor}>

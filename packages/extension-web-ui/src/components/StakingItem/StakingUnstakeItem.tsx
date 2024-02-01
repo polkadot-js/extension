@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/types';
 import { Avatar } from '@subwallet/extension-web-ui/components';
 import { useGetNativeTokenBasicInfo } from '@subwallet/extension-web-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-web-ui/types';

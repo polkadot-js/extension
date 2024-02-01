@@ -526,9 +526,9 @@ export class ChainService {
 
     // TODO: reconsider the flow of initiation
     this.multiChainAssetMapSubject.next(MultiChainAssetMap);
-    const storedAssetRefMap = await this.dbService.getAssetRefMap();
-
-    this.dataMap.assetRefMap = storedAssetRefMap && Object.values(storedAssetRefMap).length > 0 ? storedAssetRefMap : AssetRefMap;
+    // const storedAssetRefMap = await this.dbService.getAssetRefMap();
+    //
+    // this.dataMap.assetRefMap = storedAssetRefMap && Object.values(storedAssetRefMap).length > 0 ? storedAssetRefMap : AssetRefMap;
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
@@ -538,8 +538,34 @@ export class ChainService {
 
     await this.initApis();
     await this.initAssetSettings();
+    await this.initAssetRefMap();
 
     this.checkLatestData();
+  }
+
+  async initAssetRefMap () {
+    try {
+      const fetchPromise = this.fetchLatestBlockedAssetRef();
+      const timeout = new Promise((resolve) => {
+        const id = setTimeout(() => {
+          clearTimeout(id);
+          resolve(null);
+        }, 1000);
+      });
+
+      const disabledAssetRefs = await Promise.race([
+        timeout,
+        fetchPromise
+      ]) as string[] || null;
+
+      if (disabledAssetRefs) {
+        this.handleLatestBlockedAssetRef(disabledAssetRefs);
+      } else {
+        this.dataMap.assetRefMap = AssetRefMap;
+      }
+    } catch (e) {
+      this.dataMap.assetRefMap = AssetRefMap;
+    }
   }
 
   checkLatestData () {
@@ -578,15 +604,15 @@ export class ChainService {
   }
 
   handleLatestBlockedAssetRef (latestBlockedAssetRefList: string[]) {
-    if (latestBlockedAssetRefList.length > 0) {
-      latestBlockedAssetRefList.forEach((blockedAssetRef) => {
-        delete this.dataMap.assetRefMap[blockedAssetRef];
-      });
-    } else {
-      this.dataMap.assetRefMap = AssetRefMap;
-    }
+    const updatedAssetRefMap: Record<string, _AssetRef> = { ...AssetRefMap };
 
-    this.dbService.setAssetRef(this.dataMap.assetRefMap).catch(console.error);
+    latestBlockedAssetRefList.forEach((blockedAssetRef) => {
+      delete updatedAssetRefMap[blockedAssetRef];
+    });
+
+    this.dataMap.assetRefMap = updatedAssetRefMap;
+
+    // this.dbService.setAssetRef(this.dataMap.assetRefMap).catch(console.error);
     this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
     this.logger.log('Finished updating latest asset ref');
   }

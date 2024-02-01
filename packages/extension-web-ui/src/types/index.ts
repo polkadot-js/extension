@@ -26,9 +26,12 @@ export type AlertDialogProps = {
 
 export type AccountType = 'ALL' | 'ETHEREUM' | 'SUBSTRATE';
 
-export interface ThemeProps {
-  theme: _Theme;
+export interface GeneralProps {
   className?: string;
+}
+
+export interface ThemeProps extends GeneralProps {
+  theme: _Theme;
 }
 
 export interface TableColumnType<T> {
@@ -37,31 +40,6 @@ export interface TableColumnType<T> {
   className?: string,
   render: (record: T) => React.ReactNode;
   sortable?: boolean
-}
-
-export interface GeneralProps {
-  className?: string;
-}
-export interface _ThemeProps extends GeneralProps {
-  theme: _Theme;
-}
-export type SuppliedTokenInfo = {
-  holders: string,
-  blockNumber: number,
-  id: string,
-  limit: string,
-  network: string,
-  standard: string,
-  ticker: string,
-  timestamp: string,
-  totalSales: string,
-  totalSupply: string,
-  circulatingSupply: string,
-  owner: {
-    address: string,
-    id: string
-  },
-  transactions: string
 }
 
 export interface Recoded {

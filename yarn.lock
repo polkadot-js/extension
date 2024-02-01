@@ -2679,15 +2679,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@garvae/react-pie-donut-chart@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@garvae/react-pie-donut-chart@npm:1.0.0"
-  peerDependencies:
-    react: ">=16"
-  checksum: d806accc7b71fd9a4b2bace6f65e442337aab66f4844d8d8b6467ea33b1e69775577b025e3d178bd4b26c12a677661ae0dcd3779f20fca1bb84f3da041a44ac1
-  languageName: node
-  linkType: hard
-
 "@google/model-viewer@npm:3.1.1":
   version: 3.1.1
   resolution: "@google/model-viewer@npm:3.1.1"
@@ -5655,13 +5646,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.4.0":
-  version: 1.4.0
-  resolution: "@remix-run/router@npm:1.4.0"
-  checksum: 707dce35a2b8138005cf19e63f6fd3c4da05b4b892e9e9118e8b727c3b95953efe27307ca2df35084044df30fa1fc367cf0bbc98d1ded9020c82e61e6242caaf
-  languageName: node
-  linkType: hard
-
 "@rollup/plugin-alias@npm:^3.1.9":
   version: 3.1.9
   resolution: "@rollup/plugin-alias@npm:3.1.9"
@@ -6546,6 +6530,7 @@ __metadata:
     webpack: ^5.89.0
     webpack-cli: ^4.10.0
     webpack-extension-manifest-plugin: ^0.8.0
+    webpack-target-webextension: ^1.1.1
   languageName: unknown
   linkType: soft
 
@@ -6555,99 +6540,6 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     sinon-chrome: ^3.0.1
-  languageName: unknown
-  linkType: soft
-
-"@subwallet/extension-web-ui@^1.1.33-0, @subwallet/extension-web-ui@workspace:packages/extension-web-ui":
-  version: 0.0.0-use.local
-  resolution: "@subwallet/extension-web-ui@workspace:packages/extension-web-ui"
-  dependencies:
-    "@babel/runtime": ^7.20.6
-    "@coinbase/cbpay-js": ^1.7.0
-    "@fortawesome/fontawesome-svg-core": ^6.2.1
-    "@fortawesome/free-brands-svg-icons": ^6.2.1
-    "@fortawesome/free-regular-svg-icons": ^6.2.1
-    "@fortawesome/free-solid-svg-icons": ^6.2.1
-    "@fortawesome/react-fontawesome": ^0.2.0
-    "@garvae/react-pie-donut-chart": 1.0.0
-    "@ledgerhq/hw-app-eth": ^6.35.0
-    "@polkadot/api-contract": ^10.11.1
-    "@polkadot/hw-ledger": ^12.6.1
-    "@polkadot/networks": ^12.6.1
-    "@polkadot/types": ^10.11.1
-    "@polkadot/types-augment": ^10.11.1
-    "@polkadot/ui-settings": ^3.6.4
-    "@polkadot/util": ^12.6.1
-    "@polkadot/util-crypto": ^12.6.1
-    "@ramonak/react-progress-bar": ^5.0.3
-    "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": ^0.2.37
-    "@subwallet/extension-base": ^1.1.33-0
-    "@subwallet/extension-chains": ^1.1.33-0
-    "@subwallet/extension-dapp": ^1.1.33-0
-    "@subwallet/extension-inject": ^1.1.33-0
-    "@subwallet/extension-mocks": ^1.1.33-0
-    "@subwallet/keyring": ^0.1.1
-    "@subwallet/react-ui": 5.1.2-b73
-    "@subwallet/ui-keyring": ^0.1.1
-    "@types/bn.js": ^5.1.1
-    "@types/enzyme": ^3.10.12
-    "@types/enzyme-adapter-react-16": ^1.0.6
-    "@types/file-saver": ^2.0.5
-    "@types/react-copy-to-clipboard": ^5.0.4
-    "@types/react-dom": ^18.0.9
-    "@types/react-lazy-load-image-component": ^1.5.3
-    "@types/react-slick": ^0.23.11
-    "@types/redux-persist": ^4.3.1
-    "@types/sinon-chrome": ^2.2.11
-    "@types/store": ^2.0.2
-    "@types/styled-components": ^5.1.26
-    "@walletconnect/types": ^2.8.4
-    "@wojtekmaj/enzyme-adapter-react-17": ^0.8.0
-    axios: ^1.2.1
-    bip39: ^3.1.0
-    boring-avatars: ^1.7.0
-    bowser: ^2.11.0
-    classnames: ^2.3.2
-    copy-to-clipboard: ^3.3.3
-    enzyme: ^3.11.0
-    enzyme-adapter-react-16: ^1.15.7
-    file-saver: ^2.0.5
-    humanize-duration: ^3.31.0
-    i18next: ^21.9.2
-    mobile-detect: ^1.4.5
-    moment: ^2.29.4
-    phosphor-react: ^1.4.1
-    querystring: ^0.2.1
-    rc-input: ^0.2.2
-    rc-util: ^5.28.0
-    react: ^18.2.0
-    react-dom: ^18.2.0
-    react-dropzone: ^11.5.1
-    react-i18next: ^11.15.3
-    react-infinite-scroll-component: ^6.1.0
-    react-is: ^17.0.2
-    react-lazy-load-image-component: ^1.5.6
-    react-lazyload: ^3.2.0
-    react-loading-skeleton: ^3.1.0
-    react-markdown: ^9.0.1
-    react-qr-code: ^2.0.11
-    react-qr-reader: ^3.0.0-beta-1
-    react-redux: ^8.0.5
-    react-router-dom: ~6.9.0
-    react-select: ^5.7.0
-    react-share: ^4.4.1
-    react-slick: ^0.29.0
-    react-tabs: ^6.0.0
-    react-tooltip: 4.5.1
-    react-transition-group: ^4.4.5
-    redux: ^4.2.0
-    redux-persist: ^6.0.0
-    redux-toolkit: ^1.1.2-1
-    semantic-ui-react: ^2.1.4
-    sinon-chrome: ^3.0.1
-    styled-components: ^5.3.6
-    usehooks-ts: ^2.9.1
   languageName: unknown
   linkType: soft
 
@@ -6744,84 +6636,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b73":
-  version: 5.1.2-b73
-  resolution: "@subwallet/react-ui@npm:5.1.2-b73"
-  dependencies:
-    "@ant-design/colors": ^6.0.0
-    "@ant-design/cssinjs": ^1.5.6
-    "@ant-design/icons": ^4.8.0
-    "@ant-design/react-slick": ~1.0.0
-    "@babel/runtime": ^7.18.3
-    "@ctrl/tinycolor": ^3.4.0
-    "@fortawesome/fontawesome-svg-core": ^6.2.1
-    "@fortawesome/free-regular-svg-icons": ^6.2.1
-    "@fortawesome/free-solid-svg-icons": ^6.2.1
-    "@fortawesome/react-fontawesome": ^0.2.0
-    "@google/model-viewer": 3.1.1
-    "@polkadot/react-identicon": ^2.9.14
-    "@polkadot/util-crypto": ^11.1.1
-    "@rc-component/tour": ~1.1.0
-    "@zxing/browser": 0.1.1
-    "@zxing/library": 0.19.1
-    bignumber.js: ^9.1.1
-    boring-avatars: ^1.7.0
-    classnames: ^2.2.6
-    copy-to-clipboard: ^3.2.0
-    dayjs: ^1.11.1
-    flatlist-react: ^1.5.14
-    jsqr: ^1.4.0
-    patch-package: ^6.5.1
-    phosphor-react: ^1.4.1
-    qrcode.react: ^3.1.0
-    rc-cascader: ~3.8.0
-    rc-checkbox: ~2.3.0
-    rc-collapse: ~3.4.2
-    rc-dialog: ~9.0.2
-    rc-drawer: ~6.1.1
-    rc-dropdown: ~4.0.0
-    rc-field-form: ~1.27.0
-    rc-image: ~5.13.0
-    rc-input: ~0.1.4
-    rc-input-number: ~7.4.0
-    rc-mentions: ~1.13.1
-    rc-menu: ~9.8.2
-    rc-motion: ^2.6.1
-    rc-notification: ~5.0.0
-    rc-pagination: ~3.2.0
-    rc-picker: ~3.1.1
-    rc-progress: ~3.4.1
-    rc-rate: ~2.9.0
-    rc-resize-observer: ^1.2.0
-    rc-segmented: ~2.1.0
-    rc-select: ~14.2.0
-    rc-slider: ~10.0.0
-    rc-steps: ~6.0.0
-    rc-switch: ~4.0.0
-    rc-table: ~7.29.1
-    rc-tabs: ~12.5.1
-    rc-textarea: ~0.4.5
-    rc-tooltip: ~5.2.0
-    rc-tree: ~5.7.0
-    rc-tree-select: ~5.6.0
-    rc-trigger: ^5.2.10
-    rc-upload: ~4.3.0
-    rc-util: ^5.27.1
-    react-copy-to-clipboard: ^5.1.0
-    react-pin-input: 1.3.0
-    react-qrcode-logo: ^2.9.0
-    react-superellipse: ^0.0.6
-    react-toastify: ^9.1.1
-    scroll-into-view-if-needed: ^3.0.3
-    three: ^0.151.2
-    throttle-debounce: ^5.0.0
-  peerDependencies:
-    react: ">=16.9.0"
-    react-dom: ">=16.9.0"
-  checksum: f2738774f479fc245aeae3cb8286c32b4c7b811063a46572613fa2537c4bb55bbb35e7cddd322db206d4eee52357f80ff64990825dac9600ecbf3541997a237c
-  languageName: node
-  linkType: hard
-
 "@subwallet/ui-keyring@npm:^0.1.1":
   version: 0.1.1
   resolution: "@subwallet/ui-keyring@npm:0.1.1"
@@ -6866,42 +6680,6 @@ __metadata:
     thread-loader: ^3.0.4
     url-loader: ^4.1.1
     webpack: ^5.89.0
-    webpack-cli: ^4.10.0
-    webpack-dev-server: ^4.11.1
-  languageName: unknown
-  linkType: soft
-
-"@subwallet/webapp@workspace:packages/webapp":
-  version: 0.0.0-use.local
-  resolution: "@subwallet/webapp@workspace:packages/webapp"
-  dependencies:
-    "@babel/runtime": ^7.20.6
-    "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.33-0
-    "@subwallet/extension-inject": ^1.1.33-0
-    "@subwallet/extension-web-ui": ^1.1.33-0
-    assert: ^2.0.0
-    babel-loader: ^8.2.5
-    browser-resolve: ^2.0.0
-    buffer: ^6.0.3
-    copy-webpack-plugin: ^11.0.0
-    crypto-browserify: ^3.12.0
-    dotenv: ^16.3.1
-    extract-loader: ^5.1.0
-    file-loader: ^6.2.0
-    html-loader: ^4.2.0
-    html-webpack-plugin: ^5.5.0
-    https-browserify: ^1.0.0
-    os-browserify: ^0.3.0
-    path-browserify: ^1.0.1
-    process: ^0.11.10
-    sass: ^1.62.0
-    sass-loader: ^13.2.2
-    stream-browserify: ^3.0.0
-    stream-http: ^3.2.0
-    thread-loader: ^3.0.4
-    url-loader: ^4.1.1
-    webpack: ^5.74.0
     webpack-cli: ^4.10.0
     webpack-dev-server: ^4.11.1
   languageName: unknown
@@ -7474,15 +7252,6 @@ __metadata:
     "@types/react": "*"
     csstype: ^3.0.2
   checksum: 4e164a897fa750bbb216b97a9fe5b01e98e9620c68a98269d2e73f1416b9dd93277a5ab4052253ab74d0ad058462577f2eae35f94027ff9b4740242e20b185c7
-  languageName: node
-  linkType: hard
-
-"@types/react-slick@npm:^0.23.11":
-  version: 0.23.13
-  resolution: "@types/react-slick@npm:0.23.13"
-  dependencies:
-    "@types/react": "*"
-  checksum: 3e363220dd7efb7eb9d60aec80588365ddffb366cc75307b86ce83d84e6664d9a66edc9d796cc0b4f87bfd217fa912d4005a00c2a87c41b36fbe4412ae7a15a7
   languageName: node
   linkType: hard
 
@@ -9644,17 +9413,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.2.1, axios@npm:^1.6.2":
-  version: 1.6.2
-  resolution: "axios@npm:1.6.2"
-  dependencies:
-    follow-redirects: ^1.15.0
-    form-data: ^4.0.0
-    proxy-from-env: ^1.1.0
-  checksum: 4a7429e2b784be0f2902ca2680964391eae7236faa3967715f30ea45464b98ae3f1c6f631303b13dfe721b17126b01f486c7644b9ef276bfc63112db9fd379f8
-  languageName: node
-  linkType: hard
-
 "axios@npm:^1.3.4":
   version: 1.4.0
   resolution: "axios@npm:1.4.0"
@@ -9663,6 +9421,17 @@ __metadata:
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
   checksum: 7fb6a4313bae7f45e89d62c70a800913c303df653f19eafec88e56cea2e3821066b8409bc68be1930ecca80e861c52aa787659df0ffec6ad4d451c7816b9386b
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.6.2":
+  version: 1.6.2
+  resolution: "axios@npm:1.6.2"
+  dependencies:
+    follow-redirects: ^1.15.0
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: 4a7429e2b784be0f2902ca2680964391eae7236faa3967715f30ea45464b98ae3f1c6f631303b13dfe721b17126b01f486c7644b9ef276bfc63112db9fd379f8
   languageName: node
   linkType: hard
 
@@ -11252,7 +11021,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:>=3.0.0 <4.0.0, chokidar@npm:^3.4.0, chokidar@npm:^3.5.3":
+"chokidar@npm:^3.4.0, chokidar@npm:^3.5.3":
   version: 3.5.3
   resolution: "chokidar@npm:3.5.3"
   dependencies:
@@ -12209,7 +11978,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:2.6.9, debug@npm:^2.1.3, debug@npm:^2.2.0, debug@npm:^2.6.8, debug@npm:^2.6.9":
+"debug@npm:2.6.9, debug@npm:^2.2.0, debug@npm:^2.6.8, debug@npm:^2.6.9":
   version: 2.6.9
   resolution: "debug@npm:2.6.9"
   dependencies:
@@ -13035,13 +12804,6 @@ __metadata:
     graceful-fs: ^4.2.4
     tapable: ^2.2.0
   checksum: fbd8cdc9263be71cc737aa8a7d6c57b43d6aa38f6cc75dde6fcd3598a130cc465f979d2f4d01bb3bf475acb43817749c79f8eef9be048683602ca91ab52e4f11
-  languageName: node
-  linkType: hard
-
-"enquire.js@npm:^2.1.6":
-  version: 2.1.6
-  resolution: "enquire.js@npm:2.1.6"
-  checksum: bb094054ee2768edafc3b80fb2b65b79d63160d625085162e9c9016843b6eaa13d7430201bf593c2e31e1725b3208f47f57aa27e03b19729e7590d1ca2241451
   languageName: node
   linkType: hard
 
@@ -16128,13 +15890,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immutable@npm:^4.0.0":
-  version: 4.3.4
-  resolution: "immutable@npm:4.3.4"
-  checksum: de3edd964c394bab83432429d3fb0b4816b42f56050f2ca913ba520bd3068ec3e504230d0800332d3abc478616e8f55d3787424a90d0952e6aba864524f1afc3
-  languageName: node
-  linkType: hard
-
 "import-fresh@npm:^3.0.0, import-fresh@npm:^3.2.1":
   version: 3.3.0
   resolution: "import-fresh@npm:3.3.0"
@@ -18706,15 +18461,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonp@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "jsonp@npm:0.2.1"
-  dependencies:
-    debug: ^2.1.3
-  checksum: 90aabd9deb3a9ba83aedf8d40e1aaff1fc29f3f3fe42985a661782498dde526a7cd9b7bec4b8721f7d0beafab9e5ccfdafd46640f7dd6c58d529a6bb5238e2b8
-  languageName: node
-  linkType: hard
-
 "jsprim@npm:^1.2.2":
   version: 1.4.2
   resolution: "jsprim@npm:1.4.2"
@@ -20152,13 +19898,6 @@ __metadata:
     pkg-types: ^1.0.3
     ufo: ^1.3.0
   checksum: ad0813eca133e59ac03b356b87deea57da96083dce7dda58a8eeb2dce92b7cc2315bedd9268f3ff8e98effe1867ddb1307486d4c5cd8be162daa8e0fa0a98ed4
-  languageName: node
-  linkType: hard
-
-"mobile-detect@npm:^1.4.5":
-  version: 1.4.5
-  resolution: "mobile-detect@npm:1.4.5"
-  checksum: 317d170f3bc27c3e36c3f4ab7809c33d20e81914147cdc74a8551f0ecad2c5ec067bd59dd1a240caf66c1df7fd793021a36677c3a6ed8bdf027d4715dc3f0973
   languageName: node
   linkType: hard
 
@@ -23104,19 +22843,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:~6.9.0":
-  version: 6.9.0
-  resolution: "react-router-dom@npm:6.9.0"
-  dependencies:
-    "@remix-run/router": 1.4.0
-    react-router: 6.9.0
-  peerDependencies:
-    react: ">=16.8"
-    react-dom: ">=16.8"
-  checksum: 4d593491ab8db5611feda70002c62902baebb84d5c1c5e5b6172496f31f91130deee132bf4240dea634a88cb86c76d6da348f15b9cd5e5197be455efd88edf72
-  languageName: node
-  linkType: hard
-
 "react-router@npm:6.21.2, react-router@npm:^6.8.2":
   version: 6.21.2
   resolution: "react-router@npm:6.21.2"
@@ -23125,17 +22851,6 @@ __metadata:
   peerDependencies:
     react: ">=16.8"
   checksum: 8c38a4914892d5b8052bc5c244af95109affd8b74bffa16f9ea7856dc0e992dd8539b19d2618721cd7ef091a585f394fac9d05ab7a98cf3ca6aeb7519b7bce0e
-  languageName: node
-  linkType: hard
-
-"react-router@npm:6.9.0":
-  version: 6.9.0
-  resolution: "react-router@npm:6.9.0"
-  dependencies:
-    "@remix-run/router": 1.4.0
-  peerDependencies:
-    react: ">=16.8"
-  checksum: b2a5f42e042bee7a7f116ca7817b0e58359e5353d84887c9fe7a633d7490c03b1e0ae37cd01830c2a381e3d1e7d501bb4751e53cc3d491e25f36582d3f6e0546
   languageName: node
   linkType: hard
 
@@ -23168,34 +22883,6 @@ __metadata:
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: 6052c7e3e9627485120ebd8257f128aad8f56386fe8d42374b7743eac1be457c33506d153c7886b4e32923c0c352d402ab805ef9ca02dbcd8393b2bdeb6e5af8
-  languageName: node
-  linkType: hard
-
-"react-share@npm:^4.4.1":
-  version: 4.4.1
-  resolution: "react-share@npm:4.4.1"
-  dependencies:
-    classnames: ^2.3.2
-    jsonp: ^0.2.1
-  peerDependencies:
-    react: ^16.3.0 || ^17 || ^18
-  checksum: f86bf7415f9fe98243b1ea58bf9df53503de7fb2235b1e633dd25c8cef68e59070b3cd20fab6ec5286eccbd30d27ce6c458ac532c4fdf7b6f12f4048bbea24d3
-  languageName: node
-  linkType: hard
-
-"react-slick@npm:^0.29.0":
-  version: 0.29.0
-  resolution: "react-slick@npm:0.29.0"
-  dependencies:
-    classnames: ^2.2.5
-    enquire.js: ^2.1.6
-    json2mq: ^0.2.0
-    lodash.debounce: ^4.0.8
-    resize-observer-polyfill: ^1.5.0
-  peerDependencies:
-    react: ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: 67ce4981914da8a76c6efb4bc8ee7ab69e04c33bd4b3517419ab2165679a3c701dae781556149713fe2c542f84188b7ca101ea58883537be5c05756408f48c8b
   languageName: node
   linkType: hard
 
@@ -23437,7 +23124,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"redux-toolkit@npm:^1.1.2, redux-toolkit@npm:^1.1.2-1":
+"redux-toolkit@npm:^1.1.2":
   version: 1.1.2
   resolution: "redux-toolkit@npm:1.1.2"
   dependencies:
@@ -23798,7 +23485,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resize-observer-polyfill@npm:^1.5.0, resize-observer-polyfill@npm:^1.5.1":
+"resize-observer-polyfill@npm:^1.5.1":
   version: 1.5.1
   resolution: "resize-observer-polyfill@npm:1.5.1"
   checksum: 57e7f79489867b00ba43c9c051524a5c8f162a61d5547e99333549afc23e15c44fd43f2f318ea0261ea98c0eb3158cca261e6f48d66e1ed1cd1f340a43977094
@@ -24169,30 +23856,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass-loader@npm:^13.2.2":
-  version: 13.3.2
-  resolution: "sass-loader@npm:13.3.2"
-  dependencies:
-    neo-async: ^2.6.2
-  peerDependencies:
-    fibers: ">= 3.1.0"
-    node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
-    sass: ^1.3.0
-    sass-embedded: "*"
-    webpack: ^5.0.0
-  peerDependenciesMeta:
-    fibers:
-      optional: true
-    node-sass:
-      optional: true
-    sass:
-      optional: true
-    sass-embedded:
-      optional: true
-  checksum: 7394a8d1b818a289b9caabd979543c907b83e28ae08bc80ccb836e0ccabc4ae574c077ab2fa520ba5fb8abb2ec3e7c9822a1cbd8c58a28ff30018be9d1dc6c27
-  languageName: node
-  linkType: hard
-
 "sass-lookup@npm:^3.0.0":
   version: 3.0.0
   resolution: "sass-lookup@npm:3.0.0"
@@ -24201,19 +23864,6 @@ __metadata:
   bin:
     sass-lookup: bin/cli.js
   checksum: fd4bf1ad9c54111617dec30dd90aff083e87c96aef50aff6cec443ad2fbbfa65da09f6e67a7e5ef99fa39dff65c937dc7358f18d319e083c6031f21def85ce6d
-  languageName: node
-  linkType: hard
-
-"sass@npm:^1.62.0":
-  version: 1.67.0
-  resolution: "sass@npm:1.67.0"
-  dependencies:
-    chokidar: ">=3.0.0 <4.0.0"
-    immutable: ^4.0.0
-    source-map-js: ">=0.6.2 <2.0.0"
-  bin:
-    sass: sass.js
-  checksum: 9e7566e8b7386cf265dddcdb266a023fb5759c5a8f48a11da199c8bf419e5f08f4ff6404d85d6bf5eac01e1f7c7061fdb6b7b65cbfda164e59b0a06b72ac8567
   languageName: node
   linkType: hard
 
@@ -24795,7 +24445,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-js@npm:>=0.6.2 <2.0.0, source-map-js@npm:^1.0.2":
+"source-map-js@npm:^1.0.2":
   version: 1.0.2
   resolution: "source-map-js@npm:1.0.2"
   checksum: c049a7fc4deb9a7e9b481ae3d424cc793cb4845daa690bc5a05d428bf41bf231ced49b4cf0c9e77f9d42fdb3d20d6187619fc586605f5eabe995a316da8d377c
@@ -27294,40 +26944,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.74.0, webpack@npm:^5.89.0":
-  version: 5.89.0
-  resolution: "webpack@npm:5.89.0"
-  dependencies:
-    "@types/eslint-scope": ^3.7.3
-    "@types/estree": ^1.0.0
-    "@webassemblyjs/ast": ^1.11.5
-    "@webassemblyjs/wasm-edit": ^1.11.5
-    "@webassemblyjs/wasm-parser": ^1.11.5
-    acorn: ^8.7.1
-    acorn-import-assertions: ^1.9.0
-    browserslist: ^4.14.5
-    chrome-trace-event: ^1.0.2
-    enhanced-resolve: ^5.15.0
-    es-module-lexer: ^1.2.1
-    eslint-scope: 5.1.1
-    events: ^3.2.0
-    glob-to-regexp: ^0.4.1
-    graceful-fs: ^4.2.9
-    json-parse-even-better-errors: ^2.3.1
-    loader-runner: ^4.2.0
-    mime-types: ^2.1.27
-    neo-async: ^2.6.2
-    schema-utils: ^3.2.0
-    tapable: ^2.1.1
-    terser-webpack-plugin: ^5.3.7
-    watchpack: ^2.4.0
-    webpack-sources: ^3.2.3
-  peerDependenciesMeta:
-    webpack-cli:
-      optional: true
-  bin:
-    webpack: bin/webpack.js
-  checksum: 43fe0dbc30e168a685ef5a86759d5016a705f6563b39a240aa00826a80637d4a3deeb8062e709d6a4b05c63e796278244c84b04174704dc4a37bedb0f565c5ed
+"webpack-target-webextension@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "webpack-target-webextension@npm:1.1.1"
+  peerDependencies:
+    webpack: ^5.0.0
+  checksum: 6d1b63925748a109a2be97a8ea5f85f101cfbeab74a928c75b643bc4fb0aca4ea976f03f8fcbefb9bc831c88c3d19b89242bc51333e342fd5073faf01fc4ede9
   languageName: node
   linkType: hard
 
@@ -27365,6 +26987,43 @@ __metadata:
   bin:
     webpack: bin/webpack.js
   checksum: 2bcc5f3c195f375944e8af2f00bf2feea39cb9fda5f763b0d1b00077f1c51783db25c94d3fae96a07dead9fa085e6ae7474417e5ab31719c9776ea5969ceb83a
+  languageName: node
+  linkType: hard
+
+"webpack@npm:^5.89.0":
+  version: 5.89.0
+  resolution: "webpack@npm:5.89.0"
+  dependencies:
+    "@types/eslint-scope": ^3.7.3
+    "@types/estree": ^1.0.0
+    "@webassemblyjs/ast": ^1.11.5
+    "@webassemblyjs/wasm-edit": ^1.11.5
+    "@webassemblyjs/wasm-parser": ^1.11.5
+    acorn: ^8.7.1
+    acorn-import-assertions: ^1.9.0
+    browserslist: ^4.14.5
+    chrome-trace-event: ^1.0.2
+    enhanced-resolve: ^5.15.0
+    es-module-lexer: ^1.2.1
+    eslint-scope: 5.1.1
+    events: ^3.2.0
+    glob-to-regexp: ^0.4.1
+    graceful-fs: ^4.2.9
+    json-parse-even-better-errors: ^2.3.1
+    loader-runner: ^4.2.0
+    mime-types: ^2.1.27
+    neo-async: ^2.6.2
+    schema-utils: ^3.2.0
+    tapable: ^2.1.1
+    terser-webpack-plugin: ^5.3.7
+    watchpack: ^2.4.0
+    webpack-sources: ^3.2.3
+  peerDependenciesMeta:
+    webpack-cli:
+      optional: true
+  bin:
+    webpack: bin/webpack.js
+  checksum: 43fe0dbc30e168a685ef5a86759d5016a705f6563b39a240aa00826a80637d4a3deeb8062e709d6a4b05c63e796278244c84b04174704dc4a37bedb0f565c5ed
   languageName: node
   linkType: hard
 

@@ -117,10 +117,10 @@ export const calculatePriorityFee = async (web3: _EvmApi) => {
   const baseToWei = new BigN(baseFee);
 
   const maxPriority = BN_WEI.multipliedBy(1);
-  const priorityByBase = baseToWei.dividedBy(BN_TEN);
+  const priorityByBase = baseToWei.dividedBy(BN_TEN).decimalPlaces(0);
 
   return {
-    maxFeePerGas: BN_WEI.gte(baseToWei) ? baseToWei.multipliedBy(2) : baseToWei.multipliedBy(1.2),
+    maxFeePerGas: BN_WEI.gte(baseToWei) ? baseToWei.multipliedBy(2).decimalPlaces(0) : baseToWei.multipliedBy(1.2).decimalPlaces(0),
     maxPriorityFeePerGas: maxPriority.lte(priorityByBase) ? maxPriority : priorityByBase,
     baseGasFee: baseToWei
   };

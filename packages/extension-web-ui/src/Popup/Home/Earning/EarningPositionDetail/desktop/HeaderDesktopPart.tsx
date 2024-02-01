@@ -240,7 +240,7 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     }
   },
 
-  '.__balance-block': {
+  '.__balance-block, .__estimate-block': {
     alignItems: 'center',
 
     '.__balance-value': {

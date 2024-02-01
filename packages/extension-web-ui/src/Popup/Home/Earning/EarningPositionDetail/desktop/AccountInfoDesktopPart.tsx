@@ -3,7 +3,6 @@
 
 import { YieldPoolInfo } from '@subwallet/extension-base/types';
 import Table from '@subwallet/extension-web-ui/components/Table/Table';
-import HeaderDesktopPart from '@subwallet/extension-web-ui/Popup/Home/Earning/EarningPositionDetail/desktop/HeaderDesktopPart';
 import { Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, Coin } from 'phosphor-react';
@@ -155,8 +154,8 @@ const Component: React.FC<Props> = ({ className, items }: Props) => {
 
   return (
     <>
-      <HeaderDesktopPart />
       <div className={CN(className, 'explore-Table-container')}>
+        <div className={'table-account-info'}>Account info</div>
         <Table
           className={'explore-Table'}
           columns={columns}
@@ -170,7 +169,7 @@ const Component: React.FC<Props> = ({ className, items }: Props) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const EarningPositionDetails = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.__table-token-col.__table-token-col, .__earning-status-col.__earning-status-col': {
       flex: 1.2
@@ -198,6 +197,13 @@ const EarningPositionDetails = styled(Component)<Props>(({ theme: { token } }: P
     '.__tr': {
       'white-space': 'nowrap',
       cursor: 'pointer'
+    },
+
+    '.table-account-info.table-account-info': {
+      fontSize: token.fontSizeXL,
+      lineHeight: token.lineHeightHeading3,
+      paddingBottom: token.paddingMD,
+      color: token.colorWhite
     },
 
     '.__td': {
@@ -349,4 +355,4 @@ const EarningPositionDetails = styled(Component)<Props>(({ theme: { token } }: P
   };
 });
 
-export default EarningPositionDetails;
+export default AccountInfoDesktopPart;

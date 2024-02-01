@@ -16,7 +16,13 @@ import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContex
 import { useChainInfoWithState, useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } from '@subwallet/extension-web-ui/hooks';
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-web-ui/messaging';
 import EarningPositionItem from '@subwallet/extension-web-ui/Popup/Home/History/EarningPositionItem';
-import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-web-ui/types';
+import {
+  ChainItemType,
+  SuppliedTokenInfo,
+  ThemeProps,
+  TransactionHistoryDisplayData,
+  TransactionHistoryDisplayItem
+} from '@subwallet/extension-web-ui/types';
 import { customFormatDate, findAccountByAddress, findNetworkJsonByGenesisHash, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -30,6 +36,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { HistoryDetailModal } from './Detail';
 import EarningOptionsItem from "@subwallet/extension-web-ui/Popup/Home/History/EarningOptionsItem";
+import EarningPoolItem from "@subwallet/extension-web-ui/Popup/Home/History/EarningPoolItem";
 
 type Props = ThemeProps
 
@@ -738,6 +745,118 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setHistoryItems(getHistoryItems(currentItemDisplayCount));
   }, [currentItemDisplayCount, getHistoryItems]);
 
+  const fakeData: SuppliedTokenInfo[] = [
+    {
+      holders: "0xABC123, 0xDEF456, 0xGHI789",
+      blockNumber: 123456,
+      id: "token123",
+      limit: "1000000",
+      network: "Ethereum",
+      standard: "ERC-20",
+      ticker: "TKN",
+      timestamp: "1643721600",
+      totalSales: "50000",
+      totalSupply: "1000000",
+      circulatingSupply: "950000",
+      owner: {
+        address: "0xOWNERADDRESS123",
+        id: "owner123"
+      },
+      transactions: "500"
+    },
+    {
+      holders: "0xJKL012, 0xMNO345, 0xPQR678",
+      blockNumber: 789012,
+      id: "token456",
+      limit: "500000",
+      network: "Binance Smart Chain",
+      standard: "BEP-20",
+      ticker: "BNB",
+      timestamp: "1643725200",
+      totalSales: "30000",
+      totalSupply: "500000",
+      circulatingSupply: "470000",
+      owner: {
+        address: "0xOWNERADDRESS456",
+        id: "owner456"
+      },
+      transactions: "300"
+    },
+    {
+      holders: "0xJKL012, 0xMNO345, 0xPQR678",
+      blockNumber: 789012,
+      id: "token456",
+      limit: "500000",
+      network: "Binance Smart Chain",
+      standard: "BEP-20",
+      ticker: "BNB",
+      timestamp: "1643725200",
+      totalSales: "30000",
+      totalSupply: "500000",
+      circulatingSupply: "470000",
+      owner: {
+        address: "0xOWNERADDRESS456",
+        id: "owner456"
+      },
+      transactions: "300"
+    },
+    {
+      holders: "0xJKL012, 0xMNO345, 0xPQR678",
+      blockNumber: 789012,
+      id: "token456",
+      limit: "500000",
+      network: "Binance Smart Chain",
+      standard: "BEP-20",
+      ticker: "BNB",
+      timestamp: "1643725200",
+      totalSales: "30000",
+      totalSupply: "500000",
+      circulatingSupply: "470000",
+      owner: {
+        address: "0xOWNERADDRESS456",
+        id: "owner456"
+      },
+      transactions: "300"
+    },
+    {
+      holders: "0xJKL012, 0xMNO345, 0xPQR678",
+      blockNumber: 789012,
+      id: "token456",
+      limit: "500000",
+      network: "Binance Smart Chain",
+      standard: "BEP-20",
+      ticker: "BNB",
+      timestamp: "1643725200",
+      totalSales: "30000",
+      totalSupply: "500000",
+      circulatingSupply: "470000",
+      owner: {
+        address: "0xOWNERADDRESS456",
+        id: "owner456"
+      },
+      transactions: "300"
+    },
+    {
+      holders: "0xJKL012, 0xMNO345, 0xPQR678",
+      blockNumber: 789012,
+      id: "token456",
+      limit: "500000",
+      network: "Binance Smart Chain",
+      standard: "BEP-20",
+      ticker: "BNB",
+      timestamp: "1643725200",
+      totalSales: "30000",
+      totalSupply: "500000",
+      circulatingSupply: "470000",
+      owner: {
+        address: "0xOWNERADDRESS456",
+        id: "owner456"
+      },
+      transactions: "300"
+    },
+    // Add more fake data as needed
+  ];
+
   return (
     <>
       {/* <PageWrapper */}
@@ -820,6 +939,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       {/* /> */}
       <EarningPositionItem />
       <EarningOptionsItem />
+      <EarningPoolItem items={fakeData}/>
     </>
   );
 }

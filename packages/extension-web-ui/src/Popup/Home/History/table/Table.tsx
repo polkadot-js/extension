@@ -5,9 +5,8 @@ import { ActivityIndicator } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-
-import { GeneralProps, TableColumnType, TableSortInfo, ThemeProps } from '../../types';
-import { TableRow } from '../index';
+import {_ThemeProps, GeneralProps, TableColumnType} from '@subwallet/extension-web-ui/types'
+import TableRow  from './TableRow';
 import TableHead from './TableHead';
 
 interface Props<T> extends GeneralProps {
@@ -17,13 +16,10 @@ interface Props<T> extends GeneralProps {
   emptyList?: React.ReactNode;
   onClickRow?: (item: T) => void;
   loading?: boolean;
-  setSortInfo?: (sortInfo: TableSortInfo) => void;
-  sortInfo?: TableSortInfo;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Component = <T, >({ className, columns, emptyList, getRowKey, items, loading, onClickRow, setSortInfo,
-  sortInfo }: Props<T>) => {
+const Component = <T, >({ className, columns, emptyList, getRowKey, items, loading, onClickRow}: Props<T>) => {
   const renderItem = useCallback((item: T) => {
     return (
       <TableRow<T>
@@ -50,8 +46,6 @@ const Component = <T, >({ className, columns, emptyList, getRowKey, items, loadi
     >
       <TableHead<T>
         columns={columns}
-        setSortInfo={setSortInfo}
-        sortInfo={sortInfo}
       />
 
       <div className='__tbody'>
@@ -73,7 +67,7 @@ const Component = <T, >({ className, columns, emptyList, getRowKey, items, loadi
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Table = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProps) => {
+const Table = styled(Component)<Props<any>>(({ theme: { token } }: _ThemeProps) => {
   return {
     '.__tr + .__tr': {
       marginTop: token.marginXS

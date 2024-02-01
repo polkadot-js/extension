@@ -5,7 +5,7 @@ import CN from 'classnames';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { GeneralProps, TableColumnType, ThemeProps } from '../../types';
+import {_ThemeProps, GeneralProps, TableColumnType} from '@subwallet/extension-web-ui/types'
 
 interface Props<T> extends GeneralProps {
   data: T,
@@ -42,7 +42,7 @@ const Component = <T, >({ className, columns, data, onClick }: Props<T>) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const TableRow = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProps) => {
+const TableRow = styled(Component)<Props<any>>(({ theme: { token } }: _ThemeProps) => {
   return {
     display: 'flex',
     flexDirection: 'row',
@@ -54,22 +54,19 @@ const TableRow = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProps
       flex: 1
     },
     '.__td-inner': {
-      padding: token.paddingXS,
+      // padding: token.padding,
       display: 'flex',
       alignItems: 'stretch',
       height: '100%',
       justifyContent: 'center',
       flexDirection: 'column'
     },
-
-    '.__td:first-of-type .__td-inner': {
-      paddingLeft: token.paddingSM
-    },
     '.__td:last-of-type .__td-inner': {
       paddingRight: token.paddingSM
     },
     '&.__tr': {
-      transition: 'background-color 0.2s ease-in-out'
+      transition: 'background-color 0.2s ease-in-out',
+      padding: token.padding
     },
     '&.__tr:hover': {
       backgroundColor: token.colorBgInput

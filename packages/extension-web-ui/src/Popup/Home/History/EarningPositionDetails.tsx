@@ -1,16 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {Button, Icon, Logo, Number} from '@subwallet/react-ui';
+import {Number} from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Coin, PlusCircle } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import {CheckCircle, Coin} from 'phosphor-react';
+import React, {useCallback, useMemo} from 'react';
 import styled from 'styled-components';
 
-import { EmptyList } from '../../../components';
-import EarningTypeTag from '../../../components/Earning/EarningTypeTag';
+import {Avatar, EmptyList, MetaInfo} from '../../../components';
 import {SuppliedTokenInfo, ThemeProps} from '../../../types';
 import Table from './table/Table'
+import {isEthereumAddress} from "@polkadot/util-crypto";
 
 interface Props extends ThemeProps {
   items: SuppliedTokenInfo[];
@@ -36,119 +36,118 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       onClickMint?.(item);
     };
   }, [onClickMint]);
-
+  const value = '5HGX5Adwn2Rdp6qXfyN1j9oph6ZEuJuUSteRgXuAKpm4MB87'
   const columns = useMemo(() => {
-    const tokenCol = {
-      title: 'Token name',
-      key: 'token_name',
+    const accountCol = {
+      title: 'Account',
+      key: 'account',
       className: '__table-token-col',
       render: (row: SuppliedTokenInfo) => {
         return (
           <div className={'__row-token-name-wrapper'}>
-            <Logo
-              network={'polkadot'}
-              size={48}
+            <Avatar
+              size={20}
+              theme={value ? isEthereumAddress(value) ? 'ethereum' : 'polkadot' : undefined}
+              value={value}
             />
-            <div className={'token-item'}>
-            <div className={'token-info'}>
-              <span>DOT</span>
-              <span className={'__token-name'}>
-                &nbsp;(<span>Polkadot</span>)
-              </span>
-            </div>
-            <div className={'__description'}>Start staking with just 1 DOT</div>
+            <div className={'account-item'}>
+              <div className={'__account-name'}>HD Subwallet 01</div>
+              <div className={'__account-address'}>{'Ad2049jh...56097c'}</div>
             </div>
           </div>
         );
       }
     };
 
-    const stakingTypeCol = {
-      title: 'Staking type',
-      key: 'staking_type',
-      className: '__table-create-at-col',
+    const earningStatusCol = {
+      title: 'Earning status',
+      key: 'earning_status',
+      className: '__earning-status-col',
       sortable: true,
       render: (row: SuppliedTokenInfo) => {
         return (
-          <EarningTypeTag
-            className={'__item-tag'}
-            comingSoon={true}
-          />
+          <MetaInfo>
+            <MetaInfo.Status
+              className={'earning-status-item'}
+              statusIcon={CheckCircle}
+              statusName={('Earning rewards')}
+              valueColorSchema={'success'}
+            />
+          </MetaInfo>
         );
       }
     };
 
-    const totalValueStakedCol = {
-      title: 'Total value staked',
-      key: 'total_value_staked',
-      className: '__table-progress-col',
+    const activeStakeCol = {
+      title: 'Active stake',
+      key: 'active-stake',
+      className: '__table-active-stake-col',
       render: (row: SuppliedTokenInfo) => {
         return (
-          <div className={'__row-progress-wrapper'}>
+          <div className={'__row-active-stake-wrapper'}>
+            <div className={'__active-stake'}>
             <Number
               className={'__row-progress-value'}
               decimal={2}
-              prefix={'$'}
-              value={51465300000}
+              suffix={'DOT'}
+              value={2908}
             />
+            </div>
+            <div className={'__derivative-balance'}>
+              <span>Derivative balance: </span>
+              &nbsp;<Number
+                className={'__row-progress-value'}
+                decimal={2}
+                suffix={'sDOT'}
+                value={51465300000}
+                decimalOpacity={0.4}
+              />
+            </div>
           </div>
         );
       }
     };
 
-    const rewardsPerYearCol = {
-      title: 'Rewards per year',
-      key: 'rewards_per_year',
-      className: '__table-limit-col',
+    const unStakedCol = {
+      title: 'Unstaked',
+      key: 'unstaked',
+      className: '__table-unstake-col',
       sortable: true,
       render: (row: SuppliedTokenInfo) => {
         return (
-          <div className={'__row-reward-per-year'}>
             <Number
-              decimal={2}
-              decimalColor={'#4cd9ac'}
-              intColor={'#4cd9ac'}
-              suffix={'%'}
-              unitColor={'#4cd9ac'}
+              className={'__row-unstaked-value'}
+              decimal={0}
+              suffix={'DOT'}
               value={2038}
             />
-          </div>
         );
       }
     };
-    const detailActionCol = {
-      title: '',
-      key: 'detail_action',
-      className: '__table-detail_action-col',
-      render: () => {
+    const totalStakeCol = {
+      title: 'Total stake',
+      key: 'total-stake',
+      className: '__table-total-stake-col',
+      sortable: true,
+      render: (row: SuppliedTokenInfo) => {
         return (
-          <div>
-            <Button
-              icon={(
-                <Icon
-                  className={'earning-item-stake-btn'}
-                  phosphorIcon={PlusCircle}
-                  size='sm'
-                  weight='fill'
-                />
-              )}
-              onClick={onClickMock}
-              shape='circle'
-              size='xs'
-            >
-              {'Stake now'}
-            </Button>
-          </div>
+            <Number
+              className={'__row-total-Stake-value'}
+              decimal={2}
+              suffix={'DOT'}
+              value={3108}
+              decimalOpacity={0.4}
+            />
         );
       }
     };
 
     return [
-      tokenCol,
-      stakingTypeCol,
-      totalValueStakedCol,
-      rewardsPerYearCol,
-      detailActionCol
+      accountCol,
+      earningStatusCol,
+      activeStakeCol,
+      unStakedCol,
+      totalStakeCol
     ];
   }, [onClickMock]);
 
@@ -182,24 +181,28 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const EarningPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const EarningPositionDetails = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.__table-token-col.__table-token-col, .__table-create-at-col.__table-create-at-col': {
+    '.__table-token-col.__table-token-col, .__earning-status-col.__earning-status-col': {
       flex: 1.2
     },
+    '.__earning-status-col, .__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col': {
+      display: 'flex',
+      justifyContent: 'flex-end'
+    },
 
-    ['.__table-create-at-col, .__table-progress-col, ' +
-        '.__table-holder-col, .__table-transactions-col, ' +
-        '.__table-limit-col, .__table-mint-col']: {
+    ['.__earning-status-col, .__table-active-stake-col, ' +
+    '.__table-total-stake-col, .__table-transactions-col, ' +
+    '.__table-unstake-col, .__table-mint-col']: {
       textAlign: 'center'
     },
 
-    ['th.__table-create-at-col.__table-create-at-col, ' +
-        'th.__table-progress-col.__table-progress-col, ' +
-        'th.__table-limit-col.__table-limit-col, ' +
-        'th.__table-holder-col.__table-holder-col, ' +
-        'th.__table-transactions-col.__table-transactions-col, ' +
-        'th.__table-mint-col.__table-mint-col']: {
+    ['th.__earning-status-col.__earning-status-col, ' +
+    'th.__table-active-stake-col.__table-active-stake-col, ' +
+    'th.__table-unstake-col.__table-unstake-col, ' +
+    'th.__table-total-stake-col.__table-total-stake-col, ' +
+    'th.__table-transactions-col.__table-transactions-col, ' +
+    'th.__table-mint-col.__table-mint-col']: {
       textAlign: 'center'
     },
 
@@ -223,23 +226,20 @@ const EarningPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       color: 'inherit !important',
       lineHeight: 'inherit'
     },
-    '.__table-create-at-col .__td-inner': {
-    alignItems: 'center',
-  },
 
     '.__row-token-name-wrapper': {
       display: 'flex',
       gap: token.sizeSM
     },
 
-    '.token-info': {
+    '.__account-name': {
       display: 'flex',
       color: token.colorTextLight1,
       fontSize: token.fontSizeXL,
       lineHeight: token.lineHeightHeading4,
       'white-space': 'nowrap'
     },
-    '.token-item': {
+    '.account-item': {
       display: 'flex',
       flexDirection: 'column'
     },
@@ -249,10 +249,22 @@ const EarningPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       overflow: 'hidden',
       whiteSpace: 'nowrap'
     },
-    '.__description': {
+
+    '.__account-address': {
       fontSize: token.fontSizeSM,
       color: token.colorTextLabel,
       lineHeight: token.lineHeightSM
+    },
+
+    '.__derivative-balance': {
+      display: 'flex',
+      alignItems: 'center',
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      color: token.colorTextLabel
+    },
+    '.__earning-status-col .__td-inner': {
+      alignItems: 'center'
     },
     '.__row-reward-per-year': {
       color: token.colorSuccess
@@ -304,10 +316,12 @@ const EarningPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       backgroundColor: token.colorBgDefault
     },
 
-    '.__row-progress-value-wrapper': {
+    '.__row-active-stake-wrapper': {
       display: 'flex',
       justifyContent: 'center',
-      marginBottom: token.marginXXS
+      marginBottom: token.marginXXS,
+      flexDirection: 'column',
+      alignItems: 'flex-end'
     },
 
     '.__row-progress': {
@@ -333,7 +347,7 @@ const EarningPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
     },
 
     '@media(max-width: 1199px)': {
-      '.__table-create-at-col.__table-create-at-col, .__table-limit-col.__table-limit-col': {
+      '.__earning-status-col.__earning-status-col, .__table-unstake-col.__table-unstake-col': {
         display: 'none'
       }
     },
@@ -346,4 +360,4 @@ const EarningPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
   };
 });
 
-export default EarningPoolItem;
+export default EarningPositionDetails;

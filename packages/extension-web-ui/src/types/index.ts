@@ -16,6 +16,40 @@ export interface ThemeProps {
   className?: string;
 }
 
+export interface TableColumnType<T> {
+  title: string,
+  key: string,
+  className?: string,
+  render: (record: T) => React.ReactNode;
+  sortable?: boolean
+}
+
+export interface GeneralProps {
+  className?: string;
+}
+export interface _ThemeProps extends GeneralProps {
+  theme: _Theme;
+}
+export type SuppliedTokenInfo = {
+  holders: string,
+  blockNumber: number,
+  id: string,
+  limit: string,
+  network: string,
+  standard: string,
+  ticker: string,
+  timestamp: string,
+  totalSales: string,
+  totalSupply: string,
+  circulatingSupply: string,
+  owner: {
+    address: string,
+    id: string
+  },
+  transactions: string
+}
+
+
 export interface Recoded {
   account: AccountJson | null;
   formatted: string | null;

@@ -2,38 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import CN from 'classnames';
-import React, { useCallback } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
-import { GeneralProps, SortDirection, TableColumnType, TableSortInfo, ThemeProps } from '../../types';
+import {_ThemeProps, GeneralProps, TableColumnType} from '@subwallet/extension-web-ui/types'
 
 interface Props<T> extends GeneralProps {
   columns: TableColumnType<T>[],
-  setSortInfo?: (sortInfo: TableSortInfo) => void;
-  sortInfo?: TableSortInfo;
 }
 
-const Component = <T, >({ className, columns, setSortInfo, sortInfo }: Props<T>) => {
-  const onSort = useCallback((col: TableColumnType<T>) => {
-    if (!setSortInfo || !sortInfo || !col.sortable) {
-      return () => {};
-    }
-
-    return () => {
-      let direction: SortDirection = 'asc';
-
-      if (sortInfo?.colKey === col.key) {
-        if (sortInfo?.direction === 'asc') {
-          direction = 'desc';
-        } else if (sortInfo?.direction === 'desc') {
-          direction = null;
-        }
-      }
-
-      setSortInfo?.({ colKey: col.key, direction });
-    };
-  }, [setSortInfo, sortInfo]);
-
+const Component = <T, >({ className, columns }: Props<T>) => {
   return (
     <div className={CN(className, '__thead')}>
       {
@@ -41,10 +19,9 @@ const Component = <T, >({ className, columns, setSortInfo, sortInfo }: Props<T>)
           return (
             <div
               className={CN('__th', col.className, {
-                '-sortable': col.sortable && sortInfo
+                '-sortable': col.sortable
               })}
               key={col.key}
-              onClick={onSort(col)}
             >
               <div className={'__th-inner'}>
                 <div className='__th-content-wrapper'>
@@ -52,14 +29,6 @@ const Component = <T, >({ className, columns, setSortInfo, sortInfo }: Props<T>)
                     <div className='__col-title'>
                       {col.title}
                     </div>
-
-                    {!!(col.sortable && sortInfo) && (
-                      <TableSortIcon
-                        className={'__sort-icon'}
-                        column={col}
-                        sortInfo={sortInfo}
-                      />
-                    )}
                   </div>
                 </div>
               </div>
@@ -72,11 +41,11 @@ const Component = <T, >({ className, columns, setSortInfo, sortInfo }: Props<T>)
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const TableHead = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProps) => {
+const TableHead = styled(Component)<Props<any>>(({ theme: { token } }: _ThemeProps) => {
   return {
     display: 'flex',
     flexDirection: 'row',
-    color: token.colorTextLabel,
+    color: token.colorWhite,
     fontFamily: token.fontFamily,
     paddingBottom: token.paddingXS,
 

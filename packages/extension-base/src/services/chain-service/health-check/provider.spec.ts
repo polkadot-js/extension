@@ -4,9 +4,9 @@
 import { ChainInfoMap } from '@subwallet/chain-list';
 import { _ChainStatus } from '@subwallet/chain-list/types';
 import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
-import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
+import {ApiPromise, WsProvider} from '@polkadot/api';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 jest.setTimeout(3 * 60 * 60 * 1000);
@@ -19,9 +19,9 @@ const substrateHandleConnectChain = async (chain: string, key: string, provider:
   return new Promise<[_SubstrateApi | null, string]>(async (resolve) => {
     console.log('start', chain, key, provider);
 
-    let api: _SubstrateApi | null = null;
+    const api: _SubstrateApi | null = null;
 
-    const _api = new SubstrateApi(chain, provider, { providerName: key });
+    const _api = new ApiPromise({ provider: new WsProvider(provider) });
 
     let logFail = true;
 
@@ -39,20 +39,20 @@ const substrateHandleConnectChain = async (chain: string, key: string, provider:
       resolve([api, timeoutMessage]);
       logFail = false;
 
-      _api.destroy().catch(console.error);
-      _api.api.off('disconnected', handlerOnFail);
-      _api.api.off('error', handlerOnFail);
+      _api.disconnect().catch(console.error);
+      _api.off('disconnected', handlerOnFail);
+      _api.off('error', handlerOnFail);
     }, 30 * 1000);
 
-    _api.api.on('disconnected', handlerOnFail);
-    _api.api.on('error', handlerOnFail);
+    _api.on('disconnected', handlerOnFail);
+    _api.on('error', handlerOnFail);
 
-    api = await _api.isReady;
+    await _api.isReady;
 
     logFail = false;
 
-    _api.api.off('disconnected', handlerOnFail);
-    _api.api.off('error', handlerOnFail);
+    _api.off('disconnected', handlerOnFail);
+    _api.off('error', handlerOnFail);
     clearTimeout(timeout);
 
     resolve([api, '']);

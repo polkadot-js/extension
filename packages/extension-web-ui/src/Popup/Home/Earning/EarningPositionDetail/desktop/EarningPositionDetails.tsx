@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import EarningPositionHeaderInfo from '@subwallet/extension-web-ui/Popup/Home/History/EarningPositionHeaderInfo';
+import { YieldPoolInfo } from '@subwallet/extension-base/types';
+import Table from '@subwallet/extension-web-ui/components/Table/Table';
+import HeaderDesktopPart from '@subwallet/extension-web-ui/Popup/Home/Earning/EarningPositionDetail/desktop/HeaderDesktopPart';
 import { Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, Coin } from 'phosphor-react';
@@ -10,41 +12,25 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import { Avatar, EmptyList, MetaInfo } from '../../../components';
-import { SuppliedTokenInfo, ThemeProps } from '../../../types';
-import Table from './table/Table';
+import { Avatar, EmptyList, MetaInfo } from '../../../../../components';
+import { ThemeProps } from '../../../../../types';
 
 interface Props extends ThemeProps {
-  items: SuppliedTokenInfo[];
-  onClickRow?: (item: SuppliedTokenInfo) => void;
-  onClickMint?: (item: SuppliedTokenInfo) => void;
-  loading?: boolean;
-  totalItems?: number;
+  items: YieldPoolInfo[];
 }
 
 // todo: i18n this
 
 export const DEFAULT_ITEMS_PER_PAGE = 10;
 
-const Component: React.FC<Props> = ({ className, items, loading, onClickMint, onClickRow, totalItems }: Props) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
-  const onClickMock = useCallback(() => {
-    alert('dung nguyen');
-  }, []);
-  const _onClickMint = useCallback((item: SuppliedTokenInfo): React.MouseEventHandler<HTMLDivElement> => {
-    return (e) => {
-      e.stopPropagation();
-      onClickMint?.(item);
-    };
-  }, [onClickMint]);
+const Component: React.FC<Props> = ({ className, items }: Props) => {
   const value = '5HGX5Adwn2Rdp6qXfyN1j9oph6ZEuJuUSteRgXuAKpm4MB87';
   const columns = useMemo(() => {
     const accountCol = {
       title: 'Account',
       key: 'account',
       className: '__table-token-col',
-      render: (row: SuppliedTokenInfo) => {
+      render: (row: YieldPoolInfo) => {
         return (
           <div className={'__row-token-name-wrapper'}>
             <Avatar
@@ -66,7 +52,7 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       key: 'earning_status',
       className: '__earning-status-col',
       sortable: true,
-      render: (row: SuppliedTokenInfo) => {
+      render: (row: YieldPoolInfo) => {
         return (
           <MetaInfo>
             <MetaInfo.Status
@@ -84,7 +70,7 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       title: 'Active stake',
       key: 'active-stake',
       className: '__table-active-stake-col',
-      render: (row: SuppliedTokenInfo) => {
+      render: (row: YieldPoolInfo) => {
         return (
           <div className={'__row-active-stake-wrapper'}>
             <div className={'__active-stake'}>
@@ -115,7 +101,7 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       key: 'unstaked',
       className: '__table-unstake-col',
       sortable: true,
-      render: (row: SuppliedTokenInfo) => {
+      render: (row: YieldPoolInfo) => {
         return (
           <Number
             className={'__row-unstaked-value'}
@@ -131,7 +117,7 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       key: 'total-stake',
       className: '__table-total-stake-col',
       sortable: true,
-      render: (row: SuppliedTokenInfo) => {
+      render: (row: YieldPoolInfo) => {
         return (
           <Number
             className={'__row-total-Stake-value'}
@@ -153,8 +139,8 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
     ];
   }, []);
 
-  const getRowKey = useCallback((item: SuppliedTokenInfo) => {
-    return item.id;
+  const getRowKey = useCallback((item: YieldPoolInfo) => {
+    return item.slug;
   }, []);
 
   const emptyList = useMemo(() => {
@@ -169,16 +155,14 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
 
   return (
     <>
-      <EarningPositionHeaderInfo />
-      <div className={CN(className, 'explore-table-container')}>
+      <HeaderDesktopPart />
+      <div className={CN(className, 'explore-Table-container')}>
         <Table
-          className={'explore-table'}
+          className={'explore-Table'}
           columns={columns}
           emptyList={emptyList}
           getRowKey={getRowKey}
           items={items}
-          loading={loading}
-          onClickRow={onClickRow}
         />
       </div>
     </>

@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolInfo } from '@subwallet/extension-base/types';
+import { EarningTypeTag } from '@subwallet/extension-web-ui/components';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { openInNewTab } from '@subwallet/extension-web-ui/utils';
-import { Button, Icon, Logo, Number, Tooltip, Web3Block } from '@subwallet/react-ui';
-import { PlusCircle, PlusMinus, Question } from 'phosphor-react';
+import { Button, Icon, Logo, Number, Tooltip } from '@subwallet/react-ui';
+import { PlusCircle } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-
-import EarningTypeTag from '../../../components/Earning/EarningTypeTag';
 
 interface Props extends ThemeProps {
   item?: YieldPoolInfo,
@@ -75,7 +74,10 @@ const Component: React.FC<Props> = (props: Props) => {
           className={'exclusive-reward-tag-wrapper'}
           onClick={childClick(openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs#exclusive-rewards'))}
         >
-          <EarningTypeTag className={'earning-item-tag'} />
+          <EarningTypeTag
+            chain={'polkadot'}
+            className={'earning-item-tag'}
+          />
         </div>
       </Tooltip>
     );
@@ -100,13 +102,14 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className='earning-item-tags-container'>
           {!isAvailable && (
             <EarningTypeTag
+              chain={'kusama'}
               className={'__item-tag'}
               comingSoon={true}
             />
           )}
           <EarningTypeTag
+            chain={'kusama'}
             className={'earning-item-tag'}
-            type={''}
           />
 
           {exclusiveRewardTagNode}
@@ -120,7 +123,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 decimal={0}
                 size={30}
                 suffix={'%'}
-                value={'15.6'} />
+                value={'15.6'}
+              />
           }
 
           <div className={'earning-item-reward-sub-text'}>{t('per year')}</div>
@@ -139,7 +143,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 prefix={'$'}
                 size={14}
                 unitColor={token.colorSuccess}
-                value={'100'} />
+                value={'100'}
+              />
           }
         </div>
 
@@ -166,7 +171,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const EarningOptionsItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     cursor: 'pointer',
     backgroundColor: token.colorBgSecondary,
@@ -379,4 +384,4 @@ const EarningOptionsItem = styled(Component)<Props>(({ theme: { token } }: Props
   });
 });
 
-export default EarningOptionsItem;
+export default EarningOptionDesktopItem;

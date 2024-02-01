@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ThemeProps, GeneralProps, TableColumnType } from '@subwallet/extension-web-ui/types';
+import { GeneralProps, TableColumnType, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { ActivityIndicator } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
@@ -68,7 +68,7 @@ const Component = <T, >({ className, columns, emptyList, getRowKey, items, loadi
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Table = styled(Component)<Props<any>>(({ theme: { token } }: _ThemeProps) => {
+const Table = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProps) => {
   return {
     '.__tr + .__tr': {
       marginTop: token.marginXS

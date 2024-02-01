@@ -3,6 +3,7 @@
 
 import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { MetaInfo } from '@subwallet/extension-web-ui/components';
+import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { openInNewTab } from '@subwallet/extension-web-ui/utils';
@@ -11,8 +12,6 @@ import CN from 'classnames';
 import { CheckCircle, PlusMinus, Question } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
-
-import EarningTypeTag from '../../../components/Earning/EarningTypeTag';
 
 interface Props extends ThemeProps {
   compactMode?: boolean;
@@ -185,7 +184,7 @@ const Component: React.FC<Props> = (props: Props) => {
           className={'exclusive-reward-tag-wrapper'}
           onClick={childClick(openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs#exclusive-rewards'))}
         >
-          <EarningTypeTag className={'earning-item-tag'} />
+          <EarningTypeTag className={'earning-item-tag'} chain={'polkadot'} />
         </div>
       </Tooltip>
     );
@@ -214,12 +213,13 @@ const Component: React.FC<Props> = (props: Props) => {
                               <EarningTypeTag
                                 className={'earning-item-tag'}
                                 comingSoon={true}
+                                chain={'polkadot'}
                               />
                             )
             }
             <EarningTypeTag
               className={'earning-item-tag'}
-              type={''}
+              chain={'kusama'}
             />
 
             {exclusiveRewardTagNode}
@@ -362,7 +362,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const EarningPositionsItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
@@ -676,4 +676,4 @@ const EarningPositionsItem = styled(Component)<Props>(({ theme: { token } }: Pro
   });
 });
 
-export default EarningPositionsItem;
+export default EarningPositionDesktopItem;

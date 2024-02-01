@@ -8,7 +8,7 @@ import CN from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
 
-import EarningTypeTag from '../../../components/Earning/EarningTypeTag';
+import EarningTypeTag from '../../../../../components/Earning/EarningTypeTag';
 
 export type Props = ThemeProps
 
@@ -23,6 +23,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             <div className={'__block-title'}>{('Active stake')}</div>
             <div className={'__tag-earning-type'}>
               <EarningTypeTag
+                chain={'polkadot'}
                 className={'__item-tag'}
                 comingSoon={true}
               />
@@ -30,18 +31,18 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           </div>
           <div className={'earning-token-active-stake'}>
             <Number
-              className={'__balance-value'}
+              className={'__active-stake-value'}
               decimal={2}
+              size={38}
               suffix={'DOT'}
-              size={30}
               value={'34560092'}
             />
           </div>
           <div className={'earning-balance-active-stake'}>
             <Number
               decimal={0}
-              size={20}
-              suffix={'$'}
+              prefix={'$'}
+              size={30}
               value={'34560092'}
             />
           </div>
@@ -51,7 +52,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         className='__block-divider'
       />
 
-      <div className={CN('__block-item', '__balance-block')}>
+      <div className={CN('__block-item', '__estimate-block')}>
         <div className='__block-title-wrapper'>
           <div className={'__block-title'}>{t('Estimate earning')}</div>
         </div>
@@ -60,7 +61,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           <Number
             className='__balance-value'
             decimal={2}
-            prefix='%'
+            size={30}
+            suffix='%'
             value={'1609'}
           />
         </div>
@@ -78,9 +80,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
         <div className={'__block-content'}>
           <Number
-            className='__balance-value'
-            decimal={0}
+            className='__active-stake-value'
+            decimal={2}
             decimalOpacity={0.45}
+            size={30}
             suffix={'DOT'}
             value={125}
           />
@@ -97,15 +100,20 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </div>
 
         <div className={'__block-content'}>
-          <div className={'__unstaked-period'}>28</div>
-          <span className={'__day'}>days</span>
+          <Number
+            className='__active-stake-value'
+            decimal={0}
+            size={30}
+            suffix={'days'}
+            value={28}
+          />
         </div>
       </div>
     </div>
   );
 }
 
-const EarningPositionHeaderInfo = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'stretch',
@@ -121,6 +129,12 @@ const EarningPositionHeaderInfo = styled(Component)<Props>(({ theme: { token } }
   '.__block-title': {
     fontSize: token.fontSize,
     lineHeight: token.lineHeight
+  },
+  '.__earning-block-item > .__block-title': {
+    paddingRight: 8
+  },
+  '.__block-item.__balance-block .__block-content': {
+    marginTop: -18
   },
 
   '.__balance-value': {
@@ -148,10 +162,34 @@ const EarningPositionHeaderInfo = styled(Component)<Props>(({ theme: { token } }
     alignItems: 'center',
     marginTop: token.marginSM
   },
+
+  '.__active-stake-value': {
+    fontSize: token.fontSizeHeading2,
+    lineHeight: token.lineHeightHeading2,
+    fontWeight: token.headingFontWeight,
+    color: token.colorTextLight1,
+
+    '.ant-number-integer': {
+      color: 'inherit !important',
+      fontSize: 'inherit !important',
+      fontWeight: 'inherit !important',
+      lineHeight: 'inherit'
+    },
+
+    '.ant-number-decimal, .ant-number-suffix': {
+      color: `${token.colorTextLight3} !important`,
+      fontSize: `${token.fontSizeHeading3}px !important`,
+      fontWeight: 'inherit !important',
+      lineHeight: token.lineHeightHeading3
+    }
+  },
+
   '.__earning-block-item': {
     display: 'flex'
   },
-
+  '.earning-balance-active-stake': {
+    color: token.colorTextTertiary
+  },
   '.__balance-change-value': {
     marginRight: token.sizeXS,
     lineHeight: token.lineHeight
@@ -273,4 +311,4 @@ const EarningPositionHeaderInfo = styled(Component)<Props>(({ theme: { token } }
 
 }));
 
-export default EarningPositionHeaderInfo;
+export default HeaderDesktopPart;

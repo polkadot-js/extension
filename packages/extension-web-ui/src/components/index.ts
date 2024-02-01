@@ -35,3 +35,4 @@ export * from './TokenItem';
 export * from './WalletConnect';
 export * from './Crowdloan';
 export * from './Common';
+export * from './Table';

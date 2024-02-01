@@ -1,48 +1,36 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { YieldPoolInfo } from '@subwallet/extension-base/types';
+import { EarningTypeTag, EmptyList, Table } from '@subwallet/extension-web-ui/components';
+import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, Logo, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Coin, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { EmptyList } from '../../../components';
-import EarningTypeTag from '../../../components/Earning/EarningTypeTag';
-import { SuppliedTokenInfo, ThemeProps } from '../../../types';
-import Table from './table/Table';
-
 interface Props extends ThemeProps {
-  items: SuppliedTokenInfo[];
-  onClickRow?: (item: SuppliedTokenInfo) => void;
-  onClickMint?: (item: SuppliedTokenInfo) => void;
-  loading?: boolean;
-  totalItems?: number;
+  items: YieldPoolInfo[];
 }
 
 // todo: i18n this
 
 export const DEFAULT_ITEMS_PER_PAGE = 10;
 
-const Component: React.FC<Props> = ({ className, items, loading, onClickMint, onClickRow, totalItems }: Props) => {
+const Component: React.FC<Props> = ({ className, items }: Props) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
   const onClickMock = useCallback(() => {
     alert('dung nguyen');
   }, []);
-  const _onClickMint = useCallback((item: SuppliedTokenInfo): React.MouseEventHandler<HTMLDivElement> => {
-    return (e) => {
-      e.stopPropagation();
-      onClickMint?.(item);
-    };
-  }, [onClickMint]);
 
   const columns = useMemo(() => {
     const tokenCol = {
       title: 'Token name',
       key: 'token_name',
       className: '__table-token-col',
-      render: (row: SuppliedTokenInfo) => {
+      render: (row: YieldPoolInfo) => {
         return (
           <div className={'__row-token-name-wrapper'}>
             <Logo
@@ -68,9 +56,10 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       key: 'staking_type',
       className: '__table-create-at-col',
       sortable: true,
-      render: (row: SuppliedTokenInfo) => {
+      render: (row: YieldPoolInfo) => {
         return (
           <EarningTypeTag
+            chain={'polkadot'}
             className={'__item-tag'}
             comingSoon={true}
           />
@@ -82,7 +71,7 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       title: 'Total value staked',
       key: 'total_value_staked',
       className: '__table-progress-col',
-      render: (row: SuppliedTokenInfo) => {
+      render: (row: YieldPoolInfo) => {
         return (
           <div className={'__row-progress-wrapper'}>
             <Number
@@ -101,7 +90,7 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       key: 'rewards_per_year',
       className: '__table-limit-col',
       sortable: true,
-      render: (row: SuppliedTokenInfo) => {
+      render: (row: YieldPoolInfo) => {
         return (
           <div className={'__row-reward-per-year'}>
             <Number
@@ -152,8 +141,12 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
     ];
   }, [onClickMock]);
 
-  const getRowKey = useCallback((item: SuppliedTokenInfo) => {
-    return item.id;
+  const getRowKey = useCallback((item: YieldPoolInfo) => {
+    return item.slug;
+  }, []);
+
+  const onClickRow = useCallback(() => {
+    alert('xin chao');
   }, []);
 
   const emptyList = useMemo(() => {
@@ -167,14 +160,13 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
   }, []);
 
   return (
-    <div className={CN(className, 'explore-table-container')}>
+    <div className={CN(className, 'explore-Table-container')}>
       <Table
-        className={'explore-table'}
+        className={'explore-Table'}
         columns={columns}
         emptyList={emptyList}
         getRowKey={getRowKey}
         items={items}
-        loading={loading}
         onClickRow={onClickRow}
       />
     </div>
@@ -182,7 +174,7 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const EarningPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const EarningPoolDesktopItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.__table-token-col.__table-token-col, .__table-create-at-col.__table-create-at-col': {
       flex: 1.2
@@ -346,4 +338,4 @@ const EarningPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
   };
 });
 
-export default EarningPoolItem;
+export default EarningPoolDesktopItem;

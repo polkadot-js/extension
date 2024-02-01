@@ -8,13 +8,14 @@ import { useContext } from 'react';
 const useTransactionContext = <T extends TransactionFormBaseProps>() => {
   const { closeAlert,
     closeRecheckChainConnectionModal, defaultData, goBack,
-    needPersistData, onDone, openAlert,
+    modalId, needPersistData, onDone,
+    openAlert,
     openRecheckChainConnectionModal,
     persistData,
-    setBackProps,
-    setSubHeaderRightButtons } = useContext(TransactionContext);
+    setBackProps, setSubHeaderRightButtons } = useContext(TransactionContext);
 
   return {
+    modalId,
     defaultData: defaultData as T,
     needPersistData,
     onDone,

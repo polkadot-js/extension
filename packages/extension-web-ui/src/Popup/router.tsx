@@ -110,17 +110,11 @@ const Transaction = new LazyLoader('Transaction', () => import('@subwallet/exten
 const TransactionDone = new LazyLoader('TransactionDone', () => import('@subwallet/extension-web-ui/Popup/TransactionDone'));
 const SendFund = new LazyLoader('SendFund', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/SendFund'));
 const SendNFT = new LazyLoader('SendNFT', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/SendNFT'));
-// const Stake = new LazyLoader('Stake', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Stake/Stake'));
-// const Unstake = new LazyLoader('Unstake', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Stake/Unbond'));
-// const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Stake/CancelUnstake'));
-// const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Stake/ClaimReward'));
-// const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Stake/Withdraw'));
-// const Earn = new LazyLoader('Earn', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Yield/Earn'));
-// const UnYield = new LazyLoader('YieldUnstake', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Yield/YieldUnstake'));
-// const WithdrawYield = new LazyLoader('YieldWithdraw', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Yield/YieldWithdraw'));
-// const CancelUnYield = new LazyLoader('YieldCancelUnstake', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Yield/YieldCancelUnstake'));
-// const YieldWithdrawPosition = new LazyLoader('YieldWithdrawPosition', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Yield/YieldWithdrawPosition'));
-// const YieldClaimReward = new LazyLoader('YieldClaimReward', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Yield/YieldClaimReward'));
+const Earn = new LazyLoader('Stake', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Earn'));
+const Unstake = new LazyLoader('Unstake', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Unbond'));
+const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/CancelUnstake'));
+const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/ClaimReward'));
+const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw'));
 
 // Wallet Connect
 const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import('@subwallet/extension-web-ui/Popup/WalletConnect/ConnectWalletConnect'));
@@ -222,17 +216,11 @@ export const router = createBrowserRouter([
         children: [
           SendFund.generateRouterObject('send-fund'),
           SendNFT.generateRouterObject('send-nft'),
-          // Stake.generateRouterObject('stake'),
-          // Unstake.generateRouterObject('unstake'),
-          // CancelUnstake.generateRouterObject('cancel-unstake'),
-          // ClaimReward.generateRouterObject('claim-reward'),
-          // Withdraw.generateRouterObject('withdraw'),
-          // Earn.generateRouterObject('earn'),
-          // UnYield.generateRouterObject('un-yield'),
-          // WithdrawYield.generateRouterObject('withdraw-yield'),
-          // CancelUnYield.generateRouterObject('cancel-un-yield'),
-          // YieldWithdrawPosition.generateRouterObject('yield-withdraw-position'),
-          // YieldClaimReward.generateRouterObject('yield-claim'),
+          Earn.generateRouterObject('earn'),
+          Unstake.generateRouterObject('unstake'),
+          CancelUnstake.generateRouterObject('cancel-unstake'),
+          ClaimReward.generateRouterObject('claim-reward'),
+          Withdraw.generateRouterObject('withdraw'),
           {
             path: 'compound',
             element: <Example />

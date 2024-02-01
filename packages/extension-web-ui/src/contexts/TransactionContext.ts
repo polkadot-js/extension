@@ -6,6 +6,7 @@ import { ButtonProps } from '@subwallet/react-ui';
 import React, { Dispatch, SetStateAction } from 'react';
 
 export interface TransactionContextProps {
+  modalId?: string;
   defaultData: TransactionFormBaseProps;
   persistData: Dispatch<SetStateAction<TransactionFormBaseProps>>;
   needPersistData: boolean;

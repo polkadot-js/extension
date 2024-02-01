@@ -49,7 +49,6 @@ export type SuppliedTokenInfo = {
   transactions: string
 }
 
-
 export interface Recoded {
   account: AccountJson | null;
   formatted: string | null;

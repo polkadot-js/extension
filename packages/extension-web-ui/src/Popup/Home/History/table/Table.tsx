@@ -1,13 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ThemeProps, GeneralProps, TableColumnType } from '@subwallet/extension-web-ui/types';
 import { ActivityIndicator } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import {_ThemeProps, GeneralProps, TableColumnType} from '@subwallet/extension-web-ui/types'
-import TableRow  from './TableRow';
+
 import TableHead from './TableHead';
+import TableRow from './TableRow';
 
 interface Props<T> extends GeneralProps {
   items: T[],
@@ -19,7 +20,7 @@ interface Props<T> extends GeneralProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Component = <T, >({ className, columns, emptyList, getRowKey, items, loading, onClickRow}: Props<T>) => {
+const Component = <T, >({ className, columns, emptyList, getRowKey, items, loading, onClickRow }: Props<T>) => {
   const renderItem = useCallback((item: T) => {
     return (
       <TableRow<T>

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {Button, Icon, Logo, Number} from '@subwallet/react-ui';
+import { Button, Icon, Logo, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Coin, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
@@ -9,8 +9,8 @@ import styled from 'styled-components';
 
 import { EmptyList } from '../../../components';
 import EarningTypeTag from '../../../components/Earning/EarningTypeTag';
-import {SuppliedTokenInfo, ThemeProps} from '../../../types';
-import Table from './table/Table'
+import { SuppliedTokenInfo, ThemeProps } from '../../../types';
+import Table from './table/Table';
 
 interface Props extends ThemeProps {
   items: SuppliedTokenInfo[];
@@ -50,13 +50,13 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
               size={48}
             />
             <div className={'token-item'}>
-            <div className={'token-info'}>
-              <span>DOT</span>
-              <span className={'__token-name'}>
+              <div className={'token-info'}>
+                <span>DOT</span>
+                <span className={'__token-name'}>
                 &nbsp;(<span>Polkadot</span>)
-              </span>
-            </div>
-            <div className={'__description'}>Start staking with just 1 DOT</div>
+                </span>
+              </div>
+              <div className={'__description'}>Start staking with just 1 DOT</div>
             </div>
           </div>
         );
@@ -224,8 +224,8 @@ const EarningPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       lineHeight: 'inherit'
     },
     '.__table-create-at-col .__td-inner': {
-    alignItems: 'center',
-  },
+      alignItems: 'center'
+    },
 
     '.__row-token-name-wrapper': {
       display: 'flex',
@@ -262,7 +262,7 @@ const EarningPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       'white-space': 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      minWidth: 70,
+      minWidth: 70
     },
 
     '.__row-mint-button': {

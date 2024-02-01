@@ -1,16 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {Number} from '@subwallet/react-ui';
+import EarningPositionHeaderInfo from '@subwallet/extension-web-ui/Popup/Home/History/EarningPositionHeaderInfo';
+import { Number } from '@subwallet/react-ui';
 import CN from 'classnames';
-import {CheckCircle, Coin} from 'phosphor-react';
-import React, {useCallback, useMemo} from 'react';
+import { CheckCircle, Coin } from 'phosphor-react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import {Avatar, EmptyList, MetaInfo} from '../../../components';
-import {SuppliedTokenInfo, ThemeProps} from '../../../types';
-import Table from './table/Table'
-import {isEthereumAddress} from "@polkadot/util-crypto";
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
+import { Avatar, EmptyList, MetaInfo } from '../../../components';
+import { SuppliedTokenInfo, ThemeProps } from '../../../types';
+import Table from './table/Table';
 
 interface Props extends ThemeProps {
   items: SuppliedTokenInfo[];
@@ -36,7 +38,7 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       onClickMint?.(item);
     };
   }, [onClickMint]);
-  const value = '5HGX5Adwn2Rdp6qXfyN1j9oph6ZEuJuUSteRgXuAKpm4MB87'
+  const value = '5HGX5Adwn2Rdp6qXfyN1j9oph6ZEuJuUSteRgXuAKpm4MB87';
   const columns = useMemo(() => {
     const accountCol = {
       title: 'Account',
@@ -86,21 +88,21 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
         return (
           <div className={'__row-active-stake-wrapper'}>
             <div className={'__active-stake'}>
-            <Number
-              className={'__row-progress-value'}
-              decimal={2}
-              suffix={'DOT'}
-              value={2908}
-            />
+              <Number
+                className={'__row-progress-value'}
+                decimal={2}
+                suffix={'DOT'}
+                value={2908}
+              />
             </div>
             <div className={'__derivative-balance'}>
               <span>Derivative balance: </span>
               &nbsp;<Number
                 className={'__row-progress-value'}
                 decimal={2}
+                decimalOpacity={0.4}
                 suffix={'sDOT'}
                 value={51465300000}
-                decimalOpacity={0.4}
               />
             </div>
           </div>
@@ -115,12 +117,12 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       sortable: true,
       render: (row: SuppliedTokenInfo) => {
         return (
-            <Number
-              className={'__row-unstaked-value'}
-              decimal={0}
-              suffix={'DOT'}
-              value={2038}
-            />
+          <Number
+            className={'__row-unstaked-value'}
+            decimal={0}
+            suffix={'DOT'}
+            value={2038}
+          />
         );
       }
     };
@@ -131,13 +133,13 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       sortable: true,
       render: (row: SuppliedTokenInfo) => {
         return (
-            <Number
-              className={'__row-total-Stake-value'}
-              decimal={2}
-              suffix={'DOT'}
-              value={3108}
-              decimalOpacity={0.4}
-            />
+          <Number
+            className={'__row-total-Stake-value'}
+            decimal={2}
+            decimalOpacity={0.4}
+            suffix={'DOT'}
+            value={3108}
+          />
         );
       }
     };
@@ -149,7 +151,7 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
       unStakedCol,
       totalStakeCol
     ];
-  }, [onClickMock]);
+  }, []);
 
   const getRowKey = useCallback((item: SuppliedTokenInfo) => {
     return item.id;
@@ -166,17 +168,20 @@ const Component: React.FC<Props> = ({ className, items, loading, onClickMint, on
   }, []);
 
   return (
-    <div className={CN(className, 'explore-table-container')}>
-      <Table
-        className={'explore-table'}
-        columns={columns}
-        emptyList={emptyList}
-        getRowKey={getRowKey}
-        items={items}
-        loading={loading}
-        onClickRow={onClickRow}
-      />
-    </div>
+    <>
+      <EarningPositionHeaderInfo />
+      <div className={CN(className, 'explore-table-container')}>
+        <Table
+          className={'explore-table'}
+          columns={columns}
+          emptyList={emptyList}
+          getRowKey={getRowKey}
+          items={items}
+          loading={loading}
+          onClickRow={onClickRow}
+        />
+      </div>
+    </>
   );
 };
 
@@ -274,7 +279,7 @@ const EarningPositionDetails = styled(Component)<Props>(({ theme: { token } }: P
       'white-space': 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      minWidth: 70,
+      minWidth: 70
     },
 
     '.__row-mint-button': {

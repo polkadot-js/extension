@@ -65,8 +65,6 @@ export default class KoniDatabase extends Dexie {
   public mantaPay!: Table<IMantaPayLedger, object>;
   public campaign!: Table<ICampaign, object>;
 
-  public assetRef!: Table<IAssetRef, object>;
-
   private schemaVersion: number;
 
   public constructor (name = DEFAULT_DATABASE, schemaVersion = 11) {
@@ -102,10 +100,6 @@ export default class KoniDatabase extends Dexie {
 
     this.conditionalVersion(4, {
       campaign: 'slug'
-    });
-
-    this.conditionalVersion(5, {
-      assetRef: 'slug'
     });
   }
 

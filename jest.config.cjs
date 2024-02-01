@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-const config = require('@polkadot/dev/config/jest.cjs');
+const {extraGlobals, ...config} = require('@polkadot/dev/config/jest.cjs');
 
 module.exports = {
   ...config,
+  sandboxInjectedGlobals: config['extraGlobals'],
   modulePathIgnorePatterns: [
     ...config.modulePathIgnorePatterns
   ],

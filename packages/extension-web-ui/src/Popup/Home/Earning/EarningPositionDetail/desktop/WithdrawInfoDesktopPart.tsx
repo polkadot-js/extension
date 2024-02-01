@@ -3,25 +3,34 @@
 
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Number } from '@subwallet/react-ui';
+import { Button, ModalContext, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
+import {
+  EarningWithdrawalDetailModal
+} from "@subwallet/extension-web-ui/components/Modal/Earning/EarningWithdrawalDetailModal";
 
 type Props = ThemeProps;
+const modalId = 'earning-withdrawal-detail-modal';
 
 function Component ({ className }: Props) {
   const { t } = useTranslation();
+  const { activeModal } = useContext(ModalContext);
   const onClaimReward = useCallback(() => {
     alert('Dung Nguyen');
   }, []);
+
+  const onOpenModal = useCallback(() => {
+    activeModal(modalId);
+  }, [activeModal]);
 
   return (
     <div
       className={CN(className, 'withdraw-info-desktop')}
     >
       <div className={'__claim-reward-area'}>
-        <div className={'earning-info-title'}>Unclaimed rewards</div>
+        <div className={'earning-info-title'}>Withdraw info</div>
         <div className={'claim-reward-action'}>
           <Number
             className={'__claim-reward-value'}
@@ -40,7 +49,13 @@ function Component ({ className }: Props) {
           </Button>
         </div>
         <div className='__block-divider' />
-        <div className={'rewards-history'}>{t('View detail')}</div>
+        <Button
+          className={'rewards-history'}
+          onClick={onOpenModal}
+          block={true}
+          type={'ghost'}
+        >{t('View detail')}</Button>
+        <EarningWithdrawalDetailModal />
       </div>
     </div>
   );
@@ -60,7 +75,6 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
     backgroundColor: token.colorBgInput
   },
 
-
   '.__part-title': {
     paddingTop: token.padding,
     paddingLeft: token.padding,
@@ -69,7 +83,8 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
   '.earning-info-title': {
     fontSize: token.fontSize,
     lineHeight: token.lineHeight,
-    color: token.colorWhite
+    color: token.colorWhite,
+    width: '100%'
   },
   '.__block-divider': {
     height: 2,
@@ -98,7 +113,9 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
     paddingRight: token.padding
   },
   '.claim-reward-action': {
-    display: 'flex'
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '100%'
   },
 
   '.__claim-reward-value': {

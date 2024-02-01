@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MetaInfo } from '@subwallet/extension-web-ui/components';
+import { BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { customFormatDate, openInNewTab } from '@subwallet/extension-web-ui/utils';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowSquareOut } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -16,6 +16,7 @@ const modalId = 'earning-rewards-history-modal';
 
 function Component ({ className }: Props) {
   const { t } = useTranslation();
+  const { inactiveModal } = useContext(ModalContext);
   const onClickViewExplore = useCallback(() => {
     const currentAccount = 'p8DyH23aDbJCpioSXLSv9unX7b1fsF1Wg4FzKuyoPpUwW4yFL';
 
@@ -27,10 +28,17 @@ function Component ({ className }: Props) {
       }
     }
   }, []);
+  const closeModal = useCallback(() => {
+    inactiveModal(modalId);
+  }, [inactiveModal]);
+  const numberOfMetaInfoNumbers = Array.from({ length: 8 });
 
   return (
-    <div
+    <BaseModal
       className={CN(className)}
+      id={modalId}
+      onCancel={closeModal}
+      title={'History rewards'}
     >
       <MetaInfo
         labelColorScheme='gray'
@@ -38,12 +46,14 @@ function Component ({ className }: Props) {
         spaceSize='sm'
         valueColorScheme='light'
       >
-        <MetaInfo.Number
-          decimals={0}
-          label={customFormatDate(new Date('13261128'), '#DD# #MMM#, #YYYY#')}
-          suffix={'DOT'}
-          value={12345}
-        />
+        {numberOfMetaInfoNumbers.map((_, index) => (
+          <MetaInfo.Number
+            decimals={0}
+            key={index}
+            label={customFormatDate(new Date().getTime() + index * 86400000, '#DD# #MMM#, #YYYY#')}
+            suffix={'DOT'}
+            value={12345}
+          />))}
       </MetaInfo>
 
       <Button
@@ -56,15 +66,14 @@ function Component ({ className }: Props) {
         )}
         onClick={onClickViewExplore}
         size={'xs'}
-        type={'ghost'}
       >
         {t('View on explorer')}
       </Button>
-    </div>
+    </BaseModal>
   );
 }
 
-export const RewardInfoPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+export const EarningRewardsHistoryModal = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
   minHeight: 54,

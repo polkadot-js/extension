@@ -1,20 +1,27 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { EarningRewardsHistoryModal } from '@subwallet/extension-web-ui/components/Modal/Earning/EarningRewardsHistoryModal';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Number } from '@subwallet/react-ui';
+import { Button, ModalContext, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
+const modalId = 'earning-rewards-history-modal';
 
 function Component ({ className }: Props) {
   const { t } = useTranslation();
+  const { activeModal } = useContext(ModalContext);
   const onClaimReward = useCallback(() => {
     alert('Dung Nguyen');
   }, []);
+
+  const onOpenModal = useCallback(() => {
+    activeModal(modalId);
+  }, [activeModal]);
 
   return (
     <div
@@ -40,7 +47,13 @@ function Component ({ className }: Props) {
           </Button>
         </div>
         <div className='__block-divider' />
-        <div className={'rewards-history'}>Rewards history</div>
+        <Button
+          className={'rewards-history'}
+          onClick={onOpenModal}
+          block={true}
+          type={'ghost'}
+        >Rewards history</Button>
+        <EarningRewardsHistoryModal />
       </div>
     </div>
   );
@@ -68,7 +81,8 @@ export const RewardInfoDesktopPart = styled(Component)<Props>(({ theme: { token 
   '.earning-info-title': {
     fontSize: token.fontSize,
     lineHeight: token.lineHeight,
-    color: token.colorWhite
+    color: token.colorWhite,
+    width: '100%'
   },
   '.__block-divider': {
     height: 2,

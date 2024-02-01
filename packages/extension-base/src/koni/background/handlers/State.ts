@@ -30,7 +30,7 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
-import { SUBSCAN_API_CHAIN_MAP, SUBSCAN_BALANCE_CHAIN_MAP_REVERSE } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+import { SUBSCAN_BALANCE_CHAIN_MAP_REVERSE } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
@@ -149,7 +149,7 @@ export default class KoniState {
 
     this.notificationService = new NotificationService();
     this.chainService = new ChainService(this.dbService, this.eventService);
-    this.subscanService = new SubscanService(SUBSCAN_API_CHAIN_MAP);
+    this.subscanService = SubscanService.getInstance();
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService, this.settingService, this.keyringService);
     this.priceService = new PriceService(this.dbService, this.eventService, this.chainService);

@@ -5,7 +5,7 @@ import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ORDINAL_COLLECTION } from '@subwallet/extension-base/constants';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { fetchExtrinsicParams, fetchRemarkEvent } from '@subwallet/extension-base/koni/api/nft/ordinal_nft/utils';
-import { state } from '@subwallet/extension-base/koni/background/handlers';
+import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
 import { OrdinalRemarkData, SubscanBatchChild, SubscanBatchChildParam, SubscanEventBaseItemData, SubscanExtrinsicParam } from '@subwallet/extension-base/types';
 
 const parseParamData = (param: SubscanBatchChildParam, event: SubscanEventBaseItemData, chain: string, address: string): NftItem | undefined => {
@@ -50,20 +50,22 @@ const parseParamData = (param: SubscanBatchChildParam, event: SubscanEventBaseIt
 
 export default class OrdinalNftApi extends BaseNftApi {
   subscanChain: string;
+  subscanService: SubscanService;
 
   constructor (addresses: string[], chain: string, subscanChain: string) {
     super(chain, undefined, addresses);
     this.subscanChain = subscanChain;
+    this.subscanService = SubscanService.getInstance();
   }
 
   public async handleNft (address: string, handleNftParams: HandleNftParams) {
-    const events: SubscanEventBaseItemData[] = await state.subscanService.addRequest(async () => {
+    const events: SubscanEventBaseItemData[] = await this.subscanService.addRequest(async () => {
       return await fetchRemarkEvent(this.subscanChain, address);
     });
 
     if (events && events.length) {
       const extrinsicIds = events.map((data) => data.extrinsic_index);
-      const extrinsicParams: SubscanExtrinsicParam[] = await state.subscanService.addRequest(async () => {
+      const extrinsicParams: SubscanExtrinsicParam[] = await this.subscanService.addRequest(async () => {
         return await fetchExtrinsicParams(this.subscanChain, extrinsicIds);
       });
       const items: NftItem[] = [];

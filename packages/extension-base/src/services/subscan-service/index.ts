@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
+import { SUBSCAN_API_CHAIN_MAP } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import { CrowdloanContributionsResponse, ExtrinsicItem, ExtrinsicsListResponse, IMultiChainBalance, RequestBlockRange, RewardHistoryListResponse, SubscanRequest, SubscanResponse, TransferItem, TransfersListResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { wait } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
@@ -19,7 +20,10 @@ export class SubscanService {
     return this.nextId++;
   }
 
-  constructor (private subscanChainMap: Record<string, string>, options?: {limitRate?: number, intervalCheck?: number, maxRetry?: number}) {
+  private subscanChainMap: Record<string, string>;
+
+  constructor (options?: {limitRate?: number, intervalCheck?: number, maxRetry?: number}) {
+    this.subscanChainMap = SUBSCAN_API_CHAIN_MAP;
     this.limitRate = options?.limitRate || this.limitRate;
     this.intervalCheck = options?.intervalCheck || this.intervalCheck;
     this.maxRetry = options?.maxRetry || this.maxRetry;
@@ -324,5 +328,16 @@ export class SubscanService {
 
       return jsonData.data;
     });
+  }
+
+  // Singleton
+  private static _instance: SubscanService;
+
+  public static getInstance () {
+    if (!SubscanService._instance) {
+      SubscanService._instance = new SubscanService();
+    }
+
+    return SubscanService._instance;
   }
 }

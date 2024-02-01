@@ -16,7 +16,7 @@ import { addLazy, categoryAddresses, createPromiseHandler, PromiseHandler } from
 import fetch from 'cross-fetch';
 import { BehaviorSubject } from 'rxjs';
 
-import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
+import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, BifrostMantaLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
 
 const POOLS_DATA_URLS = 'https://sw-static-cache.pages.dev/earning/yield-pools.json';
 
@@ -91,6 +91,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
       if (_STAKING_CHAIN_GROUP.liquidStaking.includes(chain)) {
         if (chain === 'bifrost_dot') {
           handlers.push(new BifrostLiquidStakingPoolHandler(this.state, chain));
+          handlers.push(new BifrostMantaLiquidStakingPoolHandler(this.state, chain));
         }
 
         if (chain === 'acala') {

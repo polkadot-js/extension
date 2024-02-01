@@ -89,7 +89,7 @@
     "@polkadot/types": "^10.9.1",
     "@polkadot/util": "^12.3.2",
     "@polkadot/util-crypto": "^12.3.2",
-    "@subwallet/chain-list": "0.2.39",
+    "@subwallet/chain-list": "0.2.40-beta.2",
     "@subwallet/keyring": "^0.1.1",
     "@subwallet/ui-keyring": "^0.1.1",
     "babel-core": "^7.0.0-bridge.0",

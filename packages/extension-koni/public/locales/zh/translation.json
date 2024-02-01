@@ -888,5 +888,7 @@
   "Request a feature": "",
   "Transaction timed out": "",
   "Transaction {{info}} timed out": "",
-  "Time-out": ""
+  "Time-out": "",
+  "<highlight>Astar dApp staking V3</highlight> is launching in early February. Make sure to claim any ASTR rewards before the launch or they will be lost.": "",
+  "Check rewards": ""
 }

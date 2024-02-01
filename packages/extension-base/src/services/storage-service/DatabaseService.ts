@@ -56,6 +56,7 @@ export default class DatabaseService {
 
       mantaPay: new MantaPayStore(this._db.mantaPay),
       campaign: new CampaignStore(this._db.campaign)
+      // assetRef: new AssetRefStore(this._db.assetRef)
     };
   }
 
@@ -390,4 +391,36 @@ export default class DatabaseService {
   async getExportJson () {
     return JSON.parse(await this.exportDB()) as DexieExportJsonStructure;
   }
+
+  // public setAssetRef (assetRef: Record<string, _AssetRef>) {
+  //   const assetRefList = Object.entries(assetRef).map(([slug, item]) => {
+  //     return {
+  //       slug,
+  //       ...item
+  //     } as IAssetRef;
+  //   });
+  //
+  //   return this.stores.assetRef.bulkUpsert(assetRefList);
+  // }
+  //
+  // public getAssetRef (slug: string) {
+  //   return this.stores.assetRef.getAssetRef(slug);
+  // }
+  //
+  // public async getAssetRefMap (): Promise<Record<string, _AssetRef>> {
+  //   const assetRefList = await this.stores.assetRef.getAll();
+  //   const assetRefObj: Record<string, _AssetRef> = {};
+  //
+  //   assetRefList.forEach((item) => {
+  //     assetRefObj[item.slug] = {
+  //       ...item
+  //     };
+  //   });
+  //
+  //   return assetRefObj;
+  // }
+  //
+  // public subscribeAssetRef () {
+  //   return this.stores.assetRef.subscribeAssetRef();
+  // }
 }

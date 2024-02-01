@@ -3,3 +3,4 @@
 
 export * from './StakingNetworkDetailModal';
 export * from './ValidatorDetailModal';
+export * from './ClaimDappStakingRewardsModal';

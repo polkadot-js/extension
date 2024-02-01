@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_STAKE_PARAMS, STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { CLAIM_DAPP_STAKING_REWARDS, CLAIM_DAPP_STAKING_REWARDS_MODAL, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_STATE, DEFAULT_STAKE_PARAMS, STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
-import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ClaimDAppStakingRewardsState, StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll, sortStakingByValue } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { ArrowClockwise, Database, FadersHorizontal, Plus, PlusCircle } from 'phosphor-react';
@@ -48,6 +49,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useSetCurrentPage('/home/staking');
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [claimDAppStakingRewardsState] = useLocalStorage<ClaimDAppStakingRewardsState>(CLAIM_DAPP_STAKING_REWARDS, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_STATE);
 
   const dataContext = useContext(DataContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -113,8 +115,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     setTimeout(() => {
       activeModal(STAKING_DETAIL_MODAL_ID);
+
+      if (claimDAppStakingRewardsState !== ClaimDAppStakingRewardsState.SECOND) {
+        if (item.nominatorMetadata?.chain && _STAKING_CHAIN_GROUP.astar.includes(item.nominatorMetadata?.chain)) {
+          activeModal(CLAIM_DAPP_STAKING_REWARDS_MODAL);
+        }
+      }
     }, 100);
-  }, [activeModal]);
+  }, [activeModal, claimDAppStakingRewardsState]);
 
   const preCheck = usePreCheckAction(currentAccount?.address, false);
 

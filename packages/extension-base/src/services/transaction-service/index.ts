@@ -3,7 +3,7 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, FeeData, NotificationType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
@@ -122,10 +122,11 @@ export default class TransactionService {
     };
 
     // Estimate fee
-    const estimateFee: AmountData = {
+    const estimateFee: FeeData = {
       symbol: '',
       decimals: 0,
-      value: ''
+      value: '',
+      tooHigh: false
     };
 
     const chainInfo = this.chainService.getChainInfoByKey(chain);
@@ -155,6 +156,7 @@ export default class TransactionService {
               const maxFee = priority.maxFeePerGas.lte(priorityFee) ? priority.maxFeePerGas : priorityFee;
 
               estimateFee.value = maxFee.multipliedBy(gasLimit).toString();
+              estimateFee.tooHigh = priority.busyNetwork;
             }
           }
         } catch (e) {

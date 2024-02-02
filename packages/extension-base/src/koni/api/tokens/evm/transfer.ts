@@ -108,7 +108,7 @@ export async function getERC20TransactionObject (
     const bal = await erc20Contract.methods.balanceOf(from).call() as string;
 
     freeAmount = new BigN(bal || '0');
-    transferValue = freeAmount.toString() || '0';
+    transferValue = freeAmount.toFixed(0) || '0';
   }
 
   function generateTransferData (to: string, transferValue: string): string {
@@ -134,7 +134,7 @@ export async function getERC20TransactionObject (
   } as TransactionConfig;
 
   if (transferAll) {
-    transferValue = freeAmount.toString();
+    transferValue = freeAmount.toFixed(0);
     transactionObject.data = generateTransferData(to, transferValue);
   }
 

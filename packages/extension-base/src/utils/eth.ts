@@ -10,7 +10,7 @@ import { SignedTransaction } from 'web3-core';
 
 import { hexStripPrefix, numberToHex } from '@polkadot/util';
 
-import { BN_TEN, BN_WEI } from './number';
+import { BN_ZERO } from './number';
 
 const hexToNumberString = (s: string): string => {
   const temp = parseInt(s, 16);
@@ -103,25 +103,27 @@ export const recalculateGasPrice = (_price: string, chain: string) => {
 };
 
 export const calculatePriorityFee = async (web3: _EvmApi) => {
-  const block = await web3.api.eth.getBlock('latest');
-  let baseFee: number;
+  const history = await web3.api.eth.getFeeHistory(6, 'latest', [0, 25, 50, 75, 100]);
 
-  if (block.baseFeePerGas) {
-    baseFee = block.baseFeePerGas;
-  } else {
-    const history = await web3.api.eth.getFeeHistory(2, 'latest', [0, 25, 50, 75, 100]);
+  const baseGasFee = new BigN(history.baseFeePerGas[history.baseFeePerGas.length - 1]); // Last element is latest
 
-    baseFee = parseInt(history.baseFeePerGas[1]);
-  }
+  const maxPriorityFeePerGas = history.reward.reduce((previous, rewards) => {
+    const [first, second] = rewards;
+    const firstBN = new BigN(first);
+    const secondBN = new BigN(second);
 
-  const baseToWei = new BigN(baseFee);
+    const current = secondBN.dividedBy(2).gte(firstBN) ? firstBN : secondBN; // second too larger than first (> 2 times), use first else use second
 
-  const maxPriority = BN_WEI.multipliedBy(1);
-  const priorityByBase = baseToWei.dividedBy(BN_TEN).decimalPlaces(0);
+    return current.gte(previous) ? current : previous; // get max priority
+  }, BN_ZERO);
+
+  const busyNetwork = maxPriorityFeePerGas.dividedBy(baseGasFee).gte(0.5); // True if priority >= 0.5 * base
+  const maxFeePerGas = baseGasFee.plus(maxPriorityFeePerGas).multipliedBy(busyNetwork ? 2 : 1.5).decimalPlaces(0); // Max gas =(base + priority) * 1.5(if not busy or 2 when busy);
 
   return {
-    maxFeePerGas: BN_WEI.gte(baseToWei) ? baseToWei.multipliedBy(2).decimalPlaces(0) : baseToWei.multipliedBy(1.2).decimalPlaces(0),
-    maxPriorityFeePerGas: maxPriority.lte(priorityByBase) ? maxPriority : priorityByBase,
-    baseGasFee: baseToWei
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    baseGasFee,
+    busyNetwork
   };
 };

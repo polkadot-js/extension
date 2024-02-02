@@ -4,6 +4,8 @@
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { AlertBox } from '@subwallet/extension-koni-ui/components';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ConfirmationQueueItem } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -50,6 +52,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, confirmation: { item, type } } = props;
   const { id } = item;
 
+  const { t } = useTranslation();
+
   const { transactionRequest } = useSelector((state: RootState) => state.requestState);
 
   const transaction = useMemo(() => transactionRequest[id], [transactionRequest, id]);
@@ -66,6 +70,14 @@ const Component: React.FC<Props> = (props: Props) => {
     <>
       <div className={CN(className, 'confirmation-content')}>
         {renderContent(transaction)}
+        {!!transaction.estimateFee?.tooHigh && (
+          <AlertBox
+            className='network-box'
+            type='warning'
+            title={t('Network is busy')}
+            description={'Gas price are high and estimates are less accurate.'}
+          />
+        )}
       </div>
       {
         type === 'signingRequest' && (
@@ -95,6 +107,10 @@ const TransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: 
   return {
     '--content-gap': 0,
     marginTop: token.marginXS,
+
+    '.network-box': {
+      marginTop: token.marginSM
+    },
 
     '.-to-right': {
       '.__value': {

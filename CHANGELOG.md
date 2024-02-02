@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.1.34
+## 1.1.35
 Build date: Feb 02, 2024.
 
 Features & Update:

@@ -1,53 +1,104 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
+import { NormalYieldPoolStatistic, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/types';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import EarningTypeTag from '../../../../../components/Earning/EarningTypeTag';
 
-export type Props = ThemeProps
+export type Props = ThemeProps & {
+  poolInfo: YieldPoolInfo;
+  inputAsset: _ChainAsset;
+  isShowBalance: boolean;
+  activeStake: BigN;
+  convertActiveStake: BigN;
+};
 
-function Component ({ className }: Props): React.ReactElement<Props> {
+function Component ({ activeStake, className, convertActiveStake, inputAsset, isShowBalance, poolInfo }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
+  const totalApy = useMemo((): number | undefined => {
+    return (
+      poolInfo.statistic?.totalApy ||
+      (poolInfo.statistic?.totalApr
+        ? calculateReward(poolInfo.statistic.totalApr, undefined, YieldCompoundingPeriod.YEARLY).apy
+        : undefined)
+    );
+  }, [poolInfo.statistic?.totalApr, poolInfo.statistic?.totalApy]);
+
+  const unstakePeriod = useMemo((): number | undefined => {
+    if (poolInfo.statistic && 'unstakingPeriod' in poolInfo.statistic) {
+      return (poolInfo.statistic as NormalYieldPoolStatistic).unstakingPeriod;
+    } else {
+      return undefined;
+    }
+  }, [poolInfo.statistic]);
+
+  const unstakePeriodNode = useMemo(() => {
+    if (unstakePeriod) {
+      const days = unstakePeriod / 24;
+
+      return (
+        <div className={'__unstaking-period-value-wrapper'}>
+          <div className={'__unstaking-period-value'}>
+            {days < 1 ? unstakePeriod : days}
+          </div>
+          <div className={'__unstaking-period-value-suffix'}>
+            {days < 1 ? t('hours') : t('days')}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className={'__unstaking-period-value'}>
+          {t('TBD')}
+        </div>
+      );
+    }
+  }, [t, unstakePeriod]);
+
   return (
-    <div className={CN(className, 'flex-row')}>
+    <div className={CN(className)}>
       <div className={CN('__block-item', '__total-balance-block')}>
         <div className={'__block-title-wrapper'}>
-          <div className={'__earning-block-item'}>
-            <div className={'__block-title'}>{('Active stake')}</div>
-            <div className={'__tag-earning-type'}>
-              <EarningTypeTag
-                chain={'polkadot'}
-                className={'__item-tag'}
-                comingSoon={true}
-              />
-            </div>
-          </div>
-          <div className={'earning-token-active-stake'}>
-            <Number
-              className={'__active-stake-value'}
-              decimal={2}
-              size={38}
-              suffix={'DOT'}
-              value={'34560092'}
-            />
-          </div>
-          <div className={'earning-balance-active-stake'}>
-            <Number
-              decimal={0}
-              prefix={'$'}
-              size={30}
-              value={'34560092'}
+          <div className={'__block-title'}>{t('Active stake')}</div>
+          <div className={'__tag-earning-type'}>
+            <EarningTypeTag
+              chain={poolInfo.chain}
+              className={'__item-tag'}
+              type={poolInfo.type}
             />
           </div>
         </div>
+
+        <div className={'__block-content'}>
+          <Number
+            className={'__active-stake-value'}
+            decimal={inputAsset?.decimals || 0}
+            hide={!isShowBalance}
+            subFloatNumber={true}
+            suffix={inputAsset?.symbol}
+            value={activeStake}
+          />
+
+          <Number
+            className={'__active-stake-converted-value'}
+            decimal={0}
+            hide={!isShowBalance}
+            prefix={'$'}
+            value={convertActiveStake}
+          />
+        </div>
       </div>
+
       <div
         className='__block-divider'
       />
@@ -58,15 +109,25 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </div>
 
         <div className={'__block-content'}>
-          <Number
-            className='__balance-value'
-            decimal={2}
-            size={30}
-            suffix='%'
-            value={'1609'}
-          />
+          {
+            totalApy !== undefined
+              ? (
+                <>
+                  <Number
+                    className='__balance-value'
+                    decimal={0}
+                    suffix={'%'}
+                    value={totalApy}
+                  />
+
+                  <div className={'earning-item-reward-sub-text'}>{t('per year')}</div>
+                </>
+              )
+              : (
+                <div>{t('TBD')}</div>
+              )
+          }
         </div>
-        <div className={'earning-item-reward-sub-text'}>{t('per year')}</div>
       </div>
 
       <div
@@ -81,11 +142,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         <div className={'__block-content'}>
           <Number
             className='__active-stake-value'
-            decimal={2}
-            decimalOpacity={0.45}
-            size={30}
-            suffix={'DOT'}
-            value={125}
+            decimal={inputAsset?.decimals || 0}
+            suffix={inputAsset?.symbol}
+            value={poolInfo.statistic?.earningThreshold.join || '0'}
           />
         </div>
       </div>
@@ -100,13 +159,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </div>
 
         <div className={'__block-content'}>
-          <Number
-            className='__active-stake-value'
-            decimal={0}
-            size={30}
-            suffix={'days'}
-            value={28}
-          />
+          {unstakePeriodNode}
         </div>
       </div>
     </div>

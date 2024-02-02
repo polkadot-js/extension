@@ -1,91 +1,97 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Avatar, MetaInfo } from '@subwallet/extension-web-ui/components';
+import { EarningStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { MetaInfo } from '@subwallet/extension-web-ui/components';
+import { StakingStatusUi } from '@subwallet/extension-web-ui/constants';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, MinusCircle, PlusCircle } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import { MinusCircle, PlusCircle } from 'phosphor-react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
+type Props = ThemeProps & {
+  poolInfo: YieldPoolInfo;
+  compound: YieldPositionInfo;
+  onLeavePool: VoidFunction;
+  onEarnMore: VoidFunction;
+};
 
-type Props = ThemeProps;
-
-function Component ({ className }: Props) {
+function Component ({ className, compound, onEarnMore, onLeavePool,
+  poolInfo }: Props) {
   const { t } = useTranslation();
-  const onClaimReward = useCallback(() => {
-    alert('Dung Nguyen');
-  }, []);
 
-  const value = '0xD8EeBEc6dBBb9d761b660aA386F64bE5E3340872';
+  const earningStatus = useMemo(() => {
+    const stakingStatusUi = StakingStatusUi;
+    const status = compound.status;
+
+    if (status === EarningStatus.EARNING_REWARD) {
+      return stakingStatusUi.active;
+    }
+
+    if (status === EarningStatus.PARTIALLY_EARNING) {
+      return stakingStatusUi.partialEarning;
+    }
+
+    if (status === EarningStatus.WAITING) {
+      return stakingStatusUi.waiting;
+    }
+
+    return stakingStatusUi.inactive;
+  }, [compound.status]);
 
   return (
     <div
-      className={CN(className, 'earning-info-desktop')}
+      className={CN(className)}
     >
-      <div className={'__claim-reward-area'}>
-        <div className={'earning-info-title'}>
-          <div className={'__earning-status-title'}>{t('Earning status')}</div>
-          <div className={'__earning-status-tag'}>
-            <MetaInfo>
-              <MetaInfo.Status
-                className={'earning-status-item'}
-                statusIcon={CheckCircle}
-                statusName={('Earning rewards')}
-                valueColorSchema={'success'}
-              />
-            </MetaInfo>
-          </div>
-        </div>
-        <div className={'claim-reward-action'}>
-          <div className={'__network-label'}>Network</div>
-          <div className={'__network-item'}>
-            <div className={'__logo-network'}>
-              <Avatar
-                size={20}
-                theme={value ? isEthereumAddress(value) ? 'ethereum' : 'polkadot' : undefined}
-                value={value}
-              />
-            </div>
-            <div className={'__network-text'}>Polkadot</div>
-          </div>
-        </div>
-        <div className='__block-divider' />
-        <div className={'earning-status-action'}>
-          <Button
-            icon={
-              <Icon
-                className={'earning-item-stake-btn'}
-                phosphorIcon={MinusCircle}
-                size='sm'
-                weight='fill'
-              />
-            }
-            onClick={onClaimReward}
-            size='xs'
-            type={'ghost'}
-          >
-            {t('Unstaked')}
-          </Button>
-          <Button
-            icon={
-              <Icon
-                className={'earning-item-stake-btn'}
-                phosphorIcon={PlusCircle}
-                size='sm'
-                weight='fill'
-              />
-            }
-            onClick={onClaimReward}
-            size='xs'
-            type={'ghost'}
-          >
-            {t('Stake more')}
-          </Button>
-        </div>
+      <MetaInfo
+        labelColorScheme='gray'
+        labelFontWeight='regular'
+        spaceSize='sm'
+      >
+        <MetaInfo.Status
+          label={t('Earning status')}
+          statusIcon={earningStatus.icon}
+          statusName={earningStatus.name}
+          valueColorSchema={earningStatus.schema}
+        />
+        <MetaInfo.Chain
+          chain={poolInfo.chain}
+          label={t('Network')}
+          valueColorSchema='gray'
+        />
+      </MetaInfo>
+      <div className='__separator' />
+      <div className={'__earning-actions'}>
+        <Button
+          block={true}
+          icon={(
+            <Icon
+              phosphorIcon={MinusCircle}
+              weight='fill'
+            />
+          )}
+          onClick={onLeavePool}
+          type={'ghost'}
+        >
+          {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unstake')}
+        </Button>
+
+        <Button
+          block={true}
+          icon={(
+            <Icon
+              phosphorIcon={PlusCircle}
+              weight='fill'
+            />
+          )}
+          onClick={onEarnMore}
+          type={'ghost'}
+        >
+          {poolInfo.type === YieldPoolType.LENDING ? t('Supply more') : t('Stake more')}
+        </Button>
       </div>
     </div>
   );
@@ -95,34 +101,9 @@ export const EarningInfoDesktopPart = styled(Component)<Props>(({ theme: { token
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
   minHeight: 54,
-  width: 384,
   paddingTop: token.padding,
-  paddingBottom: token.padding,
-  paddingLeft: token.paddingLG,
-  paddingRight: token.paddingLG,
-  '&:hover': {
-    backgroundColor: token.colorBgInput
-  },
-
-  '.__part-title': {
-    paddingTop: token.padding,
-    paddingLeft: token.padding,
-    paddingRight: token.padding
-  },
-  '.earning-info-title': {
-    display: 'flex',
-    fontSize: token.fontSize,
-    lineHeight: token.lineHeight,
-    color: token.colorWhite,
-    width: '100%',
-    justifyContent: 'space-between'
-  },
-  '.__block-divider': {
-    height: 2,
-    width: 336,
-    backgroundColor: token.colorBgDivider,
-    marginTop: token.marginSM
-  },
+  paddingLeft: 24,
+  paddingRight: 24,
 
   '.__separator': {
     height: 2,
@@ -133,55 +114,10 @@ export const EarningInfoDesktopPart = styled(Component)<Props>(({ theme: { token
     marginRight: token.margin
   },
 
-  '.__claim-reward-area': {
+  '.__earning-actions': {
     display: 'flex',
-    flexDirection: 'column',
     gap: token.sizeSM,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: token.paddingSM,
-    paddingLeft: token.padding,
-    paddingRight: token.padding
-  },
-  '.claim-reward-action': {
-    display: 'flex',
-    width: '100%',
-    justifyContent: 'space-between'
-  },
-  '.__network-item': {
-    display: 'flex'
-  },
-
-  '.__claim-reward-value': {
-    fontSize: token.fontSizeHeading4,
-    lineHeight: token.lineHeightHeading4,
-    fontWeight: token.headingFontWeight,
-    color: token.colorTextLight1,
-
-    '.ant-number-integer': {
-      color: 'inherit !important',
-      fontSize: 'inherit !important',
-      fontWeight: 'inherit !important',
-      lineHeight: 'inherit'
-    },
-
-    '.ant-number-decimal, .ant-number-suffix': {
-      color: `${token.colorTextLight3} !important`,
-      fontSize: `${token.fontSizeHeading5}px !important`,
-      fontWeight: 'inherit !important',
-      lineHeight: token.lineHeightHeading5
-    }
-  },
-
-  '.__claim-reward-area + .__separator': {
-    marginTop: 0
-  },
-
-  '.__separator + .__reward-history-panel': {
-    marginTop: -13
-  },
-
-  '.__view-explorer-button': {
-    marginTop: token.marginSM
+    marginLeft: -token.sizeSM,
+    marginRight: -token.sizeSM
   }
 }));

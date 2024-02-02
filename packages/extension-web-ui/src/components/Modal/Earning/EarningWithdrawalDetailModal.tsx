@@ -1,40 +1,125 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { UnstakingInfo, UnstakingStatus, YieldPoolInfo } from '@subwallet/extension-base/types';
 import { BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { getWaitingTime } from '@subwallet/extension-web-ui/Popup/Transaction/helper';
+import { Theme } from '@subwallet/extension-web-ui/themes';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, ProhibitInset } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
-import styled from 'styled-components';
+import React, { Context, useCallback, useContext, useMemo } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
-type Props = ThemeProps;
-const modalId = 'earning-withdrawal-detail-modal';
+type Props = ThemeProps & {
+  modalId: string;
+  inputAsset: _ChainAsset;
+  unstakings: UnstakingInfo[];
+  poolInfo: YieldPoolInfo;
+  onCancelWithDraw: VoidFunction;
+};
 
-function Component ({ className }: Props) {
+function Component ({ className, inputAsset, modalId, onCancelWithDraw, poolInfo, unstakings }: Props) {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
-  const onClickViewExplore = useCallback(() => {
-    const currentAccount = 'p8DyH23aDbJCpioSXLSv9unX7b1fsF1Wg4FzKuyoPpUwW4yFL';
 
-    if (currentAccount) {
-      const subscanSlug = 'dung-nguyen';
+  const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
 
-      if (subscanSlug) {
-        openInNewTab(`https://${subscanSlug}.subscan.io/account/${currentAccount}?tab=reward`)();
+  const items = useMemo(() => {
+    return [...unstakings].sort((a, b) => {
+      if (a.waitingTime === undefined && b.waitingTime === undefined) {
+        return 0;
       }
-    }
-  }, []);
+
+      if (a.waitingTime === undefined) {
+        return -1;
+      }
+
+      if (b.waitingTime === undefined) {
+        return 1;
+      }
+
+      return a.waitingTime - b.waitingTime;
+    });
+  }, [unstakings]);
+
   const closeModal = useCallback(() => {
     inactiveModal(modalId);
-  }, [inactiveModal]);
+  }, [inactiveModal, modalId]);
+
+  const renderWithdrawTime = useCallback(
+    (item: UnstakingInfo) => {
+      if (item.waitingTime === undefined) {
+        return (
+          <>
+            <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
+            {item.status === UnstakingStatus.CLAIMABLE && (
+              <Icon
+                iconColor={token.colorSecondary}
+                phosphorIcon={CheckCircle}
+                size='sm'
+                weight='fill'
+              />
+            )}
+          </>
+        );
+      } else {
+        return (
+          <>
+            <div className={'__withdraw-time-label'}>{getWaitingTime(item.waitingTime, item.status, t)}</div>
+            {item.status === UnstakingStatus.CLAIMABLE && (
+              <Icon
+                iconColor={token.colorSecondary}
+                phosphorIcon={CheckCircle}
+                size='sm'
+                weight='fill'
+              />
+            )}
+          </>
+        );
+      }
+    },
+    [t, token.colorSecondary]
+  );
+
+  const haveUnlocking = useMemo(() => unstakings.some((i) => i.status === UnstakingStatus.UNLOCKING), [unstakings]);
+
+  const canCancelWithdraw = useMemo(
+    () => haveUnlocking && poolInfo.metadata.availableMethod.cancelUnstake,
+    [haveUnlocking, poolInfo.metadata.availableMethod.cancelUnstake]
+  );
+
+  const onClickCancelUnstaking = useCallback(() => {
+    if (!canCancelWithdraw) {
+      return;
+    }
+
+    onCancelWithDraw();
+  }, [canCancelWithdraw, onCancelWithDraw]);
 
   return (
     <BaseModal
       className={CN(className)}
+      footer={
+        <Button
+          block={true}
+          className={'__cancel-unstake-button'}
+          disabled={!canCancelWithdraw}
+          icon={(
+            <Icon
+              phosphorIcon={ProhibitInset}
+              weight={'fill'}
+            />
+          )}
+          onClick={onClickCancelUnstaking}
+          schema={'secondary'}
+        >
+          {t('Cancel unstake')}
+        </Button>
+      }
       id={modalId}
       onCancel={closeModal}
       title={'Withdraw info'}
@@ -42,55 +127,22 @@ function Component ({ className }: Props) {
       <MetaInfo
         labelColorScheme='gray'
         labelFontWeight='regular'
-        spaceSize='sm'
-        valueColorScheme='light'
+        spaceSize='ms'
       >
-        <MetaInfo.Number
-          decimals={2}
-          label={(
-            <>
-              <span className={'__withdraw-now'}>Withdraw now</span>
-              <Icon
-                className={'earning-item-stake-btn'}
-                iconColor={'#4cd9ac'}
-                phosphorIcon={CheckCircle}
-                size='sm'
-                weight='fill'
-              />
-            </>
-          )}
-          suffix={'DOT'}
-          value={2008}
-        />
-        <MetaInfo.Number
-          decimals={1}
-          label={'9 days until withdraw'}
-          suffix={'DOT'}
-          value={402}
-        />
-        <MetaInfo.Number
-          decimals={2}
-          label={'10 days until withdraw'}
-          suffix={'DOT'}
-          value={102}
-        />
+        {items.map((item, index) => {
+          return (
+            <MetaInfo.Number
+              className={'__withdraw-time-item'}
+              decimals={inputAsset?.decimals || 0}
+              key={index}
+              label={renderWithdrawTime(item)}
+              suffix={inputAsset?.symbol}
+              value={item.claimable}
+              valueColorSchema='even-odd'
+            />
+          );
+        })}
       </MetaInfo>
-
-      <Button
-        block={true}
-        className={'__cancel-unstake-button'}
-        icon={(
-          <Icon
-            phosphorIcon={ProhibitInset}
-            weight={'fill'}
-          />
-        )}
-        onClick={onClickViewExplore}
-        size={'xs'}
-        type={'ghost'}
-      >
-        {t('Cancel unstake')}
-      </Button>
     </BaseModal>
   );
 }

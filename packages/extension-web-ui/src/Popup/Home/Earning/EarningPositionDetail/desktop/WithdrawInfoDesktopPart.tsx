@@ -1,94 +1,145 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { UnstakingInfo, UnstakingStatus, YieldPoolInfo } from '@subwallet/extension-base/types';
+import { BN_ZERO } from '@subwallet/extension-base/utils';
 import { EarningWithdrawalDetailModal } from '@subwallet/extension-web-ui/components/Modal/Earning/EarningWithdrawalDetailModal';
+import { CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, WITHDRAW_TRANSACTION } from '@subwallet/extension-web-ui/constants';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, ModalContext, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
-type Props = ThemeProps;
-const modalId = 'earning-withdrawal-detail-modal';
+type Props = ThemeProps & {
+  unstakings: UnstakingInfo[];
+  poolInfo: YieldPoolInfo;
+  inputAsset: _ChainAsset;
+  transactionFromValue: string;
+  transactionChainValue: string;
+};
 
-function Component ({ className }: Props) {
+const withdrawalDetailModalId = 'earning-withdrawal-detail-modal';
+
+function Component ({ className, inputAsset, poolInfo, transactionChainValue, transactionFromValue,
+  unstakings }: Props) {
   const { t } = useTranslation();
   const { activeModal } = useContext(ModalContext);
-  const onClaimReward = useCallback(() => {
-    alert('Dung Nguyen');
-  }, []);
 
-  const onOpenModal = useCallback(() => {
-    activeModal(modalId);
+  const { slug } = poolInfo;
+
+  const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
+  const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
+
+  const totalWithdrawable = useMemo(() => {
+    let result = BN_ZERO;
+
+    unstakings.forEach((value) => {
+      if (value.status === UnstakingStatus.CLAIMABLE) {
+        result = result.plus(value.claimable);
+      }
+    });
+
+    return result;
+  }, [unstakings]);
+
+  const canWithdraw = useMemo(() => {
+    return totalWithdrawable.gt(BN_ZERO);
+  }, [totalWithdrawable]);
+
+  const onWithDraw = useCallback(() => {
+    setWithdrawStorage({
+      ...DEFAULT_WITHDRAW_PARAMS,
+      slug: slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
+    });
+
+    // todo: open WithDraw modal
+  }, [setWithdrawStorage, slug, transactionChainValue, transactionFromValue]);
+
+  const onCancelWithDraw = useCallback(() => {
+    setCancelUnStakeStorage({
+      ...DEFAULT_CANCEL_UN_STAKE_PARAMS,
+      slug: slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
+    });
+
+    // todo: open CancelWithDraw
+  }, [setCancelUnStakeStorage, slug, transactionChainValue, transactionFromValue]);
+
+  const onOpenDetailModal = useCallback(() => {
+    activeModal(withdrawalDetailModalId);
   }, [activeModal]);
 
+  if (!unstakings.length) {
+    return (
+      <div className={CN(className, '-no-content')}></div>
+    );
+  }
+
   return (
-    <div
-      className={CN(className, 'withdraw-info-desktop')}
-    >
-      <div className={'__claim-reward-area'}>
-        <div className={'earning-info-title'}>Withdraw info</div>
-        <div className={'claim-reward-action'}>
-          <Number
-            className={'__claim-reward-value'}
-            decimal={7}
-            decimalOpacity={0.45}
-            subFloatNumber={true}
-            suffix={'DOT'}
-            unitOpacity={0.45}
-            value={10360002344}
-          />
-          <Button
-            onClick={onClaimReward}
-            size='xs'
-          >
-            {t('Withdraw')}
-          </Button>
-        </div>
-        <div className='__block-divider' />
+    <>
+      <div
+        className={CN(className)}
+      >
+        <div className={'__part-title'}>{t('Withdraw info')}</div>
+
+        {canWithdraw
+          ? (
+            <div className={'__withdraw-area'}>
+              <Number
+                className={'__withdraw-value'}
+                decimal={inputAsset.decimals || 0}
+                decimalOpacity={0.45}
+                subFloatNumber={true}
+                suffix={inputAsset.symbol}
+                unitOpacity={0.45}
+                value={totalWithdrawable}
+              />
+              <Button
+                onClick={onWithDraw}
+                size='xs'
+              >
+                {t('Withdraw')}
+              </Button>
+            </div>
+          )
+          : (
+            <div className={'__withdraw-area -no-content'}></div>
+          )}
+
+        <div className={'__separator'}></div>
+
         <Button
           block={true}
           className={'rewards-history'}
-          onClick={onOpenModal}
+          onClick={onOpenDetailModal}
           type={'ghost'}
         >{t('View detail')}</Button>
-        <EarningWithdrawalDetailModal />
       </div>
-    </div>
+
+      <EarningWithdrawalDetailModal
+        inputAsset={inputAsset}
+        modalId={withdrawalDetailModalId}
+        onCancelWithDraw={onCancelWithDraw}
+        poolInfo={poolInfo}
+        unstakings={unstakings}
+      />
+    </>
   );
 }
 
 export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
-  minHeight: 54,
-  width: 384,
-  paddingTop: token.padding,
-  paddingBottom: token.padding,
-  paddingLeft: token.paddingLG,
-  paddingRight: token.paddingLG,
-
-  '&:hover': {
-    backgroundColor: token.colorBgInput
-  },
 
   '.__part-title': {
-    paddingTop: token.padding,
-    paddingLeft: token.padding,
-    paddingRight: token.padding
-  },
-  '.earning-info-title': {
-    fontSize: token.fontSize,
-    lineHeight: token.lineHeight,
-    color: token.colorWhite,
-    width: '100%'
-  },
-  '.__block-divider': {
-    height: 2,
-    width: 336,
-    backgroundColor: token.colorBgDivider,
-    marginTop: token.marginSM
+    paddingTop: token.padding
   },
 
   '.__separator': {
@@ -98,54 +149,5 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
     marginBottom: token.marginSM,
     marginLeft: token.margin,
     marginRight: token.margin
-  },
-
-  '.__claim-reward-area': {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: token.sizeSM,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: token.paddingSM,
-    paddingLeft: token.padding,
-    paddingRight: token.padding
-  },
-  '.claim-reward-action': {
-    display: 'flex',
-    justifyContent: 'space-between',
-    width: '100%'
-  },
-
-  '.__claim-reward-value': {
-    fontSize: token.fontSizeHeading4,
-    lineHeight: token.lineHeightHeading4,
-    fontWeight: token.headingFontWeight,
-    color: token.colorTextLight1,
-
-    '.ant-number-integer': {
-      color: 'inherit !important',
-      fontSize: 'inherit !important',
-      fontWeight: 'inherit !important',
-      lineHeight: 'inherit'
-    },
-
-    '.ant-number-decimal, .ant-number-suffix': {
-      color: `${token.colorTextLight3} !important`,
-      fontSize: `${token.fontSizeHeading5}px !important`,
-      fontWeight: 'inherit !important',
-      lineHeight: token.lineHeightHeading5
-    }
-  },
-
-  '.__claim-reward-area + .__separator': {
-    marginTop: 0
-  },
-
-  '.__separator + .__reward-history-panel': {
-    marginTop: -13
-  },
-
-  '.__view-explorer-button': {
-    marginTop: token.marginSM
   }
 }));

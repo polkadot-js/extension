@@ -155,7 +155,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
       const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
       const minPoolJoin = _minPoolJoin?.toString() || undefined;
-      const expectedReturn = calculateChainStakedReturnV2(new BigN(rawTotalIssuance), new BigN(blockTime), new BigN(epochDuration), new BigN(sessionsPerEra), new BigN(lastTotalStaked), validatorEraReward);
+      const expectedReturn = calculateChainStakedReturnV2(new BigN(rawTotalIssuance), new BigN(blockTime), new BigN(epochDuration), new BigN(sessionsPerEra), new BigN(lastTotalStaked), validatorEraReward, false);
       const eraTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default; // in hours
       const unlockingPeriod = parseInt(unlockingEras) * eraTime; // in hours
 

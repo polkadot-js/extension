@@ -189,20 +189,32 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   return stakedReturn;
 }
 
-export function calculateChainStakedReturnV2 (totalIssuance: BigNumber, blockTime: BigNumber, epochDuration: BigNumber, sessionsPerEra: BigNumber, lastTotalStaked: BigNumber, validatorEraReward: BigNumber) {
+export function calculateChainStakedReturnV2 (totalIssuance: BigNumber, blockTime: BigNumber, epochDuration: BigNumber, sessionsPerEra: BigNumber, lastTotalStaked: BigNumber, validatorEraReward: BigNumber, isCompound?: boolean) {
+  // todo: currently set hitory depth = 30 days
   const SECONDS_PER_DAY = 86400;
   const DAYS_PER_YEAR = 365;
   const DECIMAL = 10;
-
-  const erasPerDay = (new BigNumber(SECONDS_PER_DAY)).dividedBy(epochDuration).dividedBy(blockTime).dividedBy(sessionsPerEra);
-  const inflationToStakers = (new BigNumber(DAYS_PER_YEAR)).multipliedBy(erasPerDay).multipliedBy(validatorEraReward).dividedBy(totalIssuance).multipliedBy(100);
 
   const lastTotalStakedUnit = lastTotalStaked.dividedBy(new BigNumber(10 ** DECIMAL));
   const totalIssuanceUnit = totalIssuance.dividedBy(new BigNumber(10 ** DECIMAL));
   const supplyStaked = lastTotalStakedUnit.dividedBy(totalIssuanceUnit);
 
-  // todo: case take compound
-  return inflationToStakers.dividedBy(supplyStaked).toNumber();
+  const erasPerDay = (new BigNumber(SECONDS_PER_DAY)).dividedBy(epochDuration).dividedBy(blockTime).dividedBy(sessionsPerEra);
+  const dayRewardRate = erasPerDay.multipliedBy(validatorEraReward).dividedBy(totalIssuance).multipliedBy(100);
+
+  let inflationToStakers: BigNumber = new BigNumber(0);
+
+  if (isCompound) {
+    inflationToStakers = dayRewardRate.multipliedBy(DAYS_PER_YEAR);
+  } else {
+    const multipilier = dayRewardRate.dividedBy(100).plus(1).exponentiatedBy(365);
+
+    inflationToStakers = new BigNumber(100).multipliedBy(multipilier).minus(100);
+  }
+
+  const averageRewardRate = inflationToStakers.dividedBy(supplyStaked);
+
+  return averageRewardRate.toNumber();
 }
 
 export function calculateAlephZeroValidatorReturn (chainStakedReturn: number, commission: number) {

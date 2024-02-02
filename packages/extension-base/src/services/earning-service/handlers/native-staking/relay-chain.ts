@@ -130,7 +130,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
       const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
       // const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
-      const expectedReturn = calculateChainStakedReturnV2(new BigNumber(rawTotalIssuance), new BigNumber(blockTime), new BigNumber(epochDuration), new BigNumber(sessionsPerEra), new BigNumber(lastTotalStaked), validatorEraReward);
+      const expectedReturn = calculateChainStakedReturnV2(new BigNumber(rawTotalIssuance), new BigNumber(blockTime), new BigNumber(epochDuration), new BigNumber(sessionsPerEra), new BigNumber(lastTotalStaked), validatorEraReward, true);
       const eraTime = _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // in hours
       const unlockingPeriod = parseInt(unlockingEras) * eraTime; // in hours
       const farmerCount = _counterForNominators.toPrimitive() as number;

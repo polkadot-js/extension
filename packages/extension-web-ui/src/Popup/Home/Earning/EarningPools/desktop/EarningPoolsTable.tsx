@@ -1,29 +1,35 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo } from '@subwallet/extension-base/types';
-import { EarningTypeTag, EmptyList, Table } from '@subwallet/extension-web-ui/components';
+import { EarningTypeTag, Table } from '@subwallet/extension-web-ui/components';
+import { BN_TEN } from '@subwallet/extension-web-ui/constants';
+import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, Logo, Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { Coin, PlusCircle } from 'phosphor-react';
+import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   items: YieldPoolInfo[];
+  onClickRow: (row: YieldPoolInfo) => void;
+  filterFunction: (item: YieldPoolInfo) => boolean;
+  emptyListFunction: () => React.ReactNode;
+  searchFunction: (item: YieldPoolInfo, searchText: string) => boolean;
+  searchTerm: string;
 }
 
-// todo: i18n this
-
-export const DEFAULT_ITEMS_PER_PAGE = 10;
-
-const Component: React.FC<Props> = ({ className, items }: Props) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
-  const onClickMock = useCallback(() => {
-    alert('dung nguyen');
-  }, []);
+const Component: React.FC<Props> = ({ className, emptyListFunction, filterFunction, items, onClickRow,
+  searchFunction, searchTerm }: Props) => {
+  const { t } = useTranslation();
+  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const priceMap = useSelector((state: RootState) => state.price.priceMap);
 
   const columns = useMemo(() => {
     const tokenCol = {
@@ -34,17 +40,17 @@ const Component: React.FC<Props> = ({ className, items }: Props) => {
         return (
           <div className={'__row-token-name-wrapper'}>
             <Logo
-              network={'polkadot'}
+              network={row.metadata.logo || row.chain}
               size={48}
             />
             <div className={'token-item'}>
               <div className={'token-info'}>
-                <span>DOT</span>
+                <span>{assetRegistry[row.metadata.inputAsset]?.symbol}</span>
                 <span className={'__token-name'}>
-                &nbsp;(<span>Polkadot</span>)
+                &nbsp;(<span>{row.metadata.shortName}</span>)
                 </span>
               </div>
-              <div className={'__description'}>Start staking with just 1 DOT</div>
+              <div className={'__description'}>{row.metadata.description}</div>
             </div>
           </div>
         );
@@ -52,55 +58,101 @@ const Component: React.FC<Props> = ({ className, items }: Props) => {
     };
 
     const stakingTypeCol = {
-      title: 'Staking type',
+      title: t('Staking type'),
       key: 'staking_type',
       className: '__table-create-at-col',
       sortable: true,
       render: (row: YieldPoolInfo) => {
         return (
           <EarningTypeTag
-            chain={'polkadot'}
+            chain={row.chain}
             className={'__item-tag'}
-            comingSoon={true}
+            type={row.type}
           />
         );
       }
     };
 
     const totalValueStakedCol = {
-      title: 'Total value staked',
+      title: t('Total value staked'),
       key: 'total_value_staked',
       className: '__table-progress-col',
       render: (row: YieldPoolInfo) => {
+        const total = ((): string => {
+          const tvl = row.statistic?.tvl;
+          const asset = assetRegistry[row.metadata.inputAsset];
+
+          if (tvl && asset) {
+            const priceId = asset.priceId;
+
+            if (!priceId) {
+              return '0';
+            }
+
+            const price = priceMap[priceId] || 0;
+
+            return new BigN(tvl)
+              .div(BN_TEN.pow(asset.decimals || 0))
+              .multipliedBy(price)
+              .toString();
+          } else {
+            return '';
+          }
+        })();
+
         return (
           <div className={'__row-progress-wrapper'}>
-            <Number
-              className={'__row-progress-value'}
-              decimal={2}
-              prefix={'$'}
-              value={51465300000}
-            />
+            {total
+              ? (
+                <Number
+                  decimal={0}
+                  prefix={'$'}
+                  value={total}
+                />
+              )
+              : (
+                <span>
+                  {t('TBD')}
+                </span>
+              )}
           </div>
         );
       }
     };
 
     const rewardsPerYearCol = {
-      title: 'Rewards per year',
+      title: t('Rewards per year'),
       key: 'rewards_per_year',
       className: '__table-limit-col',
       sortable: true,
       render: (row: YieldPoolInfo) => {
+        const totalApy = row.statistic?.totalApy;
+        const totalApr = row.statistic?.totalApr;
+
+        const apy = ((): number | undefined => {
+          if (totalApy) {
+            return totalApy;
+          }
+
+          if (totalApr) {
+            const rs = calculateReward(totalApr);
+
+            return rs.apy;
+          }
+
+          return undefined;
+        })();
+
         return (
           <div className={'__row-reward-per-year'}>
-            <Number
-              decimal={2}
-              decimalColor={'#4cd9ac'}
-              intColor={'#4cd9ac'}
-              suffix={'%'}
-              unitColor={'#4cd9ac'}
-              value={2038}
-            />
+            {!!apy && (
+              <Number
+                className='__row-reward-per-year-value'
+                decimal={0}
+                suffix={'%'}
+                value={apy}
+              />
+            )}
           </div>
         );
       }
@@ -121,11 +173,10 @@ const Component: React.FC<Props> = ({ className, items }: Props) => {
                   weight='fill'
                 />
               )}
-              onClick={onClickMock}
               shape='circle'
               size='xs'
             >
-              {'Stake now'}
+              {'Stake'}
             </Button>
           </div>
         );
@@ -139,42 +190,31 @@ const Component: React.FC<Props> = ({ className, items }: Props) => {
       rewardsPerYearCol,
       detailActionCol
     ];
-  }, [onClickMock]);
+  }, [assetRegistry, priceMap, t]);
 
   const getRowKey = useCallback((item: YieldPoolInfo) => {
     return item.slug;
   }, []);
 
-  const onClickRow = useCallback(() => {
-    alert('xin chao');
-  }, []);
-
-  const emptyList = useMemo(() => {
-    return (
-      <EmptyList
-        emptyMessage={'Tokens will appear here'}
-        emptyTitle={'No token found'}
-        phosphorIcon={Coin}
-      />
-    );
-  }, []);
+  const tableItems = useMemo(() => {
+    return items.filter((i) => filterFunction(i) && searchFunction(i, searchTerm));
+  }, [filterFunction, items, searchFunction, searchTerm]);
 
   return (
-    <div className={CN(className, 'explore-Table-container')}>
+    <div className={CN(className, 'earning-pools-table-container')}>
       <Table
-        className={'explore-Table'}
+        className={'earning-pools-table'}
         columns={columns}
-        emptyList={emptyList}
+        emptyList={emptyListFunction()}
         getRowKey={getRowKey}
-        items={items}
+        items={tableItems}
         onClickRow={onClickRow}
       />
     </div>
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const EarningPoolDesktopItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.__table-token-col.__table-token-col, .__table-create-at-col.__table-create-at-col': {
       flex: 1.2
@@ -337,5 +377,3 @@ const EarningPoolDesktopItem = styled(Component)<Props>(({ theme: { token } }: P
     }
   };
 });
-
-export default EarningPoolDesktopItem;

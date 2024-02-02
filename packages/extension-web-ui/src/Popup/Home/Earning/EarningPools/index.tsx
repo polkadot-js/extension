@@ -6,15 +6,18 @@ import { EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extensio
 import { EarningPoolItem } from '@subwallet/extension-web-ui/components/Earning';
 import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, useSelector, useTranslation, useYieldPoolInfoByGroup } from '@subwallet/extension-web-ui/hooks';
+import { EarningPoolsTable } from '@subwallet/extension-web-ui/Popup/Home/Earning/EarningPools/desktop/EarningPoolsTable';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
+import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import { EarningEntryParam, EarningEntryView, EarningPoolsParam, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { isAccountAll } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { Database, FadersHorizontal } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -34,6 +37,7 @@ const FILTER_MODAL_ID = 'earning-pool-filter-modal';
 function Component ({ poolGroup, symbol }: ComponentProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isWebUI } = useContext(ScreenContext);
 
   const pools = useYieldPoolInfoByGroup(poolGroup);
 
@@ -43,6 +47,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
 
   const [selectedPool, setSelectedPool] = React.useState<YieldPoolInfo | undefined>(undefined);
+  const [searchInput, setSearchInput] = useState<string>('');
 
   const { activeModal } = useContext(ModalContext);
 
@@ -158,11 +163,14 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     };
   }, [checkChainConnected, navigateToEarnTransaction, openConnectChainModal]);
 
+  const onClickRow = useCallback((item: YieldPoolInfo) => {
+    onClickItem(item)();
+  }, [onClickItem]);
+
   const renderItem = useCallback(
     (item: YieldPoolInfo) => {
       return (
         <EarningPoolItem
-          chain={chainInfoMap[item.chain]}
           className={'earning-pool-item'}
           key={item.slug}
           onClick={onClickItem(item)}
@@ -170,7 +178,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         />
       );
     },
-    [chainInfoMap, onClickItem]
+    [onClickItem]
   );
 
   const emptyList = useCallback(() => {
@@ -228,20 +236,47 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         subHeaderPaddingVertical={true}
         title={t<string>('{{symbol}} earning options', { replace: { symbol: symbol } })}
       >
-        <SwList.Section
-          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          className={'__section-list-container'}
-          enableSearchInput
-          filterBy={filterFunction}
-          list={items}
-          onClickActionBtn={onClickFilterButton}
-          renderItem={renderItem}
-          renderWhenEmpty={emptyList}
-          searchFunction={searchFunction}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search token')}
-          showActionBtn
-        />
+
+        {
+          isWebUI
+            ? (
+              <>
+                <Toolbar
+                  className={'__desktop-toolbar'}
+                  inputPlaceholder={t<string>('Search token')}
+                  onClickFilter={onClickFilterButton}
+                  onSearch={setSearchInput}
+                  searchValue={searchInput}
+                />
+
+                <EarningPoolsTable
+                  emptyListFunction={emptyList}
+                  filterFunction={filterFunction}
+                  items={items}
+                  onClickRow={onClickRow}
+                  searchFunction={searchFunction}
+                  searchTerm={searchInput}
+                />
+              </>
+            )
+            : (
+              <SwList.Section
+                actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+                className={'__section-list-container'}
+                enableSearchInput
+                filterBy={filterFunction}
+                list={items}
+                onClickActionBtn={onClickFilterButton}
+                renderItem={renderItem}
+                renderWhenEmpty={emptyList}
+                searchFunction={searchFunction}
+                searchMinCharactersCount={1}
+                searchPlaceholder={t<string>('Search token')}
+                showActionBtn
+              />
+            )
+        }
+
         <FilterModal
           applyFilterButtonTitle={t('Apply filter')}
           id={FILTER_MODAL_ID}

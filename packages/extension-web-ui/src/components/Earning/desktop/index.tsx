@@ -2,5 +2,4 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export { default as EarningOptionDesktopItem } from './EarningOptionDesktopItem';
-export { default as EarningPoolDesktopItem } from './EarningPoolDesktopItem';
 export { default as EarningPositionDesktopItem } from './EarningPositionDesktopItem';

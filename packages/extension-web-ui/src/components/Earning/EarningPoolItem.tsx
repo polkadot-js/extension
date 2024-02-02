@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo } from '@subwallet/extension-base/types';
 import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
@@ -18,7 +17,6 @@ import styled from 'styled-components';
 type Props = ThemeProps & {
   poolInfo: YieldPoolInfo;
   onClick?: () => void;
-  chain: _ChainInfo;
 }
 
 const Component: React.FC<Props> = (props: Props) => {

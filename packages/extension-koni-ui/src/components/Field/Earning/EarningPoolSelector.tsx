@@ -11,8 +11,7 @@ import { EarningPoolDetailModal } from '@subwallet/extension-koni-ui/components/
 import { EarningPoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningPoolDetailModal';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
-import { useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
-import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
+import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';

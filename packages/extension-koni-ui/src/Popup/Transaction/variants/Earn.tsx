@@ -11,8 +11,7 @@ import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earn
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
 import { EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
-import { useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
+import { useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';

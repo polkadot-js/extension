@@ -5,8 +5,7 @@ import { EarningRewardHistoryItem, SpecialYieldPoolInfo, SpecialYieldPositionInf
 import { AlertModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_TEN, BN_ZERO, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, EARN_TRANSACTION, UN_STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useAlert, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
+import { useAlert, useSelector, useTranslation, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { AccountAndNominationInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/AccountAndNominationInfoPart';
 import { EarningInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/EarningInfoPart';
 import { RewardInfoPart } from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail/RewardInfoPart';

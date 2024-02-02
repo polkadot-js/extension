@@ -6,7 +6,7 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolType } from '@subwallet/extension-base/types';
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
-import InstructionItem from '@subwallet/extension-koni-ui/components/Common/InstructionItem';
+import { InstructionItem } from '@subwallet/extension-koni-ui/components';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EARNING_DATA_RAW, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -122,11 +122,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     if (shortName) {
-      if (shortName === 'Stellaswap') {
-        result = result.replace('{{shortName}}', 'StellaSwap');
-      } else {
-        result = result.replace('{{shortName}}', shortName);
-      }
+      result = result.replace('{{shortName}}', shortName);
     }
 
     return result;

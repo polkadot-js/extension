@@ -65,9 +65,9 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     super(state, chain);
 
     this.slug = 'xcDOT___liquid_staking___stellaswap';
-    this.name = 'Stellaswap Liquid Staking';
+    this.name = 'StellaSwap Liquid Staking';
     this._logo = 'stellaswap';
-    this.shortName = 'Stellaswap';
+    this.shortName = 'StellaSwap';
   }
 
   protected getDescription (): string {

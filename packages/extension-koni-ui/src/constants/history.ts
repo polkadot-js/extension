@@ -20,7 +20,7 @@ export const TxTypeNameMap: Record<ExtrinsicType, string> = {
   [ExtrinsicType.MINT_SDOT]: detectTranslate('Mint sDOT'),
   [ExtrinsicType.MINT_QDOT]: detectTranslate('Mint qDOT'),
   [ExtrinsicType.MINT_STDOT]: detectTranslate('Mint stDOT'),
-  [ExtrinsicType.STAKING_LEAVE_POOL]: detectTranslate('Leave pool'),
+  [ExtrinsicType.STAKING_LEAVE_POOL]: detectTranslate('Unstake'),
   [ExtrinsicType.STAKING_UNBOND]: detectTranslate('Unstake'),
   [ExtrinsicType.JOIN_YIELD_POOL]: detectTranslate('Join pool'),
   [ExtrinsicType.UNSTAKE_VDOT]: detectTranslate('Unstake vDOT'),

@@ -6,8 +6,7 @@ import { EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extensio
 import { EarningPoolItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFilterModal, useHandleChainConnection, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldPoolInfoByGroup } from '@subwallet/extension-koni-ui/hooks/earning';
+import { useFilterModal, useHandleChainConnection, useSelector, useTranslation, useYieldPoolInfoByGroup } from '@subwallet/extension-koni-ui/hooks';
 import { ChainConnectionWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { EarningEntryParam, EarningEntryView, EarningPoolsParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
@@ -163,7 +162,6 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     (item: YieldPoolInfo) => {
       return (
         <EarningPoolItem
-          chain={chainInfoMap[item.chain]}
           className={'earning-pool-item'}
           key={item.slug}
           onClick={onClickItem(item)}
@@ -171,7 +169,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         />
       );
     },
-    [chainInfoMap, onClickItem]
+    [onClickItem]
   );
 
   const emptyList = useCallback(() => {

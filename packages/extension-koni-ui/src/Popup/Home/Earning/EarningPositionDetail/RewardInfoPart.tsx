@@ -6,8 +6,7 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning
 import { EarningRewardHistoryItem, EarningStatus, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { CollapsiblePanel, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO, CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS, StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
-import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldRewardTotal } from '@subwallet/extension-koni-ui/hooks/earning';
+import { useSelector, useTranslation, useYieldRewardTotal } from '@subwallet/extension-koni-ui/hooks';
 import { AlertDialogProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Icon, Number } from '@subwallet/react-ui';
@@ -158,13 +157,13 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
                 : (
                   <ActivityIndicator size={20} />
                 )
-              : (<div></div>)}
+              : isDAppStaking && (<div className={'__visit-dapp-label'}>{t('Visit Astar portal')}</div>)}
             {canClaim && (
               <Button
                 onClick={onClaimReward}
                 size='xs'
               >
-                {t('Claim rewards')}
+                {type === YieldPoolType.NATIVE_STAKING && isDAppStaking ? t('Check rewards') : t('Claim rewards')}
               </Button>
             )}
           </div>
@@ -266,6 +265,12 @@ export const RewardInfoPart = styled(Component)<Props>(({ theme: { token } }: Pr
       fontWeight: 'inherit !important',
       lineHeight: token.lineHeightHeading5
     }
+  },
+
+  '.__visit-dapp-label': {
+    fontSize: token.fontSize,
+    lineHeight: token.lineHeight,
+    color: token.colorTextLight4
   },
 
   '.__claim-reward-area + .__separator': {

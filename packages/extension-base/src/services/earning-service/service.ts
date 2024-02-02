@@ -378,7 +378,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
     const onlineData = await Promise.race([fetchPoolsData(), new Promise((resolve) => {
       setTimeout(() => {
         resolve({});
-      }, 1800);
+      }, 9000);
     })]) as Record<string, YieldPoolInfo>;
 
     Object.values(onlineData).forEach((item) => {
@@ -393,7 +393,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.runUnsubscribePoolsInfo();
 
     // Fetching online data
-    await this.fetchingPoolsInfoOnline();
+    this.fetchingPoolsInfoOnline().catch(console.error);
 
     const interval = setInterval(() => {
       this.fetchingPoolsInfoOnline().catch(console.error);

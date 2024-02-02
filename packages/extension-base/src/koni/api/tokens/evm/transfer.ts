@@ -126,6 +126,7 @@ export async function getERC20TransactionObject (
   const transactionObject = {
     gas: gasLimit,
     from,
+    value: '0',
     to: assetAddress,
     data: transferData,
     maxFeePerGas: priority.maxFeePerGas.toString(),

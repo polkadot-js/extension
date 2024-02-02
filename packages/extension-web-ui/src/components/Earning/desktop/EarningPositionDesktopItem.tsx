@@ -184,7 +184,10 @@ const Component: React.FC<Props> = (props: Props) => {
           className={'exclusive-reward-tag-wrapper'}
           onClick={childClick(openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs#exclusive-rewards'))}
         >
-          <EarningTypeTag className={'earning-item-tag'} chain={'polkadot'} />
+          <EarningTypeTag
+            chain={'polkadot'}
+            className={'earning-item-tag'}
+          />
         </div>
       </Tooltip>
     );
@@ -211,15 +214,15 @@ const Component: React.FC<Props> = (props: Props) => {
               !isAvailable &&
                             (
                               <EarningTypeTag
+                                chain={'polkadot'}
                                 className={'earning-item-tag'}
                                 comingSoon={true}
-                                chain={'polkadot'}
                               />
                             )
             }
             <EarningTypeTag
-              className={'earning-item-tag'}
               chain={'kusama'}
+              className={'earning-item-tag'}
             />
 
             {exclusiveRewardTagNode}

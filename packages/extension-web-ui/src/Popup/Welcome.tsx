@@ -127,7 +127,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     [accounts, t]
   );
 
-
   const buttonList = useMemo((): WelcomeButtonItem[] => [
     {
       description: t('Connect to your existing wallet'),
@@ -227,15 +226,14 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   }, [reformatAttachAddress, setIsConfirmedTermGeneral, autoGenAttachReadonlyAccountName, isAttachAddressEthereum, form, navigate]);
 
   const onSubmitAttachReadonlyAccount = useCallback(() => {
+    setModalIdAfterConfirm('');
 
-      setModalIdAfterConfirm('');
-
-      if (_isConfirmedTermGeneral.includes('nonConfirmed')) {
-        activeModal(GENERAL_TERM_AND_CONDITION_MODAL);
-      } else {
-        afterConfirmTermToAttachReadonlyAccount();
-      }
-    }, [_isConfirmedTermGeneral, activeModal, afterConfirmTermToAttachReadonlyAccount]);
+    if (_isConfirmedTermGeneral.includes('nonConfirmed')) {
+      activeModal(GENERAL_TERM_AND_CONDITION_MODAL);
+    } else {
+      afterConfirmTermToAttachReadonlyAccount();
+    }
+  }, [_isConfirmedTermGeneral, activeModal, afterConfirmTermToAttachReadonlyAccount]);
 
   useEffect(() => {
     if (!isNoAccount) {
@@ -368,7 +366,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       {isWebUI && (
         <SocialGroup className={'social-group'} />
       )}
-      <GeneralTermModal onOk={modalIdAfterConfirm === '' ? afterConfirmTermToAttachReadonlyAccount : openModal(modalIdAfterConfirm)}  />
+      <GeneralTermModal onOk={modalIdAfterConfirm === '' ? afterConfirmTermToAttachReadonlyAccount : openModal(modalIdAfterConfirm)} />
     </Layout.Base>
   );
 }

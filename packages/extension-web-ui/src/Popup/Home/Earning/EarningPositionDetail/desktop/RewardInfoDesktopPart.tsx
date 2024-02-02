@@ -48,9 +48,9 @@ function Component ({ className }: Props) {
         </div>
         <div className='__block-divider' />
         <Button
+          block={true}
           className={'rewards-history'}
           onClick={onOpenModal}
-          block={true}
           type={'ghost'}
         >Rewards history</Button>
         <EarningRewardsHistoryModal />

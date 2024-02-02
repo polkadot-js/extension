@@ -1,15 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { EarningWithdrawalDetailModal } from '@subwallet/extension-web-ui/components/Modal/Earning/EarningWithdrawalDetailModal';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, ModalContext, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
-import {
-  EarningWithdrawalDetailModal
-} from "@subwallet/extension-web-ui/components/Modal/Earning/EarningWithdrawalDetailModal";
 
 type Props = ThemeProps;
 const modalId = 'earning-withdrawal-detail-modal';
@@ -50,9 +48,9 @@ function Component ({ className }: Props) {
         </div>
         <div className='__block-divider' />
         <Button
+          block={true}
           className={'rewards-history'}
           onClick={onOpenModal}
-          block={true}
           type={'ghost'}
         >{t('View detail')}</Button>
         <EarningWithdrawalDetailModal />

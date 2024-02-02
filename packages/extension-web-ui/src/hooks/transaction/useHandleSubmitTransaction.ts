@@ -49,7 +49,7 @@ const useHandleSubmitTransaction = (setIgnoreWarnings?: (value: boolean) => void
             content: t('Your available balance is {{availableBalance}} {{symbol}}, you need to ' +
               'leave {{existentialDeposit}} {{symbol}} as minimal balance (existential deposit) and pay network fees' +
               '. Make sure you have at least {{maintainBalance}} {{symbol}} in your transferable balance to proceed.',
-              { replace: { ..._data } }),
+            { replace: { ..._data } }),
             okButton: {
               text: t('I understand'),
               onClick: () => {

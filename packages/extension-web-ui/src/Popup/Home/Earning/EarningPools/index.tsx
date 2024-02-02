@@ -341,6 +341,10 @@ const EarningPools = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
     '+ .earning-pool-item': {
       marginTop: token.marginXS
     }
+  },
+
+  '.__desktop-toolbar': {
+    marginBottom: 33
   }
 }));
 

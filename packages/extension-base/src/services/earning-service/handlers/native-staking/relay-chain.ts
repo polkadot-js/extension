@@ -79,12 +79,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
       const supportedDays = 30;
       const startEra = parseInt(currentEra) - supportedDays;
-      const eraRewardPointsPromises = [];
       const eraRewardPromises = [];
-
-      for (let era = startEra; era < parseInt(currentEra); era++) {
-        eraRewardPointsPromises.push(substrateApi.api.query.staking.erasRewardPoints(era));
-      }
 
       for (let era = startEra; era < parseInt(currentEra); era++) {
         eraRewardPromises.push(substrateApi.api.query.staking.erasValidatorReward(era));

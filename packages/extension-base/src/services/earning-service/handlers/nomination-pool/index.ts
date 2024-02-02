@@ -3,7 +3,7 @@
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { APIItemState, BasicTxErrorType, ChainType, ExtrinsicType, NominationInfo, StakingTxErrorType, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, calculateInflation, getExistUnstakeErrorMessage, getMinStakeErrorMessage, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateChainStakedReturn, calculateChainStakedReturnV2, calculateInflation, getExistUnstakeErrorMessage, getMinStakeErrorMessage, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -106,12 +106,45 @@ export default class NominationPoolHandler extends BasePoolHandler {
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
-      const [_totalEraStake, _totalIssuance, _auctionCounter, _minPoolJoin] = await Promise.all([
+      const epochDuration = substrateApi.api.consts.babe.epochDuration.toString();
+      const blockTime = _EXPECTED_BLOCK_TIME[chainInfo.slug];
+      const sessionsPerEra = substrateApi.api.consts.staking.sessionsPerEra.toString();
+      const maxSupportedDays = substrateApi.api.consts.staking.historyDepth.toString(); // todo: check maxSupportedDays to calculate for 30 or 15 days
+
+      const supportedDays = 30;
+      const startEra = parseInt(currentEra) - supportedDays;
+      const eraRewardPromises = [];
+
+      for (let era = startEra; era < parseInt(currentEra); era++) {
+        eraRewardPromises.push(substrateApi.api.query.staking.erasValidatorReward(era));
+      }
+
+      const [_totalEraStake, _totalIssuance, _auctionCounter, _minPoolJoin, _lastTotalStaked, ..._eraReward] = await Promise.all([
         substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
         substrateApi.api.query.balances.totalIssuance(),
         substrateApi.api.query.auctions?.auctionCounter(),
-        substrateApi.api.query?.nominationPools?.minJoinBond()
+        substrateApi.api.query?.nominationPools?.minJoinBond(),
+        substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra) - 1),
+        ...eraRewardPromises
       ]);
+
+      let sumEraReward = new BigN(0);
+      let failEra = 0; // todo: handle case era not return rewards.
+
+      for (const _item of _eraReward) {
+        const item = _item.toString();
+
+        if (!item) {
+          failEra += 1;
+        } else {
+          const eraReward = new BigN(item);
+
+          sumEraReward = sumEraReward.plus(eraReward);
+        }
+      }
+
+      const validatorEraReward = sumEraReward.dividedBy(new BigN(supportedDays - failEra));
+      const lastTotalStaked = _lastTotalStaked.toString();
 
       const rawTotalEraStake = _totalEraStake.toString();
       const rawTotalIssuance = _totalIssuance.toString();
@@ -122,7 +155,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
       const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
       const minPoolJoin = _minPoolJoin?.toString() || undefined;
-      const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
+      const expectedReturn = calculateChainStakedReturnV2(new BigN(rawTotalIssuance), new BigN(blockTime), new BigN(epochDuration), new BigN(sessionsPerEra), new BigN(lastTotalStaked), validatorEraReward);
       const eraTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default; // in hours
       const unlockingPeriod = parseInt(unlockingEras) * eraTime; // in hours
 

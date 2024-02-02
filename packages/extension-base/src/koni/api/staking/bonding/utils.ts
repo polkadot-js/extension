@@ -4,12 +4,14 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
-import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
+import { _EXPECTED_BLOCK_TIME, _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningStatus, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
+import BigNumber from 'bignumber.js';
 import { t } from 'i18next';
 
 import { ApiPromise } from '@polkadot/api';
@@ -185,6 +187,22 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   }
 
   return stakedReturn;
+}
+
+export function calculateChainStakedReturnV2 (totalIssuance: BigNumber, blockTime: BigNumber, epochDuration: BigNumber, sessionsPerEra: BigNumber, lastTotalStaked: BigNumber, validatorEraReward: BigNumber) {
+  const SECONDS_PER_DAY = 86400;
+  const DAYS_PER_YEAR = 365;
+  const DECIMAL = 10;
+
+  const erasPerDay = (new BigNumber(SECONDS_PER_DAY)).dividedBy(epochDuration).dividedBy(blockTime).dividedBy(sessionsPerEra);
+  const inflationToStakers = (new BigNumber(DAYS_PER_YEAR)).multipliedBy(erasPerDay).multipliedBy(validatorEraReward).dividedBy(totalIssuance).multipliedBy(100);
+
+  const lastTotalStakedUnit = lastTotalStaked.dividedBy(new BigNumber(10 ** DECIMAL));
+  const totalIssuanceUnit = totalIssuance.dividedBy(new BigNumber(10 ** DECIMAL));
+  const supplyStaked = lastTotalStakedUnit.dividedBy(totalIssuanceUnit);
+
+  // todo: case take compound
+  return inflationToStakers.dividedBy(supplyStaked).toNumber();
 }
 
 export function calculateAlephZeroValidatorReturn (chainStakedReturn: number, commission: number) {

@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
@@ -13,6 +13,7 @@ import { parseIdentity } from '@subwallet/extension-base/services/earning-servic
 import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
+import BigNumber from 'bignumber.js';
 import { t } from 'i18next';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -71,14 +72,52 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
-      const [_totalEraStake, _totalIssuance, _auctionCounter, _minNominatorBond, _counterForNominators, _minimumActiveStake] = await Promise.all([
+      const epochDuration = substrateApi.api.consts.babe.epochDuration.toString();
+      const blockTime = _EXPECTED_BLOCK_TIME[chainInfo.slug];
+      const sessionsPerEra = substrateApi.api.consts.staking.sessionsPerEra.toString();
+      const maxSupportedDays = substrateApi.api.consts.staking.historyDepth.toString(); // todo: check maxSupportedDays to calculate for 30 or 15 days
+
+      const supportedDays = 30;
+      const startEra = parseInt(currentEra) - supportedDays;
+      const eraRewardPointsPromises = [];
+      const eraRewardPromises = [];
+
+      for (let era = startEra; era < parseInt(currentEra); era++) {
+        eraRewardPointsPromises.push(substrateApi.api.query.staking.erasRewardPoints(era));
+      }
+
+      for (let era = startEra; era < parseInt(currentEra); era++) {
+        eraRewardPromises.push(substrateApi.api.query.staking.erasValidatorReward(era));
+      }
+
+      const [_totalEraStake, _totalIssuance, _auctionCounter, _minNominatorBond, _counterForNominators, _minimumActiveStake, _lastTotalStaked, ..._eraReward] = await Promise.all([
         substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
         substrateApi.api.query.balances.totalIssuance(),
         substrateApi.api.query.auctions?.auctionCounter(),
         substrateApi.api.query.staking.minNominatorBond(),
         substrateApi.api.query.staking.counterForNominators(),
-        substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake()
+        substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake(),
+        substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra) - 1),
+        ...eraRewardPromises
       ]);
+
+      let sumEraReward = new BigNumber(0);
+      let failEra = 0; // todo: handle case era not return rewards.
+
+      for (const _item of _eraReward) {
+        const item = _item.toString();
+
+        if (!item) {
+          failEra += 1;
+        } else {
+          const eraReward = new BigNumber(item);
+
+          sumEraReward = sumEraReward.plus(eraReward);
+        }
+      }
+
+      const validatorEraReward = sumEraReward.dividedBy(new BigNumber(supportedDays - failEra));
+      const lastTotalStaked = _lastTotalStaked.toString();
 
       const minActiveStake = _minimumActiveStake?.toString() || '0';
       const minNominatorBond = _minNominatorBond.toString();
@@ -95,7 +134,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const bnTotalIssuance = new BN(rawTotalIssuance);
 
       const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
-      const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
+      // const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
+      const expectedReturn = calculateChainStakedReturnV2(new BigNumber(rawTotalIssuance), new BigNumber(blockTime), new BigNumber(epochDuration), new BigNumber(sessionsPerEra), new BigNumber(lastTotalStaked), validatorEraReward);
       const eraTime = _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // in hours
       const unlockingPeriod = parseInt(unlockingEras) * eraTime; // in hours
       const farmerCount = _counterForNominators.toPrimitive() as number;

@@ -1,11 +1,29 @@
 // Copyright 2019-2022 @polkadot/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
-import { BN_ZERO } from '@subwallet/extension-web-ui/constants';
+import { YieldPoolInfo } from '@subwallet/extension-base/types';
+import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useAccountBalance, useGetChainSlugsByAccountType, useSelector, useTokenGroup } from '@subwallet/extension-web-ui/hooks';
 import { BalanceValueInfo, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
+import BigN from 'bignumber.js';
 import { useMemo } from 'react';
+
+function calculateTotalValueStaked (poolInfo: YieldPoolInfo, assetRegistry: Record<string, _ChainAsset>, priceMap: Record<string, number>) {
+  const asset = assetRegistry[poolInfo.metadata.inputAsset];
+  const tvl = poolInfo.statistic?.tvl;
+
+  if (!asset || !asset.priceId || !tvl) {
+    return new BigN(0);
+  }
+
+  const price = priceMap[asset.priceId] || 0;
+
+  return new BigN(tvl)
+    .div(BN_TEN.pow(asset.decimals || 0))
+    .multipliedBy(price);
+}
 
 const useYieldGroupInfo = (): YieldGroupInfo[] => {
   const { poolInfoMap } = useSelector((state) => state.earning);
@@ -14,6 +32,7 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
   const chainsByAccountType = useGetChainSlugsByAccountType();
   const { tokenGroupMap } = useTokenGroup(chainsByAccountType);
   const { tokenBalanceMap, tokenGroupBalanceMap } = useAccountBalance(tokenGroupMap, true);
+  const { priceMap } = useSelector((state) => state.price);
 
   return useMemo(() => {
     const result: Record<string, YieldGroupInfo> = {};
@@ -43,7 +62,14 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             exists.maxApy = Math.max(exists.maxApy || 0, apy);
           }
 
+          if (pool.statistic?.earningThreshold?.join) {
+            if (new BigN(exists.minJoin || 0).gt(pool.statistic?.earningThreshold?.join || '0')) {
+              exists.description = pool.metadata.description;
+            }
+          }
+
           exists.isTestnet = exists.isTestnet || chainInfo.isTestnet;
+          exists.totalValueStaked = exists.totalValueStaked.plus(calculateTotalValueStaked(pool, assetRegistry, priceMap));
         } else {
           const token = multiChainAssetMap[group] || assetRegistry[group];
 
@@ -67,22 +93,17 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             isTestnet: chainInfo.isTestnet,
             name: token.name,
             chain: chain,
-            poolListLength: 1
+            poolListLength: 1,
+            description: pool.metadata.description,
+            totalValueStaked: calculateTotalValueStaked(pool, assetRegistry, priceMap),
+            minJoin: pool.statistic?.earningThreshold?.join
           };
         }
       }
     }
 
     return Object.values(result);
-  }, [
-    assetRegistry,
-    chainInfoMap,
-    chainsByAccountType,
-    multiChainAssetMap,
-    poolInfoMap,
-    tokenBalanceMap,
-    tokenGroupBalanceMap
-  ]);
+  }, [assetRegistry, chainInfoMap, chainsByAccountType, multiChainAssetMap, poolInfoMap, priceMap, tokenBalanceMap, tokenGroupBalanceMap]);
 };
 
 export default useYieldGroupInfo;

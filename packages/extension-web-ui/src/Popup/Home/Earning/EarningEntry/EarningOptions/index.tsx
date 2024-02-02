@@ -1,17 +1,19 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
+import { EarningOptionDesktopItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
 import { EarningOptionItem } from '@subwallet/extension-web-ui/components/Earning';
 import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-web-ui/constants';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, useSelector, useTranslation, useYieldGroupInfo } from '@subwallet/extension-web-ui/hooks';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
+import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import { EarningEntryView, EarningPoolsParam, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
 import { isAccountAll } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Database, FadersHorizontal } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -56,6 +58,7 @@ enum FilterOptionType {
 
 function Component ({ className, hasEarningPositions, setEntryView }: Props) {
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
 
   const data = useYieldGroupInfo();
@@ -68,6 +71,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
 
   const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
+  const [searchInput, setSearchInput] = useState<string>('');
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
@@ -166,6 +170,19 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 
   const renderItem = useCallback(
     (item: YieldGroupInfo) => {
+      if (isWebUI) {
+        return (
+          <EarningOptionDesktopItem
+            chain={chainInfoMap[item.chain]}
+            className={'earning-option-desktop-item'}
+            isShowBalance={isShowBalance}
+            key={item.group}
+            onClick={onClickItem(item)}
+            poolGroup={item}
+          />
+        );
+      }
+
       return (
         <EarningOptionItem
           chain={chainInfoMap[item.chain]}
@@ -177,7 +194,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
         />
       );
     },
-    [chainInfoMap, isShowBalance, onClickItem]
+    [chainInfoMap, isShowBalance, isWebUI, onClickItem]
   );
 
   const emptyList = useCallback(() => {
@@ -229,20 +246,50 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
         subHeaderPaddingVertical={true}
         title={t<string>('Earning options')}
       >
-        <SwList.Section
-          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          className={'__section-list-container'}
-          enableSearchInput
-          filterBy={filterFunction}
-          list={items}
-          onClickActionBtn={onClickFilterButton}
-          renderItem={renderItem}
-          renderWhenEmpty={emptyList}
-          searchFunction={searchFunction}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search token')}
-          showActionBtn
-        />
+        {
+          isWebUI
+            ? (
+              <>
+                <Toolbar
+                  className={'__desktop-toolbar'}
+                  inputPlaceholder={t<string>('Search token')}
+                  onClickFilter={onClickFilterButton}
+                  onSearch={setSearchInput}
+                  searchValue={searchInput}
+                />
+                <SwList
+                  className={'__desktop-list-container'}
+                  displayGrid={true}
+                  filterBy={filterFunction}
+                  gridGap={'16px'}
+                  list={items}
+                  minColumnWidth={'360px'}
+                  renderItem={renderItem}
+                  renderWhenEmpty={emptyList}
+                  searchBy={searchFunction}
+                  searchMinCharactersCount={1}
+                  searchTerm={searchInput}
+                />
+              </>
+            )
+            : (
+              <SwList.Section
+                actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+                className={'__section-list-container'}
+                enableSearchInput
+                filterBy={filterFunction}
+                list={items}
+                onClickActionBtn={onClickFilterButton}
+                renderItem={renderItem}
+                renderWhenEmpty={emptyList}
+                searchFunction={searchFunction}
+                searchMinCharactersCount={1}
+                searchPlaceholder={t<string>('Search token')}
+                showActionBtn
+              />
+            )
+        }
+
         <FilterModal
           applyFilterButtonTitle={t('Apply filter')}
           id={FILTER_MODAL_ID}
@@ -268,6 +315,12 @@ const EarningOptions = styled(Component)<Props>(({ theme: { token } }: Props) =>
     '+ .earning-option-item': {
       marginTop: token.marginXS
     }
+  },
+
+  // desktop
+
+  '.__desktop-toolbar': {
+    marginBottom: 20
   }
 }));
 

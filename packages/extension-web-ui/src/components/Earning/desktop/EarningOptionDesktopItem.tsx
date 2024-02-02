@@ -1,156 +1,93 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo } from '@subwallet/extension-base/types';
-import { EarningTypeTag } from '@subwallet/extension-web-ui/components';
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
-import { Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { openInNewTab } from '@subwallet/extension-web-ui/utils';
-import { Button, Icon, Logo, Number, Tooltip } from '@subwallet/react-ui';
+import { ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
+import { Button, Icon, Logo, Number } from '@subwallet/react-ui';
 import { PlusCircle } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
+import React from 'react';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
-  item?: YieldPoolInfo,
-  compactMode?: boolean,
-  onClickCalculatorBtn?: () => void;
-  onClickInfoBtn?: () => void;
-  onClickStakeBtn?: () => void;
+  poolGroup: YieldGroupInfo;
+  onClick?: () => void;
+  isShowBalance?: boolean;
+  chain: _ChainInfo;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className } = props;
+  const { chain, className, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
-  const { token } = useTheme() as Theme;
-  const isAvailable = true;
 
-  // const submitText = useMemo(() => {
-  //   if (!isAvailable) {
-  //     return t('Coming soon');
-  //   }
-  //
-  //   switch (type) {
-  //     case YieldPoolType.LENDING:
-  //       return t('Supply now');
-  //     case YieldPoolType.NOMINATION_POOL:
-  //     case YieldPoolType.LIQUID_STAKING:
-  //     default:
-  //       return t('Stake now');
-  //   }
-  // }, [t, type, isAvailable]);
-  //
-  // const totalTitle = useMemo(() => {
-  //   switch (type) {
-  //     case YieldPoolType.LENDING:
-  //       return t('Total value supplied');
-  //     case YieldPoolType.NOMINATION_POOL:
-  //     case YieldPoolType.LIQUID_STAKING:
-  //     default:
-  //       return t('Total value staked');
-  //   }
-  // }, [t, type]);
-
-  const childClick = useCallback((onClick: VoidFunction) => {
-    return (e?: SyntheticEvent) => {
-      e && e.stopPropagation();
-      onClick();
-    };
-  }, []);
-
-  const onClickMock = useCallback(() => {
-    alert('onClickMOck');
-  }, []);
-
-  const exclusiveRewardTagNode = useMemo(() => {
-    const label = t('No content');
-
-    return (
-      <Tooltip
-        placement={'top'}
-        title={label}
-      >
-        <div
-          className={'exclusive-reward-tag-wrapper'}
-          onClick={childClick(openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs#exclusive-rewards'))}
-        >
-          <EarningTypeTag
-            chain={'polkadot'}
-            className={'earning-item-tag'}
-          />
-        </div>
-      </Tooltip>
-    );
-  }, [childClick, t]);
+  const { balance, description, maxApy, symbol, token, totalValueStaked } = poolGroup;
 
   return (
     <div
       className={className}
-      onClick={onClickMock}
+      onClick={onClick}
     >
       <div className={'earning-item-content-wrapper'}>
         <Logo
-          network={'kusama'}
           size={64}
+          token={token.toLowerCase()}
         />
 
         <div className={'earning-item-message-wrapper'}>
-          <div className={'earning-item-name'}>{'Kusama'}</div>
-          <div className={'earning-item-description'}>{'Stake any amount of ETH, get daily staking rewards and use your stETH across the DeFi ecosystem and L2.'}</div>
+          <div className={'earning-item-name'}>{symbol}
+            {chain.slug === 'bifrost' && (
+              <span className={'__chain-wrapper'}>
+                  (<span className={'__chain'}>
+                  {chain.name}
+                </span>)
+              </span>
+            )}
+          </div>
+          <div className={'earning-item-description'}>{description}</div>
         </div>
 
-        <div className='earning-item-tags-container'>
-          {!isAvailable && (
-            <EarningTypeTag
-              chain={'kusama'}
-              className={'__item-tag'}
-              comingSoon={true}
+        <div className='__item-available-balance'>
+          <div className='__item-available-balance-label'>
+            {t('Available')}:
+          </div>
+          <div className={'__item-available-balance-value'}>
+            <Number
+              decimal={0}
+              hide={!isShowBalance}
+              suffix={symbol}
+              value={balance.value}
             />
-          )}
-          <EarningTypeTag
-            chain={'kusama'}
-            className={'earning-item-tag'}
-          />
-
-          {exclusiveRewardTagNode}
+          </div>
         </div>
 
         <div className={'earning-item-reward'}>
           {
-            !isAvailable
+            !maxApy
               ? <div className={'earning-item-not-available-title'}>TBD</div>
-              : <Number
-                decimal={0}
-                size={30}
-                suffix={'%'}
-                value={'15.6'}
-              />
+              : (
+                <Number
+                  decimal={0}
+                  suffix={'%'}
+                  value={maxApy}
+                />
+              )
           }
 
           <div className={'earning-item-reward-sub-text'}>{t('per year')}</div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: token.paddingXXS }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 4 }}>
           <div className='earning-item-total-value-staked'>{'Total value staked'}:</div>
 
-          {
-            !isAvailable
-              ? <div className='earning-item-not-available-info'>TBD</div>
-              : <Number
-                decimal={0}
-                decimalColor={token.colorSuccess}
-                intColor={token.colorSuccess}
-                prefix={'$'}
-                size={14}
-                unitColor={token.colorSuccess}
-                value={'100'}
-              />
-          }
+          <Number
+            decimal={0}
+            prefix={'$'}
+            value={totalValueStaked}
+          />
         </div>
 
         <div className='earning-item-footer'>
           <Button
-            disabled={!isAvailable}
             icon={(
               <Icon
                 className={'earning-item-stake-btn'}
@@ -159,7 +96,6 @@ const Component: React.FC<Props> = (props: Props) => {
                 weight='fill'
               />
             )}
-            onClick={onClickMock}
             shape='circle'
             size='xs'
           >

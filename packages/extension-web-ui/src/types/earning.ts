@@ -7,6 +7,7 @@ import { NominationPoolInfo, ValidatorInfo } from '@subwallet/extension-base/typ
 import { BalanceValueInfo } from '@subwallet/extension-web-ui/types/balance';
 import { PhosphorIcon } from '@subwallet/extension-web-ui/types/index';
 import { SwIconProps } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 
 export enum EarningEntryView {
   OPTIONS= 'options',
@@ -29,6 +30,9 @@ export interface YieldGroupInfo {
   name?: string;
   chain: string;
   poolListLength: number;
+  description: string;
+  totalValueStaked: BigN;
+  minJoin?: string;
 }
 
 export interface EarningTagType {

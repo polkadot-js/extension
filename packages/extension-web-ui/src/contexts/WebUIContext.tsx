@@ -112,7 +112,11 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
         pathName === '/dapps' ||
         pathName === '/mission-pools'
       ) {
-        setHeaderType(HeaderType.COMMON);
+        if (showBackButtonOnHeader) {
+          setHeaderType(HeaderType.COMMON_BACK);
+        } else {
+          setHeaderType(HeaderType.COMMON);
+        }
       } else if (pathName.startsWith('/transaction-done')) {
         setHeaderType(HeaderType.COMMON_BACK_TO_HOME);
       } else if (pathName.startsWith('/transaction')) {
@@ -121,7 +125,7 @@ export const WebUIContextProvider = ({ children }: WebUIContextProviderProps) =>
         setHeaderType(HeaderType.NONE);
       }
     }
-  }, [isPortfolio, noAccount, pathname, setBackground, setHeaderType, setShowSidebar]);
+  }, [isPortfolio, noAccount, pathname, setBackground, setHeaderType, setShowSidebar, showBackButtonOnHeader]);
 
   return (
     <WebUIContext.Provider

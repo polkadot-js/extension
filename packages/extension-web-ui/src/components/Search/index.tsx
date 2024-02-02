@@ -72,7 +72,6 @@ const Component: React.FC<Props> = ({ actionBtnIcon,
           placeholder={placeholder}
           prefix={<Icon phosphorIcon={MagnifyingGlass} />}
           size='md'
-          value={searchValue}
           suffix={
             showActionBtn && (
               <Button
@@ -83,6 +82,7 @@ const Component: React.FC<Props> = ({ actionBtnIcon,
               />
             )
           }
+          value={searchValue}
           // onKeyDown={handleKeyDown}
         />
       </div>
@@ -90,7 +90,7 @@ const Component: React.FC<Props> = ({ actionBtnIcon,
   );
 };
 
-const Search = styled(Component)<Props>(() => {
+const Search = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     display: 'grid',
     width: '100%',
@@ -98,10 +98,13 @@ const Search = styled(Component)<Props>(() => {
     '.right-section': {
       justifySelf: 'end',
       display: 'flex',
-      '.search-input': {
-        width: 360,
-        height: 50
-      }
+      alignItems: 'center',
+      gap: token.sizeXS
+    },
+
+    '.search-input': {
+      width: 360,
+      height: 48
     }
   };
 });

@@ -19,3 +19,4 @@ export * from './strings';
 export * from './transaction';
 export * from './wallet';
 export * from './banner';
+export * from './earning';

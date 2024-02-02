@@ -4,7 +4,7 @@
 import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RequestCameraAccessModal, RequestCreatePasswordModal, SelectExtensionModal } from '@subwallet/extension-web-ui/components';
 import { ConfirmationModal } from '@subwallet/extension-web-ui/components/Modal/ConfirmationModal';
 import { CustomizeModal } from '@subwallet/extension-web-ui/components/Modal/Customize/CustomizeModal';
-import { BUY_TOKEN_MODAL, CONFIRMATION_MODAL, CREATE_ACCOUNT_MODAL, SEED_PHRASE_MODAL, TRANSACTION_TRANSFER_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL } from '@subwallet/extension-web-ui/constants';
+import { BUY_TOKEN_MODAL, CONFIRMATION_MODAL, CREATE_ACCOUNT_MODAL, EARNING_INSTRUCTION_MODAL, SEED_PHRASE_MODAL, TRANSACTION_TRANSFER_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_FAST_WITHDRAW_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-web-ui/constants/router';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ModalContext, useExcludeModal } from '@subwallet/react-ui';
@@ -67,6 +67,7 @@ export const WalletModalContext = ({ children }: Props) => {
   useExcludeModal(TRANSACTION_YIELD_FAST_WITHDRAW_MODAL);
   useExcludeModal(TRANSACTION_YIELD_CLAIM_MODAL);
   useExcludeModal(BUY_TOKEN_MODAL);
+  useExcludeModal(EARNING_INSTRUCTION_MODAL);
 
   const onCloseConfirmationModal = useCallback(() => {
     setSearchParams((prev) => {

@@ -1,8 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationPoolDataType } from '@subwallet/extension-web-ui/hooks/screen/staking/useGetValidatorList';
-import { ThemeProps } from '@subwallet/extension-web-ui/types';
+import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, Number, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';

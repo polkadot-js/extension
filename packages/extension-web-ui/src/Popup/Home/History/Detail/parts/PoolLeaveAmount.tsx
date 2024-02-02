@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LeavePoolAdditionalData, YieldPoolType } from '@subwallet/extension-base/background/KoniTypes';
+import { LeavePoolAdditionalData, YieldPoolType } from '@subwallet/extension-base/types';
 import { MetaInfo } from '@subwallet/extension-web-ui/components';
-import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-web-ui/types';
 import BigN from 'bignumber.js';
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -14,12 +14,11 @@ interface Props extends ThemeProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
+  const { t } = useTranslation();
   const { data } = props;
   const { amount } = data;
 
   const additionalInfo = data.additionalInfo as LeavePoolAdditionalData;
-
-  const { t } = useTranslation();
 
   const isLending = useMemo(() => additionalInfo.type === YieldPoolType.LENDING, [additionalInfo.type]);
   const amountValue = useMemo(() => new BigN(amount?.value || '0'), [amount?.value]);
@@ -60,8 +59,6 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const HistoryDetailAmount = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const PoolLeaveAmount = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {};
 });
-
-export default HistoryDetailAmount;

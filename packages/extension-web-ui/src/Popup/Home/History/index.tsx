@@ -318,10 +318,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, {} as Record<string, string>);
   }, [accounts]);
 
-  const typeNameMap: Record<string, string> = useMemo((): Record<ExtrinsicType | 'default' | 'send' | 'received' | 'submitting' | 'processing', string> => ({
+  const typeNameMap: Record<string, string> = useMemo((): Record<string, string> => ({
     default: t('Transaction'),
     submitting: t('Submitting...'),
     processing: t('Processing...'),
+    timeout: t('Time-out'),
     send: t('Send'),
     received: t('Receive'),
     [ExtrinsicType.TRANSFER_BALANCE]: t('Send token'),
@@ -360,7 +361,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
 
-  const typeTitleMap: Record<string, string> = useMemo((): Record<ExtrinsicType | 'default' | 'send' | 'received', string> => ({
+  const typeTitleMap: Record<string, string> = useMemo(() => ({
     default: t('Transaction'),
     send: t('Send token'),
     received: t('Receive token'),

@@ -31,54 +31,29 @@ export interface StakeParams extends TransactionFormBaseProps {
   defaultType: StakingType | 'all'
 }
 
+export interface EarnParams extends TransactionFormBaseProps {
+  slug: string;
+  target: string;
+  value: string;
+}
+
 export interface UnStakeParams extends TransactionFormBaseProps {
   value: string;
   validator: string;
-  type: StakingType;
+  slug: string;
+  fastLeave: boolean;
 }
 
 export interface CancelUnStakeParams extends TransactionFormBaseProps {
-  unstake: string;
-  type: StakingType;
+  unstake: string,
+  slug: string;
 }
 
 export interface WithdrawParams extends TransactionFormBaseProps {
-  type: StakingType;
+  slug: string;
 }
 
 export interface ClaimRewardParams extends TransactionFormBaseProps {
-  type: StakingType;
+  slug: string;
   bondReward: boolean;
-}
-
-export interface YieldParams extends TransactionFormBaseProps, Record<`amount-${number}`, string> {
-  method: string;
-  nominate: string;
-  pool: string;
-}
-
-export interface UnYieldParams extends TransactionFormBaseProps {
-  value: string;
-  validator: string;
-  method: string;
-  fastUnstake?: boolean;
-}
-
-export interface YieldStakingWithdrawParams extends TransactionFormBaseProps {
-  method: string;
-}
-
-export interface ClaimYieldParams extends TransactionFormBaseProps {
-  method: string;
-  bondReward: boolean;
-}
-
-export interface CancelUnYieldParams extends TransactionFormBaseProps {
-  unstake: string;
-  method: string;
-}
-
-export interface YieldFastWithdrawParams extends TransactionFormBaseProps {
-  amount: string;
-  method: string;
 }

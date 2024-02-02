@@ -16,7 +16,6 @@ export * from './AccountSelector';
 export * from './AddressInput';
 export * from './BuyTokens/ServiceSelector';
 export * from './ChainSelector';
-export * from './EarningMethodSelector';
 export * from './ProviderSelector';
 export * from './TokenSelector';
 export * from './TokenTypeSelector';

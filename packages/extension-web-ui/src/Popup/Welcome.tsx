@@ -177,7 +177,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       setIsConfirmedTermGeneral('confirmed');
     };
   }
-  , [activeModal, selectWallet, inactiveModal, navigate, setSelectedAccountTypes]);
+  , [setIsConfirmedTermGeneral, selectWallet, setSelectedAccountTypes, navigate, inactiveModal, activeModal]);
 
   const onClickToSelectTypeConnect = useCallback((idModal: string) => {
     return () => {

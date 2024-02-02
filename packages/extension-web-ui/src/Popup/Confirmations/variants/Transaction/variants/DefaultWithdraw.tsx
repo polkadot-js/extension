@@ -23,7 +23,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { amount, slug } = transaction.data as RequestYieldLeave;
 
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
-  const { minAmountPercentMap, poolInfoMap } = useSelector((state) => state.earning);
+  const { poolInfoMap } = useSelector((state) => state.earning);
   const yieldPoolInfo = poolInfoMap[slug] as SpecialYieldPoolInfo;
 
   const isLendingPool = useMemo(() => {
@@ -52,10 +52,6 @@ const Component: React.FC<Props> = (props: Props) => {
     return convertDerivativeToOriginToken(amount, yieldPoolInfo, derivativeTokenInfo, originTokenInfo);
   }, [amount, assetRegistry, yieldPoolInfo]);
 
-  const percent = useMemo(() => {
-    return minAmountPercentMap[yieldPoolInfo.slug] || minAmountPercentMap.default;
-  }, [minAmountPercentMap, yieldPoolInfo.slug]);
-
   return (
     <>
       <CommonTransactionInfo
@@ -68,7 +64,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <MetaInfo.Number
           decimals={assetInfo.decimals || 0}
-          label={t('Amount')}
+          label={'Amount'}
           suffix={assetInfo.symbol}
           value={amount}
         />
@@ -79,15 +75,6 @@ const Component: React.FC<Props> = (props: Props) => {
             label={t('Estimated receivables')}
             suffix={receivedAssetInfo.symbol}
             value={estimatedReceivables}
-          />
-        )}
-
-        {!isLendingPool && (
-          <MetaInfo.Number
-            decimals={receivedAssetInfo.decimals || 0}
-            label={t('Minimum receivables')}
-            suffix={receivedAssetInfo.symbol}
-            value={Math.floor(estimatedReceivables * percent)}
           />
         )}
 
@@ -118,10 +105,10 @@ const Wrapper = (props: Props) => {
   );
 };
 
-const FastWithdrawTransactionConfirmation = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
+const DefaultWithdrawTransactionConfirmation = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
 
   };
 });
 
-export default FastWithdrawTransactionConfirmation;
+export default DefaultWithdrawTransactionConfirmation;

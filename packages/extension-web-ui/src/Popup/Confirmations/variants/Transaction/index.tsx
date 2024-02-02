@@ -6,17 +6,19 @@ import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ConfirmationQueueItem } from '@subwallet/extension-web-ui/stores/base/RequestState';
-import { ThemeProps } from '@subwallet/extension-web-ui/types';
+import { AlertDialogProps, ThemeProps } from '@subwallet/extension-web-ui/types';
 import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { EvmSignArea, SubstrateSignArea } from '../../parts/Sign';
-import { BaseTransactionConfirmation, BondTransactionConfirmation, CancelUnstakeTransactionConfirmation, ClaimRewardTransactionConfirmation, FastWithdrawTransactionConfirmation, JoinPoolTransactionConfirmation, JoinYieldPoolConfirmation, LeavePoolTransactionConfirmation, SendNftTransactionConfirmation, TokenApproveConfirmation, TransferBlock, UnbondTransactionConfirmation, WithdrawTransactionConfirmation, YieldPoolLeaveTransactionConfirmation } from './variants';
+import { BaseTransactionConfirmation, BondTransactionConfirmation, CancelUnstakeTransactionConfirmation, ClaimRewardTransactionConfirmation, DefaultWithdrawTransactionConfirmation, FastWithdrawTransactionConfirmation, JoinPoolTransactionConfirmation, JoinYieldPoolConfirmation, LeavePoolTransactionConfirmation, SendNftTransactionConfirmation, TokenApproveConfirmation, TransferBlock, UnbondTransactionConfirmation, WithdrawTransactionConfirmation } from './variants';
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;
+  openAlert: (alertProps: AlertDialogProps) => void;
+  closeAlert: VoidFunction;
 }
 
 const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTransactionConfirmation => {
@@ -42,23 +44,23 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
     case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
       return CancelUnstakeTransactionConfirmation;
     case ExtrinsicType.MINT_QDOT:
+    case ExtrinsicType.MINT_VDOT:
     case ExtrinsicType.MINT_LDOT:
     case ExtrinsicType.MINT_SDOT:
     case ExtrinsicType.MINT_STDOT:
-    case ExtrinsicType.MINT_VDOT:
       return JoinYieldPoolConfirmation;
     case ExtrinsicType.REDEEM_QDOT:
+    case ExtrinsicType.REDEEM_VDOT:
     case ExtrinsicType.REDEEM_LDOT:
     case ExtrinsicType.REDEEM_SDOT:
     case ExtrinsicType.REDEEM_STDOT:
-    case ExtrinsicType.REDEEM_VDOT:
       return FastWithdrawTransactionConfirmation;
     case ExtrinsicType.UNSTAKE_QDOT:
+    case ExtrinsicType.UNSTAKE_VDOT:
     case ExtrinsicType.UNSTAKE_LDOT:
     case ExtrinsicType.UNSTAKE_SDOT:
     case ExtrinsicType.UNSTAKE_STDOT:
-    case ExtrinsicType.UNSTAKE_VDOT:
-      return YieldPoolLeaveTransactionConfirmation;
+      return DefaultWithdrawTransactionConfirmation;
     case ExtrinsicType.TOKEN_APPROVE:
       return TokenApproveConfirmation;
     default:
@@ -67,7 +69,8 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
 };
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, confirmation: { item, type } } = props;
+  const { className, closeAlert, confirmation: { item, type },
+    openAlert } = props;
   const { id } = item;
 
   const { transactionRequest } = useSelector((state: RootState) => state.requestState);
@@ -79,8 +82,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
     const Component = getTransactionComponent(extrinsicType);
 
-    return <Component transaction={transaction} />;
-  }, []);
+    return (
+      <Component
+        closeAlert={closeAlert}
+        openAlert={openAlert}
+        transaction={transaction}
+      />
+    );
+  }, [closeAlert, openAlert]);
 
   return (
     <>

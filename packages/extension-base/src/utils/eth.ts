@@ -104,7 +104,7 @@ export const recalculateGasPrice = (_price: string, chain: string) => {
 
 export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) => {
   try {
-    const numBlock = 6;
+    const numBlock = 20;
     const history = await web3.api.eth.getFeeHistory(numBlock, 'latest', [0, 25, 50, 75, 100]);
 
     const baseGasFee = new BigN(history.baseFeePerGas[history.baseFeePerGas.length - 1]); // Last element is latest

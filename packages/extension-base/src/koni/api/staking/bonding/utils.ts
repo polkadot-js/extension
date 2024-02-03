@@ -4,8 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
-import { _EXPECTED_BLOCK_TIME, _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
-import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningStatus, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
@@ -15,6 +14,7 @@ import BigNumber from 'bignumber.js';
 import { t } from 'i18next';
 
 import { ApiPromise } from '@polkadot/api';
+import { Codec } from '@polkadot/types/types';
 import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
 
 export interface PalletDappsStakingDappInfo {
@@ -189,27 +189,25 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   return stakedReturn;
 }
 
-export function calculateChainStakedReturnV2 (totalIssuance: BigNumber, blockTime: BigNumber, epochDuration: BigNumber, sessionsPerEra: BigNumber, lastTotalStaked: BigNumber, validatorEraReward: BigNumber, isCompound?: boolean) {
-  // todo: currently set hitory depth = 30 days
-  const SECONDS_PER_DAY = 86400;
+export function calculateChainStakedReturnV2 (chainInfo: _ChainInfo, totalIssuance: string, erasPerDay: number, lastTotalStaked: string, validatorEraReward: BigNumber, isCompound?: boolean) {
   const DAYS_PER_YEAR = 365;
-  const DECIMAL = 10;
+  // @ts-ignore
+  const DECIMAL = chainInfo.substrateInfo.decimals;
 
-  const lastTotalStakedUnit = lastTotalStaked.dividedBy(new BigNumber(10 ** DECIMAL));
-  const totalIssuanceUnit = totalIssuance.dividedBy(new BigNumber(10 ** DECIMAL));
+  const lastTotalStakedUnit = (new BigNumber(lastTotalStaked)).dividedBy(new BigNumber(10 ** DECIMAL));
+  const totalIssuanceUnit = (new BigNumber(totalIssuance)).dividedBy(new BigNumber(10 ** DECIMAL));
   const supplyStaked = lastTotalStakedUnit.dividedBy(totalIssuanceUnit);
 
-  const erasPerDay = (new BigNumber(SECONDS_PER_DAY)).dividedBy(epochDuration).dividedBy(blockTime).dividedBy(sessionsPerEra);
-  const dayRewardRate = erasPerDay.multipliedBy(validatorEraReward).dividedBy(totalIssuance).multipliedBy(100);
+  const dayRewardRate = validatorEraReward.multipliedBy(erasPerDay).dividedBy(totalIssuance).multipliedBy(100);
 
   let inflationToStakers: BigNumber = new BigNumber(0);
 
-  if (isCompound) {
+  if (!isCompound) {
     inflationToStakers = dayRewardRate.multipliedBy(DAYS_PER_YEAR);
   } else {
-    const multipilier = dayRewardRate.dividedBy(100).plus(1).exponentiatedBy(365);
+    const multiplier = dayRewardRate.dividedBy(100).plus(1).exponentiatedBy(365);
 
-    inflationToStakers = new BigNumber(100).multipliedBy(multipilier).minus(100);
+    inflationToStakers = new BigNumber(100).multipliedBy(multiplier).minus(100);
   }
 
   const averageRewardRate = inflationToStakers.dividedBy(supplyStaked);
@@ -548,6 +546,33 @@ export function getValidatorLabel (chain: string) {
   }
 
   return 'Collator';
+}
+
+export function getAvgValidatorEraReward (supportedDays: number, eraRewardHistory: Codec[]) {
+  let sumEraReward = new BigNumber(0);
+  let failEra = 0;
+
+  for (const _item of eraRewardHistory) {
+    const item = _item.toString();
+
+    if (!item) {
+      failEra += 1;
+    } else {
+      const eraReward = new BigNumber(item);
+
+      sumEraReward = sumEraReward.plus(eraReward);
+    }
+  }
+
+  return sumEraReward.dividedBy(new BigNumber(supportedDays - failEra));
+}
+
+export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupportedEras: number) {
+  if (maxSupportedEras / erasPerDay > 30) {
+    return 30;
+  } else {
+    return 15;
+  }
 }
 
 export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {

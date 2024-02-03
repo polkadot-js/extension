@@ -115,9 +115,9 @@ export default class NominationPoolHandler extends BasePoolHandler {
       const startEra = parseInt(currentEra) - supportedDays;
       const eraRewardPromises = [];
 
-      for (let era = startEra; era < parseInt(currentEra); era++) {
-        eraRewardPromises.push(substrateApi.api.query.staking.erasValidatorReward(era));
-      }
+      // for (let era = startEra; era < parseInt(currentEra); era++) {
+      //   eraRewardPromises.push(substrateApi.api.query.staking.erasValidatorReward(era));
+      // }
 
       const [_totalEraStake, _totalIssuance, _auctionCounter, _minPoolJoin, _lastTotalStaked, ..._eraReward] = await Promise.all([
         substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
@@ -125,7 +125,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
         substrateApi.api.query.auctions?.auctionCounter(),
         substrateApi.api.query?.nominationPools?.minJoinBond(),
         substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra) - 1),
-        ...eraRewardPromises
+        substrateApi.api.query.staking.erasValidatorReward.multi([...Array(supportedDays).keys()].map((i) => i + startEra))
       ]);
 
       let sumEraReward = new BigN(0);

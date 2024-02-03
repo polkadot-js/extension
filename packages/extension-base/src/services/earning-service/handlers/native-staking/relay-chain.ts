@@ -81,9 +81,9 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const startEra = parseInt(currentEra) - supportedDays;
       const eraRewardPromises = [];
 
-      for (let era = startEra; era < parseInt(currentEra); era++) {
-        eraRewardPromises.push(substrateApi.api.query.staking.erasValidatorReward(era));
-      }
+      // for (let era = startEra; era < parseInt(currentEra); era++) {
+      //   eraRewardPromises.push(substrateApi.api.query.staking.erasValidatorReward.multi(era));
+      // }
 
       const [_totalEraStake, _totalIssuance, _auctionCounter, _minNominatorBond, _counterForNominators, _minimumActiveStake, _lastTotalStaked, ..._eraReward] = await Promise.all([
         substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
@@ -93,7 +93,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
         substrateApi.api.query.staking.counterForNominators(),
         substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake(),
         substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra) - 1),
-        ...eraRewardPromises
+        substrateApi.api.query.staking.erasValidatorReward.multi([...Array(supportedDays).keys()].map((i) => i + startEra))
       ]);
 
       let sumEraReward = new BigNumber(0);

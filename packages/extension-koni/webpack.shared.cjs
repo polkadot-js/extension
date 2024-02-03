@@ -149,11 +149,11 @@ module.exports = (entry, alias = {}, compileWithHtml = false) => {
       }),
       entry.background && new WebExtension({
         background: {
-          serviceWorkerEntry: 'background',
+          serviceWorkerEntry: 'background'
         },
         hmrConfig: false,
         weakRuntimeCheck: true
-      }),
+      })
     ],
     resolve: {
       alias: packages.reduce((alias, p) => ({

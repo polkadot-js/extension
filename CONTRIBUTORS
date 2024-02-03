@@ -1,8 +1,8 @@
-    1879	Nam Phạm                      	[Issue 2313] fix eslint
-    1848	AnhMTV                        	Release version 1.1.33
-    1520	S2kael                        	[Issue-2038] [Campaign] Handle case update and remove campaign
+    1895	Nam Phạm                      	[Issue 2463] update logic fetching latest disabled xcm channels
+    1862	AnhMTV                        	Release version 1.1.35 (fix build problem)
+    1523	S2kael                        	[Issue-2544] Fix missing unstaking request
      465	Jaco                          	0.42.5 (#969)
-     305	lw-cdm                        	[Issue-2467] Support "Request a feature" feature
+     307	lw-cdm                        	[Issue-2545] Refactor code for ClaimDappStakingRewardsModal
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       98	lw-cdm                        	
@@ -12,12 +12,12 @@
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
       29	bluedot                       	
+      26	nguyentiendung                	[Issue-2497] Fix the issue regarding the flow of the watch-only account.
       24	S2kael                        	
-      21	nguyentiendung                	[Issue-2452] Show custom network on the token list when nominate
+      12	Thiendekaco                   	update locate of file
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
-       8	Thiendekaco                   	[Issue 2387] Update design of history state time-out
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

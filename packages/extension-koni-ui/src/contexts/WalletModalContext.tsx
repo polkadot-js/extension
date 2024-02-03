@@ -3,6 +3,7 @@
 
 import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
 import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModal';
+import { ClaimDappStakingRewardsModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
 import { EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -108,6 +109,7 @@ export const WalletModalContext = ({ children }: Props) => {
     <NewSeedModal />
     <ImportSeedModal />
     <DeriveAccountModal />
+    <ClaimDappStakingRewardsModal />
     <RequestCreatePasswordModal />
     <RequestCameraAccessModal />
     <CustomizeModal />

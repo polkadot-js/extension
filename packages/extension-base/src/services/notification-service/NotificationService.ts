@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Notification, NotificationButton, NotificationParams } from '@subwallet/extension-base/background/KoniTypes';
+import { isFirefox } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
 export default class NotificationService {
@@ -38,7 +39,7 @@ export default class NotificationService {
       iconUrl: '/images/icon-128.png',
       priority: 2,
       isClickable: !!link || !!onClick,
-      buttons
+      buttons: isFirefox ? undefined : buttons
     }, (notificationId: string) => {
       if (link || onClick) {
         chrome.notifications.onClicked.addListener((nId) => {

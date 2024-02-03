@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldStepDetail, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { YieldStepDetail, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { simpleDeepClone } from '@subwallet/extension-web-ui/utils';
 
 export enum EarningStepStatus {
@@ -10,7 +10,7 @@ export enum EarningStepStatus {
   PROCESSING = 'PROCESSING',
   SUBMITTING = 'SUBMITTING',
   SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR'
+  ERROR = 'ERROR',
 }
 
 interface StepResult {
@@ -31,7 +31,7 @@ export enum EarningActionType {
   STEP_COMPLETE = 'STEP_COMPLETE', // complete current step and processing next step
   STEP_ERROR = 'STEP_ERROR', // throw error on current step
   STEP_ERROR_ROLLBACK = 'STEP_ERROR_ROLLBACK', // throw error on current step and rollback previous step
-  STEP_SUBMIT = 'STEP_SUBMIT' // submit current step
+  STEP_SUBMIT = 'STEP_SUBMIT', // submit current step
 }
 
 interface AbstractEarningAction {
@@ -49,7 +49,7 @@ export const DEFAULT_YIELD_PROCESS: YieldProcessState = {
 };
 
 interface InitAction extends AbstractEarningAction {
-  type: EarningActionType.INIT,
+  type: EarningActionType.INIT;
   payload: YieldProcessState;
 }
 
@@ -58,7 +58,7 @@ const handleInitAction: ActionHandler<InitAction> = () => {
 };
 
 interface StepCreateAction extends AbstractEarningAction {
-  type: EarningActionType.STEP_CREATE,
+  type: EarningActionType.STEP_CREATE;
   payload: Pick<YieldProcessState, 'steps' | 'feeStructure'>;
 }
 
@@ -86,7 +86,7 @@ const handleStepCreateAction: ActionHandler<StepCreateAction> = (oldState, { pay
   }
 
   const firstStep = Math.min(...Object.keys(result.stepResults).map((key) => parseInt(key)));
-  const allQueued = Object.values(result.stepResults).every((result) => result.status === EarningStepStatus.QUEUED);
+  const allQueued = Object.values(result.stepResults).every((_result) => _result.status === EarningStepStatus.QUEUED);
 
   if (allQueued) {
     result.stepResults[firstStep].status = EarningStepStatus.PROCESSING;
@@ -96,7 +96,7 @@ const handleStepCreateAction: ActionHandler<StepCreateAction> = (oldState, { pay
 };
 
 interface StepSubmitAction extends AbstractEarningAction {
-  type: EarningActionType.STEP_SUBMIT,
+  type: EarningActionType.STEP_SUBMIT;
   payload: null;
 }
 
@@ -111,7 +111,7 @@ const handleStepSubmitAction: ActionHandler<StepSubmitAction> = (oldState) => {
 };
 
 interface StepCompleteAction extends AbstractEarningAction {
-  type: EarningActionType.STEP_COMPLETE,
+  type: EarningActionType.STEP_COMPLETE;
   payload: StepResult['result'];
 }
 
@@ -135,7 +135,7 @@ const handleStepCompleteAction: ActionHandler<StepCompleteAction> = (oldState, {
 };
 
 interface StepErrorAction extends AbstractEarningAction {
-  type: EarningActionType.STEP_ERROR,
+  type: EarningActionType.STEP_ERROR;
   payload: StepResult['result'];
 }
 
@@ -153,7 +153,7 @@ const handleStepErrorAction: ActionHandler<StepErrorAction> = (oldState, { paylo
 };
 
 interface StepErrorRollbackAction extends AbstractEarningAction {
-  type: EarningActionType.STEP_ERROR_ROLLBACK,
+  type: EarningActionType.STEP_ERROR_ROLLBACK;
   payload: StepResult['result'];
 }
 
@@ -176,7 +176,13 @@ const handleStepErrorRollbackAction: ActionHandler<StepErrorRollbackAction> = (o
   return result;
 };
 
-type EarningAction = InitAction | StepCreateAction | StepSubmitAction | StepCompleteAction | StepErrorAction | StepErrorRollbackAction;
+type EarningAction =
+  | InitAction
+  | StepCreateAction
+  | StepSubmitAction
+  | StepCompleteAction
+  | StepErrorAction
+  | StepErrorRollbackAction;
 
 export const earningReducer = (oldState: YieldProcessState, action: EarningAction): YieldProcessState => {
   switch (action.type) {

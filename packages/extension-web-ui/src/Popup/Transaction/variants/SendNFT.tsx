@@ -51,7 +51,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
   const navigate = useNavigate();
   const { isWebUI } = useContext(ScreenContext);
 
-  const { defaultData, onDone, persistData } = useTransactionContext<SendNftParams>();
+  const { defaultData, persistData } = useTransactionContext<SendNftParams>();
 
   const { collectionId, itemId } = defaultData;
 
@@ -92,7 +92,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
   const addressPrefix = useGetChainPrefixBySlug(chain);
   const chainGenesisHash = chainInfoMap[chain]?.substrateInfo?.genesisHash || '';
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+  const { onError, onSuccess } = useHandleSubmitTransaction();
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -285,8 +285,6 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
         className={CN('send-nft-transaction-footer', {
           '__modal-ui': modalContent
         })}
-        errors={[]}
-        warnings={[]}
       >
         <Button
           disabled={isDisable || !isBalanceReady}

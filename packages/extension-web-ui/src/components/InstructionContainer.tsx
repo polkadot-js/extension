@@ -31,10 +31,10 @@ const Component: React.FC<PropsType> = ({ className, contents }: PropsType) => {
       {
         contents.map((alert: InstructionContentType, index: number) => (
           <AlertBox
+            className={'__alert-box'}
             description={typeof alert.description === 'string' ? t(alert.description) : alert.description}
             key={index}
             title={t(alert.title)}
-            className={'__alert-box'}
             type={alert.type || 'warning'}
           />
         ))

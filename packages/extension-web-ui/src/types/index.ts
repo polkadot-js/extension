@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { ButtonSchema } from '@subwallet/react-ui/es/button/button';
 import { Icon as _PhosphorIcon } from 'phosphor-react';
 
 import { Theme as _Theme } from '../themes';
@@ -9,11 +10,36 @@ import { Theme as _Theme } from '../themes';
 export type Theme = _Theme;
 export type PhosphorIcon = _PhosphorIcon;
 
+export type VoidFunction = () => void;
+export type AlertDialogButtonProps = {
+  text: string,
+  onClick: VoidFunction,
+  schema?: ButtonSchema
+}
+
+export type AlertDialogProps = {
+  title: string,
+  content: React.ReactNode,
+  cancelButton?: AlertDialogButtonProps,
+  okButton: AlertDialogButtonProps,
+};
+
 export type AccountType = 'ALL' | 'ETHEREUM' | 'SUBSTRATE';
 
-export interface ThemeProps {
-  theme: _Theme;
+export interface GeneralProps {
   className?: string;
+}
+
+export interface ThemeProps extends GeneralProps {
+  theme: _Theme;
+}
+
+export interface TableColumnType<T> {
+  title: string,
+  key: string,
+  className?: string,
+  render: (record: T) => React.ReactNode;
+  sortable?: boolean
 }
 
 export interface Recoded {
@@ -109,3 +135,4 @@ export * from './staking';
 export * from './transaction';
 export * from './wallet';
 export * from './walletConnect';
+export * from './earning';

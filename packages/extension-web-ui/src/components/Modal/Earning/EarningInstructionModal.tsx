@@ -1,25 +1,26 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
-import { YieldPoolType } from '@subwallet/extension-base/types';
-import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
+import {getValidatorLabel} from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import {_STAKING_CHAIN_GROUP} from '@subwallet/extension-base/services/earning-service/constants';
+import {calculateReward} from '@subwallet/extension-base/services/earning-service/utils';
+import {YieldPoolType} from '@subwallet/extension-base/types';
+import {balanceFormatter, detectTranslate, formatNumber} from '@subwallet/extension-base/utils';
 import InstructionItem from '@subwallet/extension-web-ui/components/Common/InstructionItem';
-import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
-import { EARNING_DATA_RAW, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
-import { useSelector } from '@subwallet/extension-web-ui/hooks';
-import { earlyValidateJoin } from '@subwallet/extension-web-ui/messaging';
-import { AlertDialogProps, PhosphorIcon, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { getBannerButtonIcon } from '@subwallet/extension-web-ui/utils';
-import { BackgroundIcon, Button, Icon, Logo, ModalContext, SwModal, Tag } from '@subwallet/react-ui';
-import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
+import {getInputValuesFromString} from '@subwallet/extension-web-ui/components/Field/AmountInput';
+import {EARNING_DATA_RAW, EARNING_INSTRUCTION_MODAL} from '@subwallet/extension-web-ui/constants';
+import {useSelector} from '@subwallet/extension-web-ui/hooks';
+import {earlyValidateJoin} from '@subwallet/extension-web-ui/messaging';
+import {AlertDialogProps, PhosphorIcon, ThemeProps} from '@subwallet/extension-web-ui/types';
+import {getBannerButtonIcon} from '@subwallet/extension-web-ui/utils';
+import {BackgroundIcon, Button, Icon, Logo, ModalContext, Tag} from '@subwallet/react-ui';
+import {getAlphaColor} from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
-import { CaretDown, PlusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import {CaretDown, PlusCircle} from 'phosphor-react';
+import React, {useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
+import {Trans, useTranslation} from 'react-i18next';
 import styled from 'styled-components';
+import {BaseModal} from "@subwallet/extension-web-ui/components";
 
 interface Props extends ThemeProps{
   slug: string;
@@ -533,7 +534,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <SwModal
+    <BaseModal
       className={CN(className)}
       destroyOnClose={true}
       footer={footerNode}
@@ -607,7 +608,7 @@ const Component: React.FC<Props> = (props: Props) => {
           size={'xs'}
         />}
       </div>
-    </SwModal>
+    </BaseModal>
   );
 };
 

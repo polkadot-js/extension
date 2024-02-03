@@ -38,19 +38,20 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
       className: '__table-token-col',
       render: (row: YieldPoolInfo) => {
         return (
-          <div className={'__row-token-name-wrapper'}>
+          <div className={'__row-token-info-wrapper'}>
             <Logo
+              className={'__row-token-logo'}
               network={row.metadata.logo || row.chain}
               size={48}
             />
-            <div className={'__token-item'}>
-              <div className={'__token-item-info'}>
+            <div className={'__row-token-meta'}>
+              <div className={'__row-token-title'}>
                 <span>{assetRegistry[row.metadata.inputAsset]?.symbol}</span>
-                <span className={'__token-item-name'}>
+                <span className={'__row-token-shortname'}>
                 &nbsp;(<span>{row.metadata.shortName}</span>)
                 </span>
               </div>
-              <div className={'__token-item-description'}>{row.metadata.description}</div>
+              <div className={'__row-token-description'}>{row.metadata.description}</div>
             </div>
           </div>
         );
@@ -112,7 +113,7 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
                 />
               )
               : (
-                <span>
+                <span className={'__tbd'}>
                   {t('TBD')}
                 </span>
               )}
@@ -146,14 +147,21 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
 
         return (
           <div className={'__row-reward-wrapper'}>
-            {!!apy && (
-              <Number
-                className='__row-reward-per-year-value'
-                decimal={0}
-                suffix={'%'}
-                value={apy}
-              />
-            )}
+            {apy
+              ? (
+                <Number
+                  className='__row-reward-per-year-value'
+                  decimal={0}
+                  suffix={'%'}
+                  value={apy}
+                />
+              )
+              : (
+                <span className={'__tbd'}>
+                  {t('TBD')}
+                </span>
+              )
+            }
           </div>
         );
       }
@@ -166,9 +174,9 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
         return (
           <div>
             <Button
+              className={'__row-stake-button'}
               icon={(
                 <Icon
-                  className={'__row-stake-button'}
                   phosphorIcon={PlusCircle}
                   size='sm'
                   weight='fill'
@@ -236,6 +244,7 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       'white-space': 'nowrap',
       cursor: 'pointer'
     },
+
     '.__row-total-stake-value': {
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG,
@@ -256,6 +265,7 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
         lineHeight: token.lineHeightLG
       }
     },
+
     '.__row-reward-per-year-value': {
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG,
@@ -280,6 +290,10 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
     '.__td': {
       overflow: 'hidden'
     },
+    '.__tbd': {
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG
+    },
 
     '.ant-number': {
       textOverflow: 'ellipsis',
@@ -299,29 +313,29 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       paddingRight: 0
     },
 
-    '.__row-token-name-wrapper': {
+    '.__row-token-info-wrapper': {
       display: 'flex',
       gap: token.sizeSM
     },
 
-    '.__token-item-info': {
+    '.__row-token-title': {
       display: 'flex',
       color: token.colorTextLight1,
       fontSize: token.fontSizeXL,
       lineHeight: token.lineHeightHeading4,
       'white-space': 'nowrap'
     },
-    '.__token-item': {
+    '.__row-token-meta': {
       display: 'flex',
       flexDirection: 'column'
     },
-    '.__token-item-name': {
+    '.__row-token-shortname': {
       color: token.colorTextTertiary,
       textOverflow: 'ellipsis',
       overflow: 'hidden',
       whiteSpace: 'nowrap'
     },
-    '.__token-item-description': {
+    '.__row-token-description': {
       fontSize: token.fontSizeSM,
       color: token.colorTextLabel,
       lineHeight: token.lineHeightSM
@@ -344,28 +358,6 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       justifyContent: 'flex-end'
     },
 
-    '.__row-progress-value, .__row-transactions-value, .__row-holders-value, .__row-limit-value': {
-      color: token.colorWhite,
-      fontSize: token.fontSize,
-      lineHeight: token.lineHeight
-    },
-
-    '.__row-progress-bar': {
-      backgroundColor: token.colorBgDefault
-    },
-
-    '.__row-progress-value-wrapper': {
-      display: 'flex',
-      justifyContent: 'center',
-      marginBottom: token.marginXXS
-    },
-
-    '.__row-progress': {
-      maxWidth: 200,
-      marginLeft: 'auto',
-      marginRight: 'auto'
-    },
-
     '.empty-list': {
       marginTop: 0,
       marginBottom: 0
@@ -379,6 +371,11 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       display: 'flex',
       flexDirection: 'column',
       gap: 8
+    },
+
+    '.__row-stake-button .anticon': {
+      width: 20,
+      height: 20
     },
 
     '@media(max-width: 1199px)': {

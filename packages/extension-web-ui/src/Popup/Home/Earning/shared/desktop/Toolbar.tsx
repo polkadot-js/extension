@@ -15,10 +15,10 @@ interface Props extends ThemeProps{
   onSearch: (value: string) => void;
   inputPlaceholder: string;
   searchValue: string;
-  showReload?: boolean; // todo: later
+  extraActionNode?: React.ReactNode; // todo: later
 }
 
-function Component ({ className, inputPlaceholder, onClickFilter, onSearch, searchValue }: Props): React.ReactElement<Props> {
+function Component ({ className, extraActionNode, inputPlaceholder, onClickFilter, onSearch, searchValue }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const onClickHelp = useCallback(() => {
@@ -35,19 +35,25 @@ function Component ({ className, inputPlaceholder, onClickFilter, onSearch, sear
           />
         )}
         extraButton={
-          <Button
-            icon={(
-              <Icon
-                customSize={'28px'}
-                phosphorIcon={Question}
-              />
-            )}
-            onClick={onClickHelp}
-            size='xs'
-            type='ghost'
-          >
-            {t('Help')}
-          </Button>
+          (
+            <>
+              <Button
+                icon={(
+                  <Icon
+                    customSize={'28px'}
+                    phosphorIcon={Question}
+                  />
+                )}
+                onClick={onClickHelp}
+                size='xs'
+                type='ghost'
+              >
+                {t('Help')}
+              </Button>
+
+              {extraActionNode}
+            </>
+          )
         }
         onClickActionBtn={onClickFilter}
         onSearch={onSearch}

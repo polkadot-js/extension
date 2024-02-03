@@ -46,7 +46,9 @@ const TableHead = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProp
     flexDirection: 'row',
     color: token.colorWhite,
     fontFamily: token.fontFamily,
-    paddingBottom: token.paddingXS,
+    paddingBottom: token.padding,
+    paddingLeft: token.paddingSM,
+    paddingRight: token.paddingSM,
 
     '.__th': {
       flex: 1
@@ -58,7 +60,6 @@ const TableHead = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProp
 
     '.__th-inner': {
       paddingLeft: token.paddingXS,
-      paddingRight: token.paddingXS,
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       display: 'flex',

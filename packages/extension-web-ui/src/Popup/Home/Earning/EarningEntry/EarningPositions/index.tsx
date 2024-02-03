@@ -5,14 +5,16 @@ import { YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/type
 import { EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
 import { EarningPositionItem } from '@subwallet/extension-web-ui/components/Earning';
 import { BN_TEN } from '@subwallet/extension-web-ui/constants';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { reloadCron } from '@subwallet/extension-web-ui/messaging';
+import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowsClockwise, Database, FadersHorizontal, Plus, PlusCircle } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -27,6 +29,7 @@ const FILTER_MODAL_ID = 'earning-positions-filter-modal';
 
 function Component ({ className, earningPositions, setEntryView, setLoading }: Props) {
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
 
   const { activeModal } = useContext(ModalContext);
@@ -37,6 +40,8 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const [searchInput, setSearchInput] = useState<string>('');
 
   const items: ExtraYieldPositionInfo[] = useMemo(() => {
     if (!earningPositions.length) {
@@ -224,20 +229,57 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
       subHeaderPaddingVertical={true}
       title={t<string>('Your earning positions')}
     >
-      <SwList.Section
-        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-        className={'__section-list-container'}
-        enableSearchInput
-        filterBy={filterFunction}
-        list={items}
-        onClickActionBtn={onClickFilterButton}
-        renderItem={renderItem}
-        renderWhenEmpty={emptyList}
-        searchFunction={searchFunction}
-        searchMinCharactersCount={2}
-        searchPlaceholder={t<string>('Search token')}
-        showActionBtn
-      />
+      {
+        isWebUI
+          ? (
+            <>
+              <Toolbar
+                className={'__desktop-toolbar'}
+                extraActionNode={
+                  subHeaderButtons.map((b, index) => (
+                    <Button
+                      {...b}
+                      key={index}
+                      size={'xs'}
+                      type={'ghost'}
+                    />
+                  ))
+                }
+                inputPlaceholder={t<string>('Search token')}
+                onClickFilter={onClickFilterButton}
+                onSearch={setSearchInput}
+                searchValue={searchInput}
+              />
+              <SwList
+                className={'__desktop-list-container'}
+                filterBy={filterFunction}
+                list={items}
+                renderItem={renderItem}
+                renderWhenEmpty={emptyList}
+                searchBy={searchFunction}
+                searchMinCharactersCount={1}
+                searchTerm={searchInput}
+              />
+            </>
+          )
+          : (
+            <SwList.Section
+              actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+              className={'__section-list-container'}
+              enableSearchInput
+              filterBy={filterFunction}
+              list={items}
+              onClickActionBtn={onClickFilterButton}
+              renderItem={renderItem}
+              renderWhenEmpty={emptyList}
+              searchFunction={searchFunction}
+              searchMinCharactersCount={1}
+              searchPlaceholder={t<string>('Search token')}
+              showActionBtn
+            />
+          )
+      }
+
       <FilterModal
         applyFilterButtonTitle={t('Apply filter')}
         id={FILTER_MODAL_ID}
@@ -262,6 +304,12 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
     '+ .earning-position-item': {
       marginTop: token.marginXS
     }
+  },
+
+  // desktop
+
+  '.__desktop-toolbar': {
+    marginBottom: 20
   }
 }));
 

@@ -1,47 +1,135 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolInfo } from '@subwallet/extension-base/types';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { EarningStatus, SpecialYieldPositionInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import Table from '@subwallet/extension-web-ui/components/Table/Table';
-import { Number } from '@subwallet/react-ui';
+import { EARNING_NOMINATION_MODAL, StakingStatusUi } from '@subwallet/extension-web-ui/constants';
+import { useGetAccountByAddress, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { findNetworkJsonByGenesisHash, reformatAddress, toShort } from '@subwallet/extension-web-ui/utils';
+import { Button, Icon, ModalContext, Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { CheckCircle, Coin } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import { ArrowSquareOut, Database } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
-import { Avatar, EmptyList, MetaInfo } from '../../../../../components';
+import { Avatar, EarningNominationModal, EmptyList, MetaInfo } from '../../../../../components';
 import { ThemeProps } from '../../../../../types';
 
 interface Props extends ThemeProps {
-  items: YieldPoolInfo[];
+  positionItems: YieldPositionInfo[];
+  inputAsset: _ChainAsset;
+  compound: YieldPositionInfo;
 }
 
-// todo: i18n this
+type RowAccountComponentProp = {
+  address: string
+}
 
-export const DEFAULT_ITEMS_PER_PAGE = 10;
+const getEarningStatus = (item: YieldPositionInfo) => {
+  const stakingStatusUi = StakingStatusUi;
+  const status = item.status;
 
-const Component: React.FC<Props> = ({ className, items }: Props) => {
-  const value = '5HGX5Adwn2Rdp6qXfyN1j9oph6ZEuJuUSteRgXuAKpm4MB87';
+  if (status === EarningStatus.EARNING_REWARD) {
+    return stakingStatusUi.active;
+  }
+
+  if (status === EarningStatus.PARTIALLY_EARNING) {
+    return stakingStatusUi.partialEarning;
+  }
+
+  if (status === EarningStatus.WAITING) {
+    return stakingStatusUi.waiting;
+  }
+
+  return stakingStatusUi.inactive;
+};
+
+const RowAccountComponent = ({ address }: RowAccountComponentProp) => {
+  const account = useGetAccountByAddress(address);
+
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+
+  const name = account?.name || ' ';
+
+  const _address = useMemo(() => {
+    let addPrefix = 42;
+
+    if (account?.originGenesisHash) {
+      const network = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash);
+
+      if (network) {
+        addPrefix = network.substrateInfo?.addressPrefix ?? addPrefix;
+      }
+    }
+
+    return reformatAddress(address, addPrefix);
+  }, [account?.originGenesisHash, chainInfoMap, address]);
+
+  return (
+    <div className={'__row-account-meta-wrapper'}>
+      <Avatar
+        className={'__row-account-logo'}
+        size={32}
+        value={address}
+      />
+      <div className={'__row-account-meta'}>
+        <div className={'__row-account-name'}>{name}</div>
+        <div className={'__row-account-address'}>{toShort(_address)}</div>
+      </div>
+    </div>
+  );
+};
+
+const Component: React.FC<Props> = ({ className, compound,
+  inputAsset,
+  positionItems }: Props) => {
+  const { t } = useTranslation();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  const { type } = compound;
+
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+
+  const [selectedAddress, setSelectedAddress] = useState('');
+
+  const selectedItem = useMemo((): YieldPositionInfo | undefined => {
+    return positionItems.find((item) => isSameAddress(item.address, selectedAddress));
+  }, [positionItems, selectedAddress]);
+
+  const deriveAsset = useMemo(() => {
+    if ('derivativeToken' in compound) {
+      const position = compound as SpecialYieldPositionInfo;
+
+      return assetRegistry[position.derivativeToken];
+    } else {
+      return undefined;
+    }
+  }, [assetRegistry, compound]);
+
+  const isSpecial = useMemo(() => [YieldPoolType.LENDING, YieldPoolType.LIQUID_STAKING].includes(type), [type]);
+
+  const onCloseNominationModal = useCallback(() => {
+    inactiveModal(EARNING_NOMINATION_MODAL);
+  }, [inactiveModal]);
+
+  const createOpenNomination = useCallback((item: YieldPositionInfo) => {
+    return () => {
+      setSelectedAddress(item.address);
+      activeModal(EARNING_NOMINATION_MODAL);
+    };
+  }, [activeModal]);
+
   const columns = useMemo(() => {
     const accountCol = {
       title: 'Account',
       key: 'account',
       className: '__table-token-col',
-      render: (row: YieldPoolInfo) => {
+      render: (row: YieldPositionInfo) => {
         return (
-          <div className={'__row-token-name-wrapper'}>
-            <Avatar
-              size={20}
-              theme={value ? isEthereumAddress(value) ? 'ethereum' : 'polkadot' : undefined}
-              value={value}
-            />
-            <div className={'account-item'}>
-              <div className={'__account-name'}>HD Subwallet 01</div>
-              <div className={'__account-address'}>{'Ad2049jh...56097c'}</div>
-            </div>
-          </div>
+          <RowAccountComponent address={row.address} />
         );
       }
     };
@@ -51,14 +139,15 @@ const Component: React.FC<Props> = ({ className, items }: Props) => {
       key: 'earning_status',
       className: '__earning-status-col',
       sortable: true,
-      render: (row: YieldPoolInfo) => {
+      render: (row: YieldPositionInfo) => {
+        const earningStatus = getEarningStatus(row);
+
         return (
           <MetaInfo>
             <MetaInfo.Status
-              className={'earning-status-item'}
-              statusIcon={CheckCircle}
-              statusName={('Earning rewards')}
-              valueColorSchema={'success'}
+              statusIcon={earningStatus.icon}
+              statusName={earningStatus.name}
+              valueColorSchema={earningStatus.schema}
             />
           </MetaInfo>
         );
@@ -69,27 +158,32 @@ const Component: React.FC<Props> = ({ className, items }: Props) => {
       title: 'Active stake',
       key: 'active-stake',
       className: '__table-active-stake-col',
-      render: (row: YieldPoolInfo) => {
+      render: (row: YieldPositionInfo) => {
         return (
-          <div className={'__row-active-stake-wrapper'}>
+          <div className={CN('__row-active-stake-wrapper', {
+            '-has-derivative': isSpecial
+          })}
+          >
             <div className={'__active-stake'}>
               <Number
-                className={'__row-progress-value'}
-                decimal={2}
-                suffix={'DOT'}
-                value={2908}
+                decimal={inputAsset?.decimals || 0}
+                suffix={inputAsset?.symbol}
+                value={row.activeStake}
               />
             </div>
-            <div className={'__derivative-balance'}>
-              <span>Derivative balance: </span>
-              &nbsp;<Number
-                className={'__row-progress-value'}
-                decimal={2}
-                decimalOpacity={0.4}
-                suffix={'sDOT'}
-                value={51465300000}
-              />
-            </div>
+
+            {
+              isSpecial && (
+                <div className={'__derivative-balance'}>
+                  <span>{t('Derivative balance')}: </span>
+                  <Number
+                    decimal={deriveAsset?.decimals || 0}
+                    suffix={deriveAsset?.symbol}
+                    value={row.activeStake}
+                  />
+                </div>
+              )
+            }
           </div>
         );
       }
@@ -100,70 +194,138 @@ const Component: React.FC<Props> = ({ className, items }: Props) => {
       key: 'unstaked',
       className: '__table-unstake-col',
       sortable: true,
-      render: (row: YieldPoolInfo) => {
+      render: (row: YieldPositionInfo) => {
         return (
           <Number
-            className={'__row-unstaked-value'}
-            decimal={0}
-            suffix={'DOT'}
-            value={2038}
-          />
-        );
-      }
-    };
-    const totalStakeCol = {
-      title: 'Total stake',
-      key: 'total-stake',
-      className: '__table-total-stake-col',
-      sortable: true,
-      render: (row: YieldPoolInfo) => {
-        return (
-          <Number
-            className={'__row-total-Stake-value'}
-            decimal={2}
-            decimalOpacity={0.4}
-            suffix={'DOT'}
-            value={3108}
+            decimal={inputAsset?.decimals || 0}
+            suffix={inputAsset?.symbol}
+            value={row.unstakeBalance}
           />
         );
       }
     };
 
-    return [
+    const totalStakeCol = {
+      title: 'Total stake',
+      key: 'total-stake',
+      className: '__table-total-stake-col',
+      sortable: true,
+      render: (row: YieldPositionInfo) => {
+        return (
+          <Number
+            className={'__row-total-Stake-value'}
+            decimal={inputAsset?.decimals || 0}
+            suffix={inputAsset?.symbol}
+            value={new BigN(row.totalStake)}
+          />
+        );
+      }
+    };
+
+    const poolCol = {
+      title: 'Pool',
+      key: 'pool',
+      className: '__table-pool-col',
+      sortable: true,
+      render: (row: YieldPositionInfo) => {
+        const item = row.nominations[0];
+
+        return (
+          item
+            ? (<div className={'__row-pool-wrapper'}>
+              <Avatar
+                size={24}
+                value={item.validatorAddress}
+              />
+              <div className={'__nomination-name'}>
+                {item.validatorIdentity || toShort(item.validatorAddress)}
+              </div>
+            </div>)
+            : (
+              <div className={'__row-pool-wrapper -no-content'}></div>
+            )
+        );
+      }
+    };
+
+    const nominationCol = {
+      title: '',
+      key: 'nomination',
+      className: '__table-nomination-col',
+      sortable: true,
+      render: (row: YieldPositionInfo) => {
+        const disableButton = !row.nominations.length;
+
+        return (
+          <div className={'__row-nomination-button-wrapper'}>
+            <Button
+              className={'__row-nomination-button'}
+              disabled={disableButton}
+              icon={
+                <Icon
+                  phosphorIcon={ArrowSquareOut}
+                  size={'sm'}
+                />
+              }
+              onClick={createOpenNomination(row)}
+              size={'xs'}
+              type={'ghost'}
+            />
+          </div>
+        );
+      }
+    };
+
+    const result = [
       accountCol,
       earningStatusCol,
       activeStakeCol,
       unStakedCol,
       totalStakeCol
     ];
-  }, []);
 
-  const getRowKey = useCallback((item: YieldPoolInfo) => {
-    return item.slug;
+    if (type === YieldPoolType.NOMINATION_POOL) {
+      result.push(poolCol);
+    } else if (type === YieldPoolType.NATIVE_STAKING) {
+      result.push(nominationCol);
+    }
+
+    return result;
+  }, [createOpenNomination, deriveAsset?.decimals, deriveAsset?.symbol, inputAsset?.decimals, inputAsset?.symbol, isSpecial, t, type]);
+
+  const getRowKey = useCallback((item: YieldPositionInfo) => {
+    return item.address;
   }, []);
 
   const emptyList = useMemo(() => {
     return (
       <EmptyList
-        emptyMessage={'Tokens will appear here'}
-        emptyTitle={'No token found'}
-        phosphorIcon={Coin}
+        emptyMessage={'Records will appear here'}
+        emptyTitle={'No record found'}
+        phosphorIcon={Database}
       />
     );
   }, []);
 
   return (
     <>
-      <div className={CN(className, 'explore-Table-container')}>
-        <div className={'table-account-info'}>Account info</div>
+      <div className={CN(className)}>
+        <div className={'__part-title'}>Account info</div>
+
         <Table
-          className={'explore-Table'}
+          className={'__part-table'}
           columns={columns}
           emptyList={emptyList}
           getRowKey={getRowKey}
-          items={items}
+          items={positionItems}
         />
       </div>
+
+      <EarningNominationModal
+        inputAsset={inputAsset}
+        item={selectedItem}
+        onCancel={onCloseNominationModal}
+      />
     </>
   );
 };
@@ -174,14 +336,13 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
     '.__table-token-col.__table-token-col, .__earning-status-col.__earning-status-col': {
       flex: 1.2
     },
-    '.__earning-status-col, .__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col': {
+    '.__earning-status-col, .__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col, .__table-nomination-col, .__table-pool-col': {
       display: 'flex',
       justifyContent: 'flex-end'
     },
 
     ['.__earning-status-col, .__table-active-stake-col, ' +
-    '.__table-total-stake-col, .__table-transactions-col, ' +
-    '.__table-unstake-col, .__table-mint-col']: {
+    '.__table-total-stake-col,']: {
       textAlign: 'center'
     },
 
@@ -189,8 +350,15 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
     'th.__table-active-stake-col.__table-active-stake-col, ' +
     'th.__table-unstake-col.__table-unstake-col, ' +
     'th.__table-total-stake-col.__table-total-stake-col, ' +
-    'th.__table-transactions-col.__table-transactions-col, ' +
-    'th.__table-mint-col.__table-mint-col']: {
+    'th.__table-pool-col.__table-pool-col']: {
+      textAlign: 'center'
+    },
+    [
+    'td.__table-active-stake-col.__table-active-stake-col, ' +
+    'td.__table-unstake-col.__table-unstake-col, ' +
+    'td.__table-total-stake-col.__table-total-stake-col, ' +
+    'td.__table-transactions-col.__table-transactions-col, ' +
+    'td.__table-pool-col.__table-pool-col']: {
       textAlign: 'center'
     },
 
@@ -199,11 +367,50 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       cursor: 'pointer'
     },
 
+    '.__part-title': {
+      fontSize: token.fontSizeHeading3,
+      lineHeight: token.lineHeightHeading3,
+      fontWeight: token.fontWeightStrong,
+      paddingBottom: 20,
+      paddingTop: token.padding
+    },
+
+    '.__row-account-name': {
+      lineHeight: token.lineHeight,
+      fontWeight: token.fontWeightStrong,
+      color: token.colorWhite
+    },
+
+    '.__row-pool-wrapper': {
+      display: 'flex',
+      alignItems: 'center'
+    },
+
+    '.__nomination-name': {
+      paddingLeft: token.paddingXS
+    },
+
+    '.__row-account-meta-wrapper': {
+      display: 'flex'
+    },
+
+    '.__row-account-logo': {
+      marginRight: token.paddingXS
+    },
+
     '.table-account-info.table-account-info': {
       fontSize: token.fontSizeXL,
       lineHeight: token.lineHeightHeading3,
       paddingBottom: token.paddingMD,
+      paddingTop: token.paddingXL,
       color: token.colorWhite
+    },
+
+    '.__row-account-address': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      fontWeight: token.bodyFontWeight,
+      color: token.colorTextSecondary
     },
 
     '.__td': {
@@ -289,10 +496,7 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       flexGrow: 0,
       minWidth: 140
     },
-    '.__table-mint-col.__table-mint-col': {
-      flexGrow: 0,
-      minWidth: 100
-    },
+
     '.__row-create-at-value': {
       color: token.colorTextLight4,
       fontSize: token.fontSize,

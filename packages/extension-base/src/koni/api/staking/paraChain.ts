@@ -29,11 +29,15 @@ function getSingleStakingAmplitude (substrateApi: _SubstrateApi, address: string
 
       const delegates = krestDelegatorState?.delegations as unknown as ParachainStakingStakeOption[];
 
-      delegatorState = delegatorState.concat(delegates);
+      if (delegates) {
+        delegatorState = delegatorState.concat(delegates);
+      }
     } else {
       const delegate = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
 
-      delegatorState.push(delegate);
+      if (delegate) {
+        delegatorState.push(delegate);
+      }
     }
 
     const unstakingInfo = _unstaking.toPrimitive() as Record<string, number>;
@@ -120,11 +124,15 @@ function getMultiStakingAmplitude (substrateApi: _SubstrateApi, useAddresses: st
 
           const delegates = krestDelegatorState?.delegations as unknown as ParachainStakingStakeOption[];
 
-          delegatorState = delegatorState.concat(delegates);
+          if (delegates) {
+            delegatorState = delegatorState.concat(delegates);
+          }
         } else {
           const delegate = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
 
-          delegatorState.push(delegate);
+          if (delegate) {
+            delegatorState.push(delegate);
+          }
         }
 
         const unstakingInfo = _unstakingStates[i].toPrimitive() as unknown as Record<string, number>;

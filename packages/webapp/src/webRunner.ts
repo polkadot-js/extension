@@ -2,16 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import '@subwallet/extension-inject/crossenv';
-
-import { state as koniState } from '@subwallet/extension-base/koni/background/handlers';
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import KeyringStore from '@subwallet/extension-base/stores/Keyring';
 import { ENABLE_INJECT } from '@subwallet/extension-web-ui/constants';
 import keyring from '@subwallet/ui-keyring';
-
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-
 import { PageStatus, responseMessage, setupHandlers } from './messageHandle';
+import {SWHandler} from "@subwallet/extension-base/koni/background/handlers";
+
+const koniState = SWHandler.instance.state;
 
 responseMessage({ id: '0', response: { status: 'load' } } as PageStatus);
 

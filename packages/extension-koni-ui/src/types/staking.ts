@@ -15,3 +15,9 @@ export type StakingData = {
   data: StakingDataType[];
   priceMap: Record<string, number>;
 };
+
+export enum ClaimDAppStakingRewardsState {
+  NONE = 0,
+  FIRST = 1,
+  SECOND = 2
+}

@@ -8,14 +8,11 @@ import { ProgressBar } from '@subwallet/extension-web-ui/components/ProgressBar'
 import { BN_100, BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-web-ui/contexts/screen/HomeContext';
-import { useGetStakingList } from '@subwallet/extension-web-ui/hooks';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
-import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-web-ui/hooks/screen/home/useAccountBalance';
 import { Theme } from '@subwallet/extension-web-ui/themes';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { sortTokenByValue } from '@subwallet/extension-web-ui/utils';
 import { Logo, Number } from '@subwallet/react-ui';
-import BigN from 'bignumber.js';
 import React, { Context, useContext, useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import styled, { ThemeContext } from 'styled-components';
@@ -39,7 +36,6 @@ const Component = ({ className }: Props) => {
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo } } = useContext(HomeContext);
-  const { data: stakingItems, priceMap } = useGetStakingList();
 
   const outletContext: {
     setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>
@@ -152,30 +148,32 @@ const Component = ({ className }: Props) => {
     return +totalBalanceInfo.freeValue.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue).toFixed(2);
   })();
 
-  const stakingPercent = (() => {
-    if (isTotalZero) {
-      return 0;
-    }
+  // const stakingPercent = (() => {
+  //   if (isTotalZero) {
+  //     return 0;
+  //   }
+  //
+  //   let stakingBigN = new BigN(0);
+  //
+  //   for (const si of earningPositions) {
+  //     if (!si.staking.balance || BN_ZERO.eq(si.staking.balance)) {
+  //       continue;
+  //     }
+  //
+  //     const balanceValue = getBalanceValue(si.staking.balance || '0', si.decimals);
+  //     const convertedBalanceValue = getConvertedBalanceValue(balanceValue, +`${priceMap[si.staking.chain]}` || 0);
+  //
+  //     stakingBigN = stakingBigN.plus(convertedBalanceValue);
+  //   }
+  //
+  //   if (stakingBigN.gt(totalBalanceInfo.convertedValue)) {
+  //     return 0;
+  //   }
+  //
+  //   return +stakingBigN.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue).toFixed(2);
+  // })();
 
-    let stakingBigN = new BigN(0);
-
-    for (const si of stakingItems) {
-      if (!si.staking.balance || BN_ZERO.eq(si.staking.balance)) {
-        continue;
-      }
-
-      const balanceValue = getBalanceValue(si.staking.balance || '0', si.decimals);
-      const convertedBalanceValue = getConvertedBalanceValue(balanceValue, +`${priceMap[si.staking.chain]}` || 0);
-
-      stakingBigN = stakingBigN.plus(convertedBalanceValue);
-    }
-
-    if (stakingBigN.gt(totalBalanceInfo.convertedValue)) {
-      return 0;
-    }
-
-    return +stakingBigN.multipliedBy(BN_100).dividedBy(totalBalanceInfo.convertedValue).toFixed(2);
-  })();
+  const stakingPercent = 0;
 
   const otherPercent = (() => {
     if (isTotalZero) {
@@ -194,12 +192,12 @@ const Component = ({ className }: Props) => {
       color: token['colorPrimary-6'],
       label: t('Transferable')
     },
-    {
-      id: 'Staking',
-      value: stakingPercent,
-      color: token.colorSecondary,
-      label: t('Staking')
-    },
+    // {
+    //   id: 'Staking',
+    //   value: stakingPercent,
+    //   color: token.colorSecondary,
+    //   label: t('Staking')
+    // },
     {
       id: 'Other',
       value: otherPercent,
@@ -213,7 +211,7 @@ const Component = ({ className }: Props) => {
   return (
     <PageWrapper
       className={className}
-      resolve={dataContext.awaitStores(['staking', 'price'])}
+      resolve={dataContext.awaitStores(['earning', 'price'])}
     >
       {
         isTotalZero

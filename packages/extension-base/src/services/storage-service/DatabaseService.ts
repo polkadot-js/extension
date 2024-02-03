@@ -1,12 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _ChainAsset } from '@subwallet/chain-list/types';
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { APIItemState, ChainStakingMetadata, CrowdloanItem, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { EventService } from '@subwallet/extension-base/services/event-service';
-import KoniDatabase, { IAssetRef, IBalance, ICampaign, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
+import KoniDatabase, { IBalance, ICampaign, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MetadataStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
-import AssetRefStore from '@subwallet/extension-base/services/storage-service/db-stores/AssetRef';
 import BaseStore from '@subwallet/extension-base/services/storage-service/db-stores/BaseStore';
 import CampaignStore from '@subwallet/extension-base/services/storage-service/db-stores/Campaign';
 import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
@@ -63,8 +62,8 @@ export default class DatabaseService {
       nominatorMetadata: new NominatorMetadataStore(this._db.nominatorMetadata),
 
       mantaPay: new MantaPayStore(this._db.mantaPay),
-      campaign: new CampaignStore(this._db.campaign),
-      assetRef: new AssetRefStore(this._db.assetRef)
+      campaign: new CampaignStore(this._db.campaign)
+      // assetRef: new AssetRefStore(this._db.assetRef)
     };
   }
 
@@ -475,35 +474,35 @@ export default class DatabaseService {
     return JSON.parse(await this.exportDB()) as DexieExportJsonStructure;
   }
 
-  public setAssetRef (assetRef: Record<string, _AssetRef>) {
-    const assetRefList = Object.entries(assetRef).map(([slug, item]) => {
-      return {
-        slug,
-        ...item
-      } as IAssetRef;
-    });
-
-    return this.stores.assetRef.bulkUpsert(assetRefList);
-  }
-
-  public getAssetRef (slug: string) {
-    return this.stores.assetRef.getAssetRef(slug);
-  }
-
-  public async getAssetRefMap (): Promise<Record<string, _AssetRef>> {
-    const assetRefList = await this.stores.assetRef.getAll();
-    const assetRefObj: Record<string, _AssetRef> = {};
-
-    assetRefList.forEach((item) => {
-      assetRefObj[item.slug] = {
-        ...item
-      };
-    });
-
-    return assetRefObj;
-  }
-
-  public subscribeAssetRef () {
-    return this.stores.assetRef.subscribeAssetRef();
-  }
+  // public setAssetRef (assetRef: Record<string, _AssetRef>) {
+  //   const assetRefList = Object.entries(assetRef).map(([slug, item]) => {
+  //     return {
+  //       slug,
+  //       ...item
+  //     } as IAssetRef;
+  //   });
+  //
+  //   return this.stores.assetRef.bulkUpsert(assetRefList);
+  // }
+  //
+  // public getAssetRef (slug: string) {
+  //   return this.stores.assetRef.getAssetRef(slug);
+  // }
+  //
+  // public async getAssetRefMap (): Promise<Record<string, _AssetRef>> {
+  //   const assetRefList = await this.stores.assetRef.getAll();
+  //   const assetRefObj: Record<string, _AssetRef> = {};
+  //
+  //   assetRefList.forEach((item) => {
+  //     assetRefObj[item.slug] = {
+  //       ...item
+  //     };
+  //   });
+  //
+  //   return assetRefObj;
+  // }
+  //
+  // public subscribeAssetRef () {
+  //   return this.stores.assetRef.subscribeAssetRef();
+  // }
 }

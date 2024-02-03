@@ -219,7 +219,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const { t } = useTranslation();
   const notification = useNotification();
 
-  const { defaultData, onDone, persistData } = useTransactionContext<TransferParams>();
+  const { defaultData, persistData } = useTransactionContext<TransferParams>();
   const { defaultSlug: sendFundSlug } = defaultData;
   const isFirstRender = useIsFirstRender();
   const { isWebUI } = useContext(ScreenContext);
@@ -257,7 +257,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
     setIsTransferAll(value);
   }, []);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, handleTransferAll);
+  const { onError, onSuccess } = useHandleSubmitTransaction(handleTransferAll);
 
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
@@ -733,8 +733,6 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         className={CN(`${className} -transaction-footer`, {
           '__modal-footer': modalContent
         })}
-        errors={[]}
-        warnings={[]}
       >
         <Button
           disabled={!isBalanceReady}

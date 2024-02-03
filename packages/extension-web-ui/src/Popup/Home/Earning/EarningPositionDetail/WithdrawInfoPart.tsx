@@ -139,7 +139,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
 
   return (
     <div
-      className={CN(className)}
+      className={CN(className, '__withdraw-info-part')}
     >
       <CollapsiblePanel
         className={'__collapsible-panel'}
@@ -215,7 +215,6 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
 export const WithdrawInfoPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
-
   '.__withdraw-time-item': {
     gap: token.sizeSM,
 

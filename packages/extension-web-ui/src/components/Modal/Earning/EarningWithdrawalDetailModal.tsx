@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { UnstakingInfo, UnstakingStatus, YieldPoolInfo } from '@subwallet/extension-base/types';
-import { BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
-import { useTranslation } from '@subwallet/extension-web-ui/hooks';
-import { getWaitingTime } from '@subwallet/extension-web-ui/Popup/Transaction/helper';
-import { Theme } from '@subwallet/extension-web-ui/themes';
-import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, ModalContext } from '@subwallet/react-ui';
+import {_ChainAsset} from '@subwallet/chain-list/types';
+import {UnstakingInfo, UnstakingStatus, YieldPoolInfo} from '@subwallet/extension-base/types';
+import {BaseModal, MetaInfo} from '@subwallet/extension-web-ui/components';
+import {useTranslation} from '@subwallet/extension-web-ui/hooks';
+import {getWaitingTime} from '@subwallet/extension-web-ui/Popup/Transaction/helper';
+import {Theme} from '@subwallet/extension-web-ui/themes';
+import {ThemeProps} from '@subwallet/extension-web-ui/types';
+import {Button, Icon, ModalContext} from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, ProhibitInset } from 'phosphor-react';
-import React, { Context, useCallback, useContext, useMemo } from 'react';
-import styled, { ThemeContext } from 'styled-components';
+import {CheckCircle, ProhibitInset} from 'phosphor-react';
+import React, {Context, useCallback, useContext, useMemo} from 'react';
+import styled, {ThemeContext} from 'styled-components';
 
 type Props = ThemeProps & {
   modalId: string;

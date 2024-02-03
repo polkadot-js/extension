@@ -44,7 +44,7 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
 
   return (
     <div
-      className={CN(className)}
+      className={CN(className, '__earning-info-desktop-part')}
     >
       <MetaInfo
         labelColorScheme='gray'
@@ -100,24 +100,28 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
 export const EarningInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
-  minHeight: 54,
   paddingTop: token.padding,
   paddingLeft: 24,
   paddingRight: 24,
+  flex: 1,
+
+  '&.__earning-info-desktop-part': {
+    marginBottom: token.margin
+  },
 
   '.__separator': {
     height: 2,
     backgroundColor: 'rgba(33, 33, 33, 0.80)',
     marginTop: token.marginSM,
-    marginBottom: token.marginSM,
-    marginLeft: token.margin,
-    marginRight: token.margin
+    marginBottom: token.marginSM
+  },
+
+  '.__label.__label': {
+    color: token.colorWhite
   },
 
   '.__earning-actions': {
     display: 'flex',
-    gap: token.sizeSM,
-    marginLeft: -token.sizeSM,
-    marginRight: -token.sizeSM
+    gap: token.sizeSM
   }
 }));

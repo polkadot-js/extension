@@ -1,17 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { YieldPositionInfo } from '@subwallet/extension-base/types';
-import { Avatar, MetaInfo } from '@subwallet/extension-web-ui/components';
-import { EARNING_NOMINATION_MODAL } from '@subwallet/extension-web-ui/constants';
+import {_ChainAsset} from '@subwallet/chain-list/types';
+import {_STAKING_CHAIN_GROUP} from '@subwallet/extension-base/services/earning-service/constants';
+import {YieldPositionInfo} from '@subwallet/extension-base/types';
+import {Avatar, BaseModal, MetaInfo} from '@subwallet/extension-web-ui/components';
+import {EARNING_NOMINATION_MODAL} from '@subwallet/extension-web-ui/constants';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
-import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { toShort } from '@subwallet/extension-web-ui/utils';
-import { SwModal } from '@subwallet/react-ui';
+import {ThemeProps} from '@subwallet/extension-web-ui/types';
+import {toShort} from '@subwallet/extension-web-ui/utils';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
+import React, {useMemo} from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -26,7 +25,7 @@ function Component ({ className, inputAsset, item, onCancel }: Props): React.Rea
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(item?.chain || ''), [item?.chain]);
 
   return (
-    <SwModal
+    <BaseModal
       className={className}
       id={EARNING_NOMINATION_MODAL}
       onCancel={onCancel}
@@ -68,7 +67,7 @@ function Component ({ className, inputAsset, item, onCancel }: Props): React.Rea
           </MetaInfo>
         )
       }
-    </SwModal>
+    </BaseModal>
   );
 }
 

@@ -71,6 +71,7 @@ const RowAccountComponent = ({ address }: RowAccountComponentProp) => {
   return (
     <div className={'__row-account-meta-wrapper'}>
       <Avatar
+        className={'__row-account-logo'}
         size={32}
         value={address}
       />
@@ -335,14 +336,13 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
     '.__table-token-col.__table-token-col, .__earning-status-col.__earning-status-col': {
       flex: 1.2
     },
-    '.__earning-status-col, .__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col': {
+    '.__earning-status-col, .__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col, .__table-nomination-col, .__table-pool-col': {
       display: 'flex',
       justifyContent: 'flex-end'
     },
 
     ['.__earning-status-col, .__table-active-stake-col, ' +
-    '.__table-total-stake-col, .__table-transactions-col, ' +
-    '.__table-unstake-col, .__table-mint-col']: {
+    '.__table-total-stake-col,']: {
       textAlign: 'center'
     },
 
@@ -350,8 +350,15 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
     'th.__table-active-stake-col.__table-active-stake-col, ' +
     'th.__table-unstake-col.__table-unstake-col, ' +
     'th.__table-total-stake-col.__table-total-stake-col, ' +
-    'th.__table-transactions-col.__table-transactions-col, ' +
-    'th.__table-mint-col.__table-mint-col']: {
+    'th.__table-pool-col.__table-pool-col']: {
+      textAlign: 'center'
+    },
+    [
+    'td.__table-active-stake-col.__table-active-stake-col, ' +
+    'td.__table-unstake-col.__table-unstake-col, ' +
+    'td.__table-total-stake-col.__table-total-stake-col, ' +
+    'td.__table-transactions-col.__table-transactions-col, ' +
+    'td.__table-pool-col.__table-pool-col']: {
       textAlign: 'center'
     },
 
@@ -360,11 +367,50 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       cursor: 'pointer'
     },
 
+    '.__part-title': {
+      fontSize: token.fontSizeHeading3,
+      lineHeight: token.lineHeightHeading3,
+      fontWeight: token.fontWeightStrong,
+      paddingBottom: 20,
+      paddingTop: token.padding
+    },
+
+    '.__row-account-name': {
+      lineHeight: token.lineHeight,
+      fontWeight: token.fontWeightStrong,
+      color: token.colorWhite
+    },
+
+    '.__row-pool-wrapper': {
+      display: 'flex',
+      alignItems: 'center'
+    },
+
+    '.__nomination-name': {
+      paddingLeft: token.paddingXS
+    },
+
+    '.__row-account-meta-wrapper': {
+      display: 'flex'
+    },
+
+    '.__row-account-logo': {
+      marginRight: token.paddingXS
+    },
+
     '.table-account-info.table-account-info': {
       fontSize: token.fontSizeXL,
       lineHeight: token.lineHeightHeading3,
       paddingBottom: token.paddingMD,
+      paddingTop: token.paddingXL,
       color: token.colorWhite
+    },
+
+    '.__row-account-address': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      fontWeight: token.bodyFontWeight,
+      color: token.colorTextSecondary
     },
 
     '.__td': {
@@ -450,10 +496,7 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       flexGrow: 0,
       minWidth: 140
     },
-    '.__table-mint-col.__table-mint-col': {
-      flexGrow: 0,
-      minWidth: 100
-    },
+
     '.__row-create-at-value': {
       color: token.colorTextLight4,
       fontSize: token.fontSize,

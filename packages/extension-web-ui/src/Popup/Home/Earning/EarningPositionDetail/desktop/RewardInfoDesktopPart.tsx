@@ -106,7 +106,7 @@ function Component ({ className, closeAlert, compound,
   return (
     <>
       <div
-        className={CN(className)}
+        className={CN(className, '__reward-info-desktop-part')}
       >
         <div className={'__part-title'}>{title}</div>
 
@@ -171,29 +171,40 @@ function Component ({ className, closeAlert, compound,
 export const RewardInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
-  minHeight: 54,
+  paddingTop: 16,
+  paddingRight: 24,
+  paddingLeft: 24,
+  flex: 1,
+
+  '&.__reward-info-desktop-part': {
+    marginBottom: token.margin
+  },
 
   '.__part-title': {
-
+    lineHeight: token.lineHeight
   },
 
   '.__separator': {
     height: 2,
     backgroundColor: 'rgba(33, 33, 33, 0.80)',
     marginTop: token.marginSM,
-    marginBottom: token.marginSM,
-    marginLeft: token.margin,
-    marginRight: token.margin
+    marginBottom: token.marginSM
   },
 
   '.__claim-reward-area': {
     display: 'flex',
     gap: token.sizeSM,
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: token.paddingSM,
-    paddingLeft: token.padding,
-    paddingRight: token.padding
+    alignItems: 'center'
+  },
+
+  '.__claim-reward-area.-no-content': {
+    height: 36
+  },
+  '.ant-btn-content-wrapper': {
+    fontSize: token.fontSize,
+    lineHeight: token.lineHeight,
+    fontWeight: token.fontWeightStrong
   },
 
   '.__claim-reward-value': {

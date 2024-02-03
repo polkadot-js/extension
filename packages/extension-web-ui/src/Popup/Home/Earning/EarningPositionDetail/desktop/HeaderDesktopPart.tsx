@@ -66,7 +66,7 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
   }, [t, unstakePeriod]);
 
   return (
-    <div className={CN(className)}>
+    <div className={CN(className, '__header-desktop-part-container')}>
       <div className={CN('__block-item', '__total-balance-block')}>
         <div className={'__block-title-wrapper'}>
           <div className={'__block-title'}>{t('Active stake')}</div>
@@ -81,12 +81,13 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
 
         <div className={'__block-content'}>
           <Number
-            className={'__active-stake-value'}
+            className={'__header-active-stake-value'}
             decimal={inputAsset?.decimals || 0}
             hide={!isShowBalance}
             subFloatNumber={true}
             suffix={inputAsset?.symbol}
             value={activeStake}
+            size={38}
           />
 
           <Number
@@ -124,7 +125,7 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
                 </>
               )
               : (
-                <div>{t('TBD')}</div>
+                <div className={'__tbd'}>{t('TBD')}</div>
               )
           }
         </div>
@@ -134,14 +135,14 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
         className='__block-divider'
       />
 
-      <div className={CN('__block-item', '__balance-block')}>
+      <div className={CN('__block-item', '__minimun-stake-block')}>
         <div className='__block-title-wrapper'>
           <div className={'__block-title'}>{t('Minimum staked')}</div>
         </div>
 
         <div className={'__block-content'}>
           <Number
-            className='__active-stake-value'
+            className='__active-minimum-stake-value'
             decimal={inputAsset?.decimals || 0}
             suffix={inputAsset?.symbol}
             value={poolInfo.statistic?.earningThreshold.join || '0'}
@@ -179,23 +180,47 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     lineHeight: 'inherit'
   },
 
+  '&.__header-desktop-part-container': {
+    marginBottom: token.marginXL
+  },
+
   '.__block-title': {
     fontSize: token.fontSize,
-    lineHeight: token.lineHeight
+    lineHeight: token.lineHeight,
+    color: token.colorWhite
   },
   '.__earning-block-item > .__block-title': {
     paddingRight: 8
   },
-  '.__block-item.__balance-block .__block-content': {
-    marginTop: -18
+
+  '.__tbd': {
+    fontSize: token.fontSizeHeading2,
+    lineHeight: token.lineHeightHeading2,
+    fontWeight: token.fontWeightStrong,
+    color: token.colorWhite
   },
 
-  '.__balance-value': {
-    fontWeight: token.headingFontWeight,
-    '.ant-number-decimal': {
-      fontSize: '24px !important',
-      lineHeight: '32px !important'
-    }
+  '.__estimate-block .__block-content': {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
+  },
+  '.__minimun-stake-block .__block-content': {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
+  },
+  '.__unstaking-period-value': {
+    fontSize: token.fontSizeHeading2,
+    lineHeight: token.lineHeightHeading2,
+    paddingRight: token.paddingXXS
+  },
+
+  '.__unstaking-period-value-suffix': {
+    fontSize: token.fontSizeHeading3,
+    lineHeight: token.lineHeightHeading3,
+    color: token.colorTextLight4,
+    fontWeight: token.fontWeightStrong
   },
 
   '.__block-divider': {
@@ -215,12 +240,22 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     alignItems: 'center',
     marginTop: token.marginSM
   },
+  '.__unstaking-period-value-wrapper': {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'baseline'
+  },
 
-  '.__active-stake-value': {
+  '.__unstaking-period': {
     fontSize: token.fontSizeHeading2,
-    lineHeight: token.lineHeightHeading2,
-    fontWeight: token.headingFontWeight,
-    color: token.colorTextLight1,
+    lineHeight: token.lineHeightHeading2
+  },
+
+  '.__header-active-stake-value': {
+    fontSize: token.fontSizeHeading1,
+    lineHeight: token.lineHeightHeading1,
+    fontWeight: token.fontWeightStrong,
+    color: token.colorWhite,
 
     '.ant-number-integer': {
       color: 'inherit !important',
@@ -230,7 +265,27 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     },
 
     '.ant-number-decimal, .ant-number-suffix': {
-      color: `${token.colorTextLight3} !important`,
+      color: `${token.colorTextLight4} !important`,
+      fontSize: `${token.fontSizeHeading3}px !important`,
+      fontWeight: 'inherit !important',
+      lineHeight: token.lineHeightHeading3
+    }
+  },
+  '.__active-minimum-stake-value': {
+    fontSize: token.fontSizeHeading2,
+    lineHeight: token.lineHeightHeading2,
+    fontWeight: token.fontWeightStrong,
+    color: token.colorWhite,
+
+    '.ant-number-integer': {
+      color: 'inherit !important',
+      fontSize: 'inherit !important',
+      fontWeight: 'inherit !important',
+      lineHeight: 'inherit'
+    },
+
+    '.ant-number-decimal, .ant-number-suffix': {
+      color: `${token.colorTextLight4} !important`,
       fontSize: `${token.fontSizeHeading3}px !important`,
       fontWeight: 'inherit !important',
       lineHeight: token.lineHeightHeading3
@@ -251,8 +306,9 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     fontSize: token.fontSizeLG,
     lineHeight: token.lineHeightLG,
     color: token.colorTextLight4,
-    // backgroundColor: 'green',
-    paddingBottom: 6
+    paddingBottom: 6,
+    display: 'block',
+    alignItems: 'center'
   },
 
   '.__balance-change-percent': {
@@ -283,7 +339,7 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     minHeight: 40,
     marginBottom: token.marginXS,
     alignItems: 'center',
-    flexDirection: 'column'
+    flexDirection: 'row'
   },
 
   '.__total-balance-block': {
@@ -293,7 +349,7 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     }
   },
 
-  '.__balance-block, .__estimate-block': {
+  '.__minimun-stake-block, .__estimate-block': {
     alignItems: 'center',
 
     '.__balance-value': {
@@ -313,6 +369,10 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
       display: 'flex',
       gap: token.sizeSM
     }
+  },
+  '.__action-block .__block-content': {
+    display: 'flex',
+    flexDirection: 'row'
   },
 
   '.__action-button': {

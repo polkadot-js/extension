@@ -85,7 +85,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
   return (
     <>
       <div
-        className={CN(className)}
+        className={CN(className, '__withdraw-info-part')}
       >
         <div className={'__part-title'}>{t('Withdraw info')}</div>
 
@@ -137,17 +137,49 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
 export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
+  paddingRight: token.paddingLG,
+  paddingLeft: token.paddingLG,
+  paddingTop: token.padding,
+  paddingBottom: token.padding,
+  flex: 1,
+
+  '&.-no-content': {
+    opacity: 0,
+    padding: 0
+  },
+
+  '&.__withdraw-info-part': {
+    marginBottom: token.margin
+  },
 
   '.__part-title': {
-    paddingTop: token.padding
+    lineHeight: token.lineHeight
+  },
+
+  '.__withdraw-area.-no-content': {
+    height: 36
+  },
+
+  '.ant-btn-content-wrapper': {
+    fontSize: token.fontSize,
+    lineHeight: token.lineHeight,
+    fontWeight: token.fontWeightStrong
+  },
+
+  '.__withdraw-area': {
+    display: 'flex',
+    gap: token.sizeSM,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: token.paddingSM,
+    paddingLeft: token.padding,
+    paddingRight: token.padding
   },
 
   '.__separator': {
     height: 2,
     backgroundColor: 'rgba(33, 33, 33, 0.80)',
     marginTop: token.marginSM,
-    marginBottom: token.marginSM,
-    marginLeft: token.margin,
-    marginRight: token.margin
+    marginBottom: token.marginSM
   }
 }));

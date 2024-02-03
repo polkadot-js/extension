@@ -91,7 +91,8 @@ export class SubstrateApi implements _SubstrateApi {
     const apiOption: ApiOptions = {
       provider,
       typesBundle,
-      registry: this.registry
+      registry: this.registry,
+      noInitWarn: true
     };
 
     if (this.metadata) {
@@ -109,26 +110,29 @@ export class SubstrateApi implements _SubstrateApi {
     if (externalApiPromise) {
       api = externalApiPromise;
     } else if (_API_OPTIONS_CHAIN_GROUP.acala.includes(this.chainSlug)) {
-      api = new ApiPromise(acalaOptions({ provider }));
+      api = new ApiPromise(acalaOptions({ provider, noInitWarn: true }));
     } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(this.chainSlug)) {
       api = new ApiPromise({
         provider,
         rpc: oakRpc,
-        types: oakTypes
+        types: oakTypes,
+        noInitWarn: true
       });
     } else if (_API_OPTIONS_CHAIN_GROUP.avail.includes(this.chainSlug)) {
       api = new ApiPromise({
         provider,
         rpc: availSpec.rpc,
         types: availSpec.types,
-        signedExtensions: availSpec.signedExtensions
+        signedExtensions: availSpec.signedExtensions,
+        noInitWarn: true
       });
     } else if (_API_OPTIONS_CHAIN_GROUP.goldberg.includes(this.chainSlug)) {
       api = new ApiPromise({
         provider,
         rpc: goldbergSpec.rpc,
         types: goldbergSpec.types,
-        signedExtensions: goldbergSpec.signedExtensions
+        signedExtensions: goldbergSpec.signedExtensions,
+        noInitWarn: true
       });
     } else {
       api = new ApiPromise(apiOption);

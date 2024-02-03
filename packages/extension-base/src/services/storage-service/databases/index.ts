@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _AssetRef, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { CampaignData, ChainStakingMetadata, CrowdloanItem, MetadataItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceItem, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
 import Dexie, { Table, Transaction } from 'dexie';
@@ -43,6 +43,10 @@ export interface IMetadataItem extends MetadataItem, DefaultChainDoc {}
 export type IMantaPayLedger = any;
 
 export type ICampaign = CampaignData;
+
+export interface IAssetRef extends _AssetRef {
+  slug: string
+}
 
 export default class KoniDatabase extends Dexie {
   public price!: Table<PriceJson, object>;

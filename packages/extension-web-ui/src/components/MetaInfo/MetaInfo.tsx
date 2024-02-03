@@ -173,6 +173,18 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
       color: token.colorWarning
     },
 
+    '.__value.-schema-magenta': {
+      color: token['magenta-6']
+    },
+
+    '.__value.-schema-cyan': {
+      color: token['cyan-6']
+    },
+
+    '.__value.-schema-green': {
+      color: token['green-6']
+    },
+
     '.__value.-schema-even-odd': {
       color: token.colorTextLight2,
 

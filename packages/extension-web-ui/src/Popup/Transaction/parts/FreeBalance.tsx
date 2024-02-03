@@ -12,14 +12,15 @@ import styled, { useTheme } from 'styled-components';
 type Props = ThemeProps & {
   address?: string,
   tokenSlug?: string;
-  customTokenBalance?: string; // TODO: used only for earning
   label?: string;
   chain?: string;
   onBalanceReady?: (rs: boolean) => void;
+  hidden?: boolean;
   isSubscribe?: boolean;
 }
 
-const Component = ({ address, chain, className, customTokenBalance, isSubscribe, label, onBalanceReady, tokenSlug }: Props) => {
+const Component = ({ address, chain, className, hidden, isSubscribe, label, onBalanceReady,
+  tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug, isSubscribe);
@@ -32,8 +33,22 @@ const Component = ({ address, chain, className, customTokenBalance, isSubscribe,
     return <></>;
   }
 
+  if (!address) {
+    return (
+      <Typography.Paragraph className={CN(className, 'free-balance', {
+        hidden: hidden
+      })}
+      >
+        {t('Select account to view available balance')}
+      </Typography.Paragraph>
+    );
+  }
+
   return (
-    <Typography.Paragraph className={CN(className, 'free-balance')}>
+    <Typography.Paragraph className={CN(className, 'free-balance', {
+      hidden: hidden
+    })}
+    >
       {!error && <span className='__label'>{label || t('Sender available balance:')}</span>}
       {isLoading && <ActivityIndicator size={14} />}
       {error && <Typography.Text className={'error-message'}>{error}</Typography.Text>}
@@ -61,7 +76,7 @@ const Component = ({ address, chain, className, customTokenBalance, isSubscribe,
               size={14}
               suffix={tokenBalance?.symbol}
               unitColor={token.colorTextTertiary}
-              value={customTokenBalance || tokenBalance.value}
+              value={tokenBalance.value}
             />
           </>
         )

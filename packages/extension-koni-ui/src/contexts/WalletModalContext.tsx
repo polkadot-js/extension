@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
 import { UnlockModal } from '../components/Modal/UnlockModal';
+import { ClaimDappStakingRewardsModal } from "@subwallet/extension-koni-ui/components/Modal/Earning";
 
 interface Props {
   children: React.ReactNode;
@@ -108,6 +109,7 @@ export const WalletModalContext = ({ children }: Props) => {
     <NewSeedModal />
     <ImportSeedModal />
     <DeriveAccountModal />
+    <ClaimDappStakingRewardsModal />
     <RequestCreatePasswordModal />
     <RequestCameraAccessModal />
     <CustomizeModal />

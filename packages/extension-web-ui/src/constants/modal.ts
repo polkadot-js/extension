@@ -87,3 +87,6 @@ export const HOME_CAMPAIGN_BANNER_MODAL = 'home-campaign-banner-modal';
 export const GENERAL_TERM_AND_CONDITION_MODAL = 'general-term-and-condition-modal';
 export const TERM_AND_CONDITION_SEED_PHRASE_MODAL = 'term-and-condition-seed-phrase-modal';
 /* Terms and Conditions */
+
+export const EARNING_INSTRUCTION_MODAL = 'earning-instruction-modal';
+export const EARNING_NOMINATION_MODAL = 'earning-nomination-modal';

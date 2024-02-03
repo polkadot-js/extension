@@ -18,7 +18,7 @@ import { ContractPromise } from '@polkadot/api-contract';
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN, BN_ZERO } from '@polkadot/util';
 
-import { subscribeEqBalanceAccountPallet, subscribeEquilibriumTokenBalance } from './equilibrium';
+import { subscribeEquilibriumTokenBalance } from './equilibrium';
 
 export async function subscribeSubstrateBalance (addresses: string[], chainInfo: _ChainInfo, chain: string, networkAPI: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, callBack: (rs: BalanceItem[]) => void) {
   let unsubNativeToken: () => void;
@@ -38,9 +38,7 @@ export async function subscribeSubstrateBalance (addresses: string[], chainInfo:
       unsubLocalToken = await subscribeTokensAccountsPallet(addresses, chain, networkAPI.api, callBack, true);
     } else if (_BALANCE_CHAIN_GROUP.statemine.includes(chain)) {
       unsubLocalToken = await subscribeAssetsAccountPallet(addresses, chain, networkAPI.api, callBack);
-    } else if (_BALANCE_CHAIN_GROUP.genshiro.includes(chain)) {
-      unsubLocalToken = await subscribeEqBalanceAccountPallet(addresses, chain, networkAPI.api, callBack, true);
-    } else if (_BALANCE_CHAIN_GROUP.equilibrium_parachain.includes(chain)) {
+    } else if (_BALANCE_CHAIN_GROUP.genshiro.includes(chain) || _BALANCE_CHAIN_GROUP.equilibrium_parachain.includes(chain)) {
       unsubLocalToken = await subscribeEquilibriumTokenBalance(addresses, chain, networkAPI.api, callBack, true);
     } else if (_BALANCE_CHAIN_GROUP.centrifuge.includes(chain)) {
       unsubLocalToken = await subscribeOrmlTokensPallet(addresses, chain, networkAPI.api, callBack);

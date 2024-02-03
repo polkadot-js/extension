@@ -66,6 +66,8 @@ export const RuntimeInfo: RuntimeEnvironmentInfo = detectRuntimeEnvironment();
 // Todo: Support more in backend case
 export const BowserParser = Bowser.getParser(typeof navigator !== 'undefined' ? navigator.userAgent : '');
 export const isFirefox = BowserParser.getBrowserName(true) === 'firefox';
+export const osName = BowserParser.getOSName();
+export const isMobile = BowserParser.getPlatform().type === 'mobile';
 
 export const TARGET_ENV = (process.env.TARGET_ENV || 'extension') as TargetEnvironment;
 export const targetIsExtension = TARGET_ENV === 'extension';

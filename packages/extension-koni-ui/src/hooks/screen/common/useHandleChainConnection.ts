@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { useAlert, useChainConnection, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -78,6 +79,7 @@ export default function useHandleChainConnection (
           setIsLoadingChainConnection(false);
           openAlert({
             title: t('Error!'),
+            type: NotificationType.ERROR,
             content: t('Failed to get data. Please try again later.'),
             okButton: {
               text: t('Continue'),

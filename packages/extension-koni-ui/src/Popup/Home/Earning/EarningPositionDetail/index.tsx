@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { EarningRewardHistoryItem, SpecialYieldPoolInfo, SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { AlertModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_TEN, BN_ZERO, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, EARN_TRANSACTION, UN_STAKE_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
@@ -109,6 +110,7 @@ function Component ({ compound,
     if (isActiveStakeZero) {
       openAlert({
         title: t('Unstaking not available'),
+        type: NotificationType.ERROR,
         content: t("You don't have any staked funds left to unstake. Check withdrawal status (how long left until the unstaking period ends) by checking the Withdraw info. Keep in mind that you need to withdraw manually."),
         okButton: {
           text: t('OK'),

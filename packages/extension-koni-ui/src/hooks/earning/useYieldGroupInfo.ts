@@ -59,6 +59,7 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
           };
 
           let apy: undefined | number;
+
           if (pool.statistic?.totalApy) {
             apy = pool.statistic?.totalApy;
           }

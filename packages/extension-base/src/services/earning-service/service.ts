@@ -13,21 +13,13 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { EarningRewardHistoryItem, EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { addLazy, categoryAddresses, createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
-import fetch from 'cross-fetch';
+import { fetchStaticCache } from '@subwallet/extension-base/utils/fetchStaticCache';
 import { BehaviorSubject } from 'rxjs';
 
 import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
 
-const POOLS_DATA_URLS = 'https://sw-static-cache.pages.dev/earning/yield-pools.json';
-
 const fetchPoolsData = async () => {
-  const res = await fetch(POOLS_DATA_URLS);
-
-  if (res.status !== 200) {
-    return {};
-  }
-
-  const fetchData = (await res.json()) as {data: Record<string, YieldPoolInfo>};
+  const fetchData = await fetchStaticCache<{data: Record<string, YieldPoolInfo>}>('earning/yield-pools.json', { data: {} });
 
   return fetchData.data;
 };
@@ -375,11 +367,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
   }
 
   private async fetchingPoolsInfoOnline () {
-    const onlineData = await Promise.race([fetchPoolsData(), new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({});
-      }, 9000);
-    })]) as Record<string, YieldPoolInfo>;
+    const onlineData = await fetchPoolsData();
 
     Object.values(onlineData).forEach((item) => {
       this.updateYieldPoolInfo(item);

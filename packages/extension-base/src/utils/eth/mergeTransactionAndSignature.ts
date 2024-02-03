@@ -14,18 +14,32 @@ export const mergeTransactionAndSignature = (tx: Web3Transaction, _rawSignature:
     v: parseInt(`0x${_signature.substring(128)}`)
   };
 
-  const transaction: TransactionLike = {
-    type: 2,
-    nonce: tx.nonce,
-    maxFeePerGas: addHexPrefix(tx.maxFeePerGas.toString(16)),
-    maxPriorityFeePerGas: addHexPrefix(tx.maxPriorityFeePerGas.toString(16)),
-    gasLimit: addHexPrefix(tx.gasLimit.toString(16)),
-    to: tx.to,
-    value: addHexPrefix(tx.value.toString(16)),
-    data: tx.data,
-    chainId: tx.chainId,
-    signature: signature
-  };
+  let transaction: TransactionLike;
+
+  if (tx.maxFeePerGas) {
+    transaction = {
+      nonce: tx.nonce,
+      maxFeePerGas: addHexPrefix(tx.maxFeePerGas.toString(16)),
+      maxPriorityFeePerGas: addHexPrefix(tx.maxPriorityFeePerGas.toString(16)),
+      gasLimit: addHexPrefix(tx.gasLimit.toString(16)),
+      to: tx.to,
+      value: addHexPrefix(tx.value.toString(16)),
+      data: tx.data,
+      chainId: tx.chainId,
+      signature: signature
+    };
+  } else {
+    transaction = {
+      nonce: tx.nonce,
+      gasPrice: addHexPrefix(tx.gasPrice.toString(16)),
+      gasLimit: addHexPrefix(tx.gasLimit.toString(16)),
+      to: tx.to,
+      value: addHexPrefix(tx.value.toString(16)),
+      data: tx.data,
+      chainId: tx.chainId,
+      signature: signature
+    };
+  }
 
   return ethers.Transaction.from(transaction).serialized as `0x${string}`;
 };

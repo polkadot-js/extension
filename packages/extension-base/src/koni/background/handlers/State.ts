@@ -35,12 +35,13 @@ import WalletConnectService from '@subwallet/extension-base/services/wallet-conn
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
 import { addLazy, isAccountAll, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
-import { calculatePriorityFee } from '@subwallet/extension-base/utils/eth';
+import { calculateGasFeeParams } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { decodePair } from '@subwallet/keyring/pair/decode';
 import { keyring } from '@subwallet/ui-keyring';
+import BigN from 'bignumber.js';
 import { Subscription } from 'dexie';
 import SimpleKeyring from 'eth-simple-keyring';
 import { t } from 'i18next';
@@ -1518,15 +1519,21 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
     }
 
-    const priority = await calculatePriorityFee(evmApi);
+    const priority = await calculateGasFeeParams(evmApi, networkKey);
 
-    transaction.maxPriorityFeePerGas = priority.maxPriorityFeePerGas.toString();
-    transaction.maxFeePerGas = priority.maxFeePerGas.toString();
+    let estimateGas: string;
 
-    const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
-    const maxFee = priority.maxFeePerGas.lte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+    if (priority.baseGasFee) {
+      transaction.maxPriorityFeePerGas = priority.maxPriorityFeePerGas.toString();
+      transaction.maxFeePerGas = priority.maxFeePerGas.toString();
 
-    const estimateGas = maxFee.multipliedBy(transaction.gas).toString();
+      const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
+      const maxFee = priority.maxFeePerGas.lte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+
+      estimateGas = maxFee.multipliedBy(transaction.gas).toFixed(0);
+    } else {
+      estimateGas = new BigN(priority.gasPrice).multipliedBy(transaction.gas).toFixed(0);
+    }
 
     // Address is validated in before step
     const fromAddress = allowedAccounts.find((account) => (account.toLowerCase() === (transaction.from as string).toLowerCase()));

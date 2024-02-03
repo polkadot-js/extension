@@ -25,9 +25,10 @@ import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { anyNumberToBN, calculatePriorityFee } from '@subwallet/extension-base/utils/eth';
+import { anyNumberToBN, calculateGasFeeParams } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
+import { BN_ZERO } from '@subwallet/extension-base/utils/number';
 import keyring from '@subwallet/ui-keyring';
 import BigN from 'bignumber.js';
 import { addHexPrefix } from 'ethereumjs-util';
@@ -151,11 +152,17 @@ export default class TransactionService {
             } else {
               const gasLimit = await web3.api.eth.estimateGas(transaction);
 
-              const priority = await calculatePriorityFee(web3);
-              const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
-              const maxFee = priority.maxFeePerGas.lte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+              const priority = await calculateGasFeeParams(web3, chainInfo.slug);
 
-              estimateFee.value = maxFee.multipliedBy(gasLimit).toString();
+              if (priority.baseGasFee) {
+                const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
+                const maxFee = priority.maxFeePerGas.lte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+
+                estimateFee.value = maxFee.multipliedBy(gasLimit).toFixed(0);
+              } else {
+                estimateFee.value = new BigN(priority.gasPrice).multipliedBy(gasLimit).toFixed(0);
+              }
+
               estimateFee.tooHigh = priority.busyNetwork;
             }
           }
@@ -710,17 +717,32 @@ export default class TransactionService {
   public generateHashPayload (chain: string, transaction: TransactionConfig): HexString {
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
-    const txObject: TransactionLike = {
-      nonce: transaction.nonce ?? 0,
-      maxFeePerGas: addHexPrefix(anyNumberToBN(transaction.maxFeePerGas).toString(16)),
-      maxPriorityFeePerGas: addHexPrefix(anyNumberToBN(transaction.maxPriorityFeePerGas).toString(16)),
-      gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
-      to: transaction.to !== undefined ? transaction.to : '',
-      value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
-      data: transaction.data,
-      chainId: _getEvmChainId(chainInfo),
-      type: 2
-    };
+    let txObject: TransactionLike;
+
+    const max = anyNumberToBN(transaction.maxFeePerGas);
+
+    if (max.gt(BN_ZERO)) {
+      txObject = {
+        nonce: transaction.nonce ?? 0,
+        maxFeePerGas: addHexPrefix(anyNumberToBN(transaction.maxFeePerGas).toString(16)),
+        maxPriorityFeePerGas: addHexPrefix(anyNumberToBN(transaction.maxPriorityFeePerGas).toString(16)),
+        gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
+        to: transaction.to !== undefined ? transaction.to : '',
+        value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
+        data: transaction.data,
+        chainId: _getEvmChainId(chainInfo)
+      };
+    } else {
+      txObject = {
+        nonce: transaction.nonce ?? 0,
+        gasPrice: addHexPrefix(anyNumberToBN(transaction.gasPrice).toString(16)),
+        gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
+        to: transaction.to !== undefined ? transaction.to : '',
+        value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
+        data: transaction.data,
+        chainId: _getEvmChainId(chainInfo)
+      };
+    }
 
     return ethers.Transaction.from(txObject).unsignedSerialized as HexString;
   }
@@ -793,6 +815,7 @@ export default class TransactionService {
     const txObject: Web3Transaction = {
       nonce: payload.nonce ?? 0,
       from: payload.from as string,
+      gasPrice: anyNumberToBN(payload.gasPrice).toNumber(),
       maxFeePerGas: anyNumberToBN(payload.maxFeePerGas).toNumber(),
       maxPriorityFeePerGas: anyNumberToBN(payload.maxPriorityFeePerGas).toNumber(),
       gasLimit: anyNumberToBN(payload.gas).toNumber(),

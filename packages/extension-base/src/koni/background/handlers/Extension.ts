@@ -36,7 +36,7 @@ import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectN
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo } from '@subwallet/extension-base/types';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
-import { calculatePriorityFee, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
+import { calculateGasFeeParams, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { MetadataDef } from '@subwallet/extension-inject/types';
@@ -2022,11 +2022,16 @@ export default class KoniExtension {
               from: address
             };
             const gasLimit = await web3.api.eth.estimateGas(transaction);
-            const priority = await calculatePriorityFee(web3);
-            const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
-            const maxFee = priority.maxFeePerGas.gte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+            const priority = await calculateGasFeeParams(web3, networkKey);
 
-            estimatedFee = maxFee.multipliedBy(gasLimit).toString();
+            if (priority.baseGasFee) {
+              const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
+              const maxFee = priority.maxFeePerGas.gte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+
+              estimatedFee = maxFee.multipliedBy(gasLimit).toFixed(0);
+            } else {
+              estimatedFee = new BigN(priority.gasPrice).multipliedBy(gasLimit).toFixed(0);
+            }
           } else {
             const [mockTx] = await createTransferExtrinsic({
               from: address,

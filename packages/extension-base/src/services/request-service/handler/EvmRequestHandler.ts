@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Common } from '@ethereumjs/common';
-import { FeeMarketEIP1559Transaction, TypedTransaction } from '@ethereumjs/tx';
+import { FeeMarketEIP1559Transaction, FeeMarketEIP1559TxData, LegacyTransaction, LegacyTxData, TypedTransaction } from '@ethereumjs/tx';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, EvmProviderErrorType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
 import { ConfirmationRequestBase, Resolver } from '@subwallet/extension-base/background/types';
@@ -177,32 +177,45 @@ export default class EvmRequestHandler {
       return bnToHex(input);
     }
 
-    // Convert any string, number to number with BigN exclude hex string
-    const txData = {
-      from: config.from,
-      nonce: formatField(config.nonce),
-      gasLimit: formatField(config.gas),
-      to: config.to,
-      value: formatField(config.value),
-      data: toBuffer(config.data),
-      maxFeePerGas: formatField(config.maxFeePerGas),
-      maxPriorityFeePerGas: formatField(config.maxPriorityFeePerGas),
-      chainId: config.chainId
-    };
-
     const common = Common.custom({ chainId: config.chainId, defaultHardfork: 'london', networkId: config.chainId }, { eips: [1559] });
 
-    return new FeeMarketEIP1559Transaction(txData, { common });
+    if (config.maxPriorityFeePerGas) {
+      const txData: FeeMarketEIP1559TxData = {
+        nonce: formatField(config.nonce),
+        gasLimit: formatField(config.gas),
+        to: config.to,
+        value: formatField(config.value),
+        data: toBuffer(config.data),
+        maxFeePerGas: formatField(config.maxFeePerGas),
+        maxPriorityFeePerGas: formatField(config.maxPriorityFeePerGas),
+        chainId: config.chainId
+      };
+
+      return new FeeMarketEIP1559Transaction(txData, { common });
+    } else {
+      // Convert any string, number to number with BigN exclude hex string
+      const txData: LegacyTxData = {
+        nonce: formatField(config.nonce),
+        gasLimit: formatField(config.gas),
+        gasPrice: formatField(config.gasPrice),
+        to: config.to,
+        value: formatField(config.value),
+        data: toBuffer(config.data)
+      };
+
+      return new LegacyTransaction(txData, { common });
+    }
   }
 
   private async signTransaction (confirmation: ConfirmationDefinitions['evmSendTransactionRequest'][0]): Promise<string> {
     const transaction = confirmation.payload;
-    const { estimateGas, from, gas, maxFeePerGas, maxPriorityFeePerGas, value } = transaction;
+    const { estimateGas, from, gas, gasPrice, maxFeePerGas, maxPriorityFeePerGas, value } = transaction;
     const pair = keyring.getPair(from as string);
     const params = {
       ...transaction,
       gas: anyNumberToBN(gas).toNumber(),
       value: anyNumberToBN(value).toNumber(),
+      gasPrice: anyNumberToBN(gasPrice).toNumber(),
       gasLimit: anyNumberToBN(estimateGas).toNumber(),
       maxFeePerGas: anyNumberToBN(maxFeePerGas).toNumber(),
       maxPriorityFeePerGas: anyNumberToBN(maxPriorityFeePerGas).toNumber()

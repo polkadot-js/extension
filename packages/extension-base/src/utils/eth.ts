@@ -102,28 +102,58 @@ export const recalculateGasPrice = (_price: string, chain: string) => {
   return needMulti ? new BigN(_price).multipliedBy(GAS_PRICE_RATIO).toFixed(0) : _price;
 };
 
-export const calculatePriorityFee = async (web3: _EvmApi) => {
-  const history = await web3.api.eth.getFeeHistory(6, 'latest', [0, 25, 50, 75, 100]);
+export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) => {
+  try {
+    const numBlock = 6;
+    const history = await web3.api.eth.getFeeHistory(numBlock, 'latest', [0, 25, 50, 75, 100]);
 
-  const baseGasFee = new BigN(history.baseFeePerGas[history.baseFeePerGas.length - 1]); // Last element is latest
+    const baseGasFee = new BigN(history.baseFeePerGas[history.baseFeePerGas.length - 1]); // Last element is latest
 
-  const maxPriorityFeePerGas = history.reward.reduce((previous, rewards) => {
-    const [first, second] = rewards;
-    const firstBN = new BigN(first);
-    const secondBN = new BigN(second);
+    const blocksBusy = history.reward.reduce((previous: number, rewards, currentIndex) => {
+      const [priority] = rewards;
+      const base = history.baseFeePerGas[currentIndex];
 
-    const current = secondBN.dividedBy(2).gte(firstBN) ? firstBN : secondBN; // second too larger than first (> 2 times), use first else use second
+      const priorityBN = new BigN(priority);
+      const baseBN = new BigN(base);
 
-    return current.gte(previous) ? current : previous; // get max priority
-  }, BN_ZERO);
+      const blockIsBusy = (priorityBN.dividedBy(baseBN).gte(0.5) ? 1 : 0); // True if priority >= 0.5 * base
 
-  const busyNetwork = maxPriorityFeePerGas.dividedBy(baseGasFee).gte(0.5); // True if priority >= 0.5 * base
-  const maxFeePerGas = baseGasFee.plus(maxPriorityFeePerGas).multipliedBy(busyNetwork ? 2 : 1.5).decimalPlaces(0); // Max gas =(base + priority) * 1.5(if not busy or 2 when busy);
+      return previous + blockIsBusy;
+    }, 0);
 
-  return {
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-    baseGasFee,
-    busyNetwork
-  };
+    const busyNetwork = blocksBusy >= (numBlock / 2); // True if half of block is busy
+
+    const maxPriorityFeePerGas = history.reward.reduce((previous, rewards) => {
+      const [first, second] = rewards;
+      const firstBN = new BigN(first);
+      const secondBN = new BigN(second);
+
+      if (busyNetwork) {
+        const current = secondBN.dividedBy(2).gte(firstBN) ? firstBN : secondBN; // second too larger than first (> 2 times), use first else use second
+
+        return current.gte(previous) ? current : previous; // get max priority
+      } else {
+        const current = firstBN;
+
+        return current.lte(previous) ? current : previous; // get min priority
+      }
+    }, BN_ZERO);
+
+    const maxFeePerGas = baseGasFee.plus(maxPriorityFeePerGas).multipliedBy(busyNetwork ? 2 : 1.5).decimalPlaces(0); // Max gas =(base + priority) * 1.5(if not busy or 2 when busy);
+
+    return {
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      baseGasFee,
+      busyNetwork
+    };
+  } catch (e) {
+    const _price = await web3.api.eth.getGasPrice();
+    const gasPrice = recalculateGasPrice(_price, networkKey);
+
+    return {
+      gasPrice,
+      busyNetwork: false
+    };
+  }
 };

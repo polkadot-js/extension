@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getOS } from '@subwallet/extension-base/utils';
 import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Input, InputRef } from '@subwallet/react-ui';
@@ -11,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { BasicInputWrapper } from './Base';
+import {osName} from "@subwallet/extension-base/utils";
 
 interface Props extends ThemeProps, BasicInputWrapper {
   decimals: number;
@@ -57,7 +57,7 @@ interface ControlData {
   [cmdFirefoxKey]: boolean;
 }
 
-const isMacOs = getOS() === 'Mac OS';
+const isMacOs = osName === 'macOS';
 
 const isControlKey = (keycode: number) => {
   if (isMacOs) {

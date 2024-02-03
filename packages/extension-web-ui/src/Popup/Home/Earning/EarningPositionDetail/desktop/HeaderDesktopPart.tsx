@@ -213,7 +213,8 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
   '.__unstaking-period-value': {
     fontSize: token.fontSizeHeading2,
     lineHeight: token.lineHeightHeading2,
-    paddingRight: token.paddingXXS
+    paddingRight: token.paddingXXS,
+    color: token.colorWhite
   },
 
   '.__unstaking-period-value-suffix': {

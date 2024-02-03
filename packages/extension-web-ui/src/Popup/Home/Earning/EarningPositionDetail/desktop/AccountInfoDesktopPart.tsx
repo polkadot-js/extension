@@ -166,6 +166,7 @@ const Component: React.FC<Props> = ({ className, compound,
           >
             <div className={'__active-stake'}>
               <Number
+                className={'__active-stake-account-value'}
                 decimal={inputAsset?.decimals || 0}
                 suffix={inputAsset?.symbol}
                 value={row.activeStake}
@@ -175,12 +176,14 @@ const Component: React.FC<Props> = ({ className, compound,
             {
               isSpecial && (
                 <div className={'__derivative-balance'}>
-                  <span>{t('Derivative balance')}: </span>
-                  <Number
-                    decimal={deriveAsset?.decimals || 0}
-                    suffix={deriveAsset?.symbol}
-                    value={row.activeStake}
-                  />
+                  <span className={'__derivative-title'}>{t('Derivative balance: ')}</span>
+                  <div className={'__derivative-balance-value'}>
+                    <Number
+                      decimal={deriveAsset?.decimals || 0}
+                      suffix={deriveAsset?.symbol}
+                      value={row.activeStake}
+                    />
+                  </div>
                 </div>
               )
             }
@@ -197,6 +200,7 @@ const Component: React.FC<Props> = ({ className, compound,
       render: (row: YieldPositionInfo) => {
         return (
           <Number
+            className={'__table-unstake-value'}
             decimal={inputAsset?.decimals || 0}
             suffix={inputAsset?.symbol}
             value={row.unstakeBalance}
@@ -375,6 +379,56 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       paddingTop: token.padding
     },
 
+    '.__row-nomination-button': {
+      color: token.colorWhite
+    },
+
+    '.__derivative-title': {
+      paddingRight: token.paddingXXS
+    },
+
+    '.__derivative-balance-value': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      fontWeight: token.bodyFontWeight,
+      color: token.colorWhite,
+
+      '.ant-number-integer, .ant-number-suffix': {
+        color: 'inherit !important',
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      },
+
+      '.ant-number-decimal': {
+        color: `${token.colorTextLight3} !important`,
+        fontSize: `${token.fontSizeSM}px !important`,
+        fontWeight: 'inherit !important',
+        lineHeight: token.lineHeightSM
+      }
+    },
+
+    '.__active-stake-account-value, .__row-total-Stake-value, .__table-unstake-value': {
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      fontWeight: token.fontWeightStrong,
+      color: token.colorWhite,
+
+      '.ant-number-integer': {
+        color: 'inherit !important',
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      },
+
+      '.ant-number-decimal': {
+        color: `${token.colorTextLight4} !important`,
+        fontSize: `${token.fontSizeLG}px !important`,
+        fontWeight: 'inherit !important',
+        lineHeight: token.lineHeightLG
+      }
+    },
+
     '.__row-account-name': {
       lineHeight: token.lineHeight,
       fontWeight: token.fontWeightStrong,
@@ -422,13 +476,6 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       overflow: 'hidden'
     },
 
-    '.ant-number .ant-typography': {
-      fontSize: 'inherit !important',
-      fontWeight: 'inherit !important',
-      color: 'inherit !important',
-      lineHeight: 'inherit'
-    },
-
     '.__row-token-name-wrapper': {
       display: 'flex',
       gap: token.sizeSM
@@ -463,8 +510,10 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       alignItems: 'center',
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
-      color: token.colorTextLabel
+      color: token.colorTextLight4,
+      paddingRight: token.paddingXXS
     },
+
     '.__earning-status-col .__td-inner': {
       alignItems: 'center'
     },

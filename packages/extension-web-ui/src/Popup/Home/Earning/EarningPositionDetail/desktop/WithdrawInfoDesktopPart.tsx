@@ -85,7 +85,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
   return (
     <>
       <div
-        className={CN(className, '__withdraw-info-part')}
+        className={CN(className, '__withdraw-info-desktop-part')}
       >
         <div className={'__part-title'}>{t('Withdraw info')}</div>
 
@@ -148,9 +148,9 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
     padding: 0
   },
 
-  '&.__withdraw-info-part': {
-    marginBottom: token.margin
-  },
+  // '&.__withdraw-info-desktop-part': {
+  //   marginBottom: 38
+  // },
 
   '.__part-title': {
     lineHeight: token.lineHeight
@@ -158,6 +158,27 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
 
   '.__withdraw-area.-no-content': {
     height: 36
+  },
+
+  '.__withdraw-value': {
+    fontSize: token.fontSizeHeading4,
+    lineHeight: token.lineHeightHeading4,
+    fontWeight: token.headingFontWeight,
+    color: token.colorTextLight1,
+
+    '.ant-number-integer': {
+      color: 'inherit !important',
+      fontSize: 'inherit !important',
+      fontWeight: 'inherit !important',
+      lineHeight: 'inherit'
+    },
+
+    '.ant-number-decimal, .ant-number-suffix': {
+      color: `${token.colorTextLight3} !important`,
+      fontSize: `${token.fontSizeHeading5}px !important`,
+      fontWeight: 'inherit !important',
+      lineHeight: token.lineHeightHeading5
+    }
   },
 
   '.ant-btn-content-wrapper': {
@@ -170,10 +191,7 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
     display: 'flex',
     gap: token.sizeSM,
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: token.paddingSM,
-    paddingLeft: token.padding,
-    paddingRight: token.padding
+    alignItems: 'center'
   },
 
   '.__separator': {

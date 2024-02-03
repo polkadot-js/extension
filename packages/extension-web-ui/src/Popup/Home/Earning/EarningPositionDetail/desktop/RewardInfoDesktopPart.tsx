@@ -177,7 +177,7 @@ export const RewardInfoDesktopPart = styled(Component)<Props>(({ theme: { token 
   flex: 1,
 
   '&.__reward-info-desktop-part': {
-    marginBottom: token.margin
+    marginBottom: 38
   },
 
   '.__part-title': {

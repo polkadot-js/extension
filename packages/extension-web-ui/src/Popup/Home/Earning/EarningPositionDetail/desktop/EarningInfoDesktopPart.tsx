@@ -106,7 +106,7 @@ export const EarningInfoDesktopPart = styled(Component)<Props>(({ theme: { token
   flex: 1,
 
   '&.__earning-info-desktop-part': {
-    marginBottom: token.margin
+    marginBottom: 38
   },
 
   '.__separator': {

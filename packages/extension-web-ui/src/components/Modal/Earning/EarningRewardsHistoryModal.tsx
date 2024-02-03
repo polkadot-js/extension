@@ -37,7 +37,7 @@ function Component ({ address, className, inputAsset, modalId, rewardHistories, 
 
   return (
     <BaseModal
-      className={CN(className)}
+      className={CN(className, '__rewards-history-modal')}
       footer={
         <Button
           block={true}
@@ -77,6 +77,10 @@ function Component ({ address, className, inputAsset, modalId, rewardHistories, 
   );
 }
 
-export const EarningRewardsHistoryModal = styled(Component)<Props>(({ theme: { token } }: Props) => ({
-
-}));
+export const EarningRewardsHistoryModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  return {
+    '&.__rewards-history-modal .ant-sw-modal-footer': {
+      borderTop: 0
+    }
+  };
+});

@@ -218,7 +218,11 @@ function Component ({ compound,
                   unstakings={compound.unstakings}
                 />
               </div>
-              <AccountInfoDesktopPart items={[]} />
+              <AccountInfoDesktopPart
+                compound={compound}
+                inputAsset={inputAsset}
+                positionItems={list}
+              />
             </>
           )
         }

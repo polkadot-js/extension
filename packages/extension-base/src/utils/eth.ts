@@ -116,7 +116,7 @@ export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) =
       const priorityBN = new BigN(priority);
       const baseBN = new BigN(base);
 
-      const blockIsBusy = (priorityBN.dividedBy(baseBN).gte(0.5) ? 1 : 0); // True if priority >= 0.5 * base
+      const blockIsBusy = (priorityBN.dividedBy(baseBN).gte(0.3) ? 1 : 0); // True if priority >= 0.5 * base
 
       return previous + blockIsBusy;
     }, 0);

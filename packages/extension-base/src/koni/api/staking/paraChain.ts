@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeAmplitudeNominatorMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/amplitude';
 import { subscribeAstarNominatorMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { subscribeParaChainNominatorMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
 import { KrestDelegateState, PalletDappsStakingAccountLedger, PalletParachainStakingDelegator, ParachainStakingStakeOption } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { EarningStatus } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Codec } from '@polkadot/types/types';
@@ -61,7 +62,7 @@ function getSingleStakingAmplitude (substrateApi: _SubstrateApi, address: string
         chain,
         type: StakingType.NOMINATED,
         address: owner,
-        status: StakingStatus.NOT_STAKING,
+        status: EarningStatus.NOT_STAKING,
         activeStake: '0',
         nominations: [],
         unstakings: []
@@ -154,7 +155,7 @@ function getMultiStakingAmplitude (substrateApi: _SubstrateApi, useAddresses: st
             chain,
             type: StakingType.NOMINATED,
             address: owner,
-            status: StakingStatus.NOT_STAKING,
+            status: EarningStatus.NOT_STAKING,
             activeStake: '0',
             nominations: [],
             unstakings: []
@@ -301,7 +302,7 @@ export function getParaStakingOnChain (substrateApi: _SubstrateApi, useAddresses
             chain,
             type: StakingType.NOMINATED,
             address: owner,
-            status: StakingStatus.NOT_STAKING,
+            status: EarningStatus.NOT_STAKING,
             activeStake: '0',
             nominations: [],
             unstakings: []
@@ -370,7 +371,7 @@ export function getAstarStakingOnChain (substrateApi: _SubstrateApi, useAddresse
             chain,
             type: StakingType.NOMINATED,
             address: owner,
-            status: StakingStatus.NOT_STAKING,
+            status: EarningStatus.NOT_STAKING,
             activeStake: '0',
             nominations: [],
             unstakings: []

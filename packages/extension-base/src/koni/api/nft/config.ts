@@ -27,8 +27,10 @@ export const BIT_COUNTRY_LAND_ESTATE_METADATA_API = 'https://pioneer-api.bit.cou
 
 export const BIT_COUNTRY_THUMBNAIL_RESOLVER = 'https://res.cloudinary.com/ddftctzph/image/upload/c_scale,q_100,w_250/production-ipfs/asset/';
 
+// XOrigin
 export const CF_IPFS_GATEWAY = 'https://cf-ipfs.com/ipfs/';
 
+// XOrigin
 export const PINATA_IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';
 
 export const UNIQUE_SCAN_ENDPOINT = 'https://explorer-api.unique.network/v1/graphql';
@@ -41,14 +43,18 @@ export const VARA_SCAN_ENDPOINT = 'https://nft-explorer.vara-network.io/graphql'
 
 export const UNIQUE_IPFS_GATEWAY = 'https://ipfs.unique.network/ipfs/';
 
+// XOrigin
 export const NFT_STORAGE_GATEWAY = 'https://nftstorage.link/ipfs/';
 
 export const IPFS_W3S_LINK = 'https://w3s.link/ipfs/';
 
+// XOrigin
 export const GATEWAY_IPFS_IO = 'https://gateway.ipfs.io/ipfs/';
 
+// XOrigin
 export const IPFS_IO = 'https://ipfs.io/ipfs/';
 
+// XOrigin
 export const DWEB_LINK = 'https://dweb.link/ipfs/';
 
 export const IPFS_GATEWAY_4EVERLAND = 'https://4everland.io/ipfs/';
@@ -124,32 +130,8 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
 
 const RANDOM_IPFS_GATEWAY_SETTING = [
   {
-    provider: CF_IPFS_GATEWAY,
-    weight: 4
-  },
-  {
     provider: CLOUDFLARE_PINATA_SERVER,
     weight: 10
-  },
-  {
-    provider: PINATA_IPFS_GATEWAY,
-    weight: 1 // Rate limit too low
-  },
-  {
-    provider: DWEB_LINK,
-    weight: 5
-  },
-  {
-    provider: GATEWAY_IPFS_IO,
-    weight: 5
-  },
-  {
-    provider: IPFS_IO,
-    weight: 5
-  },
-  {
-    provider: NFT_STORAGE_GATEWAY,
-    weight: 50
   }
 ];
 
@@ -160,19 +142,45 @@ if (isFirefox) {
   });
 }
 
-if (!RuntimeInfo.protocol || (RuntimeInfo.protocol && !RuntimeInfo.protocol.startsWith('http'))) {
+if (!RuntimeInfo.protocol ||
+  (!RuntimeInfo.protocol.startsWith('http') || RuntimeInfo.protocol.startsWith('https'))) {
   RANDOM_IPFS_GATEWAY_SETTING.push({
     provider: IPFS_FLEEK,
     weight: 4
-  });
-  RANDOM_IPFS_GATEWAY_SETTING.push({
+  },
+  {
     provider: IPFS_GATEWAY_4EVERLAND,
     weight: 2
-  });
-  RANDOM_IPFS_GATEWAY_SETTING.push({
+  },
+  {
     provider: IPFS_W3S_LINK,
     weight: 1
-  });
+  },
+  {
+    provider: CF_IPFS_GATEWAY,
+    weight: 4
+  },
+  {
+    provider: PINATA_IPFS_GATEWAY,
+    weight: 1 // Rate limit too low
+  },
+  {
+    provider: NFT_STORAGE_GATEWAY,
+    weight: 50
+  },
+  {
+    provider: GATEWAY_IPFS_IO,
+    weight: 5
+  },
+  {
+    provider: DWEB_LINK,
+    weight: 5
+  },
+  {
+    provider: IPFS_IO,
+    weight: 5
+  }
+  );
 }
 
 const RANDOM_IPFS_GATEWAY_TOTAL_WEIGHT = RANDOM_IPFS_GATEWAY_SETTING.reduce((value, item) => value + item.weight, 0);

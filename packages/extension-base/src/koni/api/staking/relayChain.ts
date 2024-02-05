@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { PalletStakingStakingLedger, subscribeRelayChainNominatorMetadata, subscribeRelayChainPoolMemberMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
-import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { EarningStatus, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Codec } from '@polkadot/types/types';
@@ -60,7 +60,7 @@ export function getRelayStakingOnChain (substrateApi: _SubstrateApi, useAddresse
           nominatorStateCallback({
             chain,
             type: StakingType.NOMINATED,
-            status: StakingStatus.NOT_STAKING,
+            status: EarningStatus.NOT_STAKING,
             address: owner,
             activeStake: '0',
             nominations: [],
@@ -130,7 +130,7 @@ export function getRelayPoolingOnChain (substrateApi: _SubstrateApi, useAddresse
             chain,
             type: StakingType.POOLED,
             address: owner,
-            status: StakingStatus.NOT_STAKING,
+            status: EarningStatus.NOT_STAKING,
             activeStake: '0',
             nominations: [], // can only join 1 pool at a time
             unstakings: []

@@ -283,8 +283,10 @@ export class ChainService {
     const result: Record<string, _ChainInfo> = {};
 
     Object.values(this.getChainStateMap()).forEach((chainState) => {
-      if (chainState.active) {
-        result[chainState.slug] = this.getChainInfoByKey(chainState.slug);
+      const chainInfo = this.getChainInfoByKey(chainState.slug);
+
+      if (chainState.active && chainInfo && chainInfo.chainStatus === _ChainStatus.ACTIVE) {
+        result[chainState.slug] = chainInfo;
       }
     });
 
@@ -568,6 +570,11 @@ export class ChainService {
 
   checkLatestData () {
     clearInterval(this.refreshLatestChainDataTimeOut);
+    this.handleLatestData();
+
+    this.handleLatestData();
+
+    this.handleLatestData();
 
     this.handleLatestData();
 

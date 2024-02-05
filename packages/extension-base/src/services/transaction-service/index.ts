@@ -3,27 +3,24 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, FeeData, NotificationType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, FeeData, NotificationType, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { BalanceService } from '@subwallet/extension-base/services/balance-service';
+import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
-import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
-import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
-import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { TRANSACTION_TIMEOUT } from '@subwallet/extension-base/services/transaction-service/constants';
-import { parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
+import { parseLiquidStakingEvents, parseLiquidStakingFastUnstakeEvents, parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
 import { getBaseTransactionInfo, getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEmitter, TransactionEventMap, TransactionEventResponse, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
 import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
+import { LeavePoolAdditionalData, RequestStakePoolingBonding, RequestYieldStepSubmit, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { anyNumberToBN, calculateGasFeeParams } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
@@ -47,15 +44,16 @@ import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 import { isHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 
+import { _TRANSFER_CHAIN_GROUP } from '../chain-service/constants';
+import NotificationService from '../notification-service/NotificationService';
+
 export default class TransactionService {
-  private readonly balanceService: BalanceService;
-  private readonly chainService: ChainService;
-  private readonly databaseService: DatabaseService;
+  private readonly state: KoniState;
+  private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
   private readonly eventService: EventService;
   private readonly historyService: HistoryService;
   private readonly notificationService: NotificationService;
-  private readonly requestService: RequestService;
-  private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
+  private readonly chainService: ChainService;
 
   private readonly watchTransactionSubscribes: Record<string, Promise<void>> = {};
 
@@ -63,14 +61,12 @@ export default class TransactionService {
     return this.transactionSubject.getValue();
   }
 
-  constructor (chainService: ChainService, eventService: EventService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService, notificationService: NotificationService, databaseService: DatabaseService) {
-    this.chainService = chainService;
-    this.eventService = eventService;
-    this.requestService = requestService;
-    this.balanceService = balanceService;
-    this.historyService = historyService;
-    this.notificationService = notificationService;
-    this.databaseService = databaseService;
+  constructor (state: KoniState) {
+    this.state = state;
+    this.eventService = state.eventService;
+    this.historyService = state.historyService;
+    this.notificationService = state.notificationService;
+    this.chainService = state.chainService;
   }
 
   private get allTransactions (): SWTransaction[] {
@@ -130,7 +126,7 @@ export default class TransactionService {
       tooHigh: false
     };
 
-    const chainInfo = this.chainService.getChainInfoByKey(chain);
+    const chainInfo = this.state.chainService.getChainInfoByKey(chain);
 
     if (!chainInfo) {
       validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('Cannot find network')));
@@ -145,7 +141,7 @@ export default class TransactionService {
           if (isSubstrateTransaction(transaction)) {
             estimateFee.value = (await transaction.paymentInfo(address)).partialFee.toString();
           } else {
-            const web3 = this.chainService.getEvmApi(chain);
+            const web3 = this.state.chainService.getEvmApi(chain);
 
             if (!web3) {
               validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED, undefined));
@@ -193,9 +189,9 @@ export default class TransactionService {
 
     // Balance
     const transferNative = validationResponse.transferNativeAmount || '0';
-    const nativeTokenInfo = this.chainService.getNativeTokenInfo(chain);
+    const nativeTokenInfo = this.state.chainService.getNativeTokenInfo(chain);
 
-    const balance = await this.balanceService.getTokenFreeBalance(address, chain, nativeTokenInfo.slug);
+    const balance = await this.state.balanceService.getTokenFreeBalance(address, chain, nativeTokenInfo.slug);
 
     const existentialDeposit = nativeTokenInfo.minAmount || '0';
 
@@ -204,31 +200,34 @@ export default class TransactionService {
     const edNum = parseInt(existentialDeposit);
     const transferNativeNum = parseInt(transferNative);
 
-    if (!new BigN(balance.value).gt(0)) {
-      validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-    }
-
-    if (transferNativeNum + feeNum > balanceNum) {
-      if (!isTransferAll) {
+    if (!validationInput.skipFeeValidation) {
+      // TODO
+      if (!new BigN(balance.value).gt(0)) {
         validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-      } else {
-        if ([
-          ..._TRANSFER_CHAIN_GROUP.acala,
-          ..._TRANSFER_CHAIN_GROUP.genshiro,
-          ..._TRANSFER_CHAIN_GROUP.bitcountry,
-          ..._TRANSFER_CHAIN_GROUP.statemine
-        ].includes(chain)) { // Chain not have transfer all function
+      }
+
+      if (transferNativeNum + feeNum > balanceNum) {
+        if (!isTransferAll) {
           validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+        } else {
+          if ([
+            ..._TRANSFER_CHAIN_GROUP.acala,
+            ..._TRANSFER_CHAIN_GROUP.genshiro,
+            ..._TRANSFER_CHAIN_GROUP.bitcountry,
+            ..._TRANSFER_CHAIN_GROUP.statemine
+          ].includes(chain)) { // Chain not have transfer all function
+            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+          }
         }
       }
-    }
 
-    if (!isTransferAll) {
-      if (balanceNum - (transferNativeNum + feeNum) < edNum) {
-        if (edAsWarning) {
-          validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
-        } else {
-          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
+      if (!isTransferAll) {
+        if (balanceNum - (transferNativeNum + feeNum) < edNum) {
+          if (edAsWarning) {
+            validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
+          } else {
+            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
+          }
         }
       }
     }
@@ -306,12 +305,21 @@ export default class TransactionService {
 
     const emitter = await this.addTransaction(validatedTransaction);
 
-    await new Promise<void>((resolve) => {
-      emitter.on('signed', (data: TransactionEventResponse) => {
-        validatedTransaction.id = data.id;
-        validatedTransaction.extrinsicHash = data.extrinsicHash;
-        resolve();
-      });
+    await new Promise<void>((resolve, reject) => {
+      // TODO
+      if (transaction.resolveOnDone) {
+        emitter.on('success', (data: TransactionEventResponse) => {
+          validatedTransaction.id = data.id;
+          validatedTransaction.extrinsicHash = data.extrinsicHash;
+          resolve();
+        });
+      } else {
+        emitter.on('signed', (data: TransactionEventResponse) => {
+          validatedTransaction.id = data.id;
+          validatedTransaction.extrinsicHash = data.extrinsicHash;
+          resolve();
+        });
+      }
 
       emitter.on('error', (data: TransactionEventResponse) => {
         if (data.errors.length > 0) {
@@ -388,7 +396,7 @@ export default class TransactionService {
 
   private getTransactionLink (id: string): string | undefined {
     const transaction = this.getTransaction(id);
-    const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
+    const chainInfo = this.state.chainService.getChainInfoByKey(transaction.chain);
 
     return getExplorerLink(chainInfo, transaction.extrinsicHash, 'tx');
   }
@@ -419,7 +427,7 @@ export default class TransactionService {
       startBlock: startBlock || 0
     };
 
-    const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
+    const chainInfo = this.state.chainService.getChainInfoByKey(transaction.chain);
     const nativeAsset = _getChainNativeTokenBasicInfo(chainInfo);
     const baseNativeAmount = { value: '0', decimals: nativeAsset.decimals, symbol: nativeAsset.symbol };
 
@@ -429,7 +437,7 @@ export default class TransactionService {
         const inputData = parseTransactionData<ExtrinsicType.TRANSFER_TOKEN>(transaction.data);
 
         historyItem.to = inputData.to;
-        const sendingTokenInfo = this.chainService.getAssetBySlug(inputData.tokenSlug);
+        const sendingTokenInfo = this.state.chainService.getAssetBySlug(inputData.tokenSlug);
 
         historyItem.amount = { value: inputData.value || '0', decimals: sendingTokenInfo.decimals || 0, symbol: sendingTokenInfo.symbol };
         eventLogs && parseTransferEventLogs(historyItem, eventLogs, transaction.chain, sendingTokenInfo, chainInfo);
@@ -440,7 +448,7 @@ export default class TransactionService {
         const inputData = parseTransactionData<ExtrinsicType.TRANSFER_TOKEN>(transaction.data);
 
         historyItem.to = inputData.to;
-        const sendingTokenInfo = this.chainService.getAssetBySlug(inputData.tokenSlug);
+        const sendingTokenInfo = this.state.chainService.getAssetBySlug(inputData.tokenSlug);
 
         historyItem.amount = { value: inputData.value || '0', decimals: sendingTokenInfo.decimals || 0, symbol: sendingTokenInfo.symbol };
         eventLogs && parseTransferEventLogs(historyItem, eventLogs, transaction.chain, sendingTokenInfo, chainInfo);
@@ -451,7 +459,7 @@ export default class TransactionService {
         const inputData = parseTransactionData<ExtrinsicType.TRANSFER_XCM>(transaction.data);
 
         historyItem.to = inputData.to;
-        const sendingTokenInfo = this.chainService.getAssetBySlug(inputData.tokenSlug);
+        const sendingTokenInfo = this.state.chainService.getAssetBySlug(inputData.tokenSlug);
 
         historyItem.amount = { value: inputData.value || '0', decimals: sendingTokenInfo.decimals || 0, symbol: sendingTokenInfo.symbol };
 
@@ -492,8 +500,21 @@ export default class TransactionService {
         {
           const data = parseTransactionData<ExtrinsicType.STAKING_UNBOND>(transaction.data);
 
-          historyItem.to = data.validatorAddress || '';
-          historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
+          if (data.isLiquidStaking && data.derivativeTokenInfo && data.exchangeRate && data.inputTokenInfo) {
+            historyItem.amount = {
+              decimals: _getAssetDecimals(data.derivativeTokenInfo),
+              symbol: _getAssetSymbol(data.derivativeTokenInfo),
+              value: data.amount
+            };
+
+            historyItem.additionalInfo = {
+              inputTokenSlug: data.inputTokenInfo.slug,
+              exchangeRate: data.exchangeRate
+            } as TransactionAdditionalInfo[ExtrinsicType.STAKING_UNBOND];
+          } else {
+            historyItem.to = data.validatorAddress || '';
+            historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
+          }
         }
 
         break;
@@ -501,7 +522,7 @@ export default class TransactionService {
         {
           const data = parseTransactionData<ExtrinsicType.STAKING_LEAVE_POOL>(transaction.data);
 
-          historyItem.to = data.nominatorMetadata.address || '';
+          historyItem.to = data.address || '';
           historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
         }
 
@@ -517,8 +538,25 @@ export default class TransactionService {
       case ExtrinsicType.STAKING_WITHDRAW: {
         const data = parseTransactionData<ExtrinsicType.STAKING_WITHDRAW>(transaction.data);
 
-        historyItem.to = data.validatorAddress || '';
-        historyItem.amount = { ...baseNativeAmount, value: data.unstakingInfo.claimable || '0' };
+        const slug = data.slug;
+        const poolHandler = this.state.earningService.getPoolHandler(slug);
+
+        const amount: AmountData = {
+          ...baseNativeAmount,
+          value: data.unstakingInfo.claimable || '0'
+        };
+
+        if (poolHandler) {
+          const asset = this.state.getAssetBySlug(poolHandler.metadataInfo.inputAsset);
+
+          if (asset) {
+            amount.decimals = asset.decimals || 0;
+            amount.symbol = asset.symbol;
+          }
+        }
+
+        historyItem.to = data.unstakingInfo.validatorAddress || '';
+        historyItem.amount = amount;
         break;
       }
 
@@ -535,6 +573,116 @@ export default class TransactionService {
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
         historyItem.to = data?.to || '';
+        break;
+      }
+
+      case ExtrinsicType.MINT_STDOT:
+      case ExtrinsicType.MINT_QDOT:
+      case ExtrinsicType.MINT_LDOT:
+      case ExtrinsicType.MINT_SDOT:
+
+      // eslint-disable-next-line no-fallthrough
+      case ExtrinsicType.MINT_VDOT: {
+        const params = parseTransactionData<ExtrinsicType.MINT_VDOT>(transaction.data);
+
+        const inputTokenInfo = this.state.chainService.getAssetBySlug(params.inputTokenSlug);
+        const isFeePaidWithInputAsset = params.feeTokenSlug === params.inputTokenSlug;
+
+        historyItem.amount = { value: params.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
+
+        const additionalInfo: TransactionAdditionalInfo[ExtrinsicType.MINT_VDOT] = {
+          slug: params.slug,
+          derivativeTokenSlug: params.derivativeTokenSlug,
+          exchangeRate: params.exchangeRate
+        };
+
+        historyItem.additionalInfo = additionalInfo;
+        eventLogs && !_isChainEvmCompatible(chainInfo) && parseLiquidStakingEvents(historyItem, eventLogs, inputTokenInfo, chainInfo, isFeePaidWithInputAsset, extrinsicType);
+
+        break;
+      }
+
+      case ExtrinsicType.UNSTAKE_QDOT:
+
+      // eslint-disable-next-line no-fallthrough
+      case ExtrinsicType.REDEEM_QDOT: {
+        const data = parseTransactionData<ExtrinsicType.REDEEM_QDOT>(transaction.data);
+        const yieldPoolInfo = data.poolInfo as SpecialYieldPoolInfo;
+
+        if (yieldPoolInfo.metadata.derivativeAssets) {
+          const inputTokenSlug = yieldPoolInfo.metadata.inputAsset;
+          const inputTokenInfo = this.state.chainService.getAssetBySlug(inputTokenSlug);
+
+          historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(inputTokenInfo), decimals: _getAssetDecimals(inputTokenInfo) };
+          eventLogs && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
+
+          const additionalInfo: LeavePoolAdditionalData = {
+            minAmountPercent: 1,
+            symbol: inputTokenInfo.symbol,
+            decimals: inputTokenInfo.decimals || 0,
+            exchangeRate: 1,
+            slug: yieldPoolInfo.slug,
+            type: yieldPoolInfo.type,
+            chain: yieldPoolInfo.chain,
+            group: yieldPoolInfo.group,
+            isFast: data.fastLeave
+          };
+
+          historyItem.additionalInfo = additionalInfo;
+        }
+
+        break;
+      }
+
+      case ExtrinsicType.UNSTAKE_VDOT:
+      case ExtrinsicType.UNSTAKE_LDOT:
+      case ExtrinsicType.UNSTAKE_SDOT:
+      case ExtrinsicType.UNSTAKE_STDOT:
+      case ExtrinsicType.REDEEM_STDOT:
+      case ExtrinsicType.REDEEM_LDOT:
+      case ExtrinsicType.REDEEM_SDOT:
+
+      // eslint-disable-next-line no-fallthrough
+      case ExtrinsicType.REDEEM_VDOT: {
+        const data = parseTransactionData<ExtrinsicType.REDEEM_VDOT>(transaction.data);
+        const yieldPoolInfo = data.poolInfo as SpecialYieldPoolInfo;
+        const minAmountPercents = this.state.earningService.getMinAmountPercent();
+
+        if (yieldPoolInfo.metadata.derivativeAssets) {
+          const derivativeTokenSlug = yieldPoolInfo.metadata.derivativeAssets[0];
+          const derivativeTokenInfo = this.state.chainService.getAssetBySlug(derivativeTokenSlug);
+          const chainInfo = this.state.chainService.getChainInfoByKey(data.poolInfo.chain);
+
+          historyItem.amount = { value: data.amount, symbol: _getAssetSymbol(derivativeTokenInfo), decimals: _getAssetDecimals(derivativeTokenInfo) };
+          eventLogs && !_isChainEvmCompatible(chainInfo) && parseLiquidStakingFastUnstakeEvents(historyItem, eventLogs, chainInfo, extrinsicType);
+
+          const minAmountPercent = minAmountPercents[yieldPoolInfo.slug] || 1;
+          const inputTokenSlug = yieldPoolInfo.metadata.inputAsset;
+          const inputTokenInfo = this.state.chainService.getAssetBySlug(inputTokenSlug);
+          const additionalInfo: LeavePoolAdditionalData = {
+            minAmountPercent,
+            symbol: inputTokenInfo.symbol,
+            decimals: inputTokenInfo.decimals || 0,
+            exchangeRate: yieldPoolInfo.statistic?.assetEarning[0].exchangeRate || 1,
+            slug: yieldPoolInfo.slug,
+            type: yieldPoolInfo.type,
+            chain: yieldPoolInfo.chain,
+            group: yieldPoolInfo.group,
+            isFast: data.fastLeave
+          };
+
+          historyItem.additionalInfo = additionalInfo;
+        }
+
+        break;
+      }
+
+      case ExtrinsicType.TOKEN_APPROVE: {
+        const data = parseTransactionData<ExtrinsicType.TOKEN_APPROVE>(transaction.data);
+        const inputAsset = this.state.chainService.getAssetBySlug(data.inputTokenSlug);
+
+        historyItem.amount = { value: '0', symbol: _getAssetSymbol(inputAsset), decimals: _getAssetDecimals(inputAsset) };
+
         break;
       }
 
@@ -583,7 +731,7 @@ export default class TransactionService {
     this.updateTransaction(id, { status: ExtrinsicStatus.SUBMITTING });
 
     // Create Input History Transaction History
-    this.historyService.insertHistories(this.transactionToHistories(id, startBlock, nonce)).catch(console.error);
+    this.state.historyService.insertHistories(this.transactionToHistories(id, startBlock, nonce)).catch(console.error);
 
     console.debug(`Transaction "${id}" is sent`);
   }
@@ -595,9 +743,22 @@ export default class TransactionService {
     this.updateTransaction(id, updateData);
 
     // In this case transaction id is the same as extrinsic hash and will change after below update
-    this.historyService.updateHistoryByExtrinsicHash(id, updateData).catch(console.error);
+    this.state.historyService.updateHistoryByExtrinsicHash(id, updateData).catch(console.error);
 
     console.debug(`Transaction "${id}" is submitted with hash ${extrinsicHash || ''}`);
+
+    const transaction = this.getTransaction(id);
+
+    if ([
+      ExtrinsicType.STAKING_JOIN_POOL,
+      ExtrinsicType.JOIN_YIELD_POOL,
+      ExtrinsicType.MINT_LDOT,
+      ExtrinsicType.MINT_QDOT,
+      ExtrinsicType.MINT_SDOT,
+      ExtrinsicType.MINT_VDOT
+    ].includes(transaction.extrinsicType)) {
+      this.handlePostEarningTransaction(id);
+    }
   }
 
   private handlePostProcessing (id: string) { // must be done after success/failure to make sure the transaction is finalized
@@ -609,9 +770,9 @@ export default class TransactionService {
       try {
         const sender = keyring.getPair(inputData.senderAddress);
 
-        sender && this.databaseService.handleNftTransfer(transaction.chain, [sender.address, ALL_ACCOUNT_KEY], inputData.nftItem)
+        sender && this.state.dbService.handleNftTransfer(transaction.chain, [sender.address, ALL_ACCOUNT_KEY], inputData.nftItem)
           .then(() => {
-            this.eventService.emit('transaction.transferNft', undefined);
+            this.state.eventService.emit('transaction.transferNft', undefined);
           })
           .catch(console.error);
       } catch (e) {
@@ -621,13 +782,13 @@ export default class TransactionService {
       try {
         const recipient = keyring.getPair(inputData.recipientAddress);
 
-        recipient && this.databaseService.addNft(recipient.address, { ...inputData.nftItem, owner: recipient.address })
+        recipient && this.state.dbService.addNft(recipient.address, { ...inputData.nftItem, owner: recipient.address })
           .catch(console.error);
       } catch (e) {
         console.error(e);
       }
     } else if ([ExtrinsicType.STAKING_BOND, ExtrinsicType.STAKING_UNBOND, ExtrinsicType.STAKING_WITHDRAW, ExtrinsicType.STAKING_CANCEL_UNSTAKE, ExtrinsicType.STAKING_CLAIM_REWARD, ExtrinsicType.STAKING_JOIN_POOL, ExtrinsicType.STAKING_POOL_WITHDRAW, ExtrinsicType.STAKING_LEAVE_POOL].includes(transaction.extrinsicType)) {
-      this.eventService.emit('transaction.submitStaking', transaction.chain);
+      this.state.eventService.emit('transaction.submitStaking', transaction.chain);
     }
   }
 
@@ -637,16 +798,16 @@ export default class TransactionService {
     this.updateTransaction(id, { status: ExtrinsicStatus.SUCCESS, extrinsicHash });
 
     // Write success transaction history
-    this.historyService.updateHistoryByExtrinsicHash(transaction.extrinsicHash, {
+    this.state.historyService.updateHistoryByExtrinsicHash(transaction.extrinsicHash, {
       extrinsicHash,
       status: ExtrinsicStatus.SUCCESS,
       blockNumber: blockNumber || 0,
       blockHash: blockHash || ''
     }).catch(console.error);
 
-    const info = isHex(extrinsicHash) ? extrinsicHash : getBaseTransactionInfo(transaction, this.chainService.getChainInfoMap());
+    const info = isHex(extrinsicHash) ? extrinsicHash : getBaseTransactionInfo(transaction, this.state.chainService.getChainInfoMap());
 
-    this.notificationService.notify({
+    this.state.notificationService.notify({
       type: NotificationType.SUCCESS,
       title: t('Transaction completed'),
       message: t('Transaction {{info}} completed', { replace: { info } }),
@@ -654,7 +815,7 @@ export default class TransactionService {
       notifyViaBrowser: true
     });
 
-    this.eventService.emit('transaction.done', transaction);
+    this.state.eventService.emit('transaction.done', transaction);
   }
 
   private onFailed ({ blockHash, blockNumber, errors, extrinsicHash, id }: TransactionEventResponse) {
@@ -665,16 +826,16 @@ export default class TransactionService {
       this.updateTransaction(id, { status: nextStatus, errors, extrinsicHash });
 
       // Write failed transaction history
-      this.historyService.updateHistoryByExtrinsicHash(transaction.extrinsicHash, {
+      this.state.historyService.updateHistoryByExtrinsicHash(transaction.extrinsicHash, {
         extrinsicHash: extrinsicHash || transaction.extrinsicHash,
         status: nextStatus,
         blockNumber: blockNumber || 0,
         blockHash: blockHash || ''
       }).catch(console.error);
 
-      const info = isHex(transaction?.extrinsicHash) ? transaction?.extrinsicHash : getBaseTransactionInfo(transaction, this.chainService.getChainInfoMap());
+      const info = isHex(transaction?.extrinsicHash) ? transaction?.extrinsicHash : getBaseTransactionInfo(transaction, this.state.chainService.getChainInfoMap());
 
-      this.notificationService.notify({
+      this.state.notificationService.notify({
         type: NotificationType.ERROR,
         title: t('Transaction failed'),
         message: t('Transaction {{info}} failed', { replace: { info } }),
@@ -683,7 +844,7 @@ export default class TransactionService {
       });
     }
 
-    this.eventService.emit('transaction.failed', transaction);
+    this.state.eventService.emit('transaction.failed', transaction);
   }
 
   private onTimeOut ({ blockHash, blockNumber, errors, extrinsicHash, id }: TransactionEventResponse) {
@@ -715,7 +876,7 @@ export default class TransactionService {
   }
 
   public generateHashPayload (chain: string, transaction: TransactionConfig): HexString {
-    const chainInfo = this.chainService.getChainInfoByKey(chain);
+    const chainInfo = this.state.chainService.getChainInfoByKey(chain);
 
     let txObject: TransactionLike;
 
@@ -753,8 +914,8 @@ export default class TransactionService {
     transaction,
     url }: SWTransaction): Promise<TransactionEmitter> {
     const payload = (transaction as EvmSendTransactionRequest);
-    const evmApi = this.chainService.getEvmApi(chain);
-    const chainInfo = this.chainService.getChainInfoByKey(chain);
+    const evmApi = this.state.chainService.getEvmApi(chain);
+    const chainInfo = this.state.chainService.getChainInfoByKey(chain);
 
     const accountPair = keyring.getPair(address);
     const account: AccountJson = { address, ...accountPair.meta };
@@ -790,7 +951,7 @@ export default class TransactionService {
 
     // Set unique nonce to avoid transaction errors
     if (!payload.nonce) {
-      const evmApi = this.chainService.getEvmApi(chain);
+      const evmApi = this.state.chainService.getEvmApi(chain);
 
       payload.nonce = await evmApi.api.eth.getTransactionCount(address);
     }
@@ -833,14 +994,14 @@ export default class TransactionService {
     };
 
     if (isInjected) {
-      this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmWatchTransactionRequest', payload, {})
+      this.state.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmWatchTransactionRequest', payload, {})
         .then(async ({ isApproved, payload }) => {
           if (isApproved) {
             if (!payload) {
               throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
             }
 
-            const web3Api = this.chainService.getEvmApi(chain).api;
+            const web3Api = this.state.chainService.getEvmApi(chain).api;
 
             // Emit signed event
             emitter.emit('signed', eventData);
@@ -905,7 +1066,7 @@ export default class TransactionService {
           emitter.emit('error', eventData);
         });
     } else {
-      this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
+      this.state.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
         .then(async ({ isApproved, payload }) => {
           if (isApproved) {
             let signedTransaction: string | undefined;
@@ -914,7 +1075,7 @@ export default class TransactionService {
               throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, t('Failed to sign'));
             }
 
-            const web3Api = this.chainService.getEvmApi(chain).api;
+            const web3Api = this.state.chainService.getEvmApi(chain).api;
 
             if (!isExternal) {
               signedTransaction = payload;
@@ -988,7 +1149,7 @@ export default class TransactionService {
     (transaction as SubmittableExtrinsic).signAsync(address, {
       signer: {
         signPayload: async (payload: SignerPayloadJSON) => {
-          const signing = await this.requestService.signInternalTransaction(id, address, url || EXTENSION_REQUEST_URL, payload);
+          const signing = await this.state.requestService.signInternalTransaction(id, address, url || EXTENSION_REQUEST_URL, payload);
 
           return {
             id: (new Date()).getTime(),
@@ -1001,7 +1162,7 @@ export default class TransactionService {
       emitter.emit('signed', eventData);
 
       // Send transaction
-      const api = this.chainService.getSubstrateApi(chain);
+      const api = this.state.chainService.getSubstrateApi(chain);
 
       eventData.nonce = rs.nonce.toNumber();
       eventData.startBlock = (await api.api.query.system.number()).toPrimitive() as number;
@@ -1070,6 +1231,40 @@ export default class TransactionService {
     emitter.once('error', () => {
       clearTimeout(timeout);
     });
+  }
+
+  private handlePostEarningTransaction (id: string) {
+    const transaction = this.getTransaction(id);
+
+    let slug: string;
+
+    // TODO
+    if ('data' in transaction.data) {
+      slug = (transaction.data as RequestYieldStepSubmit).data.slug;
+    } else {
+      slug = (transaction.data as RequestStakePoolingBonding).slug;
+    }
+
+    const poolHandler = this.state.earningService.getPoolHandler(slug);
+
+    if (poolHandler) {
+      const type = poolHandler.type;
+
+      if (type === YieldPoolType.NATIVE_STAKING) {
+        return;
+      }
+    } else {
+      return;
+    }
+
+    this.state.mintCampaignService.unlockDotCampaign.mintNft({
+      transactionId: id,
+      address: transaction.address,
+      slug: slug,
+      network: transaction.chain,
+      extrinsicHash: transaction.extrinsicHash
+    })
+      .catch(console.error);
   }
 
   public resetWallet (): void {

@@ -3,7 +3,8 @@
 
 import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
 import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModal';
-import ClaimDappStakingRewardsModal from '@subwallet/extension-koni-ui/components/Modal/Staking/ClaimDappStakingRewardsModal';
+import { ClaimDappStakingRewardsModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
+import { EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
@@ -58,6 +59,7 @@ export const WalletModalContext = ({ children }: Props) => {
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useExcludeModal('confirmations');
+  useExcludeModal(EARNING_INSTRUCTION_MODAL);
 
   const onCloseModal = useCallback(() => {
     setSearchParams((prev) => {
@@ -93,6 +95,7 @@ export const WalletModalContext = ({ children }: Props) => {
     <SwModal
       className={'modal-full'}
       closable={false}
+      destroyOnClose={true}
       id={'confirmations'}
       onCancel={onCloseModal}
       transitionName={'fade'}

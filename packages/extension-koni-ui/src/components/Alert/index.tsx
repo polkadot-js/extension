@@ -12,7 +12,7 @@ import styled from 'styled-components';
 interface Props extends ThemeProps {
   type?: 'info' | 'warning';
   title: string;
-  description: string;
+  description: React.ReactNode;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -42,7 +42,7 @@ const AlertBox = styled(Component)<Props>(({ theme: { token } }: Props) => {
     textAlign: 'start',
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
-    padding: `${token.paddingSM + 2}px ${token.paddingXS}px ${token.paddingSM + 2}px ${token.paddingSM}px`,
+    padding: `${token.paddingSM + 2}px ${token.paddingSM}px ${token.paddingSM + 2}px ${token.paddingSM}px`,
     display: 'flex',
     flexDirection: 'row',
     gap: token.sizeXS + 2,

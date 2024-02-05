@@ -16,6 +16,7 @@ import CampaignReducer from './feature/Campaign';
 import AssetRegistryReducer from './feature/common/AssetRegistry';
 import ChainStoreReducer from './feature/common/ChainStore';
 import CrowdloanReducer from './feature/Crowdloan';
+import EarningReducer from './feature/Earning';
 import MantaPayReducer from './feature/MantaPay';
 import NftReducer from './feature/Nft';
 import PriceReducer from './feature/Price';
@@ -48,6 +49,7 @@ const rootReducers = combineReducers({
   mantaPay: MantaPayReducer,
   campaign: CampaignReducer,
   buyService: BuyServiceReducer,
+  earning: EarningReducer,
 
   // common
   chainStore: ChainStoreReducer,

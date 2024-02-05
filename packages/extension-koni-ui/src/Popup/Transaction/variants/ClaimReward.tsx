@@ -250,7 +250,7 @@ const Component = () => {
             valuePropName='checked'
           >
             <Checkbox>
-              <span className={'__option-label'}>{t('Bond reward after claim')}</span>
+              <span className={'__option-label'}>{t('Stake reward after claim')}</span>
             </Checkbox>
           </Form.Item>
         </Form>

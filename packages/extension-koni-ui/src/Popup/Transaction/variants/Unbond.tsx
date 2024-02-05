@@ -451,7 +451,7 @@ const Component: React.FC = () => {
           loading={loading}
           onClick={onPreCheck(form.submit, poolInfo.type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND)}
         >
-          {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unbond')}
+          {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unstake')}
         </Button>
       </TransactionFooter>
     </>

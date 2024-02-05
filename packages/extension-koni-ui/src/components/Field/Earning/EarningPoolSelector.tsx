@@ -84,7 +84,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       },
       {
         desc: true,
-        label: t('Highest total bonded'),
+        label: t('Highest total staked'),
         value: SortKey.TOTAL_POOLED
       }
     ];

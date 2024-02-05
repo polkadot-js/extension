@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.1.35
+Build date: Feb 02, 2024.
+
+Features & Update:
+- Set pool default for Aleph Zero (#2578)
+- Update disabled XCM channels online (#2463)
+
 ## 1.1.34
 Build date: Feb 01, 2024.
 

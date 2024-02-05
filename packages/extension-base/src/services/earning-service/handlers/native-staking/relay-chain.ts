@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getAvgValidatorEraReward, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getSupportedDaysByHistoryDepth } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
@@ -71,14 +71,24 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
-      const [_totalEraStake, _totalIssuance, _auctionCounter, _minNominatorBond, _counterForNominators, _minimumActiveStake] = await Promise.all([
-        substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
+      const maxSupportedEras = substrateApi.api.consts.staking.historyDepth.toString();
+      const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // Can be exactly calculate from epochDuration, blockTime, sessionsPerEra
+
+      const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras));
+      const startEra = parseInt(currentEra) - supportedDays * erasPerDay;
+
+      const [_EraStakeInfo, _totalIssuance, _auctionCounter, _minNominatorBond, _counterForNominators, _minimumActiveStake, ..._eraReward] = await Promise.all([
+        substrateApi.api.query.staking.erasTotalStake.multi([parseInt(currentEra), parseInt(currentEra) - 1]),
         substrateApi.api.query.balances.totalIssuance(),
         substrateApi.api.query.auctions?.auctionCounter(),
         substrateApi.api.query.staking.minNominatorBond(),
         substrateApi.api.query.staking.counterForNominators(),
-        substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake()
+        substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake(),
+        substrateApi.api.query.staking.erasValidatorReward.multi([...Array(supportedDays).keys()].map((i) => i + startEra))
       ]);
+      const [_totalEraStake, _lastTotalStaked] = _EraStakeInfo;
+      const validatorEraReward = getAvgValidatorEraReward(supportedDays, _eraReward[0]);
+      const lastTotalStaked = _lastTotalStaked.toString();
 
       const minActiveStake = _minimumActiveStake?.toString() || '0';
       const minNominatorBond = _minNominatorBond.toString();
@@ -95,7 +105,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const bnTotalIssuance = new BN(rawTotalIssuance);
 
       const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
-      const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
+      const expectedReturn = calculateChainStakedReturnV2(chainInfo, rawTotalIssuance, erasPerDay, lastTotalStaked, validatorEraReward, true);
       const eraTime = _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // in hours
       const unlockingPeriod = parseInt(unlockingEras) * eraTime; // in hours
       const farmerCount = _counterForNominators.toPrimitive() as number;

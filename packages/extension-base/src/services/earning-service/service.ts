@@ -16,7 +16,7 @@ import { addLazy, categoryAddresses, createPromiseHandler, PromiseHandler } from
 import { fetchStaticCache } from '@subwallet/extension-base/utils/fetchStaticCache';
 import { BehaviorSubject } from 'rxjs';
 
-import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
+import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, BifrostMantaLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
 
 const fetchPoolsData = async () => {
   const fetchData = await fetchStaticCache<{data: Record<string, YieldPoolInfo>}>('earning/yield-pools.json', { data: {} });
@@ -83,6 +83,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
       if (_STAKING_CHAIN_GROUP.liquidStaking.includes(chain)) {
         if (chain === 'bifrost_dot') {
           handlers.push(new BifrostLiquidStakingPoolHandler(this.state, chain));
+          handlers.push(new BifrostMantaLiquidStakingPoolHandler(this.state, chain));
         }
 
         if (chain === 'acala') {
@@ -509,9 +510,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.yieldPositionPersistQueue = [];
   }
 
-  public resetYieldPosition () {
+  public async resetYieldPosition () {
     this.yieldPositionSubject.next({});
     this.yieldPositionPersistQueue = [];
+    await this.dbService.stores.yieldPosition.clear();
   }
 
   private _getYieldPositionKey (slug: string, address: string): string {
@@ -544,7 +546,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.runUnsubscribeStakingRewardInterval();
     this.runUnsubscribeEarningRewardHistoryInterval();
 
-    reset && this.resetYieldPosition();
+    reset && await this.resetYieldPosition();
 
     await this.runSubscribePoolsPosition();
     this.runSubscribeStakingRewardInterval();
@@ -885,4 +887,9 @@ export default class EarningService implements StoppableServiceInterface, Persis
   /* Other */
 
   /* Handle actions */
+
+  // Clear wallet data
+  public async resetWallet () {
+    await this.resetYieldPosition();
+  }
 }

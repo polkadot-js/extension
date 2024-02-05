@@ -10,9 +10,11 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning
 import { EarningStatus, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
+import BigNumber from 'bignumber.js';
 import { t } from 'i18next';
 
 import { ApiPromise } from '@polkadot/api';
+import { Codec } from '@polkadot/types/types';
 import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
 
 export interface PalletDappsStakingDappInfo {
@@ -185,6 +187,32 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   }
 
   return stakedReturn;
+}
+
+export function calculateChainStakedReturnV2 (chainInfo: _ChainInfo, totalIssuance: string, erasPerDay: number, lastTotalStaked: string, validatorEraReward: BigNumber, isCompound?: boolean) {
+  const DAYS_PER_YEAR = 365;
+  // @ts-ignore
+  const DECIMAL = chainInfo.substrateInfo.decimals;
+
+  const lastTotalStakedUnit = (new BigNumber(lastTotalStaked)).dividedBy(new BigNumber(10 ** DECIMAL));
+  const totalIssuanceUnit = (new BigNumber(totalIssuance)).dividedBy(new BigNumber(10 ** DECIMAL));
+  const supplyStaked = lastTotalStakedUnit.dividedBy(totalIssuanceUnit);
+
+  const dayRewardRate = validatorEraReward.multipliedBy(erasPerDay).dividedBy(totalIssuance).multipliedBy(100);
+
+  let inflationToStakers: BigNumber = new BigNumber(0);
+
+  if (!isCompound) {
+    inflationToStakers = dayRewardRate.multipliedBy(DAYS_PER_YEAR);
+  } else {
+    const multiplier = dayRewardRate.dividedBy(100).plus(1).exponentiatedBy(365);
+
+    inflationToStakers = new BigNumber(100).multipliedBy(multiplier).minus(100);
+  }
+
+  const averageRewardRate = inflationToStakers.dividedBy(supplyStaked);
+
+  return averageRewardRate.toNumber();
 }
 
 export function calculateAlephZeroValidatorReturn (chainStakedReturn: number, commission: number) {
@@ -518,6 +546,33 @@ export function getValidatorLabel (chain: string) {
   }
 
   return 'Collator';
+}
+
+export function getAvgValidatorEraReward (supportedDays: number, eraRewardHistory: Codec[]) {
+  let sumEraReward = new BigNumber(0);
+  let failEra = 0;
+
+  for (const _item of eraRewardHistory) {
+    const item = _item.toString();
+
+    if (!item) {
+      failEra += 1;
+    } else {
+      const eraReward = new BigNumber(item);
+
+      sumEraReward = sumEraReward.plus(eraReward);
+    }
+  }
+
+  return sumEraReward.dividedBy(new BigNumber(supportedDays - failEra));
+}
+
+export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupportedEras: number) {
+  if (maxSupportedEras / erasPerDay > 30) {
+    return 30;
+  } else {
+    return 15;
+  }
 }
 
 export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {

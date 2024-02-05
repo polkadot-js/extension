@@ -572,12 +572,6 @@ export class ChainService {
     clearInterval(this.refreshLatestChainDataTimeOut);
     this.handleLatestData();
 
-    this.handleLatestData();
-
-    this.handleLatestData();
-
-    this.handleLatestData();
-
     this.refreshLatestChainDataTimeOut = setInterval(this.handleLatestData.bind(this), LATEST_CHAIN_DATA_FETCHING_INTERVAL);
   }
 

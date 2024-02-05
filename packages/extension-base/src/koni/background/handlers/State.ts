@@ -1899,6 +1899,8 @@ export default class KoniState {
     await this.keyringService.resetWallet(resetAll);
     this.requestService.resetWallet();
     this.transactionService.resetWallet();
+    await this.handleResetBalance(ALL_ACCOUNT_KEY, true);
+    await this.earningService.resetWallet();
     await this.dbService.resetWallet(resetAll);
     this.accountRefStore.set('refList', []);
 

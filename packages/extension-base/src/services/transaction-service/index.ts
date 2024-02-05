@@ -580,6 +580,7 @@ export default class TransactionService {
       case ExtrinsicType.MINT_QDOT:
       case ExtrinsicType.MINT_LDOT:
       case ExtrinsicType.MINT_SDOT:
+      case ExtrinsicType.MINT_VMANTA:
 
       // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.MINT_VDOT: {
@@ -635,12 +636,14 @@ export default class TransactionService {
       }
 
       case ExtrinsicType.UNSTAKE_VDOT:
+      case ExtrinsicType.UNSTAKE_VMANTA:
       case ExtrinsicType.UNSTAKE_LDOT:
       case ExtrinsicType.UNSTAKE_SDOT:
       case ExtrinsicType.UNSTAKE_STDOT:
       case ExtrinsicType.REDEEM_STDOT:
       case ExtrinsicType.REDEEM_LDOT:
       case ExtrinsicType.REDEEM_SDOT:
+      case ExtrinsicType.REDEEM_VMANTA:
 
       // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.REDEEM_VDOT: {

@@ -210,7 +210,7 @@ export const BLOCK_APPROVE_LEDGER_NETWORKS: string[] = [];
 
 /// OTHER
 export const BLOCK_CROWDLOAN_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['substrate'];
 export const BLOCK_UNKNOWN_LEDGER_NETWORKS: string[] = ['*'];
 
 export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {

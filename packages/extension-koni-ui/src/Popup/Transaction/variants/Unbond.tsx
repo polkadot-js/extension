@@ -313,6 +313,26 @@ const Component: React.FC = () => {
     }
   }, [accountList, form, fromValue]);
 
+  const exType = useMemo(() => {
+    if (poolType === YieldPoolType.NOMINATION_POOL || poolType === YieldPoolType.NATIVE_STAKING) {
+      return ExtrinsicType.STAKING_UNBOND;
+    }
+
+    if (YieldPoolType.LIQUID_STAKING) {
+      if (chainValue === 'moonbeam') {
+        return ExtrinsicType.UNSTAKE_STDOT;
+      }
+
+      return ExtrinsicType.UNSTAKE_LDOT;
+    }
+
+    if (YieldPoolType.LENDING) {
+      return ExtrinsicType.UNSTAKE_LDOT;
+    }
+
+    return ExtrinsicType.STAKING_UNBOND;
+  }, [poolType, chainValue]);
+
   return (
     <>
       <TransactionContent>
@@ -449,7 +469,7 @@ const Component: React.FC = () => {
             />
           )}
           loading={loading}
-          onClick={onPreCheck(form.submit, poolInfo.type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND)}
+          onClick={onPreCheck(form.submit, exType)}
         >
           {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unstake')}
         </Button>

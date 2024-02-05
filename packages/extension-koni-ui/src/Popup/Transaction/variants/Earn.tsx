@@ -563,6 +563,26 @@ const Component = () => {
 
   const onPreCheck = usePreCheckAction(fromValue);
 
+  const exType = useMemo(() => {
+    if (poolType === YieldPoolType.NOMINATION_POOL || poolType === YieldPoolType.NATIVE_STAKING) {
+      return ExtrinsicType.STAKING_BOND;
+    }
+
+    if (YieldPoolType.LIQUID_STAKING) {
+      if (chainValue === 'moonbeam') {
+        return ExtrinsicType.MINT_STDOT;
+      }
+
+      return ExtrinsicType.MINT_LDOT;
+    }
+
+    if (YieldPoolType.LENDING) {
+      return ExtrinsicType.MINT_LDOT;
+    }
+
+    return ExtrinsicType.STAKING_BOND;
+  }, [poolType, chainValue]);
+
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);
 
@@ -875,7 +895,7 @@ const Component = () => {
             />
           )}
           loading={submitLoading}
-          onClick={onPreCheck(form.submit, ExtrinsicType.JOIN_YIELD_POOL)}
+          onClick={onPreCheck(form.submit, exType)}
         >
           {t('Stake')}
         </Button>

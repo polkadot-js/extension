@@ -3,14 +3,13 @@
 
 import { ExtrinsicType, NominationPoolInfo, NominatorMetadata, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getOriginChainOfAsset, _isChainEvmCompatible, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, HiddenInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import useFetchChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainAssetInfo';
+import { useChainInfo, useFetchChainAssetInfo, useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, StakeParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -89,6 +88,7 @@ const Component: React.FC = () => {
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const chainState = useFetchChainState(chain);
   const assetInfo = useFetchChainAssetInfo(asset);
+  const chainInfo = useChainInfo(chain);
 
   const [isDisable, setIsDisable] = useState(true);
 
@@ -96,6 +96,10 @@ const Component: React.FC = () => {
   const nominatorMetadataList = useGetNominatorInfo(chain, stakingType, from);
 
   const nominatorMetadata: NominatorMetadata | undefined = useMemo(() => nominatorMetadataList[0], [nominatorMetadataList]);
+
+  const disableMax = useMemo(() => {
+    return !!chainInfo && _isChainEvmCompatible(chainInfo) && _isNativeToken(assetInfo);
+  }, [chainInfo, assetInfo]);
 
   const { nativeTokenBalance } = useGetBalance(chain, from);
   const tokenList = useGetSupportedStakingTokens(stakingType, from, stakingChain);
@@ -494,7 +498,7 @@ const Component: React.FC = () => {
               <AmountInput
                 decimals={(chain && from) ? decimals : -1}
                 maxValue={maxValue}
-                showMaxButton={false}
+                showMaxButton={disableMax}
               />
             </Form.Item>
           </div>

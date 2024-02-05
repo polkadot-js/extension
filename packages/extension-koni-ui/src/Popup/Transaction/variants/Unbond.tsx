@@ -493,6 +493,15 @@ const Unbond = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.__instruction-items-container, .__instruction-item + .__instruction-item': {
       marginTop: token.marginSM
+    },
+
+    '.ant-checkbox-wrapper': {
+      display: 'flex',
+      alignItems: 'center',
+
+      '.ant-checkbox': {
+        top: 0
+      }
     }
   };
 });

@@ -55,8 +55,11 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const { transactionRequest } = useSelector((state: RootState) => state.requestState);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
   const transaction = useMemo(() => transactionRequest[id], [transactionRequest, id]);
+
+  const network = useMemo(() => chainInfoMap[transaction.chain], [chainInfoMap, transaction.chain]);
 
   const renderContent = useCallback((transaction: SWTransactionResult): React.ReactNode => {
     const { extrinsicType } = transaction;
@@ -73,8 +76,8 @@ const Component: React.FC<Props> = (props: Props) => {
         {!!transaction.estimateFee?.tooHigh && (
           <AlertBox
             className='network-box'
-            description={'Gas price are high and estimates are less accurate.'}
-            title={t('Network is busy')}
+            description={t('Gas fees on {{networkName}} are high due to high demands, so gas estimates are less accurate.', { replace: { networkName: network?.name } })}
+            title={t('Pay attention!')}
             type='warning'
           />
         )}

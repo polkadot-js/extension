@@ -4,13 +4,19 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { UnstakingInfo, UnstakingStatus, YieldPoolInfo } from '@subwallet/extension-base/types';
 import { BN_ZERO } from '@subwallet/extension-base/utils';
+import { BaseModal } from '@subwallet/extension-web-ui/components';
 import { EarningWithdrawalDetailModal } from '@subwallet/extension-web-ui/components/Modal/Earning/EarningWithdrawalDetailModal';
-import { CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, WITHDRAW_TRANSACTION } from '@subwallet/extension-web-ui/constants';
+import { CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, WITHDRAW_TRANSACTION } from '@subwallet/extension-web-ui/constants';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transaction';
+import CancelUnstake from '@subwallet/extension-web-ui/Popup/Transaction/variants/CancelUnstake';
+import Withdraw from '@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, ModalContext, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -27,7 +33,9 @@ const withdrawalDetailModalId = 'earning-withdrawal-detail-modal';
 function Component ({ className, inputAsset, poolInfo, transactionChainValue, transactionFromValue,
   unstakings }: Props) {
   const { t } = useTranslation();
-  const { activeModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
+  const navigate = useNavigate();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { slug } = poolInfo;
 
@@ -58,8 +66,14 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
       from: transactionFromValue
     });
 
+    if (isWebUI) {
+      activeModal(TRANSACTION_YIELD_WITHDRAW_MODAL);
+    } else {
+      navigate('/transaction/withdraw');
+    }
+
     // todo: open WithDraw modal
-  }, [setWithdrawStorage, slug, transactionChainValue, transactionFromValue]);
+  }, [activeModal, isWebUI, navigate, setWithdrawStorage, slug, transactionChainValue, transactionFromValue]);
 
   const onCancelWithDraw = useCallback(() => {
     setCancelUnStakeStorage({
@@ -70,11 +84,24 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
     });
 
     // todo: open CancelWithDraw
-  }, [setCancelUnStakeStorage, slug, transactionChainValue, transactionFromValue]);
+    if (isWebUI) {
+      activeModal(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL);
+    } else {
+      navigate('/transaction/cancel-unstake');
+    }
+  }, [activeModal, isWebUI, navigate, setCancelUnStakeStorage, slug, transactionChainValue, transactionFromValue]);
 
   const onOpenDetailModal = useCallback(() => {
     activeModal(withdrawalDetailModalId);
   }, [activeModal]);
+
+  const handleCloseWithdraw = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_WITHDRAW_MODAL);
+  }, [inactiveModal]);
+
+  const handleCloseCancelUnstake = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL);
+  }, [inactiveModal]);
 
   if (!unstakings.length) {
     return (
@@ -130,6 +157,34 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
         poolInfo={poolInfo}
         unstakings={unstakings}
       />
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_WITHDRAW_MODAL}
+        onCancel={handleCloseWithdraw}
+        title={t('Withdraw')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_WITHDRAW_MODAL}
+        >
+          <Withdraw />
+        </Transaction>
+      </BaseModal>
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL}
+        onCancel={handleCloseCancelUnstake}
+        title={t('Cancel unstake')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL}
+        >
+          <CancelUnstake />
+        </Transaction>
+      </BaseModal>
     </>
   );
 }

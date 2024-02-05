@@ -179,7 +179,7 @@ export default class EvmRequestHandler {
 
     const common = Common.custom({ chainId: config.chainId, defaultHardfork: 'london', networkId: config.chainId }, { eips: [1559] });
 
-    if (config.maxPriorityFeePerGas) {
+    if (config.maxFeePerGas) {
       const txData: FeeMarketEIP1559TxData = {
         nonce: formatField(config.nonce),
         gasLimit: formatField(config.gas),

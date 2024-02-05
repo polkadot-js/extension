@@ -148,9 +148,9 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
     padding: 0
   },
 
-  // '&.__withdraw-info-desktop-part': {
-  //   marginBottom: 38
-  // },
+  '&.__withdraw-info-desktop-part': {
+    paddingBottom: 0
+  },
 
   '.__part-title': {
     lineHeight: token.lineHeight

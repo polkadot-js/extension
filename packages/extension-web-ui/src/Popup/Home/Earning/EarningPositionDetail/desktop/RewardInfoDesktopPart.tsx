@@ -176,10 +176,6 @@ export const RewardInfoDesktopPart = styled(Component)<Props>(({ theme: { token 
   paddingLeft: 24,
   flex: 1,
 
-  '&.__reward-info-desktop-part': {
-    marginBottom: 38
-  },
-
   '.__part-title': {
     lineHeight: token.lineHeight
   },

@@ -367,12 +367,6 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       minHeight: 376
     },
 
-    '.__tr-list': {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 8
-    },
-
     '.__row-stake-button .anticon': {
       width: 20,
       height: 20

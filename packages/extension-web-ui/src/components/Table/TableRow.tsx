@@ -57,12 +57,18 @@ const TableRow = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProps
       alignItems: 'stretch',
       height: '100%',
       justifyContent: 'center',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      paddingLeft: token.paddingXS,
+      paddingRight: token.paddingXS,
+      overflow: 'hidden'
     },
 
     '&.__tr': {
       transition: 'background-color 0.2s ease-in-out',
-      padding: token.paddingSM
+      padding: token.paddingSM,
+      paddingRight: token.paddingSM,
+      paddingBottom: token.paddingSM,
+      paddingLeft: token.paddingXXS
     },
     '&.__tr:hover': {
       backgroundColor: token.colorBgInput

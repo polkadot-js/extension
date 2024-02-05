@@ -203,6 +203,7 @@ export function getScanExplorerAddressInfoUrl (networkKey: string, address: stri
   if (!subscanByNetworkKey[networkKey]) {
     return '';
   }
+
   return `${subscanByNetworkKey[networkKey]}/account/${address}`;
 }
 

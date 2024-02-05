@@ -1,9 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ButtonSchema } from '@subwallet/react-ui/es/button/button';
-import { Icon as _PhosphorIcon } from 'phosphor-react';
+import { Icon as _PhosphorIcon, IconProps } from 'phosphor-react';
+import React from 'react';
 
 import { Theme as _Theme } from '../themes';
 
@@ -14,11 +16,15 @@ export type VoidFunction = () => void;
 export type AlertDialogButtonProps = {
   text: string,
   onClick: VoidFunction,
-  schema?: ButtonSchema
+  schema?: ButtonSchema,
+  icon?: PhosphorIcon,
+  iconWeight?: IconProps['weight']
 }
 
 export type AlertDialogProps = {
   title: string,
+  type?: NotificationType,
+  closable?: boolean,
   content: React.ReactNode,
   cancelButton?: AlertDialogButtonProps,
   okButton: AlertDialogButtonProps,

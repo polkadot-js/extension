@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
@@ -22,7 +22,7 @@ import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwal
 import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { PlusCircle } from 'phosphor-react';
+import { CheckCircle, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -253,12 +253,12 @@ const Component = () => {
       if (insufficientMessages.some((v) => error.message.includes(v))) {
         openAlert({
           title: t('Insufficient balance'),
+          type: NotificationType.ERROR,
           content: t('Your available balance is {{availableBalance}} {{symbol}}, you need to leave {{existentialDeposit}} {{symbol}} as minimal balance (existential deposit) and pay network fees. Make sure you have at least {{maintainBalance}} {{symbol}} in your transferable balance to proceed.', { replace: { ...handleDataForInsufficientAlert() } }),
           okButton: {
             text: t('I understand'),
-            onClick: () => {
-              closeAlert();
-            }
+            onClick: closeAlert,
+            icon: CheckCircle
           }
         });
         dispatchProcessState({
@@ -270,12 +270,12 @@ const Component = () => {
       } else if (insufficientXCMMessages.some((v) => error.message.includes(v))) {
         openAlert({
           title: t('Insufficient balance'),
+          type: NotificationType.ERROR,
           content: error.message,
           okButton: {
             text: t('I understand'),
-            onClick: () => {
-              closeAlert();
-            }
+            onClick: closeAlert,
+            icon: CheckCircle
           }
         });
 
@@ -547,17 +547,16 @@ const Component = () => {
     } else {
       openAlert({
         title: t('Cancel earning process?'),
+        type: NotificationType.WARNING,
         content: t('Going back will cancel the current earning process. Do you wish to cancel?'),
         okButton: {
           text: t('Cancel earning'),
           onClick: goBack,
-          schema: 'error'
+          schema: 'warning'
         },
         cancelButton: {
           text: t('Not now'),
-          onClick: () => {
-            closeAlert();
-          }
+          onClick: closeAlert
         }
       });
     }

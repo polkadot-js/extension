@@ -26,6 +26,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 
 type Props = ThemeProps;
 
@@ -114,6 +115,7 @@ function Component ({ compound,
     if (isActiveStakeZero) {
       openAlert({
         title: t('Unstaking not available'),
+        type: NotificationType.ERROR,
         content: t("You don't have any staked funds left to unstake. Check withdrawal status (how long left until the unstaking period ends) by checking the Withdraw info. Keep in mind that you need to withdraw manually."),
         okButton: {
           text: t('OK'),

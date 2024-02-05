@@ -7,11 +7,13 @@ import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { useGetNativeTokenBasicInfo, useSelector } from '@subwallet/extension-web-ui/hooks';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
+import { CheckCircle } from 'phosphor-react';
 import React, { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { BaseTransactionConfirmationProps } from './Base';
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 
 type Props = BaseTransactionConfirmationProps;
 
@@ -33,12 +35,14 @@ const Component: React.FC<Props> = (props: Props) => {
       // todo: will convert message to key for i18n later
       openAlert({
         title: t('Pay attention!'),
+        type: NotificationType.WARNING,
         content: t(`The rewards you are about to claim are ${
           isRewardLtFee ? 'smaller than' : 'equal to'
         } the transaction fee. This means that you won’t receive any rewards after claiming. Do you wish to continue?`),
         okButton: {
           text: t('I understand'),
-          onClick: closeAlert
+          onClick: closeAlert,
+          icon: CheckCircle
         }
       });
     }

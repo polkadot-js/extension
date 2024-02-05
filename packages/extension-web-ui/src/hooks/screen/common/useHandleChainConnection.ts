@@ -4,6 +4,7 @@
 import { useAlert, useChainConnection, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useEffect, useState } from 'react';
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 
 type ModalIds = {
   connectChainModalId: string,
@@ -78,6 +79,7 @@ export default function useHandleChainConnection (
           setIsLoadingChainConnection(false);
           openAlert({
             title: t('Error!'),
+            type: NotificationType.ERROR,
             content: t('Failed to get data. Please try again later.'),
             okButton: {
               text: t('Continue'),

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningRewardHistoryItem, EarningStatus, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { CollapsiblePanel, MetaInfo } from '@subwallet/extension-web-ui/components';
@@ -12,7 +13,7 @@ import { customFormatDate, openInNewTab } from '@subwallet/extension-web-ui/util
 import { ActivityIndicator, Button, Icon, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowSquareOut } from 'phosphor-react';
+import { ArrowSquareOut, CheckCircle } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -30,7 +31,7 @@ type Props = ThemeProps & {
 };
 
 function Component ({ className, closeAlert, compound, inputAsset, isShowBalance, openAlert, rewardHistories, transactionChainValue,
-  transactionFromValue }: Props) {
+                      transactionFromValue }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -101,10 +102,12 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
     } else {
       openAlert({
         title: t('Rewards unavailable'),
+        type: NotificationType.ERROR,
         content: t("You don't have any rewards to claim at the moment. Try again later."),
         okButton: {
           text: t('I understand'),
-          onClick: closeAlert
+          onClick: closeAlert,
+          icon: CheckCircle
         }
       });
     }

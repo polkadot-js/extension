@@ -197,15 +197,12 @@ export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: 
 
 export function getScanExplorerAddressInfoUrl (networkKey: string, address: string): string {
   if (Object.keys(evmBlockExplorer).indexOf(networkKey) > -1) {
-    console.log('1')
     return `${evmBlockExplorer[networkKey]}/address/${address}`;
   }
 
   if (!subscanByNetworkKey[networkKey]) {
-    console.log('2')
     return '';
   }
-  console.log('3')
   return `${subscanByNetworkKey[networkKey]}/account/${address}`;
 }
 

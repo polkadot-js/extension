@@ -30,7 +30,7 @@ export const EARNING_DATA_RAW = {
       icon: 'Wallet',
       title: 'Claim your rewards',
       description:
-        'Your staking rewards will be paid out every {paidOut} hour. Make sure to claim them <strong>manually</strong>',
+        'Your staking rewards will be paid out every {paidOut} {paidOutTimeUnit}. Make sure to claim them <strong>manually</strong>',
       iconColor: '#51BC5E'
     },
     {

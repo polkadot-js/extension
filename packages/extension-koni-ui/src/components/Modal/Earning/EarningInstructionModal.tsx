@@ -200,8 +200,8 @@ const Component: React.FC<Props> = (props: Props) => {
     switch (poolInfo.type) {
       case YieldPoolType.NOMINATION_POOL: {
         const _label = getValidatorLabel(poolInfo.chain);
-        const label = _label.slice(0, 1).toLowerCase().concat(_label.slice(1)).concat('s');
         const maxCandidatePerFarmer = poolInfo.statistic?.maxCandidatePerFarmer || 0;
+        const label = `${_label.charAt(0).toLowerCase() + _label.substr(1)}${maxCandidatePerFarmer > 1 ? 's' : ''}`;
         const inputAsset = assetRegistry[poolInfo.metadata.inputAsset];
         const maintainAsset = assetRegistry[poolInfo.metadata.maintainAsset];
         const paidOut = poolInfo.statistic?.eraTime;
@@ -224,6 +224,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
             if (paidOut !== undefined) {
               replaceEarningValue(_item, '{paidOut}', paidOut.toString());
+              replaceEarningValue(_item, '{paidOutTimeUnit}', paidOut > 1 ? 'hours' : 'hour');
             }
 
             return _item;
@@ -235,8 +236,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
       case YieldPoolType.NATIVE_STAKING: {
         const _label = getValidatorLabel(poolInfo.chain);
-        const label = _label.slice(0, 1).toLowerCase().concat(_label.slice(1)).concat('s');
         const maxCandidatePerFarmer = poolInfo.statistic?.maxCandidatePerFarmer || 0;
+        const label = `${_label.charAt(0).toLowerCase() + _label.substr(1)}${maxCandidatePerFarmer > 1 ? 's' : ''}`;
         const inputAsset = assetRegistry[poolInfo.metadata.inputAsset];
         const maintainAsset = assetRegistry[poolInfo.metadata.maintainAsset];
         const paidOut = poolInfo.statistic?.eraTime;
@@ -259,6 +260,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
               if (paidOut !== undefined) {
                 replaceEarningValue(_item, '{paidOut}', paidOut.toString());
+                replaceEarningValue(_item, '{paidOutTimeUnit}', paidOut > 1 ? 'hours' : 'hour');
               }
 
               return _item;
@@ -276,6 +278,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
             if (paidOut !== undefined) {
               replaceEarningValue(_item, '{paidOut}', paidOut.toString());
+              replaceEarningValue(_item, '{paidOutTimeUnit}', paidOut > 1 ? 'hours' : 'hour');
             }
 
             return _item;
@@ -397,7 +400,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const onError = (message: string) => {
       openAlert({
         title: t('Pay attention!'),
-        type: NotificationType.WARNING,
+        type: NotificationType.ERROR,
         content: message,
         okButton: {
           text: t('I understand'),

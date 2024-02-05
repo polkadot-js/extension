@@ -90,12 +90,13 @@ export function getNftTransferExtrinsic (networkKey: string, substrateApi: _Subs
       return acalaGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.kusama:
       return rmrkGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.uniqueNft:
-      return uniqueGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.quartz:
-      return uniqueGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
-    case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.opal:
-      return uniqueGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
+    // temporary prevent send nfts on Unique network-based chains
+    // case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.uniqueNft:
+    //   return uniqueGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
+    // case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.quartz:
+    //   return uniqueGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
+    // case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.opal:
+    //   return uniqueGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemine:
       return statemineGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemint:

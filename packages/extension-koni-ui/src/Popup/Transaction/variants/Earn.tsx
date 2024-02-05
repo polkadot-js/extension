@@ -3,6 +3,7 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
 import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
@@ -11,7 +12,7 @@ import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earn
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
 import { EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
-import { useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useChainChecker, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
@@ -28,7 +29,6 @@ import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef,
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import useNotification from '../../../hooks/common/useNotification';
 import { accountFilterFunc, getJoinYieldParams } from '../helper';
 import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '../parts';
 
@@ -47,6 +47,8 @@ const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
   const { activeModal } = useContext(ModalContext);
+
+  const chainChecker = useChainChecker();
 
   const { closeAlert, defaultData, goBack, onDone,
     openAlert, persistData,
@@ -84,6 +86,20 @@ const Component = () => {
   const poolInfo = poolInfoMap[slug];
   const poolType = poolInfo.type;
   const poolChain = poolInfo.chain;
+
+  const altChain = useMemo(() => {
+    if (poolInfo) {
+      if (isLiquidPool(poolInfo) || isLendingPool(poolInfo)) {
+        const asset = chainAsset[poolInfo.metadata.altInputAssets || ''];
+
+        return asset ? asset.originChain : '';
+      } else {
+        return '';
+      }
+    } else {
+      return '';
+    }
+  }, [chainAsset, poolInfo]);
 
   const [isBalanceReady, setIsBalanceReady] = useState<boolean>(true);
   const [forceFetchValidator, setForceFetchValidator] = useState(false);
@@ -718,6 +734,10 @@ const Component = () => {
       onClick: onBack
     }));
   }, [onBack, setBackProps]);
+
+  useEffect(() => {
+    altChain !== '' && chainChecker(altChain);
+  }, [altChain, chainChecker]);
 
   return (
     <>

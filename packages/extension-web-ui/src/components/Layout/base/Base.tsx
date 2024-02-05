@@ -38,7 +38,7 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
   const { pathname } = useLocation();
   const { t } = useTranslation();
   const { setTitle } = useContext(WebUIContext);
-  const { headerType, isSettingPage, setShowBackButtonOnHeader } = useContext(WebUIContext);
+  const { headerType, isSettingPage, setOnBack, setShowBackButtonOnHeader } = useContext(WebUIContext);
   const [customClassName, setCustomClassName] = useState('');
   const { language } = useSelector((state) => state.settings);
 
@@ -150,6 +150,10 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
   useEffect(() => {
     setShowBackButtonOnHeader(props.showBackButton);
   }, [props.showBackButton, setShowBackButtonOnHeader]);
+
+  useEffect(() => {
+    setOnBack(onBack);
+  }, [onBack, setOnBack]);
 
   return (
     <SwScreenLayout

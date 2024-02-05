@@ -6,4 +6,3 @@ export * from './confirmation';
 export * from './crowdloan';
 export * from './home';
 export * from './nft';
-export * from './staking';

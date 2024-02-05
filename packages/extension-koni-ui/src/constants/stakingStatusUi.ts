@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PalletNominationPoolsBondedPoolInner } from '@subwallet/extension-base/background/KoniTypes';
+import { PalletNominationPoolsBondedPoolInner } from '@subwallet/extension-base/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { InfoItemBase } from '@subwallet/extension-koni-ui/components/MetaInfo/parts/types';
 import { PhosphorIcon } from '@subwallet/extension-koni-ui/types';

@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestStakeCancelWithdrawal } from '@subwallet/extension-base/background/KoniTypes';
-import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-web-ui/components';
-import { useGetNativeTokenBasicInfo } from '@subwallet/extension-web-ui/hooks';
+import { RequestStakeCancelWithdrawal } from '@subwallet/extension-base/types';
+import CommonTransactionInfo from '@subwallet/extension-web-ui/components/Confirmation/CommonTransactionInfo';
+import MetaInfo from '@subwallet/extension-web-ui/components/MetaInfo/MetaInfo';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-web-ui/hooks/common/useGetNativeTokenBasicInfo';
 import CN from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,10 +16,12 @@ type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
+
   const data = transaction.data as RequestStakeCancelWithdrawal;
 
   const { t } = useTranslation();
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(data.chain);
+
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(data.selectedUnstaking.chain);
 
   return (
     <div className={CN(className)}>

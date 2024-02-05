@@ -32,15 +32,20 @@ export default class NotificationService {
     const onClick = action?.click;
     const onButtonClick = action?.buttonClick;
 
-    chrome?.notifications?.create({
+    const options: chrome.notifications.NotificationOptions<true> = {
       type: 'basic',
       title,
       message,
       iconUrl: '/images/icon-128.png',
       priority: 2,
-      isClickable: !!link || !!onClick,
-      buttons: isFirefox ? undefined : buttons
-    }, (notificationId: string) => {
+      isClickable: !!link || !!onClick
+    };
+
+    if (!isFirefox) {
+      options.buttons = buttons;
+    }
+
+    chrome?.notifications?.create(options, (notificationId: string) => {
       if (link || onClick) {
         chrome.notifications.onClicked.addListener((nId) => {
           if (nId === notificationId) {

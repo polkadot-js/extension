@@ -509,9 +509,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.yieldPositionPersistQueue = [];
   }
 
-  public resetYieldPosition () {
+  public async resetYieldPosition () {
     this.yieldPositionSubject.next({});
     this.yieldPositionPersistQueue = [];
+    await this.dbService.stores.yieldPosition.clear();
   }
 
   private _getYieldPositionKey (slug: string, address: string): string {
@@ -544,7 +545,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.runUnsubscribeStakingRewardInterval();
     this.runUnsubscribeEarningRewardHistoryInterval();
 
-    reset && this.resetYieldPosition();
+    reset && await this.resetYieldPosition();
 
     await this.runSubscribePoolsPosition();
     this.runSubscribeStakingRewardInterval();
@@ -885,4 +886,9 @@ export default class EarningService implements StoppableServiceInterface, Persis
   /* Other */
 
   /* Handle actions */
+
+  // Clear wallet data
+  public async resetWallet () {
+    await this.resetYieldPosition();
+  }
 }

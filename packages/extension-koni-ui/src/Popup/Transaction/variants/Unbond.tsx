@@ -408,54 +408,51 @@ const Component: React.FC = () => {
             </Checkbox>
           </Form.Item>
 
-          {!fastLeaveValue || !showFastLeave
-            ? (
-              poolInfo.type !== YieldPoolType.LENDING
-                ? (
-                  <>
-                    {!!UNSTAKE_ALERT_DATA.length && (
-                      <div className={'__instruction-items-container'}>
-                        {UNSTAKE_ALERT_DATA.map((_props, index) => {
-                          return (
-                            <InstructionItem
-                              className={'__instruction-item'}
-                              description={(
-                                <div dangerouslySetInnerHTML={{ __html: (_props.description)?.replace('{unBondedTime}', unBondedTime) }}></div>
-                              )}
-                              iconInstruction={
-                                <BackgroundIcon
-                                  backgroundColor={getAlphaColor(_props.iconColor, 0.1)}
-                                  iconColor={_props.iconColor}
-                                  phosphorIcon={getBannerButtonIcon(_props.icon)}
-                                  size='lg'
-                                  weight='fill'
-                                />
-                              }
-                              key={`${_props.icon}-${index}`}
-                              title={_props.title}
-                            />
-                          );
-                        })}
-                      </div>
-                    )}
-                  </>
-                )
-                : (
-                  <AlertBox
-                    description={t('You can withdraw your supplied funds immediately')}
-                    title={t('Withdraw')}
-                    type={'info'}
-                  />
-                )
-            )
-            : (
-              <AlertBox
-                description={t('With fast unstake, you will receive your funds immediately with a higher fee')}
-                title={t('Fast unstake')}
-                type={'info'}
-              />
-            )}
-
+          <div className={'__instruction-items-container'}>
+            {!fastLeaveValue || !showFastLeave
+              ? (
+                poolInfo.type !== YieldPoolType.LENDING
+                  ? (
+                    <>
+                      {!!UNSTAKE_ALERT_DATA.length && UNSTAKE_ALERT_DATA.map((_props, index) => {
+                        return (
+                          <InstructionItem
+                            className={'__instruction-item'}
+                            description={(
+                              <div dangerouslySetInnerHTML={{ __html: (_props.description)?.replace('{unBondedTime}', unBondedTime) }}></div>
+                            )}
+                            iconInstruction={
+                              <BackgroundIcon
+                                backgroundColor={getAlphaColor(_props.iconColor, 0.1)}
+                                iconColor={_props.iconColor}
+                                phosphorIcon={getBannerButtonIcon(_props.icon)}
+                                size='lg'
+                                weight='fill'
+                              />
+                            }
+                            key={`${_props.icon}-${index}`}
+                            title={_props.title}
+                          />
+                        );
+                      })}
+                    </>
+                  )
+                  : (
+                    <AlertBox
+                      description={t('You can withdraw your supplied funds immediately')}
+                      title={t('Withdraw')}
+                      type={'info'}
+                    />
+                  )
+              )
+              : (
+                <AlertBox
+                  description={t('With fast unstake, you will receive your funds immediately with a higher fee')}
+                  title={t('Fast unstake')}
+                  type={'info'}
+                />
+              )}
+          </div>
         </Form>
       </TransactionContent>
       <TransactionFooter>

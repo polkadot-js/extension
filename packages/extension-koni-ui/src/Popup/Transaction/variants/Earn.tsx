@@ -7,19 +7,19 @@ import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
 import { addLazy } from '@subwallet/extension-base/utils';
-import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, LoadingScreen, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
 import { BN_ZERO, EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
-import { useChainChecker, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
+import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -28,7 +28,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef,
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { accountFilterFunc, getJoinYieldParams } from '../helper';
+import { getJoinYieldParams } from '../helper';
 import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '../parts';
 
 type Props = ThemeProps;
@@ -47,8 +47,6 @@ const Component = () => {
   const notify = useNotification();
   const { activeModal } = useContext(ModalContext);
 
-  const chainChecker = useChainChecker();
-
   const { closeAlert, defaultData, goBack, onDone,
     openAlert, persistData,
     setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
@@ -56,10 +54,11 @@ const Component = () => {
   const { slug } = defaultData;
 
   const { accounts, isAllAccount } = useSelector((state) => state.accountState);
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
-  const { poolInfoMap, poolTargetsMap } = useSelector((state) => state.earning);
-  const { assetRegistry: chainAsset } = useSelector((state) => state.assetRegistry);
-  const { priceMap } = useSelector((state) => state.price);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
+  const poolTargetsMap = useSelector((state) => state.earning.poolTargetsMap);
+  const chainAsset = useSelector((state) => state.assetRegistry.assetRegistry);
+  const priceMap = useSelector((state) => state.price.priceMap);
 
   const [form] = Form.useForm<EarnParams>();
   const formDefault = useMemo((): EarnParams => ({ ...defaultData }), [defaultData]);
@@ -81,29 +80,19 @@ const Component = () => {
 
   const { compound } = useYieldPositionDetail(slug);
   const { nativeTokenBalance } = useGetBalance(chainValue, fromValue);
+  const { checkChainConnected, turnOnChain } = useChainConnection();
+  const [isConnectingChainSuccess, setIsConnectingChainSuccess] = useState<boolean>(false);
+  const [isLoadingChainConnection, setIsLoadingChainConnection] = useState<boolean>(false);
 
   const poolInfo = poolInfoMap[slug];
   const poolType = poolInfo?.type || '';
   const poolChain = poolInfo?.chain || '';
 
-  const altChain = useMemo(() => {
-    if (poolInfo) {
-      if (isLiquidPool(poolInfo) || isLendingPool(poolInfo)) {
-        const asset = chainAsset[poolInfo.metadata.altInputAssets || ''];
-
-        return asset ? asset.originChain : '';
-      } else {
-        return '';
-      }
-    } else {
-      return '';
-    }
-  }, [chainAsset, poolInfo]);
-
   const [isBalanceReady, setIsBalanceReady] = useState<boolean>(true);
   const [forceFetchValidator, setForceFetchValidator] = useState(false);
   const [targetLoading, setTargetLoading] = useState(false);
   const [stepLoading, setStepLoading] = useState<boolean>(true);
+  const [screenLoading, setScreenLoading] = useState(true);
   const [submitString, setSubmitString] = useState<string | undefined>();
   const [connectionError, setConnectionError] = useState<string>();
   const [, setCanMint] = useState(false);
@@ -248,8 +237,8 @@ const Component = () => {
   }, [poolTargetValue, poolTargetsMap, poolType, slug]);
 
   const accountSelectorList = useMemo(() => {
-    return accounts.filter(accountFilterFunc(chainInfoMap, poolType, poolChain));
-  }, [accounts, chainInfoMap, poolChain, poolType]);
+    return accounts.filter((a) => !isAccountAll(a.address));
+  }, [accounts]);
 
   const onFieldsChange: FormCallbacks<EarnParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
@@ -561,7 +550,7 @@ const Component = () => {
         )}
 
         <MetaInfo.Chain
-          chain={chainInfoMap[chainValue].slug}
+          chain={chainValue}
           label={t('Network')}
         />
 
@@ -575,7 +564,7 @@ const Component = () => {
         )}
       </MetaInfo>
     );
-  }, [amountValue, assetDecimals, inputAsset.symbol, poolInfo.statistic, poolInfo.metadata, poolInfo?.type, t, chainInfoMap, chainValue, estimatedFee, poolTargets, chainAsset]);
+  }, [amountValue, assetDecimals, inputAsset.symbol, poolInfo.statistic, poolInfo.metadata, poolInfo?.type, t, chainValue, estimatedFee, poolTargets, chainAsset]);
 
   const onPreCheck = usePreCheckAction(fromValue);
 
@@ -628,6 +617,96 @@ const Component = () => {
       goBack();
     }
   }, [goBack]);
+
+  const altChain = useMemo(() => {
+    if (poolInfo && (isLiquidPool(poolInfo) || isLendingPool(poolInfo))) {
+      const asset = chainAsset[poolInfo.metadata.altInputAssets || ''];
+
+      return asset ? asset.originChain : '';
+    }
+
+    return '';
+  }, [chainAsset, poolInfo]);
+
+  useEffect(() => {
+    if (poolChain) {
+      if (altChain) {
+        if (checkChainConnected(poolChain) && checkChainConnected(altChain)) {
+          setScreenLoading(false);
+        } else if (!checkChainConnected(altChain)) {
+          turnOnChain(altChain);
+          setIsLoadingChainConnection(true);
+        } else {
+          setIsLoadingChainConnection(true);
+        }
+      } else {
+        if (checkChainConnected(poolChain)) {
+          setScreenLoading(false);
+        } else {
+          setIsLoadingChainConnection(true);
+        }
+      }
+    }
+  }, [altChain, poolChain, checkChainConnected, turnOnChain]);
+
+  const { altChainName, poolChainName } = useMemo(() => ({
+    poolChainName: poolChain ? chainInfoMap[poolChain]?.name : '',
+    altChainName: altChain ? chainInfoMap[altChain]?.name : ''
+  }), [altChain, chainInfoMap, poolChain]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timer;
+    let timeout: NodeJS.Timeout;
+
+    if (isLoadingChainConnection && poolChain) {
+      const checkConnection = () => {
+        if (altChain) {
+          if (checkChainConnected(poolChain) && checkChainConnected(altChain)) {
+            setIsConnectingChainSuccess(true);
+            setIsLoadingChainConnection(false);
+            clearTimeout(timeout);
+            setScreenLoading(false);
+          }
+        } else {
+          if (checkChainConnected(poolChain)) {
+            setIsConnectingChainSuccess(true);
+            clearInterval(timer);
+            clearTimeout(timeout);
+            setScreenLoading(false);
+          }
+        }
+      };
+
+      // Check network connection every 0.5 second
+      timer = setInterval(checkConnection, 500);
+
+      // Set timeout for 3 seconds
+      timeout = setTimeout(() => {
+        clearInterval(timer);
+
+        if (!isConnectingChainSuccess) {
+          setIsLoadingChainConnection(false);
+          openAlert({
+            title: t('Connection lost'),
+            type: NotificationType.ERROR,
+            content: altChain
+              ? t(`${poolChainName} network or ${altChainName} network has lost connection. Re-enable the network and try again`)
+              : t(`${poolChainName} network has lost connection. Re-enable the network and try again`),
+            okButton: {
+              text: t('I understand'),
+              onClick: closeAlert,
+              icon: CheckCircle
+            }
+          });
+        }
+      }, 3000);
+    }
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(timeout);
+    };
+  }, [altChain, poolChain, checkChainConnected, closeAlert, isConnectingChainSuccess, isLoadingChainConnection, openAlert, t, poolChainName, altChainName]);
 
   useEffect(() => {
     form.setFieldValue('asset', inputAsset.slug || '');
@@ -740,23 +819,28 @@ const Component = () => {
   }, [chainState?.active, forceFetchValidator, slug, chainValue, fromValue]);
 
   useEffect(() => {
-    if (!compound) {
+    if (!compound && !screenLoading) {
       isClickInfoButtonRef.current = false;
       activeModal(instructionModalId);
     }
-  }, [activeModal, compound]);
+  }, [activeModal, compound, screenLoading]);
 
   const subHeaderButtons: ButtonProps[] = useMemo(() => {
     return [
       {
         icon: <InfoIcon />,
+        disabled: screenLoading || submitLoading,
         onClick: () => {
+          if (screenLoading || submitLoading) {
+            return;
+          }
+
           isClickInfoButtonRef.current = true;
-          activeModal(EARNING_INSTRUCTION_MODAL);
+          activeModal(instructionModalId);
         }
       }
     ];
-  }, [activeModal]);
+  }, [activeModal, screenLoading, submitLoading]);
 
   useEffect(() => {
     setSubHeaderRightButtons(subHeaderButtons);
@@ -780,146 +864,153 @@ const Component = () => {
     }));
   }, [onBack, setBackProps]);
 
-  useEffect(() => {
-    altChain !== '' && chainChecker(altChain);
-  }, [altChain, chainChecker]);
-
   return (
     <>
-      <TransactionContent>
-        {processState.steps && (
+      {
+        screenLoading && (
+          <LoadingScreen />
+        )
+      }
+      {
+        !screenLoading && (
           <>
-            <div className={'__process-item-wrapper'}>
-              {stepLoading
-                ? (
-                  <div className={'__process-item-loading'}>
-                    <ActivityIndicator size={24} />
+            <TransactionContent>
+              {processState.steps && (
+                <>
+                  <div className={'__process-item-wrapper'}>
+                    {stepLoading
+                      ? (
+                        <div className={'__process-item-loading'}>
+                          <ActivityIndicator size={24} />
+                        </div>
+                      )
+                      : (
+                        <EarningProcessItem
+                          index={processState.currentStep}
+                          stepName={processState.steps[processState.currentStep]?.name}
+                          stepStatus={processState.stepResults[processState.currentStep]?.status}
+                        />
+                      )}
                   </div>
-                )
-                : (
-                  <EarningProcessItem
-                    index={processState.currentStep}
-                    stepName={processState.steps[processState.currentStep]?.name}
-                    stepStatus={processState.stepResults[processState.currentStep]?.status}
+                </>
+              )}
+
+              <Form
+                className={'form-container form-space-sm'}
+                form={form}
+                initialValues={formDefault}
+                onFieldsChange={onFieldsChange}
+                onFinish={onSubmit}
+              >
+                <HiddenInput fields={hideFields} />
+
+                <Form.Item
+                  name={'from'}
+                >
+                  <AccountSelector
+                    disabled={!isAllAccount}
+                    doFilter={false}
+                    externalAccounts={accountSelectorList}
+                  />
+                </Form.Item>
+
+                <div className={'__balance-display-area'}>
+                  <FreeBalanceToEarn
+                    address={fromValue}
+                    hidden={submitStepType !== YieldStepType.XCM}
+                    label={`${t('Available balance')}:`}
+                    onBalanceReady={setIsBalanceReady}
+                    tokens={balanceTokens}
+                  />
+
+                  <FreeBalance
+                    address={fromValue}
+                    chain={poolInfo.chain}
+                    hidden={[YieldStepType.XCM].includes(submitStepType)}
+                    isSubscribe={true}
+                    label={`${t('Available balance')}:`}
+                    tokenSlug={inputAsset.slug}
+                  />
+                </div>
+
+                <Form.Item
+                  name={'value'}
+                >
+                  <AmountInput
+                    decimals={assetDecimals}
+                    disabled={processState.currentStep !== 0}
+                    maxValue={'1'} // todo: no maxValue, this is just temporary solution
+                    showMaxButton={false}
+                  />
+                </Form.Item>
+
+                <div className={'__transformed-amount-value'}>
+                  <Number
+                    decimal={0}
+                    prefix={'$'}
+                    value={transformAmount}
+                  />
+                </div>
+
+                {poolType === YieldPoolType.NOMINATION_POOL && (
+                  <Form.Item
+                    name={'target'}
+                  >
+                    <EarningPoolSelector
+                      chain={poolChain}
+                      disabled={submitLoading}
+                      from={fromValue}
+                      label={t('Select pool')}
+                      loading={targetLoading}
+                      setForceFetchValidator={setForceFetchValidator}
+                      slug={slug}
+                    />
+                  </Form.Item>
+                )}
+
+                {poolType === YieldPoolType.NATIVE_STAKING && (
+                  <Form.Item
+                    name={'target'}
+                  >
+                    <EarningValidatorSelector
+                      chain={chainValue}
+                      disabled={submitLoading}
+                      from={fromValue}
+                      loading={targetLoading}
+                      setForceFetchValidator={setForceFetchValidator}
+                      slug={slug}
+                    />
+                  </Form.Item>
+                )}
+              </Form>
+
+              {renderMetaInfo()}
+
+              <AlertBox
+                className={'__alert-box'}
+                description={STAKE_ALERT_DATA.description.replace('{tokenAmount}', maintainString)}
+                title={STAKE_ALERT_DATA.title}
+                type={'warning'}
+              />
+            </TransactionContent>
+            <TransactionFooter>
+              <Button
+                disabled={isDisabledButton}
+                icon={(
+                  <Icon
+                    phosphorIcon={PlusCircle}
+                    weight={'fill'}
                   />
                 )}
-            </div>
+                loading={submitLoading}
+                onClick={onPreCheck(form.submit, exType)}
+              >
+                {t('Stake')}
+              </Button>
+            </TransactionFooter>
           </>
-        )}
-
-        <Form
-          className={'form-container form-space-sm'}
-          form={form}
-          initialValues={formDefault}
-          onFieldsChange={onFieldsChange}
-          onFinish={onSubmit}
-        >
-          <HiddenInput fields={hideFields} />
-
-          <Form.Item
-            name={'from'}
-          >
-            <AccountSelector
-              disabled={!isAllAccount}
-              doFilter={false}
-              externalAccounts={accountSelectorList}
-            />
-          </Form.Item>
-
-          <div className={'__balance-display-area'}>
-            <FreeBalanceToEarn
-              address={fromValue}
-              hidden={submitStepType !== YieldStepType.XCM}
-              label={`${t('Available balance')}:`}
-              onBalanceReady={setIsBalanceReady}
-              tokens={balanceTokens}
-            />
-
-            <FreeBalance
-              address={fromValue}
-              chain={poolInfo.chain}
-              hidden={[YieldStepType.XCM].includes(submitStepType)}
-              isSubscribe={true}
-              label={`${t('Available balance')}:`}
-              tokenSlug={inputAsset.slug}
-            />
-          </div>
-
-          <Form.Item
-            name={'value'}
-          >
-            <AmountInput
-              decimals={assetDecimals}
-              disabled={processState.currentStep !== 0}
-              maxValue={'1'} // todo: no maxValue, this is just temporary solution
-              showMaxButton={false}
-            />
-          </Form.Item>
-
-          <div className={'__transformed-amount-value'}>
-            <Number
-              decimal={0}
-              prefix={'$'}
-              value={transformAmount}
-            />
-          </div>
-
-          {poolType === YieldPoolType.NOMINATION_POOL && (
-            <Form.Item
-              name={'target'}
-            >
-              <EarningPoolSelector
-                chain={poolChain}
-                disabled={submitLoading}
-                from={fromValue}
-                label={t('Select pool')}
-                loading={targetLoading}
-                setForceFetchValidator={setForceFetchValidator}
-                slug={slug}
-              />
-            </Form.Item>
-          )}
-
-          {poolType === YieldPoolType.NATIVE_STAKING && (
-            <Form.Item
-              name={'target'}
-            >
-              <EarningValidatorSelector
-                chain={chainValue}
-                disabled={submitLoading}
-                from={fromValue}
-                loading={targetLoading}
-                setForceFetchValidator={setForceFetchValidator}
-                slug={slug}
-              />
-            </Form.Item>
-          )}
-        </Form>
-
-        {renderMetaInfo()}
-
-        <AlertBox
-          className={'__alert-box'}
-          description={STAKE_ALERT_DATA.description.replace('{tokenAmount}', maintainString)}
-          title={STAKE_ALERT_DATA.title}
-          type={'warning'}
-        />
-      </TransactionContent>
-      <TransactionFooter>
-        <Button
-          disabled={isDisabledButton}
-          icon={(
-            <Icon
-              phosphorIcon={PlusCircle}
-              weight={'fill'}
-            />
-          )}
-          loading={submitLoading}
-          onClick={onPreCheck(form.submit, exType)}
-        >
-          {t('Stake')}
-        </Button>
-      </TransactionFooter>
+        )
+      }
 
       <EarningInstructionModal
         closeAlert={closeAlert}

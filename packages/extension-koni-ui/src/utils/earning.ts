@@ -6,6 +6,11 @@ import { YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningTagType } from '@subwallet/extension-koni-ui/types';
 import { Database, HandsClapping, Leaf, User, Users } from 'phosphor-react';
 
+// todo: after supporting Astar v3, remove this
+export function isRelatedToAstar (slug: string) {
+  return ['ASTR___native_staking___astar', 'SDN___native_staking___shiden', 'SDN-Shiden', 'ASTR-Astar'].includes(slug);
+}
+
 // todo: About label, will convert to key for i18n later
 export const createEarningTypeTags = (chain: string): Record<YieldPoolType, EarningTagType> => {
   return {

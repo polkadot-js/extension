@@ -171,8 +171,16 @@ const Component = () => {
   }, [accounts, allPositionInfos, chainInfoMap, poolInfo.type]);
 
   const exType = useMemo(() => {
-    if (type === YieldPoolType.LIQUID_STAKING && chainValue === 'moonbeam') {
-      return ExtrinsicType.EVM_EXECUTE;
+    if (type === YieldPoolType.LIQUID_STAKING) {
+      if (chainValue === 'moonbeam') {
+        return ExtrinsicType.EVM_EXECUTE;
+      } else {
+        return ExtrinsicType.UNKNOWN;
+      }
+    }
+
+    if (type === YieldPoolType.LENDING) {
+      return ExtrinsicType.UNKNOWN;
     }
 
     return ExtrinsicType.STAKING_WITHDRAW;

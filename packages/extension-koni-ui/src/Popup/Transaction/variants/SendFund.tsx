@@ -246,7 +246,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const hideMaxButton = useMemo(() => {
     const chainInfo = chainInfoMap[chain];
 
-    return !!chainInfo && _isChainEvmCompatible(chainInfo) && destChain === chain && _isNativeToken(assetInfo);
+    return !!chainInfo && !!assetInfo && _isChainEvmCompatible(chainInfo) && destChain === chain && _isNativeToken(assetInfo);
   }, [chainInfoMap, chain, destChain, assetInfo]);
 
   const [loading, setLoading] = useState(false);

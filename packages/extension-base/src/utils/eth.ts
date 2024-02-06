@@ -123,10 +123,19 @@ export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) =
 
     const busyNetwork = blocksBusy >= (numBlock / 2); // True if half of block is busy
 
-    const maxPriorityFeePerGas = history.reward.reduce((previous, rewards) => {
+    const maxPriorityFeePerGas = history.reward.reduce((previous, rewards, currentIndex) => {
       const [first, second] = rewards;
+      const base = history.baseFeePerGas[currentIndex];
       const firstBN = new BigN(first);
       const secondBN = new BigN(second);
+      const baseBN = new BigN(base);
+
+      // Special for bsc, base and first always 0
+      if (baseBN.eq(BN_ZERO) && firstBN.eq(BN_ZERO)) {
+        const current = secondBN;
+
+        return current.gte(previous) ? current : previous; // get min priority
+      }
 
       if (busyNetwork) {
         const current = secondBN.dividedBy(2).gte(firstBN) ? firstBN : secondBN; // second too larger than first (> 2 times), use first else use second

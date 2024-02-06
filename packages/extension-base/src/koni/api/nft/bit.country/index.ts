@@ -99,7 +99,7 @@ export class BitCountryNftApi extends BaseNftApi {
     if (onChainMeta.data.attributes['MetaverseId:']) {
       return await fetch(`${BIT_COUNTRY_LAND_ESTATE_METADATA_API}/${assetId.classId}/${assetId.tokenId}/metadata.json`)
         .then((resp) => resp.json()) as Record<string, any>;
-    } else if ((onChainMeta.metadata as string).includes('/avatar/')) {
+    } else if ((onChainMeta.metadata as string).startsWith('/avatar/')) {
       return await fetch(BIT_AVATAR_API + (onChainMeta.metadata as string))
         .then((resp) => resp.json()) as Record<string, any>;
     } else {

@@ -12,7 +12,13 @@ import BaseLiquidStakingPoolHandler from '@subwallet/extension-base/services/ear
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { EarningRewardHistoryItem, EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { addLazy, categoryAddresses, createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
+import {
+  addLazy,
+  categoryAddresses,
+  createPromiseHandler,
+  PromiseHandler,
+  removeLazy
+} from '@subwallet/extension-base/utils';
 import { fetchStaticCache } from '@subwallet/extension-base/utils/fetchStaticCache';
 import { BehaviorSubject } from 'rxjs';
 
@@ -506,13 +512,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   yieldPositionPersistQueue: YieldPositionInfo[] = [];
 
-  public resetYieldPositionQueue () {
-    this.yieldPositionPersistQueue = [];
-  }
-
   public async resetYieldPosition () {
     this.yieldPositionSubject.next({});
     this.yieldPositionPersistQueue = [];
+    removeLazy('persistYieldPositionInfo');
     await this.dbService.stores.yieldPosition.clear();
   }
 
@@ -570,6 +573,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   runUnsubscribePoolsPosition () {
     this.yieldPositionUnsub?.();
+    removeLazy('persistYieldPositionInfo');
     this.yieldPositionPersistQueue = [];
   }
 
@@ -577,15 +581,25 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   /* Get pools' reward */
 
+  earningsRewardQueue: EarningRewardItem[] = [];
+
   public updateEarningReward (stakingRewardData: EarningRewardItem): void {
-    const stakingRewardState = this.earningRewardSubject.getValue();
+    this.earningsRewardQueue.push(stakingRewardData);
 
-    stakingRewardState.ready = true;
-    const key = `${stakingRewardData.slug}---${stakingRewardData.address}`;
+    addLazy('updateEarningReward', () => {
+      const stakingRewardState = this.earningRewardSubject.getValue();
 
-    stakingRewardState.data[key] = stakingRewardData;
+      this.earningsRewardQueue.forEach((item) => {
+        const key = `${item.slug}---${item.address}`;
 
-    this.earningRewardSubject.next(stakingRewardState);
+        stakingRewardState.data[key] = item;
+      });
+      stakingRewardState.ready = true;
+
+      this.earningRewardSubject.next(stakingRewardState);
+
+      this.earningsRewardQueue = [];
+    });
   }
 
   public async getPoolReward (addresses: string[], callback: (result: EarningRewardItem) => void): Promise<VoidFunction> {
@@ -651,6 +665,8 @@ export default class EarningService implements StoppableServiceInterface, Persis
   }
 
   runUnsubscribeStakingRewardInterval () {
+    removeLazy('updateEarningReward');
+    this.earningsRewardQueue = [];
     this.earningsRewardInterval && clearInterval(this.earningsRewardInterval);
   }
 
@@ -688,14 +704,23 @@ export default class EarningService implements StoppableServiceInterface, Persis
     };
   }
 
+  private earningRewardHistoryQueue: EarningRewardHistoryItem[] = [];
+
   public updateEarningRewardHistory (earningRewardHistory: EarningRewardHistoryItem): void {
-    const earningRewardHistoryState = this.earningRewardHistorySubject.getValue();
+    this.earningRewardHistoryQueue.push(earningRewardHistory);
 
-    const key = `${earningRewardHistory.slug}---${earningRewardHistory.address}---${earningRewardHistory.eventIndex}`;
+    addLazy('updateEarningRewardHistory', () => {
+      const earningRewardHistoryState = this.earningRewardHistorySubject.getValue();
 
-    earningRewardHistoryState[key] = earningRewardHistory;
+      this.earningRewardHistoryQueue.forEach((item) => {
+        const key = `${item.slug}---${item.address}---${item.eventIndex}`;
 
-    this.earningRewardHistorySubject.next(earningRewardHistoryState);
+        earningRewardHistoryState[key] = item;
+      });
+
+      this.earningRewardHistorySubject.next(earningRewardHistoryState);
+      this.earningRewardHistoryQueue = [];
+    }, 300, 1800);
   }
 
   public subscribeEarningRewardHistory (): BehaviorSubject<Record<string, EarningRewardHistoryItem>> {
@@ -728,6 +753,8 @@ export default class EarningService implements StoppableServiceInterface, Persis
   }
 
   runUnsubscribeEarningRewardHistoryInterval () {
+    removeLazy('updateEarningRewardHistory');
+    this.earningRewardHistoryQueue = [];
     this.earningsRewardHistoryInterval && clearInterval(this.earningsRewardHistoryInterval);
   }
 

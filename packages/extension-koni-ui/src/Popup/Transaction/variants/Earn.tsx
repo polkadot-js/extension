@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
@@ -27,6 +27,8 @@ import { CheckCircle, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { getJoinYieldParams } from '../helper';
 import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '../parts';
@@ -237,8 +239,12 @@ const Component = () => {
   }, [poolTargetValue, poolTargetsMap, poolType, slug]);
 
   const accountSelectorList = useMemo(() => {
-    return accounts.filter((a) => !isAccountAll(a.address));
-  }, [accounts]);
+    return accounts.filter((a) => {
+      const isEvmChain = _isChainEvmCompatible(chainInfoMap[poolChain]);
+
+      return !isAccountAll(a.address) && isEvmChain === isEthereumAddress(a.address);
+    });
+  }, [accounts, chainInfoMap, poolChain]);
 
   const onFieldsChange: FormCallbacks<EarnParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change

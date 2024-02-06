@@ -44,6 +44,7 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
           }
 
           exists.isTestnet = exists.isTestnet || chainInfo.isTestnet;
+          exists.poolSlugs.push(pool.slug);
         } else {
           const token = multiChainAssetMap[group] || assetRegistry[group];
 
@@ -77,7 +78,8 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             isTestnet: chainInfo.isTestnet,
             name: token.name,
             chain: chain,
-            poolListLength: 1
+            poolListLength: 1,
+            poolSlugs: [pool.slug]
           };
         }
       }

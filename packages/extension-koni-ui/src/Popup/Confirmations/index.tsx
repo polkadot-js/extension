@@ -185,6 +185,44 @@ const Component = function ({ className }: Props) {
           return t('Claim rewards confirm');
         case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
           return t('Cancel unstake confirm');
+        case ExtrinsicType.MINT_VDOT:
+          return t('Mint vDOT transaction');
+        case ExtrinsicType.MINT_VMANTA:
+          return t('Mint vMANTA transaction');
+        case ExtrinsicType.MINT_LDOT:
+          return t('Mint LDOT transaction');
+        case ExtrinsicType.MINT_SDOT:
+          return t('Mint sDOT transaction');
+        case ExtrinsicType.MINT_QDOT:
+          return t('Mint qDOT transaction');
+        case ExtrinsicType.MINT_STDOT:
+          return t('Mint stDOT transaction');
+        case ExtrinsicType.REDEEM_VDOT:
+          return t('Redeem vDOT transaction');
+        case ExtrinsicType.REDEEM_VMANTA:
+          return t('Redeem vMANTA transaction');
+        case ExtrinsicType.REDEEM_LDOT:
+          return t('Redeem LDOT transaction');
+        case ExtrinsicType.REDEEM_SDOT:
+          return t('Redeem sDOT transaction');
+        case ExtrinsicType.REDEEM_QDOT:
+          return t('Redeem qDOT transaction');
+        case ExtrinsicType.REDEEM_STDOT:
+          return t('Redeem stDOT transaction');
+        case ExtrinsicType.UNSTAKE_VDOT:
+          return t('Unstake vDOT transaction');
+        case ExtrinsicType.UNSTAKE_VMANTA:
+          return t('Unstake vMANTA transaction');
+        case ExtrinsicType.UNSTAKE_LDOT:
+          return t('Unstake lDOT transaction');
+        case ExtrinsicType.UNSTAKE_SDOT:
+          return t('Unstake sDOT transaction');
+        case ExtrinsicType.UNSTAKE_STDOT:
+          return t('Unstake stDOT transaction');
+        case ExtrinsicType.UNSTAKE_QDOT:
+          return t('Unstake qDOT transaction');
+        case ExtrinsicType.TOKEN_APPROVE:
+          return t('Unstake vDOT transaction');
         default:
           return t('Transaction confirm');
       }

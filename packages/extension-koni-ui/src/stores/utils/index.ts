@@ -319,7 +319,13 @@ export const subscribeBuyServices = lazySubscribeMessage('pri(buyService.service
 /* Earning */
 
 export const updateYieldPoolInfo = (data: YieldPoolInfo[]) => {
-  store.dispatch({ type: 'earning/updateYieldPoolInfo', payload: data });
+  addLazy(
+    'updateYieldPoolInfo',
+    () => {
+      store.dispatch({ type: 'earning/updateYieldPoolInfo', payload: data });
+    },
+    900
+  );
 };
 
 export const subscribeYieldPoolInfo = lazySubscribeMessage(
@@ -330,7 +336,13 @@ export const subscribeYieldPoolInfo = lazySubscribeMessage(
 );
 
 export const updateYieldPositionInfo = (data: YieldPositionInfo[]) => {
-  store.dispatch({ type: 'earning/updateYieldPositionInfo', payload: data });
+  addLazy(
+    'updateYieldPositionInfo',
+    () => {
+      store.dispatch({ type: 'earning/updateYieldPositionInfo', payload: data });
+    },
+    900
+  );
 };
 
 export const subscribeYieldPositionInfo = lazySubscribeMessage(
@@ -341,7 +353,13 @@ export const subscribeYieldPositionInfo = lazySubscribeMessage(
 );
 
 export const updateYieldReward = (data: EarningRewardJson) => {
-  store.dispatch({ type: 'earning/updateYieldReward', payload: Object.values(data.data) });
+  addLazy(
+    'updateYieldReward',
+    () => {
+      store.dispatch({ type: 'earning/updateYieldReward', payload: Object.values(data.data) });
+    },
+    900
+  );
 };
 
 export const subscribeYieldReward = lazySubscribeMessage(

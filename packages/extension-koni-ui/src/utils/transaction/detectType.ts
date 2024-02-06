@@ -25,6 +25,7 @@ export const isTypeMint = (txType: ExtrinsicType) =>
     ExtrinsicType.MINT_QDOT,
     ExtrinsicType.MINT_SDOT,
     ExtrinsicType.MINT_VDOT,
+    ExtrinsicType.MINT_VMANTA,
     ExtrinsicType.MINT_STDOT
   ].includes(txType);
 
@@ -35,9 +36,11 @@ export const isPoolLeave = (txType: ExtrinsicType) =>
     ExtrinsicType.REDEEM_SDOT,
     ExtrinsicType.REDEEM_STDOT,
     ExtrinsicType.REDEEM_VDOT,
+    ExtrinsicType.REDEEM_VMANTA,
     ExtrinsicType.UNSTAKE_LDOT,
     ExtrinsicType.UNSTAKE_QDOT,
     ExtrinsicType.UNSTAKE_SDOT,
     ExtrinsicType.UNSTAKE_STDOT,
-    ExtrinsicType.UNSTAKE_VDOT
+    ExtrinsicType.UNSTAKE_VDOT,
+    ExtrinsicType.UNSTAKE_VMANTA
   ].includes(txType);

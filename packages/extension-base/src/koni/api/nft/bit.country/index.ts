@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { BIT_COUNTRY_IPFS_SERVER, BIT_COUNTRY_LAND_ESTATE_METADATA_API } from '@subwallet/extension-base/koni/api/nft/config';
+import { BIT_AVATAR_API, BIT_COUNTRY_IPFS_SERVER, BIT_COUNTRY_LAND_ESTATE_METADATA_API } from '@subwallet/extension-base/koni/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { isUrl } from '@subwallet/extension-base/utils';
@@ -98,6 +98,9 @@ export class BitCountryNftApi extends BaseNftApi {
     // check if NFT is Land/Estate
     if (onChainMeta.data.attributes['MetaverseId:']) {
       return await fetch(`${BIT_COUNTRY_LAND_ESTATE_METADATA_API}/${assetId.classId}/${assetId.tokenId}/metadata.json`)
+        .then((resp) => resp.json()) as Record<string, any>;
+    } else if ((onChainMeta.metadata as string).includes('/avatar/')) {
+      return await fetch(BIT_AVATAR_API + (onChainMeta.metadata as string))
         .then((resp) => resp.json()) as Record<string, any>;
     } else {
       return await fetch(BIT_COUNTRY_IPFS_SERVER + (onChainMeta.metadata as string))

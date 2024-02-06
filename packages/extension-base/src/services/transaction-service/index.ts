@@ -743,11 +743,14 @@ export default class TransactionService {
 
     if ([
       ExtrinsicType.STAKING_JOIN_POOL,
+      ExtrinsicType.STAKING_BOND,
       ExtrinsicType.JOIN_YIELD_POOL,
       ExtrinsicType.MINT_LDOT,
       ExtrinsicType.MINT_QDOT,
       ExtrinsicType.MINT_SDOT,
-      ExtrinsicType.MINT_VDOT
+      ExtrinsicType.MINT_STDOT,
+      ExtrinsicType.MINT_VDOT,
+      ExtrinsicType.MINT_VMANTA
     ].includes(transaction.extrinsicType)) {
       this.handlePostEarningTransaction(id);
     }

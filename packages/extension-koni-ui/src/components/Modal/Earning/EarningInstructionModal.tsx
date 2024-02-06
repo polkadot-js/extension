@@ -254,6 +254,7 @@ const Component: React.FC<Props> = (props: Props) => {
               const _item: BoxProps = { ...item, id: item.icon, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
 
               replaceEarningValue(_item, '{validatorNumber}', maxCandidatePerFarmer.toString());
+              replaceEarningValue(_item, '{dAppString}', maxCandidatePerFarmer > 1 ? 'dApps' : 'dApp');
               replaceEarningValue(_item, '{periodNumb}', unBondedTime);
               replaceEarningValue(_item, '{maintainBalance}', maintainBalance);
               replaceEarningValue(_item, '{maintainSymbol}', maintainSymbol);

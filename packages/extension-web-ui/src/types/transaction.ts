@@ -9,6 +9,20 @@ export interface TransactionFormBaseProps {
   asset: string
 }
 
+export const DEFAULT_TRANSACTION_PARAMS: TransactionFormBaseProps = {
+  asset: '',
+  chain: '',
+  from: ''
+};
+
+export const DEFAULT_YIELD_PARAMS: EarnParams = {
+  ...DEFAULT_TRANSACTION_PARAMS,
+  slug: '',
+  value: '',
+  target: ''
+};
+
+
 export interface TransferParams extends TransactionFormBaseProps {
   to: string;
   destChain: string;

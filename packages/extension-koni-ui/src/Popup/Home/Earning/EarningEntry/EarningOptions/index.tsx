@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
+import { YieldPoolInfo } from '@subwallet/extension-base/types';
 import { EmptyList, FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningOptionItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
@@ -11,7 +13,7 @@ import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Database, FadersHorizontal } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -60,6 +62,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 
   const data = useYieldGroupInfo();
   const { poolInfoMap } = useSelector((state) => state.earning);
+  const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
 
@@ -139,11 +142,23 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
     closeConnectChainModal,
     connectingChain,
     onConnectChain,
-    openConnectChainModal } = useHandleChainConnection({
+    openConnectChainModal, setExtraSuccessFlag, turnOnChain } = useHandleChainConnection({
     alertModalId,
     chainConnectionLoadingModalId,
     connectChainModalId
   }, onConnectChainSuccess);
+
+  const [currentAltChain, setCurrentAltChain] = useState<string | undefined>();
+
+  const getAltChain = useCallback((poolInfo: YieldPoolInfo) => {
+    if (isLiquidPool(poolInfo) || isLendingPool(poolInfo)) {
+      const asset = assetRegistry[poolInfo.metadata.altInputAssets || ''];
+
+      return asset ? asset.originChain : '';
+    }
+
+    return '';
+  }, [assetRegistry]);
 
   const onClickItem = useCallback((item: YieldGroupInfo) => {
     return () => {
@@ -155,14 +170,46 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
           symbol: item.symbol
         } as EarningPoolsParam });
       } else if (item.poolListLength === 1) {
-        if (!checkChainConnected(item.chain)) {
-          openConnectChainModal(item.chain);
-        } else {
-          navigateToEarnTransaction(item);
+        const poolInfo = poolInfoMap[item.poolSlugs[0]];
+
+        if (!poolInfo) {
+          // will not happen
+
+          return;
         }
+
+        const altChain = getAltChain(poolInfo);
+
+        if (!checkChainConnected(item.chain)) {
+          if (altChain) {
+            setCurrentAltChain(altChain);
+          }
+
+          openConnectChainModal(item.chain);
+
+          return;
+        }
+
+        navigateToEarnTransaction(item);
       }
     };
-  }, [checkChainConnected, navigate, navigateToEarnTransaction, openConnectChainModal]);
+  }, [checkChainConnected, getAltChain, navigate, navigateToEarnTransaction, openConnectChainModal, poolInfoMap]);
+
+  const _onConnectChain = useCallback((chain: string) => {
+    if (currentAltChain) {
+      turnOnChain(currentAltChain);
+    }
+
+    onConnectChain(chain);
+  }, [currentAltChain, onConnectChain, turnOnChain]);
+
+  useEffect(() => {
+    if (currentAltChain) {
+      setExtraSuccessFlag(checkChainConnected(currentAltChain));
+    } else {
+      setExtraSuccessFlag(true);
+    }
+  }, [checkChainConnected, currentAltChain, setExtraSuccessFlag]);
 
   const renderItem = useCallback(
     (item: YieldGroupInfo) => {
@@ -217,7 +264,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
       closeConnectChainModal={closeConnectChainModal}
       connectChainModalId={connectChainModalId}
       connectingChain={connectingChain}
-      onConnectChain={onConnectChain}
+      onConnectChain={_onConnectChain}
     >
       <Layout.Base
         className={CN(className)}

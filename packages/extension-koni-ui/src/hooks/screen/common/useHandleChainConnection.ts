@@ -26,6 +26,7 @@ export default function useHandleChainConnection (
   const [isLoadingChainConnection, setIsLoadingChainConnection] = useState<boolean>(false);
   const [isConnectingChainSuccess, setIsConnectingChainSuccess] = useState<boolean>(false);
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
+  const [extraSuccessFlag, setExtraSuccessFlag] = useState(true);
 
   const openConnectChainModal = useCallback((chain: string) => {
     setConnectingChain(chain);
@@ -57,7 +58,7 @@ export default function useHandleChainConnection (
 
     if (isLoadingChainConnection && connectingChain) {
       const checkConnection = () => {
-        if (checkChainConnected(connectingChain)) {
+        if (checkChainConnected(connectingChain) && extraSuccessFlag) {
           setIsConnectingChainSuccess(true);
           closeLoadingModal();
           setIsLoadingChainConnection(false);
@@ -94,7 +95,7 @@ export default function useHandleChainConnection (
       clearInterval(timer);
       clearTimeout(timeout);
     };
-  }, [checkChainConnected, closeAlert, closeLoadingModal, connectingChain, isConnectingChainSuccess, isLoadingChainConnection, onConnectSuccess, openAlert, t]);
+  }, [checkChainConnected, closeAlert, closeLoadingModal, connectingChain, extraSuccessFlag, isConnectingChainSuccess, isLoadingChainConnection, onConnectSuccess, openAlert, t]);
 
   return {
     alertProps,
@@ -104,6 +105,8 @@ export default function useHandleChainConnection (
     openConnectChainModal,
     closeConnectChainModal,
     connectingChain,
-    onConnectChain
+    onConnectChain,
+    turnOnChain,
+    setExtraSuccessFlag
   };
 }

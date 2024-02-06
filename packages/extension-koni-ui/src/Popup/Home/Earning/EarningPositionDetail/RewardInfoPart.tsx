@@ -140,8 +140,6 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
 
       {(type === YieldPoolType.NOMINATION_POOL || (type === YieldPoolType.NATIVE_STAKING && isDAppStaking)) && (
         <>
-          <div className={'__separator'}></div>
-
           <div className={'__claim-reward-area'}>
             { type === YieldPoolType.NOMINATION_POOL
               ? total
@@ -245,6 +243,7 @@ export const RewardInfoPart = styled(Component)<Props>(({ theme: { token } }: Pr
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingBottom: token.paddingSM,
+    paddingTop: token.paddingSM,
     paddingLeft: token.padding,
     paddingRight: token.padding
   },

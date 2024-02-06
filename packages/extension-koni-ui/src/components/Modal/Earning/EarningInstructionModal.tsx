@@ -364,6 +364,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
       case 'Bifrost Polkadot': {
         urlParam = '#bifrost';
+
+        if (poolInfo.slug === 'MANTA___liquid_staking___bifrost_dot') {
+          urlParam = '#vmanta-on-bifrost';
+        }
+
         break;
       }
 
@@ -377,6 +382,11 @@ const Component: React.FC<Props> = (props: Props) => {
         break;
       }
 
+      case 'Parallel': {
+        urlParam = '#parallel';
+        break;
+      }
+
       case 'Stellaswap': {
         urlParam = '#stellaswap';
         break;
@@ -386,7 +396,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const url = `https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs${urlParam}`;
 
     open(url);
-  }, [poolInfo.metadata.shortName]);
+  }, [poolInfo.metadata.shortName, poolInfo.slug]);
 
   const onClickButton = useCallback(() => {
     const time = Date.now();

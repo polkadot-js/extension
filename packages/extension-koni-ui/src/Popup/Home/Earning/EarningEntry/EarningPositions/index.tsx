@@ -6,11 +6,12 @@ import { EmptyList, FilterModal, Layout } from '@subwallet/extension-koni-ui/com
 import { EarningPositionItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { Database, FadersHorizontal, Plus, PlusCircle } from 'phosphor-react';
+import { ArrowsClockwise, Database, FadersHorizontal, Plus, PlusCircle } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -18,12 +19,13 @@ import styled from 'styled-components';
 type Props = ThemeProps & {
   earningPositions: YieldPositionInfo[];
   setEntryView: React.Dispatch<React.SetStateAction<EarningEntryView>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 let cacheData: Record<string, boolean> = {};
 const FILTER_MODAL_ID = 'earning-positions-filter-modal';
 
-function Component ({ className, earningPositions, setEntryView }: Props) {
+function Component ({ className, earningPositions, setEntryView, setLoading }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -166,6 +168,24 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
       {
         icon: (
           <Icon
+            phosphorIcon={ArrowsClockwise}
+            size='sm'
+            type='phosphor'
+          />
+        ),
+        onClick: () => {
+          setLoading(true);
+          reloadCron({ data: 'staking' })
+            .catch(console.error).finally(() => {
+              setTimeout(() => {
+                setLoading(false);
+              }, 1000);
+            });
+        }
+      },
+      {
+        icon: (
+          <Icon
             phosphorIcon={Plus}
             size='sm'
             type='phosphor'
@@ -176,7 +196,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
         }
       }
     ];
-  }, [setEntryView]);
+  }, [setEntryView, setLoading]);
 
   useEffect(() => {
     const address = currentAccount?.address || '';

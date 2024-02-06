@@ -1,30 +1,29 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
-import { addLazy, isSameAddress } from '@subwallet/extension-base/utils';
+import { addLazy } from '@subwallet/extension-base/utils';
 import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
-import { EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
-import { useChainChecker, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
+import { BN_ZERO, EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
+import { useChainChecker, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { PlusCircle } from 'phosphor-react';
+import { CheckCircle, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -68,7 +67,7 @@ const Component = () => {
   const fromValue = useWatchTransaction('from', form, defaultData);
   const amountValue = useWatchTransaction('value', form, defaultData);
   const chainValue = useWatchTransaction('chain', form, defaultData);
-  const poolTarget = useWatchTransaction('target', form, defaultData);
+  const poolTargetValue = useWatchTransaction('target', form, defaultData);
 
   const nativeTokenSlug = useGetNativeTokenSlug(chainValue);
 
@@ -84,8 +83,8 @@ const Component = () => {
   const { nativeTokenBalance } = useGetBalance(chainValue, fromValue);
 
   const poolInfo = poolInfoMap[slug];
-  const poolType = poolInfo.type;
-  const poolChain = poolInfo.chain;
+  const poolType = poolInfo?.type || '';
+  const poolChain = poolInfo?.chain || '';
 
   const altChain = useMemo(() => {
     if (poolInfo) {
@@ -112,7 +111,7 @@ const Component = () => {
   const [checkMintLoading, setCheckMintLoading] = useState(false);
   const [isFormInvalid, setIsFormInvalid] = useState(true);
 
-  const chainState = useFetchChainState(poolInfo.chain);
+  const chainState = useFetchChainState(poolInfo?.chain || '');
 
   const mustChooseTarget = useMemo(
     () => [YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolType),
@@ -122,15 +121,19 @@ const Component = () => {
   const balanceTokens = useMemo(() => {
     const result: Array<{ chain: string; token: string }> = [];
 
-    const _chain = poolInfo.chain;
+    if (!poolInfo) {
+      return [];
+    }
+
+    const _chain = poolInfo?.chain;
 
     result.push({
-      token: poolInfo.metadata.inputAsset,
+      token: poolInfo?.metadata.inputAsset,
       chain: _chain
     });
 
-    if (poolInfo.type === YieldPoolType.LENDING || poolInfo.type === YieldPoolType.LIQUID_STAKING) {
-      const altAsset = poolInfo.metadata.altInputAssets;
+    if (poolInfo?.type === YieldPoolType.LENDING || poolInfo?.type === YieldPoolType.LIQUID_STAKING) {
+      const altAsset = poolInfo?.metadata?.altInputAssets;
       const asset = chainAsset[altAsset || ''];
 
       if (asset) {
@@ -154,13 +157,13 @@ const Component = () => {
       isFormInvalid ||
       submitLoading ||
       targetLoading ||
-      (mustChooseTarget && !poolTarget),
-    [checkMintLoading, stepLoading, connectionError, amountValue, isBalanceReady, isFormInvalid, submitLoading, targetLoading, mustChooseTarget, poolTarget]
+      (mustChooseTarget && !poolTargetValue),
+    [checkMintLoading, stepLoading, connectionError, amountValue, isBalanceReady, isFormInvalid, submitLoading, targetLoading, mustChooseTarget, poolTargetValue]
   );
 
   const inputAsset = useMemo(
-    () => chainAsset[poolInfo.metadata.inputAsset],
-    [chainAsset, poolInfo.metadata.inputAsset]
+    () => chainAsset[poolInfo?.metadata?.inputAsset],
+    [chainAsset, poolInfo?.metadata?.inputAsset]
   );
 
   const nativeAsset = useMemo(() => chainAsset[nativeTokenSlug], [chainAsset, nativeTokenSlug]);
@@ -190,54 +193,59 @@ const Component = () => {
   }, [chainAsset, priceMap, processState.feeStructure]);
 
   const maintainString = useMemo(() => {
-    const maintainAsset = chainAsset[poolInfo.metadata.maintainAsset];
-    const maintainBalance = poolInfo.metadata.maintainBalance;
+    if (!poolInfo) {
+      return '';
+    }
+
+    const maintainAsset = chainAsset[poolInfo?.metadata?.maintainAsset];
+    const maintainBalance = poolInfo?.metadata?.maintainBalance;
 
     return `${getInputValuesFromString(maintainBalance, maintainAsset.decimals || 0)} ${maintainAsset.symbol}`;
-  }, [poolInfo.metadata.maintainAsset, poolInfo.metadata.maintainBalance, chainAsset]);
+  }, [poolInfo, chainAsset]);
 
-  const getTargetedPool = useCallback(
-    (target: string) => {
-      const _poolTargets = poolTargetsMap[slug];
+  const poolTargets = useMemo(() => {
+    const _poolTargets = poolTargetsMap[slug];
 
-      if (!_poolTargets) {
+    if (!_poolTargets) {
+      return [];
+    } else {
+      if (YieldPoolType.NOMINATION_POOL === poolType) {
+        const poolTargets = _poolTargets as NominationPoolInfo[];
+
+        for (const pool of poolTargets) {
+          if (String(pool.id) === poolTargetValue) {
+            return [pool];
+          }
+        }
+
         return [];
-      } else {
-        if (YieldPoolType.NOMINATION_POOL === poolType) {
-          const poolTargets = _poolTargets as NominationPoolInfo[];
+      } else if (YieldPoolType.NATIVE_STAKING === poolType) {
+        const validatorList = _poolTargets as ValidatorInfo[];
 
-          for (const pool of poolTargets) {
-            if (String(pool.id) === target) {
-              return [pool];
-            }
-          }
-
-          return [];
-        } else if (YieldPoolType.NATIVE_STAKING === poolType) {
-          const validatorList = _poolTargets as ValidatorInfo[];
-
-          if (!validatorList) {
-            return [];
-          }
-
-          const result: ValidatorInfo[] = [];
-          const nominations = parseNominations(target);
-
-          validatorList.forEach((validator) => {
-            if (nominations.some((nomination) => isSameAddress(nomination, validator.address))) {
-              // remember the format of the address
-              result.push(validator);
-            }
-          });
-
-          return result;
-        } else {
+        if (!validatorList) {
           return [];
         }
+
+        const result: ValidatorInfo[] = [];
+        const nominations = parseNominations(poolTargetValue);
+        const newValidatorList: { [address: string]: ValidatorInfo } = {};
+
+        validatorList.forEach((validator) => {
+          newValidatorList[reformatAddress(validator.address)] = validator;
+        });
+        nominations.forEach((nomination) => {
+          if (newValidatorList?.[reformatAddress(nomination)]) {
+            // remember the format of the address
+            result.push(newValidatorList[reformatAddress(nomination)]);
+          }
+        });
+
+        return result;
+      } else {
+        return [];
       }
-    },
-    [poolTargetsMap, poolType, slug]
-  );
+    }
+  }, [poolTargetValue, poolTargetsMap, poolType, slug]);
 
   const accountSelectorList = useMemo(() => {
     return accounts.filter(accountFilterFunc(chainInfoMap, poolType, poolChain));
@@ -260,24 +268,40 @@ const Component = () => {
     return {
       existentialDeposit: getInputValuesFromString(existentialDeposit, _assetDecimals),
       availableBalance: getInputValuesFromString(nativeTokenBalance.value, _assetDecimals),
-      maintainBalance: getInputValuesFromString(poolInfo.metadata.maintainBalance || '0', _assetDecimals),
+      maintainBalance: getInputValuesFromString(poolInfo?.metadata?.maintainBalance || '0', _assetDecimals),
       symbol: nativeAsset.symbol
     };
-  }, [nativeAsset, nativeTokenBalance.value, poolInfo.metadata.maintainBalance]);
+  }, [nativeAsset, nativeTokenBalance.value, poolInfo?.metadata?.maintainBalance]);
 
   const onError = useCallback(
     (error: Error) => {
       if (insufficientMessages.some((v) => error.message.includes(v))) {
-        openAlert({
-          title: t('Insufficient balance'),
-          content: t('Your available balance is {{availableBalance}} {{symbol}}, you need to leave {{existentialDeposit}} {{symbol}} as minimal balance (existential deposit) and pay network fees. Make sure you have at least {{maintainBalance}} {{symbol}} in your transferable balance to proceed.', { replace: { ...handleDataForInsufficientAlert() } }),
-          okButton: {
-            text: t('I understand'),
-            onClick: () => {
-              closeAlert();
+        const availableBalanceBN = new BigN(nativeTokenBalance.value || 0);
+
+        if (availableBalanceBN.gt(BN_ZERO) && new BigN(amountValue || 0).gt(availableBalanceBN)) {
+          openAlert({
+            title: t('Insufficient balance'),
+            type: NotificationType.ERROR,
+            content: t('Insufficient balance. Amount must be smaller than available balance'),
+            okButton: {
+              text: t('I understand'),
+              onClick: closeAlert,
+              icon: CheckCircle
             }
-          }
-        });
+          });
+        } else {
+          openAlert({
+            title: t('Insufficient balance'),
+            type: NotificationType.ERROR,
+            content: t('Your available balance is {{availableBalance}} {{symbol}}, you need to leave {{existentialDeposit}} {{symbol}} as minimal balance (existential deposit) and pay network fees. Make sure you have at least {{maintainBalance}} {{symbol}} in your transferable balance to proceed.', { replace: { ...handleDataForInsufficientAlert() } }),
+            okButton: {
+              text: t('I understand'),
+              onClick: closeAlert,
+              icon: CheckCircle
+            }
+          });
+        }
+
         dispatchProcessState({
           type: EarningActionType.STEP_ERROR_ROLLBACK,
           payload: error
@@ -287,12 +311,12 @@ const Component = () => {
       } else if (insufficientXCMMessages.some((v) => error.message.includes(v))) {
         openAlert({
           title: t('Insufficient balance'),
+          type: NotificationType.ERROR,
           content: error.message,
           okButton: {
             text: t('I understand'),
-            onClick: () => {
-              closeAlert();
-            }
+            onClick: closeAlert,
+            icon: CheckCircle
           }
         });
 
@@ -315,7 +339,7 @@ const Component = () => {
         payload: error
       });
     },
-    [closeAlert, handleDataForInsufficientAlert, notify, openAlert, t]
+    [amountValue, closeAlert, handleDataForInsufficientAlert, nativeTokenBalance.value, notify, openAlert, t]
   );
 
   const onSuccess = useCallback(
@@ -378,7 +402,7 @@ const Component = () => {
 
     const getData = (submitStep: number): SubmitYieldJoinData => {
       if ([YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(poolInfo.type) && target) {
-        const targets = getTargetedPool(target);
+        const targets = poolTargets;
 
         if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
           const selectedPool = targets[0];
@@ -472,22 +496,22 @@ const Component = () => {
           setSubmitLoading(false);
         });
     }, 300);
-  }, [currentStep, getTargetedPool, onError, onSuccess, poolInfo, processState.feeStructure, processState.steps]);
+  }, [currentStep, onError, onSuccess, poolInfo, poolTargets, processState.feeStructure, processState.steps]);
 
   const renderMetaInfo = useCallback(() => {
     const value = amountValue ? parseFloat(amountValue) / 10 ** assetDecimals : 0;
     const assetSymbol = inputAsset.symbol;
 
     const assetEarnings =
-      poolInfo.statistic && 'assetEarning' in poolInfo.statistic ? poolInfo.statistic.assetEarning : [];
-    const derivativeAssets = 'derivativeAssets' in poolInfo.metadata ? poolInfo.metadata.derivativeAssets : [];
-    const showFee = [YieldPoolType.LENDING, YieldPoolType.LIQUID_STAKING].includes(poolInfo.type);
+      poolInfo?.statistic && 'assetEarning' in poolInfo.statistic ? poolInfo.statistic.assetEarning : [];
+    const derivativeAssets = poolInfo?.metadata && 'derivativeAssets' in poolInfo.metadata ? poolInfo.metadata.derivativeAssets : [];
+    const showFee = [YieldPoolType.LENDING, YieldPoolType.LIQUID_STAKING].includes(poolInfo?.type);
 
     let minJoinPool: string | undefined;
 
-    if (poolInfo.statistic) {
+    if (poolInfo?.statistic) {
       const minPoolJoin = poolInfo.statistic.earningThreshold.join;
-      const targeted = getTargetedPool(poolTarget)[0];
+      const targeted = poolTargets[0];
 
       if (targeted) {
         if ('minBond' in targeted) {
@@ -551,9 +575,29 @@ const Component = () => {
         )}
       </MetaInfo>
     );
-  }, [amountValue, assetDecimals, inputAsset.symbol, poolInfo.statistic, poolInfo.metadata, poolInfo.type, t, chainInfoMap, chainValue, estimatedFee, getTargetedPool, poolTarget, chainAsset]);
+  }, [amountValue, assetDecimals, inputAsset.symbol, poolInfo.statistic, poolInfo.metadata, poolInfo?.type, t, chainInfoMap, chainValue, estimatedFee, poolTargets, chainAsset]);
 
   const onPreCheck = usePreCheckAction(fromValue);
+
+  const exType = useMemo(() => {
+    if (poolType === YieldPoolType.NOMINATION_POOL || poolType === YieldPoolType.NATIVE_STAKING) {
+      return ExtrinsicType.STAKING_BOND;
+    }
+
+    if (YieldPoolType.LIQUID_STAKING) {
+      if (chainValue === 'moonbeam') {
+        return ExtrinsicType.MINT_STDOT;
+      }
+
+      return ExtrinsicType.MINT_LDOT;
+    }
+
+    if (YieldPoolType.LENDING) {
+      return ExtrinsicType.MINT_LDOT;
+    }
+
+    return ExtrinsicType.STAKING_BOND;
+  }, [poolType, chainValue]);
 
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);
@@ -564,17 +608,16 @@ const Component = () => {
     } else {
       openAlert({
         title: t('Cancel earning process?'),
+        type: NotificationType.WARNING,
         content: t('Going back will cancel the current earning process. Do you wish to cancel?'),
         okButton: {
           text: t('Cancel earning'),
           onClick: goBack,
-          schema: 'error'
+          schema: 'warning'
         },
         cancelButton: {
           text: t('Not now'),
-          onClick: () => {
-            closeAlert();
-          }
+          onClick: closeAlert
         }
       });
     }
@@ -602,7 +645,7 @@ const Component = () => {
         address: fromValue,
         amount: amountValue,
         slug: slug,
-        targets: poolTarget ? getTargetedPool(poolTarget) : undefined
+        targets: poolTargetValue ? poolTargets : undefined
       };
 
       const newData = JSON.stringify(submitData);
@@ -649,15 +692,15 @@ const Component = () => {
         );
       }
     }
-  }, [submitString, currentStep, chainInfoMap, slug, poolTarget, getTargetedPool, fromValue, amountValue, notify]);
+  }, [submitString, currentStep, chainInfoMap, slug, fromValue, amountValue, notify, poolTargetValue, poolTargets]);
 
   useEffect(() => {
     setCheckMintLoading(true);
 
     unlockDotCheckCanMint({
-      slug: poolInfo.slug,
+      slug: poolInfo?.slug || '',
       address: fromValue,
-      network: poolInfo.chain
+      network: poolInfo?.chain || ''
     })
       .then((value) => {
         setCanMint(value);
@@ -669,7 +712,7 @@ const Component = () => {
     return () => {
       setCanMint(false);
     };
-  }, [fromValue, poolInfo.chain, poolInfo.slug]);
+  }, [fromValue, poolInfo?.chain, poolInfo?.slug]);
 
   useEffect(() => {
     let unmount = false;
@@ -678,7 +721,9 @@ const Component = () => {
       setTargetLoading(true);
       fetchPoolTarget({ slug })
         .then((result) => {
-          store.dispatch({ type: 'earning/updatePoolTargets', payload: result });
+          if (!unmount) {
+            store.dispatch({ type: 'earning/updatePoolTargets', payload: result });
+          }
         })
         .catch(console.error)
         .finally(() => {
@@ -870,7 +915,7 @@ const Component = () => {
             />
           )}
           loading={submitLoading}
-          onClick={onPreCheck(form.submit, ExtrinsicType.JOIN_YIELD_POOL)}
+          onClick={onPreCheck(form.submit, exType)}
         >
           {t('Stake')}
         </Button>

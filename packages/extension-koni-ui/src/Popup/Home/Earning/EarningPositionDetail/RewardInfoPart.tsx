@@ -2,18 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningRewardHistoryItem, EarningStatus, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { CollapsiblePanel, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO, CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS, StakingStatusUi } from '@subwallet/extension-koni-ui/constants';
-import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldRewardTotal } from '@subwallet/extension-koni-ui/hooks/earning';
+import { useSelector, useTranslation, useYieldRewardTotal } from '@subwallet/extension-koni-ui/hooks';
 import { AlertDialogProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, Icon, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowSquareOut } from 'phosphor-react';
+import { ArrowSquareOut, CheckCircle } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -102,10 +102,12 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
     } else {
       openAlert({
         title: t('Rewards unavailable'),
+        type: NotificationType.ERROR,
         content: t("You don't have any rewards to claim at the moment. Try again later."),
         okButton: {
           text: t('I understand'),
-          onClick: closeAlert
+          onClick: closeAlert,
+          icon: CheckCircle
         }
       });
     }
@@ -158,13 +160,13 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
                 : (
                   <ActivityIndicator size={20} />
                 )
-              : (<div></div>)}
+              : isDAppStaking && (<div className={'__visit-dapp-label'}>{t('Visit Astar portal')}</div>)}
             {canClaim && (
               <Button
                 onClick={onClaimReward}
                 size='xs'
               >
-                {t('Claim rewards')}
+                {type === YieldPoolType.NATIVE_STAKING && isDAppStaking ? t('Check rewards') : t('Claim rewards')}
               </Button>
             )}
           </div>
@@ -266,6 +268,12 @@ export const RewardInfoPart = styled(Component)<Props>(({ theme: { token } }: Pr
       fontWeight: 'inherit !important',
       lineHeight: token.lineHeightHeading5
     }
+  },
+
+  '.__visit-dapp-label': {
+    fontSize: token.fontSize,
+    lineHeight: token.lineHeight,
+    color: token.colorTextLight4
   },
 
   '.__claim-reward-area + .__separator': {

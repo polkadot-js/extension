@@ -10,8 +10,7 @@ import { RequestYieldWithdrawal, UnstakingInfo, UnstakingStatus, YieldPoolType, 
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, HiddenInput, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import { useGetBalance, useGetChainAssetInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
+import { useGetBalance, useGetChainAssetInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitStakingWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { accountFilterFunc } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { FormCallbacks, FormFieldData, ThemeProps, WithdrawParams } from '@subwallet/extension-koni-ui/types';
@@ -171,6 +170,14 @@ const Component = () => {
     return accounts.filter(filterAccount(chainInfoMap, allPositionInfos, poolInfo.type));
   }, [accounts, allPositionInfos, chainInfoMap, poolInfo.type]);
 
+  const exType = useMemo(() => {
+    if (type === YieldPoolType.LIQUID_STAKING && chainValue === 'moonbeam') {
+      return ExtrinsicType.EVM_EXECUTE;
+    }
+
+    return ExtrinsicType.STAKING_WITHDRAW;
+  }, [type, chainValue]);
+
   useEffect(() => {
     if (!fromValue && accountList.length === 1) {
       form.setFieldValue('from', accountList[0].address);
@@ -252,7 +259,7 @@ const Component = () => {
             />
           )}
           loading={loading}
-          onClick={onPreCheck(form.submit, type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_POOL_WITHDRAW : ExtrinsicType.STAKING_WITHDRAW)}
+          onClick={onPreCheck(form.submit, exType)}
         >
           {t('Continue')}
         </Button>

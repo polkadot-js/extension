@@ -4,6 +4,8 @@
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { AlertBox } from '@subwallet/extension-koni-ui/components';
+import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ConfirmationQueueItem } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { AlertDialogProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -82,9 +84,14 @@ const Component: React.FC<Props> = (props: Props) => {
     openAlert } = props;
   const { id } = item;
 
+  const { t } = useTranslation();
+
   const { transactionRequest } = useSelector((state: RootState) => state.requestState);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
   const transaction = useMemo(() => transactionRequest[id], [transactionRequest, id]);
+
+  const network = useMemo(() => chainInfoMap[transaction.chain], [chainInfoMap, transaction.chain]);
 
   const renderContent = useCallback((transaction: SWTransactionResult): React.ReactNode => {
     const { extrinsicType } = transaction;
@@ -104,6 +111,14 @@ const Component: React.FC<Props> = (props: Props) => {
     <>
       <div className={CN(className, 'confirmation-content')}>
         {renderContent(transaction)}
+        {!!transaction.estimateFee?.tooHigh && (
+          <AlertBox
+            className='network-box'
+            description={t('Gas fees on {{networkName}} are high due to high demands, so gas estimates are less accurate.', { replace: { networkName: network?.name } })}
+            title={t('Pay attention!')}
+            type='warning'
+          />
+        )}
       </div>
       {
         type === 'signingRequest' && (
@@ -133,6 +148,10 @@ const TransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: 
   return {
     '--content-gap': 0,
     marginTop: token.marginXS,
+
+    '.network-box': {
+      marginTop: token.marginSM
+    },
 
     '.-to-right': {
       '.__value': {

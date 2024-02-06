@@ -13,14 +13,14 @@ export const TxTypeNameMap: Record<ExtrinsicType, string> = {
   [ExtrinsicType.SEND_NFT]: detectTranslate('NFT transaction'),
   [ExtrinsicType.CROWDLOAN]: detectTranslate('Crowdloan contribution'),
   [ExtrinsicType.STAKING_JOIN_POOL]: detectTranslate('Join pool'),
-  [ExtrinsicType.STAKING_BOND]: detectTranslate('Bond'),
+  [ExtrinsicType.STAKING_BOND]: detectTranslate('Stake'),
   [ExtrinsicType.MINT_VDOT]: detectTranslate('Mint vDOT'),
   [ExtrinsicType.MINT_VMANTA]: detectTranslate('Mint vMANTA'),
   [ExtrinsicType.MINT_LDOT]: detectTranslate('Mint LDOT'),
   [ExtrinsicType.MINT_SDOT]: detectTranslate('Mint sDOT'),
   [ExtrinsicType.MINT_QDOT]: detectTranslate('Mint qDOT'),
   [ExtrinsicType.MINT_STDOT]: detectTranslate('Mint stDOT'),
-  [ExtrinsicType.STAKING_LEAVE_POOL]: detectTranslate('Leave pool'),
+  [ExtrinsicType.STAKING_LEAVE_POOL]: detectTranslate('Unstake'),
   [ExtrinsicType.STAKING_UNBOND]: detectTranslate('Unstake'),
   [ExtrinsicType.JOIN_YIELD_POOL]: detectTranslate('Join pool'),
   [ExtrinsicType.UNSTAKE_VDOT]: detectTranslate('Unstake vDOT'),
@@ -49,8 +49,8 @@ export const TxTypeNameMap: Record<ExtrinsicType, string> = {
 export const StakingTypeNameMap: Record<string, string> = {
   [ExtrinsicType.STAKING_JOIN_POOL]: detectTranslate('Stake'),
   [ExtrinsicType.STAKING_LEAVE_POOL]: detectTranslate('Unstake'),
-  [ExtrinsicType.STAKING_BOND]: detectTranslate('Bond'),
-  [ExtrinsicType.STAKING_UNBOND]: detectTranslate('Unbond'),
+  [ExtrinsicType.STAKING_BOND]: detectTranslate('Stake'),
+  [ExtrinsicType.STAKING_UNBOND]: detectTranslate('Unstake'),
   [ExtrinsicType.STAKING_WITHDRAW]: detectTranslate('Withdraw'),
   [ExtrinsicType.STAKING_COMPOUNDING]: detectTranslate('Compounding')
 };

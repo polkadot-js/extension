@@ -176,10 +176,10 @@ const Component = function ({ className }: Props) {
         case ExtrinsicType.STAKING_JOIN_POOL:
         case ExtrinsicType.STAKING_BOND:
         case ExtrinsicType.JOIN_YIELD_POOL:
-          return t('Add to bond confirm');
+          return t('Add to stake confirm');
         case ExtrinsicType.STAKING_LEAVE_POOL:
         case ExtrinsicType.STAKING_UNBOND:
-          return t('Unbond confirm');
+          return t('Unstake confirm');
         case ExtrinsicType.STAKING_WITHDRAW:
         case ExtrinsicType.STAKING_POOL_WITHDRAW:
           return t('Withdrawal confirm');

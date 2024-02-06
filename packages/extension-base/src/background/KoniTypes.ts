@@ -599,6 +599,10 @@ export interface AmountData extends BasicTokenInfo {
   value: string;
 }
 
+export interface FeeData extends AmountData {
+  tooHigh?: boolean;
+}
+
 export interface AmountDataWithId extends AmountData {
   id: string;
 }

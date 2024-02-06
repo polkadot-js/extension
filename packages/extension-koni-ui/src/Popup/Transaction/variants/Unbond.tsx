@@ -7,12 +7,10 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { isActionFromValidator } from '@subwallet/extension-base/services/earning-service/utils';
 import { RequestYieldLeave, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { AccountSelector, AlertBox, AmountInput, HiddenInput, NominationSelector } from '@subwallet/extension-koni-ui/components';
-import InstructionItem from '@subwallet/extension-koni-ui/components/Common/InstructionItem';
+import { AccountSelector, AlertBox, AmountInput, HiddenInput, InstructionItem, NominationSelector } from '@subwallet/extension-koni-ui/components';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { BN_ZERO, UNSTAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
-import { useGetBalance, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
+import { useGetBalance, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitLeavePool } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, getBannerButtonIcon, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -315,6 +313,26 @@ const Component: React.FC = () => {
     }
   }, [accountList, form, fromValue]);
 
+  const exType = useMemo(() => {
+    if (poolType === YieldPoolType.NOMINATION_POOL || poolType === YieldPoolType.NATIVE_STAKING) {
+      return ExtrinsicType.STAKING_UNBOND;
+    }
+
+    if (YieldPoolType.LIQUID_STAKING) {
+      if (chainValue === 'moonbeam') {
+        return ExtrinsicType.UNSTAKE_STDOT;
+      }
+
+      return ExtrinsicType.UNSTAKE_LDOT;
+    }
+
+    if (YieldPoolType.LENDING) {
+      return ExtrinsicType.UNSTAKE_LDOT;
+    }
+
+    return ExtrinsicType.STAKING_UNBOND;
+  }, [poolType, chainValue]);
+
   return (
     <>
       <TransactionContent>
@@ -451,9 +469,9 @@ const Component: React.FC = () => {
             />
           )}
           loading={loading}
-          onClick={onPreCheck(form.submit, poolInfo.type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND)}
+          onClick={onPreCheck(form.submit, exType)}
         >
-          {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unbond')}
+          {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unstake')}
         </Button>
       </TransactionFooter>
     </>
@@ -495,6 +513,15 @@ const Unbond = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.__instruction-items-container, .__instruction-item + .__instruction-item': {
       marginTop: token.marginSM
+    },
+
+    '.ant-checkbox-wrapper': {
+      display: 'flex',
+      alignItems: 'center',
+
+      '.ant-checkbox': {
+        top: 0
+      }
     }
   };
 });

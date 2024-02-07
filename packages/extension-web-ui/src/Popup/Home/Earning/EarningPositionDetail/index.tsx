@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { EarningRewardHistoryItem, SpecialYieldPoolInfo, SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { AlertModal, Layout, PageWrapper } from '@subwallet/extension-web-ui/components';
-import { BN_TEN, BN_ZERO, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, EARN_TRANSACTION, UN_STAKE_TRANSACTION } from '@subwallet/extension-web-ui/constants';
+import { BN_TEN, BN_ZERO, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, EARN_TRANSACTION, TRANSACTION_YIELD_UNSTAKE_MODAL, UN_STAKE_TRANSACTION } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useAlert, useSelector, useTranslation, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
@@ -18,7 +19,7 @@ import { RewardInfoPart } from '@subwallet/extension-web-ui/Popup/Home/Earning/E
 import { WithdrawInfoPart } from '@subwallet/extension-web-ui/Popup/Home/Earning/EarningPositionDetail/WithdrawInfoPart';
 import { EarningEntryParam, EarningEntryView, EarningPositionDetailParam, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { isAccountAll } from '@subwallet/extension-web-ui/utils';
-import { Button, ButtonProps, Icon, Number } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { MinusCircle, Plus, PlusCircle } from 'phosphor-react';
@@ -26,7 +27,6 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
-import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 
 type Props = ThemeProps;
 
@@ -45,6 +45,7 @@ function Component ({ compound,
   rewardHistories }: ComponentProp) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { activeModal } = useContext(ModalContext);
 
   // @ts-ignore
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
@@ -133,9 +134,13 @@ function Component ({ compound,
       from: transactionFromValue
     });
 
+    if (isWebUI) {
+      activeModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
+    } else {
+      navigate('/transaction/unstake');
+    }
     // todo: open modal is isWebUI
-    navigate('/transaction/unstake');
-  }, [closeAlert, isActiveStakeZero, navigate, poolInfo.slug, setUnStakeStorage, openAlert, t, transactionChainValue, transactionFromValue]);
+  }, [isActiveStakeZero, setUnStakeStorage, poolInfo.slug, transactionChainValue, transactionFromValue, isWebUI, openAlert, t, closeAlert, activeModal, navigate]);
 
   const onEarnMore = useCallback(() => {
     setEarnStorage({

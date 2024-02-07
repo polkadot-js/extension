@@ -2,14 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EarningStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { MetaInfo } from '@subwallet/extension-web-ui/components';
-import { StakingStatusUi } from '@subwallet/extension-web-ui/constants';
+import { BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
+import { StakingStatusUi, TRANSACTION_YIELD_UNSTAKE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transaction';
+import Unbond from '@subwallet/extension-web-ui/Popup/Transaction/variants/Unbond';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { MinusCircle, PlusCircle } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -22,6 +25,8 @@ type Props = ThemeProps & {
 function Component ({ className, compound, onEarnMore, onLeavePool,
   poolInfo }: Props) {
   const { t } = useTranslation();
+  const { inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const earningStatus = useMemo(() => {
     const stakingStatusUi = StakingStatusUi;
@@ -42,58 +47,78 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
     return stakingStatusUi.inactive;
   }, [compound.status]);
 
-  return (
-    <div
-      className={CN(className, '__earning-info-desktop-part')}
-    >
-      <MetaInfo
-        labelColorScheme='gray'
-        labelFontWeight='regular'
-        spaceSize='sm'
-      >
-        <MetaInfo.Status
-          label={t('Earning status')}
-          statusIcon={earningStatus.icon}
-          statusName={earningStatus.name}
-          valueColorSchema={earningStatus.schema}
-        />
-        <MetaInfo.Chain
-          chain={poolInfo.chain}
-          label={t('Network')}
-          valueColorSchema='gray'
-        />
-      </MetaInfo>
-      <div className='__separator' />
-      <div className={'__earning-actions'}>
-        <Button
-          block={true}
-          icon={(
-            <Icon
-              phosphorIcon={MinusCircle}
-              weight='fill'
-            />
-          )}
-          onClick={onLeavePool}
-          type={'ghost'}
-        >
-          {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unstake')}
-        </Button>
+  const handleCloseUnstake = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
+  }, [inactiveModal]);
 
-        <Button
-          block={true}
-          icon={(
-            <Icon
-              phosphorIcon={PlusCircle}
-              weight='fill'
-            />
-          )}
-          onClick={onEarnMore}
-          type={'ghost'}
+  return (
+    <>
+      <div
+        className={CN(className, '__earning-info-desktop-part')}
+      >
+        <MetaInfo
+          labelColorScheme='gray'
+          labelFontWeight='regular'
+          spaceSize='sm'
         >
-          {poolInfo.type === YieldPoolType.LENDING ? t('Supply more') : t('Stake more')}
-        </Button>
+          <MetaInfo.Status
+            label={t('Earning status')}
+            statusIcon={earningStatus.icon}
+            statusName={earningStatus.name}
+            valueColorSchema={earningStatus.schema}
+          />
+          <MetaInfo.Chain
+            chain={poolInfo.chain}
+            label={t('Network')}
+            valueColorSchema='gray'
+          />
+        </MetaInfo>
+        <div className='__separator' />
+        <div className={'__earning-actions'}>
+          <Button
+            block={true}
+            icon={(
+              <Icon
+                phosphorIcon={MinusCircle}
+                weight='fill'
+              />
+            )}
+            onClick={onLeavePool}
+            type={'ghost'}
+          >
+            {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unstake')}
+          </Button>
+
+          <Button
+            block={true}
+            icon={(
+              <Icon
+                phosphorIcon={PlusCircle}
+                weight='fill'
+              />
+            )}
+            onClick={onEarnMore}
+            type={'ghost'}
+          >
+            {poolInfo.type === YieldPoolType.LENDING ? t('Supply more') : t('Stake more')}
+          </Button>
+        </div>
       </div>
-    </div>
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_UNSTAKE_MODAL}
+        onCancel={handleCloseUnstake}
+        title={t('Unstake')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_UNSTAKE_MODAL}
+        >
+          <Unbond />
+        </Transaction>
+      </BaseModal>
+    </>
   );
 }
 
@@ -104,10 +129,6 @@ export const EarningInfoDesktopPart = styled(Component)<Props>(({ theme: { token
   paddingLeft: 24,
   paddingRight: 24,
   flex: 1,
-
-  '&.__earning-info-desktop-part': {
-    marginBottom: 38
-  },
 
   '.__separator': {
     height: 2,

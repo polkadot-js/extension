@@ -441,23 +441,18 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
     },
 
     '.__nomination-name': {
-      paddingLeft: token.paddingXS
+      paddingLeft: token.paddingXS,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
 
     '.__row-account-meta-wrapper': {
-      display: 'flex'
+      display: 'flex',
+      alignItems: 'center'
     },
 
     '.__row-account-logo': {
       marginRight: token.paddingXS
-    },
-
-    '.table-account-info.table-account-info': {
-      fontSize: token.fontSizeXL,
-      lineHeight: token.lineHeightHeading3,
-      paddingBottom: token.paddingMD,
-      paddingTop: token.paddingXL,
-      color: token.colorWhite
     },
 
     '.__row-account-address': {
@@ -488,10 +483,7 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       lineHeight: token.lineHeightHeading4,
       'white-space': 'nowrap'
     },
-    '.account-item': {
-      display: 'flex',
-      flexDirection: 'column'
-    },
+
     '.__token-name': {
       color: token.colorTextTertiary,
       textOverflow: 'ellipsis',
@@ -528,40 +520,13 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       minWidth: 70
     },
 
-    '.__row-mint-button': {
-      cursor: 'pointer',
-      padding: token.paddingXXS,
-
-      '.ant-tag': {
-        marginRight: 0
-      },
-
-      '&.-disabled': {
-        opacity: 0.4,
-        cursor: 'not-allowed'
-      }
-    },
-    '.__table-detail_action-col.__table-detail_action-col': {
-      flexGrow: 0,
-      minWidth: 140
-    },
-
-    '.__row-create-at-value': {
+    '.__table-pool-col': {
       color: token.colorTextLight4,
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       textOverflow: 'ellipsis',
-      overflow: 'hidden'
-    },
-
-    '.__row-progress-value, .__row-transactions-value, .__row-holders-value, .__row-limit-value': {
-      color: token.colorWhite,
-      fontSize: token.fontSize,
-      lineHeight: token.lineHeight
-    },
-
-    '.__row-progress-bar': {
-      backgroundColor: token.colorBgDefault
+      overflow: 'hidden',
+      justifyContent: 'left'
     },
 
     '.__row-active-stake-wrapper': {
@@ -570,19 +535,6 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       marginBottom: token.marginXXS,
       flexDirection: 'column',
       alignItems: 'flex-end'
-    },
-
-    '.__row-progress': {
-      maxWidth: 200,
-      marginLeft: 'auto',
-      marginRight: 'auto'
-    },
-
-    '.__pagination-wrapper': {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      paddingTop: token.padding,
-      paddingBottom: token.padding
     },
 
     '.empty-list': {

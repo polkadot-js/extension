@@ -1,29 +1,32 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { MetaInfo } from '@subwallet/extension-web-ui/components';
 import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
-import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { StakingStatusUi } from '@subwallet/extension-web-ui/constants';
+import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { openInNewTab } from '@subwallet/extension-web-ui/utils';
-import { Button, ButtonProps, Icon, Logo, Number, Tooltip } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, Logo, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, PlusMinus, Question } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { MinusCircle, PlusCircle, StopCircle, Wallet } from 'phosphor-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
 
+import { getEarnExtrinsicType, getUnstakeExtrinsicType, getWithdrawExtrinsicType } from './earning';
+
 interface Props extends ThemeProps {
-  compactMode?: boolean;
-  onClickCalculatorBtn?: () => void;
-  onClickCancelUnStakeBtn?: () => void;
-  onClickClaimBtn?: () => void;
+  onClickCancelUnStakeBtn: () => void;
+  onClickClaimBtn: () => void;
   onClickItem?: () => void;
-  onClickInfoBtn?: () => void;
-  onClickStakeBtn?: () => void;
-  onClickUnStakeBtn?: () => void;
-  onClickWithdrawBtn?: () => void;
-  onClickMoreBtn?: () => void; // compactMode only
+  onClickStakeBtn: () => void;
+  onClickUnStakeBtn: () => void;
+  onClickWithdrawBtn: () => void;
+  yieldPoolInfo: YieldPoolInfo;
+  yieldPositionInfo: YieldPositionInfo;
   nominationPoolReward?: StakingRewardItem;
 }
 
@@ -39,8 +42,9 @@ interface ButtonOptionProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className } = props;
+  const { className, nominationPoolReward, onClickCancelUnStakeBtn, onClickClaimBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, yieldPoolInfo, yieldPositionInfo } = props;
 
+  // const isAvailable = yieldPoolInfo.stats?.isAvailable ?? true;
   const isAvailable = true;
 
   const { t } = useTranslation();
@@ -49,8 +53,56 @@ const Component: React.FC<Props> = (props: Props) => {
   const line3Ref = useRef<HTMLDivElement | null>(null);
   const line3LeftPartRef = useRef<HTMLDivElement | null>(null);
   const line3RightPartRef = useRef<HTMLDivElement | null>(null);
+  const { poolInfoMap } = useSelector((state) => state.earning);
+
+  console.log('poolInfoMap', poolInfoMap);
+  console.log('nominationPoolReward', nominationPoolReward);
+  console.log('nominationPoolReward', nominationPoolReward);
+  console.log('yieldPoolInfo', yieldPoolInfo);
+  console.log('yieldPositionInfo', yieldPositionInfo);
+  const { address } = yieldPositionInfo;
+
+  const preCheckAction = usePreCheckAction(address, false);
 
   const [isCompactButtons, setCompactButtons] = useState<boolean>(false);
+
+  // const yieldPositionInfoBalance = useMemo((): YieldAssetBalance => {
+  //   if (!yieldPoolInfo.metadata.hasOwnProperty('derivativeAssets')) {
+  //     return yieldPositionInfo.balance[0];
+  //   }
+  //
+  //   const derivativeTokenBalance = yieldPositionInfo.balance[0].activeBalance;
+  //   const inputTokenSlug = yieldPoolInfo.inputAssets[0];
+  //   // @ts-ignore
+  //   const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 1;
+  //   const inputTokenBalance = Math.floor(parseInt(derivativeTokenBalance) * exchangeRate);
+  //
+  //   return {
+  //     activeBalance: inputTokenBalance.toString(),
+  //     slug: inputTokenSlug
+  //   };
+  // }, [yieldPoolInfo.derivativeAssets, yieldPoolInfo.inputAssets, yieldPoolInfo?.stats?.assetEarning, yieldPositionInfo.balance]);
+
+  // const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
+
+  const availableActionsByMetadata = useMemo(() => {
+    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo, nominationPoolReward?.unclaimedReward);
+  }, [nominationPoolReward?.unclaimedReward, yieldPoolInfo, yieldPositionInfo]);
+  const actionListByChain = useMemo(() => {
+    return getYieldAvailableActionsByType(yieldPoolInfo);
+  }, [yieldPoolInfo]);
+
+  const nominatorMetadata = useMemo((): YieldPositionInfo | undefined => {
+    if (![YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(yieldPoolInfo.type)) {
+      return;
+    }
+
+    return yieldPositionInfo;
+  }, [yieldPoolInfo.type, yieldPositionInfo]);
+
+  const getStakingStatus = useMemo(() => {
+    return StakingStatusUi.inactive;
+  }, []);
 
   useEffect(() => {
     const updateCompactButtons = () => {
@@ -76,170 +128,142 @@ const Component: React.FC<Props> = (props: Props) => {
       window.removeEventListener('resize', updateCompactButtons);
     };
   }, []);
+  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const onClickButton = useCallback((callback: VoidFunction, extrinsicType?: ExtrinsicType): React.MouseEventHandler => {
+    return (event) => {
+      event.stopPropagation();
 
-  const onClickButton = useCallback(() => {
-    alert('nguyen dung');
-  }, []);
+      if (extrinsicType) {
+        preCheckAction(callback, extrinsicType)();
+      } else {
+        callback();
+      }
+    };
+  }, [preCheckAction]);
+  // const derivativeTokenState = useMemo(() => {
+  //   if (!yieldPoolInfo.metadata.) {
+  //     return;
+  //   }
+  //
+  //   const derivativeTokenSlug = yieldPoolInfo.derivativeAssets[0];
+  //
+  //   const derivativeTokenInfo = assetRegistry[derivativeTokenSlug];
+  //
+  //   return {
+  //     symbol: _getAssetSymbol(derivativeTokenInfo),
+  //     decimals: _getAssetDecimals(derivativeTokenInfo),
+  //     amount: yieldPositionInfo.balance[0].activeBalance
+  //   };
+  // }, [assetRegistry, yieldPoolInfo.derivativeAssets, yieldPositionInfo.balance]);
+
   const getButtons = useCallback((compact?: boolean): ButtonOptionProps[] => {
     const result: ButtonOptionProps[] = [];
 
-    // Calculator
-    result.push({
-      disable: !isAvailable,
-      icon: PlusMinus,
-      onClick: onClickButton,
-      key: 'calculator',
-      hidden: false,
-      schema: 'secondary',
-      tooltip: t('Earning calculator')
+    actionListByChain.forEach((item) => {
+      const temp: ButtonOptionProps = {
+        disable: !availableActionsByMetadata.includes(item) || !isAvailable,
+        key: item,
+        hidden: false
+      } as ButtonOptionProps;
+
+      switch (item) {
+        case YieldAction.STAKE:
+
+          // eslint-disable-next-line no-fallthrough
+        case YieldAction.START_EARNING: {
+          const text = isAvailable ? t('Supply now') : t('Stake now');
+
+          temp.icon = PlusCircle;
+          temp.label = !compact ? text : undefined;
+          temp.tooltip = compact ? text : undefined;
+          temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(yieldPoolInfo.slug));
+          break;
+        }
+
+        case YieldAction.CLAIM_REWARD:
+          temp.icon = Wallet;
+          temp.onClick = onClickButton(onClickClaimBtn, ExtrinsicType.STAKING_CLAIM_REWARD);
+          temp.label = !compact ? t('Claim rewards') : undefined;
+          temp.tooltip = compact ? t('Claim rewards') : undefined;
+          break;
+        case YieldAction.WITHDRAW:
+        case YieldAction.WITHDRAW_EARNING:
+          temp.icon = StopCircle;
+          temp.onClick = onClickButton(onClickWithdrawBtn, getWithdrawExtrinsicType(yieldPoolInfo.slug));
+          temp.label = !compact ? t('Withdraw') : undefined;
+          temp.tooltip = compact ? t('Withdraw') : undefined;
+          temp.schema = 'secondary';
+          break;
+        case YieldAction.UNSTAKE:
+          temp.icon = MinusCircle;
+          temp.onClick = onClickButton(onClickUnStakeBtn, getUnstakeExtrinsicType(yieldPoolInfo.slug));
+          temp.label = !compact ? t('Unstake') : undefined;
+          temp.tooltip = compact ? t('Unstake') : undefined;
+          temp.schema = 'secondary';
+          break;
+        case YieldAction.CANCEL_UNSTAKE:
+          temp.icon = MinusCircle;
+          temp.onClick = onClickButton(onClickCancelUnStakeBtn, ExtrinsicType.STAKING_CANCEL_UNSTAKE);
+          temp.label = !compact ? t('Cancel unstake') : undefined;
+          temp.tooltip = compact ? t('Cancel unstake') : undefined;
+          temp.schema = 'secondary';
+          break;
+      }
+
+      result.push(temp);
     });
-
-    // Info
-    result.push({
-      disable: !isAvailable,
-      icon: Question,
-      onClick: onClickButton,
-      key: 'info',
-      hidden: false,
-      schema: 'secondary',
-      tooltip: t('Earning information')
-    });
-
-    // const actionListByChain = useMemo(() => {
-    //   return [];
-    // }, []);
-
-    // actionListByChain.forEach((item) => {
-    //   const temp: ButtonOptionProps = {
-    //     disable: false,
-    //     key: item,
-    //     hidden: false
-    //   } as ButtonOptionProps;
-    //
-    //   switch (item) {
-    //     case YieldAction.STAKE:
-    //
-    //       // eslint-disable-next-line no-fallthrough
-    //     case YieldAction.START_EARNING: {
-    //       const text = isAvailable ? t('Supply now') : t('Stake now');
-    //
-    //       temp.icon = PlusCircle;
-    //       temp.label = !compact ? text : undefined;
-    //       temp.tooltip = compact ? text : undefined;
-    //       temp.onClick = onClickButton;
-    //       break;
-    //     }
-    //
-    //     case YieldAction.CLAIM_REWARD:
-    //       temp.icon = Wallet;
-    //       temp.onClick = onClickButton;
-    //       temp.label = !compact ? t('Claim rewards') : undefined;
-    //       temp.tooltip = compact ? t('Claim rewards') : undefined;
-    //       break;
-    //     case YieldAction.WITHDRAW:
-    //     case YieldAction.WITHDRAW_EARNING:
-    //       temp.icon = StopCircle;
-    //       temp.onClick = onClickButton;
-    //       temp.label = !compact ? t('Withdraw') : undefined;
-    //       temp.tooltip = compact ? t('Withdraw') : undefined;
-    //       temp.schema = 'secondary';
-    //       break;
-    //     case YieldAction.UNSTAKE:
-    //       temp.icon = MinusCircle;
-    //       temp.onClick = onClickButton;
-    //       temp.label = !compact ? t('Unstake') : undefined;
-    //       temp.tooltip = compact ? t('Unstake') : undefined;
-    //       temp.schema = 'secondary';
-    //       break;
-    //     case YieldAction.CANCEL_UNSTAKE:
-    //       temp.icon = MinusCircle;
-    //       temp.onClick = onClickButton;
-    //       temp.label = !compact ? t('Cancel unstake') : undefined;
-    //       temp.tooltip = compact ? t('Cancel unstake') : undefined;
-    //       temp.schema = 'secondary';
-    //       break;
-    //   }
-    //
-    //   result.push(temp);
-    // });
 
     return result;
-  }, [isAvailable, onClickButton, t]);
-
-  const childClick = useCallback((onClick: VoidFunction) => {
-    return (e?: SyntheticEvent) => {
-      e && e.stopPropagation();
-      onClick();
-    };
-  }, []);
-  const exclusiveRewardTagNode = useMemo(() => {
-    const label = t('No content');
-
-    return (
-      <Tooltip
-        placement={'top'}
-        title={label}
-      >
-        <div
-          className={'exclusive-reward-tag-wrapper'}
-          onClick={childClick(openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs#exclusive-rewards'))}
-        >
-          <EarningTypeTag
-            chain={'polkadot'}
-            className={'earning-item-tag'}
-          />
-        </div>
-      </Tooltip>
-    );
-  }, [childClick, t]);
+  }, [actionListByChain, availableActionsByMetadata, isAvailable, onClickButton, onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo.slug]);
 
   const checkShowedMock = false;
 
   return (
     <div
       className={CN(className, '-normal-mode')}
-      onClick={onClickButton}
+      onClick={onClickItem}
     >
       <Logo
         className='earning-item-logo'
-        network={'polkadot'}
+        network={yieldPoolInfo.metadata.logo || yieldPoolInfo.chain}
         size={64}
       />
 
       <div className='earning-item-lines-container'>
         <div className='earning-item-line-1 earning-item-line'>
           <div className={'earning-item-name-wrapper'}>
-            <div className={'earning-item-name'}>{'Polkadot'}</div>
+            <div className={'earning-item-name'}>{yieldPoolInfo.metadata.name}</div>
             {
               !isAvailable &&
                             (
                               <EarningTypeTag
-                                chain={'polkadot'}
+                                chain={yieldPoolInfo.chain}
                                 className={'earning-item-tag'}
                                 comingSoon={true}
+                                type={yieldPoolInfo.type}
                               />
                             )
             }
             <EarningTypeTag
-              chain={'kusama'}
+              chain={yieldPoolInfo.chain}
               className={'earning-item-tag'}
+              type={yieldPoolInfo.type}
             />
 
-            {exclusiveRewardTagNode}
           </div>
 
           <MetaInfo>
             <MetaInfo.Status
               className={'earning-status-item'}
-              statusIcon={CheckCircle}
-              statusName={t('Earning rewards')}
-              valueColorSchema={'success'}
+              statusIcon={getStakingStatus.icon}
+              statusName={t(getStakingStatus.name)}
+              valueColorSchema={getStakingStatus.schema}
             />
           </MetaInfo>
         </div>
 
         <div className='earning-item-line-2 earning-item-line'>
-          <div className={'earning-item-description'}>{'Stake any amount of ETH, get daily staking rewards and use your stETH across the DeFi ecosystem and L2.'}</div>
+          <div className={'earning-item-description'}>{yieldPoolInfo.metadata.description}</div>
 
           <div className='earning-item-total-balance-value'>
             <Number
@@ -325,7 +349,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {
               <div className={'earning-item-equivalent'}>
                 <div className={'earning-item-equivalent-label'}>
-                  {t('Equivalent to:')}
+                  {t('Total rewards:')}
                 </div>
 
                 <div className={'earning-item-equivalent-value'}>

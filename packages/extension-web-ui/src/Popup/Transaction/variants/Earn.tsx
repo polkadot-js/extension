@@ -11,21 +11,23 @@ import { EarningProcessItem } from '@subwallet/extension-web-ui/components/Earni
 import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-web-ui/components/Modal/Earning';
 import { EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-web-ui/constants';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { insufficientMessages } from '@subwallet/extension-web-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-web-ui/messaging';
 import { unlockDotCheckCanMint } from '@subwallet/extension-web-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-web-ui/reducer';
 import { store } from '@subwallet/extension-web-ui/stores';
-import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { EarnParams, FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { convertFieldToObject, parseNominations, simpleCheckForm } from '@subwallet/extension-web-ui/utils';
-import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { CheckCircle, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { Divider } from 'semantic-ui-react';
+import styled, { useTheme } from 'styled-components';
 
 import useNotification from '../../../hooks/common/useNotification';
 import { accountFilterFunc, getJoinYieldParams } from '../helper';
@@ -46,6 +48,8 @@ const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
   const { activeModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
+  const { token } = useTheme() as Theme;
 
   const { closeAlert, defaultData, goBack, onDone,
     openAlert, persistData,
@@ -101,6 +105,8 @@ const Component = () => {
     () => [YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolType),
     [poolType]
   );
+
+  const currentPoolInfo = useMemo(() => poolInfoMap[slug], [slug, poolInfoMap]);
 
   const balanceTokens = useMemo(() => {
     const result: Array<{ chain: string; token: string }> = [];
@@ -719,148 +725,185 @@ const Component = () => {
 
   return (
     <>
-      <TransactionContent>
-        {processState.steps && (
-          <>
-            <div className={'__process-item-wrapper'}>
-              {stepLoading
-                ? (
-                  <div className={'__process-item-loading'}>
-                    <ActivityIndicator size={24} />
-                  </div>
-                )
-                : (
-                  <EarningProcessItem
-                    index={processState.currentStep}
-                    stepName={processState.steps[processState.currentStep]?.name}
-                    stepStatus={processState.stepResults[processState.currentStep]?.status}
+      <div className={CN('earning-wrapper')}>
+        <div className={'__transaction-block'}>
+          <TransactionContent>
+            {processState.steps && (
+              <>
+                <div className={'__process-item-wrapper'}>
+                  {stepLoading
+                    ? (
+                      <div className={'__process-item-loading'}>
+                        <ActivityIndicator size={24} />
+                      </div>
+                    )
+                    : (
+                      <EarningProcessItem
+                        index={processState.currentStep}
+                        stepName={processState.steps[processState.currentStep]?.name}
+                        stepStatus={processState.stepResults[processState.currentStep]?.status}
+                      />
+                    )}
+                </div>
+              </>
+            )}
+
+            <Form
+              className={'form-container form-space-sm'}
+              form={form}
+              initialValues={formDefault}
+              onFieldsChange={onFieldsChange}
+              onFinish={onSubmit}
+            >
+              <HiddenInput fields={hideFields} />
+
+              <Form.Item
+                name={'from'}
+              >
+                <AccountSelector
+                  disabled={!isAllAccount}
+                  doFilter={false}
+                  externalAccounts={accountSelectorList}
+                />
+              </Form.Item>
+
+              <div className={'__balance-display-area'}>
+                <FreeBalanceToEarn
+                  address={fromValue}
+                  hidden={submitStepType !== YieldStepType.XCM}
+                  label={`${t('Available balance')}:`}
+                  onBalanceReady={setIsBalanceReady}
+                  tokens={balanceTokens}
+                />
+
+                <FreeBalance
+                  address={fromValue}
+                  chain={poolInfo.chain}
+                  hidden={[YieldStepType.XCM].includes(submitStepType)}
+                  isSubscribe={true}
+                  label={`${t('Available balance')}:`}
+                  tokenSlug={inputAsset.slug}
+                />
+              </div>
+
+              <Form.Item
+                name={'value'}
+              >
+                <AmountInput
+                  decimals={assetDecimals}
+                  disabled={processState.currentStep !== 0}
+                  maxValue={'1'} // todo: no maxValue, this is just temporary solution
+                  showMaxButton={false}
+                />
+              </Form.Item>
+
+              <div className={'__transformed-amount-value'}>
+                <Number
+                  decimal={0}
+                  prefix={'$'}
+                  value={transformAmount}
+                />
+              </div>
+
+              {poolType === YieldPoolType.NOMINATION_POOL && (
+                <Form.Item
+                  name={'target'}
+                >
+                  <EarningPoolSelector
+                    chain={poolChain}
+                    disabled={submitLoading}
+                    from={fromValue}
+                    label={t('Select pool')}
+                    loading={targetLoading}
+                    setForceFetchValidator={setForceFetchValidator}
+                    slug={slug}
                   />
-                )}
+                </Form.Item>
+              )}
+
+              {poolType === YieldPoolType.NATIVE_STAKING && (
+                <Form.Item
+                  name={'target'}
+                >
+                  <EarningValidatorSelector
+                    chain={chainValue}
+                    disabled={submitLoading}
+                    from={fromValue}
+                    loading={targetLoading}
+                    setForceFetchValidator={setForceFetchValidator}
+                    slug={slug}
+                  />
+                </Form.Item>
+              )}
+            </Form>
+
+            {renderMetaInfo()}
+
+            <AlertBox
+              className={'__alert-box'}
+              description={STAKE_ALERT_DATA.description.replace('{tokenAmount}', maintainString)}
+              title={STAKE_ALERT_DATA.title}
+              type={'warning'}
+            />
+          </TransactionContent>
+          <TransactionFooter>
+            <Button
+              disabled={isDisabledButton}
+              icon={(
+                <Icon
+                  phosphorIcon={PlusCircle}
+                  weight={'fill'}
+                />
+              )}
+              loading={submitLoading}
+              onClick={onPreCheck(form.submit, ExtrinsicType.JOIN_YIELD_POOL)}
+            >
+              {processState.currentStep === 0 ? t('Stake') : t('Continue')}
+            </Button>
+          </TransactionFooter>
+
+          <EarningInstructionModal
+            closeAlert={closeAlert}
+            isShowStakeMoreButton={!isClickInfoButtonRef.current}
+            onCancel={onCancelInstructionModal}
+            openAlert={openAlert}
+            slug={slug}
+          />
+        </div>
+        <div className={'__transaction-process'}>
+          {isWebUI && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
+
+              <Typography.Text className={'earning-calculator-message'}>{t(`${currentPoolInfo.metadata.name} process:`)}</Typography.Text>
+
+              {!stepLoading && processState.steps.map((item, index) => {
+                return (
+                  <EarningProcessItem
+                    index={index}
+                    key={index}
+                    stepName={item.name}
+                    stepStatus={processState.stepResults[index]?.status}
+                  />
+                );
+              })}
+
+              {
+                stepLoading && (
+                  <ActivityIndicator
+                    prefixCls={'ant'}
+                    size={'32px'}
+                  />
+                )
+              }
+              <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
+
+              <Typography.Text style={{ color: token.colorTextLight4 }}>
+                {t('All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.')}
+              </Typography.Text>
             </div>
-          </>
-        )}
-
-        <Form
-          className={'form-container form-space-sm'}
-          form={form}
-          initialValues={formDefault}
-          onFieldsChange={onFieldsChange}
-          onFinish={onSubmit}
-        >
-          <HiddenInput fields={hideFields} />
-
-          <Form.Item
-            name={'from'}
-          >
-            <AccountSelector
-              disabled={!isAllAccount}
-              doFilter={false}
-              externalAccounts={accountSelectorList}
-            />
-          </Form.Item>
-
-          <div className={'__balance-display-area'}>
-            <FreeBalanceToEarn
-              address={fromValue}
-              hidden={submitStepType !== YieldStepType.XCM}
-              label={`${t('Available balance')}:`}
-              onBalanceReady={setIsBalanceReady}
-              tokens={balanceTokens}
-            />
-
-            <FreeBalance
-              address={fromValue}
-              chain={poolInfo.chain}
-              hidden={[YieldStepType.XCM].includes(submitStepType)}
-              isSubscribe={true}
-              label={`${t('Available balance')}:`}
-              tokenSlug={inputAsset.slug}
-            />
-          </div>
-
-          <Form.Item
-            name={'value'}
-          >
-            <AmountInput
-              decimals={assetDecimals}
-              disabled={processState.currentStep !== 0}
-              maxValue={'1'} // todo: no maxValue, this is just temporary solution
-              showMaxButton={false}
-            />
-          </Form.Item>
-
-          <div className={'__transformed-amount-value'}>
-            <Number
-              decimal={0}
-              prefix={'$'}
-              value={transformAmount}
-            />
-          </div>
-
-          {poolType === YieldPoolType.NOMINATION_POOL && (
-            <Form.Item
-              name={'target'}
-            >
-              <EarningPoolSelector
-                chain={poolChain}
-                disabled={submitLoading}
-                from={fromValue}
-                label={t('Select pool')}
-                loading={targetLoading}
-                setForceFetchValidator={setForceFetchValidator}
-                slug={slug}
-              />
-            </Form.Item>
           )}
-
-          {poolType === YieldPoolType.NATIVE_STAKING && (
-            <Form.Item
-              name={'target'}
-            >
-              <EarningValidatorSelector
-                chain={chainValue}
-                disabled={submitLoading}
-                from={fromValue}
-                loading={targetLoading}
-                setForceFetchValidator={setForceFetchValidator}
-                slug={slug}
-              />
-            </Form.Item>
-          )}
-        </Form>
-
-        {renderMetaInfo()}
-
-        <AlertBox
-          className={'__alert-box'}
-          description={STAKE_ALERT_DATA.description.replace('{tokenAmount}', maintainString)}
-          title={STAKE_ALERT_DATA.title}
-          type={'warning'}
-        />
-      </TransactionContent>
-      <TransactionFooter>
-        <Button
-          disabled={isDisabledButton}
-          icon={(
-            <Icon
-              phosphorIcon={PlusCircle}
-              weight={'fill'}
-            />
-          )}
-          loading={submitLoading}
-          onClick={onPreCheck(form.submit, ExtrinsicType.JOIN_YIELD_POOL)}
-        >
-          {t('Stake')}
-        </Button>
-      </TransactionFooter>
-
-      <EarningInstructionModal
-        closeAlert={closeAlert}
-        isShowStakeMoreButton={!isClickInfoButtonRef.current}
-        onCancel={onCancelInstructionModal}
-        openAlert={openAlert}
-        slug={slug}
-      />
+        </div>
+      </div>
     </>
   );
 };
@@ -914,7 +957,39 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.__alert-box': {
       marginTop: token.marginSM
-    }
+    },
+
+    '.earning-wrapper': {
+      display: 'flex',
+      flex: 1
+    },
+    '.web-ui-enable &': {
+      '.earning-wrapper': {
+        paddingTop: 24,
+        maxWidth: 784,
+        width: '100%',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        gap: token.size
+      },
+
+      '.__transaction-block': {
+        display: 'block',
+        maxWidth: 384,
+        flex: '1 0 auto'
+      },
+
+      '.transaction-footer': {
+        paddingTop: 12,
+        paddingLeft: 0,
+        paddingRight: 0,
+        marginBottom: 0
+      },
+
+      '.meta-info': {
+        marginBottom: token.marginSM
+      }
+    },
   };
 });
 

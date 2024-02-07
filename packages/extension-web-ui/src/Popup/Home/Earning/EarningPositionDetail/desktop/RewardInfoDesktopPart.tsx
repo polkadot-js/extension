@@ -4,15 +4,20 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningRewardHistoryItem, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { BaseModal } from '@subwallet/extension-web-ui/components';
 import { EarningRewardsHistoryModal } from '@subwallet/extension-web-ui/components/Modal/Earning/EarningRewardsHistoryModal';
-import { BN_ZERO, CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS } from '@subwallet/extension-web-ui/constants';
+import { BN_ZERO, CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS, TRANSACTION_YIELD_CLAIM_MODAL } from '@subwallet/extension-web-ui/constants';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useSelector, useTranslation, useYieldRewardTotal } from '@subwallet/extension-web-ui/hooks';
+import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transaction';
+import ClaimReward from '@subwallet/extension-web-ui/Popup/Transaction/variants/ClaimReward';
 import { AlertDialogProps, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { ActivityIndicator, Button, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -32,7 +37,9 @@ function Component ({ className, closeAlert, compound,
   inputAsset, isShowBalance, openAlert, rewardHistories, transactionChainValue,
   transactionFromValue }: Props) {
   const { t } = useTranslation();
-  const { activeModal } = useContext(ModalContext);
+  const navigate = useNavigate();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const { currentAccount } = useSelector((state) => state.accountState);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
@@ -81,6 +88,11 @@ function Component ({ className, closeAlert, compound,
       });
 
       // todo: open Modal
+      if (isWebUI) {
+        activeModal(TRANSACTION_YIELD_CLAIM_MODAL);
+      } else {
+        navigate('/transaction/claim-reward');
+      }
     } else {
       openAlert({
         title: t('Rewards unavailable'),
@@ -91,7 +103,10 @@ function Component ({ className, closeAlert, compound,
         }
       });
     }
-  }, [type, isDAppStaking, total, setClaimRewardStorage, slug, transactionChainValue, transactionFromValue, openAlert, t, closeAlert]);
+  }, [type, isDAppStaking, total, setClaimRewardStorage, slug, transactionChainValue, transactionFromValue, isWebUI, activeModal, navigate, openAlert, t, closeAlert]);
+  const handleCloseClaim = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_CLAIM_MODAL);
+  }, [inactiveModal]);
 
   const onOpenRewardsHistoryModal = useCallback(() => {
     activeModal(rewardsHistoryModalId);
@@ -164,6 +179,20 @@ function Component ({ className, closeAlert, compound,
         rewardHistories={rewardHistories}
         subscanSlug={subscanSlug}
       />
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_CLAIM_MODAL}
+        onCancel={handleCloseClaim}
+        title={t('Claim rewards')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_CLAIM_MODAL}
+        >
+          <ClaimReward />
+        </Transaction>
+      </BaseModal>
     </>
   );
 }
@@ -175,10 +204,6 @@ export const RewardInfoDesktopPart = styled(Component)<Props>(({ theme: { token 
   paddingRight: 24,
   paddingLeft: 24,
   flex: 1,
-
-  '&.__reward-info-desktop-part': {
-    marginBottom: 38
-  },
 
   '.__part-title': {
     lineHeight: token.lineHeight

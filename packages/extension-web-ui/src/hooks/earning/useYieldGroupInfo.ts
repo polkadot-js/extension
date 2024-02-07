@@ -69,6 +69,7 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
           }
 
           exists.isTestnet = exists.isTestnet || chainInfo.isTestnet;
+          exists.poolSlugs.push(pool.slug);
           exists.totalValueStaked = exists.totalValueStaked.plus(calculateTotalValueStaked(pool, assetRegistry, priceMap));
         } else {
           const token = multiChainAssetMap[group] || assetRegistry[group];
@@ -104,6 +105,7 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             name: token.name,
             chain: chain,
             poolListLength: 1,
+            poolSlugs: [pool.slug],
             description: pool.metadata.description,
             totalValueStaked: calculateTotalValueStaked(pool, assetRegistry, priceMap),
             minJoin: pool.statistic?.earningThreshold?.join

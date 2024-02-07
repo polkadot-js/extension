@@ -1,19 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
+import { YieldPoolInfo } from '@subwallet/extension-base/types';
 import { EarningOptionDesktopItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
 import { EarningOptionItem } from '@subwallet/extension-web-ui/components/Earning';
-import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-web-ui/constants';
+import { ASTAR_PORTAL_URL, DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, useSelector, useTranslation, useYieldGroupInfo } from '@subwallet/extension-web-ui/hooks';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import { EarningEntryView, EarningPoolsParam, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
-import { isAccountAll } from '@subwallet/extension-web-ui/utils';
+import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Database, FadersHorizontal } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -63,6 +65,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 
   const data = useYieldGroupInfo();
   const { poolInfoMap } = useSelector((state) => state.earning);
+  const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
 
@@ -140,17 +143,51 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 
   const { alertProps,
     checkChainConnected,
+    closeAlert,
     closeConnectChainModal,
     connectingChain,
-    onConnectChain,
-    openConnectChainModal } = useHandleChainConnection({
+    onConnectChain, openAlert,
+    openConnectChainModal, setExtraSuccessFlag, turnOnChain } = useHandleChainConnection({
     alertModalId,
     chainConnectionLoadingModalId,
     connectChainModalId
   }, onConnectChainSuccess);
 
+  const [currentAltChain, setCurrentAltChain] = useState<string | undefined>();
+
+  const getAltChain = useCallback((poolInfo: YieldPoolInfo) => {
+    if (isLiquidPool(poolInfo) || isLendingPool(poolInfo)) {
+      const asset = assetRegistry[poolInfo.metadata.altInputAssets || ''];
+
+      return asset ? asset.originChain : '';
+    }
+
+    return '';
+  }, [assetRegistry]);
+
   const onClickItem = useCallback((item: YieldGroupInfo) => {
     return () => {
+      if (isRelatedToAstar(item.group)) {
+        openAlert({
+          title: t('Enter Astar portal'),
+          content: t('You are navigating to Astar portal to view and manage your stake in Astar dApp staking v3. SubWallet will offer support for Astar dApp staking v3 soon.'),
+          cancelButton: {
+            text: t('Cancel'),
+            schema: 'secondary',
+            onClick: closeAlert
+          },
+          okButton: {
+            text: t('Enter Astar portal'),
+            onClick: () => {
+              openInNewTab(ASTAR_PORTAL_URL)();
+              closeAlert();
+            }
+          }
+        });
+
+        return;
+      }
+
       setSelectedPoolGroup(item);
 
       if (item.poolListLength > 1) {
@@ -159,14 +196,46 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
           symbol: item.symbol
         } as EarningPoolsParam });
       } else if (item.poolListLength === 1) {
-        if (!checkChainConnected(item.chain)) {
-          openConnectChainModal(item.chain);
-        } else {
-          navigateToEarnTransaction(item);
+        const poolInfo = poolInfoMap[item.poolSlugs[0]];
+
+        if (!poolInfo) {
+          // will not happen
+
+          return;
         }
+
+        const altChain = getAltChain(poolInfo);
+
+        if (!checkChainConnected(item.chain)) {
+          if (altChain) {
+            setCurrentAltChain(altChain);
+          }
+
+          openConnectChainModal(item.chain);
+
+          return;
+        }
+
+        navigateToEarnTransaction(item);
       }
     };
-  }, [checkChainConnected, navigate, navigateToEarnTransaction, openConnectChainModal]);
+  }, [checkChainConnected, closeAlert, getAltChain, navigate, navigateToEarnTransaction, openAlert, openConnectChainModal, poolInfoMap, t]);
+
+  const _onConnectChain = useCallback((chain: string) => {
+    if (currentAltChain) {
+      turnOnChain(currentAltChain);
+    }
+
+    onConnectChain(chain);
+  }, [currentAltChain, onConnectChain, turnOnChain]);
+
+  useEffect(() => {
+    if (currentAltChain) {
+      setExtraSuccessFlag(checkChainConnected(currentAltChain));
+    } else {
+      setExtraSuccessFlag(true);
+    }
+  }, [checkChainConnected, currentAltChain, setExtraSuccessFlag]);
 
   const renderItem = useCallback(
     (item: YieldGroupInfo) => {
@@ -234,7 +303,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
       closeConnectChainModal={closeConnectChainModal}
       connectChainModalId={connectChainModalId}
       connectingChain={connectingChain}
-      onConnectChain={onConnectChain}
+      onConnectChain={_onConnectChain}
     >
       <Layout.Base
         className={CN(className)}
@@ -306,6 +375,10 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 }
 
 const EarningOptions = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  '.ant-sw-sub-header-container': {
+    marginBottom: token.marginXS
+  },
+
   '.__section-list-container': {
     height: '100%',
     flex: 1

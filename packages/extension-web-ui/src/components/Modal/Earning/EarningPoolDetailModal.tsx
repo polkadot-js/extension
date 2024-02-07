@@ -1,17 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BaseModal } from '@subwallet/extension-web-ui/components';
 import MetaInfo from '@subwallet/extension-web-ui/components/MetaInfo/MetaInfo';
-import {
-  NominationPoolsEarningStatusUi,
-  StakingStatusType,
-  StakingStatusUi
-} from '@subwallet/extension-web-ui/constants/stakingStatusUi';
+import { NominationPoolsEarningStatusUi, StakingStatusType, StakingStatusUi } from '@subwallet/extension-web-ui/constants/stakingStatusUi';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
-import {NominationPoolDataType, ThemeProps} from '@subwallet/extension-web-ui/types';
-import React, {useMemo} from 'react';
+import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-web-ui/types';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import {BaseModal} from "@subwallet/extension-web-ui/components";
 
 type Props = ThemeProps & {
   onCancel: () => void,
@@ -66,7 +62,7 @@ function Component ({ className, detailItem, onCancel }: Props): React.ReactElem
 
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Total bonded')}
+          label={t('Total staked')}
           suffix={symbol}
           value={bondedAmount || '0'}
           valueColorSchema={'even-odd'}

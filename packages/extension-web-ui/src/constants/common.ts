@@ -17,4 +17,5 @@ export const DISCORD_URL = 'https://discord.com/invite/vPCN4vdB8v';
 export const EXTENSION_URL = 'https://subwallet.app/download.html';
 export const CONTACT_US = 'https://t.me/subwallet';
 export const ALL_KEY = 'all';
+export const ASTAR_PORTAL_URL = 'https://portal.astar.network/astar/dapp-staking/discover';
 export const HELP_URL = 'https://docs.subwallet.app/main/';

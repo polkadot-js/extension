@@ -170,6 +170,22 @@ const Component = () => {
     return accounts.filter(filterAccount(chainInfoMap, allPositionInfos, poolInfo.type));
   }, [accounts, allPositionInfos, chainInfoMap, poolInfo.type]);
 
+  const exType = useMemo(() => {
+    if (type === YieldPoolType.LIQUID_STAKING) {
+      if (chainValue === 'moonbeam') {
+        return ExtrinsicType.EVM_EXECUTE;
+      } else {
+        return ExtrinsicType.UNKNOWN;
+      }
+    }
+
+    if (type === YieldPoolType.LENDING) {
+      return ExtrinsicType.UNKNOWN;
+    }
+
+    return ExtrinsicType.STAKING_WITHDRAW;
+  }, [type, chainValue]);
+
   useEffect(() => {
     if (!fromValue && accountList.length === 1) {
       form.setFieldValue('from', accountList[0].address);
@@ -251,7 +267,7 @@ const Component = () => {
             />
           )}
           loading={loading}
-          onClick={onPreCheck(form.submit, type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_POOL_WITHDRAW : ExtrinsicType.STAKING_WITHDRAW)}
+          onClick={onPreCheck(form.submit, exType)}
         >
           {t('Continue')}
         </Button>

@@ -187,15 +187,15 @@ export const BLOCK_JOIN_YIELD_POOL_LEDGER_NETWORKS: string[] = [];
 export const BLOCK_MINT_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_SDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_MINT_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_VDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_MINT_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_STDOT_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_REDEEM_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_SDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_REDEEM_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_VDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_REDEEM_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_STDOT_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_UNSTAKE_QDOT_LEDGER_NETWORKS: string[] = ['*'];
@@ -210,7 +210,7 @@ export const BLOCK_APPROVE_LEDGER_NETWORKS: string[] = [];
 
 /// OTHER
 export const BLOCK_CROWDLOAN_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['substrate'];
 export const BLOCK_UNKNOWN_LEDGER_NETWORKS: string[] = ['*'];
 
 export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {

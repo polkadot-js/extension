@@ -4,10 +4,10 @@
 import { APIItemState, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { BaseModal, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
-import { BN_TEN, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL } from '@subwallet/extension-web-ui/constants';
+import { AlertModal, BaseModal, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
+import { ASTAR_PORTAL_URL, BN_TEN, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useFilterModal, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { useAlert, useFilterModal, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { reloadCron } from '@subwallet/extension-web-ui/messaging';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transaction';
@@ -17,7 +17,7 @@ import Unbond from '@subwallet/extension-web-ui/Popup/Transaction/variants/Unbon
 import Withdraw from '@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { isAccountAll } from '@subwallet/extension-web-ui/utils';
+import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -25,8 +25,6 @@ import { ArrowsClockwise, Database, FadersHorizontal, Plus, PlusCircle } from 'p
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-import { BN } from '@polkadot/util';
 
 import EarningPositionDesktopItem from '../../../../../components/Earning/desktop/EarningPositionDesktopItem';
 
@@ -38,6 +36,7 @@ type Props = ThemeProps & {
 
 let cacheData: Record<string, boolean> = {};
 const FILTER_MODAL_ID = 'earning-positions-filter-modal';
+const alertModalId = 'earning-positions-alert-modal';
 
 function Component ({ className, earningPositions, setEntryView, setLoading }: Props) {
   const { t } = useTranslation();
@@ -53,8 +52,9 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
   const { poolInfoMap } = useSelector((state) => state.earning);
-  const stakingRewardMap = useSelector((state: RootState) => state.staking.stakingRewardMap);
+  const stakingRewardMap = useSelector((state: RootState) => state.earning.earningRewards);
   const { inactiveModal } = useContext(ModalContext);
 
   const [searchInput, setSearchInput] = useState<string>('');
@@ -217,11 +217,30 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
   const onClickItem = useCallback((item: YieldPositionInfo) => {
     return () => {
-      navigate('/home/earning/position-detail', { state: {
-        earningSlug: item.slug
-      } as EarningPositionDetailParam });
+      if (isRelatedToAstar(item.slug)) {
+        openAlert({
+          title: t('Enter Astar portal'),
+          content: t('You are navigating to Astar portal to view and manage your stake in Astar dApp staking v3. SubWallet will offer support for Astar dApp staking v3 soon.'),
+          cancelButton: {
+            text: t('Cancel'),
+            schema: 'secondary',
+            onClick: closeAlert
+          },
+          okButton: {
+            text: t('Enter Astar portal'),
+            onClick: () => {
+              openInNewTab(ASTAR_PORTAL_URL)();
+              closeAlert();
+            }
+          }
+        });
+      } else {
+        navigate('/home/earning/position-detail', { state: {
+          earningSlug: item.slug
+        } as EarningPositionDetailParam });
+      }
     };
-  }, [navigate]);
+  }, [closeAlert, navigate, openAlert, t]);
 
   const renderEarningItem = useCallback((item: YieldPositionInfo) => {
     const poolInfo = poolInfoMap[item.slug];
@@ -241,19 +260,6 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         address: ALL_ACCOUNT_KEY,
         type: StakingType.POOLED
       } as StakingRewardItem;
-
-      stakingRewardMap.forEach((stakingReward: StakingRewardItem) => {
-        if (nominationPoolReward && stakingReward.chain === poolInfo?.chain && stakingReward.type === StakingType.POOLED) {
-          nominationPoolReward.name = stakingReward.name;
-          nominationPoolReward.chain = stakingReward.chain;
-
-          const bnUnclaimedReward = new BN(stakingReward.unclaimedReward || '0');
-
-          nominationPoolReward.unclaimedReward = bnUnclaimedReward.add(new BN(nominationPoolReward.unclaimedReward || '0')).toString();
-        }
-      });
-    } else {
-      nominationPoolReward = stakingRewardMap.find((rewardItem) => rewardItem.address === item?.address && rewardItem.chain === poolInfo?.chain && rewardItem.type === StakingType.POOLED);
     }
 
     return (
@@ -271,7 +277,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         yieldPositionInfo={item}
       />
     );
-  }, [poolInfoMap, currentAccount?.address, onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, onClickItem, stakingRewardMap]);
+  }, [poolInfoMap, currentAccount?.address, onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, onClickItem]);
 
   const filterFunction = useMemo<(items: ExtraYieldPositionInfo) => boolean>(() => {
     return (item) => {
@@ -492,6 +498,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
           title={t('Filter')}
         />
       </Layout.Base>
+
       <BaseModal
         className={'right-side-modal'}
         destroyOnClose={true}
@@ -562,15 +569,29 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
           <CancelUnstake />
         </Transaction>
       </BaseModal>
+
+      {
+        !!alertProps && (
+          <AlertModal
+            modalId={alertModalId}
+            {...alertProps}
+          />
+        )
+      }
     </>
   );
 }
 
 const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  '.ant-sw-sub-header-container': {
+    marginBottom: token.marginXS
+  },
+
   '.__section-list-container': {
     height: '100%',
     flex: 1
   },
+
   '.__desktop-list-container': {
     display: 'flex',
     gap: 16,

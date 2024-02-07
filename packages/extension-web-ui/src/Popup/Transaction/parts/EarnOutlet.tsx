@@ -3,6 +3,7 @@
 
 import { LoadingScreen, PageWrapper } from '@subwallet/extension-web-ui/components';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useSelector, useSetCurrentPage, useTransactionContext } from '@subwallet/extension-web-ui/hooks';
 import { StoreName } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -20,6 +21,7 @@ interface Props extends ThemeProps {
 
 const Component: React.FC<Props> = (props: Props) => {
   const { children, className, path, stores } = props;
+  const { isWebUI } = useContext(ScreenContext);
 
   useSetCurrentPage(path);
 
@@ -45,7 +47,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper
-      className={CN(className, 'page-wrapper')}
+      className={CN(className, 'page-wrapper', {
+        '-is-desktop': isWebUI
+      })}
       resolve={dataContext.awaitStores(stores)}
     >
       {children}

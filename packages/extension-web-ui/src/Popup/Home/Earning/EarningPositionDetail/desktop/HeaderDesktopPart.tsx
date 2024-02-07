@@ -84,10 +84,10 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
             className={'__header-active-stake-value'}
             decimal={inputAsset?.decimals || 0}
             hide={!isShowBalance}
+            size={38}
             subFloatNumber={true}
             suffix={inputAsset?.symbol}
             value={activeStake}
-            size={38}
           />
 
           <Number

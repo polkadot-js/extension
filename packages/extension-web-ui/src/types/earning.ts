@@ -30,6 +30,7 @@ export interface YieldGroupInfo {
   name?: string;
   chain: string;
   poolListLength: number;
+  poolSlugs: string[];
   description: string;
   totalValueStaked: BigN;
   minJoin?: string;

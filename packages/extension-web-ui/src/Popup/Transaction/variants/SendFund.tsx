@@ -4,7 +4,7 @@
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
 import { HiddenInput } from '@subwallet/extension-web-ui/components';
@@ -14,7 +14,7 @@ import AmountInput from '@subwallet/extension-web-ui/components/Field/AmountInpu
 import { ChainSelector } from '@subwallet/extension-web-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-web-ui/components/Field/TokenSelector';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
+import { useFetchChainAssetInfo, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-web-ui/hooks/account/useIsMantaPayEnabled';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-web-ui/messaging';
 import { RootState } from '@subwallet/extension-web-ui/stores';
@@ -238,12 +238,20 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const chain = useWatchTransaction('chain', form, defaultData);
   const asset = useWatchTransaction('asset', form, defaultData);
 
+  const assetInfo = useFetchChainAssetInfo(asset);
+
   const { chainInfoMap, chainStateMap } = useSelector((root) => root.chainStore);
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
   const checkAction = usePreCheckAction(from, true, detectTranslate('The account you are using is {{accountTitle}}, you cannot send assets with it'));
   const isZKModeEnabled = useIsMantaPayEnabled(from);
+
+  const hideMaxButton = useMemo(() => {
+    const chainInfo = chainInfoMap[chain];
+
+    return !!chainInfo && !!assetInfo && _isChainEvmCompatible(chainInfo) && destChain === chain && _isNativeToken(assetInfo);
+  }, [chainInfoMap, chain, destChain, assetInfo]);
 
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
@@ -715,7 +723,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
               forceUpdateMaxValue={forceUpdateMaxValue}
               maxValue={maxTransfer}
               onSetMax={onSetMaxTransferable}
-              showMaxButton={true}
+              showMaxButton={!hideMaxButton}
               tooltip={isWebUI ? t('Amount') : undefined}
             />
           </Form.Item>

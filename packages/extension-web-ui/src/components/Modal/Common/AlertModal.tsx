@@ -57,22 +57,22 @@ const Component: React.FC<Props> = (props: Props) => {
         destroyOnClose={true}
         footer={
           <>
-            {!!cancelButton &&
-							<Button
-								block={true}
-								className={'__left-button'}
-								icon={cancelButton.icon && (
+            {!!cancelButton && (
+              <Button
+                block={true}
+                className={'__left-button'}
+                icon={cancelButton.icon && (
                   <Icon
                     phosphorIcon={cancelButton.icon}
                     weight={cancelButton.iconWeight || 'fill'}
                   />
                 )}
-								onClick={cancelButton.onClick}
-								schema={cancelButton.schema || 'secondary'}
-							>
+                onClick={cancelButton.onClick}
+                schema={cancelButton.schema || 'secondary'}
+              >
                 {cancelButton.text}
-							</Button>
-            }
+              </Button>
+            )}
             <Button
               block={true}
               className={'__right-button'}

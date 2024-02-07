@@ -1,16 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_ChainAsset} from '@subwallet/chain-list/types';
-import {_STAKING_CHAIN_GROUP} from '@subwallet/extension-base/services/earning-service/constants';
-import {YieldPositionInfo} from '@subwallet/extension-base/types';
-import {Avatar, BaseModal, MetaInfo} from '@subwallet/extension-web-ui/components';
-import {EARNING_NOMINATION_MODAL} from '@subwallet/extension-web-ui/constants';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { YieldPositionInfo } from '@subwallet/extension-base/types';
+import { Avatar, BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
+import { EARNING_NOMINATION_MODAL } from '@subwallet/extension-web-ui/constants';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
-import {ThemeProps} from '@subwallet/extension-web-ui/types';
-import {toShort} from '@subwallet/extension-web-ui/utils';
+import { ThemeProps } from '@subwallet/extension-web-ui/types';
+import { toShort } from '@subwallet/extension-web-ui/utils';
 import CN from 'classnames';
-import React, {useMemo} from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {

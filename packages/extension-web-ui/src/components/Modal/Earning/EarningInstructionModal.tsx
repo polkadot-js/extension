@@ -200,8 +200,8 @@ const Component: React.FC<Props> = (props: Props) => {
     switch (poolInfo.type) {
       case YieldPoolType.NOMINATION_POOL: {
         const _label = getValidatorLabel(poolInfo.chain);
-        const label = _label.slice(0, 1).toLowerCase().concat(_label.slice(1)).concat('s');
         const maxCandidatePerFarmer = poolInfo.statistic?.maxCandidatePerFarmer || 0;
+        const label = `${_label.charAt(0).toLowerCase() + _label.substr(1)}${maxCandidatePerFarmer > 1 ? 's' : ''}`;
         const inputAsset = assetRegistry[poolInfo.metadata.inputAsset];
         const maintainAsset = assetRegistry[poolInfo.metadata.maintainAsset];
         const paidOut = poolInfo.statistic?.eraTime;
@@ -224,6 +224,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
             if (paidOut !== undefined) {
               replaceEarningValue(_item, '{paidOut}', paidOut.toString());
+              replaceEarningValue(_item, '{paidOutTimeUnit}', paidOut > 1 ? 'hours' : 'hour');
             }
 
             return _item;
@@ -235,8 +236,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
       case YieldPoolType.NATIVE_STAKING: {
         const _label = getValidatorLabel(poolInfo.chain);
-        const label = _label.slice(0, 1).toLowerCase().concat(_label.slice(1)).concat('s');
         const maxCandidatePerFarmer = poolInfo.statistic?.maxCandidatePerFarmer || 0;
+        const label = `${_label.charAt(0).toLowerCase() + _label.substr(1)}${maxCandidatePerFarmer > 1 ? 's' : ''}`;
         const inputAsset = assetRegistry[poolInfo.metadata.inputAsset];
         const maintainAsset = assetRegistry[poolInfo.metadata.maintainAsset];
         const paidOut = poolInfo.statistic?.eraTime;
@@ -253,12 +254,14 @@ const Component: React.FC<Props> = (props: Props) => {
               const _item: BoxProps = { ...item, id: item.icon, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
 
               replaceEarningValue(_item, '{validatorNumber}', maxCandidatePerFarmer.toString());
+              replaceEarningValue(_item, '{dAppString}', maxCandidatePerFarmer > 1 ? 'dApps' : 'dApp');
               replaceEarningValue(_item, '{periodNumb}', unBondedTime);
               replaceEarningValue(_item, '{maintainBalance}', maintainBalance);
               replaceEarningValue(_item, '{maintainSymbol}', maintainSymbol);
 
               if (paidOut !== undefined) {
                 replaceEarningValue(_item, '{paidOut}', paidOut.toString());
+                replaceEarningValue(_item, '{paidOutTimeUnit}', paidOut > 1 ? 'hours' : 'hour');
               }
 
               return _item;
@@ -276,6 +279,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
             if (paidOut !== undefined) {
               replaceEarningValue(_item, '{paidOut}', paidOut.toString());
+              replaceEarningValue(_item, '{paidOutTimeUnit}', paidOut > 1 ? 'hours' : 'hour');
             }
 
             return _item;
@@ -360,6 +364,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
       case 'Bifrost Polkadot': {
         urlParam = '#bifrost';
+
+        if (poolInfo.slug === 'MANTA___liquid_staking___bifrost_dot') {
+          urlParam = '#vmanta-on-bifrost';
+        }
+
         break;
       }
 
@@ -373,6 +382,11 @@ const Component: React.FC<Props> = (props: Props) => {
         break;
       }
 
+      case 'Parallel': {
+        urlParam = '#parallel';
+        break;
+      }
+
       case 'Stellaswap': {
         urlParam = '#stellaswap';
         break;
@@ -382,7 +396,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const url = `https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs${urlParam}`;
 
     open(url);
-  }, [poolInfo.metadata.shortName]);
+  }, [poolInfo.metadata.shortName, poolInfo.slug]);
 
   const onClickButton = useCallback(() => {
     const time = Date.now();
@@ -397,7 +411,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const onError = (message: string) => {
       openAlert({
         title: t('Pay attention!'),
-        type: NotificationType.WARNING,
+        type: NotificationType.ERROR,
         content: message,
         okButton: {
           text: t('I understand'),

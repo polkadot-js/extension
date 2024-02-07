@@ -49,25 +49,12 @@ export const _NFT_CHAIN_GROUP = {
   rmrk: ['kusama'],
   statemine: ['statemine'],
   statemint: ['statemint'],
-  unique_network: ['unique_network'],
+  unique_network: ['unique_network', 'quartz', 'opal'],
   bitcountry: ['bitcountry', 'pioneer'],
   vara: ['vara_network']
 };
 
 // Staking--------------------------------------------------------------------------------------------------------------
-
-export const _STAKING_CHAIN_GROUP = {
-  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend', 'kate', 'edgeware', 'creditcoin', 'vara_network', 'goldberg_testnet'],
-  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari', 'manta_network'],
-  astar: ['astar', 'shiden', 'shibuya'],
-  amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine', 'pendulum', 'krest_network'], // amplitude and kilt only share some common logic
-  krest_network: ['krest_network'],
-  kilt: ['kilt', 'kilt_peregrine'],
-  nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph', 'kate', 'vara_network', 'goldberg_testnet'],
-  bifrost: ['bifrost', 'bifrost_testnet'],
-  aleph: ['aleph', 'alephTest'], // A0 has distinct tokenomics
-  ternoa: ['ternoa', 'ternoa_alphanet']
-};
 
 export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   alephTest: 24,
@@ -257,7 +244,7 @@ export const EVM_REFORMAT_DECIMALS = {
   acala: ['acala_evm', 'karura_evm']
 };
 
-export const LATEST_CHAIN_DATA_FETCHING_INTERVAL = 300000;
+export const LATEST_CHAIN_DATA_FETCHING_INTERVAL = 120000;
 
 // TODO: review
 const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni-dev' : 'master';

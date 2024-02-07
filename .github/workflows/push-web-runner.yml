@@ -1,5 +1,9 @@
 name: Web Runner
 on:
+  pull_request:
+    branches:
+      - web-runner
+      - web-runner-demo
   push:
     branches:
       - web-runner

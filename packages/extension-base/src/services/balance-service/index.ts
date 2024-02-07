@@ -42,7 +42,7 @@ export class BalanceService {
     const chainState = this.state.chainService.getChainStateByKey(chain);
 
     if (!chainInfo || !chainState || !chainState.active) {
-      return Promise.reject(new BalanceError(BalanceErrorType.NETWORK_ERROR, t('{{chain}} is inactive. Please enable network', { replace: { chain } })));
+      return Promise.reject(new BalanceError(BalanceErrorType.NETWORK_ERROR, t('{{chain}} is inactive. Please enable network', { replace: { chain: chainInfo.name } })));
     }
 
     const tSlug = tokenSlug || _getChainNativeTokenSlug(chainInfo);

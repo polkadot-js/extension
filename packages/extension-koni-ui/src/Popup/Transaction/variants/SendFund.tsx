@@ -4,7 +4,7 @@
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
 import { HiddenInput } from '@subwallet/extension-koni-ui/components';
@@ -13,7 +13,7 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainAssetInfo, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -217,7 +217,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { t } = useTranslation();
   const notification = useNotification();
 
-  const { defaultData, onDone, persistData } = useTransactionContext<TransferParams>();
+  const { defaultData, persistData } = useTransactionContext<TransferParams>();
   const { defaultSlug: sendFundSlug } = defaultData;
   const isFirstRender = useIsFirstRender();
 
@@ -234,12 +234,20 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const chain = useWatchTransaction('chain', form, defaultData);
   const asset = useWatchTransaction('asset', form, defaultData);
 
+  const assetInfo = useFetchChainAssetInfo(asset);
+
   const { chainInfoMap, chainStateMap } = useSelector((root) => root.chainStore);
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
   const checkAction = usePreCheckAction(from, true, detectTranslate('The account you are using is {{accountTitle}}, you cannot send assets with it'));
   const isZKModeEnabled = useIsMantaPayEnabled(from);
+
+  const hideMaxButton = useMemo(() => {
+    const chainInfo = chainInfoMap[chain];
+
+    return !!chainInfo && !!assetInfo && _isChainEvmCompatible(chainInfo) && destChain === chain && _isNativeToken(assetInfo);
+  }, [chainInfoMap, chain, destChain, assetInfo]);
 
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
@@ -253,7 +261,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     setIsTransferAll(value);
   }, []);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, handleTransferAll);
+  const { onError, onSuccess } = useHandleSubmitTransaction(handleTransferAll);
 
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
@@ -708,7 +716,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               forceUpdateMaxValue={forceUpdateMaxValue}
               maxValue={maxTransfer}
               onSetMax={onSetMaxTransferable}
-              showMaxButton={true}
+              showMaxButton={!hideMaxButton}
               tooltip={t('Amount')}
             />
           </Form.Item>
@@ -723,8 +731,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       </TransactionContent>
       <TransactionFooter
         className={`${className} -transaction-footer`}
-        errors={[]}
-        warnings={[]}
       >
         <Button
           disabled={!isBalanceReady}

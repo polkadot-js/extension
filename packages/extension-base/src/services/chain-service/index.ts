@@ -15,7 +15,7 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
-import { fetchStaticData, MODULE_SUPPORT } from '@subwallet/extension-base/utils';
+import { addLazy, fetchStaticData, MODULE_SUPPORT } from '@subwallet/extension-base/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
@@ -283,8 +283,10 @@ export class ChainService {
     const result: Record<string, _ChainInfo> = {};
 
     Object.values(this.getChainStateMap()).forEach((chainState) => {
-      if (chainState.active) {
-        result[chainState.slug] = this.getChainInfoByKey(chainState.slug);
+      const chainInfo = this.getChainInfoByKey(chainState.slug);
+
+      if (chainState.active && chainInfo && chainInfo.chainStatus === _ChainStatus.ACTIVE) {
+        result[chainState.slug] = chainInfo;
       }
     });
 
@@ -524,22 +526,50 @@ export class ChainService {
 
     // TODO: reconsider the flow of initiation
     this.multiChainAssetMapSubject.next(MultiChainAssetMap);
-    this.dataMap.assetRefMap = AssetRefMap;
+    // const storedAssetRefMap = await this.dbService.getAssetRefMap();
+    //
+    // this.dataMap.assetRefMap = storedAssetRefMap && Object.values(storedAssetRefMap).length > 0 ? storedAssetRefMap : AssetRefMap;
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
-    this.updateChainStateMapSubscription();
     this.assetRegistrySubject.next(this.getAssetRegistry());
     this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
 
     await this.initApis();
     await this.initAssetSettings();
+    await this.initAssetRefMap();
 
     this.checkLatestData();
   }
 
+  async initAssetRefMap () {
+    try {
+      const fetchPromise = this.fetchLatestBlockedAssetRef();
+      const timeout = new Promise((resolve) => {
+        const id = setTimeout(() => {
+          clearTimeout(id);
+          resolve(null);
+        }, 1000);
+      });
+
+      const disabledAssetRefs = await Promise.race([
+        timeout,
+        fetchPromise
+      ]) as string[] || null;
+
+      if (disabledAssetRefs) {
+        this.handleLatestBlockedAssetRef(disabledAssetRefs);
+      } else {
+        this.dataMap.assetRefMap = AssetRefMap;
+      }
+    } catch (e) {
+      this.dataMap.assetRefMap = AssetRefMap;
+    }
+  }
+
   checkLatestData () {
     clearInterval(this.refreshLatestChainDataTimeOut);
+    this.handleLatestData();
 
     this.refreshLatestChainDataTimeOut = setInterval(this.handleLatestData.bind(this), LATEST_CHAIN_DATA_FETCHING_INTERVAL);
   }
@@ -568,6 +598,20 @@ export class ChainService {
     }
   }
 
+  handleLatestBlockedAssetRef (latestBlockedAssetRefList: string[]) {
+    const updatedAssetRefMap: Record<string, _AssetRef> = { ...AssetRefMap };
+
+    latestBlockedAssetRefList.forEach((blockedAssetRef) => {
+      delete updatedAssetRefMap[blockedAssetRef];
+    });
+
+    this.dataMap.assetRefMap = updatedAssetRefMap;
+
+    // this.dbService.setAssetRef(this.dataMap.assetRefMap).catch(console.error);
+    this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
+    this.logger.log('Finished updating latest asset ref');
+  }
+
   handleLatestPriceId (latestPriceIds: Record<string, string | null>) {
     Object.entries(latestPriceIds).forEach(([slug, priceId]) => {
       if (this.dataMap.assetRegistry[slug]) {
@@ -584,6 +628,10 @@ export class ChainService {
   handleLatestData () {
     this.fetchLatestChainData().then((latestChainInfo) => {
       this.handleLatestProviderData(latestChainInfo);
+    }).catch(console.error);
+
+    this.fetchLatestBlockedAssetRef().then((latestAssetRef) => {
+      this.handleLatestBlockedAssetRef(latestAssetRef);
     }).catch(console.error);
 
     // this.fetchLatestPriceIdsData().then((latestPriceIds) => {
@@ -813,6 +861,10 @@ export class ChainService {
   // @ts-ignore
   private async fetchLatestPriceIdsData () {
     return await fetchStaticData<Record<string, string | null>>('chain-assets/price-map');
+  }
+
+  private async fetchLatestBlockedAssetRef () {
+    return await fetchStaticData<string[]>('chain-assets/disabled-xcm-channels');
   }
 
   private async initChains () {
@@ -1053,7 +1105,9 @@ export class ChainService {
   }
 
   private updateChainStateMapSubscription () {
-    this.chainStateMapSubject.next(this.getChainStateMap());
+    addLazy('updateChainStateMapSubscription', () => {
+      this.chainStateMapSubject.next(this.getChainStateMap());
+    }, 300, 900);
   }
 
   private updateChainInfoMapSubscription () {

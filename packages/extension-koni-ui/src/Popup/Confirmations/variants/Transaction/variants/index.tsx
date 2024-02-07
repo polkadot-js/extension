@@ -11,5 +11,9 @@ export { default as LeavePoolTransactionConfirmation } from './LeavePool';
 export { default as SendNftTransactionConfirmation } from './SendNft';
 export { default as UnbondTransactionConfirmation } from './Unbond';
 export { default as WithdrawTransactionConfirmation } from './Withdraw';
+export { default as DefaultWithdrawTransactionConfirmation } from './DefaultWithdraw';
+export { default as FastWithdrawTransactionConfirmation } from './FastWithdraw';
+export { default as JoinYieldPoolConfirmation } from './JoinYieldPool';
+export { default as TokenApproveConfirmation } from './TokenApprove';
 
 export * from './TransferBlock';

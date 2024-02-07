@@ -335,6 +335,10 @@ const Wrapper = ({ className }: Props) => {
 };
 
 const EarningPools = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
+  '.ant-sw-sub-header-container': {
+    marginBottom: token.marginXS
+  },
+
   '.__section-list-container': {
     height: '100%',
     flex: 1

@@ -6672,7 +6672,6 @@ __metadata:
     webpack: ^5.89.0
     webpack-cli: ^4.10.0
     webpack-extension-manifest-plugin: ^0.8.0
-    webpack-target-webextension: ^1.1.1
   languageName: unknown
   linkType: soft
 
@@ -27671,15 +27670,6 @@ __metadata:
     html-webpack-plugin:
       optional: true
   checksum: 827c2c1170f52eaec9d68728d4c3910be5451253ffb24e7dbab35c48acc69c4b4ed6dcea2c29bd62b4cb4569c00eafa4e95d8aa00305656fe9c2a6aeb5415e1e
-  languageName: node
-  linkType: hard
-
-"webpack-target-webextension@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "webpack-target-webextension@npm:1.1.1"
-  peerDependencies:
-    webpack: ^5.0.0
-  checksum: 6d1b63925748a109a2be97a8ea5f85f101cfbeab74a928c75b643bc4fb0aca4ea976f03f8fcbefb9bc831c88c3d19b89242bc51333e342fd5073faf01fc4ede9
   languageName: node
   linkType: hard
 

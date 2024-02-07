@@ -11,7 +11,6 @@ const ManifestPlugin = require('webpack-extension-manifest-plugin');
 const pkgJson = require('./package.json');
 const manifest = require('./manifest.json');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const WebExtension = require('webpack-target-webextension');
 
 const args = process.argv.slice(2);
 
@@ -146,13 +145,6 @@ module.exports = (entry, alias = {}, compileWithHtml = false) => {
         filename: 'notification.html',
         template: 'public/notification.html',
         chunks: ['extension']
-      }),
-      entry.background && new WebExtension({
-        background: {
-          serviceWorkerEntry: 'background'
-        },
-        hmrConfig: false,
-        weakRuntimeCheck: true
       })
     ],
     resolve: {
@@ -181,7 +173,7 @@ module.exports = (entry, alias = {}, compileWithHtml = false) => {
     },
     optimization: {
       splitChunks: {
-        chunks: (chunk) => (chunk.name === 'extension' || chunk.name === 'background'),
+        chunks: (chunk) => (chunk.name === 'extension'),
         maxSize: 3000000,
         cacheGroups: {
           vendors: {

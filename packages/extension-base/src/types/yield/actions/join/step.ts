@@ -53,6 +53,7 @@ export enum YieldStepType {
 
   // bifrost
   MINT_VDOT = 'MINT_VDOT',
+  MINT_VMANTA = 'MINT_VMANTA',
 
   // acala
   MINT_LDOT = 'MINT_LDOT',

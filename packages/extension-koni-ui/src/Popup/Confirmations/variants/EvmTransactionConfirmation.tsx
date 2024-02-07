@@ -2,14 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ConfirmationsQueueItem, EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
-import { ConfirmationGeneralInfo, MetaInfo, ViewDetailIcon } from '@subwallet/extension-koni-ui/components';
+import { AlertBox, ConfirmationGeneralInfo, MetaInfo, ViewDetailIcon } from '@subwallet/extension-koni-ui/components';
 import { useGetAccountByAddress, useGetChainInfoByChainId, useOpenDetailModal } from '@subwallet/extension-koni-ui/hooks';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { EvmSignatureSupportType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BaseDetailModal, EvmSignArea, EvmTransactionDetail } from '../parts';
@@ -30,6 +32,11 @@ const convertToBigN = (num: EvmSendTransactionRequest['value']): string | number
 function Component ({ className, request, type }: Props) {
   const { id, payload: { account, chainId, to } } = request;
   const { t } = useTranslation();
+
+  const { transactionRequest } = useSelector((state: RootState) => state.requestState);
+
+  const transaction = useMemo(() => transactionRequest[id], [transactionRequest, id]);
+
   const chainInfo = useGetChainInfoByChainId(chainId);
   const recipientAddress = to;
   const recipient = useGetAccountByAddress(recipientAddress);
@@ -77,6 +84,14 @@ function Component ({ className, request, type }: Props) {
                 value={request.payload.estimateGas || '0'}
               />}
         </MetaInfo>
+        {!!transaction.estimateFee?.tooHigh && (
+          <AlertBox
+            className='network-box'
+            description={t('Gas fees on {{networkName}} are high due to high demands, so gas estimates are less accurate.', { replace: { networkName: chainInfo?.name } })}
+            title={t('Pay attention!')}
+            type='warning'
+          />
+        )}
         <div>
           <Button
             icon={<ViewDetailIcon />}

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { useTransactionContext } from '@subwallet/extension-koni-ui/hooks';
 import { ClaimRewardParams } from '@subwallet/extension-koni-ui/types';
@@ -46,6 +46,7 @@ const useHandleSubmitTransaction = (setIgnoreWarnings?: (value: boolean) => void
 
           openAlert({
             title: t('Insufficient balance'),
+            type: NotificationType.ERROR,
             content: t('Your available balance is {{availableBalance}} {{symbol}}, you need to ' +
               'leave {{existentialDeposit}} {{symbol}} as minimal balance (existential deposit) and pay network fees' +
               '. Make sure you have at least {{maintainBalance}} {{symbol}} in your transferable balance to proceed.',
@@ -60,7 +61,8 @@ const useHandleSubmitTransaction = (setIgnoreWarnings?: (value: boolean) => void
         } else {
           notify({
             message: errors[0]?.message || warnings[0]?.message,
-            type: errors.length ? 'error' : 'warning'
+            type: errors.length ? 'error' : 'warning',
+            duration: 8
           });
         }
       }
@@ -76,7 +78,8 @@ const useHandleSubmitTransaction = (setIgnoreWarnings?: (value: boolean) => void
   const onError = useCallback((error: Error) => {
     notify({
       message: t(error.message),
-      type: 'error'
+      type: 'error',
+      duration: 8
     });
   }, [t, notify]);
 

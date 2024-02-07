@@ -5,6 +5,8 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { RuntimeDispatchInfo, SpecialYieldPoolInfo, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/types';
+import { BN_TEN } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 
 export const syntheticSelectedValidators = [
   '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',
@@ -66,8 +68,8 @@ export function convertDerivativeToOriginToken (amount: string, poolInfo: Specia
   const originDecimals = _getAssetDecimals(originTokenInfo);
 
   const exchangeRate = poolInfo.statistic?.assetEarning?.[0].exchangeRate || 1;
-  const formattedAmount = parseInt(amount) / (10 ** derivativeDecimals); // TODO: decimals
-  const minAmount = formattedAmount * exchangeRate;
+  const formattedAmount = new BigN(amount).dividedBy(BN_TEN.pow(derivativeDecimals)); // TODO: decimals
+  const minAmount = formattedAmount.multipliedBy(exchangeRate);
 
-  return Math.floor(minAmount * (10 ** originDecimals));
+  return minAmount.multipliedBy(BN_TEN.pow(originDecimals)).toFixed(0);
 }

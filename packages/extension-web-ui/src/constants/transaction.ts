@@ -28,18 +28,21 @@ export const TRANSACTION_TITLE_MAP: Record<ExtrinsicType, string> = {
   [ExtrinsicType.UNKNOWN]: detectTranslate('Unknown'),
 
   [ExtrinsicType.MINT_VDOT]: detectTranslate('Mint vDOT'), // TODO: Change this
+  [ExtrinsicType.MINT_VMANTA]: detectTranslate('Mint vMANTA'), // TODO: Change this
   [ExtrinsicType.MINT_LDOT]: detectTranslate('Mint LDOT'), // TODO: Change this
   [ExtrinsicType.MINT_SDOT]: detectTranslate('Mint sDOT'), // TODO: Change this
   [ExtrinsicType.MINT_QDOT]: detectTranslate('Mint qDOT'), // TODO: Change this
   [ExtrinsicType.MINT_STDOT]: detectTranslate('Mint stDOT'), // TODO: Change this
 
   [ExtrinsicType.REDEEM_VDOT]: detectTranslate('Redeem vDOT'), // TODO: Change this
+  [ExtrinsicType.REDEEM_VMANTA]: detectTranslate('Redeem vMANTA'), // TODO: Change this
   [ExtrinsicType.REDEEM_LDOT]: detectTranslate('Redeem lDOT'), // TODO: Change this
   [ExtrinsicType.REDEEM_SDOT]: detectTranslate('Redeem sDOT'), // TODO: Change this
   [ExtrinsicType.REDEEM_QDOT]: detectTranslate('Redeem qDOT'), // TODO: Change this
   [ExtrinsicType.REDEEM_STDOT]: detectTranslate('Redeem stDOT'), // TODO: Change this
 
   [ExtrinsicType.UNSTAKE_VDOT]: detectTranslate('Unstake vDOT'),
+  [ExtrinsicType.UNSTAKE_VMANTA]: detectTranslate('Unstake vMANTA'),
   [ExtrinsicType.UNSTAKE_LDOT]: detectTranslate('Unstake LDOT'),
   [ExtrinsicType.UNSTAKE_SDOT]: detectTranslate('Unstake sDOT'),
   [ExtrinsicType.UNSTAKE_STDOT]: detectTranslate('Unstake stDOT'),

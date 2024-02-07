@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AmountData, BaseRequestSign, ChainType, ExtrinsicDataTypeMap, ExtrinsicStatus, ExtrinsicType, ValidateTransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseRequestSign, ChainType, ExtrinsicDataTypeMap, ExtrinsicStatus, ExtrinsicType, FeeData, ValidateTransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import EventEmitter from 'eventemitter3';
 import { TransactionConfig } from 'web3-core';
 
@@ -21,7 +21,7 @@ export interface SWTransaction extends ValidateTransactionResponse, Partial<Pick
   extrinsicType: ExtrinsicType;
   createdAt: number;
   updatedAt: number;
-  estimateFee?: AmountData,
+  estimateFee?: FeeData,
   transaction: SubmittableExtrinsic | TransactionConfig;
   additionalValidator?: (inputTransaction: SWTransactionResponse) => Promise<void>;
   eventsHandler?: (eventEmitter: TransactionEmitter) => void;

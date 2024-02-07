@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AmountData, BasicTxErrorType, ChainType, ExtrinsicType, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
@@ -250,13 +249,16 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
         const bnAltInputTokenBalance = new BN(altInputTokenBalance.value || '0');
 
         if (bnAltInputTokenBalance.gt(BN_ZERO)) {
+          const altChainInfo = this.state.getChainInfo(altInputTokenInfo.originChain);
+          const symbol = altInputTokenInfo.symbol;
+          const networkName = altChainInfo.name;
           const step: BaseYieldStepDetail = {
             metadata: {
               sendingValue: bnAmount.toString(),
               originTokenInfo: altInputTokenInfo,
               destinationTokenInfo: inputTokenInfo
             },
-            name: 'Transfer DOT from Polkadot',
+            name: `Transfer ${symbol} from ${networkName}`,
             type: YieldStepType.XCM
           };
 
@@ -500,7 +502,9 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const { address, amount } = data as SubmitYieldStepData;
 
     const destinationTokenSlug = this.inputAsset;
-    const originChainInfo = this.state.getChainInfo(COMMON_CHAIN_SLUGS.POLKADOT);
+    const altInputTokenSlug = this.altInputAsset || '';
+    const altInputTokenInfo = this.state.getAssetBySlug(altInputTokenSlug);
+    const originChainInfo = this.state.getChainInfo(altInputTokenInfo.originChain);
     const originTokenSlug = _getChainNativeTokenSlug(originChainInfo);
     const originTokenInfo = this.state.getAssetBySlug(originTokenSlug);
     const destinationTokenInfo = this.state.getAssetBySlug(destinationTokenSlug);

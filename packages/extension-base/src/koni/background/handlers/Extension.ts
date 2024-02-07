@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import Common from '@ethereumjs/common';
+import { Common } from '@ethereumjs/common';
+import { LegacyTransaction } from '@ethereumjs/tx';
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
@@ -35,7 +36,7 @@ import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectN
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
-import { createTransactionFromRLP, recalculateGasPrice, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
+import { calculateGasFeeParams, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { MetadataDef } from '@subwallet/extension-inject/types';
@@ -48,7 +49,6 @@ import { ProposalTypes } from '@walletconnect/types/dist/types/sign-client/propo
 import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/session';
 import { getSdkError } from '@walletconnect/utils';
 import BigN from 'bignumber.js';
-import { Transaction } from 'ethereumjs-tx';
 import { t } from 'i18next';
 import { TransactionConfig } from 'web3-core';
 
@@ -2034,12 +2034,17 @@ export default class KoniExtension {
               to: '0x0000000000000000000000000000000000000000', // null address
               from: address
             };
-
-            const _price = await web3.api.eth.getGasPrice();
-            const gasPrice = recalculateGasPrice(_price, networkKey);
             const gasLimit = await web3.api.eth.estimateGas(transaction);
+            const priority = await calculateGasFeeParams(web3, networkKey);
 
-            estimatedFee = (gasLimit * parseInt(gasPrice)).toString();
+            if (priority.baseGasFee) {
+              const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
+              const maxFee = priority.maxFeePerGas.gte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+
+              estimatedFee = maxFee.multipliedBy(gasLimit).toFixed(0);
+            } else {
+              estimatedFee = new BigN(priority.gasPrice).multipliedBy(gasLimit).toFixed(0);
+            }
           } else {
             const [mockTx] = await createTransferExtrinsic({
               from: address,
@@ -2589,20 +2594,21 @@ export default class KoniExtension {
         gas: new BigN(tx.gas).toNumber()
       };
 
-      const common = Common.forCustomChain('mainnet', {
+      const common = Common.custom({
         name: network.name,
         networkId: _getEvmChainId(network),
         chainId: _getEvmChainId(network)
-      }, 'petersburg');
+      }, { hardfork: 'petersburg' });
 
       // @ts-ignore
-      const transaction = new Transaction(txObject, { common });
+      const transaction = new LegacyTransaction(txObject, { common });
 
-      pair.evmSigner.signTransaction(transaction);
+      const signedTranaction = LegacyTransaction.fromSerializedTx(hexToU8a(pair.evmSigner.signTransaction(transaction)));
+
       signed = signatureToHex({
-        r: u8aToHex(transaction.r),
-        s: u8aToHex(transaction.s),
-        v: u8aToHex(transaction.v)
+        r: signedTranaction.r?.toString(16) || '',
+        s: signedTranaction.s?.toString(16) || '',
+        v: signedTranaction.v?.toString(16) || ''
       });
     }
 

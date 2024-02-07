@@ -292,7 +292,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, {} as Record<string, string>);
   }, [accounts]);
 
-  const typeNameMap: Record<string, string> = useMemo(() => ({
+  const typeNameMap: Record<string, string> = useMemo((): Record<ExtrinsicType | 'default' | 'submitting' | 'processing' | 'timeout' | 'send' | 'received', string> => ({
     default: t('Transaction'),
     submitting: t('Submitting...'),
     processing: t('Processing...'),
@@ -306,7 +306,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan'),
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake'),
     [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake'),
-    [ExtrinsicType.STAKING_BOND]: t('Bond'),
+    [ExtrinsicType.STAKING_BOND]: t('Stake'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unstake'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),
@@ -320,14 +320,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.MINT_SDOT]: t('Mint sDOT'),
     [ExtrinsicType.MINT_LDOT]: t('Mint LDOT'),
     [ExtrinsicType.MINT_VDOT]: t('Mint vDOT'),
+    [ExtrinsicType.MINT_VMANTA]: t('Mint vMANTA'),
     [ExtrinsicType.MINT_STDOT]: t('Mint stDOT'),
     [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT'),
     [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT'),
     [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT'),
     [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT'),
+    [ExtrinsicType.REDEEM_VMANTA]: t('Redeem vMANTA'),
     [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT'),
     [ExtrinsicType.UNSTAKE_QDOT]: t('Unstake qDOT'),
     [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT'),
+    [ExtrinsicType.UNSTAKE_VMANTA]: t('Unstake vMANTA'),
     [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT'),
     [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT'),
     [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT'),
@@ -335,7 +338,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
 
-  const typeTitleMap: Record<string, string> = useMemo(() => ({
+  const typeTitleMap: Record<string, string> = useMemo((): Record<ExtrinsicType | 'default' | 'send' | 'received', string> => ({
     default: t('Transaction'),
     send: t('Send token'),
     received: t('Receive token'),
@@ -346,8 +349,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan transaction'),
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake transaction'),
     [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake transaction'),
-    [ExtrinsicType.STAKING_BOND]: t('Bond transaction'),
-    [ExtrinsicType.STAKING_UNBOND]: t('Unbond transaction'),
+    [ExtrinsicType.STAKING_BOND]: t('Stake transaction'),
+    [ExtrinsicType.STAKING_UNBOND]: t('Unstake transaction'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward transaction'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw transaction'),
     [ExtrinsicType.STAKING_POOL_WITHDRAW]: t('Withdraw transaction'),
@@ -360,14 +363,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.MINT_SDOT]: t('Mint sDOT transaction'),
     [ExtrinsicType.MINT_LDOT]: t('Mint LDOT transaction'),
     [ExtrinsicType.MINT_VDOT]: t('Mint vDOT transaction'),
+    [ExtrinsicType.MINT_VMANTA]: t('Mint vMANTA transaction'),
     [ExtrinsicType.MINT_STDOT]: t('Mint stDOT transaction'),
     [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT transaction'),
     [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT transaction'),
     [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT transaction'),
     [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT transaction'),
+    [ExtrinsicType.REDEEM_VMANTA]: t('Redeem vMANTA transaction'),
     [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT transaction'),
     [ExtrinsicType.UNSTAKE_QDOT]: t('Unstake qDOT tranasction'),
     [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_VMANTA]: t('Unstake vMANTA tranasction'),
     [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT tranasction'),
     [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT tranasction'),
     [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT tranasction'),

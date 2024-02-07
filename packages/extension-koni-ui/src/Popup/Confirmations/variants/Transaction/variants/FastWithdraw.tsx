@@ -87,7 +87,7 @@ const Component: React.FC<Props> = (props: Props) => {
             decimals={receivedAssetInfo.decimals || 0}
             label={t('Minimum receivables')}
             suffix={receivedAssetInfo.symbol}
-            value={Math.floor(estimatedReceivables * percent)}
+            value={Math.floor(parseInt(estimatedReceivables) * percent)}
           />
         )}
 

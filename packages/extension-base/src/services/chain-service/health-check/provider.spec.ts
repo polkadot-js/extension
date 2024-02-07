@@ -6,7 +6,7 @@ import { _ChainStatus } from '@subwallet/chain-list/types';
 import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
-import {ApiPromise, WsProvider} from '@polkadot/api';
+import { ApiPromise, WsProvider } from '@polkadot/api';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 jest.setTimeout(3 * 60 * 60 * 1000);
@@ -14,7 +14,7 @@ jest.setTimeout(3 * 60 * 60 * 1000);
 const failedMessage = 'Connect failed';
 const timeoutMessage = 'Connect timeout';
 
-const substrateHandleConnectChain = async (chain: string, key: string, provider: string): Promise<[_SubstrateApi | null, string]> => {
+const substrateHandleConnectChain = async (chain: string, key: string, provider: string, hash: string): Promise<[_SubstrateApi | null, string]> => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
   return new Promise<[_SubstrateApi | null, string]>(async (resolve) => {
     console.log('start', chain, key, provider);
@@ -47,7 +47,7 @@ const substrateHandleConnectChain = async (chain: string, key: string, provider:
     _api.on('disconnected', handlerOnFail);
     _api.on('error', handlerOnFail);
 
-    await _api.isReady;
+    const temp = await _api.isReady;
 
     logFail = false;
 
@@ -55,11 +55,17 @@ const substrateHandleConnectChain = async (chain: string, key: string, provider:
     _api.off('error', handlerOnFail);
     clearTimeout(timeout);
 
+    const tempHash = temp.genesisHash.toHex();
+
+    if (hash !== tempHash) {
+      resolve([api, 'Wrong genesisHash']);
+    }
+
     resolve([api, '']);
   });
 };
 
-const evmHandleConnectChain = async (chain: string, key: string, provider: string): Promise<[_EvmApi | null, string]> => {
+const evmHandleConnectChain = async (chain: string, key: string, provider: string, chainId: number): Promise<[_EvmApi | null, string]> => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
   return new Promise<[_EvmApi | null, string]>(async (resolve) => {
     console.log('start', chain, key, provider);
@@ -96,6 +102,12 @@ const evmHandleConnectChain = async (chain: string, key: string, provider: strin
     logFail = false;
 
     clearTimeout(timeout);
+
+    const tempId = await _api.api.eth.getChainId();
+
+    if (tempId !== chainId) {
+      resolve([api, 'Wrong chain id']);
+    }
 
     resolve([api, '']);
   });
@@ -137,7 +149,7 @@ describe('test chain provider', () => {
                 const timeout = setTimeout(() => {
                   timeHandler(chain, key, provider);
                 }, 60 * 1000);
-                const [api, message] = await substrateHandleConnectChain(chain, key, provider);
+                const [api, message] = await substrateHandleConnectChain(chain, key, provider, info.substrateInfo?.genesisHash || '');
 
                 if (message === timeoutMessage) {
                   const value: [string, string] = [key, provider];
@@ -207,7 +219,7 @@ describe('test chain provider', () => {
                 const timeout = setTimeout(() => {
                   timeHandler(chain, key, provider);
                 }, 2 * 60 * 1000);
-                const [api, message] = await evmHandleConnectChain(chain, key, provider);
+                const [api, message] = await evmHandleConnectChain(chain, key, provider, info.evmInfo?.evmChainId || 0);
 
                 if (message === timeoutMessage) {
                   const value: [string, string] = [key, provider];

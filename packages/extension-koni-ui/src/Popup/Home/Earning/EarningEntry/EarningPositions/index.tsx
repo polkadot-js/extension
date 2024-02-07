@@ -2,15 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { EmptyList, FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
+import { AlertModal, EmptyList, FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningPositionItem } from '@subwallet/extension-koni-ui/components/Earning';
-import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
-import { useFilterModal, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { ASTAR_PORTAL_URL, BN_TEN } from '@subwallet/extension-koni-ui/constants';
+import { useAlert, useFilterModal, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isRelatedToAstar, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { Database, FadersHorizontal, Plus, PlusCircle } from 'phosphor-react';
+import { ArrowsClockwise, Database, FadersHorizontal, Plus, PlusCircle } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -18,12 +20,14 @@ import styled from 'styled-components';
 type Props = ThemeProps & {
   earningPositions: YieldPositionInfo[];
   setEntryView: React.Dispatch<React.SetStateAction<EarningEntryView>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 let cacheData: Record<string, boolean> = {};
 const FILTER_MODAL_ID = 'earning-positions-filter-modal';
+const alertModalId = 'earning-positions-alert-modal';
 
-function Component ({ className, earningPositions, setEntryView }: Props) {
+function Component ({ className, earningPositions, setEntryView, setLoading }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -35,6 +39,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
 
   const items: ExtraYieldPositionInfo[] = useMemo(() => {
     if (!earningPositions.length) {
@@ -107,11 +112,30 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
 
   const onClickItem = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
-      navigate('/home/earning/position-detail', { state: {
-        earningSlug: item.slug
-      } as EarningPositionDetailParam });
+      if (isRelatedToAstar(item.slug)) {
+        openAlert({
+          title: t('Enter Astar portal'),
+          content: t('You are navigating to Astar portal to view and manage your stake in Astar dApp staking v3. SubWallet will offer support for Astar dApp staking v3 soon.'),
+          cancelButton: {
+            text: t('Cancel'),
+            schema: 'secondary',
+            onClick: closeAlert
+          },
+          okButton: {
+            text: t('Enter Astar portal'),
+            onClick: () => {
+              openInNewTab(ASTAR_PORTAL_URL)();
+              closeAlert();
+            }
+          }
+        });
+      } else {
+        navigate('/home/earning/position-detail', { state: {
+          earningSlug: item.slug
+        } as EarningPositionDetailParam });
+      }
     };
-  }, [navigate]);
+  }, [closeAlert, navigate, openAlert, t]);
 
   const renderItem = useCallback(
     (item: ExtraYieldPositionInfo) => {
@@ -166,6 +190,24 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
       {
         icon: (
           <Icon
+            phosphorIcon={ArrowsClockwise}
+            size='sm'
+            type='phosphor'
+          />
+        ),
+        onClick: () => {
+          setLoading(true);
+          reloadCron({ data: 'staking' })
+            .catch(console.error).finally(() => {
+              setTimeout(() => {
+                setLoading(false);
+              }, 1000);
+            });
+        }
+      },
+      {
+        icon: (
+          <Icon
             phosphorIcon={Plus}
             size='sm'
             type='phosphor'
@@ -176,7 +218,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
         }
       }
     ];
-  }, [setEntryView]);
+  }, [setEntryView, setLoading]);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -195,40 +237,51 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   );
 
   return (
-    <Layout.Base
-      className={CN(className)}
-      showSubHeader={true}
-      subHeaderBackground={'transparent'}
-      subHeaderCenter={false}
-      subHeaderIcons={subHeaderButtons}
-      subHeaderPaddingVertical={true}
-      title={t<string>('Your earning positions')}
-    >
-      <SwList.Section
-        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-        className={'__section-list-container'}
-        enableSearchInput
-        filterBy={filterFunction}
-        list={items}
-        onClickActionBtn={onClickFilterButton}
-        renderItem={renderItem}
-        renderWhenEmpty={emptyList}
-        searchFunction={searchFunction}
-        searchMinCharactersCount={2}
-        searchPlaceholder={t<string>('Search token')}
-        showActionBtn
-      />
-      <FilterModal
-        applyFilterButtonTitle={t('Apply filter')}
-        id={FILTER_MODAL_ID}
-        onApplyFilter={onApplyFilter}
-        onCancel={onCloseFilterModal}
-        onChangeOption={onChangeFilterOption}
-        optionSelectionMap={filterSelectionMap}
-        options={filterOptions}
-        title={t('Filter')}
-      />
-    </Layout.Base>
+    <>
+      <Layout.Base
+        className={CN(className)}
+        showSubHeader={true}
+        subHeaderBackground={'transparent'}
+        subHeaderCenter={false}
+        subHeaderIcons={subHeaderButtons}
+        subHeaderPaddingVertical={true}
+        title={t<string>('Your earning positions')}
+      >
+        <SwList.Section
+          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+          className={'__section-list-container'}
+          enableSearchInput
+          filterBy={filterFunction}
+          list={items}
+          onClickActionBtn={onClickFilterButton}
+          renderItem={renderItem}
+          renderWhenEmpty={emptyList}
+          searchFunction={searchFunction}
+          searchMinCharactersCount={2}
+          searchPlaceholder={t<string>('Search token')}
+          showActionBtn
+        />
+        <FilterModal
+          applyFilterButtonTitle={t('Apply filter')}
+          id={FILTER_MODAL_ID}
+          onApplyFilter={onApplyFilter}
+          onCancel={onCloseFilterModal}
+          onChangeOption={onChangeFilterOption}
+          optionSelectionMap={filterSelectionMap}
+          options={filterOptions}
+          title={t('Filter')}
+        />
+      </Layout.Base>
+
+      {
+        !!alertProps && (
+          <AlertModal
+            modalId={alertModalId}
+            {...alertProps}
+          />
+        )
+      }
+    </>
   );
 }
 

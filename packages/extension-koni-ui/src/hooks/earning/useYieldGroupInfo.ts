@@ -44,8 +44,14 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
           }
 
           exists.isTestnet = exists.isTestnet || chainInfo.isTestnet;
+          exists.poolSlugs.push(pool.slug);
         } else {
           const token = multiChainAssetMap[group] || assetRegistry[group];
+
+          if (!token) {
+            continue;
+          }
+
           const balance = tokenGroupBalanceMap[group] || tokenBalanceMap[group];
           const freeBalance: BalanceValueInfo = balance?.free || {
             value: BN_ZERO,
@@ -53,16 +59,27 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             pastConvertedValue: BN_ZERO
           };
 
+          let apy: undefined | number;
+
+          if (pool.statistic?.totalApy) {
+            apy = pool.statistic?.totalApy;
+          }
+
+          if (pool.statistic?.totalApr) {
+            apy = calculateReward(pool.statistic?.totalApr).apy;
+          }
+
           result[group] = {
             group: group,
             token: token.slug,
-            maxApy: pool.statistic?.totalApy,
+            maxApy: apy,
             symbol: token.symbol,
             balance: freeBalance,
             isTestnet: chainInfo.isTestnet,
             name: token.name,
             chain: chain,
-            poolListLength: 1
+            poolListLength: 1,
+            poolSlugs: [pool.slug]
           };
         }
       }

@@ -84,7 +84,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       setLocking(true);
       lock()
         .then(() => {
-          goHome();
+          // goHome(); // with new root logic, not require go home after lock
         })
         .catch((e: Error) => {
           notify({

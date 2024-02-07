@@ -38,7 +38,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <span>{name || `Pool #${id}`}</span>
           </div>
           <div className={'middle-item__bond-amount'}>
-            <span className={'middle-item__bond-amount-label'}>{t('Bonded:')}</span>
+            <span className={'middle-item__bond-amount-label'}>{t('Staked:')}</span>
             <Number
               className={'middle-item__bond-amount-number'}
               decimal={decimals}

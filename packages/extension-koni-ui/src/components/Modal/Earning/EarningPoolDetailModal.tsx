@@ -62,7 +62,7 @@ function Component ({ className, detailItem, onCancel }: Props): React.ReactElem
 
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Total bonded')}
+          label={t('Total staked')}
           suffix={symbol}
           value={bondedAmount || '0'}
           valueColorSchema={'even-odd'}

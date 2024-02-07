@@ -10,4 +10,4 @@ function detectMv3 () {
 }
 
 export const isManifestV3 = detectMv3();
-export const isSupportWindow = typeof window !== 'undefined';
+export const isSupportWindow = typeof window !== 'undefined' && !!window;

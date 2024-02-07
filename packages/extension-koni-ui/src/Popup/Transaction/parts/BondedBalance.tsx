@@ -31,7 +31,7 @@ const Component = ({ bondedBalance, className, decimals, label, symbol }: Props)
         unitColor={token.colorTextTertiary}
         value={bondedBalance || 0}
       />
-      {label || t('Bonded')}
+      {label || t('Staked')}
     </Typography.Paragraph>
   );
 };

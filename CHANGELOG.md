@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.1.36
+Build date: Feb 07, 2024.
+
+Features & Update:
+- Update staking APY formula for relaychain (#2563)
+- Unique Network and Quartz NFTs support (#2580)
+- Migrate to earning feature (#2361, #2558, #2561)
+- Support vManta liquid staking on Bifrost (#2569)
+- Update position and options actions for Astar Staking DApp (#2594)
+- Update chain-list (#2586)
+- Remove explorer on Genshiro network
+- Update chain subspace gemini 3h
+- Check fee estimation on EVM networks (#2336)
+
 ## 1.1.35
 Build date: Feb 02, 2024.
 

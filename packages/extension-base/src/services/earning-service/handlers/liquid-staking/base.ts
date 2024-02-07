@@ -6,6 +6,7 @@ import { BasicTxErrorType, StakingTxErrorType } from '@subwallet/extension-base/
 import { convertDerivativeToOriginToken } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { formatNumber } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 import { t } from 'i18next';
 
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -25,7 +26,7 @@ export default abstract class BaseLiquidStakingPoolHandler extends BaseSpecialSt
 
   /* Leave pool action */
 
-  async createParamToRedeem (amount: string, address: string): Promise<number> {
+  async createParamToRedeem (amount: string, address: string): Promise<string> {
     const yieldPositionInfo = await this.getPoolPosition(address);
     const poolInfo = await this.getPoolInfo();
     const originTokenSlug = this.inputAsset;
@@ -39,7 +40,7 @@ export default abstract class BaseLiquidStakingPoolHandler extends BaseSpecialSt
 
     const formattedMinAmount = convertDerivativeToOriginToken(amount, poolInfo as SpecialYieldPoolInfo, derivativeTokenInfo, originTokenInfo);
 
-    return Math.floor(this.minAmountPercent * formattedMinAmount);
+    return new BigN(formattedMinAmount).multipliedBy(this.minAmountPercent).toFixed(0);
   }
 
   async validateYieldLeave (amount: string, address: string, fastLeave: boolean, selectedTarget?: string): Promise<TransactionError[]> {

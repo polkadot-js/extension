@@ -7,20 +7,20 @@ import Bowser from 'bowser';
 import { EnvironmentSupport, RuntimeEnvironment, RuntimeEnvironmentInfo, TargetEnvironment } from '../background/KoniTypes';
 
 function detectRuntimeEnvironment (): RuntimeEnvironmentInfo {
-  if (isSupportWindow) {
+  if (isSupportWindow && typeof document !== 'undefined') {
     // Web environment
     return {
       environment: RuntimeEnvironment.Web,
-      version: navigator.userAgent,
-      host: window.location.host,
-      protocol: window.location.protocol
+      version: navigator?.userAgent,
+      host: window.location?.host,
+      protocol: window.location?.protocol
     };
   } else if (typeof self !== 'undefined' && typeof importScripts !== 'undefined') {
     // Service Worker environment
     return {
       environment: RuntimeEnvironment.ServiceWorker,
-      version: navigator.userAgent,
-      host: self.location.host,
+      version: navigator?.userAgent,
+      host: self.location?.host,
       protocol: 'https'
     };
   } else if (typeof process !== 'undefined' && process.versions && process.versions.node) {
@@ -34,16 +34,16 @@ function detectRuntimeEnvironment (): RuntimeEnvironmentInfo {
     return {
       environment: RuntimeEnvironment.ExtensionChrome,
       version: chrome.runtime.getManifest().version,
-      host: window.location.host,
-      protocol: window.location.protocol
+      host: window.location?.host,
+      protocol: window.location?.protocol
     };
   } else if (typeof browser !== 'undefined' && typeof browser.runtime !== 'undefined') {
     // Extension environment (Firefox)
     return {
       environment: RuntimeEnvironment.ExtensionFirefox,
       version: browser.runtime.getManifest().version,
-      host: window.location.host,
-      protocol: window.location.protocol
+      host: window.location?.host,
+      protocol: window.location?.protocol
     };
     // @ts-ignore
   } else if (typeof WorkerGlobalScope !== 'undefined') {
@@ -64,7 +64,7 @@ function detectRuntimeEnvironment (): RuntimeEnvironmentInfo {
 export const RuntimeInfo: RuntimeEnvironmentInfo = detectRuntimeEnvironment();
 
 // Todo: Support more in backend case
-export const BowserParser = Bowser.getParser(typeof navigator !== 'undefined' ? navigator.userAgent : '');
+export const BowserParser = Bowser.getParser(typeof navigator !== 'undefined' ? navigator?.userAgent + '' : '');
 export const isFirefox = BowserParser.getBrowserName(true) === 'firefox';
 export const osName = BowserParser.getOSName();
 export const isMobile = BowserParser.getPlatform().type === 'mobile';

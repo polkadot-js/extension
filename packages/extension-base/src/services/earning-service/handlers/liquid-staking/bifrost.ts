@@ -54,14 +54,14 @@ const BIFROST_EXCHANGE_RATE_REQUEST = 'query MyQuery{slp_polkadot_ratio(limit:1 
 
 export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   public slug: string;
-  protected readonly name: string;
-  protected readonly shortName: string;
+  protected name: string;
+  protected shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['bifrost_dot-LOCAL-vDOT'];
   protected readonly inputAsset: string = 'bifrost_dot-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['bifrost_dot-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['bifrost_dot-NATIVE-BNC', 'bifrost_dot-LOCAL-DOT'];
-  public override readonly minAmountPercent = 0.99;
+  public override readonly minAmountPercent: number = 0.99;
   protected readonly availableMethod: YieldPoolMethodInfo = {
     join: true,
     defaultUnstake: true,
@@ -79,7 +79,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const chainInfo = this.chainInfo;
 
     this.slug = `DOT___liquid_staking___${chain}`;
-    this.name = `${chainInfo.name} Liquid Staking`;
+    this.name = `${chainInfo.name} Liquid Staking DOT`;
     this.shortName = chainInfo.name.replaceAll(' Relay Chain', '');
   }
 
@@ -155,6 +155,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
         unstakingPeriod: 24 * 28,
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
+        farmerCount: vDOTStats.holders,
         earningThreshold: {
           join: minimumMint,
           defaultUnstake: minimumRedeem,

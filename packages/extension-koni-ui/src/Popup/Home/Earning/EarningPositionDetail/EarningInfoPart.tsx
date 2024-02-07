@@ -56,7 +56,7 @@ function Component ({ className, inputAsset, poolInfo }: Props) {
         {totalApy !== undefined && (
           <MetaInfo.Number
             label={t('Estimated earnings')}
-            suffix={'%'}
+            suffix={'% ' + t('per year')}
             value={totalApy}
             valueColorSchema='even-odd'
           />

@@ -30,7 +30,7 @@ export const EARNING_DATA_RAW = {
       icon: 'Wallet',
       title: 'Claim your rewards',
       description:
-        'Your staking rewards will be paid out every {paidOut} hour. Make sure to claim them <strong>manually</strong>',
+        'Your staking rewards will be paid out every {paidOut} {paidOutTimeUnit}. Make sure to claim them <strong>manually</strong>',
       iconColor: '#51BC5E'
     },
     {
@@ -66,7 +66,7 @@ export const EARNING_DATA_RAW = {
       icon: 'Wallet',
       title: 'Check your rewards',
       description:
-        'Your staking rewards will be paid out every {paidOut} hour and will be automatically compounded to your stake',
+        'Your staking rewards will be paid out every {paidOut} {paidOutTimeUnit} and will be automatically compounded to your stake',
       iconColor: '#51BC5E'
     },
     {
@@ -151,8 +151,8 @@ export const EARNING_DATA_RAW = {
   DAPP_STAKING: [
     {
       icon: 'ThumbsUp',
-      title: 'Select {validatorNumber} dApps',
-      description: 'It is recommended that you select {validatorNumber} dApp to optimize your staking rewards',
+      title: 'Select {validatorNumber} {dAppString}',
+      description: 'It is recommended that you select {validatorNumber} {dAppString} to optimize your staking rewards',
       iconColor: '#aada62'
     },
     {
@@ -173,7 +173,7 @@ export const EARNING_DATA_RAW = {
       icon: 'Wallet',
       title: 'Claim your rewards',
       description:
-        'Your staking rewards will be paid out every {paidOut} hour. Make sure to claim them <strong>manually</strong>',
+        'Your staking rewards will be paid out every {paidOut} {paidOutTimeUnit}. Make sure to claim them <strong>manually</strong>',
       iconColor: '#51BC5E'
     },
     {

@@ -11,8 +11,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, HiddenInput, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
-import { useGetBalance, useGetNativeTokenBasicInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
+import { useGetBalance, useGetNativeTokenBasicInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitStakingClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { ClaimRewardParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -251,7 +250,7 @@ const Component = () => {
             valuePropName='checked'
           >
             <Checkbox>
-              <span className={'__option-label'}>{t('Bond reward after claim')}</span>
+              <span className={'__option-label'}>{t('Stake reward after claim')}</span>
             </Checkbox>
           </Form.Item>
         </Form>

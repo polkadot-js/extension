@@ -34,8 +34,12 @@ export const HOME_CAMPAIGN_BANNER_MODAL = 'home-campaign-banner-modal';
 /* Terms and Conditions */
 export const GENERAL_TERM_AND_CONDITION_MODAL = 'general-term-and-condition-modal';
 export const TERM_AND_CONDITION_SEED_PHRASE_MODAL = 'term-and-condition-seed-phrase-modal';
-export const CLAIM_DAPP_STAKING_REWARDS_MODAL = 'claim-dapp-staking-rewards-modal';
 /* Terms and Conditions */
 
 export const EARNING_INSTRUCTION_MODAL = 'earning-instruction-modal';
 export const EARNING_NOMINATION_MODAL = 'earning-nomination-modal';
+
+/* Announcement */
+export const CLAIM_DAPP_STAKING_REWARDS_MODAL = 'claim-dapp-staking-rewards-modal';
+export const EARNING_MIGRATION_MODAL = 'earning-migration-modal';
+/* Announcement */

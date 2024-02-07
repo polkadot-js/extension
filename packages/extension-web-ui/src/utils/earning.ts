@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { YieldPoolType } from '@subwallet/extension-base/types';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningTagType } from '@subwallet/extension-web-ui/types';
 import { Database, HandsClapping, Leaf, User, Users } from 'phosphor-react';
 
@@ -58,4 +59,66 @@ export const createEarningTypeTags = (chain: string): Record<YieldPoolType, Earn
       weight: 'fill'
     }
   };
+};
+
+export const getEarnExtrinsicType = (pool: YieldPoolInfo): ExtrinsicType => {
+  const { chain, type } = pool;
+
+  if (type === YieldPoolType.NOMINATION_POOL || type === YieldPoolType.NATIVE_STAKING) {
+    return ExtrinsicType.STAKING_BOND;
+  }
+
+  if (type === YieldPoolType.LIQUID_STAKING) {
+    if (chain === 'moonbeam') {
+      return ExtrinsicType.MINT_STDOT;
+    }
+
+    return ExtrinsicType.MINT_LDOT;
+  }
+
+  if (type === YieldPoolType.LENDING) {
+    return ExtrinsicType.MINT_LDOT;
+  }
+
+  return ExtrinsicType.STAKING_BOND;
+};
+
+export const getWithdrawExtrinsicType = (pool: YieldPoolInfo): ExtrinsicType => {
+  const { chain, type } = pool;
+
+  if (type === YieldPoolType.LIQUID_STAKING) {
+    if (chain === 'moonbeam') {
+      return ExtrinsicType.EVM_EXECUTE;
+    } else {
+      return ExtrinsicType.UNKNOWN;
+    }
+  }
+
+  if (type === YieldPoolType.LENDING) {
+    return ExtrinsicType.UNKNOWN;
+  }
+
+  return ExtrinsicType.STAKING_WITHDRAW;
+};
+
+export const getUnstakeExtrinsicType = (pool: YieldPoolInfo): ExtrinsicType => {
+  const { chain, type } = pool;
+
+  if (type === YieldPoolType.NOMINATION_POOL || type === YieldPoolType.NATIVE_STAKING) {
+    return ExtrinsicType.STAKING_UNBOND;
+  }
+
+  if (type === YieldPoolType.LIQUID_STAKING) {
+    if (chain === 'moonbeam') {
+      return ExtrinsicType.UNSTAKE_STDOT;
+    }
+
+    return ExtrinsicType.UNSTAKE_LDOT;
+  }
+
+  if (type === YieldPoolType.LENDING) {
+    return ExtrinsicType.UNSTAKE_LDOT;
+  }
+
+  return ExtrinsicType.STAKING_UNBOND;
 };

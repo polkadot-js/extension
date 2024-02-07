@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { MetaInfo } from '@subwallet/extension-web-ui/components';
@@ -10,13 +10,12 @@ import { StakingStatusUi } from '@subwallet/extension-web-ui/constants';
 import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { getEarnExtrinsicType, getUnstakeExtrinsicType, getWithdrawExtrinsicType } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, Logo, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { MinusCircle, PlusCircle, StopCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
-
-import { getEarnExtrinsicType, getUnstakeExtrinsicType, getWithdrawExtrinsicType } from './earning';
 
 interface Props extends ThemeProps {
   onClickCancelUnStakeBtn: () => void;
@@ -27,7 +26,6 @@ interface Props extends ThemeProps {
   onClickWithdrawBtn: () => void;
   yieldPoolInfo: YieldPoolInfo;
   yieldPositionInfo: YieldPositionInfo;
-  nominationPoolReward?: StakingRewardItem;
 }
 
 interface ButtonOptionProps {
@@ -42,7 +40,7 @@ interface ButtonOptionProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, nominationPoolReward, onClickCancelUnStakeBtn, onClickClaimBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, yieldPoolInfo, yieldPositionInfo } = props;
+  const { className, onClickCancelUnStakeBtn, onClickClaimBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, yieldPoolInfo, yieldPositionInfo } = props;
 
   // const isAvailable = yieldPoolInfo.stats?.isAvailable ?? true;
   const isAvailable = true;
@@ -53,13 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const line3Ref = useRef<HTMLDivElement | null>(null);
   const line3LeftPartRef = useRef<HTMLDivElement | null>(null);
   const line3RightPartRef = useRef<HTMLDivElement | null>(null);
-  const { poolInfoMap } = useSelector((state) => state.earning);
 
-  console.log('poolInfoMap', poolInfoMap);
-  console.log('nominationPoolReward', nominationPoolReward);
-  console.log('nominationPoolReward', nominationPoolReward);
-  console.log('yieldPoolInfo', yieldPoolInfo);
-  console.log('yieldPositionInfo', yieldPositionInfo);
   const { address } = yieldPositionInfo;
 
   const preCheckAction = usePreCheckAction(address, false);
@@ -86,8 +78,9 @@ const Component: React.FC<Props> = (props: Props) => {
   // const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
 
   const availableActionsByMetadata = useMemo(() => {
-    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo, nominationPoolReward?.unclaimedReward);
-  }, [nominationPoolReward?.unclaimedReward, yieldPoolInfo, yieldPositionInfo]);
+    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo);
+  }, [yieldPoolInfo, yieldPositionInfo]);
+
   const actionListByChain = useMemo(() => {
     return getYieldAvailableActionsByType(yieldPoolInfo);
   }, [yieldPoolInfo]);
@@ -171,12 +164,12 @@ const Component: React.FC<Props> = (props: Props) => {
 
           // eslint-disable-next-line no-fallthrough
         case YieldAction.START_EARNING: {
-          const text = isAvailable ? t('Supply now') : t('Stake now');
+          const text = t('Stake now');
 
           temp.icon = PlusCircle;
           temp.label = !compact ? text : undefined;
           temp.tooltip = compact ? text : undefined;
-          temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(yieldPoolInfo.slug));
+          temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(yieldPoolInfo));
           break;
         }
 
@@ -189,14 +182,14 @@ const Component: React.FC<Props> = (props: Props) => {
         case YieldAction.WITHDRAW:
         case YieldAction.WITHDRAW_EARNING:
           temp.icon = StopCircle;
-          temp.onClick = onClickButton(onClickWithdrawBtn, getWithdrawExtrinsicType(yieldPoolInfo.slug));
+          temp.onClick = onClickButton(onClickWithdrawBtn, getWithdrawExtrinsicType(yieldPoolInfo));
           temp.label = !compact ? t('Withdraw') : undefined;
           temp.tooltip = compact ? t('Withdraw') : undefined;
           temp.schema = 'secondary';
           break;
         case YieldAction.UNSTAKE:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickUnStakeBtn, getUnstakeExtrinsicType(yieldPoolInfo.slug));
+          temp.onClick = onClickButton(onClickUnStakeBtn, getUnstakeExtrinsicType(yieldPoolInfo));
           temp.label = !compact ? t('Unstake') : undefined;
           temp.tooltip = compact ? t('Unstake') : undefined;
           temp.schema = 'secondary';
@@ -214,7 +207,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [actionListByChain, availableActionsByMetadata, isAvailable, onClickButton, onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo.slug]);
+  }, [actionListByChain, availableActionsByMetadata, isAvailable, onClickButton, onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo]);
 
   const checkShowedMock = false;
 
@@ -233,23 +226,11 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className='earning-item-line-1 earning-item-line'>
           <div className={'earning-item-name-wrapper'}>
             <div className={'earning-item-name'}>{yieldPoolInfo.metadata.name}</div>
-            {
-              !isAvailable &&
-                            (
-                              <EarningTypeTag
-                                chain={yieldPoolInfo.chain}
-                                className={'earning-item-tag'}
-                                comingSoon={true}
-                                type={yieldPoolInfo.type}
-                              />
-                            )
-            }
             <EarningTypeTag
               chain={yieldPoolInfo.chain}
               className={'earning-item-tag'}
               type={yieldPoolInfo.type}
             />
-
           </div>
 
           <MetaInfo>

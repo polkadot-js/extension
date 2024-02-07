@@ -930,6 +930,35 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       borderBottomColor: 'rgba(33, 33, 33, 0.80)',
       marginBottom: token.marginSM
     },
+
+    '.__process-item-loading': {
+      height: 32,
+      display: 'flex',
+      alignItems: 'center'
+    },
+
+    '.__balance-display-area': {
+      marginBottom: token.marginSM
+    },
+
+    '.__transformed-amount-value': {
+      color: token.colorTextLight4,
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
+      marginBottom: token.marginSM,
+
+      '.ant-number, .ant-typography': {
+        color: 'inherit !important',
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      }
+    },
+
+    '.__alert-box': {
+      marginTop: token.marginSM
+    },
+
     '.earning-wrapper': {
       display: 'flex',
       flex: 1
@@ -961,34 +990,6 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
         marginBottom: token.marginSM
       }
     },
-
-    '.__process-item-loading': {
-      height: 32,
-      display: 'flex',
-      alignItems: 'center'
-    },
-
-    '.__balance-display-area': {
-      marginBottom: token.marginSM
-    },
-
-    '.__transformed-amount-value': {
-      color: token.colorTextLight4,
-      fontSize: token.fontSize,
-      lineHeight: token.lineHeight,
-      marginBottom: token.marginSM,
-
-      '.ant-number, .ant-typography': {
-        color: 'inherit !important',
-        fontSize: 'inherit !important',
-        fontWeight: 'inherit !important',
-        lineHeight: 'inherit'
-      }
-    },
-
-    '.__alert-box': {
-      marginTop: token.marginSM
-    }
   };
 });
 

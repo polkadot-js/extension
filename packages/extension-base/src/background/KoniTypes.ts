@@ -2071,26 +2071,6 @@ export interface ResolveAddressToDomainRequest {
   address: string
 }
 
-export enum StakingStatus {
-  EARNING_REWARD = 'EARNING_REWARD',
-  PARTIALLY_EARNING = 'PARTIALLY_EARNING',
-  NOT_EARNING = 'NOT_EARNING',
-  WAITING = 'WAITING',
-  NOT_STAKING = 'NOT_STAKING'
-}
-
-// export interface NominatorMetadata {
-//   chain: string,
-//   type: StakingType,
-//
-//   status: StakingStatus,
-//   address: string,
-//   activeStake: string,
-//   nominations: NominationInfo[],
-//   unstakings: UnstakingInfo[],
-//   isBondedBefore?: boolean
-// }
-
 export interface RequestYieldFastWithdrawal extends BaseRequestSign {
   address: string;
   yieldPoolInfo: YieldPoolInfo;

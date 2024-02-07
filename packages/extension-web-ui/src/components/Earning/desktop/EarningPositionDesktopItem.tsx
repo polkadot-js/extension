@@ -3,9 +3,12 @@
 
 import { ExtrinsicType, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { MetaInfo } from '@subwallet/extension-web-ui/components';
 import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
+import { StakingStatusUi } from '@subwallet/extension-web-ui/constants';
 import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, ButtonProps, Icon, Logo, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -62,6 +65,26 @@ const Component: React.FC<Props> = (props: Props) => {
   const preCheckAction = usePreCheckAction(address, false);
 
   const [isCompactButtons, setCompactButtons] = useState<boolean>(false);
+
+  // const yieldPositionInfoBalance = useMemo((): YieldAssetBalance => {
+  //   if (!yieldPoolInfo.metadata.hasOwnProperty('derivativeAssets')) {
+  //     return yieldPositionInfo.balance[0];
+  //   }
+  //
+  //   const derivativeTokenBalance = yieldPositionInfo.balance[0].activeBalance;
+  //   const inputTokenSlug = yieldPoolInfo.inputAssets[0];
+  //   // @ts-ignore
+  //   const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 1;
+  //   const inputTokenBalance = Math.floor(parseInt(derivativeTokenBalance) * exchangeRate);
+  //
+  //   return {
+  //     activeBalance: inputTokenBalance.toString(),
+  //     slug: inputTokenSlug
+  //   };
+  // }, [yieldPoolInfo.derivativeAssets, yieldPoolInfo.inputAssets, yieldPoolInfo?.stats?.assetEarning, yieldPositionInfo.balance]);
+
+  // const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
+
   const availableActionsByMetadata = useMemo(() => {
     return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo, nominationPoolReward?.unclaimedReward);
   }, [nominationPoolReward?.unclaimedReward, yieldPoolInfo, yieldPositionInfo]);
@@ -69,33 +92,17 @@ const Component: React.FC<Props> = (props: Props) => {
     return getYieldAvailableActionsByType(yieldPoolInfo);
   }, [yieldPoolInfo]);
 
-  // const nominatorMetadata = useMemo((): NominatorMetadata | undefined => {
-  //   if (![YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(yieldPoolInfo.type)) {
-  //     return;
-  //   }
-  //
-  //   return yieldPositionInfo.metadata as NominatorMetadata;
-  // }, [yieldPoolInfo.type, yieldPositionInfo.metadata]);
+  const nominatorMetadata = useMemo((): YieldPositionInfo | undefined => {
+    if (![YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(yieldPoolInfo.type)) {
+      return;
+    }
 
-  // const getStakingStatus = useMemo(() => {
-  //   if (!nominatorMetadata) {
-  //     return StakingStatusUi.active;
-  //   }
-  //
-  //   if (nominatorMetadata.status === StakingStatus.EARNING_REWARD) {
-  //     return StakingStatusUi.active;
-  //   }
-  //
-  //   if (nominatorMetadata.status === StakingStatus.PARTIALLY_EARNING) {
-  //     return StakingStatusUi.partialEarning;
-  //   }
-  //
-  //   if (nominatorMetadata.status === StakingStatus.WAITING) {
-  //     return StakingStatusUi.waiting;
-  //   }
-  //
-  //   return StakingStatusUi.inactive;
-  // }, [nominatorMetadata]);
+    return yieldPositionInfo;
+  }, [yieldPoolInfo.type, yieldPositionInfo]);
+
+  const getStakingStatus = useMemo(() => {
+    return StakingStatusUi.inactive;
+  }, []);
 
   useEffect(() => {
     const updateCompactButtons = () => {
@@ -121,7 +128,7 @@ const Component: React.FC<Props> = (props: Props) => {
       window.removeEventListener('resize', updateCompactButtons);
     };
   }, []);
-
+  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const onClickButton = useCallback((callback: VoidFunction, extrinsicType?: ExtrinsicType): React.MouseEventHandler => {
     return (event) => {
       event.stopPropagation();
@@ -133,6 +140,21 @@ const Component: React.FC<Props> = (props: Props) => {
       }
     };
   }, [preCheckAction]);
+  // const derivativeTokenState = useMemo(() => {
+  //   if (!yieldPoolInfo.metadata.) {
+  //     return;
+  //   }
+  //
+  //   const derivativeTokenSlug = yieldPoolInfo.derivativeAssets[0];
+  //
+  //   const derivativeTokenInfo = assetRegistry[derivativeTokenSlug];
+  //
+  //   return {
+  //     symbol: _getAssetSymbol(derivativeTokenInfo),
+  //     decimals: _getAssetDecimals(derivativeTokenInfo),
+  //     amount: yieldPositionInfo.balance[0].activeBalance
+  //   };
+  // }, [assetRegistry, yieldPoolInfo.derivativeAssets, yieldPositionInfo.balance]);
 
   const getButtons = useCallback((compact?: boolean): ButtonOptionProps[] => {
     const result: ButtonOptionProps[] = [];
@@ -192,7 +214,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [actionListByChain, availableActionsByMetadata, isAvailable, onClickButton, onClickCancelUnStakeBtn, onClickClaimBtn, t]);
+  }, [actionListByChain, availableActionsByMetadata, isAvailable, onClickButton, onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo.slug]);
 
   const checkShowedMock = false;
 
@@ -228,17 +250,16 @@ const Component: React.FC<Props> = (props: Props) => {
               type={yieldPoolInfo.type}
             />
 
-            {/* {exclusiveRewardTagNode} */}
           </div>
 
-          {/* <MetaInfo> */}
-          {/*  <MetaInfo.Status */}
-          {/*    className={'earning-status-item'} */}
-          {/*    statusIcon={getStakingStatus.icon} */}
-          {/*    statusName={t(getStakingStatus.name)} */}
-          {/*    valueColorSchema={getStakingStatus.schema} */}
-          {/*  /> */}
-          {/* </MetaInfo> */}
+          <MetaInfo>
+            <MetaInfo.Status
+              className={'earning-status-item'}
+              statusIcon={getStakingStatus.icon}
+              statusName={t(getStakingStatus.name)}
+              valueColorSchema={getStakingStatus.schema}
+            />
+          </MetaInfo>
         </div>
 
         <div className='earning-item-line-2 earning-item-line'>
@@ -328,7 +349,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {
               <div className={'earning-item-equivalent'}>
                 <div className={'earning-item-equivalent-label'}>
-                  {t('Equivalent to:')}
+                  {t('Total rewards:')}
                 </div>
 
                 <div className={'earning-item-equivalent-value'}>

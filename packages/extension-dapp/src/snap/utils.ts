@@ -5,7 +5,7 @@ export const hasMetamask = window.ethereum?.isMetaMask;
 
 export async function getLatestPackageVersion(): Promise<string> {
   try {
-    const response = await fetch(`https://raw.githubusercontent.com/PolkaGate/polkaMask/main/packages/snap/snap.manifest.json`);
+    const response = await fetch(`https://raw.githubusercontent.com/PolkaGate/snap/main/packages/snap/snap.manifest.json`);
     if (!response.ok) {
       throw new Error(`Failed to fetch package information. Status: ${response.status}`);
     }

@@ -211,9 +211,9 @@ export const injectedMetamaskSnap: InjectedWindowProvider = {
 }
 
 /**
- * @summary Verifies the presence of PolkaMask Snap on the user's wallet.
+ * @summary Verifies the presence of Polkagate Snap on the user's wallet.
  * @description 
- * This function asynchronously checks whether PolkaMask Snap is installed in the user's Metamask extension.
+ * This function asynchronously checks whether Polkagate Snap is installed in the user's Metamask extension.
  */
 export async function isPolkaMaskInstalled(): Promise<boolean> {
   try {

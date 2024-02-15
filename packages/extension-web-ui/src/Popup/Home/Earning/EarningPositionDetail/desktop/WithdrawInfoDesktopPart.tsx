@@ -223,7 +223,13 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
 
   '&.-no-content': {
     opacity: 0,
-    padding: 0
+    padding: 0,
+    flexBasis: 400
+  },
+
+  '.-is-show-button': {
+    paddingBottom: 6,
+    paddingTop: 6
   },
 
   '&.__withdraw-info-desktop-part': {
@@ -269,7 +275,8 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
     display: 'flex',
     gap: token.sizeSM,
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    minHeight: 40
   },
 
   '.__separator': {

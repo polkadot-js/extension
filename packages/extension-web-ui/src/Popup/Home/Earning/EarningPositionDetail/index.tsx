@@ -196,11 +196,7 @@ function Component ({ compound,
                 isShowBalance={isShowBalance}
                 poolInfo={poolInfo}
               />
-              <div style={{
-                display: 'flex',
-                gap: 16
-              }}
-              >
+              <div className={'__mid-part'}>
                 <EarningInfoDesktopPart
                   compound={compound}
                   onEarnMore={onEarnMore}
@@ -402,6 +398,11 @@ const EarningPositionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Prop
     paddingBottom: 24
   },
 
+  '.__mid-part': {
+    display: 'flex',
+    gap: 16
+  },
+
   '.__active-stake-title': {
     fontSize: token.sizeSM,
     lineHeight: token.lineHeightSM,
@@ -446,7 +447,17 @@ const EarningPositionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Prop
   '.__transaction-buttons': {
     display: 'flex',
     gap: token.sizeSM
+  },
+
+  '@media (max-width: 1260px)': {
+    '.__mid-part': {
+      flexWrap: 'wrap'
+    },
+    '.__earning-info-desktop-part, .__reward-info-desktop-part, .__withdraw-info-desktop-part': {
+      flexBasis: 350
+    }
   }
+
 }));
 
 export default EarningPositionDetail;

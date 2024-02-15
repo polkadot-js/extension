@@ -354,8 +354,9 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     alignItems: 'center',
 
     '.__balance-value': {
-      fontSize: 30,
-      lineHeight: '38px'
+      fontSize: token.fontSizeHeading2,
+      lineHeight: token.lineHeightHeading2,
+      fontWeight: token.fontWeightStrong
     }
   },
 
@@ -394,26 +395,36 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     }
   },
 
-  '@media screen and (min-width: 1480px) and (max-width: 1600px)': {
-    '.__balance-value': {
-      fontSize: '28px !important',
-      '.ant-number-decimal': {
-        fontSize: '22px !important'
+  '@media screen and (max-width: 1248px)': {
+    '.__total-balance-block': {
+      flexBasis: 220,
+      '.__header-active-stake-value': {
+        fontSize: '30px !important',
+        '.ant-number-decimal': {
+          fontSize: '20px !important'
+        }
       }
     },
-    '.__total-balance-block': {
-      '.__balance-value': {
-        fontSize: '35px !important'
-      }
-    }
-  },
+    '.__estimate-block': {
+      alignItems: 'center',
 
-  '@media screen and (max-width: 1480px)': {
-    '.__balance-value': {
-      fontSize: '25px !important',
-      '.ant-number-decimal': {
-        fontSize: '20px !important'
+      '.__balance-value': {
+        fontSize: token.fontSizeHeading3,
+        lineHeight: token.lineHeightHeading3,
+        fontWeight: token.fontWeightStrong
       }
+    },
+    '.__minimun-stake-block': {
+      alignItems: 'center',
+
+      '.__active-minimum-stake-value': {
+        fontSize: token.fontSizeHeading3,
+        lineHeight: token.lineHeightHeading3,
+        fontWeight: token.fontWeightStrong
+      }
+    },
+    '.__unstaking-period-value': {
+      fontSize: token.fontSizeHeading3
     }
   },
 

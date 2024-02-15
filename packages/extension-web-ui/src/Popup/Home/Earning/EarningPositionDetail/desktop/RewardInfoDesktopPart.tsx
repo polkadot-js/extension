@@ -257,6 +257,15 @@ export const RewardInfoDesktopPart = styled(Component)<Props>(({ theme: { token 
     }
   },
 
+  '.__auto-compounded': {
+    fontSize: token.fontSizeXL,
+    lineHeight: token.lineHeightHeading4,
+    fontWeight: token.fontWeightStrong,
+    color: token.colorWhite,
+    paddingBottom: 6,
+    paddingTop: 6
+  },
+
   '.__visit-dapp-label': {
     fontSize: token.fontSize,
     lineHeight: token.lineHeight,

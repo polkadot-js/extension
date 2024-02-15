@@ -10,7 +10,7 @@ import { SignedTransaction } from 'web3-core';
 
 import { hexStripPrefix, numberToHex } from '@polkadot/util';
 
-import { BN_ZERO } from './number';
+import { BN_ONE, BN_ZERO } from './number';
 
 const hexToNumberString = (s: string): string => {
   const temp = parseInt(s, 16);
@@ -121,9 +121,9 @@ export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) =
       return previous + blockIsBusy;
     }, 0);
 
-    const busyNetwork = blocksBusy >= (numBlock / 2); // True if half of block is busy
+    const busyNetwork = blocksBusy >= (numBlock / 2); // True, if half of block is busy
 
-    const maxPriorityFeePerGas = history.reward.reduce((previous, rewards, currentIndex) => {
+    const rawMaxPriorityFeePerGas = history.reward.reduce((previous, rewards, currentIndex) => {
       const [first, second] = rewards;
       const base = history.baseFeePerGas[currentIndex];
       const firstBN = new BigN(first);
@@ -147,6 +147,8 @@ export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) =
         return current.lte(previous) ? current : previous; // get min priority
       }
     }, BN_ZERO);
+
+    const maxPriorityFeePerGas = rawMaxPriorityFeePerGas.gte(BN_ONE) ? rawMaxPriorityFeePerGas : BN_ONE;
 
     const maxFeePerGas = baseGasFee.plus(maxPriorityFeePerGas).multipliedBy(busyNetwork ? 2 : 1.5).decimalPlaces(0); // Max gas =(base + priority) * 1.5(if not busy or 2 when busy);
 

@@ -4,6 +4,7 @@
 import Search from '@subwallet/extension-web-ui/components/Search';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
+import { openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, Question } from 'phosphor-react';
@@ -22,7 +23,7 @@ function Component ({ className, extraActionNode, inputPlaceholder, onClickFilte
   const { t } = useTranslation();
 
   const onClickHelp = useCallback(() => {
-    // todo: open earning doc
+    openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs')();
   }, []);
 
   return (

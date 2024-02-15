@@ -34,7 +34,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import useNotification from '../../../hooks/common/useNotification';
 import { getJoinYieldParams } from '../helper';
-import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '../parts';
+import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent } from '../parts';
 
 type Props = ThemeProps;
 
@@ -1013,9 +1013,9 @@ const Component = () => {
               title={STAKE_ALERT_DATA.title}
               type={'warning'}
             />
-          </TransactionContent>
-          <TransactionFooter>
             <Button
+              block={true}
+              className={'__start-earning-button'}
               disabled={isDisabledButton}
               icon={(
                 <Icon
@@ -1028,7 +1028,7 @@ const Component = () => {
             >
               {processState.currentStep === 0 ? t('Stake') : t('Continue')}
             </Button>
-          </TransactionFooter>
+          </TransactionContent>
         </div>
 
         {isWebUI && (
@@ -1093,11 +1093,39 @@ const Wrapper: React.FC<Props> = (props: Props) => {
 
 const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
+    display: 'flex',
+    flexDirection: 'row',
+    paddingTop: 24,
+    maxWidth: 784,
+    width: '100%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    gap: token.size,
+
     '.__process-item-wrapper': {
       paddingBottom: token.paddingSM,
       borderBottom: '2px solid',
       borderBottomColor: 'rgba(33, 33, 33, 0.80)',
       marginBottom: token.marginSM
+    },
+
+    '.__col': {
+      flex: '0 1 auto'
+    },
+
+    '.__chain-name': {
+      'white-space': 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
+
+    },
+
+    '.__start-earning-button': {
+      marginTop: 12
+    },
+
+    '.__chain-item': {
+      paddingLeft: 8
     },
 
     '.__process-item-loading': {
@@ -1133,26 +1161,11 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       flex: 1
     },
     '.web-ui-enable &': {
-      '.earning-wrapper': {
-        paddingTop: 24,
-        maxWidth: 784,
-        width: '100%',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        gap: token.size
-      },
 
       '.__transaction-block': {
         display: 'block',
         maxWidth: 384,
         flex: '1 0 auto'
-      },
-
-      '.transaction-footer': {
-        paddingTop: 12,
-        paddingLeft: 0,
-        paddingRight: 0,
-        marginBottom: 0
       },
 
       '.meta-info': {

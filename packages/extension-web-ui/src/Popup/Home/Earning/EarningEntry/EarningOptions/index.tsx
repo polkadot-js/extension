@@ -269,6 +269,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
   const emptyList = useCallback(() => {
     return (
       <EmptyList
+        className={'__empty-list-earning-options'}
         emptyMessage={t('No earning option found')}
         emptyTitle={t('Change your search and try again')}
         phosphorIcon={Database}
@@ -375,8 +376,19 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 }
 
 const EarningOptions = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+
   '.ant-sw-sub-header-container': {
     marginBottom: token.marginXS
+  },
+
+  '.__empty-list-earning-options': {
+    height: '100%',
+    marginBottom: 0,
+    marginTop: 0
+  },
+
+  '.__desktop-list-container': {
+    height: '100%'
   },
 
   '.__section-list-container': {
@@ -394,7 +406,15 @@ const EarningOptions = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
   '.__desktop-toolbar': {
     marginBottom: 20
+  },
+
+  '@media (min-width: 992px)': {
+    '.__empty-list-earning-options': {
+      paddingBottom: 62,
+      paddingTop: 32
+    }
   }
+
 }));
 
 export default EarningOptions;

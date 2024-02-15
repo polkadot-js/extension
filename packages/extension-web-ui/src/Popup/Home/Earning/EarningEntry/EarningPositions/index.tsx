@@ -342,6 +342,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
           shape: 'circle',
           children: t('Explore earning options')
         }}
+        className={'__empty-list-earning-positions'}
         emptyMessage={t('Change your search or explore other earning options')}
         emptyTitle={t('No earning position found')}
         phosphorIcon={Database}
@@ -592,10 +593,17 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
     flex: 1
   },
 
+  '.__empty-list-earning-positions': {
+    height: '100%',
+    marginBottom: 0,
+    marginTop: 0
+  },
+
   '.__desktop-list-container': {
     display: 'flex',
     gap: 16,
-    flexDirection: 'column'
+    flexDirection: 'column',
+    height: '100%'
   },
 
   '.earning-position-item': {
@@ -608,6 +616,13 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
 
   '.__desktop-toolbar': {
     marginBottom: 20
+  },
+
+  '@media (min-width: 992px)': {
+    '.__empty-list-earning-positions': {
+      paddingTop: 32,
+      paddingBottom: 62
+    }
   }
 }));
 

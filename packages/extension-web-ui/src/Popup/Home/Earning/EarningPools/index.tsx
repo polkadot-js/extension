@@ -222,6 +222,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const emptyList = useCallback(() => {
     return (
       <EmptyList
+        className='__empty-list-earning-pool'
         emptyMessage={t('Change your search and try again')}
         emptyTitle={t('No earning option found')}
         phosphorIcon={Database}
@@ -375,6 +376,22 @@ const EarningPools = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
     marginBottom: token.marginXS
   },
 
+  '.earning-pools-table-container': {
+    height: '100%'
+  },
+
+  '.earning-pools-table': {
+    height: '100%'
+  },
+
+  '.__tbody': {
+    height: '100%'
+  },
+
+  '.__empty-list-earning-pool': {
+    height: '100%'
+  },
+
   '.__section-list-container': {
     height: '100%',
     flex: 1
@@ -388,6 +405,13 @@ const EarningPools = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
 
   '.__desktop-toolbar': {
     marginBottom: 33
+  },
+
+  '@media (min-width: 992px)': {
+    '.__empty-list-earning-pool': {
+      paddingBottom: 62,
+      paddingTop: 32
+    }
   }
 }));
 

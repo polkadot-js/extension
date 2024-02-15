@@ -42,21 +42,47 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
   const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
   const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
 
+  const unstakingItems = useMemo(() => {
+    return [...unstakings].sort((a, b) => {
+      if (a.waitingTime === undefined && b.waitingTime === undefined) {
+        return 0;
+      }
+
+      if (a.waitingTime === undefined) {
+        return -1;
+      }
+
+      if (b.waitingTime === undefined) {
+        return 1;
+      }
+
+      return a.waitingTime - b.waitingTime;
+    });
+  }, [unstakings]);
+
   const totalWithdrawable = useMemo(() => {
     let result = BN_ZERO;
 
-    unstakings.forEach((value) => {
+    unstakingItems.forEach((value) => {
       if (value.status === UnstakingStatus.CLAIMABLE) {
         result = result.plus(value.claimable);
       }
     });
 
     return result;
-  }, [unstakings]);
+  }, [unstakingItems]);
 
   const canWithdraw = useMemo(() => {
     return totalWithdrawable.gt(BN_ZERO);
   }, [totalWithdrawable]);
+
+  const withdrawableValue = useMemo(() => {
+    if (canWithdraw) {
+      return totalWithdrawable;
+    }
+
+    return unstakingItems[0]?.claimable || '0';
+  }, [canWithdraw, totalWithdrawable, unstakingItems]);
 
   const onWithDraw = useCallback(() => {
     setWithdrawStorage({
@@ -103,7 +129,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
     inactiveModal(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL);
   }, [inactiveModal]);
 
-  if (!unstakings.length) {
+  if (!unstakingItems.length) {
     return (
       <div className={CN(className, '-no-content')}></div>
     );
@@ -116,29 +142,26 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
       >
         <div className={'__part-title'}>{t('Withdraw info')}</div>
 
-        {canWithdraw
-          ? (
-            <div className={'__withdraw-area'}>
-              <Number
-                className={'__withdraw-value'}
-                decimal={inputAsset.decimals || 0}
-                decimalOpacity={0.45}
-                subFloatNumber={true}
-                suffix={inputAsset.symbol}
-                unitOpacity={0.45}
-                value={totalWithdrawable}
-              />
-              <Button
-                onClick={onWithDraw}
-                size='xs'
-              >
-                {t('Withdraw')}
-              </Button>
-            </div>
-          )
-          : (
-            <div className={'__withdraw-area -no-content'}></div>
+        <div className={'__withdraw-area'}>
+          <Number
+            className={'__withdraw-value'}
+            decimal={inputAsset.decimals || 0}
+            decimalOpacity={0.45}
+            subFloatNumber={true}
+            suffix={inputAsset.symbol}
+            unitOpacity={0.45}
+            value={withdrawableValue}
+          />
+
+          {canWithdraw && (
+            <Button
+              onClick={onWithDraw}
+              size='xs'
+            >
+              {t('Withdraw')}
+            </Button>
           )}
+        </div>
 
         <div className={'__separator'}></div>
 
@@ -155,7 +178,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
         modalId={withdrawalDetailModalId}
         onCancelWithDraw={onCancelWithDraw}
         poolInfo={poolInfo}
-        unstakings={unstakings}
+        unstakingItems={unstakingItems}
       />
       <BaseModal
         className={'right-side-modal'}

@@ -17,34 +17,16 @@ import styled, { ThemeContext } from 'styled-components';
 type Props = ThemeProps & {
   modalId: string;
   inputAsset: _ChainAsset;
-  unstakings: UnstakingInfo[];
+  unstakingItems: UnstakingInfo[];
   poolInfo: YieldPoolInfo;
   onCancelWithDraw: VoidFunction;
 };
 
-function Component ({ className, inputAsset, modalId, onCancelWithDraw, poolInfo, unstakings }: Props) {
+function Component ({ className, inputAsset, modalId, onCancelWithDraw, poolInfo, unstakingItems }: Props) {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
 
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
-
-  const items = useMemo(() => {
-    return [...unstakings].sort((a, b) => {
-      if (a.waitingTime === undefined && b.waitingTime === undefined) {
-        return 0;
-      }
-
-      if (a.waitingTime === undefined) {
-        return -1;
-      }
-
-      if (b.waitingTime === undefined) {
-        return 1;
-      }
-
-      return a.waitingTime - b.waitingTime;
-    });
-  }, [unstakings]);
 
   const closeModal = useCallback(() => {
     inactiveModal(modalId);
@@ -85,7 +67,7 @@ function Component ({ className, inputAsset, modalId, onCancelWithDraw, poolInfo
     [t, token.colorSecondary]
   );
 
-  const haveUnlocking = useMemo(() => unstakings.some((i) => i.status === UnstakingStatus.UNLOCKING), [unstakings]);
+  const haveUnlocking = useMemo(() => unstakingItems.some((i) => i.status === UnstakingStatus.UNLOCKING), [unstakingItems]);
 
   const canCancelWithdraw = useMemo(
     () => haveUnlocking && poolInfo.metadata.availableMethod.cancelUnstake,
@@ -129,7 +111,7 @@ function Component ({ className, inputAsset, modalId, onCancelWithDraw, poolInfo
         labelFontWeight='regular'
         spaceSize='ms'
       >
-        {items.map((item, index) => {
+        {unstakingItems.map((item, index) => {
           return (
             <MetaInfo.Number
               className={'__withdraw-time-item'}

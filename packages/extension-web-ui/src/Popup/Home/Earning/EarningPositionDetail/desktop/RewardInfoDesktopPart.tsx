@@ -159,7 +159,11 @@ function Component ({ className, closeAlert, compound,
             </>
           )
           : (
-            <div className={'__claim-reward-area -no-content'}></div>
+            <div className={'__claim-reward-area'}>
+              <div className={'__auto-compounded'}>
+                {t('Auto compounded')}
+              </div>
+            </div>
           )}
 
         <div className='__separator' />

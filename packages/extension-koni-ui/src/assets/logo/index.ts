@@ -16,6 +16,7 @@ export const DefaultLogosMap: Record<string, string> = {
   walletconnect: './images/projects/walletconnect.png',
   banxa: './images/projects/banxa.png',
   coinbase: './images/projects/coinbase.png',
+  stellaswap: './images/projects/stellaswap.png',
   [SUBSTRATE_GENERIC_KEY]: './images/projects/substrate.png'
 };
 

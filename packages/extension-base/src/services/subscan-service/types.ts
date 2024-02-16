@@ -191,3 +191,25 @@ export type RequestBlockRange = {
   from: number | null,
   to: number | null
 }
+
+export interface RewardHistoryItem {
+  block_num: number;
+  extrinsic_idx: number;
+  stash: string;
+  account: string;
+  module_id: string;
+  event_id: string;
+  event_method: string;
+  params: string;
+  extrinsic_hash: string;
+  event_idx: number;
+  amount: string;
+  block_timestamp: number;
+  event_index: string;
+  extrinsic_index: string;
+}
+
+export interface RewardHistoryListResponse {
+  count: number,
+  list: null | RewardHistoryItem[]
+}

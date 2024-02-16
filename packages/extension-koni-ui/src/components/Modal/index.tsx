@@ -15,4 +15,5 @@ export * from './Customize/CustomizeModal';
 export * from './FilterModal';
 export * from './GlobalSearchTokenModal';
 export * from './ReceiveModal';
-export * from './Staking';
+export * from './Common';
+export * from './Announcement';

@@ -10,14 +10,16 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "1.1.32",
+  "version": "1.1.37",
   "workspaces": [
     "packages/*"
   ],
   "bin": {
     "koni-ci-build-dev": "./scripts/koni-ci-build-dev.mjs",
     "koni-ci-build-i18n": "./scripts/koni-ci-build-i18n.mjs",
+    "koni-ci-build-webapp": "./scripts/koni-ci-build-webapp.mjs",
     "koni-ci-ghact-build": "./scripts/koni-ci-ghact-build.mjs",
+    "koni-ci-webapp-update-build-number": "./scripts/koni-ci-webapp-update-build-number.mjs",
     "koni-dev-build-ts": "./scripts/koni-dev-build-ts.mjs"
   },
   "scripts": {
@@ -25,6 +27,7 @@
     "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "koni-ci-build-i18n",
     "build:koni-dev": "koni-ci-build-dev",
+    "build:koni-webapp": "koni-ci-build-webapp",
     "build:release": "koni-ci-ghact-build",
     "build:rollup": "polkadot-exec-rollup --config",
     "build:ui": "cd packages/extension-koni && NODE_ENV=production yarn webpack --config webpack.extension.cjs --mode production",
@@ -46,7 +49,14 @@
     "web-runner:build": "cd packages/web-runner && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
     "web-runner:build-zip": "yarn web-runner:build && cd packages/web-runner && zip -r -FS ./web-runner.zip ./build && mv ./web-runner.zip ./build",
     "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
-    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development"
+    "web-runner:publish": "gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'",
+    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
+    "webapp:build": "cd packages/webapp && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
+    "webapp:change-build-number": "node scripts/koni-ci-webapp-update-build-number.mjs",
+    "webapp:deploy": "yarn webapp:build && gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
+    "webapp:dev": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
+    "webapp:publish": "gh-pages --dist 'packages/webapp/build' --branch 'webapp-publish'",
+    "webapp:watch": "cd packages/webapp && yarn webpack-dev-server --config webpack.config.cjs --mode development"
   },
   "dependencies": {
     "@types/node": "^17.0.10",
@@ -69,16 +79,19 @@
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@ethereumjs/common": "^2.6.5",
+    "@ethereumjs/common": "^4.1.0",
+    "@google/model-viewer": "3.1.1",
+    "@ledgerhq/hw-app-eth": "6.33.4",
     "@polkadot/api": "^10.9.1",
+    "@polkadot/api-base": "^10.9.1",
     "@polkadot/api-contract": "^10.9.1",
     "@polkadot/networks": "^12.3.2",
     "@polkadot/types": "^10.9.1",
     "@polkadot/util": "^12.3.2",
     "@polkadot/util-crypto": "^12.3.2",
-    "@subwallet/chain-list": "0.2.38",
-    "@subwallet/keyring": "^0.1.1",
-    "@subwallet/ui-keyring": "^0.1.1",
+    "@subwallet/chain-list": "0.2.40",
+    "@subwallet/keyring": "^0.1.3",
+    "@subwallet/ui-keyring": "^0.1.3",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^29.3.1",
     "browserify-sign": "^4.2.2",

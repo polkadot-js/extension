@@ -15,6 +15,7 @@ const SwLogosMap: Record<string, string> = {
   moonpay: DefaultLogosMap.moonpay,
   banxa: DefaultLogosMap.banxa,
   coinbase: DefaultLogosMap.coinbase,
+  stellaswap: DefaultLogosMap.stellaswap,
   [SUBSTRATE_GENERIC_KEY]: DefaultLogosMap[SUBSTRATE_GENERIC_KEY]
 };
 

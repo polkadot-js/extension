@@ -20,6 +20,7 @@ import { GeneralEmptyList } from '../EmptyList';
 interface Props extends ThemeProps, BasicInputWrapper {
   externalAccounts?: AccountJson[];
   filter?: (account: AccountJson) => boolean;
+  doFilter?: boolean;
   addressPrefix?: number;
 }
 
@@ -30,12 +31,18 @@ function defaultFiler (account: AccountJson): boolean {
 }
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
-  const { addressPrefix, className = '', disabled, externalAccounts, filter, id = 'account-selector', label, placeholder, readOnly, statusHelp, value } = props;
-  const _items = useSelector((state) => state.accountState.accounts);
+  const { addressPrefix, className = '', disabled, doFilter = true, externalAccounts, filter, id = 'account-selector', label, placeholder, readOnly, statusHelp, value } = props;
+  const accounts = useSelector((state) => state.accountState.accounts);
 
   const items = useMemo(() => {
-    return (externalAccounts || _items).filter(filter || defaultFiler).sort(funcSortByName);
-  }, [_items, externalAccounts, filter]);
+    let _items = (externalAccounts || accounts);
+
+    if (doFilter) {
+      _items = _items.filter(filter || defaultFiler);
+    }
+
+    return _items.sort(funcSortByName);
+  }, [accounts, doFilter, externalAccounts, filter]);
 
   const { t } = useTranslation();
   const { onSelect } = useSelectModalInputHelper(props, ref);

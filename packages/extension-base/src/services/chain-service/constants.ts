@@ -33,7 +33,7 @@ export const _BALANCE_CHAIN_GROUP = {
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
   bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude'],
-  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari'],
+  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'], // perhaps there are some runtime updates
   centrifuge: ['centrifuge']
 };
@@ -49,24 +49,12 @@ export const _NFT_CHAIN_GROUP = {
   rmrk: ['kusama'],
   statemine: ['statemine'],
   statemint: ['statemint'],
-  unique_network: ['unique_network'],
+  unique_network: ['unique_network', 'quartz', 'opal'],
   bitcountry: ['bitcountry', 'pioneer'],
   vara: ['vara_network']
 };
 
 // Staking--------------------------------------------------------------------------------------------------------------
-
-export const _STAKING_CHAIN_GROUP = {
-  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend', 'kate', 'edgeware', 'creditcoin', 'vara_network', 'goldberg_testnet'],
-  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari', 'manta_network'],
-  astar: ['astar', 'shiden', 'shibuya'],
-  amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine', 'pendulum'], // amplitude and kilt only share some common logic
-  kilt: ['kilt', 'kilt_peregrine'],
-  nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph', 'kate', 'vara_network', 'goldberg_testnet'],
-  bifrost: ['bifrost', 'bifrost_testnet'],
-  aleph: ['aleph', 'alephTest'], // A0 has distinct tokenomics
-  ternoa: ['ternoa', 'ternoa_alphanet']
-};
 
 export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   alephTest: 24,
@@ -99,7 +87,8 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   creditcoin: 24,
   vara_network: 12,
   goldberg_testnet: 24,
-  manta_network: 6
+  manta_network: 6,
+  krest_network: 4
 };
 
 export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
@@ -254,6 +243,8 @@ export const EVM_PASS_CONNECT_STATUS: Record<string, string[]> = {
 export const EVM_REFORMAT_DECIMALS = {
   acala: ['acala_evm', 'karura_evm']
 };
+
+export const LATEST_CHAIN_DATA_FETCHING_INTERVAL = 120000;
 
 // TODO: review
 const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni-dev' : 'master';

@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, NominationPoolInfo, NominatorMetadata, RequestBondingSubmit, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, StakingJson, StakingRewardJson, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, RequestBondingSubmit, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, StakingJson, StakingRewardJson, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { NominationPoolInfo, RequestStakeCancelWithdrawal, RequestStakeClaimReward } from '@subwallet/extension-base/types';
 
 import { sendMessage } from '../base';
 
@@ -20,10 +21,6 @@ export async function submitBonding (request: RequestBondingSubmit): Promise<SWT
 
 export async function submitUnbonding (request: RequestUnbondingSubmit): Promise<SWTransactionResponse> {
   return sendMessage('pri(unbonding.submitTransaction)', request);
-}
-
-export async function submitStakeWithdrawal (params: RequestStakeWithdrawal): Promise<SWTransactionResponse> {
-  return sendMessage('pri(unbonding.submitWithdrawal)', params);
 }
 
 export async function submitStakeClaimReward (request: RequestStakeClaimReward): Promise<SWTransactionResponse> {

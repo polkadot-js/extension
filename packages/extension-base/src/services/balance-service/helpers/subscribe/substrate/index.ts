@@ -4,7 +4,6 @@
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
-import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
@@ -12,14 +11,14 @@ import { subscribeERC20Interval } from '@subwallet/extension-base/services/balan
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { BalanceItem, TokenBalanceRaw } from '@subwallet/extension-base/types';
+import { BalanceItem, PalletNominationPoolsPoolMember, TokenBalanceRaw } from '@subwallet/extension-base/types';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN, BN_ZERO } from '@polkadot/util';
 
-import { subscribeEqBalanceAccountPallet, subscribeEquilibriumTokenBalance } from './equilibrium';
+import { subscribeEquilibriumTokenBalance } from './equilibrium';
 
 export async function subscribeSubstrateBalance (addresses: string[], chainInfo: _ChainInfo, chain: string, networkAPI: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, callBack: (rs: BalanceItem[]) => void) {
   let unsubNativeToken: () => void;
@@ -39,9 +38,7 @@ export async function subscribeSubstrateBalance (addresses: string[], chainInfo:
       unsubLocalToken = await subscribeTokensAccountsPallet(addresses, chain, networkAPI.api, callBack, true);
     } else if (_BALANCE_CHAIN_GROUP.statemine.includes(chain)) {
       unsubLocalToken = await subscribeAssetsAccountPallet(addresses, chain, networkAPI.api, callBack);
-    } else if (_BALANCE_CHAIN_GROUP.genshiro.includes(chain)) {
-      unsubLocalToken = await subscribeEqBalanceAccountPallet(addresses, chain, networkAPI.api, callBack, true);
-    } else if (_BALANCE_CHAIN_GROUP.equilibrium_parachain.includes(chain)) {
+    } else if (_BALANCE_CHAIN_GROUP.genshiro.includes(chain) || _BALANCE_CHAIN_GROUP.equilibrium_parachain.includes(chain)) {
       unsubLocalToken = await subscribeEquilibriumTokenBalance(addresses, chain, networkAPI.api, callBack, true);
     } else if (_BALANCE_CHAIN_GROUP.centrifuge.includes(chain)) {
       unsubLocalToken = await subscribeOrmlTokensPallet(addresses, chain, networkAPI.api, callBack);

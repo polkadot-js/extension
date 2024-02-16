@@ -3,12 +3,15 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingTxErrorType, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { MAX_NOMINATIONS } from '@subwallet/extension-base/constants';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _EXPECTED_BLOCK_TIME, _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
+import { EarningStatus, NominationPoolInfo, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, TernoaStakingRewardsStakingRewardsData, UnstakingStatus, ValidatorExtraInfo } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -92,7 +95,7 @@ export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: st
   const minStakeErrorMessage = getMinStakeErrorMessage(chainInfo, bnMinStake);
   const maxValidatorErrorMessage = getMaxValidatorErrorMessage(chainInfo, chainStakingMetadata.maxValidatorPerNominator);
 
-  if (!nominatorMetadata || nominatorMetadata.status === StakingStatus.NOT_STAKING) {
+  if (!nominatorMetadata || nominatorMetadata.status === EarningStatus.NOT_STAKING) {
     if (!bnTotalStake.gte(bnMinStake)) {
       errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE, minStakeErrorMessage));
     }
@@ -175,7 +178,7 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
   const chainApi = await substrateApi.isReady;
   const _era = await chainApi.api.query.staking.currentEra();
   const currentEra = _era.toString();
-  const maxNominations = chainApi.api.consts.staking.maxNominations.toString();
+  const maxNominations = chainApi.api.consts.staking?.maxNominations?.toString() || '16'; // TODO
   const maxUnlockingChunks = chainApi.api.consts.staking.maxUnlockingChunks.toString();
   const unlockingEras = chainApi.api.consts.staking.bondingDuration.toString();
 
@@ -280,7 +283,7 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
     const validatorList = nominations.targets;
 
     await Promise.all(validatorList.map(async (validatorAddress) => {
-      let nominationStatus = StakingStatus.NOT_EARNING;
+      let nominationStatus = EarningStatus.NOT_EARNING;
       const [[identity], _eraStaker] = await Promise.all([
         parseIdentity(chainApi, validatorAddress),
         chainApi.api.query.staking.erasStakers(currentEra, validatorAddress)
@@ -299,9 +302,9 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
       ;
 
       if (!topNominators.includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if nominator has target but not in nominator list
-        nominationStatus = StakingStatus.WAITING;
+        nominationStatus = EarningStatus.WAITING;
       } else if (topNominators.slice(0, unlimitedNominatorRewarded ? undefined : maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
-        nominationStatus = StakingStatus.EARNING_REWARD;
+        nominationStatus = EarningStatus.EARNING_REWARD;
       }
 
       nominationList.push({
@@ -314,21 +317,21 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
     }));
   }
 
-  let stakingStatus = StakingStatus.NOT_EARNING;
+  let stakingStatus = EarningStatus.NOT_EARNING;
   const bnActiveStake = new BN(activeStake);
   let waitingNominationCount = 0;
 
   if (bnActiveStake.gte(minStake)) {
     for (const nomination of nominationList) {
-      if (nomination.status === StakingStatus.EARNING_REWARD) { // only need 1 earning nomination to count
-        stakingStatus = StakingStatus.EARNING_REWARD;
-      } else if (nomination.status === StakingStatus.WAITING) {
+      if (nomination.status === EarningStatus.EARNING_REWARD) { // only need 1 earning nomination to count
+        stakingStatus = EarningStatus.EARNING_REWARD;
+      } else if (nomination.status === EarningStatus.WAITING) {
         waitingNominationCount += 1;
       }
     }
 
     if (waitingNominationCount === nominationList.length) {
-      stakingStatus = StakingStatus.WAITING;
+      stakingStatus = EarningStatus.WAITING;
     }
   }
 
@@ -407,7 +410,7 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
     return {
       chain,
       type: StakingType.NOMINATED,
-      status: StakingStatus.NOT_STAKING,
+      status: EarningStatus.NOT_STAKING,
       address: address,
       activeStake: '0',
 
@@ -424,7 +427,7 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
     const validatorList = nominations.targets;
 
     await Promise.all(validatorList.map(async (validatorAddress) => {
-      let nominationStatus = StakingStatus.NOT_EARNING;
+      let nominationStatus = EarningStatus.NOT_EARNING;
       const [[identity], _eraStaker] = await Promise.all([
         parseIdentity(chainApi, validatorAddress),
         chainApi.api.query.staking.erasStakers(currentEra, validatorAddress)
@@ -443,9 +446,9 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
       ;
 
       if (!topNominators.includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if nominator has target but not in nominator list
-        nominationStatus = StakingStatus.WAITING;
+        nominationStatus = EarningStatus.WAITING;
       } else if (topNominators.slice(0, unlimitedNominatorRewarded ? undefined : maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
-        nominationStatus = StakingStatus.EARNING_REWARD;
+        nominationStatus = EarningStatus.EARNING_REWARD;
       }
 
       nominationList.push({
@@ -458,21 +461,21 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
     }));
   }
 
-  let stakingStatus = StakingStatus.NOT_EARNING;
+  let stakingStatus = EarningStatus.NOT_EARNING;
   const bnActiveStake = new BN(activeStake);
   let waitingNominationCount = 0;
 
   if (bnActiveStake.gte(minStake)) {
     for (const nomination of nominationList) {
-      if (nomination.status === StakingStatus.EARNING_REWARD) { // only need 1 earning nomination to count
-        stakingStatus = StakingStatus.EARNING_REWARD;
-      } else if (nomination.status === StakingStatus.WAITING) {
+      if (nomination.status === EarningStatus.EARNING_REWARD) { // only need 1 earning nomination to count
+        stakingStatus = EarningStatus.EARNING_REWARD;
+      } else if (nomination.status === EarningStatus.WAITING) {
         waitingNominationCount += 1;
       }
     }
 
     if (waitingNominationCount === nominationList.length) {
-      stakingStatus = StakingStatus.WAITING;
+      stakingStatus = EarningStatus.WAITING;
     }
   }
 
@@ -520,7 +523,7 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
   const currentEra = _currentEra.toString();
   const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
 
-  let stakingStatus = StakingStatus.NOT_EARNING;
+  let stakingStatus = EarningStatus.NOT_EARNING;
 
   const getPoolName = () => {
     if (poolMetadata.isUtf8) {
@@ -555,7 +558,7 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
       ;
 
       if (topNominators.includes(reformatAddress(poolStashAccount, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
-        stakingStatus = StakingStatus.EARNING_REWARD;
+        stakingStatus = EarningStatus.EARNING_REWARD;
       }
     }));
   }
@@ -596,7 +599,7 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
   const bnActiveStake = new BN(poolMemberInfo.points.toString());
 
   if (!bnActiveStake.gt(BN_ZERO)) {
-    stakingStatus = StakingStatus.NOT_EARNING;
+    stakingStatus = EarningStatus.NOT_EARNING;
   }
 
   return {
@@ -633,14 +636,14 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
       chain: chainInfo.slug,
       type: StakingType.POOLED,
       address,
-      status: StakingStatus.NOT_STAKING,
+      status: EarningStatus.NOT_STAKING,
       activeStake: '0',
       nominations: [], // can only join 1 pool at a time
       unstakings: []
     } as NominatorMetadata;
   }
 
-  let stakingStatus = StakingStatus.NOT_EARNING;
+  let stakingStatus = EarningStatus.NOT_EARNING;
 
   const _poolMetadata = (await chainApi.api.query.nominationPools.metadata(poolMemberInfo.poolId));
   const poolMetadata = _poolMetadata.toPrimitive() as unknown as Bytes;
@@ -682,7 +685,7 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
       ;
 
       if (topNominators.includes(reformatAddress(poolStashAccount, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
-        stakingStatus = StakingStatus.EARNING_REWARD;
+        stakingStatus = EarningStatus.EARNING_REWARD;
       }
     }));
   }
@@ -714,7 +717,7 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
   const bnActiveStake = new BN(poolMemberInfo.points.toString());
 
   if (!bnActiveStake.gt(BN_ZERO)) {
-    stakingStatus = StakingStatus.NOT_EARNING;
+    stakingStatus = EarningStatus.NOT_EARNING;
   }
 
   return {

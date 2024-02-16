@@ -1,5 +1,50 @@
 # CHANGELOG
 
+## 1.1.37
+Build date: Feb 07, 2024.
+
+Features & Update:
+- Add popup Introducing Earning feature (#2599)
+
+Bugs fixed:
+- Fixed bug Unable to connect with eip6763 dApp (#2590)
+
+
+## 1.1.36
+Build date: Feb 07, 2024.
+
+Features & Update:
+- Update staking APY formula for relaychain (#2563)
+- Unique Network and Quartz NFTs support (#2580)
+- Migrate to earning feature (#2361, #2558, #2561)
+- Support vManta liquid staking on Bifrost (#2569)
+- Update position and options actions for Astar Staking DApp (#2594)
+- Update chain-list (#2586)
+- Remove explorer on Genshiro network
+- Update chain subspace gemini 3h
+- Check fee estimation on EVM networks (#2336)
+
+## 1.1.35
+Build date: Feb 02, 2024.
+
+Features & Update:
+- Set pool default for Aleph Zero (#2578)
+- Update disabled XCM channels online (#2463)
+
+## 1.1.34
+Build date: Feb 01, 2024.
+
+Features & Update:
+- Update unstaking request info for KREST, AMPE (#2544)
+- Add popup want to user claim reward when Astar update dApp staking v3 (#2545)
+- Change "Claim rewards" to "Check rewards" for dApp staking (#2497)
+- Update RPC online (#2463)
+
+Bugs fixed:
+- Fixed bug Show incorrect tokens on the balance screen in case an account with the type 'ed25519' is imported (#2518)
+- Fixed bug not showing GENS token from Genshiro (#2540)
+
+
 ## 1.1.33
 Build date: Jan 23, 2024.
 

@@ -3,7 +3,10 @@
 
 import BigNumber from 'bignumber.js';
 
+export const BN_ZERO = new BigNumber(0);
 export const BN_TEN = new BigNumber(10);
+export const BN_ONE = new BigNumber(1);
+export const BN_WEI = BN_TEN.pow(9);
 export interface NumberFormatter {
   (input: string, metadata?: Record<string, number>): string;
 }
@@ -127,7 +130,7 @@ export const toBNString = (input: string | number | BigNumber, decimal: number):
 export const formatNumber = (
   input: string | number | BigNumber,
   decimal: number,
-  formatter: NumberFormatter,
+  formatter: NumberFormatter = balanceFormatter,
   metadata?: Record<string, number>
 ): string => {
   const raw = new BigNumber(input).dividedBy(BN_TEN.pow(decimal)).toFixed();

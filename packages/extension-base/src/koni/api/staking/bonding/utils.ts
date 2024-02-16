@@ -2,24 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
-import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
-import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { detectTranslate, isSameAddress, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { EarningStatus, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
+import BigNumber from 'bignumber.js';
 import { t } from 'i18next';
 
 import { ApiPromise } from '@polkadot/api';
-import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, hexToString, isHex, stringToU8a, u8aConcat } from '@polkadot/util';
-
-export interface PalletNominationPoolsPoolMember {
-  poolId: number,
-  points: number,
-  lasRecordedRewardCounter: number,
-  unbondingEras: Record<string, number>
-}
+import { Codec } from '@polkadot/types/types';
+import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
 
 export interface PalletDappsStakingDappInfo {
   address: string,
@@ -92,17 +88,6 @@ export interface PalletParachainStakingDelegator {
   status: number
 }
 
-export interface PalletStakingExposureItem {
-  who: string,
-  value: number
-}
-
-export interface PalletStakingExposure {
-  total: number,
-  own: number,
-  others: PalletStakingExposureItem[]
-}
-
 export interface PalletIdentityRegistration {
   judgements: any[],
   deposit: number,
@@ -124,21 +109,9 @@ export interface PalletIdentityRegistration {
 
 export type PalletIdentitySuper = [string, { Raw: string }]
 
-export interface ValidatorExtraInfo {
-  commission: string,
-  blocked: false,
-  identity?: string,
-  isVerified: boolean
-}
-
 export interface Unlocking {
   remainingEras: BN;
   value: BN;
-}
-
-export interface TernoaStakingRewardsStakingRewardsData {
-  sessionEraPayout: string,
-  sessionExtraRewardPayout: string
 }
 
 export function parsePoolStashAddress (api: ApiPromise, index: number, poolId: number, poolsPalletId: string) {
@@ -162,75 +135,6 @@ export function parsePoolStashAddress (api: ApiPromise, index: number, poolId: n
 
 export function transformPoolName (input: string): string {
   return input.replace(/[^\x20-\x7E]/g, '');
-}
-
-/**
-  * @returns
-  * <p>
-  * [0] - identity
-  * </p>
-  * <p>
-  * [1] - isReasonable (isVerified)
-  * </p>
-  *  */
-export async function parseIdentity (substrateApi: _SubstrateApi, address: string, children?: string): Promise<[string | undefined, boolean]> {
-  const compactResult = (rs?: string) => {
-    const result: string[] = [];
-
-    if (rs) {
-      result.push(rs);
-    }
-
-    if (children) {
-      result.push(children);
-    }
-
-    if (result.length > 0) {
-      return result.join('/');
-    } else {
-      return undefined;
-    }
-  };
-
-  if (substrateApi.api.query.identity) {
-    let identity;
-
-    const _parent = await substrateApi.api.query.identity.superOf(address);
-
-    const parentInfo = _parent.toHuman() as unknown as PalletIdentitySuper;
-
-    if (parentInfo) {
-      const [parentAddress, { Raw: data }] = parentInfo;
-      const child = isHex(data) ? hexToString(data) : data;
-
-      if (!isSameAddress(address, parentAddress)) {
-        const [rs, isReasonable] = await parseIdentity(substrateApi, parentAddress, child);
-
-        return [compactResult(rs), isReasonable];
-      }
-    }
-
-    const _identity = await substrateApi.api.query.identity.identityOf(address);
-    const identityInfo = _identity.toHuman() as unknown as PalletIdentityRegistration;
-
-    if (identityInfo) {
-      const displayName = identityInfo.info?.display?.Raw;
-      const web = identityInfo.info?.web?.Raw;
-      const riot = identityInfo.info?.riot?.Raw;
-      const twitter = identityInfo.info?.twitter?.Raw;
-      const isReasonable = identityInfo.judgements.length > 0;
-
-      if (displayName) {
-        identity = isHex(displayName) ? hexToString(displayName) : displayName;
-      } else {
-        identity = twitter || web || riot;
-      }
-
-      return [compactResult(identity), isReasonable];
-    }
-  }
-
-  return [undefined, false];
 }
 
 export function getInflationParams (networkKey: string): _SubstrateInflationParams {
@@ -283,6 +187,32 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   }
 
   return stakedReturn;
+}
+
+export function calculateChainStakedReturnV2 (chainInfo: _ChainInfo, totalIssuance: string, erasPerDay: number, lastTotalStaked: string, validatorEraReward: BigNumber, isCompound?: boolean) {
+  const DAYS_PER_YEAR = 365;
+  // @ts-ignore
+  const DECIMAL = chainInfo.substrateInfo.decimals;
+
+  const lastTotalStakedUnit = (new BigNumber(lastTotalStaked)).dividedBy(new BigNumber(10 ** DECIMAL));
+  const totalIssuanceUnit = (new BigNumber(totalIssuance)).dividedBy(new BigNumber(10 ** DECIMAL));
+  const supplyStaked = lastTotalStakedUnit.dividedBy(totalIssuanceUnit);
+
+  const dayRewardRate = validatorEraReward.multipliedBy(erasPerDay).dividedBy(totalIssuance).multipliedBy(100);
+
+  let inflationToStakers: BigNumber = new BigNumber(0);
+
+  if (!isCompound) {
+    inflationToStakers = dayRewardRate.multipliedBy(DAYS_PER_YEAR);
+  } else {
+    const multiplier = dayRewardRate.dividedBy(100).plus(1).exponentiatedBy(365);
+
+    inflationToStakers = new BigNumber(100).multipliedBy(multiplier).minus(100);
+  }
+
+  const averageRewardRate = inflationToStakers.dividedBy(supplyStaked);
+
+  return averageRewardRate.toNumber();
 }
 
 export function calculateAlephZeroValidatorReturn (chainStakedReturn: number, commission: number) {
@@ -400,6 +330,99 @@ export function isUnstakeAll (selectedValidator: string, nominations: Nomination
   return isUnstakeAll;
 }
 
+export enum YieldAction {
+  STAKE = 'STAKE',
+  UNSTAKE = 'UNSTAKE',
+  WITHDRAW = 'WITHDRAW',
+  CLAIM_REWARD = 'CLAIM_REWARD',
+  CANCEL_UNSTAKE = 'CANCEL_UNSTAKE',
+
+  START_EARNING = 'EARN',
+  WITHDRAW_EARNING = 'WITHDRAW_EARNING',
+  CUSTOM_ACTION = 'CUSTOM_ACTION'
+}
+
+export function getYieldAvailableActionsByType (yieldPoolInfo: YieldPoolInfo): YieldAction[] {
+  if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(yieldPoolInfo.type)) {
+    if (yieldPoolInfo.type === YieldPoolType.NOMINATION_POOL) {
+      return [YieldAction.STAKE, YieldAction.CLAIM_REWARD, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
+    }
+
+    const chain = yieldPoolInfo.chain;
+
+    if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+      return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CANCEL_UNSTAKE];
+    } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+      return [YieldAction.STAKE, YieldAction.CLAIM_REWARD, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
+    } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+      return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
+    }
+  }
+
+  if (yieldPoolInfo.type === YieldPoolType.LENDING) {
+    return [YieldAction.START_EARNING, YieldAction.WITHDRAW_EARNING];
+  } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
+    return [YieldAction.START_EARNING, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
+  }
+
+  return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CANCEL_UNSTAKE];
+}
+
+export function getYieldAvailableActionsByPosition (yieldPosition: YieldPositionInfo, yieldPoolInfo: YieldPoolInfo, unclaimedReward?: string): YieldAction[] {
+  const result: YieldAction[] = [];
+
+  if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(yieldPoolInfo.type)) {
+    result.push(YieldAction.STAKE);
+
+    const bnActiveStake = new BN(yieldPosition.activeStake);
+
+    if (yieldPosition.activeStake && bnActiveStake.gt(BN_ZERO)) {
+      result.push(YieldAction.UNSTAKE);
+
+      const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(yieldPosition.chain);
+      const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(yieldPosition.chain);
+      const bnUnclaimedReward = new BN(unclaimedReward || '0');
+
+      if (
+        ((yieldPosition.type === YieldPoolType.NOMINATION_POOL || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
+        isAstarNetwork
+      ) {
+        result.push(YieldAction.CLAIM_REWARD);
+      }
+    }
+
+    if (yieldPosition.unstakings.length > 0) {
+      result.push(YieldAction.CANCEL_UNSTAKE);
+      const hasClaimable = yieldPosition.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
+
+      if (hasClaimable) {
+        result.push(YieldAction.WITHDRAW);
+      }
+    }
+  } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
+    result.push(YieldAction.START_EARNING);
+
+    const activeBalance = new BN(yieldPosition.activeStake || '0');
+
+    if (activeBalance.gt(BN_ZERO)) {
+      result.push(YieldAction.UNSTAKE);
+    }
+
+    const hasWithdrawal = yieldPosition.unstakings.some((unstakingInfo) => unstakingInfo.status === UnstakingStatus.CLAIMABLE);
+
+    if (hasWithdrawal) {
+      result.push(YieldAction.WITHDRAW);
+    }
+
+    // TODO: check has unstakings to withdraw
+  } else {
+    result.push(YieldAction.START_EARNING);
+    result.push(YieldAction.WITHDRAW_EARNING); // TODO
+  }
+
+  return result;
+}
+
 export enum StakingAction {
   STAKE = 'STAKE',
   UNSTAKE = 'UNSTAKE',
@@ -457,7 +480,7 @@ export function getStakingAvailableActionsByNominator (nominatorMetadata: Nomina
 }
 
 export function isActionFromValidator (stakingType: StakingType, chain: string) {
-  if (stakingType === StakingType.POOLED) {
+  if (stakingType === StakingType.POOLED || stakingType === StakingType.LIQUID_STAKING) {
     return false;
   }
 
@@ -491,24 +514,24 @@ export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
   return result;
 }
 
-export function getStakingStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): StakingStatus {
-  let stakingStatus: StakingStatus = StakingStatus.EARNING_REWARD;
+export function getEarningStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): EarningStatus {
+  let stakingStatus: EarningStatus = EarningStatus.EARNING_REWARD;
 
   if (bnTotalActiveStake.isZero()) {
-    stakingStatus = StakingStatus.NOT_EARNING;
+    stakingStatus = EarningStatus.NOT_EARNING;
   } else {
     let invalidDelegationCount = 0;
 
     for (const nomination of nominationList) {
-      if (nomination.status === StakingStatus.NOT_EARNING) {
+      if (nomination.status === EarningStatus.NOT_EARNING) {
         invalidDelegationCount += 1;
       }
     }
 
     if (invalidDelegationCount > 0 && invalidDelegationCount < nominationList.length) {
-      stakingStatus = StakingStatus.PARTIALLY_EARNING;
+      stakingStatus = EarningStatus.PARTIALLY_EARNING;
     } else if (invalidDelegationCount === nominationList.length) {
-      stakingStatus = StakingStatus.NOT_EARNING;
+      stakingStatus = EarningStatus.NOT_EARNING;
     }
   }
 
@@ -523,6 +546,33 @@ export function getValidatorLabel (chain: string) {
   }
 
   return 'Collator';
+}
+
+export function getAvgValidatorEraReward (supportedDays: number, eraRewardHistory: Codec[]) {
+  let sumEraReward = new BigNumber(0);
+  let failEra = 0;
+
+  for (const _item of eraRewardHistory) {
+    const item = _item.toString();
+
+    if (!item) {
+      failEra += 1;
+    } else {
+      const eraReward = new BigNumber(item);
+
+      sumEraReward = sumEraReward.plus(eraReward);
+    }
+  }
+
+  return sumEraReward.dividedBy(new BigNumber(supportedDays - failEra));
+}
+
+export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupportedEras: number) {
+  if (maxSupportedEras / erasPerDay > 30) {
+    return 30;
+  } else {
+    return 15;
+  }
 }
 
 export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {

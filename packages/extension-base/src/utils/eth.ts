@@ -10,7 +10,7 @@ import { SignedTransaction } from 'web3-core';
 
 import { hexStripPrefix, numberToHex } from '@polkadot/util';
 
-import { BN_ONE, BN_ZERO } from './number';
+import { BN_ZERO } from './number';
 
 const hexToNumberString = (s: string): string => {
   const temp = parseInt(s, 16);
@@ -116,10 +116,10 @@ export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) =
     const baseGasFee = new BigN(history.baseFeePerGas[history.baseFeePerGas.length - 1]); // Last element is latest
 
     const blocksBusy = history.reward.reduce((previous: number, rewards, currentIndex) => {
-      const [priority] = rewards;
+      const [firstPriority] = rewards;
       const base = history.baseFeePerGas[currentIndex];
 
-      const priorityBN = new BigN(priority);
+      const priorityBN = new BigN(firstPriority);
       const baseBN = new BigN(base);
 
       /*
@@ -134,10 +134,11 @@ export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) =
 
     const busyNetwork = blocksBusy >= (numBlock / 2); // True, if half of block is busy
 
-    const rawMaxPriorityFeePerGas = history.reward.reduce((previous, rewards) => {
+    const maxPriorityFeePerGas = history.reward.reduce((previous, rewards) => {
       let firstBN = BN_ZERO;
       let firstIndex = 0;
 
+      /* Get first priority which greater than 0 */
       for (let i = 0; i < rewards.length; i++) {
         firstIndex = i;
         const current = rewards[i];
@@ -152,6 +153,7 @@ export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) =
 
       let secondBN = firstBN;
 
+      /* Get second priority which greater than first priority */
       for (let i = firstIndex; i < rewards.length; i++) {
         const current = rewards[i];
         const currentBN = new BigN(current);
@@ -165,19 +167,17 @@ export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) =
 
       let current: BigN;
 
-      if (firstBN.eq(BN_ZERO)) {
-        current = secondBN;
-
-        return current.gte(previous) ? current : previous; // get min priority
-      } else if (busyNetwork) {
+      if (busyNetwork) {
         current = secondBN.dividedBy(2).gte(firstBN) ? firstBN : secondBN; // second too larger than first (> 2 times), use first else use second
       } else {
         current = firstBN;
       }
 
       if (busyNetwork) {
+        /* Get max value */
         return current.gte(previous) ? current : previous; // get max priority
       } else {
+        /* Get min value which greater than 0 */
         if (previous.eq(BN_ZERO)) {
           return current; // get min priority
         } else if (current.eq(BN_ZERO)) {
@@ -188,7 +188,15 @@ export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string) =
       }
     }, BN_ZERO);
 
-    const maxPriorityFeePerGas = rawMaxPriorityFeePerGas.gte(BN_ONE) ? rawMaxPriorityFeePerGas : BN_ONE;
+    if (maxPriorityFeePerGas.eq(BN_ZERO)) {
+      const _price = await web3.api.eth.getGasPrice();
+      const gasPrice = recalculateGasPrice(_price, networkKey);
+
+      return {
+        gasPrice,
+        busyNetwork: false
+      };
+    }
 
     /* Max gas = (base + priority) * 1.5 (if not busy or 2 when busy); */
     const maxFeePerGas = baseGasFee.plus(maxPriorityFeePerGas).multipliedBy(busyNetwork ? 2 : 1.5).decimalPlaces(0);

@@ -147,7 +147,7 @@ const Component: React.FC<Props> = ({ className, compound,
                 className={'__active-stake-account-value'}
                 decimal={inputAsset?.decimals || 0}
                 suffix={inputAsset?.symbol}
-                value={row.totalStake}
+                value={BigN(row.totalStake).minus(row.unstakeBalance)}
               />
             </div>
 

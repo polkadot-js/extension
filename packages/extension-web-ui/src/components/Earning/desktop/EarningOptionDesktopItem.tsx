@@ -64,6 +64,7 @@ const Component: React.FC<Props> = (props: Props) => {
               ? <div className={'__item-apy-not-available'}>TBD</div>
               : (
                 <Number
+                  className={'__item-apy-value'}
                   decimal={0}
                   size={30}
                   suffix={'%'}
@@ -159,6 +160,22 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
       fontSize: token.fontSizeSM
     },
 
+    '.__item-apy-value': {
+      fontSize: token.fontSizeHeading2,
+      fontWeight: token.fontWeightStrong,
+      lineHeight: token.lineHeightHeading2,
+      '.ant-number-integer': {
+        fontWeight: 'inherit !important',
+        fontSize: 'inherit !important',
+        lineHeight: token.lineHeightHeading2
+      },
+      '.ant-number-decimal, .ant-number-suffix': {
+        fontSize: `${token.fontSizeHeading2}px !important`,
+        fontWeight: 'inherit !important',
+        lineHeight: token.lineHeightHeading2
+      }
+    },
+
     '.__item-available-balance-value': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
@@ -183,7 +200,8 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
     '.__item-apy': {
       display: 'flex',
       alignItems: 'baseline',
-      gap: token.paddingXS
+      gap: token.paddingXS,
+      fontWeight: token.fontWeightStrong
     },
 
     '.__item-apy-not-available': {
@@ -209,7 +227,8 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
     '.__item-total-stake-label': {
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
-      color: token.colorTextLight4
+      color: token.colorTextLight4,
+      fontWeight: token.fontWeightStrong
     },
     '.__item-total-stake-value': {
       fontSize: token.fontSizeHeading6,

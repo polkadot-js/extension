@@ -208,6 +208,10 @@ export const RewardInfoDesktopPart = styled(Component)<Props>(({ theme: { token 
   paddingRight: 24,
   paddingLeft: 24,
   flex: 1,
+  display: 'flex',
+  gap: 12,
+  flexDirection: 'column',
+  flexBasis: 384,
 
   '.__part-title': {
     lineHeight: token.lineHeight
@@ -216,8 +220,7 @@ export const RewardInfoDesktopPart = styled(Component)<Props>(({ theme: { token 
   '.__separator': {
     height: 2,
     backgroundColor: 'rgba(33, 33, 33, 0.80)',
-    marginTop: token.marginSM,
-    marginBottom: token.marginSM
+    marginBottom: -token.marginSM
   },
 
   '.__claim-reward-area': {
@@ -255,6 +258,15 @@ export const RewardInfoDesktopPart = styled(Component)<Props>(({ theme: { token 
       fontWeight: 'inherit !important',
       lineHeight: token.lineHeightHeading5
     }
+  },
+
+  '.__auto-compounded': {
+    fontSize: token.fontSizeXL,
+    lineHeight: token.lineHeightHeading4,
+    fontWeight: token.fontWeightStrong,
+    color: token.colorWhite,
+    paddingBottom: 6,
+    paddingTop: 6
   },
 
   '.__visit-dapp-label': {

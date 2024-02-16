@@ -225,8 +225,12 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
 
 export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.__table-token-col.__table-token-col, .__table-staking-type-col.__table-staking-type-col': {
+    '.__table-token-col.__table-token-col': {
       flex: 1.2
+    },
+
+    '.__table-staking-type-col.__table-staking-type-col': {
+      flex: 0.8
     },
 
     ['.__table-staking-type-col, .__table-total-value-stake-col, ' +
@@ -323,11 +327,15 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       color: token.colorTextLight1,
       fontSize: token.fontSizeXL,
       lineHeight: token.lineHeightHeading4,
-      'white-space': 'nowrap'
+      'white-space': 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      fontWeight: token.fontWeightStrong
     },
     '.__row-token-meta': {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overflow: 'hidden'
     },
     '.__row-token-shortname': {
       color: token.colorTextTertiary,
@@ -335,10 +343,14 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       overflow: 'hidden',
       whiteSpace: 'nowrap'
     },
+
     '.__row-token-description': {
       fontSize: token.fontSizeSM,
       color: token.colorTextLabel,
-      lineHeight: token.lineHeightSM
+      lineHeight: token.lineHeightSM,
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap'
     },
     '.__row-reward-wrapper': {
       color: token.colorSuccess
@@ -365,6 +377,18 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
 
     '.__tr-list, .__loading-area, .empty-list': {
       minHeight: 376
+    },
+
+    '.__tr-list': {
+      gap: 8,
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
+    '.earning-pools-table .__thead': {
+      color: token.colorWhite,
+      fontWeight: token.fontWeightStrong,
+      lineHeight: token.lineHeight
     },
 
     '.__row-stake-button .anticon': {

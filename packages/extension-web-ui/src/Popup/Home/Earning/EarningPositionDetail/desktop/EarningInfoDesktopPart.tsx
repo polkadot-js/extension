@@ -110,6 +110,7 @@ export const EarningInfoDesktopPart = styled(Component)<Props>(({ theme: { token
   paddingLeft: 24,
   paddingRight: 24,
   flex: 1,
+  flexBasis: 384,
 
   '.__separator': {
     height: 2,

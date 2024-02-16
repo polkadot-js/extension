@@ -2,19 +2,27 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { AbstractYieldPositionInfo } from '@subwallet/extension-base/types';
+import { PalletNominationPoolsBondedPoolInner, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { NominationPoolInfo, ValidatorInfo } from '@subwallet/extension-base/types/yield/info/chain/target';
+import { InfoItemBase } from '@subwallet/extension-web-ui/components/MetaInfo/parts';
 import { BalanceValueInfo } from '@subwallet/extension-web-ui/types/balance';
 import { PhosphorIcon } from '@subwallet/extension-web-ui/types/index';
 import { SwIconProps } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
+
+export type NominationPoolState = Pick<PalletNominationPoolsBondedPoolInner, 'state'>;
+export interface EarningStatusUiProps {
+  schema: InfoItemBase['valueColorSchema'];
+  icon: PhosphorIcon;
+  name: string;
+}
 
 export enum EarningEntryView {
   OPTIONS= 'options',
   POSITIONS= 'positions',
 }
 
-export interface ExtraYieldPositionInfo extends AbstractYieldPositionInfo {
+export type ExtraYieldPositionInfo = YieldPositionInfo & {
   asset: _ChainAsset;
   price: number;
   // exchangeRate: number;

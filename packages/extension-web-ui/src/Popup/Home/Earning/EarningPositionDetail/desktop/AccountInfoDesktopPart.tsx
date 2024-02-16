@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { EarningStatus, SpecialYieldPositionInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { SpecialYieldPositionInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import Table from '@subwallet/extension-web-ui/components/Table/Table';
-import { EARNING_NOMINATION_MODAL, StakingStatusUi } from '@subwallet/extension-web-ui/constants';
+import { EARNING_NOMINATION_MODAL, EarningStatusUi } from '@subwallet/extension-web-ui/constants';
 import { useGetAccountByAddress, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { findNetworkJsonByGenesisHash, reformatAddress, toShort } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, ModalContext, Number } from '@subwallet/react-ui';
@@ -27,25 +27,6 @@ interface Props extends ThemeProps {
 type RowAccountComponentProp = {
   address: string
 }
-
-const getEarningStatus = (item: YieldPositionInfo) => {
-  const stakingStatusUi = StakingStatusUi;
-  const status = item.status;
-
-  if (status === EarningStatus.EARNING_REWARD) {
-    return stakingStatusUi.active;
-  }
-
-  if (status === EarningStatus.PARTIALLY_EARNING) {
-    return stakingStatusUi.partialEarning;
-  }
-
-  if (status === EarningStatus.WAITING) {
-    return stakingStatusUi.waiting;
-  }
-
-  return stakingStatusUi.inactive;
-};
 
 const RowAccountComponent = ({ address }: RowAccountComponentProp) => {
   const account = useGetAccountByAddress(address);
@@ -140,14 +121,12 @@ const Component: React.FC<Props> = ({ className, compound,
       className: '__earning-status-col',
       sortable: true,
       render: (row: YieldPositionInfo) => {
-        const earningStatus = getEarningStatus(row);
-
         return (
           <MetaInfo>
             <MetaInfo.Status
-              statusIcon={earningStatus.icon}
-              statusName={earningStatus.name}
-              valueColorSchema={earningStatus.schema}
+              statusIcon={EarningStatusUi[row.status].icon}
+              statusName={EarningStatusUi[row.status].name}
+              valueColorSchema={EarningStatusUi[row.status].schema}
             />
           </MetaInfo>
         );
@@ -176,7 +155,7 @@ const Component: React.FC<Props> = ({ className, compound,
             {
               isSpecial && (
                 <div className={'__derivative-balance'}>
-                  <span className={'__derivative-title'}>{t('Derivative balance: ')}</span>
+                  <span className={'__derivative-title'}>{`${t('Derivative balance')}: `}</span>
                   <div className={'__derivative-balance-value'}>
                     <Number
                       decimal={deriveAsset?.decimals || 0}

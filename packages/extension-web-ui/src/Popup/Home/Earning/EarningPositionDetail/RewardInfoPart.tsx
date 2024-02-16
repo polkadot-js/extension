@@ -4,9 +4,9 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningRewardHistoryItem, EarningStatus, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningRewardHistoryItem, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { CollapsiblePanel, MetaInfo } from '@subwallet/extension-web-ui/components';
-import { ASTAR_PORTAL_URL, BN_ZERO, CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS, StakingStatusUi } from '@subwallet/extension-web-ui/constants';
+import { ASTAR_PORTAL_URL, BN_ZERO, CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS, EarningStatusUi } from '@subwallet/extension-web-ui/constants';
 import { useSelector, useTranslation, useYieldRewardTotal } from '@subwallet/extension-web-ui/hooks';
 import { AlertDialogProps, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { customFormatDate, openInNewTab } from '@subwallet/extension-web-ui/utils';
@@ -56,25 +56,6 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
         return true;
     }
   }, [isDAppStaking, type]);
-
-  const earningStatus = useMemo(() => {
-    const stakingStatusUi = StakingStatusUi;
-    const status = compound.status;
-
-    if (status === EarningStatus.EARNING_REWARD) {
-      return stakingStatusUi.active;
-    }
-
-    if (status === EarningStatus.PARTIALLY_EARNING) {
-      return stakingStatusUi.partialEarning;
-    }
-
-    if (status === EarningStatus.WAITING) {
-      return stakingStatusUi.waiting;
-    }
-
-    return stakingStatusUi.inactive;
-  }, [compound.status]);
 
   const title = useMemo(() => {
     if (type === YieldPoolType.NOMINATION_POOL) {
@@ -131,9 +112,9 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
         <MetaInfo>
           <MetaInfo.Status
             label={title}
-            statusIcon={earningStatus.icon}
-            statusName={earningStatus.name}
-            valueColorSchema={earningStatus.schema}
+            statusIcon={EarningStatusUi[compound.status].icon}
+            statusName={EarningStatusUi[compound.status].name}
+            valueColorSchema={EarningStatusUi[compound.status].schema}
           />
         </MetaInfo>
       </div>

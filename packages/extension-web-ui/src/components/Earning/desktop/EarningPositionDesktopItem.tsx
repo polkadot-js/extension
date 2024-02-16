@@ -3,13 +3,12 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { YieldPoolInfo } from '@subwallet/extension-base/types';
 import { MetaInfo } from '@subwallet/extension-web-ui/components';
 import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
-import { StakingStatusUi } from '@subwallet/extension-web-ui/constants';
-import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
-import { RootState } from '@subwallet/extension-web-ui/stores';
-import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { EarningStatusUi } from '@subwallet/extension-web-ui/constants';
+import { usePreCheckAction, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { ExtraYieldPositionInfo, PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { getEarnExtrinsicType, getUnstakeExtrinsicType, getWithdrawExtrinsicType } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, Logo, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -24,8 +23,8 @@ interface Props extends ThemeProps {
   onClickStakeBtn: () => void;
   onClickUnStakeBtn: () => void;
   onClickWithdrawBtn: () => void;
-  yieldPoolInfo: YieldPoolInfo;
-  yieldPositionInfo: YieldPositionInfo;
+  poolInfo: YieldPoolInfo;
+  positionInfo: ExtraYieldPositionInfo;
 }
 
 interface ButtonOptionProps {
@@ -40,7 +39,7 @@ interface ButtonOptionProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, onClickCancelUnStakeBtn, onClickClaimBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, yieldPoolInfo, yieldPositionInfo } = props;
+  const { className, onClickCancelUnStakeBtn, onClickClaimBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, poolInfo, positionInfo } = props;
 
   // const isAvailable = yieldPoolInfo.stats?.isAvailable ?? true;
   const isAvailable = true;
@@ -52,7 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const line3LeftPartRef = useRef<HTMLDivElement | null>(null);
   const line3RightPartRef = useRef<HTMLDivElement | null>(null);
 
-  const { address } = yieldPositionInfo;
+  const { address } = positionInfo;
 
   const preCheckAction = usePreCheckAction(address, false);
 
@@ -78,24 +77,12 @@ const Component: React.FC<Props> = (props: Props) => {
   // const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
 
   const availableActionsByMetadata = useMemo(() => {
-    return getYieldAvailableActionsByPosition(yieldPositionInfo, yieldPoolInfo);
-  }, [yieldPoolInfo, yieldPositionInfo]);
+    return getYieldAvailableActionsByPosition(positionInfo, poolInfo);
+  }, [poolInfo, positionInfo]);
 
   const actionListByChain = useMemo(() => {
-    return getYieldAvailableActionsByType(yieldPoolInfo);
-  }, [yieldPoolInfo]);
-
-  const nominatorMetadata = useMemo((): YieldPositionInfo | undefined => {
-    if (![YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(yieldPoolInfo.type)) {
-      return;
-    }
-
-    return yieldPositionInfo;
-  }, [yieldPoolInfo.type, yieldPositionInfo]);
-
-  const getStakingStatus = useMemo(() => {
-    return StakingStatusUi.inactive;
-  }, []);
+    return getYieldAvailableActionsByType(poolInfo);
+  }, [poolInfo]);
 
   useEffect(() => {
     const updateCompactButtons = () => {
@@ -121,7 +108,7 @@ const Component: React.FC<Props> = (props: Props) => {
       window.removeEventListener('resize', updateCompactButtons);
     };
   }, []);
-  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+
   const onClickButton = useCallback((callback: VoidFunction, extrinsicType?: ExtrinsicType): React.MouseEventHandler => {
     return (event) => {
       event.stopPropagation();
@@ -169,7 +156,7 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.icon = PlusCircle;
           temp.label = !compact ? text : undefined;
           temp.tooltip = compact ? text : undefined;
-          temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(yieldPoolInfo));
+          temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(poolInfo));
           break;
         }
 
@@ -182,14 +169,14 @@ const Component: React.FC<Props> = (props: Props) => {
         case YieldAction.WITHDRAW:
         case YieldAction.WITHDRAW_EARNING:
           temp.icon = StopCircle;
-          temp.onClick = onClickButton(onClickWithdrawBtn, getWithdrawExtrinsicType(yieldPoolInfo));
+          temp.onClick = onClickButton(onClickWithdrawBtn, getWithdrawExtrinsicType(poolInfo));
           temp.label = !compact ? t('Withdraw') : undefined;
           temp.tooltip = compact ? t('Withdraw') : undefined;
           temp.schema = 'secondary';
           break;
         case YieldAction.UNSTAKE:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickUnStakeBtn, getUnstakeExtrinsicType(yieldPoolInfo));
+          temp.onClick = onClickButton(onClickUnStakeBtn, getUnstakeExtrinsicType(poolInfo));
           temp.label = !compact ? t('Unstake') : undefined;
           temp.tooltip = compact ? t('Unstake') : undefined;
           temp.schema = 'secondary';
@@ -207,7 +194,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [actionListByChain, availableActionsByMetadata, isAvailable, onClickButton, onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, t, yieldPoolInfo]);
+  }, [actionListByChain, availableActionsByMetadata, isAvailable, onClickButton, onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, poolInfo, t]);
 
   const checkShowedMock = false;
 
@@ -218,33 +205,33 @@ const Component: React.FC<Props> = (props: Props) => {
     >
       <Logo
         className='earning-item-logo'
-        network={yieldPoolInfo.metadata.logo || yieldPoolInfo.chain}
+        network={poolInfo.metadata.logo || poolInfo.chain}
         size={64}
       />
 
       <div className='earning-item-lines-container'>
         <div className='earning-item-line-1 earning-item-line'>
           <div className={'earning-item-name-wrapper'}>
-            <div className={'earning-item-name'}>{yieldPoolInfo.metadata.name}</div>
+            <div className={'earning-item-name'}>{poolInfo.metadata.name}</div>
             <EarningTypeTag
-              chain={yieldPoolInfo.chain}
+              chain={poolInfo.chain}
               className={'earning-item-tag'}
-              type={yieldPoolInfo.type}
+              type={poolInfo.type}
             />
           </div>
 
           <MetaInfo>
             <MetaInfo.Status
               className={'earning-status-item'}
-              statusIcon={getStakingStatus.icon}
-              statusName={t(getStakingStatus.name)}
-              valueColorSchema={getStakingStatus.schema}
+              statusIcon={EarningStatusUi[positionInfo.status].icon}
+              statusName={EarningStatusUi[positionInfo.status].name}
+              valueColorSchema={EarningStatusUi[positionInfo.status].schema}
             />
           </MetaInfo>
         </div>
 
         <div className='earning-item-line-2 earning-item-line'>
-          <div className={'earning-item-description'}>{yieldPoolInfo.metadata.description}</div>
+          <div className={'earning-item-description'}>{poolInfo.metadata.description}</div>
 
           <div className='earning-item-total-balance-value'>
             <Number

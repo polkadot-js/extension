@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { EarningStatus, SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { Avatar, CollapsiblePanel, MetaInfo } from '@subwallet/extension-web-ui/components';
 import { InfoItemBase } from '@subwallet/extension-web-ui/components/MetaInfo/parts';
 import { EarningNominationModal } from '@subwallet/extension-web-ui/components/Modal/Earning';
-import { EARNING_NOMINATION_MODAL, StakingStatusUi } from '@subwallet/extension-web-ui/constants';
+import { EARNING_NOMINATION_MODAL, EarningStatusUi } from '@subwallet/extension-web-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { EarningTagType, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { createEarningTypeTags, findAccountByAddress, isAccountAll, toShort } from '@subwallet/extension-web-ui/utils';
@@ -64,25 +64,6 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
     return list.find((item) => isSameAddress(item.address, selectedAddress));
   }, [list, selectedAddress]);
 
-  const getEarningStatus = useCallback((item: YieldPositionInfo) => {
-    const stakingStatusUi = StakingStatusUi;
-    const status = item.status;
-
-    if (status === EarningStatus.EARNING_REWARD) {
-      return stakingStatusUi.active;
-    }
-
-    if (status === EarningStatus.PARTIALLY_EARNING) {
-      return stakingStatusUi.partialEarning;
-    }
-
-    if (status === EarningStatus.WAITING) {
-      return stakingStatusUi.waiting;
-    }
-
-    return stakingStatusUi.inactive;
-  }, []);
-
   const renderAccount = useCallback(
     (item: YieldPositionInfo) => {
       const account = findAccountByAddress(accounts, item.address);
@@ -123,7 +104,6 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
         title={t('Account info')}
       >
         {list.map((item) => {
-          const earningStatus = getEarningStatus(item);
           const disableButton = !item.nominations.length;
 
           return (
@@ -149,9 +129,9 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
                   <MetaInfo.Status
                     className={'__meta-earning-status-item'}
                     label={renderAccount(item)}
-                    statusIcon={earningStatus.icon}
-                    statusName={earningStatus.name}
-                    valueColorSchema={earningStatus.schema}
+                    statusIcon={EarningStatusUi[item.status].icon}
+                    statusName={EarningStatusUi[item.status].name}
+                    valueColorSchema={EarningStatusUi[item.status].schema}
                   />
                 )}
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './staticData';
+export * from './statusUi';
 
 export enum ExclusiveRewardSlug {
   PARALLEL='DOT___parallel_liquid_staking',

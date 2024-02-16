@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EarningStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
-import { StakingStatusUi, TRANSACTION_YIELD_UNSTAKE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { EarningStatusUi, TRANSACTION_YIELD_UNSTAKE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transaction';
@@ -12,7 +12,7 @@ import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { MinusCircle, PlusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -27,25 +27,6 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-
-  const earningStatus = useMemo(() => {
-    const stakingStatusUi = StakingStatusUi;
-    const status = compound.status;
-
-    if (status === EarningStatus.EARNING_REWARD) {
-      return stakingStatusUi.active;
-    }
-
-    if (status === EarningStatus.PARTIALLY_EARNING) {
-      return stakingStatusUi.partialEarning;
-    }
-
-    if (status === EarningStatus.WAITING) {
-      return stakingStatusUi.waiting;
-    }
-
-    return stakingStatusUi.inactive;
-  }, [compound.status]);
 
   const handleCloseUnstake = useCallback(() => {
     inactiveModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
@@ -63,9 +44,9 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
         >
           <MetaInfo.Status
             label={t('Earning status')}
-            statusIcon={earningStatus.icon}
-            statusName={earningStatus.name}
-            valueColorSchema={earningStatus.schema}
+            statusIcon={EarningStatusUi[compound.status].icon}
+            statusName={EarningStatusUi[compound.status].name}
+            valueColorSchema={EarningStatusUi[compound.status].schema}
           />
           <MetaInfo.Chain
             chain={poolInfo.chain}

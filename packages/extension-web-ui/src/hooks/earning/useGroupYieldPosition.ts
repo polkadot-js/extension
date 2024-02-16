@@ -94,12 +94,29 @@ const useGroupYieldPosition = (): YieldPositionInfo[] => {
             break;
         }
 
+        const statuses: EarningStatus[] = [];
+
         for (const info of infoList) {
           rs.totalStake = new BigN(rs.totalStake).plus(info.totalStake).toString();
           rs.activeStake = new BigN(rs.activeStake).plus(info.activeStake).toString();
           rs.unstakeBalance = new BigN(rs.unstakeBalance).plus(info.unstakeBalance).toString();
           rs.isBondedBefore = rs.isBondedBefore || info.isBondedBefore;
+          statuses.push(info.status);
         }
+
+        let status: EarningStatus;
+
+        if (statuses.every((st) => st === EarningStatus.WAITING)) {
+          status = EarningStatus.WAITING;
+        } else if (statuses.every((st) => st === EarningStatus.NOT_EARNING)) {
+          status = EarningStatus.NOT_EARNING;
+        } else if (statuses.every((st) => st === EarningStatus.EARNING_REWARD)) {
+          status = EarningStatus.EARNING_REWARD;
+        } else {
+          status = EarningStatus.PARTIALLY_EARNING;
+        }
+
+        rs.status = status;
 
         result.push(rs);
       } else {

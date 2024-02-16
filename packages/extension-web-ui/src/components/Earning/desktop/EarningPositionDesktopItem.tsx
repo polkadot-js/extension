@@ -3,28 +3,31 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { YieldPoolInfo } from '@subwallet/extension-base/types';
+import { SpecialYieldPoolInfo, SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { MetaInfo } from '@subwallet/extension-web-ui/components';
 import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
 import { EarningStatusUi } from '@subwallet/extension-web-ui/constants';
-import { usePreCheckAction, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ExtraYieldPositionInfo, PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { getEarnExtrinsicType, getUnstakeExtrinsicType, getWithdrawExtrinsicType } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, Logo, Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { MinusCircle, PlusCircle, StopCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
-  onClickCancelUnStakeBtn: () => void;
-  onClickClaimBtn: () => void;
+  onClickCancelUnStakeButton: () => void;
+  onClickClaimButton: () => void;
   onClickItem?: () => void;
-  onClickStakeBtn: () => void;
-  onClickUnStakeBtn: () => void;
-  onClickWithdrawBtn: () => void;
+  onClickStakeButton: () => void;
+  onClickUnStakeButton: () => void;
+  onClickWithdrawButton: () => void;
   poolInfo: YieldPoolInfo;
   positionInfo: ExtraYieldPositionInfo;
+  isShowBalance?: boolean;
+  unclaimedReward?: string
 }
 
 interface ButtonOptionProps {
@@ -39,10 +42,11 @@ interface ButtonOptionProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, onClickCancelUnStakeBtn, onClickClaimBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, poolInfo, positionInfo } = props;
+  const { className, isShowBalance, onClickCancelUnStakeButton,
+    onClickClaimButton, onClickItem, onClickStakeButton, onClickUnStakeButton,
+    onClickWithdrawButton, poolInfo, positionInfo, unclaimedReward } = props;
 
-  // const isAvailable = yieldPoolInfo.stats?.isAvailable ?? true;
-  const isAvailable = true;
+  const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
 
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
@@ -57,28 +61,43 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [isCompactButtons, setCompactButtons] = useState<boolean>(false);
 
-  // const yieldPositionInfoBalance = useMemo((): YieldAssetBalance => {
-  //   if (!yieldPoolInfo.metadata.hasOwnProperty('derivativeAssets')) {
-  //     return yieldPositionInfo.balance[0];
-  //   }
-  //
-  //   const derivativeTokenBalance = yieldPositionInfo.balance[0].activeBalance;
-  //   const inputTokenSlug = yieldPoolInfo.inputAssets[0];
-  //   // @ts-ignore
-  //   const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 1;
-  //   const inputTokenBalance = Math.floor(parseInt(derivativeTokenBalance) * exchangeRate);
-  //
-  //   return {
-  //     activeBalance: inputTokenBalance.toString(),
-  //     slug: inputTokenSlug
-  //   };
-  // }, [yieldPoolInfo.derivativeAssets, yieldPoolInfo.inputAssets, yieldPoolInfo?.stats?.assetEarning, yieldPositionInfo.balance]);
+  const isSpecial = useMemo(() => [YieldPoolType.LENDING, YieldPoolType.LIQUID_STAKING].includes(positionInfo.type), [positionInfo.type]);
 
-  // const inputTokenInfo = useMemo(() => assetRegistry[yieldPositionInfoBalance.slug], [assetRegistry, yieldPositionInfoBalance]);
+  const deriveAsset = useMemo(() => {
+    if ('derivativeToken' in positionInfo) {
+      const position = positionInfo as SpecialYieldPositionInfo;
+
+      return assetRegistry[position.derivativeToken];
+    } else {
+      return undefined;
+    }
+  }, [assetRegistry, positionInfo]);
+
+  const exchangeRate = useMemo(() => {
+    let rate = 1;
+
+    if ('derivativeToken' in positionInfo) {
+      const _item = positionInfo as SpecialYieldPositionInfo;
+      const _poolInfo = poolInfo as SpecialYieldPoolInfo;
+      const balanceToken = _item.balanceToken;
+
+      if (_poolInfo) {
+        const asset = _poolInfo.statistic?.assetEarning.find((i) => i.slug === balanceToken);
+
+        rate = asset?.exchangeRate || 1;
+      }
+    }
+
+    return rate;
+  }, [positionInfo, poolInfo]);
+
+  const activeStake = useMemo(() => {
+    return new BigN(positionInfo.activeStake).multipliedBy(exchangeRate);
+  }, [positionInfo.activeStake, exchangeRate]);
 
   const availableActionsByMetadata = useMemo(() => {
-    return getYieldAvailableActionsByPosition(positionInfo, poolInfo);
-  }, [poolInfo, positionInfo]);
+    return getYieldAvailableActionsByPosition(positionInfo, poolInfo, unclaimedReward);
+  }, [poolInfo, positionInfo, unclaimedReward]);
 
   const actionListByChain = useMemo(() => {
     return getYieldAvailableActionsByType(poolInfo);
@@ -120,70 +139,54 @@ const Component: React.FC<Props> = (props: Props) => {
       }
     };
   }, [preCheckAction]);
-  // const derivativeTokenState = useMemo(() => {
-  //   if (!yieldPoolInfo.metadata.) {
-  //     return;
-  //   }
-  //
-  //   const derivativeTokenSlug = yieldPoolInfo.derivativeAssets[0];
-  //
-  //   const derivativeTokenInfo = assetRegistry[derivativeTokenSlug];
-  //
-  //   return {
-  //     symbol: _getAssetSymbol(derivativeTokenInfo),
-  //     decimals: _getAssetDecimals(derivativeTokenInfo),
-  //     amount: yieldPositionInfo.balance[0].activeBalance
-  //   };
-  // }, [assetRegistry, yieldPoolInfo.derivativeAssets, yieldPositionInfo.balance]);
 
   const getButtons = useCallback((compact?: boolean): ButtonOptionProps[] => {
     const result: ButtonOptionProps[] = [];
 
     actionListByChain.forEach((item) => {
       const temp: ButtonOptionProps = {
-        disable: !availableActionsByMetadata.includes(item) || !isAvailable,
+        disable: !availableActionsByMetadata.includes(item),
         key: item,
         hidden: false
       } as ButtonOptionProps;
 
+      let text: string;
+
       switch (item) {
         case YieldAction.STAKE:
-
-          // eslint-disable-next-line no-fallthrough
-        case YieldAction.START_EARNING: {
-          const text = t('Stake now');
+        case YieldAction.START_EARNING:
+          text = t('Stake now');
 
           temp.icon = PlusCircle;
           temp.label = !compact ? text : undefined;
           temp.tooltip = compact ? text : undefined;
-          temp.onClick = onClickButton(onClickStakeBtn, getEarnExtrinsicType(poolInfo));
+          temp.onClick = onClickButton(onClickStakeButton, getEarnExtrinsicType(poolInfo));
           break;
-        }
 
         case YieldAction.CLAIM_REWARD:
           temp.icon = Wallet;
-          temp.onClick = onClickButton(onClickClaimBtn, ExtrinsicType.STAKING_CLAIM_REWARD);
+          temp.onClick = onClickButton(onClickClaimButton, ExtrinsicType.STAKING_CLAIM_REWARD);
           temp.label = !compact ? t('Claim rewards') : undefined;
           temp.tooltip = compact ? t('Claim rewards') : undefined;
           break;
         case YieldAction.WITHDRAW:
         case YieldAction.WITHDRAW_EARNING:
           temp.icon = StopCircle;
-          temp.onClick = onClickButton(onClickWithdrawBtn, getWithdrawExtrinsicType(poolInfo));
+          temp.onClick = onClickButton(onClickWithdrawButton, getWithdrawExtrinsicType(poolInfo));
           temp.label = !compact ? t('Withdraw') : undefined;
           temp.tooltip = compact ? t('Withdraw') : undefined;
           temp.schema = 'secondary';
           break;
         case YieldAction.UNSTAKE:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickUnStakeBtn, getUnstakeExtrinsicType(poolInfo));
+          temp.onClick = onClickButton(onClickUnStakeButton, getUnstakeExtrinsicType(poolInfo));
           temp.label = !compact ? t('Unstake') : undefined;
           temp.tooltip = compact ? t('Unstake') : undefined;
           temp.schema = 'secondary';
           break;
         case YieldAction.CANCEL_UNSTAKE:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickCancelUnStakeBtn, ExtrinsicType.STAKING_CANCEL_UNSTAKE);
+          temp.onClick = onClickButton(onClickCancelUnStakeButton, ExtrinsicType.STAKING_CANCEL_UNSTAKE);
           temp.label = !compact ? t('Cancel unstake') : undefined;
           temp.tooltip = compact ? t('Cancel unstake') : undefined;
           temp.schema = 'secondary';
@@ -194,9 +197,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [actionListByChain, availableActionsByMetadata, isAvailable, onClickButton, onClickCancelUnStakeBtn, onClickClaimBtn, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, poolInfo, t]);
-
-  const checkShowedMock = false;
+  }, [actionListByChain, availableActionsByMetadata, onClickButton, onClickCancelUnStakeButton, onClickClaimButton, onClickStakeButton, onClickUnStakeButton, onClickWithdrawButton, poolInfo, t]);
 
   return (
     <div
@@ -235,12 +236,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
           <div className='earning-item-total-balance-value'>
             <Number
-              decimal={8}
-              decimalOpacity={0.4}
-              size={30}
-              suffix={'$'}
-              unitOpacity={0.4}
-              value={'12345'} // TODO
+              decimal={positionInfo.asset.decimals || 0}
+              hide={!isShowBalance}
+              suffix={positionInfo.asset.symbol}
+              value={activeStake}
             />
           </div>
         </div>
@@ -314,38 +313,38 @@ const Component: React.FC<Props> = (props: Props) => {
             className={'earning-item-label-and-value'}
             ref={line3RightPartRef}
           >
-            {
+            {isSpecial && (
               <div className={'earning-item-equivalent'}>
                 <div className={'earning-item-equivalent-label'}>
-                  {t('Total rewards:')}
+                  {t('Equivalent to')}:
                 </div>
 
                 <div className={'earning-item-equivalent-value'}>
                   <Number
-                    decimal={9}
+                    decimal={deriveAsset?.decimals || 0}
                     decimalColor={token.colorSuccess}
                     intColor={token.colorSuccess}
-                    suffix={'KSM'}
+                    suffix={deriveAsset?.symbol}
                     unitColor={token.colorSuccess}
-                    value={77777}
+                    value={positionInfo.activeStake}
                   />
                 </div>
               </div>
-            }
+            )}
 
-            {checkShowedMock &&
+            {positionInfo.type === YieldPoolType.NOMINATION_POOL &&
               <div className={'earning-item-unclaimed-rewards'}>
                 <div className={'earning-item-unclaimed-rewards-label'}>
-                  {t('Unclaimed rewards:')}
+                  {t('Unclaimed rewards')}:
                 </div>
                 <div className={'earning-item-unclaimed-rewards-value'}>
                   <Number
-                    decimal={10}
+                    decimal={positionInfo.asset.decimals || 0}
                     decimalColor={token.colorSuccess}
                     intColor={token.colorSuccess}
-                    suffix={'DOT'}
+                    suffix={positionInfo.asset.symbol}
                     unitColor={token.colorSuccess}
-                    value={'11110'}
+                    value={unclaimedReward || '0'}
                   />
                 </div>
               </div>

@@ -4,9 +4,11 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SpecialYieldPositionInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
+import { Avatar, EarningNominationModal, EmptyList, MetaInfo } from '@subwallet/extension-web-ui/components';
 import Table from '@subwallet/extension-web-ui/components/Table/Table';
 import { EARNING_NOMINATION_MODAL, EarningStatusUi } from '@subwallet/extension-web-ui/constants';
 import { useGetAccountByAddress, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { findNetworkJsonByGenesisHash, reformatAddress, toShort } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -14,9 +16,6 @@ import CN from 'classnames';
 import { ArrowSquareOut, Database } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
-
-import { Avatar, EarningNominationModal, EmptyList, MetaInfo } from '../../../../../components';
-import { ThemeProps } from '../../../../../types';
 
 interface Props extends ThemeProps {
   positionItems: YieldPositionInfo[];
@@ -148,7 +147,7 @@ const Component: React.FC<Props> = ({ className, compound,
                 className={'__active-stake-account-value'}
                 decimal={inputAsset?.decimals || 0}
                 suffix={inputAsset?.symbol}
-                value={row.activeStake}
+                value={row.totalStake}
               />
             </div>
 

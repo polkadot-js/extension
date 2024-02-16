@@ -1,9 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { AlertModal, BaseModal, EarningPositionItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
-import { ASTAR_PORTAL_URL, BN_TEN, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL } from '@subwallet/extension-web-ui/constants';
+import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { EarningRewardItem, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { AlertModal, BaseModal, EarningPositionDesktopItem, EarningPositionItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
+import { ASTAR_PORTAL_URL, BN_TEN, CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, EARN_TRANSACTION, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useAlert, useFilterModal, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { reloadCron } from '@subwallet/extension-web-ui/messaging';
@@ -13,9 +16,8 @@ import CancelUnstake from '@subwallet/extension-web-ui/Popup/Transaction/variant
 import ClaimReward from '@subwallet/extension-web-ui/Popup/Transaction/variants/ClaimReward';
 import Unbond from '@subwallet/extension-web-ui/Popup/Transaction/variants/Unbond';
 import Withdraw from '@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw';
-import { RootState } from '@subwallet/extension-web-ui/stores';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
+import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -23,8 +25,7 @@ import { ArrowsClockwise, Database, FadersHorizontal, Plus, PlusCircle } from 'p
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-import EarningPositionDesktopItem from '../../../../../components/Earning/desktop/EarningPositionDesktopItem';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps & {
   earningPositions: YieldPositionInfo[];
@@ -42,7 +43,6 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const navigate = useNavigate();
 
   const { activeModal } = useContext(ModalContext);
-  const [, setSelectedSlug] = useState('');
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
   const priceMap = useSelector((state) => state.price.priceMap);
@@ -51,8 +51,15 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const { currentAccount } = useSelector((state) => state.accountState);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
-  const { poolInfoMap } = useSelector((state) => state.earning);
-  const stakingRewardMap = useSelector((state: RootState) => state.earning.earningRewards);
+  const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
+  const earningRewards = useSelector((state) => state.earning.earningRewards);
+
+  const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
+  const [, setUnStakeStorage] = useLocalStorage(UN_STAKE_TRANSACTION, DEFAULT_UN_STAKE_PARAMS);
+  const [, setClaimRewardStorage] = useLocalStorage(CLAIM_REWARD_TRANSACTION, DEFAULT_CLAIM_REWARD_PARAMS);
+  const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
+  const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
+
   const { inactiveModal } = useContext(ModalContext);
 
   const [searchInput, setSearchInput] = useState<string>('');
@@ -126,123 +133,88 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
     };
   }, [selectedFilters]);
 
-  const onClickCancelUnStakeBtn = useCallback((item: ExtraYieldPositionInfo) => {
+  const transactionFromValue = useMemo(() => {
+    return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+  }, [currentAccount?.address]);
+
+  const onClickCancelUnStakeButton = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
-      // const poolInfo = poolInfoMap[item.slug];
+      setCancelUnStakeStorage({
+        ...DEFAULT_CANCEL_UN_STAKE_PARAMS,
+        slug: item.slug,
+        chain: item.chain,
+        from: transactionFromValue
+      });
 
-      setSelectedSlug(item.slug);
-
-      // const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
-
-      // setCancelUnYieldStorage({
-      //   ...DEFAULT_CANCEL_UN_YIELD_PARAMS,
-      //   from: address,
-      //   chain: poolInfo.chain,
-      //   method: poolInfo.slug,
-      //   asset: poolInfo.inputAssets[0]
-      // });
-
-      if (isWebUI) {
-        activeModal(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL);
-      } else {
-        navigate('/transaction/cancel-unstake');
-      }
+      activeModal(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL);
     };
-  }, [activeModal, isWebUI, navigate]);
+  }, [activeModal, setCancelUnStakeStorage, transactionFromValue]);
 
-  const onClickClaimBtn = useCallback((item: ExtraYieldPositionInfo) => {
+  const onClickClaimButton = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
-      // const poolInfo = poolInfoMap[item.slug];
+      const isDAppStaking = _STAKING_CHAIN_GROUP.astar.includes(item.chain);
 
-      setSelectedSlug(item.slug);
+      if (item.type === YieldPoolType.NATIVE_STAKING && isDAppStaking) {
+        openInNewTab('https://portal.astar.network/astar/dapp-staking/discover')();
 
-      // const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
-
-      // setClaimStorage({
-      //   ...DEFAULT_CLAIM_YIELD_PARAMS,
-      //   method: poolInfo.slug,
-      //   from: address,
-      //   chain: poolInfo.chain,
-      //   asset: poolInfo.inputAssets[0]
-      // });
-
-      if (isWebUI) {
-        activeModal(TRANSACTION_YIELD_CLAIM_MODAL);
-      } else {
-        navigate('/transaction/claim-reward');
+        return;
       }
+
+      setClaimRewardStorage({
+        ...DEFAULT_CLAIM_REWARD_PARAMS,
+        slug: item.slug,
+        chain: item.chain,
+        from: transactionFromValue
+      });
+
+      activeModal(TRANSACTION_YIELD_CLAIM_MODAL);
     };
-  }, [activeModal, isWebUI, navigate]);
+  }, [activeModal, setClaimRewardStorage, transactionFromValue]);
 
-  const onClickStakeBtn = useCallback((item: ExtraYieldPositionInfo) => {
+  const onClickStakeButton = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
-      // const poolInfo = poolInfoMap[item.slug];
-
-      setSelectedSlug(item.slug);
-
-      // const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
-
-      // setYieldStorage({
-      //   ...DEFAULT_YIELD_PARAMS,
-      //   method: poolInfo.slug,
-      //   from: address,
-      //   chain: poolInfo.chain,
-      //   asset: poolInfo.inputAssets[0]
-      // });
+      setEarnStorage({
+        ...DEFAULT_EARN_PARAMS,
+        slug: item.slug,
+        chain: item.chain,
+        from: transactionFromValue
+      });
 
       navigate('/transaction/earn');
     };
-  }, [navigate]);
+  }, [navigate, setEarnStorage, transactionFromValue]);
 
-  const onClickUnStakeBtn = useCallback((item: ExtraYieldPositionInfo) => {
+  const onClickUnStakeButton = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
-      // const poolInfo = poolInfoMap[item.slug];
+      setUnStakeStorage({
+        ...DEFAULT_UN_STAKE_PARAMS,
+        slug: item.slug,
+        chain: item.chain,
+        from: transactionFromValue
+      });
 
-      setSelectedSlug(item.slug);
-
-      // const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
-
-      // setUnYieldStorage({
-      //   ...DEFAULT_UN_YIELD_PARAMS,
-      //   from: address,
-      //   chain: poolInfo.chain,
-      //   method: poolInfo.slug,
-      //   asset: poolInfo.inputAssets[0]
-      // });
-
-      if (isWebUI) {
-        activeModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
-      } else {
-        navigate('/transaction/unstake');
-      }
+      activeModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
     };
-  }, [activeModal, isWebUI, navigate]);
+  }, [activeModal, setUnStakeStorage, transactionFromValue]);
 
-  const onClickWithdrawBtn = useCallback((item: ExtraYieldPositionInfo) => {
+  const onClickWithdrawButton = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
-      const poolInfo = poolInfoMap[item.slug];
+      if (item.type === YieldPoolType.LENDING) {
+        onClickUnStakeButton(item)();
 
-      setSelectedSlug(item.slug);
-
-      // const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
-
-      // if (isStaking) {
-      // setWithdrawStorage({
-      //   ...DEFAULT_WITHDRAW_YIELD_PARAMS,
-      //   from: address,
-      //   chain: poolInfo.chain,
-      //   method: poolInfo.slug,
-      //   asset: poolInfo.inputAssets[0]
-      // });
-
-      if (isWebUI) {
-        activeModal(TRANSACTION_YIELD_WITHDRAW_MODAL);
-      } else {
-        navigate('/transaction/withdraw');
+        return;
       }
-      // }
+
+      setWithdrawStorage({
+        ...DEFAULT_WITHDRAW_PARAMS,
+        slug: item.slug,
+        chain: item.chain,
+        from: transactionFromValue
+      });
+
+      activeModal(TRANSACTION_YIELD_WITHDRAW_MODAL);
     };
-  }, [activeModal, isWebUI, navigate, poolInfoMap]);
+  }, [activeModal, onClickUnStakeButton, setWithdrawStorage, transactionFromValue]);
 
   const onClickItem = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
@@ -271,7 +243,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
     };
   }, [closeAlert, navigate, openAlert, t]);
 
-  const renderEarningItem = useCallback((item: ExtraYieldPositionInfo) => {
+  const renderItem = useCallback((item: ExtraYieldPositionInfo) => {
     if (!isWebUI) {
       return (
         <EarningPositionItem
@@ -291,36 +263,46 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
       return null;
     }
 
+    let nominationPoolReward: EarningRewardItem | undefined;
+
+    if (isAccountAll(currentAccount?.address || '')) {
+      nominationPoolReward = {
+        state: APIItemState.READY,
+        chain: poolInfo.chain,
+        slug: poolInfo.slug,
+        group: poolInfo.group,
+        address: ALL_ACCOUNT_KEY,
+        type: YieldPoolType.NOMINATION_POOL
+      } as EarningRewardItem;
+
+      earningRewards.forEach((earningReward: EarningRewardItem) => {
+        if (nominationPoolReward && earningReward.chain === poolInfo.chain && earningReward.type === YieldPoolType.NOMINATION_POOL) {
+          const bnUnclaimedReward = new BigN(earningReward.unclaimedReward || '0');
+
+          nominationPoolReward.unclaimedReward = bnUnclaimedReward.plus(nominationPoolReward.unclaimedReward || '0').toString();
+        }
+      });
+    } else {
+      nominationPoolReward = earningRewards.find((rewardItem) => rewardItem.address === item?.address && rewardItem.chain === poolInfo?.chain && rewardItem.type === YieldPoolType.NOMINATION_POOL);
+    }
+
     return (
       <EarningPositionDesktopItem
-        className={'__earning-item'}
+        className={'earning-position-desktop-item'}
+        isShowBalance={isShowBalance}
         key={key}
-        onClickCancelUnStakeBtn={onClickCancelUnStakeBtn(item)}
-        onClickClaimBtn={onClickClaimBtn(item)}
+        onClickCancelUnStakeButton={onClickCancelUnStakeButton(item)}
+        onClickClaimButton={onClickClaimButton(item)}
         onClickItem={onClickItem(item)}
-        onClickStakeBtn={onClickStakeBtn(item)}
-        onClickUnStakeBtn={onClickUnStakeBtn(item)}
-        onClickWithdrawBtn={onClickWithdrawBtn(item)}
+        onClickStakeButton={onClickStakeButton(item)}
+        onClickUnStakeButton={onClickUnStakeButton(item)}
+        onClickWithdrawButton={onClickWithdrawButton(item)}
         poolInfo={poolInfo}
         positionInfo={item}
+        unclaimedReward={nominationPoolReward?.unclaimedReward}
       />
     );
-  }, [isWebUI, poolInfoMap, onClickCancelUnStakeBtn, onClickClaimBtn, onClickItem, onClickStakeBtn, onClickUnStakeBtn, onClickWithdrawBtn, isShowBalance]);
-
-  // const renderItem = useCallback(
-  //   (item: ExtraYieldPositionInfo) => {
-  //     return (
-  //       <EarningPositionItem
-  //         className={'earning-position-item'}
-  //         isShowBalance={isShowBalance}
-  //         key={item.slug}
-  //         onClick={onClickItem(item)}
-  //         positionInfo={item}
-  //       />
-  //     );
-  //   },
-  //   [isShowBalance, onClickItem]
-  // );
+  }, [isWebUI, poolInfoMap, currentAccount?.address, isShowBalance, onClickCancelUnStakeButton, onClickClaimButton, onClickItem, onClickStakeButton, onClickUnStakeButton, onClickWithdrawButton, earningRewards]);
 
   const emptyList = useCallback(() => {
     return (
@@ -458,7 +440,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
                   className={'__desktop-list-container'}
                   filterBy={filterFunction}
                   list={items}
-                  renderItem={renderEarningItem}
+                  renderItem={renderItem}
                   renderWhenEmpty={emptyList}
                   searchBy={searchFunction}
                   searchMinCharactersCount={1}
@@ -474,7 +456,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
                 filterBy={filterFunction}
                 list={items}
                 onClickActionBtn={onClickFilterButton}
-                renderItem={renderEarningItem}
+                renderItem={renderItem}
                 renderWhenEmpty={emptyList}
                 searchFunction={searchFunction}
                 searchMinCharactersCount={1}
@@ -550,20 +532,6 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
           modalId={TRANSACTION_YIELD_WITHDRAW_MODAL}
         >
           <Withdraw />
-        </Transaction>
-      </BaseModal>
-      <BaseModal
-        className={'right-side-modal'}
-        destroyOnClose={true}
-        id={TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL}
-        onCancel={handleCloseCancelUnstake}
-        title={t('Cancel unstake')}
-      >
-        <Transaction
-          modalContent={isWebUI}
-          modalId={TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL}
-        >
-          <CancelUnstake />
         </Transaction>
       </BaseModal>
 

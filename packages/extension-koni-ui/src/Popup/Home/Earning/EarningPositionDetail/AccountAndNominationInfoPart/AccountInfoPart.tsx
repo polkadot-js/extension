@@ -12,9 +12,10 @@ import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks'
 import { EarningTagType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTypeTags, findAccountByAddress, isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
+import Slider, { CustomArrowProps, Settings } from 'react-slick';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowSquareOut } from 'phosphor-react';
+import { ArrowCircleLeft, ArrowCircleRight, ArrowSquareOut } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -25,6 +26,30 @@ type Props = ThemeProps & {
   poolInfo: YieldPoolInfo;
 };
 
+const NextArrow = ({ currentSlide, slideCount, ...props }: CustomArrowProps) => (
+  <div {...props}>
+    <div className={'__right-arrow'}>
+      <Icon
+        customSize={'28px'}
+        phosphorIcon={ArrowCircleRight}
+        weight={'fill'}
+      />
+    </div>
+  </div>
+);
+
+const PrevArrow = ({ currentSlide, slideCount, ...props }: CustomArrowProps) => (
+  <div {...props}>
+    <div className={'__left-arrow'}>
+      <Icon
+        customSize={'28px'}
+        phosphorIcon={ArrowCircleLeft}
+        weight={'fill'}
+      />
+    </div>
+  </div>
+);
+
 function Component ({ className, compound, inputAsset, list, poolInfo }: Props) {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -33,6 +58,18 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
 
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { accounts } = useSelector((state) => state.accountState);
+
+  const sliderSettings: Settings = useMemo(() => {
+    return {
+      dots: false,
+      infinite: true,
+      speed: 500,
+      centerMode: true,
+      slidesToShow: 1,
+      nextArrow: <NextArrow />,
+      prevArrow: <PrevArrow />
+    };
+  }, [list.length]);
 
   const deriveAsset = useMemo(() => {
     if ('derivativeToken' in compound) {
@@ -122,6 +159,11 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
         })}
         title={t('Account info')}
       >
+        <div className={'__slider-container'}>
+        <Slider
+          className={'__carousel-container'}
+          {...sliderSettings}
+        >
         {list.map((item) => {
           const earningStatus = getEarningStatus(item);
           const disableButton = !item.nominations.length;
@@ -234,6 +276,8 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
             </MetaInfo>
           );
         })}
+        </Slider>
+        </div>
       </CollapsiblePanel>
 
       <EarningNominationModal
@@ -251,6 +295,44 @@ export const AccountInfoPart = styled(Component)<Props>(({ theme: { token } }: P
       overflowX: 'auto',
       display: 'flex',
       gap: token.sizeSM
+    }
+  },
+
+  '.__slider-container': {
+    flex: 1,
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    display: 'flex',
+    flexDirection: 'column'
+  },
+
+  '.__carousel-container': {
+    // position: 'relative',
+    marginBottom: 40,
+
+    '.slick-prev, .slick-next': {
+      width: 40,
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      cursor: 'pointer',
+      zIndex: 20
+    },
+
+    '.slick-prev': {
+      left: 0
+    },
+
+    '.slick-next': {
+      right: token.size
+    },
+
+    '.__left-arrow, .__right-arrow': {
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
     }
   },
 

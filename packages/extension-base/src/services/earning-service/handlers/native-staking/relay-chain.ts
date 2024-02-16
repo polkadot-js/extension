@@ -10,7 +10,7 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -159,11 +159,11 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
   async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletStakingStakingLedger, currentEra: string, minStake: BN, _deriveSessionProgress: DeriveSessionProgress): Promise<Omit<YieldPositionInfo, keyof BaseYieldPositionInfo>> {
     const chain = chainInfo.slug;
 
-    const [_nominations, _bonded] = await Promise.all([
+    const [_nominations, _bonded, _activeEra] = await Promise.all([
       substrateApi.api.query?.staking?.nominators(address),
-      substrateApi.api.query?.staking?.bonded(address)
+      substrateApi.api.query?.staking?.bonded(address),
+      substrateApi.api.query?.staking?.activeEra()
     ]);
-
     const unlimitedNominatorRewarded = substrateApi.api.consts.staking.maxExposurePageSize !== undefined;
     const _maxNominatorRewardedPerValidator = (substrateApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
     const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
@@ -233,8 +233,9 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     ledger.unlocking.forEach((unlockingChunk) => {
       // Calculate the remaining time for current era ending
-      const isClaimable = unlockingChunk.era - parseInt(currentEra) < 0;
-      const remainingEra = unlockingChunk.era - parseInt(currentEra);
+      const activeEra = _activeEra.toPrimitive() as unknown as PalletStakingActiveEraInfo;
+      const isClaimable = unlockingChunk.era - parseInt(activeEra.index) <= 0;
+      const remainingEra = unlockingChunk.era - parseInt(activeEra.index) - 1;
       const expectedBlockTime = _EXPECTED_BLOCK_TIME[chain];
       const eraLength = _deriveSessionProgress.eraLength.toNumber();
       const eraProgress = _deriveSessionProgress.eraProgress.toNumber();

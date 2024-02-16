@@ -8,7 +8,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldPositionInfo, EarningRewardHistoryItem, EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NominationYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolInfo, YieldPoolMethodInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningRewardHistoryItem, EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NominationYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingActiveEraInfo, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolInfo, YieldPoolMethodInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -190,9 +190,10 @@ export default class NominationPoolHandler extends BasePoolHandler {
     const poolsPalletId = substrateApi.api.consts.nominationPools.palletId.toString();
     const poolStashAccount = parsePoolStashAddress(substrateApi.api, 0, poolMemberInfo.poolId, poolsPalletId);
 
-    const [_nominations, _poolMetadata] = await Promise.all([
+    const [_nominations, _poolMetadata, _activeEra] = await Promise.all([
       substrateApi.api.query.staking.nominators(poolStashAccount),
-      substrateApi.api.query.nominationPools.metadata(poolMemberInfo.poolId)
+      substrateApi.api.query.nominationPools.metadata(poolMemberInfo.poolId),
+      substrateApi.api.query.staking.activeEra()
     ]);
 
     const poolMetadata = _poolMetadata.toPrimitive() as unknown as string;
@@ -241,8 +242,9 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
       // Calculate the remaining time for current era ending
-      const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) < 0;
-      const remainingEra = parseInt(unlockingEra) - parseInt(currentEra);
+      const activeEra = _activeEra.toPrimitive() as unknown as PalletStakingActiveEraInfo;
+      const isClaimable = parseInt(unlockingEra) - parseInt(activeEra.index) <= 0;
+      const remainingEra = parseInt(unlockingEra) - parseInt(activeEra.index) - 1;
       const expectedBlockTime = _EXPECTED_BLOCK_TIME[this.chain];
       const eraLength = _deriveSessionProgress.eraLength.toNumber();
       const eraProgress = _deriveSessionProgress.eraProgress.toNumber();

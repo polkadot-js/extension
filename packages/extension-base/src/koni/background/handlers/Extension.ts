@@ -1696,6 +1696,7 @@ export default class KoniExtension {
           to: to,
           substrateApi
         });
+        console.log(transaction?.toHex());
       }
     } catch (e) {
       const error = e as Error;

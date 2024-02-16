@@ -546,8 +546,8 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       minHeight: 376
     },
 
-    '@media(max-width: 1199px)': {
-      '.__earning-status-col.__earning-status-col, .__table-unstake-col.__table-unstake-col': {
+    '@media(max-width: 1430px)': {
+      '.__earning-status-col.__earning-status-col': {
         display: 'none'
       }
     },

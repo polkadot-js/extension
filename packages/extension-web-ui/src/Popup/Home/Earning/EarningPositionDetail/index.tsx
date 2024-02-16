@@ -196,30 +196,36 @@ function Component ({ compound,
                 isShowBalance={isShowBalance}
                 poolInfo={poolInfo}
               />
-              <div className={'__mid-part'}>
-                <EarningInfoDesktopPart
-                  compound={compound}
-                  onEarnMore={onEarnMore}
-                  onLeavePool={onLeavePool}
-                  poolInfo={poolInfo}
-                />
-                <RewardInfoDesktopPart
-                  closeAlert={closeAlert}
-                  compound={compound}
-                  inputAsset={inputAsset}
-                  isShowBalance={isShowBalance}
-                  openAlert={openAlert}
-                  rewardHistories={filteredRewardHistories}
-                  transactionChainValue={transactionChainValue}
-                  transactionFromValue={transactionFromValue}
-                />
-                <WithdrawInfoDesktopPart
-                  inputAsset={inputAsset}
-                  poolInfo={poolInfo}
-                  transactionChainValue={transactionChainValue}
-                  transactionFromValue={transactionFromValue}
-                  unstakings={compound.unstakings}
-                />
+              <div className={'__middle-part'}>
+                <div className={'__middle-part-item-wrapper'}>
+                  <EarningInfoDesktopPart
+                    compound={compound}
+                    onEarnMore={onEarnMore}
+                    onLeavePool={onLeavePool}
+                    poolInfo={poolInfo}
+                  />
+                </div>
+                <div className={'__middle-part-item-wrapper'}>
+                  <RewardInfoDesktopPart
+                    closeAlert={closeAlert}
+                    compound={compound}
+                    inputAsset={inputAsset}
+                    isShowBalance={isShowBalance}
+                    openAlert={openAlert}
+                    rewardHistories={filteredRewardHistories}
+                    transactionChainValue={transactionChainValue}
+                    transactionFromValue={transactionFromValue}
+                  />
+                </div>
+                <div className={'__middle-part-item-wrapper'}>
+                  <WithdrawInfoDesktopPart
+                    inputAsset={inputAsset}
+                    poolInfo={poolInfo}
+                    transactionChainValue={transactionChainValue}
+                    transactionFromValue={transactionFromValue}
+                    unstakings={compound.unstakings}
+                  />
+                </div>
               </div>
               <AccountInfoDesktopPart
                 compound={compound}
@@ -398,9 +404,24 @@ const EarningPositionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Prop
     paddingBottom: 24
   },
 
-  '.__mid-part': {
+  '.__middle-part': {
     display: 'flex',
-    gap: 16
+    marginLeft: -8,
+    marginRight: -8
+  },
+
+  '.__middle-part-item-wrapper': {
+    flex: '1 1 384px',
+    display: 'flex'
+  },
+
+  '.__earning-info-desktop-part, .__reward-info-desktop-part, .__withdraw-info-desktop-part': {
+    marginLeft: 8,
+    marginRight: 8,
+    marginBottom: 16
+  },
+  '.__withdraw-info-desktop-part .-no-content': {
+    marginBottom: 0
   },
 
   '.__active-stake-title': {
@@ -449,12 +470,12 @@ const EarningPositionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Prop
     gap: token.sizeSM
   },
 
-  '@media (max-width: 1260px)': {
-    '.__mid-part': {
+  '@media (max-width: 1450px)': {
+    '.__middle-part': {
       flexWrap: 'wrap'
     },
     '.__earning-info-desktop-part, .__reward-info-desktop-part, .__withdraw-info-desktop-part': {
-      flexBasis: 350
+      flexBasis: 384
     }
   }
 

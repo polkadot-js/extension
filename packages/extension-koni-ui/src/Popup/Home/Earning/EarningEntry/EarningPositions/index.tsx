@@ -286,6 +286,10 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 }
 
 const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  '.ant-sw-sub-header-container': {
+    marginBottom: token.marginXS
+  },
+
   '.__section-list-container': {
     height: '100%',
     flex: 1

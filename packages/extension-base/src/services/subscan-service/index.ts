@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
-import { CrowdloanContributionsResponse, ExtrinsicItem, ExtrinsicsListResponse, IMultiChainBalance, RequestBlockRange, SubscanRequest, SubscanResponse, TransferItem, TransfersListResponse } from '@subwallet/extension-base/services/subscan-service/types';
+import { CrowdloanContributionsResponse, ExtrinsicItem, ExtrinsicsListResponse, IMultiChainBalance, RequestBlockRange, RewardHistoryListResponse, SubscanRequest, SubscanResponse, TransferItem, TransfersListResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { wait } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -45,7 +45,7 @@ export class SubscanService {
     });
   }
 
-  private addRequest<T> (run: SubscanRequest<T>['run']) {
+  public addRequest<T> (run: SubscanRequest<T>['run']) {
     const newId = this.getId();
 
     return new Promise<T>((resolve, reject) => {
@@ -305,5 +305,24 @@ export class SubscanService {
     await _getTransferItems(0);
 
     return resultMap;
+  }
+
+  public getRewardHistoryList (chain: string, address: string, page = 0): Promise<RewardHistoryListResponse> {
+    return this.addRequest<RewardHistoryListResponse>(async () => {
+      const rs = await this.postRequest(this.getApiUrl(chain, 'api/scan/account/reward_slash'), {
+        page,
+        category: 'Reward',
+        row: 10,
+        address
+      });
+
+      if (rs.status !== 200) {
+        throw new SWError('SubscanService.getRewardHistoryList', await rs.text());
+      }
+
+      const jsonData = (await rs.json()) as SubscanResponse<RewardHistoryListResponse>;
+
+      return jsonData.data;
+    });
   }
 }

@@ -49,7 +49,7 @@ const packages = [
 const polkadotDevOptions = require('@polkadot/dev/config/babel-config-webpack.cjs');
 
 const _additionalEnv = {
-
+  NFT_MINTING_HOST: JSON.stringify(process.env.NFT_MINTING_HOST)
 };
 
 // Overwrite babel babel config from polkadot dev
@@ -67,7 +67,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       liveReload: false,
       webSocketServer: false,
       compress: true,
-      port: 9000
+      port: 9001
     },
     module: {
       rules: [

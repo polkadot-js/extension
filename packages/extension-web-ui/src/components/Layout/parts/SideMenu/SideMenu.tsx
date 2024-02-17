@@ -49,7 +49,7 @@ function Component ({ className,
       },
       {
         label: t('Earning'),
-        value: '/home/earning/',
+        value: '/home/earning',
         icon: Vault
       },
       {

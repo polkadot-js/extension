@@ -54,10 +54,6 @@ const TableHead = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProp
       flex: 1
     },
 
-    '.__th.-sortable': {
-      cursor: 'pointer'
-    },
-
     '.__th-inner': {
       paddingLeft: token.paddingXS,
       paddingRight: token.paddingXS,

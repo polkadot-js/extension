@@ -169,6 +169,19 @@ export const EarningWithdrawalDetailModal = styled(Component)<Props>(({ theme: {
     paddingRight: token.padding
   },
 
+  '.__withdraw-time-item .__label': {
+    display: 'flex',
+    gap: 4,
+    'white-space': 'nowrap'
+  },
+  '.__withdraw-time-item .__value-col': {
+    flex: '0 1 auto'
+  },
+  '.__withdraw-time-item .__withdraw-time-label': {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden'
+  },
+
   '.__claim-reward-value': {
     fontSize: token.fontSizeHeading4,
     lineHeight: token.lineHeightHeading4,

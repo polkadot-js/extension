@@ -24,7 +24,6 @@ import CN from 'classnames';
 import { ArrowsClockwise, Database, FadersHorizontal, Plus, PlusCircle, Vault } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Divider } from 'semantic-ui-react';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -470,7 +469,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
               />
             )
         }
-        <Divider className='divider' />
+        <div className={'__separator'}></div>
         <div className='footer-group'>
           <div className='footer-left'>
             <Icon
@@ -591,8 +590,16 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
   },
 
   '.__section-list-container': {
+    paddingLeft: 0,
+    paddingRight: 0,
     height: '100%',
     flex: 1
+  },
+  '.__separator': {
+    height: 2,
+    backgroundColor: token.colorSplit,
+    marginTop: token.marginSM,
+    marginBottom: token.marginSM
   },
 
   '.__empty-list-earning-positions': {
@@ -602,6 +609,8 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
   },
 
   '.__desktop-list-container': {
+    paddingLeft: 0,
+    paddingRight: 0,
     display: 'flex',
     gap: 16,
     flexDirection: 'column',
@@ -657,12 +666,16 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
   },
   '@media (max-width: 992px)': {
     '.footer-group': {
-      paddingRight: token.padding,
       paddingLeft: token.padding,
+      paddingRight: token.padding,
       '.footer-content': {
         fontSize: token.fontSize,
         lineHeight: token.lineHeight
       }
+    },
+    '.__separator': {
+      marginLeft: token.margin,
+      marginRight: token.margin
     },
     '.__desktop-list-container': {
       overflow: 'visible'

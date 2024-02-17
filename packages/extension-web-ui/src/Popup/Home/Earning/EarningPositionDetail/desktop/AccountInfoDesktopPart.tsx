@@ -345,8 +345,10 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
     },
 
     '.__tr': {
-      'white-space': 'nowrap',
-      cursor: 'pointer'
+      'white-space': 'nowrap'
+    },
+    '.__tr:hover': {
+      backgroundColor: token.colorBgSecondary
     },
 
     '.__part-title': {

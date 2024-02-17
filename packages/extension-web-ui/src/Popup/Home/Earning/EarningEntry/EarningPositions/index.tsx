@@ -63,6 +63,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const { inactiveModal } = useContext(ModalContext);
 
   const [searchInput, setSearchInput] = useState<string>('');
+  const [selectedPositionInfo, setSelectedPositionInfo] = useState<ExtraYieldPositionInfo | undefined>(undefined);
 
   const items: ExtraYieldPositionInfo[] = useMemo(() => {
     if (!earningPositions.length) {
@@ -139,6 +140,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
   const onClickCancelUnStakeButton = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
+      setSelectedPositionInfo(item);
       setCancelUnStakeStorage({
         ...DEFAULT_CANCEL_UN_STAKE_PARAMS,
         slug: item.slug,
@@ -160,6 +162,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         return;
       }
 
+      setSelectedPositionInfo(item);
       setClaimRewardStorage({
         ...DEFAULT_CLAIM_REWARD_PARAMS,
         slug: item.slug,
@@ -173,6 +176,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
   const onClickStakeButton = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
+      setSelectedPositionInfo(item);
       setEarnStorage({
         ...DEFAULT_EARN_PARAMS,
         slug: item.slug,
@@ -186,6 +190,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
   const onClickUnStakeButton = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
+      setSelectedPositionInfo(item);
       setUnStakeStorage({
         ...DEFAULT_UN_STAKE_PARAMS,
         slug: item.slug,
@@ -205,6 +210,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         return;
       }
 
+      setSelectedPositionInfo(item);
       setWithdrawStorage({
         ...DEFAULT_WITHDRAW_PARAMS,
         slug: item.slug,
@@ -513,7 +519,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         destroyOnClose={true}
         id={TRANSACTION_YIELD_UNSTAKE_MODAL}
         onCancel={handleCloseUnstake}
-        title={t('Unstake')}
+        title={selectedPositionInfo?.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unstake')}
       >
         <Transaction
           modalContent={isWebUI}

@@ -155,7 +155,7 @@ const Component: React.FC<Props> = (props: Props) => {
       switch (item) {
         case YieldAction.STAKE:
         case YieldAction.START_EARNING:
-          text = t('Stake now');
+          text = poolInfo.type === YieldPoolType.LENDING ? t('Supply more') : t('Stake now');
 
           temp.icon = PlusCircle;
           temp.label = !compact ? text : undefined;

@@ -21,9 +21,10 @@ import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extensi
 import { Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowsClockwise, Database, FadersHorizontal, Plus, PlusCircle } from 'phosphor-react';
+import { ArrowsClockwise, Database, FadersHorizontal, Plus, PlusCircle, Vault } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Divider } from 'semantic-ui-react';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -404,6 +405,10 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
     inactiveModal(TRANSACTION_YIELD_WITHDRAW_MODAL);
   }, [inactiveModal]);
 
+  const addMore = useCallback(() => {
+    setEntryView(EarningEntryView.OPTIONS);
+  }, [setEntryView]);
+
   return (
     <>
       <Layout.Base
@@ -465,6 +470,32 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
               />
             )
         }
+        <Divider className='divider' />
+        <div className='footer-group'>
+          <div className='footer-left'>
+            <Icon
+              iconColor='var(--icon-color)'
+              phosphorIcon={PlusCircle}
+              size='md'
+              weight='fill'
+            />
+            <span className='footer-content'>{t('Do you want to add more funds or add funds to other pools')}</span>
+          </div>
+          <Button
+            icon={(
+              <Icon
+                phosphorIcon={Vault}
+                size='sm'
+                weight='fill'
+              />
+            )}
+            onClick={addMore}
+            shape='circle'
+            size='xs'
+          >
+            {t('Add more fund')}
+          </Button>
+        </div>
 
         <FilterModal
           applyFilterButtonTitle={t('Apply filter')}
@@ -548,6 +579,13 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 }
 
 const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  overflow: 'auto',
+  flex: 1,
+  width: '100%',
+  alignSelf: 'center',
+  display: 'flex',
+  flexDirection: 'column',
+
   '.ant-sw-sub-header-container': {
     marginBottom: token.marginXS
   },
@@ -567,6 +605,8 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
     display: 'flex',
     gap: 16,
     flexDirection: 'column',
+    overflowY: 'auto',
+    flex: 1,
     height: '100%'
   },
 
@@ -581,11 +621,51 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
   '.__desktop-toolbar': {
     marginBottom: 20
   },
+  '.divider': {
+    marginTop: 0,
+    marginBottom: token.margin
+  },
+
+  '.footer-group': {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: token.paddingXS,
+    paddingBottom: token.paddingXL,
+
+    '.footer-left': {
+      '--icon-color': token['gold-6'],
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: token.sizeXS
+    },
+
+    '.footer-content': {
+      fontSize: token.fontSizeHeading5,
+      lineHeight: token.lineHeightHeading5,
+      color: token.colorTextSecondary
+    }
+  },
 
   '@media (min-width: 992px)': {
     '.__empty-list-earning-positions': {
       paddingTop: 32,
       paddingBottom: 62
+    }
+  },
+  '@media (max-width: 992px)': {
+    '.footer-group': {
+      paddingRight: token.padding,
+      paddingLeft: token.padding,
+      '.footer-content': {
+        fontSize: token.fontSize,
+        lineHeight: token.lineHeight
+      }
+    },
+    '.__desktop-list-container': {
+      overflow: 'visible'
     }
   }
 }));

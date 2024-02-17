@@ -201,29 +201,29 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div
-      className={CN(className, '-normal-mode')}
+      className={CN(className)}
       onClick={onClickItem}
     >
       <Logo
-        className='earning-item-logo'
+        className='__item-logo'
         network={poolInfo.metadata.logo || poolInfo.chain}
         size={64}
       />
 
-      <div className='earning-item-lines-container'>
-        <div className='earning-item-line-1 earning-item-line'>
-          <div className={'earning-item-name-wrapper'}>
-            <div className={'earning-item-name'}>{poolInfo.metadata.name}</div>
+      <div className='__item-lines-container'>
+        <div className='__item-line-1 __item-line-common'>
+          <div className={'__item-name-wrapper'}>
+            <div className={'__item-name'}>{poolInfo.metadata.name}</div>
             <EarningTypeTag
               chain={poolInfo.chain}
-              className={'earning-item-tag'}
+              className={'__item-tag'}
               type={poolInfo.type}
             />
           </div>
 
           <MetaInfo>
             <MetaInfo.Status
-              className={'earning-status-item'}
+              className={'__item-status'}
               statusIcon={EarningStatusUi[positionInfo.status].icon}
               statusName={EarningStatusUi[positionInfo.status].name}
               valueColorSchema={EarningStatusUi[positionInfo.status].schema}
@@ -231,10 +231,10 @@ const Component: React.FC<Props> = (props: Props) => {
           </MetaInfo>
         </div>
 
-        <div className='earning-item-line-2 earning-item-line'>
-          <div className={'earning-item-description'}>{poolInfo.metadata.description}</div>
+        <div className='__item-line-2 __item-line-common'>
+          <div className={'__item-description'}>{poolInfo.metadata.description}</div>
 
-          <div className='earning-item-total-balance-value'>
+          <div className='__item-total-balance-value'>
             <Number
               decimal={positionInfo.asset.decimals || 0}
               hide={!isShowBalance}
@@ -245,21 +245,21 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
 
         <div
-          className='earning-item-line-3 earning-item-line'
+          className='__item-line-3 __item-line-common'
           ref={line3Ref}
         >
-          <div className={CN('earning-item-buttons-wrapper', { '-compact': isCompactButtons })}>
+          <div className={CN('__item-buttons-wrapper', { '-compact': isCompactButtons })}>
             <div
-              className='earning-item-buttons'
+              className='__item-buttons'
             >
               {getButtons(true).map((item) => {
                 return (
                   <Button
-                    className='earning-action'
+                    className='__item-button-action'
                     disabled={item.disable}
                     icon={(
                       <Icon
-                        className={'earning-item-stake-btn'}
+                        className={'__item-stake-button'}
                         phosphorIcon={item.icon}
                         size='sm'
                         weight='fill'
@@ -279,17 +279,17 @@ const Component: React.FC<Props> = (props: Props) => {
             </div>
 
             <div
-              className='earning-item-shadow-buttons'
+              className='__item-shadow-buttons'
               ref={line3LeftPartRef}
             >
               {getButtons().map((item) => {
                 return (
                   <Button
-                    className='earning-action'
+                    className='__item-button-action'
                     disabled={item.disable}
                     icon={(
                       <Icon
-                        className={'earning-item-stake-btn'}
+                        className={'__item-stake-button'}
                         phosphorIcon={item.icon}
                         size='sm'
                         weight='fill'
@@ -310,16 +310,16 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
 
           <div
-            className={'earning-item-label-and-value'}
+            className={'__item-label-and-value'}
             ref={line3RightPartRef}
           >
             {isSpecial && (
-              <div className={'earning-item-equivalent'}>
-                <div className={'earning-item-equivalent-label'}>
+              <div className={'__item-equivalent'}>
+                <div className={'__item-equivalent-label'}>
                   {t('Equivalent to')}:
                 </div>
 
-                <div className={'earning-item-equivalent-value'}>
+                <div className={'__item-equivalent-value'}>
                   <Number
                     decimal={deriveAsset?.decimals || 0}
                     decimalColor={token.colorSuccess}
@@ -333,11 +333,11 @@ const Component: React.FC<Props> = (props: Props) => {
             )}
 
             {positionInfo.type === YieldPoolType.NOMINATION_POOL &&
-              <div className={'earning-item-unclaimed-rewards'}>
-                <div className={'earning-item-unclaimed-rewards-label'}>
+              <div className={'__item-unclaimed-rewards'}>
+                <div className={'__item-unclaimed-rewards-label'}>
                   {t('Unclaimed rewards')}:
                 </div>
-                <div className={'earning-item-unclaimed-rewards-value'}>
+                <div className={'__item-unclaimed-rewards-value'}>
                   <Number
                     decimal={positionInfo.asset.decimals || 0}
                     decimalColor={token.colorSuccess}
@@ -361,48 +361,44 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
     cursor: 'pointer',
-
-    '&.-normal-mode': {
-      padding: `${token.paddingXL}px ${token.paddingMD}px ${token.padding}px`,
-      display: 'flex',
-
-      '&:hover': {
-        backgroundColor: token.colorBgInput
-      }
+    padding: `${token.paddingXL}px ${token.paddingMD}px ${token.padding}px`,
+    display: 'flex',
+    '&:hover': {
+      backgroundColor: token.colorBgInput
     },
 
-    '.earning-item-logo': {
+    '.__item-logo': {
       marginRight: token.size
     },
 
-    '.earning-item-lines-container': {
+    '.__item-lines-container': {
       overflow: 'hidden',
       flex: 1
     },
 
-    '.earning-item-line': {
+    '.__item-line-common': {
       display: 'flex',
       justifyContent: 'space-between',
       overflow: 'hidden',
       gap: token.size
     },
 
-    '.earning-item-line-1': {
+    '.__item-line-1': {
       marginBottom: 2
     },
 
-    '.earning-item-name-wrapper': {
+    '.__item-name-wrapper': {
       display: 'flex',
       alignItems: 'center',
       gap: token.paddingSM,
       overflow: 'hidden'
     },
 
-    '.earning-status-item, .earning-item-total-balance-value': {
+    '.__item-status, .__item-total-balance-value': {
       'white-space': 'nowrap'
     },
 
-    '.earning-item-name': {
+    '.__item-name': {
       fontSize: token.fontSizeHeading4,
       lineHeight: token.lineHeightHeading4,
       fontWeight: 600,
@@ -412,14 +408,14 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       textOverflow: 'ellipsis'
     },
 
-    '.earning-item-tag': {
+    '.__item-tag': {
       marginRight: 0,
       'white-space': 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis'
     },
 
-    '.earning-item-description': {
+    '.__item-description': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
       fontWeight: 500,
@@ -430,7 +426,7 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       overflow: 'hidden'
     },
 
-    '.earning-item-total-balance-value': {
+    '.__item-total-balance-value': {
       fontSize: 30,
       lineHeight: `${38}px`,
       color: token.colorTextLight1,
@@ -451,11 +447,11 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       }
     },
 
-    '.earning-item-line-2': {
+    '.__item-line-2': {
       marginBottom: token.marginXXS
     },
 
-    '.earning-item-label-and-value': {
+    '.__item-label-and-value': {
       overflow: 'hidden'
     },
 
@@ -464,16 +460,16 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       borderRadius: '50%'
     },
 
-    '.earning-item-stake-btn': {
+    '.__item-stake-button': {
       width: token.sizeMD,
       height: token.sizeMD
     },
 
-    '.earning-status-item': {
+    '.__item-status': {
       display: 'block'
     },
 
-    '.earning-action': {
+    '.__item-button-action': {
       '&.ant-btn-default.-schema-secondary': {
         borderWidth: '2px',
         borderStyle: 'solid',
@@ -485,7 +481,7 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       }
     },
 
-    '.earning-item-equivalent, .earning-item-unclaimed-rewards': {
+    '.__item-equivalent, .__item-unclaimed-rewards': {
       display: 'flex',
       'white-space': 'nowrap',
       overflow: 'hidden',
@@ -495,13 +491,13 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       lineHeight: token.lineHeight
     },
 
-    '.earning-item-equivalent-label, .earning-item-unclaimed-rewards-label': {
+    '.__item-equivalent-label, .__item-unclaimed-rewards-label': {
       color: token.colorTextLight4,
       overflow: 'hidden',
       textOverflow: 'ellipsis'
     },
 
-    '.earning-item-equivalent-value, .earning-item-unclaimed-rewards-value': {
+    '.__item-equivalent-value, .__item-unclaimed-rewards-value': {
       '.ant-number .ant-typography': {
         fontSize: 'inherit !important',
         fontWeight: 'inherit !important',
@@ -510,75 +506,52 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       }
     },
 
-    '.earning-item-buttons, .earning-item-shadow-buttons': {
+    '.__item-buttons, .__item-shadow-buttons': {
       display: 'flex',
       paddingTop: token.paddingXS,
       paddingBottom: token.paddingXS
     },
 
-    '.earning-item-buttons': {
+    '.__item-buttons': {
       gap: token.paddingSM
     },
 
-    '.earning-item-shadow-buttons': {
+    '.__item-shadow-buttons': {
       gap: token.paddingSM,
       position: 'absolute',
       left: 0,
       top: 0
     },
 
-    '.earning-item-buttons-wrapper': {
+    '.__item-buttons-wrapper': {
       position: 'relative',
 
-      '.earning-item-buttons': {
+      '.__item-buttons': {
         opacity: 0,
         pointerEvents: 'none'
       },
 
-      '.earning-item-shadow-buttons': {
+      '.__item-shadow-buttons': {
         opacity: 1,
         pointerEvents: 'auto'
       },
 
       '&.-compact': {
-        '.earning-item-buttons': {
+        '.__item-buttons': {
           opacity: 1,
           pointerEvents: 'auto'
         },
 
-        '.earning-item-shadow-buttons': {
+        '.__item-shadow-buttons': {
           opacity: 0,
           pointerEvents: 'none'
         }
       }
     },
-
-    // compact mode style
-    '&.-compact-mode': {
-      paddingTop: token.sizeSM,
-      paddingLeft: token.sizeSM,
-      paddingRight: token.sizeSM,
-      paddingBottom: 0
-    },
-
-    '.__item-logo': {
-      marginRight: token.marginSM
-    },
-
-    '.__item-lines-container': {
-      flex: 1,
-      overflow: 'hidden'
-    },
-
     '.__item-line-1, .__item-line-2': {
       display: 'flex',
       justifyContent: 'space-between',
       gap: token.sizeSM
-    },
-
-    '.__item-line-1': {
-      'white-space': 'nowrap',
-      marginBottom: token.marginXXS
     },
 
     '.__item-button': {
@@ -587,74 +560,11 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       }
     },
 
-    '.__item-name': {
-      fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG,
-      color: token.colorTextLight1,
-      fontWeight: token.headingFontWeight,
-      overflow: 'hidden',
-      'white-space': 'nowrap',
-      textOverflow: 'ellipsis'
-    },
-
-    '.__item-status': {
-      '.__status-icon': {
-        fontSize: `${token.size}px !important`
-      },
-
-      '.__status-name': {
-        fontSize: token.fontSizeSM,
-        lineHeight: token.lineHeightSM
-      }
-    },
-
-    '.__item-total-balance-value': {
-      fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG,
-      color: token.colorTextLight1,
-      fontWeight: token.headingFontWeight,
-
-      '.ant-number, .ant-number-integer': {
-        color: 'inherit !important',
-        fontSize: 'inherit !important',
-        fontWeight: 'inherit !important',
-        lineHeight: 'inherit'
-      },
-
-      '.ant-number-decimal, .ant-number-suffix': {
-        color: 'inherit !important',
-        fontSize: `${token.fontSize}px !important`,
-        fontWeight: 'inherit !important',
-        lineHeight: token.lineHeight
-      }
-    },
-
-    '.__item-equivalent-value, .__item-unclaimed-rewards-value': {
-      color: token.colorSuccess,
-      fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightSM,
-
-      '.ant-number, .ant-typography': {
-        color: 'inherit !important',
-        fontSize: 'inherit !important',
-        fontWeight: 'inherit !important',
-        lineHeight: 'inherit'
-      }
-    },
-
     '.__item-tags-container': {
       flex: 1,
       display: 'flex',
       overflow: 'hidden',
       gap: token.sizeXS
-    },
-
-    '.__item-tag': {
-      marginRight: 0,
-      'white-space': 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      minWidth: 70
     },
 
     '.__item-upper-part': {

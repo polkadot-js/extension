@@ -594,7 +594,7 @@ const Component = () => {
       return ExtrinsicType.STAKING_BOND;
     }
 
-    if (YieldPoolType.LIQUID_STAKING) {
+    if (poolType === YieldPoolType.LIQUID_STAKING) {
       if (chainValue === 'moonbeam') {
         return ExtrinsicType.MINT_STDOT;
       }
@@ -602,7 +602,7 @@ const Component = () => {
       return ExtrinsicType.MINT_LDOT;
     }
 
-    if (YieldPoolType.LENDING) {
+    if (poolType === YieldPoolType.LENDING) {
       return ExtrinsicType.MINT_LDOT;
     }
 
@@ -840,11 +840,11 @@ const Component = () => {
   }, [chainState?.active, forceFetchValidator, slug, chainValue, fromValue]);
 
   useEffect(() => {
-    if (!compound && !screenLoading) {
+    if (!isWebUI && !compound && !screenLoading) {
       isClickInfoButtonRef.current = false;
       activeModal(instructionModalId);
     }
-  }, [activeModal, compound, screenLoading]);
+  }, [activeModal, compound, isWebUI, screenLoading]);
 
   const subHeaderButtons: ButtonProps[] = useMemo(() => {
     return [
@@ -1066,13 +1066,17 @@ const Component = () => {
         )}
       </>
 
-      <EarningInstructionModal
-        closeAlert={closeAlert}
-        isShowStakeMoreButton={!isClickInfoButtonRef.current}
-        onCancel={onCancelInstructionModal}
-        openAlert={openAlert}
-        slug={slug}
-      />
+      {
+        !isWebUI && (
+          <EarningInstructionModal
+            closeAlert={closeAlert}
+            isShowStakeMoreButton={!isClickInfoButtonRef.current}
+            onCancel={onCancelInstructionModal}
+            openAlert={openAlert}
+            slug={slug}
+          />
+        )
+      }
     </>
   );
 };

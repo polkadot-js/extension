@@ -3,9 +3,10 @@
 
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-web-ui/components';
+import { isSameAddress } from '@subwallet/extension-base/utils';
+import { EarningInstructionModal, EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-web-ui/components';
 import { EarningPoolItem } from '@subwallet/extension-web-ui/components/Earning';
-import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-web-ui/constants';
+import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, useSelector, useTranslation, useYieldPoolInfoByGroup } from '@subwallet/extension-web-ui/hooks';
@@ -32,6 +33,7 @@ type ComponentProps = {
 const connectChainModalId = 'earning-pools-connect-chain-modal';
 const chainConnectionLoadingModalId = 'earning-pools-chain-connection-loading-modalId';
 const alertModalId = 'earning-pools-alert-modal';
+const instructionModalId = EARNING_INSTRUCTION_MODAL;
 
 const FILTER_MODAL_ID = 'earning-pool-filter-modal';
 
@@ -41,6 +43,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const { isWebUI } = useContext(ScreenContext);
 
   const pools = useYieldPoolInfoByGroup(poolGroup);
+  const yieldPositions = useSelector((state) => state.earning.yieldPositions);
 
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
@@ -123,12 +126,29 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     };
   }, [selectedFilters]);
 
+  const isNeedToShowInstruction = useCallback((item: YieldPoolInfo) => {
+    const address = currentAccount?.address || '';
+
+    for (const info of yieldPositions) {
+      if (item.slug === info.slug) {
+        const isValid = isAccountAll(address) ? true : isSameAddress(address, info.address);
+        const haveStake = new BigN(info.totalStake).gt(0);
+
+        if (isValid && haveStake) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }, [currentAccount?.address, yieldPositions]);
+
   const navigateToEarnTransaction = useCallback(
-    (item: YieldPoolInfo) => {
+    (slug: string, chain: string) => {
       setEarnStorage({
         ...DEFAULT_EARN_PARAMS,
-        slug: item.slug,
-        chain: item.chain,
+        slug,
+        chain,
         from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
       });
       navigate('/transaction/earn');
@@ -138,15 +158,21 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
   const onConnectChainSuccess = useCallback(() => {
     if (selectedPool) {
-      navigateToEarnTransaction(selectedPool);
+      if (isNeedToShowInstruction(selectedPool)) {
+        activeModal(instructionModalId);
+      } else {
+        navigateToEarnTransaction(selectedPool.slug, selectedPool.chain);
+      }
     }
-  }, [navigateToEarnTransaction, selectedPool]);
+  }, [activeModal, isNeedToShowInstruction, navigateToEarnTransaction, selectedPool]);
 
   const { alertProps,
     checkChainConnected,
+    closeAlert,
     closeConnectChainModal,
     connectingChain,
     onConnectChain,
+    openAlert,
     openConnectChainModal, setExtraSuccessFlag, turnOnChain } = useHandleChainConnection({
     alertModalId,
     chainConnectionLoadingModalId,
@@ -181,9 +207,15 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         return;
       }
 
-      navigateToEarnTransaction(item);
+      if (isNeedToShowInstruction(item)) {
+        activeModal(instructionModalId);
+
+        return;
+      }
+
+      navigateToEarnTransaction(item.slug, item.chain);
     };
-  }, [checkChainConnected, getAltChain, navigateToEarnTransaction, openConnectChainModal]);
+  }, [activeModal, checkChainConnected, getAltChain, isNeedToShowInstruction, navigateToEarnTransaction, openConnectChainModal]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {
@@ -328,6 +360,18 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
           title={t('Filter')}
         />
       </Layout.Base>
+
+      {
+        isWebUI && selectedPool && (
+          <EarningInstructionModal
+            closeAlert={closeAlert}
+            isShowStakeMoreButton={true}
+            onStakeMore={navigateToEarnTransaction}
+            openAlert={openAlert}
+            slug={selectedPool.slug}
+          />
+        )
+      }
     </ChainConnectionWrapper>
   );
 }

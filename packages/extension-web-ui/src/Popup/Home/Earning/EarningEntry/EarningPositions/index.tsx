@@ -360,7 +360,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
             .catch(console.error).finally(() => {
               setTimeout(() => {
                 setLoading(false);
-              }, 1000);
+              }, 3000);
             });
         }
       },
@@ -475,7 +475,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
               />
             )
         }
-        <div className={'__separator'}></div>
+        <div className={'footer-separator'}></div>
         <div className='footer-group'>
           <div className='footer-left'>
             <Icon
@@ -601,10 +601,9 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
     height: '100%',
     flex: 1
   },
-  '.__separator': {
+  '.footer-separator': {
     height: 2,
     backgroundColor: token.colorSplit,
-    marginTop: token.marginSM,
     marginBottom: token.marginSM
   },
 

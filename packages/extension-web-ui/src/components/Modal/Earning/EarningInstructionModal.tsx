@@ -25,7 +25,7 @@ import styled from 'styled-components';
 interface Props extends ThemeProps{
   slug: string;
   onCancel?: VoidFunction;
-  onStakeMore?: (value: string) => void;
+  onStakeMore?: (slug: string, chain: string) => void;
   isShowStakeMoreButton?: boolean;
   openAlert: (alertProps: AlertDialogProps) => void;
   closeAlert: VoidFunction;
@@ -49,7 +49,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const { poolInfoMap } = useSelector((state) => state.earning);
+  const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { currentAccount } = useSelector((state) => state.accountState);
   const [loading, setLoading] = useState(false);
@@ -430,7 +430,7 @@ const Component: React.FC<Props> = (props: Props) => {
           if (rs.passed) {
             setVisible(false);
             setTimeout(() => {
-              onStakeMore?.(slug);
+              onStakeMore?.(slug, poolInfo.chain);
             }, 300);
           } else {
             const message = rs.errorMessage || '';
@@ -451,7 +451,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         }
       });
-  }, [closeAlert, currentAccount?.address, onStakeMore, openAlert, setVisible, slug, t]);
+  }, [closeAlert, currentAccount?.address, onStakeMore, openAlert, poolInfo.chain, setVisible, slug, t]);
 
   const onScrollContent = useCallback(() => {
     scrollRef?.current?.scroll({ top: scrollRef?.current?.scrollHeight, left: 0 });

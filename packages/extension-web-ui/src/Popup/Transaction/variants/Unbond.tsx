@@ -328,7 +328,7 @@ const Component: React.FC = () => {
       return ExtrinsicType.STAKING_UNBOND;
     }
 
-    if (YieldPoolType.LIQUID_STAKING) {
+    if (poolType === YieldPoolType.LIQUID_STAKING) {
       if (chainValue === 'moonbeam') {
         return ExtrinsicType.UNSTAKE_STDOT;
       }
@@ -336,7 +336,7 @@ const Component: React.FC = () => {
       return ExtrinsicType.UNSTAKE_LDOT;
     }
 
-    if (YieldPoolType.LENDING) {
+    if (poolType === YieldPoolType.LENDING) {
       return ExtrinsicType.UNSTAKE_LDOT;
     }
 

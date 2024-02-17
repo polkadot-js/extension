@@ -45,7 +45,7 @@ function Component () {
     )
     : (
       <EarningOptions
-        hasEarningPositions={!!earningPositions.length}
+        earningPositions={earningPositions}
         setEntryView={setEntryView}
       />
     );

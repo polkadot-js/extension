@@ -9,7 +9,8 @@ import BigN from 'bignumber.js';
 import { useMemo } from 'react';
 
 const useGroupYieldPosition = (): YieldPositionInfo[] => {
-  const { poolInfoMap, yieldPositions } = useSelector((state) => state.earning);
+  const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
+  const yieldPositions = useSelector((state) => state.earning.yieldPositions);
   const { currentAccount } = useSelector((state) => state.accountState);
   const chainsByAccountType = useGetChainSlugsByAccountType();
 

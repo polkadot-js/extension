@@ -1,4 +1,4 @@
-    2255	AnhMTV                        	
+    2257	AnhMTV                        	Release version 1.1.38
     2165	Nam Phạm                      	[Issue 2558] fix bug showing slug instead of network name
     1910	S2kael                        	[Issue-2570] Update chain list
      609	lw-cdm                        	[Issue-2598] Update UI for earning screens
@@ -12,7 +12,7 @@
       80	leewong                       	Update account filter for earn transaction
       63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
-      47	nguyentiendung                	Update modal for Earning
+      48	nguyentiendung                	Update modal for Earning
       44	bluedot                       	update priceId for EWT on Energy Web X
       29	Automation Bot                	[CI Skip] Auto increase webapp build number
       27	Thiendekaco                   	update locate of file

@@ -4,7 +4,7 @@
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import { SelectValidatorInput, StakingValidatorItem } from '@subwallet/extension-web-ui/components';
+import { BaseModal, SelectValidatorInput, StakingValidatorItem } from '@subwallet/extension-web-ui/components';
 import EmptyValidator from '@subwallet/extension-web-ui/components/Account/EmptyValidator';
 import { BasicInputWrapper } from '@subwallet/extension-web-ui/components/Field/Base';
 import { EarningValidatorDetailModal } from '@subwallet/extension-web-ui/components/Modal/Earning';
@@ -14,7 +14,7 @@ import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-web-ui/constants';
 import { useFilterModal, useGetPoolTargetList, useSelector, useSelectValidators, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, ValidatorDataType } from '@subwallet/extension-web-ui/types';
 import { getValidatorKey } from '@subwallet/extension-web-ui/utils/transaction/stake';
-import { Badge, Button, Icon, InputRef, ModalContext, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
+import { Badge, Button, Icon, InputRef, ModalContext, SwList, useExcludeModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import BigN from 'bignumber.js';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
@@ -322,7 +322,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         onClick={onActiveValidatorSelector}
         value={value || ''}
       />
-      <SwModal
+      <BaseModal
         className={`${className} modal-full`}
         closeIcon={(
           <Icon
@@ -373,7 +373,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           searchPlaceholder={t<string>(`Search ${handleValidatorLabel}`)}
           // showActionBtn
         />
-      </SwModal>
+      </BaseModal>
 
       <FilterModal
         id={FILTER_MODAL_ID}

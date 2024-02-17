@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { BaseModal } from '@subwallet/extension-web-ui/components';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, VoidFunction } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, Logo, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, Logo } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, XCircle } from 'phosphor-react';
 import React, { useCallback } from 'react';
@@ -28,7 +29,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <SwModal
+      <BaseModal
+        center={true}
         className={CN(className)}
         footer={(
           <>
@@ -81,7 +83,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {t('Your selected network is currently disabled. Enable it to start using.')}
           </div>
         </div>
-      </SwModal>
+      </BaseModal>
     </>
   );
 };

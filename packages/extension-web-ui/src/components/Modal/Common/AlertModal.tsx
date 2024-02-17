@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
+import { BaseModal } from '@subwallet/extension-web-ui/components';
 import { AlertDialogProps, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, Info, Warning, XCircle } from 'phosphor-react';
 import { IconProps } from 'phosphor-react/src/lib';
@@ -51,7 +52,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <SwModal
+      <BaseModal
+        center={true}
         className={CN(className)}
         closable={closable}
         destroyOnClose={true}
@@ -112,7 +114,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
           {content}
         </div>
-      </SwModal>
+      </BaseModal>
     </>
   );
 };

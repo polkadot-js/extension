@@ -12,11 +12,11 @@ import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks'
 import { EarningTagType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createEarningTypeTags, findAccountByAddress, isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
-import Slider, { CustomArrowProps, Settings } from 'react-slick';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowCircleLeft, ArrowCircleRight, ArrowSquareOut } from 'phosphor-react';
+import { ArrowSquareOut, CaretLeft, CaretRight } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
+import Slider, { CustomArrowProps, Settings } from 'react-slick';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -29,11 +29,12 @@ type Props = ThemeProps & {
 const NextArrow = ({ currentSlide, slideCount, ...props }: CustomArrowProps) => (
   <div {...props}>
     <div className={'__right-arrow'}>
-      <Icon
-        customSize={'28px'}
-        phosphorIcon={ArrowCircleRight}
-        weight={'fill'}
-      />
+      <div className={'__circle-icon'}>
+        <Icon
+          customSize={'28px'}
+          phosphorIcon={CaretRight}
+        />
+      </div>
     </div>
   </div>
 );
@@ -41,11 +42,12 @@ const NextArrow = ({ currentSlide, slideCount, ...props }: CustomArrowProps) => 
 const PrevArrow = ({ currentSlide, slideCount, ...props }: CustomArrowProps) => (
   <div {...props}>
     <div className={'__left-arrow'}>
-      <Icon
-        customSize={'28px'}
-        phosphorIcon={ArrowCircleLeft}
-        weight={'fill'}
-      />
+      <div className={'__circle-icon'}>
+        <Icon
+          customSize={'28px'}
+          phosphorIcon={CaretLeft}
+        />
+      </div>
     </div>
   </div>
 );
@@ -62,14 +64,15 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
   const sliderSettings: Settings = useMemo(() => {
     return {
       dots: false,
-      infinite: true,
+      infinite: false,
       speed: 500,
+      centerPadding: '22px',
       centerMode: true,
       slidesToShow: 1,
       nextArrow: <NextArrow />,
       prevArrow: <PrevArrow />
     };
-  }, [list.length]);
+  }, []);
 
   const deriveAsset = useMemo(() => {
     if ('derivativeToken' in compound) {
@@ -150,134 +153,147 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
     };
   }, [activeModal]);
 
+  const accountInfoItemsNode = useMemo(() => {
+    return list.map((item) => {
+      const earningStatus = getEarningStatus(item);
+      const disableButton = !item.nominations.length;
+
+      return (
+        <MetaInfo
+          className={CN('__account-info-item', {
+            '-box-mode': isAllAccount
+          })}
+          hasBackgroundWrapper={isAllAccount}
+          key={item.address}
+          labelColorScheme='gray'
+          labelFontWeight='regular'
+          spaceSize='sm'
+          valueColorScheme='light'
+        >
+          {!isAllAccount
+            ? (
+              <MetaInfo.Account
+                address={item.address}
+                label={t('Account')}
+              />
+            )
+            : (
+              <MetaInfo.Status
+                className={'__meta-earning-status-item'}
+                label={renderAccount(item)}
+                statusIcon={earningStatus.icon}
+                statusName={earningStatus.name}
+                valueColorSchema={earningStatus.schema}
+              />
+            )}
+
+          <MetaInfo.Default
+            label={t('Staking type')}
+            valueColorSchema={earningTagType.color as InfoItemBase['valueColorSchema']}
+          >
+            {earningTagType.label}
+          </MetaInfo.Default>
+
+          {!isSpecial
+            ? (
+              <>
+                <MetaInfo.Number
+                  decimals={inputAsset?.decimals || 0}
+                  label={t('Total stake')}
+                  suffix={inputAsset?.symbol}
+                  value={new BigN(item.totalStake)}
+                  valueColorSchema='even-odd'
+                />
+                <MetaInfo.Number
+                  decimals={inputAsset?.decimals || 0}
+                  label={t('Active staked')}
+                  suffix={inputAsset?.symbol}
+                  value={item.activeStake}
+                  valueColorSchema='even-odd'
+                />
+                <MetaInfo.Number
+                  decimals={inputAsset?.decimals || 0}
+                  label={t('Unstaked')}
+                  suffix={inputAsset?.symbol}
+                  value={item.unstakeBalance}
+                  valueColorSchema='even-odd'
+                />
+              </>
+            )
+            : (
+              <>
+                <MetaInfo.Number
+                  decimals={inputAsset?.decimals || 0}
+                  label={t('Total stake')}
+                  suffix={inputAsset?.symbol}
+                  value={new BigN(item.totalStake)}
+                  valueColorSchema='even-odd'
+                />
+                <MetaInfo.Number
+                  decimals={deriveAsset?.decimals || 0}
+                  label={t('Derivative token balance')}
+                  suffix={deriveAsset?.symbol}
+                  value={item.activeStake}
+                  valueColorSchema='even-odd'
+                />
+              </>
+            )}
+          {isAllAccount && haveNomination && (
+            <>
+              <div className='__separator'></div>
+
+              <div className={'__nomination-button-wrapper'}>
+                <Button
+                  block={true}
+                  className={'__nomination-button'}
+                  disabled={disableButton}
+                  onClick={createOpenNomination(item)}
+                  size={'xs'}
+                  type={'ghost'}
+                >
+                  <div className={'__nomination-button-label'}>
+                    {t('Nomination info')}
+                  </div>
+
+                  <Icon
+                    phosphorIcon={ArrowSquareOut}
+                    size={'sm'}
+                  />
+                </Button>
+              </div>
+            </>
+          )}
+        </MetaInfo>
+      );
+    });
+  }, [createOpenNomination, deriveAsset?.decimals, deriveAsset?.symbol, earningTagType.color, earningTagType.label, getEarningStatus, haveNomination, inputAsset?.decimals, inputAsset?.symbol, isAllAccount, isSpecial, list, renderAccount, t]);
+
   return (
     <>
       <CollapsiblePanel
         className={CN(className, {
           '-no-nomination': noNomination,
-          '-horizontal-mode': isAllAccount
+          '-horizontal-mode': isAllAccount,
+          '-has-one-item': list.length === 1
         })}
         title={t('Account info')}
       >
-        <div className={'__slider-container'}>
-        <Slider
-          className={'__carousel-container'}
-          {...sliderSettings}
-        >
-        {list.map((item) => {
-          const earningStatus = getEarningStatus(item);
-          const disableButton = !item.nominations.length;
 
-          return (
-            <MetaInfo
-              className={CN('__account-info-item', {
-                '-box-mode': isAllAccount
-              })}
-              hasBackgroundWrapper={isAllAccount}
-              key={item.address}
-              labelColorScheme='gray'
-              labelFontWeight='regular'
-              spaceSize='sm'
-              valueColorScheme='light'
-            >
-              {!isAllAccount
-                ? (
-                  <MetaInfo.Account
-                    address={item.address}
-                    label={t('Account')}
-                  />
-                )
-                : (
-                  <MetaInfo.Status
-                    className={'__meta-earning-status-item'}
-                    label={renderAccount(item)}
-                    statusIcon={earningStatus.icon}
-                    statusName={earningStatus.name}
-                    valueColorSchema={earningStatus.schema}
-                  />
-                )}
-
-              <MetaInfo.Default
-                label={t('Staking type')}
-                valueColorSchema={earningTagType.color as InfoItemBase['valueColorSchema']}
+        {isAllAccount
+          ? (
+            <div className={'__slider-container'}>
+              <Slider
+                className={'__carousel-container'}
+                {...sliderSettings}
               >
-                {earningTagType.label}
-              </MetaInfo.Default>
+                {accountInfoItemsNode}
+              </Slider>
+            </div>
+          )
+          : (
+            accountInfoItemsNode
+          )}
 
-              {!isSpecial
-                ? (
-                  <>
-                    <MetaInfo.Number
-                      decimals={inputAsset?.decimals || 0}
-                      label={t('Total stake')}
-                      suffix={inputAsset?.symbol}
-                      value={new BigN(item.totalStake)}
-                      valueColorSchema='even-odd'
-                    />
-                    <MetaInfo.Number
-                      decimals={inputAsset?.decimals || 0}
-                      label={t('Active staked')}
-                      suffix={inputAsset?.symbol}
-                      value={item.activeStake}
-                      valueColorSchema='even-odd'
-                    />
-                    <MetaInfo.Number
-                      decimals={inputAsset?.decimals || 0}
-                      label={t('Unstaked')}
-                      suffix={inputAsset?.symbol}
-                      value={item.unstakeBalance}
-                      valueColorSchema='even-odd'
-                    />
-                  </>
-                )
-                : (
-                  <>
-                    <MetaInfo.Number
-                      decimals={inputAsset?.decimals || 0}
-                      label={t('Total stake')}
-                      suffix={inputAsset?.symbol}
-                      value={new BigN(item.totalStake)}
-                      valueColorSchema='even-odd'
-                    />
-                    <MetaInfo.Number
-                      decimals={deriveAsset?.decimals || 0}
-                      label={t('Derivative token balance')}
-                      suffix={deriveAsset?.symbol}
-                      value={item.activeStake}
-                      valueColorSchema='even-odd'
-                    />
-                  </>
-                )}
-              {isAllAccount && haveNomination && (
-                <>
-                  <div className='__separator'></div>
-
-                  <div className={'__nomination-button-wrapper'}>
-                    <Button
-                      block={true}
-                      className={'__nomination-button'}
-                      disabled={disableButton}
-                      onClick={createOpenNomination(item)}
-                      size={'xs'}
-                      type={'ghost'}
-                    >
-                      <div className={'__nomination-button-label'}>
-                        {t('Nomination info')}
-                      </div>
-
-                      <Icon
-                        phosphorIcon={ArrowSquareOut}
-                        size={'sm'}
-                      />
-                    </Button>
-                  </div>
-                </>
-              )}
-            </MetaInfo>
-          );
-        })}
-        </Slider>
-        </div>
       </CollapsiblePanel>
 
       <EarningNominationModal
@@ -298,6 +314,19 @@ export const AccountInfoPart = styled(Component)<Props>(({ theme: { token } }: P
     }
   },
 
+  '&.-horizontal-mode:not(.-has-one-item)': {
+    '.__panel-body': {
+      paddingLeft: 0,
+      paddingRight: 0
+    }
+  },
+
+  '&.-horizontal-mode.-has-one-item': {
+    '.__account-info-item.-box-mode': {
+      minWidth: 300
+    }
+  },
+
   '.__slider-container': {
     flex: 1,
     overflowY: 'auto',
@@ -306,10 +335,22 @@ export const AccountInfoPart = styled(Component)<Props>(({ theme: { token } }: P
     flexDirection: 'column'
   },
 
-  '.__carousel-container': {
-    // position: 'relative',
-    marginBottom: 40,
+  '.__circle-icon': {
+    width: 40,
+    height: 40,
+    backgroundColor: token['gray-2'],
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
 
+  '.slick-slide > div': {
+    paddingLeft: 6,
+    paddingRight: 6
+  },
+
+  '.__carousel-container': {
     '.slick-prev, .slick-next': {
       width: 40,
       position: 'absolute',
@@ -325,6 +366,14 @@ export const AccountInfoPart = styled(Component)<Props>(({ theme: { token } }: P
 
     '.slick-next': {
       right: token.size
+    },
+
+    '.slick-disabled .__right-arrow': {
+      display: 'none'
+    },
+
+    '.slick-disabled .__left-arrow': {
+      display: 'none'
     },
 
     '.__left-arrow, .__right-arrow': {
@@ -352,8 +401,7 @@ export const AccountInfoPart = styled(Component)<Props>(({ theme: { token } }: P
   },
 
   '.__account-info-item.-box-mode': {
-    backgroundColor: token.colorBgDefault,
-    minWidth: 300
+    backgroundColor: token.colorBgDefault
   },
 
   '.__meta-earning-status-item': {

@@ -72,9 +72,8 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 
   const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
 
-  const { filterSelectionMap: initialFilterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters: initialSelectedFilters } = useFilterModal(FILTER_MODAL_ID);
-  const filterSelectionMap = Object.keys(initialFilterSelectionMap).length === 0 ? { "MAIN_NETWORK": true, "TEST_NETWORK": false } : initialFilterSelectionMap;
-  const selectedFilters = initialSelectedFilters.length === 0 ? ['MAIN_NETWORK'] : initialSelectedFilters;
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID, [FilterOptionType.MAIN_NETWORK]);
+
   const { activeModal } = useContext(ModalContext);
 
   const items = useMemo(() => {

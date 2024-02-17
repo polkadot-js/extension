@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 1.1.37
+Build date: Feb 07, 2024.
+
+Features & Update:
+- Add popup Introducing Earning feature (#2599)
+
+Bugs fixed:
+- Fixed bug Unable to connect with eip6763 dApp (#2590)
+
+
 ## 1.1.36
 Build date: Feb 07, 2024.
 

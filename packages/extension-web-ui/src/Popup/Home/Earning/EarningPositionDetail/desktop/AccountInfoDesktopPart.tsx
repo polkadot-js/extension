@@ -506,7 +506,7 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       lineHeight: token.lineHeight,
       textOverflow: 'ellipsis',
       overflow: 'hidden',
-      justifyContent: 'left'
+      justifyContent: 'flex-end'
     },
 
     '.__row-active-stake-wrapper': {

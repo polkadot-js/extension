@@ -1519,20 +1519,29 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
     }
 
-    const priority = await calculateGasFeeParams(evmApi, networkKey);
-
     let estimateGas: string;
 
-    if (priority.baseGasFee) {
-      transaction.maxPriorityFeePerGas = priority.maxPriorityFeePerGas.toString();
-      transaction.maxFeePerGas = priority.maxFeePerGas.toString();
-
-      const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
-      const maxFee = priority.maxFeePerGas.lte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+    // TODO: Review, If not override, transaction maybe fail because fee too low
+    if (transactionParams.maxPriorityFeePerGas && transactionParams.maxFeePerGas) {
+      const maxFee = new BigN(transactionParams.maxFeePerGas);
 
       estimateGas = maxFee.multipliedBy(transaction.gas).toFixed(0);
+    } else if (transactionParams.gasPrice) {
+      estimateGas = new BigN(transactionParams.gasPrice).multipliedBy(transaction.gas).toFixed(0);
     } else {
-      estimateGas = new BigN(priority.gasPrice).multipliedBy(transaction.gas).toFixed(0);
+      const priority = await calculateGasFeeParams(evmApi, networkKey);
+
+      if (priority.baseGasFee) {
+        transaction.maxPriorityFeePerGas = priority.maxPriorityFeePerGas.toString();
+        transaction.maxFeePerGas = priority.maxFeePerGas.toString();
+
+        const maxFee = priority.maxFeePerGas;
+
+        estimateGas = maxFee.multipliedBy(transaction.gas).toFixed(0);
+      } else {
+        transaction.gasPrice = priority.gasPrice;
+        estimateGas = new BigN(priority.gasPrice).multipliedBy(transaction.gas).toFixed(0);
+      }
     }
 
     // Address is validated in before step

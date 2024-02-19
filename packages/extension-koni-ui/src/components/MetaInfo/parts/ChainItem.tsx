@@ -48,7 +48,19 @@ const Component: React.FC<ChainInfoItem> = (props: ChainInfoItem) => {
 };
 
 const ChainItem = styled(Component)<ChainInfoItem>(({ theme: { token } }: ChainInfoItem) => {
-  return {};
+  return {
+    '.__chain-name': {
+      'white-space': 'nowrap',
+      textOverflow: 'ellipsis',
+      overflow: 'hidden'
+    },
+    '.__col.__col': {
+      flex: 'unset'
+    },
+    '.__label': {
+      paddingRight: token.paddingSM
+    }
+  };
 });
 
 export default ChainItem;

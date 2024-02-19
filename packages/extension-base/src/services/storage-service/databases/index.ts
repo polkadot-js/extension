@@ -115,7 +115,7 @@ export default class KoniDatabase extends Dexie {
       campaign: 'slug'
     });
 
-    this.conditionalVersion(5, {
+    this.conditionalVersion(6, {
       keyValue: 'key'
     });
   }

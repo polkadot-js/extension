@@ -579,7 +579,7 @@ const Component = () => {
       return ExtrinsicType.STAKING_BOND;
     }
 
-    if (YieldPoolType.LIQUID_STAKING) {
+    if (poolType === YieldPoolType.LIQUID_STAKING) {
       if (chainValue === 'moonbeam') {
         return ExtrinsicType.MINT_STDOT;
       }
@@ -587,7 +587,7 @@ const Component = () => {
       return ExtrinsicType.MINT_LDOT;
     }
 
-    if (YieldPoolType.LENDING) {
+    if (poolType === YieldPoolType.LENDING) {
       return ExtrinsicType.MINT_LDOT;
     }
 

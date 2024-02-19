@@ -76,8 +76,7 @@ export async function getEVMTransactionObject (
   let estimateFee: BigN;
 
   if (priority.baseGasFee) {
-    const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
-    const maxFee = priority.maxFeePerGas.gte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+    const maxFee = priority.maxFeePerGas;
 
     estimateFee = maxFee.multipliedBy(gasLimit);
   } else {

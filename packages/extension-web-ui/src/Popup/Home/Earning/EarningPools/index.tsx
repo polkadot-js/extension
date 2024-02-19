@@ -362,7 +362,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
       </Layout.Base>
 
       {
-        isWebUI && selectedPool && (
+        selectedPool && (
           <EarningInstructionModal
             closeAlert={closeAlert}
             isShowStakeMoreButton={true}

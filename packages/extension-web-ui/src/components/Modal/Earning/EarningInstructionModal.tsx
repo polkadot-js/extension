@@ -10,6 +10,7 @@ import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/exte
 import { BaseModal, InstructionItem } from '@subwallet/extension-web-ui/components';
 import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { EARNING_DATA_RAW, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { earlyValidateJoin } from '@subwallet/extension-web-ui/messaging';
 import { AlertDialogProps, PhosphorIcon, ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -46,6 +47,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const checkRef = useRef<number>(Date.now());
   const scrollRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
@@ -513,26 +515,27 @@ const Component: React.FC<Props> = (props: Props) => {
       </div>
 
       <div className={'__buttons'}>
-        <Button
-          block={true}
-          className={'__cancel-button'}
-          icon={
-            <Icon
-              phosphorIcon={isShowStakeMoreButton ? CaretCircleLeft : XCircle}
-              weight='fill'
-            />
-          }
-          onClick={closeModal}
-          schema={'secondary'}
-        >
-          {isShowStakeMoreButton ? t('Back') : t('Close')}
-        </Button>
-
+        { !isWebUI &&
+          <Button
+            block={true}
+            className={'__cancel-button'}
+            icon={
+              <Icon
+                phosphorIcon={isShowStakeMoreButton ? CaretCircleLeft : XCircle}
+                weight='fill'
+              />
+            }
+            onClick={closeModal}
+            schema={'secondary'}
+          >
+            {isShowStakeMoreButton ? t('Back') : t('Close')}
+          </Button>
+        }
         {isShowStakeMoreButton && (
           <Button
             block={true}
             className={'__stake-more-button'}
-            disabled={isDisableEarnButton}
+            disabled={!isWebUI && isDisableEarnButton}
             icon={
               <Icon
                 phosphorIcon={PlusCircle}
@@ -556,13 +559,14 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <BaseModal
       center={true}
-      className={CN(className)}
-      closable={false}
+      className={CN(className, { '-desktop-instruction': isWebUI })}
+      closable={isWebUI}
       destroyOnClose={true}
       footer={footerNode}
       id={modalId}
       onCancel={closeModal}
       title={title}
+      width={isWebUI ? 642 : undefined}
     >
       <div
         className={'__scroll-container'}
@@ -599,6 +603,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const EarningInstructionModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    justifyContent: 'normal',
     '.ant-sw-modal-content': {
       maxHeight: 584,
       height: 584
@@ -617,6 +622,7 @@ const EarningInstructionModal = styled(Component)<Props>(({ theme: { token } }: 
     },
 
     '.__footer-more-information-text-wrapper': {
+      justifyContent: 'space-between',
       display: 'flex',
       gap: token.size
     },
@@ -654,12 +660,14 @@ const EarningInstructionModal = styled(Component)<Props>(({ theme: { token } }: 
     },
 
     '.ant-sw-sub-header-title-content': {
-      'white-space': 'normal'
+      'white-space': 'normal',
+      paddingLeft: token.padding,
+      paddingRight: token.padding
     },
 
     '.ant-sw-header-container-center .ant-sw-header-center-part': {
       position: 'relative',
-      maxWidth: 284,
+      maxWidth: 445,
       marginLeft: 'auto',
       marginRight: 'auto'
     },
@@ -668,7 +676,44 @@ const EarningInstructionModal = styled(Component)<Props>(({ theme: { token } }: 
       marginTop: token.margin,
       display: 'flex',
       gap: token.sizeXXS
+    },
+
+    '&.-desktop-instruction': {
+      '&:before, &:after': {
+        content: '""',
+        display: 'block',
+        minHeight: 80,
+        width: '100%',
+        flex: 1
+      }
+    },
+
+    '&.-desktop-instruction .ant-sw-modal-content': {
+      width: '100%',
+      maxHeight: 'none',
+      height: 'auto',
+      overflow: 'hidden',
+      '.ant-sw-modal-footer': {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      },
+      '.__scroll-to-end-button': {
+        display: 'none'
+      },
+      '.__buttons': {
+        width: 390,
+        paddingLeft: token.padding,
+        paddingRight: token.padding
+      }
+    },
+    '@media (max-height: 600px)': {
+      '&.-desktop-instruction .ant-sw-modal-content': {
+        maxHeight: 584,
+        minHeight: 445
+      }
     }
+
   });
 });
 

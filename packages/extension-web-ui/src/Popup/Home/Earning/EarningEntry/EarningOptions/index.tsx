@@ -385,7 +385,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
       </Layout.Base>
 
       {
-        isWebUI && selectedPoolGroup && selectedPoolGroup.poolSlugs.length && (
+        selectedPoolGroup && selectedPoolGroup.poolSlugs.length && (
           <EarningInstructionModal
             closeAlert={closeAlert}
             isShowStakeMoreButton={true}
@@ -412,6 +412,7 @@ const EarningOptions = styled(Component)<Props>(({ theme: { token } }: Props) =>
   },
 
   '.__desktop-list-container': {
+    overflowY: 'auto',
     height: '100%'
   },
 

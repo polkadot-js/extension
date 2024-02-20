@@ -80,7 +80,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
   const [searchInput, setSearchInput] = useState<string>('');
 
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID, [FilterOptionType.MAIN_NETWORK]);
 
   const { activeModal } = useContext(ModalContext);
 
@@ -99,27 +99,34 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
     });
   }, [data]);
 
+  const filterOptions = useMemo(() => [
+    { label: t('Mainnet'), value: FilterOptionType.MAIN_NETWORK },
+    { label: t('Testnet'), value: FilterOptionType.TEST_NETWORK }
+  ], [t]);
+
   const filterFunction = useMemo<(item: YieldGroupInfo) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
         return true;
       }
 
-      for (const filter of selectedFilters) {
-        if (filter === '') {
-          return true;
+      if (selectedFilters.length === filterOptions.length) {
+        return true;
+      }
+
+      if (selectedFilters.length === 1) {
+        if (selectedFilters.includes(FilterOptionType.MAIN_NETWORK)) {
+          return !item.isTestnet;
         }
 
-        if (filter === FilterOptionType.MAIN_NETWORK) {
-          return !item.isTestnet;
-        } else if (filter === FilterOptionType.TEST_NETWORK) {
+        if (selectedFilters.includes(FilterOptionType.TEST_NETWORK)) {
           return item.isTestnet;
         }
       }
 
       return false;
     };
-  }, [selectedFilters]);
+  }, [filterOptions.length, selectedFilters]);
 
   const navigateToEarnTransaction = useCallback(
     (slug: string, chain: string) => {
@@ -133,11 +140,6 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
     },
     [currentAccount?.address, navigate, setEarnStorage]
   );
-
-  const filterOptions = useMemo(() => [
-    { label: t('Mainnet'), value: FilterOptionType.MAIN_NETWORK },
-    { label: t('Testnet'), value: FilterOptionType.TEST_NETWORK }
-  ], [t]);
 
   const onConnectChainSuccess = useCallback(() => {
     if (selectedPoolGroup && selectedPoolGroup.poolSlugs[0]) {

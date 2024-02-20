@@ -315,8 +315,8 @@ const Component: React.FC<Props> = ({ className, compound,
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.__table-token-col.__table-token-col, .__earning-status-col.__earning-status-col': {
-      flex: 1.2
+    '.__earning-status-col.__earning-status-col': {
+      flex: 0.8
     },
     '.__earning-status-col, .__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col, .__table-nomination-col, .__table-pool-col': {
       display: 'flex',

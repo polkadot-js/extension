@@ -21,7 +21,7 @@ import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extensi
 import { Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowsClockwise, Database, FadersHorizontal, Plus, PlusCircle, Vault } from 'phosphor-react';
+import { ArrowsClockwise, FadersHorizontal, Plus, PlusCircle, Vault } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -329,7 +329,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         className={'__empty-list-earning-positions'}
         emptyMessage={t('Change your search or explore other earning options')}
         emptyTitle={t('No earning position found')}
-        phosphorIcon={Database}
+        phosphorIcon={Vault}
       />
     );
   }, [setEntryView, t]);
@@ -675,15 +675,21 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
       paddingRight: token.padding,
       '.footer-content': {
         fontSize: token.fontSize,
-        lineHeight: token.lineHeight
+        lineHeight: token.lineHeight,
+        paddingRight: token.paddingXXS
       }
     },
-    '.__separator': {
+    '.footer-separator': {
       marginLeft: token.margin,
       marginRight: token.margin
     },
     '.__desktop-list-container': {
       overflow: 'visible'
+    }
+  },
+  '@media (max-width: 300px)': {
+    '.footer-group .ant-btn-content-wrapper': {
+      display: 'none'
     }
   }
 }));

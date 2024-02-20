@@ -323,7 +323,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         value={value || ''}
       />
       <BaseModal
-        className={`${className} modal-full`}
+        className={`${className}`}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}
@@ -404,22 +404,18 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
 const EarningValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
-    '.ant-sw-modal-header': {
-      paddingTop: token.paddingXS,
-      paddingBottom: token.paddingLG
-    },
-
     '.ant-sw-modal-body': {
       overflow: 'hidden',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      paddingLeft: 0,
+      paddingRight: 0
     },
-
     '.ant-sw-modal-footer': {
       margin: 0,
-      marginTop: token.marginXS,
       borderTop: 0,
-      marginBottom: token.margin
+      paddingLeft: 0,
+      paddingRight: 0
     },
 
     '.pool-item:not(:last-child)': {

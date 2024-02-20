@@ -14,7 +14,7 @@ import { EarningEntryView, EarningPoolsParam, ThemeProps, YieldGroupInfo } from 
 import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Database, FadersHorizontal } from 'phosphor-react';
+import { FadersHorizontal, Vault } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -284,7 +284,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
         className={'__empty-list-earning-options'}
         emptyMessage={t('No earning option found')}
         emptyTitle={t('Change your search and try again')}
-        phosphorIcon={Database}
+        phosphorIcon={Vault}
       />
     );
   }, [t]);
@@ -413,7 +413,8 @@ const EarningOptions = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
   '.__desktop-list-container': {
     overflowY: 'auto',
-    height: '100%'
+    height: '100%',
+    gridTemplateRows: 'min-content'
   },
 
   '.__section-list-container': {

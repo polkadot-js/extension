@@ -213,7 +213,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <div className='__item-lines-container'>
         <div className='__item-line-1 __item-line-common'>
           <div className={'__item-name-wrapper'}>
-            <div className={'__item-name'}>{positionInfo.asset.symbol}</div>
+            <div className={'__item-name'}>{poolInfo.metadata.shortName}</div>
             <EarningTypeTag
               chain={poolInfo.chain}
               className={'__item-tag'}
@@ -440,7 +440,7 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       },
 
       '.ant-number-decimal, .ant-number-suffix': {
-        color: 'inherit !important',
+        color: `${token.colorTextTertiary} !important`,
         fontSize: '24px !important',
         fontWeight: 'inherit !important',
         lineHeight: `${24}px`

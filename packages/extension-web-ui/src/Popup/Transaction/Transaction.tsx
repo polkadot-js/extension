@@ -276,9 +276,6 @@ const Transaction = styled(Component)(({ theme }) => {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    '&.transaction-wrapper': {
-      height: 'auto'
-    },
 
     '.content': {
       '&.__web-ui': {

@@ -18,7 +18,7 @@ import { isAccountAll } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { Database, FadersHorizontal } from 'phosphor-react';
+import { FadersHorizontal, Vault } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -257,7 +257,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         className='__empty-list-earning-pool'
         emptyMessage={t('Change your search and try again')}
         emptyTitle={t('No earning option found')}
-        phosphorIcon={Database}
+        phosphorIcon={Vault}
       />
     );
   }, [t]);

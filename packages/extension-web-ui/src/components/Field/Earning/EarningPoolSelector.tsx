@@ -252,7 +252,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             <Icon phosphorIcon={FadersHorizontal} />
           </Badge>
         )}
-        className={`${className} modal-full`}
+        className={`${className}`}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}
@@ -363,11 +363,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
 const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
-    '.ant-sw-modal-header': {
-      paddingTop: token.paddingXS,
-      paddingBottom: token.paddingLG
-    },
-
     '.ant-sw-modal-content': {
       paddingBottom: token.padding
     },

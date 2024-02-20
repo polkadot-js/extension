@@ -71,7 +71,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
-  const { currentAccount } = useSelector((state) => state.accountState);
+  const currentAccount = useSelector((state) => state.accountState.currentAccount);
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
 
@@ -387,11 +387,13 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
       {
         selectedPoolGroup && selectedPoolGroup.poolSlugs.length && (
           <EarningInstructionModal
+            address={currentAccount?.address}
+            assetRegistry={assetRegistry}
             closeAlert={closeAlert}
             isShowStakeMoreButton={true}
             onStakeMore={navigateToEarnTransaction}
             openAlert={openAlert}
-            slug={selectedPoolGroup.poolSlugs[0]}
+            poolInfo={poolInfoMap[selectedPoolGroup.poolSlugs[0]]}
           />
         )
       }

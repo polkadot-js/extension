@@ -1,17 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
-import { YieldPoolType } from '@subwallet/extension-base/types';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
 import { BaseModal, InstructionItem } from '@subwallet/extension-web-ui/components';
 import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { EARNING_DATA_RAW, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { earlyValidateJoin } from '@subwallet/extension-web-ui/messaging';
 import { AlertDialogProps, PhosphorIcon, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { getBannerButtonIcon } from '@subwallet/extension-web-ui/utils';
@@ -23,13 +23,16 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-interface Props extends ThemeProps{
-  slug: string;
+interface Props extends ThemeProps {
+  poolInfo: YieldPoolInfo | undefined;
   onCancel?: VoidFunction;
   onStakeMore?: (slug: string, chain: string) => void;
   isShowStakeMoreButton?: boolean;
   openAlert: (alertProps: AlertDialogProps) => void;
   closeAlert: VoidFunction;
+  assetRegistry: Record<string, _ChainAsset>;
+  address?: string;
+  bypassEarlyValidate?: boolean;
 }
 
 export interface BoxProps {
@@ -43,7 +46,7 @@ export interface BoxProps {
 const modalId = EARNING_INSTRUCTION_MODAL;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, closeAlert, isShowStakeMoreButton = true, onCancel, onStakeMore, openAlert, slug } = props;
+  const { address, assetRegistry, bypassEarlyValidate, className, closeAlert, isShowStakeMoreButton = true, onCancel, onStakeMore, openAlert, poolInfo } = props;
   const checkRef = useRef<number>(Date.now());
   const scrollRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
@@ -51,13 +54,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
-  const { assetRegistry } = useSelector((state) => state.assetRegistry);
-  const { currentAccount } = useSelector((state) => state.accountState);
   const [loading, setLoading] = useState(false);
   const [isScrollEnd, setIsScrollEnd] = useState(false);
   const [isDisableEarnButton, setDisableEarnButton] = useState(true);
-  const poolInfo = useMemo(() => poolInfoMap[slug], [poolInfoMap, slug]);
   const title = useMemo(() => {
     if (!poolInfo) {
       return '';
@@ -185,6 +184,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, []);
 
   const unBondedTime = useMemo((): string => {
+    if (!poolInfo) {
+      return '';
+    }
+
     let time: number | undefined;
 
     if (poolInfo.statistic && 'unstakingPeriod' in poolInfo.statistic) {
@@ -192,7 +195,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return convertTime(time);
-  }, [poolInfo.statistic, convertTime]);
+  }, [poolInfo, convertTime]);
 
   const data: BoxProps[] = useMemo(() => {
     if (!poolInfo) {
@@ -351,6 +354,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [assetRegistry, poolInfo, replaceEarningValue, unBondedTime]);
 
   const onClickFaq = useCallback(() => {
+    if (!poolInfo) {
+      return;
+    }
+
     let urlParam = '';
 
     switch (poolInfo.metadata.shortName) {
@@ -398,9 +405,19 @@ const Component: React.FC<Props> = (props: Props) => {
     const url = `https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs${urlParam}`;
 
     open(url);
-  }, [poolInfo.metadata.shortName, poolInfo.slug]);
+  }, [poolInfo]);
 
   const onClickButton = useCallback(() => {
+    if (!poolInfo) {
+      return;
+    }
+
+    if (bypassEarlyValidate) {
+      onStakeMore?.(poolInfo.slug, poolInfo.chain);
+
+      return;
+    }
+
     const time = Date.now();
 
     checkRef.current = time;
@@ -424,15 +441,15 @@ const Component: React.FC<Props> = (props: Props) => {
     };
 
     earlyValidateJoin({
-      slug: slug,
-      address: currentAccount?.address || ''
+      slug: poolInfo.slug,
+      address: address || ''
     })
       .then((rs) => {
         if (isValid()) {
           if (rs.passed) {
             setVisible(false);
             setTimeout(() => {
-              onStakeMore?.(slug, poolInfo.chain);
+              onStakeMore?.(poolInfo.slug, poolInfo.chain);
             }, 300);
           } else {
             const message = rs.errorMessage || '';
@@ -453,7 +470,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         }
       });
-  }, [closeAlert, currentAccount?.address, onStakeMore, openAlert, poolInfo.chain, setVisible, slug, t]);
+  }, [address, bypassEarlyValidate, closeAlert, onStakeMore, openAlert, poolInfo, setVisible, t]);
 
   const onScrollContent = useCallback(() => {
     scrollRef?.current?.scroll({ top: scrollRef?.current?.scrollHeight, left: 0 });

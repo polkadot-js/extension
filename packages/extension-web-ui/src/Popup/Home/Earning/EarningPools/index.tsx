@@ -47,7 +47,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
-  const { currentAccount } = useSelector((state) => state.accountState);
+  const currentAccount = useSelector((state) => state.accountState.currentAccount);
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
 
@@ -364,11 +364,13 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
       {
         selectedPool && (
           <EarningInstructionModal
+            address={currentAccount?.address}
+            assetRegistry={assetRegistry}
             closeAlert={closeAlert}
             isShowStakeMoreButton={true}
             onStakeMore={navigateToEarnTransaction}
             openAlert={openAlert}
-            slug={selectedPool.slug}
+            poolInfo={selectedPool}
           />
         )
       }

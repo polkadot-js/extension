@@ -60,7 +60,7 @@ const Component = () => {
 
   const { slug } = defaultData;
 
-  const { accounts, isAllAccount } = useSelector((state) => state.accountState);
+  const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
   const poolTargetsMap = useSelector((state) => state.earning.poolTargetsMap);
@@ -1069,11 +1069,13 @@ const Component = () => {
       {
         !isWebUI && (
           <EarningInstructionModal
+            address={currentAccount?.address}
+            assetRegistry={chainAsset}
             closeAlert={closeAlert}
             isShowStakeMoreButton={!isClickInfoButtonRef.current}
             onCancel={onCancelInstructionModal}
             openAlert={openAlert}
-            slug={slug}
+            poolInfo={poolInfo}
           />
         )
       }

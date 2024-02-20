@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { OPAL_SCAN_ENDPOINT, QUARTZ_SCAN_ENDPOINT, UNIQUE_SCAN_ENDPOINT } from '@subwallet/extension-base/koni/api/nft/config';
+import { OPAL_SCAN_ENDPOINT, QUARTZ_SCAN_ENDPOINT, UNIQUE_IPFS_GATEWAY, UNIQUE_SCAN_ENDPOINT } from '@subwallet/extension-base/koni/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
+import { isUrl } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
@@ -31,6 +32,18 @@ interface NftData {
 export class UniqueNftApi extends BaseNftApi {
   constructor (chain: string, addresses: string[]) {
     super(chain, undefined, addresses);
+  }
+
+  override parseUrl (input: string): string | undefined {
+    if (!input || input.length === 0) {
+      return undefined;
+    }
+
+    if (isUrl(input)) {
+      return input;
+    }
+
+    return UNIQUE_IPFS_GATEWAY + input;
   }
 
   private handleProperties (nft: NftData) {

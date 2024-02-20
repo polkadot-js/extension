@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
-import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { noop } from '@polkadot/util';
 
 export const failedMessage = 'Connect failed';
 export const timeoutMessage = 'Connect timeout';
@@ -44,15 +45,17 @@ export const substrateHandleConnectChain = async (chain: string, key: string, pr
 
     logFail = false;
 
-    _api.off('disconnected', handlerOnFail);
-    _api.off('error', handlerOnFail);
-    clearTimeout(timeout);
-
     const tempHash = temp.genesisHash.toHex();
 
     if (hash && hash !== tempHash) {
       resolve([_api, 'Wrong genesisHash']);
     }
+
+    await _api.query.system.number();
+
+    _api.off('disconnected', handlerOnFail);
+    _api.off('error', handlerOnFail);
+    clearTimeout(timeout);
 
     resolve([_api, '']);
   });
@@ -103,5 +106,117 @@ export const evmHandleConnectChain = async (chain: string, key: string, provider
     }
 
     resolve([api, '']);
+  });
+};
+
+interface HandleProviderProp {
+  chain: string;
+  key: string;
+  provider: string;
+  onTimeout: () => void;
+  awaitDisconnect: boolean;
+  onError: (message: string) => Promise<void>;
+}
+
+interface HandleSubstrateProviderProp extends HandleProviderProp {
+  genHash: string;
+  onSuccess: (api: ApiPromise) => Promise<void>;
+}
+
+interface HandleEvmProviderProp extends HandleProviderProp {
+  chainId: number;
+  onSuccess: (api: _EvmApi) => Promise<void>;
+}
+
+export const handleSubstrateProvider = ({ awaitDisconnect,
+  chain,
+  genHash,
+  key,
+  onError,
+  onSuccess,
+  onTimeout,
+  provider }: HandleSubstrateProviderProp) => {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+  return new Promise<void>(async (resolve) => {
+    const timeHandler = () => {
+      onTimeout();
+      resolve();
+    };
+
+    const timeout = setTimeout(() => {
+      timeHandler();
+    }, 2 * 60 * 1000);
+
+    const [api, message] = await substrateHandleConnectChain(chain, key, provider, genHash);
+
+    const disconnectApi = async () => {
+      if (awaitDisconnect) {
+        await api?.disconnect();
+      } else {
+        api?.disconnect().finally(noop);
+      }
+    };
+
+    clearTimeout(timeout);
+
+    if (message) {
+      await onError(message);
+      await disconnectApi();
+
+      resolve();
+    }
+
+    await onSuccess(api);
+    await disconnectApi();
+
+    resolve();
+  });
+};
+
+export const handleEvmProvider = ({ awaitDisconnect,
+  chain,
+  chainId,
+  key,
+  onError,
+  onSuccess,
+  onTimeout,
+  provider }: HandleEvmProviderProp) => {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
+  return new Promise<void>(async (resolve) => {
+    const timeHandler = () => {
+      onTimeout();
+      resolve();
+    };
+
+    const timeout = setTimeout(() => {
+      timeHandler();
+    }, 2 * 60 * 1000);
+
+    const [_api, message] = await evmHandleConnectChain(chain, key, provider, chainId);
+
+    const disconnectApi = async () => {
+      if (awaitDisconnect) {
+        await api?.destroy();
+      } else {
+        api?.destroy().finally(noop);
+      }
+    };
+
+    clearTimeout(timeout);
+
+    if (message) {
+      await onError(message);
+      await disconnectApi();
+
+      resolve();
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const api = _api!;
+
+    await onSuccess(api);
+    await disconnectApi();
+
+    resolve();
   });
 };

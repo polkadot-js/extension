@@ -6,7 +6,7 @@ import { _ChainStatus } from '@subwallet/chain-list/types';
 
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
-import { evmHandleConnectChain, substrateHandleConnectChain, timeoutMessage } from './base';
+import { evmHandleConnectChain, substrateHandleConnectChain, timeoutMessage } from './utils';
 
 jest.setTimeout(3 * 60 * 60 * 1000);
 

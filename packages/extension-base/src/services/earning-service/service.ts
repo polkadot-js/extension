@@ -38,11 +38,16 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   private dbService: DatabaseService;
   private eventService: EventService;
+  private useOnlineCacheOnly = true;
 
   constructor (state: KoniState) {
     this.state = state;
     this.dbService = state.dbService;
     this.eventService = state.eventService;
+  }
+
+  public disableOnlineCacheOnly () {
+    this.useOnlineCacheOnly = false;
   }
 
   private async initHandlers () {
@@ -398,15 +403,21 @@ export default class EarningService implements StoppableServiceInterface, Persis
     }, CRON_REFRESH_CHAIN_STAKING_METADATA);
 
     // Fetching from chains
-    this.subscribePoolsInfo((data) => {
-      data.lastUpdated = Date.now();
-      this.updateYieldPoolInfo(data);
-    }).then((rs) => {
+    if (this.useOnlineCacheOnly) {
       this.yieldPoolsInfoUnsub = () => {
-        rs();
         clearInterval(interval);
       };
-    }).catch(console.error);
+    } else {
+      this.subscribePoolsInfo((data) => {
+        data.lastUpdated = Date.now();
+        this.updateYieldPoolInfo(data);
+      }).then((rs) => {
+        this.yieldPoolsInfoUnsub = () => {
+          rs();
+          clearInterval(interval);
+        };
+      }).catch(console.error);
+    }
   }
 
   runUnsubscribePoolsInfo () {
@@ -772,15 +783,20 @@ export default class EarningService implements StoppableServiceInterface, Persis
    * @return {Promise<YieldPoolTarget[]>} List of pool's target
    * */
   public async getPoolTargets (slug: string): Promise<YieldPoolTarget[]> {
-    await this.eventService.waitChainReady;
+    let targets: YieldPoolTarget[] = [];
+
+    if (this.useOnlineCacheOnly) {
+      targets = await fetchStaticCache(`earning/targets/${slug}.json`, []);
+    }
 
     const handler = this.getPoolHandler(slug);
 
-    if (handler) {
-      return await handler.getPoolTargets();
-    } else {
-      return [];
+    if (!targets.length && handler) {
+      await this.eventService.waitChainReady;
+      targets = await handler.getPoolTargets();
     }
+
+    return targets;
   }
 
   /* Get pool's targets */

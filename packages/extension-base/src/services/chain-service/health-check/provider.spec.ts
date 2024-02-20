@@ -1,9 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { cryptoWaitReady } from '@polkadot/util-crypto';
 import { ChainInfoMap } from '@subwallet/chain-list';
 import { _ChainStatus } from '@subwallet/chain-list/types';
+
+import { cryptoWaitReady } from '@polkadot/util-crypto';
+
 import { evmHandleConnectChain, substrateHandleConnectChain, timeoutMessage } from './base';
 
 jest.setTimeout(3 * 60 * 60 * 1000);

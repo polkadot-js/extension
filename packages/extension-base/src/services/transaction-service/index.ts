@@ -896,7 +896,8 @@ export default class TransactionService {
         to: transaction.to !== undefined ? transaction.to : '',
         value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
         data: transaction.data,
-        chainId: _getEvmChainId(chainInfo)
+        chainId: _getEvmChainId(chainInfo),
+        type: 2
       };
     } else {
       txObject = {
@@ -906,7 +907,8 @@ export default class TransactionService {
         to: transaction.to !== undefined ? transaction.to : '',
         value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
         data: transaction.data,
-        chainId: _getEvmChainId(chainInfo)
+        chainId: _getEvmChainId(chainInfo),
+        type: 0
       };
     }
 

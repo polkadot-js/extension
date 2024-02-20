@@ -3107,7 +3107,7 @@ export default class KoniExtension {
         const isChainActive = this.#koniState.getChainStateByKey(chainInfo.slug).active;
 
         if (!isChainActive) {
-          reject(new Error('Please active chain {{chain}} before sign'.replaceAll('{{chain}}', chainInfo.name)));
+          reject(new Error('Please activate {{chain}} network before signing'.replaceAll('{{chain}}', chainInfo.name)));
 
           return false;
         } else {

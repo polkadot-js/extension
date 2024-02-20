@@ -12,11 +12,13 @@ import BigN from 'bignumber.js';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
-import { BN } from '@polkadot/util';
+import { noop } from '@polkadot/util';
 
 import { evmHandleConnectChain, substrateHandleConnectChain } from './base';
 
 jest.setTimeout(3 * 60 * 60 * 1000);
+
+const BN_TEN = new BigN(10);
 
 interface AssetSpec {
   minAmount: string;
@@ -297,7 +299,7 @@ const getPsp22AssetInfo = async (asset: _ChainAsset, api: ApiPromise): Promise<A
     const nameObj = nameResp.output?.toHuman() as Record<string, any>;
 
     const name = nameResp.output ? (nameObj.Ok as string || nameObj.ok as string) : '';
-    const decimals = decimalsResp.output ? (new BN((decimalsObj.Ok || decimalsObj.ok) as string | number)).toNumber() : 0;
+    const decimals = decimalsResp.output ? (new BigN((decimalsObj.Ok || decimalsObj.ok) as string | number)).toNumber() : 0;
     const symbol = decimalsResp.output ? (symbolObj.Ok as string || symbolObj.ok as string) : '';
 
     if (!name || !symbol || typeof name === 'object' || typeof symbol === 'object') {
@@ -381,23 +383,63 @@ const getErc20AssetInfo = async (asset: _ChainAsset, api: _EvmApi): Promise<Asse
   };
 };
 
+const compareAsset = (
+  assetInfo: AssetSpec,
+  asset: _ChainAsset,
+  errors: string[]
+) => {
+  const { decimals, minAmount, symbol } = assetInfo;
+
+  const _minAmount = asset.minAmount || '0';
+  const _decimals = asset.decimals || 0;
+
+  if (minAmount !== _minAmount) {
+    const convert = new BigN(minAmount).dividedBy(BN_TEN.pow(decimals)).toFixed();
+    const _convert = new BigN(_minAmount).dividedBy(BN_TEN.pow(_decimals)).toFixed();
+
+    errors.push(`Wrong min amount: current - ${asset.minAmount ?? 'null'} (${_convert}), onChain - ${minAmount} (${convert})`);
+  }
+
+  if (symbol !== asset.symbol) {
+    const zkSymbol = 'zk' + symbol;
+
+    if (zkSymbol !== asset.symbol) {
+      errors.push(`Wrong symbol: current - ${asset.symbol}, onChain - ${symbol}`);
+    }
+  }
+
+  if (decimals !== _decimals) {
+    errors.push(`Wrong decimals: current - ${asset.decimals ?? 'null'}, onChain - ${decimals}`);
+  }
+};
+
 const assetProvider: Record<string, number> = {
   default: 0,
-  polkadot: 4,
-  kusama: 4
+  ethereum: 1,
+  polygon: 2,
+  shidenEvm: 2,
+  shiden: 2,
+  ajunaPolkadot: 1,
+  crabParachain: 1
 };
 
 const assetProviderBackup: Record<string, number> = {
-  default: 1
+  default: 1,
+  pangolin: 0,
+  moonbase: 0,
+  moonriver: 3,
+  darwinia2: 2,
+  crabParachain: 0
 };
 
-const ignoreChains: string[] = ['interlay', 'kintsugi'];
+const ignoreChains: string[] = ['interlay', 'kintsugi', 'kintsugi_test'];
 
 describe('test chain asset', () => {
   it('chain asset', async () => {
     const chainAssets = Object.values(ChainAssetMap).filter((info) =>
       ChainInfoMap[info.originChain].chainStatus === _ChainStatus.ACTIVE &&
       !ignoreChains.includes(info.originChain)
+      // && ['watr_mainnet_evm'].includes(info.originChain)
     );
     const assetByChain: Record<string, _ChainAsset[]> = {};
     const errorChain: Record<string, string> = {};
@@ -446,11 +488,14 @@ describe('test chain asset', () => {
           const timeout = setTimeout(() => {
             timeHandler(chain);
           }, 2 * 60 * 1000);
+
           const [api, message] = await substrateHandleConnectChain(chain, key, provider, '');
+
+          clearTimeout(timeout);
 
           if (message) {
             errorChain[chain] = message;
-            await api?.disconnect();
+            api?.disconnect().finally(noop);
             resolve();
           }
 
@@ -470,7 +515,9 @@ describe('test chain asset', () => {
                 if (['moonbeam', 'moonriver', 'moonbase'].includes(chain)) {
                   const assetId = new BigN(_getTokenOnChainAssetId(asset));
                   const address = _getContractAddressOfToken(asset);
-                  const calcAddress = '0xFFFFFFFF' + assetId.toString(16);
+                  const _suffix = assetId.toString(16);
+                  const suffix = _suffix.length % 2 === 0 ? _suffix : '0' + _suffix;
+                  const calcAddress = '0xFFFFFFFF' + suffix;
 
                   if (address.toLocaleLowerCase() !== calcAddress.toLocaleLowerCase()) {
                     errors.push(`Wrong contract address: current - ${address}, onChain - ${calcAddress}`);
@@ -483,23 +530,7 @@ describe('test chain asset', () => {
               }
 
               if (assetInfo) {
-                const { decimals, minAmount, symbol } = assetInfo;
-
-                if (minAmount !== asset.minAmount) {
-                  errors.push(`Wrong min amount: current - ${asset.minAmount || 'null'}, onChain - ${minAmount}`);
-                }
-
-                if (symbol !== asset.symbol) {
-                  const zkSymbol = 'zk' + symbol;
-
-                  if (zkSymbol !== asset.symbol) {
-                    errors.push(`Wrong symbol: current - ${asset.symbol}, onChain - ${symbol}`);
-                  }
-                }
-
-                if (decimals !== asset.decimals) {
-                  errors.push(`Wrong decimals: current - ${asset.decimals || 'null'}, onChain - ${decimals}`);
-                }
+                compareAsset(assetInfo, asset, errors);
               } else {
                 errors.push('Cannot get info');
               }
@@ -521,8 +552,8 @@ describe('test chain asset', () => {
             localTokenChain[chain] = localToken;
           }
 
-          await api?.disconnect();
-          clearTimeout(timeout);
+          api?.disconnect().finally(noop);
+          resolve();
         });
       }
 
@@ -539,7 +570,9 @@ describe('test chain asset', () => {
           let _provider = provider;
 
           if (chainInfo.substrateInfo) {
-            const providerIndex = assetProviderBackup[chain] || assetProviderBackup.default;
+            const _providerIndex = assetProviderBackup[chain] || assetProviderBackup.default;
+            const length = Object.keys(chainInfo.providers).length;
+            const providerIndex = _providerIndex >= length ? length - 1 : _providerIndex;
 
             [_key, _provider] = Object.entries(chainInfo.providers)[providerIndex];
           }
@@ -550,9 +583,11 @@ describe('test chain asset', () => {
 
           const [_api, message] = await evmHandleConnectChain(chain, _key, _provider, chainInfo.evmInfo?.evmChainId || 0);
 
+          clearTimeout(timeout);
+
           if (message) {
             errorChain[chain] = message;
-            await _api?.destroy();
+            _api?.destroy().finally(noop);
             resolve();
           }
 
@@ -574,31 +609,16 @@ describe('test chain asset', () => {
                 continue;
               }
 
+              const errors: string[] = [];
+
               if (assetInfo) {
-                const { decimals, minAmount, symbol } = assetInfo;
-                const errors: string[] = [];
-
-                if (minAmount !== asset.minAmount) {
-                  errors.push(`Wrong min amount: current - ${asset.minAmount || 'null'}, onChain - ${minAmount}`);
-                }
-
-                if (symbol !== asset.symbol) {
-                  const zkSymbol = 'zk' + symbol;
-
-                  if (zkSymbol !== asset.symbol) {
-                    errors.push(`Wrong symbol: current - ${asset.symbol}, onChain - ${symbol}`);
-                  }
-                }
-
-                if (decimals !== asset.decimals) {
-                  errors.push(`Wrong decimals: current - ${asset.decimals || 'null'}, onChain - ${decimals}`);
-                }
-
-                if (errors.length) {
-                  tmpErrorAsset[asset.slug] = errors.join(' --- ');
-                }
+                compareAsset(assetInfo, asset, errors);
               } else {
-                tmpErrorAsset[asset.slug] = 'Cannot get info';
+                errors.push('Cannot get info');
+              }
+
+              if (errors.length) {
+                tmpErrorAsset[asset.slug] = errors.join(' --- ');
               }
             } catch (e) {
               console.error(asset.slug, e);
@@ -614,8 +634,8 @@ describe('test chain asset', () => {
             localTokenChain[chain] = localToken;
           }
 
-          await api?.destroy();
-          clearTimeout(timeout);
+          _api?.destroy().finally(noop);
+          resolve();
         });
       }
     }

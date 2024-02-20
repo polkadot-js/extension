@@ -1,9 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { cryptoWaitReady } from '@polkadot/util-crypto';
 import { ChainInfoMap } from '@subwallet/chain-list';
 import { _ChainStatus } from '@subwallet/chain-list/types';
+
+import { cryptoWaitReady } from '@polkadot/util-crypto';
+
 import { evmHandleConnectChain, substrateHandleConnectChain, timeoutMessage } from './base';
 
 jest.setTimeout(3 * 60 * 60 * 1000);
@@ -56,9 +58,9 @@ describe('test chain provider', () => {
                   errorProvider[chain] = errorProvider[chain] ? [...errorProvider[chain], value] : [value];
                 }
 
-                await api?.disconnect();
-
                 clearTimeout(timeout);
+
+                await api?.disconnect();
               } else {
                 if (!provider.startsWith('light://')) {
                   const value: [string, string] = [key, provider];
@@ -126,9 +128,9 @@ describe('test chain provider', () => {
                   errorProvider[chain] = errorProvider[chain] ? [...errorProvider[chain], value] : [value];
                 }
 
-                await api?.destroy();
-
                 clearTimeout(timeout);
+
+                await api?.destroy();
               }
             }
           } else {

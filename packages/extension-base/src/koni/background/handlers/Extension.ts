@@ -35,7 +35,7 @@ import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/servi
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
-import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
+import { convertSubjectInfoToAddresses, isSameAddress, MODULE_SUPPORT, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { calculateGasFeeParams, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
@@ -3014,8 +3014,8 @@ export default class KoniExtension {
   private keyringUnlock ({ password }: RequestUnlockKeyring): ResponseUnlockKeyring {
     try {
       keyring.unlockKeyring(password);
-      this.#koniState.initMantaPay(password)
-        .catch(console.error);
+      // this.#koniState.initMantaPay(password)
+      //   .catch(console.error);
     } catch (e) {
       return {
         errors: [(e as Error).message],
@@ -3751,7 +3751,7 @@ export default class KoniExtension {
   }
 
   private async initSyncMantaPay (address: string) {
-    if (this.#koniState.chainService?.mantaPay?.getSyncState().isSyncing) {
+    if (this.#koniState.chainService?.mantaPay?.getSyncState().isSyncing || !MODULE_SUPPORT.MANTA_ZK) {
       return;
     }
 

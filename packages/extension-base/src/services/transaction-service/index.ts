@@ -151,8 +151,7 @@ export default class TransactionService {
               const priority = await calculateGasFeeParams(web3, chainInfo.slug);
 
               if (priority.baseGasFee) {
-                const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
-                const maxFee = priority.maxFeePerGas.lte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+                const maxFee = priority.maxFeePerGas; // TODO: Need review
 
                 estimateFee.value = maxFee.multipliedBy(gasLimit).toFixed(0);
               } else {

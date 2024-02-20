@@ -134,6 +134,7 @@ export const TokenSelectionItem = styled(Component)<Props>(({ theme: { token } }
       display: 'flex',
       flexDirection: 'row',
       overflow: 'hidden',
+      'white-space': 'nowrap',
 
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,

@@ -669,7 +669,11 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
       paddingBottom: 62
     }
   },
-  '@media (max-width: 992px)': {
+  '@media (max-width: 991px)': {
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
     '.footer-group': {
       paddingLeft: token.padding,
       paddingRight: token.padding,

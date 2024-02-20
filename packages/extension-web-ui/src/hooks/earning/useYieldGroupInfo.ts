@@ -7,6 +7,7 @@ import { YieldPoolInfo } from '@subwallet/extension-base/types';
 import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useAccountBalance, useGetChainSlugsByAccountType, useSelector, useTokenGroup } from '@subwallet/extension-web-ui/hooks';
 import { BalanceValueInfo, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
+import { isRelatedToAstar } from '@subwallet/extension-web-ui/utils';
 import BigN from 'bignumber.js';
 import { useMemo } from 'react';
 
@@ -42,6 +43,11 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
 
       if (chainsByAccountType.includes(chain)) {
         const group = pool.group;
+
+        if (isRelatedToAstar(group)) {
+          continue;
+        }
+
         const exists = result[group];
         const chainInfo = chainInfoMap[chain];
 

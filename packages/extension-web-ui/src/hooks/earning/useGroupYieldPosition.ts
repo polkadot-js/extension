@@ -5,6 +5,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { AbstractYieldPositionInfo, EarningStatus, LendingYieldPositionInfo, LiquidYieldPositionInfo, NativeYieldPositionInfo, NominationYieldPositionInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { isAccountAll, isSameAddress } from '@subwallet/extension-base/utils';
 import { useGetChainSlugsByAccountType, useSelector } from '@subwallet/extension-web-ui/hooks';
+import { isRelatedToAstar } from '@subwallet/extension-web-ui/utils';
 import BigN from 'bignumber.js';
 import { useMemo } from 'react';
 
@@ -34,7 +35,9 @@ const useGroupYieldPosition = (): YieldPositionInfo[] => {
         const isValid = checkAddress(info);
         const haveStake = new BigN(info.totalStake).gt(0);
 
-        if (isValid && haveStake) {
+        const _isRelatedToAstar = isRelatedToAstar(info.slug);
+
+        if (isValid && haveStake && !_isRelatedToAstar) {
           if (raw[info.slug]) {
             raw[info.slug].push(info);
           } else {

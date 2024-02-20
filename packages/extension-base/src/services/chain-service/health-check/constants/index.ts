@@ -10,16 +10,20 @@ export const chainProvider: Record<string, number> = {
   shidenEvm: 2,
   shiden: 2,
   ajunaPolkadot: 1,
-  crabParachain: 1
+  crabParachain: 1,
+  astarEvm: 1,
+  shibuya: 1,
+  shibuyaEvm: 0
 };
 
 export const chainProviderBackup: Record<string, number> = {
   default: 1,
   pangolin: 0,
+  moonbeam: 0,
   moonbase: 0,
   moonriver: 3,
   darwinia2: 2,
-  crabParachain: 0
+  crabParachain: 1
 };
 
 export const BIG_TEN = new BigN(10);

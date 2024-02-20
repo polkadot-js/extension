@@ -48,7 +48,7 @@ export const substrateHandleConnectChain = async (chain: string, key: string, pr
     const tempHash = temp.genesisHash.toHex();
 
     if (hash && hash !== tempHash) {
-      resolve([_api, 'Wrong genesisHash']);
+      resolve([_api, `Wrong genesisHash: current - ${hash}, onChain - ${tempHash}`]);
     }
 
     await _api.query.system.number();
@@ -102,7 +102,7 @@ export const evmHandleConnectChain = async (chain: string, key: string, provider
     const tempId = await _api.api.eth.getChainId();
 
     if (tempId !== chainId) {
-      resolve([api, 'Wrong chain id']);
+      resolve([api, `Wrong chain id: current - ${chainId}, onChain - ${tempId}`]);
     }
 
     resolve([api, '']);
@@ -138,38 +138,43 @@ export const handleSubstrateProvider = ({ awaitDisconnect,
   provider }: HandleSubstrateProviderProp) => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
   return new Promise<void>(async (resolve) => {
-    const timeHandler = () => {
-      onTimeout();
-      resolve();
-    };
+    try {
+      const timeHandler = () => {
+        onTimeout();
+        resolve();
+      };
 
-    const timeout = setTimeout(() => {
-      timeHandler();
-    }, 2 * 60 * 1000);
+      const timeout = setTimeout(() => {
+        timeHandler();
+      }, 2 * 60 * 1000);
 
-    const [api, message] = await substrateHandleConnectChain(chain, key, provider, genHash);
+      const [api, message] = await substrateHandleConnectChain(chain, key, provider, genHash);
 
-    const disconnectApi = async () => {
-      if (awaitDisconnect) {
-        await api?.disconnect();
-      } else {
-        api?.disconnect().finally(noop);
+      const disconnectApi = async (api: ApiPromise) => {
+        if (awaitDisconnect) {
+          await api?.disconnect();
+        } else {
+          api?.disconnect().finally(noop);
+        }
+      };
+
+      clearTimeout(timeout);
+
+      if (message) {
+        await onError(message);
+        await disconnectApi(api);
+
+        resolve();
       }
-    };
 
-    clearTimeout(timeout);
+      await onSuccess(api);
+      await disconnectApi(api);
 
-    if (message) {
-      await onError(message);
-      await disconnectApi();
-
+      resolve();
+    } catch (e) {
+      await onError((e as Error).message);
       resolve();
     }
-
-    await onSuccess(api);
-    await disconnectApi();
-
-    resolve();
   });
 };
 
@@ -183,40 +188,47 @@ export const handleEvmProvider = ({ awaitDisconnect,
   provider }: HandleEvmProviderProp) => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises,no-async-promise-executor
   return new Promise<void>(async (resolve) => {
-    const timeHandler = () => {
-      onTimeout();
-      resolve();
-    };
+    try {
+      const timeHandler = () => {
+        onTimeout();
+        resolve();
+      };
 
-    const timeout = setTimeout(() => {
-      timeHandler();
-    }, 2 * 60 * 1000);
+      const timeout = setTimeout(() => {
+        timeHandler();
+      }, 2 * 60 * 1000);
 
-    const [_api, message] = await evmHandleConnectChain(chain, key, provider, chainId);
+      const [_api, message] = await evmHandleConnectChain(chain, key, provider, chainId);
 
-    const disconnectApi = async () => {
-      if (awaitDisconnect) {
-        await api?.destroy();
-      } else {
-        api?.destroy().finally(noop);
+      const disconnectApi = async (_api: _EvmApi | null) => {
+        if (awaitDisconnect) {
+          await _api?.destroy();
+        } else {
+          _api?.destroy().finally(noop);
+        }
+      };
+
+      console.log('connected', chain, key, provider);
+
+      clearTimeout(timeout);
+
+      if (message) {
+        await onError(message);
+        await disconnectApi(_api);
+
+        resolve();
       }
-    };
 
-    clearTimeout(timeout);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const api = _api!;
 
-    if (message) {
-      await onError(message);
-      await disconnectApi();
+      await onSuccess(api);
+      await disconnectApi(_api);
 
+      resolve();
+    } catch (e) {
+      await onError((e as Error).message);
       resolve();
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const api = _api!;
-
-    await onSuccess(api);
-    await disconnectApi();
-
-    resolve();
   });
 };

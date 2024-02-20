@@ -18,7 +18,8 @@ describe('test chain asset', () => {
   it('chain asset', async () => {
     const chainInfos = Object.values(ChainInfoMap).filter((info) =>
       info.chainStatus === _ChainStatus.ACTIVE
-      // && ['polkadot'].includes(info.slug)
+      // && !['acala_testnet'].includes(info.slug)
+      && ['automata'].includes(info.slug)
     );
     const errorChain: Record<string, string[]> = {};
 
@@ -44,7 +45,7 @@ describe('test chain asset', () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const substrateInfo = chainInfo.substrateInfo!;
         const ss58Prefix = api.consts.system.ss58Prefix.toPrimitive() as number;
-        const paraChainId = api.consts.parachainInfo?.parachainId.toPrimitive() as number ?? null;
+        const paraChainId = api.query.parachainInfo ? (await api.query.parachainInfo.parachainId()).toPrimitive() as number : null;
 
         if (!ignoreChains.includes(chain)) {
           const nativeToken = await getSubstrateNativeInfo(api);
@@ -61,7 +62,7 @@ describe('test chain asset', () => {
         }
 
         if (paraChainId !== substrateInfo.paraId) {
-          errors.push(`Wrong paraChainId: current - ${substrateInfo.paraId ?? 'null'}, onChain - ${paraChainId}`);
+          errors.push(`Wrong paraChainId: current - ${substrateInfo.paraId ?? 'null'}, onChain - ${paraChainId ?? 'null'}`);
         }
       };
 

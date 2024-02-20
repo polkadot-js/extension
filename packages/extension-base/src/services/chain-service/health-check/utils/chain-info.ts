@@ -21,7 +21,7 @@ export const compareNativeAsset = (
 
   if (minAmount !== _minAmount) {
     const convert = new BigN(minAmount).dividedBy(BIG_TEN.pow(decimals)).toFixed();
-    const _convert = new BigN(_minAmount).dividedBy(BIG_TEN.pow(_decimals)).toFixed();
+    const _convert = new BigN(_minAmount ?? '0').dividedBy(BIG_TEN.pow(_decimals)).toFixed();
 
     errors.push(`Wrong min amount: current - ${_minAmount} (${_convert}), onChain - ${minAmount} (${convert})`);
   }

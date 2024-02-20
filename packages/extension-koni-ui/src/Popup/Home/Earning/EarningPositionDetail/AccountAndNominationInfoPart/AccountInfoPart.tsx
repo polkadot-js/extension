@@ -32,7 +32,7 @@ const NextArrow = ({ currentSlide, slideCount, ...props }: CustomArrowProps) => 
     <div className={'__right-arrow'}>
       <div className={'__circle-icon'}>
         <Icon
-          customSize={'28px'}
+          customSize={'20px'}
           phosphorIcon={CaretRight}
         />
       </div>
@@ -46,7 +46,7 @@ const PrevArrow = ({ currentSlide, slideCount, ...props }: CustomArrowProps) => 
     <div className={'__left-arrow'}>
       <div className={'__circle-icon'}>
         <Icon
-          customSize={'28px'}
+          customSize={'20px'}
           phosphorIcon={CaretLeft}
         />
       </div>

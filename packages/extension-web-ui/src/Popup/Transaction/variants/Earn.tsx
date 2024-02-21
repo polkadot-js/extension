@@ -34,7 +34,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import useNotification from '../../../hooks/common/useNotification';
 import { getJoinYieldParams } from '../helper';
-import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent } from '../parts';
+import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '../parts';
 
 type Props = ThemeProps;
 
@@ -1013,6 +1013,8 @@ const Component = () => {
               title={STAKE_ALERT_DATA.title}
               type={'warning'}
             />
+          </TransactionContent>
+          <TransactionFooter>
             <Button
               block={true}
               className={'__start-earning-button'}
@@ -1028,7 +1030,7 @@ const Component = () => {
             >
               {processState.currentStep === 0 ? t('Stake') : t('Continue')}
             </Button>
-          </TransactionContent>
+          </TransactionFooter>
         </div>
 
         {isWebUI && (
@@ -1126,10 +1128,6 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     },
 
-    '.__start-earning-button': {
-      marginTop: 12
-    },
-
     '.__chain-item': {
       paddingLeft: 8
     },
@@ -1156,6 +1154,10 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
         fontWeight: 'inherit !important',
         lineHeight: 'inherit'
       }
+    },
+    '.__transaction-block': {
+      display: 'flex',
+      flexDirection: 'column'
     },
 
     '.__alert-box': {

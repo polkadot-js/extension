@@ -19,7 +19,7 @@ describe('test chain asset', () => {
     const chainInfos = Object.values(ChainInfoMap).filter((info) =>
       info.chainStatus === _ChainStatus.ACTIVE
       // && !['acala_testnet'].includes(info.slug)
-      && ['automata'].includes(info.slug)
+      // && ['imbue_network'].includes(info.slug)
     );
     const errorChain: Record<string, string[]> = {};
 

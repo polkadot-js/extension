@@ -25,10 +25,12 @@ export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t:
     return t('Available for withdrawal');
   } else {
     const waitingTimeInMs = waitingTime * 60 * 60 * 1000;
+
+    // Formatted waitting time without round up
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-    const formattedWaitingTime = humanizeDuration(waitingTimeInMs, {
-      units: ['d', 'h'],
-      round: true,
+    const _formattedWaitingTime = humanizeDuration(waitingTimeInMs, {
+      units: waitingTime >= 24 ? ['d', 'h'] : ['h', 'm'],
+      round: false,
       delimiter: ' ',
       language: 'shortEn',
       languages: {
@@ -37,13 +39,22 @@ export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t:
           mo: () => 'mo',
           w: () => 'w',
           d: () => 'd',
-          h: () => 'hr',
+          h: () => 'h',
           m: () => 'm',
           s: () => 's',
           ms: () => 'ms'
         }
       } // TODO: should not be shorten
     }) as string;
+
+    // Formatted waitting time with round up
+    const formattedWaitingTime = _formattedWaitingTime.split(' ').map((segment, index) => {
+      if (index % 2 === 0) {
+        return Math.ceil(parseFloat(segment)).toString();
+      }
+
+      return segment;
+    }).join(' ');
 
     return t('Withdrawable in {{time}}', { replace: { time: formattedWaitingTime } });
   }

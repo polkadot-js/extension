@@ -203,7 +203,8 @@ const Component: React.FC<Props> = (props: Props) => {
           genesisHash: selectedChain.genesisHash,
           hardwareType: 'ledger',
           name: item.name,
-          isEthereum: selectedChain.isEthereum
+          isEthereum: selectedChain.isEthereum,
+          isGeneric: selectedChain.isGeneric
         }))
       })
         .then(() => {

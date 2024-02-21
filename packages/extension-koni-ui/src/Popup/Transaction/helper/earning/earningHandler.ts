@@ -21,7 +21,7 @@ export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
 }
 
 export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t: TFunction) {
-  if (status === UnstakingStatus.CLAIMABLE) {
+  if (status === UnstakingStatus.CLAIMABLE || waitingTime === 0) {
     return t('Available for withdrawal');
   } else {
     const waitingTimeInMs = waitingTime * 60 * 60 * 1000;

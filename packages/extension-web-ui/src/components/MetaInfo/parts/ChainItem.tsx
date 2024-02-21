@@ -30,7 +30,7 @@ const Component: React.FC<ChainInfoItem> = (props: ChainInfoItem) => {
           </div>
         )
       }
-      <div className={'__col __value-col -to-right'}>
+      <div className={'__col __value-col -to-right -inline'}>
         <div className={`__chain-item __value -is-wrapper -schema-${valueColorSchema}`}>
           <Logo
             className={'__chain-logo'}

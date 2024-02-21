@@ -39,7 +39,7 @@ export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t:
           mo: () => 'mo',
           w: () => 'w',
           d: () => 'd',
-          h: () => 'h',
+          h: () => 'hr',
           m: () => 'm',
           s: () => 's',
           ms: () => 'ms'

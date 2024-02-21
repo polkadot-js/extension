@@ -79,17 +79,21 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         {t('Copy to the clipboard')}
       </Button>
-      <span style={{ color: token.colorTextLight5, marginTop: '-4px', marginBottom: '-4px' }}>{t('or')}</span>
-      <Button
-        disabled={!enableDownload}
-        icon={(<></>)}
-        onClick={onClickToSave}
-        size='xs'
-        style={{ textDecoration: 'underline' }}
-        type='ghost'
-      >
-        {t('Download seed phrase')}
-      </Button>
+      {enableDownload && (
+        <>
+          <span style={{ color: token.colorTextLight5, marginTop: '-4px', marginBottom: '-4px' }}>{t('or')}</span>
+          <Button
+            disabled={!enableDownload}
+            icon={(<></>)}
+            onClick={onClickToSave}
+            size='xs'
+            style={{ textDecoration: 'underline' }}
+            type='ghost'
+          >
+            {t('Download seed phrase')}
+          </Button>
+        </>)
+      }
     </div>
   );
 };

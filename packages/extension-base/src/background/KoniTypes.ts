@@ -26,6 +26,13 @@ import { HexString } from '@polkadot/util/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
+import {
+  SwapPair,
+  SwapQuote,
+  SwapQuoteResponse,
+  SwapRequest,
+  SwapSubmitTransaction
+} from '@subwallet/extension-base/types/swap';
 
 export enum RuntimeEnvironment {
   Web = 'Web',
@@ -2505,6 +2512,12 @@ export interface KoniRequestSignatures {
   'pri(database.import)': [string, boolean];
   'pri(database.exportJson)': [null, DexieExportJsonStructure];
   /* Database Service */
+
+  /* Swap */
+  'pri(swapService.subscribePairs)': [null, SwapPair[], SwapPair[]];
+  'pri(swapService.getQuote)': [SwapRequest, SwapQuoteResponse];
+  'pri(swapService.submitTransaction)': [SwapSubmitTransaction, SWTransactionResponse];
+  /* Swap */
 }
 
 export interface ApplicationMetadataType {

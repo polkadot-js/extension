@@ -65,7 +65,7 @@ export class ChainService {
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
-    this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
+    this.xcmRefMapSubject.next(this.dataMap.assetRefMap); // todo: filter out swap pairs
 
     if (MODULE_SUPPORT.MANTA_ZK) {
       console.log('Init Manta ZK');
@@ -80,7 +80,7 @@ export class ChainService {
 
   // Getter
   public getXcmRefMap () {
-    return this.dataMap.assetRefMap;
+    return this.dataMap.assetRefMap; // todo: filter out swap pairs
     // const result: Record<string, _AssetRef> = {};
     //
     // Object.entries(AssetRefMap).forEach(([key, assetRef]) => {
@@ -226,7 +226,7 @@ export class ChainService {
   }
 
   public getAssetRefMap () {
-    return this.dataMap.assetRefMap;
+    return this.dataMap.assetRefMap; // todo: check if need to filter out swap pairs
   }
 
   public getChainStateMap () {
@@ -533,7 +533,7 @@ export class ChainService {
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
     this.assetRegistrySubject.next(this.getAssetRegistry());
-    this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
+    this.xcmRefMapSubject.next(this.dataMap.assetRefMap); // todo: filter out swap pairs
 
     await this.initApis();
     await this.initAssetSettings();

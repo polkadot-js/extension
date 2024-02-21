@@ -14,6 +14,7 @@ import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
 import { SessionTypes } from '@walletconnect/types';
+import { SwapPair } from '@subwallet/extension-base/types/swap';
 
 // Setup redux stores
 
@@ -400,3 +401,11 @@ export const subscribeYieldMinAmountPercent = lazySubscribeMessage(
 );
 
 /* Earning */
+
+/* Swap */
+export const updateSwapPairs = (data: SwapPair[]) => {
+  store.dispatch({ type: 'swap/updateSwapPairs', payload: data });
+}
+
+export const subscribeSwapPairs = lazySubscribeMessage('pri(swapService.subscribePairs)', null, updateSwapPairs, updateSwapPairs);
+/* Swap */

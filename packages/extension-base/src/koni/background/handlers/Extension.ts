@@ -58,6 +58,7 @@ import { TypeRegistry } from '@polkadot/types';
 import { assert, BN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { addressToEvm, base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+import { SwapPair, SwapQuoteResponse, SwapRequest } from '@subwallet/extension-base/types/swap';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -4215,6 +4216,37 @@ export default class KoniExtension {
 
   /* Buy service */
 
+  /* Swap service */
+  private async subscribeSwapPairs (id: string, port: chrome.runtime.Port): Promise<SwapPair[]> {
+    const cb = createSubscription<'pri(swapService.subscribePairs)'>(id, port);
+    let ready = false;
+
+    await this.#koniState.swapService.waitForStarted();
+
+    const callback = (rs: SwapPair[]) => {
+      if (ready) {
+        cb(rs);
+      }
+    };
+
+    const subscription = this.#koniState.swapService.subscribeSwapPairs().subscribe(callback);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    ready = true;
+
+    return this.#koniState.swapService.getSwapPairs();
+  }
+
+  private async getSwapQuote (request: SwapRequest): Promise<SwapQuoteResponse> {
+    return this.#koniState.swapService.getSwapQuote(request);
+  }
+  /* Swap service */
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -4770,6 +4802,11 @@ export default class KoniExtension {
       case 'pri(database.exportJson)':
         return this.#koniState.dbService.getExportJson();
         /* Database */
+
+      case 'pri(swapService.subscribePairs)':
+        return this.subscribeSwapPairs(id, port);
+      case 'pri(swapService.getQuote)':
+        return this.getSwapQuote(request as SwapRequest);
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

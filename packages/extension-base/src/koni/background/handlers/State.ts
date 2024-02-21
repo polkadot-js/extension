@@ -58,6 +58,7 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { KoniCron } from '../cron';
 import { KoniSubscription } from '../subscription';
+import { SwapService } from '@subwallet/extension-base/services/swap-service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 const passworder = require('browser-passworder');
@@ -134,6 +135,7 @@ export default class KoniState {
   readonly campaignService: CampaignService;
   readonly buyService: BuyService;
   readonly earningService: EarningService;
+  readonly swapService: SwapService;
 
   // Handle the general status of the extension
   private generalStatus: ServiceStatus = ServiceStatus.INITIALIZING;
@@ -163,6 +165,7 @@ export default class KoniState {
     this.buyService = new BuyService(this);
     this.transactionService = new TransactionService(this);
     this.earningService = new EarningService(this);
+    this.swapService = new SwapService(this);
 
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
@@ -316,6 +319,7 @@ export default class KoniState {
     this.eventService.emit('chain.ready', true);
 
     await this.earningService.init();
+    await this.swapService.init();
 
     this.onReady();
     this.onAccountAdd();
@@ -1726,7 +1730,7 @@ export default class KoniState {
     // Stopping services
     await Promise.all([this.cron.stop(), this.subscription.stop()]);
     await this.pauseAllNetworks(undefined, 'IDLE mode');
-    await Promise.all([this.historyService.stop(), this.priceService.stop(), this.earningService.stop()]);
+    await Promise.all([this.historyService.stop(), this.priceService.stop(), this.earningService.stop(), this.swapService.stop()]);
 
     // Complete sleeping
     sleeping.resolve();
@@ -1762,7 +1766,7 @@ export default class KoniState {
     }
 
     // Start services
-    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start(), this.earningService.start()]);
+    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start(), this.earningService.start(), this.swapService.start()]);
 
     // Complete starting
     starting.resolve();

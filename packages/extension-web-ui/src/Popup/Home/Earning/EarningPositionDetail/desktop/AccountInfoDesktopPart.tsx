@@ -315,8 +315,11 @@ const Component: React.FC<Props> = ({ className, compound,
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.__earning-status-col.__earning-status-col': {
-      flex: 0.8
+    '.__table-nomination-col.__table-nomination-col': {
+      maxWidth: 48
+    },
+    '.__table-nomination-col.__table-nomination-col .ant-btn': {
+      marginRight: -token.marginXS
     },
     '.__earning-status-col, .__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col, .__table-nomination-col, .__table-pool-col': {
       display: 'flex',

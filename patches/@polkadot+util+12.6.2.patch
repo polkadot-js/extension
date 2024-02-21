@@ -1,9 +1,9 @@
 diff --git a/node_modules/@polkadot/util/cjs/versionDetect.js b/node_modules/@polkadot/util/cjs/versionDetect.js
-index 501f104..9173933 100644
+index af482b7..23518d9 100644
 --- a/node_modules/@polkadot/util/cjs/versionDetect.js
 +++ b/node_modules/@polkadot/util/cjs/versionDetect.js
-@@ -74,7 +74,7 @@ function warn(pre, all, fmt) {
-  * @description A `@polkadot/*` version detection utility, checking for one occurence of a package in addition to checking for ddependency versions.
+@@ -75,7 +75,7 @@ function warn(pre, all, fmt) {
+  * @description A `@polkadot/*` version detection utility, checking for one occurrence of a package in addition to checking for dependency versions.
   */
  function detectPackage({ name, path, type, version }, pathOrFn, deps = []) {
 -    if (!name.startsWith('@polkadot')) {
@@ -12,11 +12,11 @@ index 501f104..9173933 100644
      }
      const entry = getEntry(name);
 diff --git a/node_modules/@polkadot/util/versionDetect.js b/node_modules/@polkadot/util/versionDetect.js
-index b76c020..a6d1bed 100644
+index 23b8f8d..4f5cdd6 100644
 --- a/node_modules/@polkadot/util/versionDetect.js
 +++ b/node_modules/@polkadot/util/versionDetect.js
-@@ -71,7 +71,7 @@ function warn(pre, all, fmt) {
-  * @description A `@polkadot/*` version detection utility, checking for one occurence of a package in addition to checking for ddependency versions.
+@@ -72,7 +72,7 @@ function warn(pre, all, fmt) {
+  * @description A `@polkadot/*` version detection utility, checking for one occurrence of a package in addition to checking for dependency versions.
   */
  export function detectPackage({ name, path, type, version }, pathOrFn, deps = []) {
 -    if (!name.startsWith('@polkadot')) {

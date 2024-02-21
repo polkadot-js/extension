@@ -48,7 +48,7 @@ const filterAddress = (addresses: string[], chainInfo: _ChainInfo): [string[], s
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   if (isEvmChain) {
-    return [evmAddresses, []];
+    return [evmAddresses, substrateAddresses];
   } else {
     const fetchList: string[] = [];
     const unfetchList: string[] = [];

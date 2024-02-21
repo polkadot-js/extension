@@ -144,11 +144,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onSelectItem = useCallback((item: AccountItem) => {
     return () => {
+      const address = reformatAddress(item.address, addressPrefix);
+
       inactiveModal(id);
-      onSelect(item.address);
+      onSelect(address);
       onResetFilter();
     };
-  }, [id, inactiveModal, onResetFilter, onSelect]);
+  }, [addressPrefix, id, inactiveModal, onResetFilter, onSelect]);
 
   const renderItem = useCallback((item: AccountItem) => {
     const address = formatAddress(item);

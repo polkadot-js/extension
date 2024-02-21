@@ -128,6 +128,9 @@ const DApps = new LazyLoader('DApps', () => import('@subwallet/extension-web-ui/
 const EarningEntry = new LazyLoader('EarningEntry', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningEntry'));
 const EarningPools = new LazyLoader('EarningPools', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPools'));
 const EarningPositionDetail = new LazyLoader('EarningPositionDetail', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPositionDetail'));
+const EarningDemoOptions = new LazyLoader('EarningDemoOptions', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningDemo/EarningDemoOptions'));
+const EarningDemoPools = new LazyLoader('EarningDemoPools', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningDemo/EarningDemoPools'));
+const EarningDemoOutlet = new LazyLoader('EarningDemoOutlet', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningDemo/EarningDemoOutlet'));
 
 // const EarningDoneOutlet = new LazyLoader('EarningDoneOutlet', () => import('@subwallet/extension-web-ui/Popup/EarningDone/Outlet'));
 // const EarningDoneContent = new LazyLoader('EarningDoneContent', () => import('@subwallet/extension-web-ui/Popup/EarningDone/Content'));
@@ -230,12 +233,13 @@ export const router = createBrowserRouter([
       {
         ...TransactionDone.generateRouterObject('transaction-done/:address/:chain/:transactionId')
       },
-      // {
-      //   ...EarningDoneOutlet.generateRouterObject('earning-done'),
-      //   children: [
-      //     EarningDoneContent.generateRouterObject(':address/:chain/:transactionId')
-      //   ]
-      // },
+      {
+        ...EarningDemoOutlet.generateRouterObject('/earning-demo'),
+        children: [
+          EarningDemoOptions.generateRouterObject(''),
+          EarningDemoPools.generateRouterObject('pools')
+        ]
+      },
       {
         path: '/keyring',
         element: <Outlet />,
@@ -304,12 +308,6 @@ export const router = createBrowserRouter([
           ConnectionDetail.generateRouterObject('detail/:topic')
         ]
       },
-      // {
-      //   ...EarningOutlet.generateRouterObject('earning-demo'),
-      //   children: [
-      //     EarningDemo.generateRouterObject('')
-      //   ]
-      // },
       {
         ...CrowdloanUnlockCampaign.generateRouterObject('/crowdloan-unlock-campaign'),
         children: [

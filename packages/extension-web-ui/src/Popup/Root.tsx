@@ -45,8 +45,8 @@ const securityUrl = '/settings/security';
 const createDoneUrl = '/create-done';
 
 // Campaign
-const earningDemoUrl = '/earning-demo';
-const earningHomeUrl = '/home/earning/';
+const earningOptionsDemoUrl = '/earning-demo';
+const earningPoolsDemoUrl = '/earning-demo/pools';
 const checkCrowdloanUrl = '/crowdloan-unlock-campaign/check-contributions';
 const crowdloanResultUrl = '/crowdloan-unlock-campaign/contributions-result';
 
@@ -54,7 +54,8 @@ const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
-const allowPreventWelcomeUrls = [...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl, earningDemoUrl, checkCrowdloanUrl, crowdloanResultUrl];
+const allowPreventWelcomeUrls = [...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl,
+  earningOptionsDemoUrl, earningPoolsDemoUrl, checkCrowdloanUrl, crowdloanResultUrl];
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
   display: 'flex',
@@ -201,8 +202,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       if (!allowPreventWelcomeUrls.includes(pathName)) {
         redirectObj.redirect = welcomeUrl;
       }
-    } else if (pathName === earningDemoUrl && !isNoAccount) {
-      redirectObj.redirect = earningHomeUrl;
     } else if (hasConfirmations) {
       redirectObj.modal = `open:${CONFIRMATION_MODAL}`;
     } else if (pathName === DEFAULT_ROUTER_PATH) {

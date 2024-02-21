@@ -5,7 +5,7 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo } from '@subwallet/extension-base/types';
 import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
-import { useAccountBalance, useGetChainSlugsByCurrentAccount, useSelector, useTokenGroup } from '@subwallet/extension-web-ui/hooks';
+import { useGetChainSlugsByCurrentAccount, useSelector } from '@subwallet/extension-web-ui/hooks';
 import { BalanceValueInfo, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
 import { isRelatedToAstar } from '@subwallet/extension-web-ui/utils';
 import BigN from 'bignumber.js';
@@ -26,14 +26,12 @@ function calculateTotalValueStaked (poolInfo: YieldPoolInfo, assetRegistry: Reco
     .multipliedBy(price);
 }
 
-const useYieldGroupInfo = (): YieldGroupInfo[] => {
-  const { poolInfoMap } = useSelector((state) => state.earning);
-  const { assetRegistry, multiChainAssetMap } = useSelector((state) => state.assetRegistry);
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
+const usePreviewYieldGroupInfo = (poolInfoMap: Record<string, YieldPoolInfo>): YieldGroupInfo[] => {
+  const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
+  const multiChainAssetMap = useSelector((state) => state.assetRegistry.multiChainAssetMap);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const chainsByAccountType = useGetChainSlugsByCurrentAccount();
-  const { tokenGroupMap } = useTokenGroup(chainsByAccountType);
-  const { tokenBalanceMap, tokenGroupBalanceMap } = useAccountBalance(tokenGroupMap, true);
-  const { priceMap } = useSelector((state) => state.price);
+  const priceMap = useSelector((state) => state.price.priceMap);
 
   return useMemo(() => {
     const result: Record<string, YieldGroupInfo> = {};
@@ -84,8 +82,7 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             continue;
           }
 
-          const balance = tokenGroupBalanceMap[group] || tokenBalanceMap[group];
-          const freeBalance: BalanceValueInfo = balance?.free || {
+          const freeBalance: BalanceValueInfo = {
             value: BN_ZERO,
             convertedValue: BN_ZERO,
             pastConvertedValue: BN_ZERO
@@ -121,7 +118,7 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
     }
 
     return Object.values(result);
-  }, [assetRegistry, chainInfoMap, chainsByAccountType, multiChainAssetMap, poolInfoMap, priceMap, tokenBalanceMap, tokenGroupBalanceMap]);
+  }, [assetRegistry, chainInfoMap, chainsByAccountType, multiChainAssetMap, poolInfoMap, priceMap]);
 };
 
-export default useYieldGroupInfo;
+export default usePreviewYieldGroupInfo;

@@ -68,6 +68,7 @@ const simplePages = [
   '/keyring/migrate-password',
   '/create-done',
   '/earning-demo',
+  '/earning-demo/pools',
   '/crowdloan-unlock-campaign/check-contributions',
   '/crowdloan-unlock-campaign/contributions-result',
   '/not-found',

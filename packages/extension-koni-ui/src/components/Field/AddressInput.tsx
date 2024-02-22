@@ -16,7 +16,7 @@ import { Book, Scan } from 'phosphor-react';
 import React, { ChangeEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
+import { decodeAddress, isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { Avatar } from '../Avatar';
 import { QrScannerErrorNotice } from '../Qr';
@@ -90,9 +90,15 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     !skipClearDomainName && setDomainName(undefined);
 
     if (isAddress(val) && saveAddress) {
-      saveRecentAccount(val).catch(console.error);
+      if (isEthereumAddress(val)) {
+        saveRecentAccount(val, chain).catch(console.error);
+      } else {
+        if (decodeAddress(val, false, addressPrefix)) {
+          saveRecentAccount(val, chain).catch(console.error);
+        }
+      }
     }
-  }, [onChange, saveAddress]);
+  }, [onChange, saveAddress, chain, addressPrefix]);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     parseAndChangeValue(event.target.value);

@@ -35,6 +35,7 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionE
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { AccountsStore } from '@subwallet/extension-base/stores';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { calculateGasFeeParams, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
@@ -45,7 +46,7 @@ import { createPair } from '@subwallet/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
 import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
-import { KeyringAddress } from '@subwallet/ui-keyring/types';
+import { KeyringAddress, KeyringJson$Meta } from '@subwallet/ui-keyring/types';
 import { ProposalTypes } from '@walletconnect/types/dist/types/sign-client/proposal';
 import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/session';
 import { getSdkError } from '@walletconnect/utils';
@@ -542,13 +543,42 @@ export default class KoniExtension {
     };
   }
 
-  private saveRecentAccount ({ accountId }: RequestSaveRecentAccount): KeyringAddress {
+  private saveRecentAccount ({ accountId, chain }: RequestSaveRecentAccount): KeyringAddress {
     if (isAddress((accountId))) {
       const address = reformatAddress(accountId);
       const account = keyring.getAccount(address);
-      const contact = keyring.getAddress(address);
+      const contact = keyring.getAddress(address, 'address');
+      const recent = keyring.getAddress(address, 'address');
 
-      return account || contact || { ...keyring.saveRecent(address).json, publicKey: decodeAddress(address) };
+      if (account) {
+        return account;
+      } else if (contact) {
+        return contact;
+      } else {
+        let metadata: KeyringJson$Meta;
+
+        if (recent) {
+          metadata = recent.meta;
+        } else {
+          const _new = keyring.saveRecent(address);
+
+          metadata = _new.json.meta;
+        }
+
+        const recentChainSlugs: string[] = (metadata.recentChainSlugs as string[]) || [];
+
+        if (chain) {
+          if (!recentChainSlugs.includes(chain)) {
+            recentChainSlugs.push(chain);
+          }
+        }
+
+        metadata.recentChainSlugs = recentChainSlugs;
+
+        const result = keyring.addresses.add(new AccountsStore(), address, { address: address, meta: metadata });
+
+        return { ...result.json, publicKey: decodeAddress(address) };
+      }
     } else {
       throw Error(t('This is not an address'));
     }

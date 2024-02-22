@@ -12,7 +12,7 @@ import { isRelatedToAstar, openInNewTab } from '@subwallet/extension-koni-ui/uti
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowsClockwise, Database, FadersHorizontal, Plus, PlusCircle } from 'phosphor-react';
+import { ArrowsClockwise, FadersHorizontal, Plus, PlusCircle, Vault } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -170,7 +170,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         }}
         emptyMessage={t('Change your search or explore other earning options')}
         emptyTitle={t('No earning position found')}
-        phosphorIcon={Database}
+        phosphorIcon={Vault}
       />
     );
   }, [setEntryView, t]);

@@ -1,16 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
-import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
-import { EventService } from '@subwallet/extension-base/services/event-service';
-import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { SwapPair, SwapQuote, SwapQuoteResponse, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { _AssetRef, _AssetRefPath } from '@subwallet/chain-list/types';
-import { SWFeeType, SWFee } from '@subwallet/extension-base/types/fee';
+import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { EventService } from '@subwallet/extension-base/services/event-service';
+import { SWFee, SWFeeType } from '@subwallet/extension-base/types/fee';
+import { SwapPair, SwapQuote, SwapQuoteResponse, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
-import { EarningRewardJson } from '@subwallet/extension-base/types';
 
 const MOCK_ASSET_REF: Record<string, _AssetRef> = {
   'polkadot-NATIVE-DOT___ethereum-NATIVE-ETH': {
@@ -20,7 +19,7 @@ const MOCK_ASSET_REF: Record<string, _AssetRef> = {
     destChain: 'ethereum',
     destAsset: 'ethereum-NATIVE-ETH'
   }
-}
+};
 
 export class SwapService implements StoppableServiceInterface {
   protected readonly state: KoniState;
@@ -44,7 +43,7 @@ export class SwapService implements StoppableServiceInterface {
       return {
         slug,
         from: assetRef.srcAsset,
-        to: assetRef.destAsset,
+        to: assetRef.destAsset
       } as SwapPair;
     });
   }
@@ -53,7 +52,7 @@ export class SwapService implements StoppableServiceInterface {
     return this.swapPairSubject;
   }
 
-  public async getSwapQuote (request: SwapRequest): Promise<SwapQuoteResponse> {
+  public async handleSwapRequest (request: SwapRequest): Promise<SwapQuoteResponse> {
     // todo: calculate fee
     const feeStruct = SWFee.buildSimpleFee(this.chainService.getAssetBySlug(request.pair.from), request.fromAmount, SWFeeType.SUBSTRATE);
     const mockQuote = {
@@ -65,14 +64,20 @@ export class SwapService implements StoppableServiceInterface {
         slug: 'mock',
         name: 'Mock Provider',
         faq: 'https://mock.com/faq'
-      },
+      }
     } as SwapQuote;
 
-    return {
+    return Promise.resolve({
       feeStruct,
       quotes: [mockQuote],
       optimalQuote: mockQuote
-    }
+    });
+  }
+
+  public async getLatestSwapQuote (swapQuote: SwapQuote): Promise<SwapQuote> {
+    swapQuote.rate *= 0.005;
+
+    return Promise.resolve(swapQuote);
   }
 
   async init (): Promise<void> {

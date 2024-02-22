@@ -9,6 +9,7 @@ import { _ChainState } from '@subwallet/extension-base/services/chain-service/ty
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { SwapPair } from '@subwallet/extension-base/types/swap';
 import { addLazy, canDerive, isEmptyObject } from '@subwallet/extension-base/utils';
 import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-web-ui/messaging';
@@ -473,3 +474,11 @@ export const subscribeYieldMinAmountPercent = lazySubscribeMessage(
 );
 
 /* Earning */
+
+/* Swap */
+export const updateSwapPairs = (data: SwapPair[]) => {
+  store.dispatch({ type: 'swap/updateSwapPairs', payload: data });
+};
+
+export const subscribeSwapPairs = lazySubscribeMessage('pri(swapService.subscribePairs)', null, updateSwapPairs, updateSwapPairs);
+/* Swap */

@@ -36,6 +36,7 @@ import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/servi
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
+import { SwapPair, SwapQuote, SwapQuoteResponse, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { calculateGasFeeParams, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -58,7 +59,6 @@ import { TypeRegistry } from '@polkadot/types';
 import { assert, BN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { addressToEvm, base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
-import { SwapPair, SwapQuoteResponse, SwapRequest } from '@subwallet/extension-base/types/swap';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -4242,8 +4242,12 @@ export default class KoniExtension {
     return this.#koniState.swapService.getSwapPairs();
   }
 
-  private async getSwapQuote (request: SwapRequest): Promise<SwapQuoteResponse> {
-    return this.#koniState.swapService.getSwapQuote(request);
+  private async handleSwapRequest (request: SwapRequest): Promise<SwapQuoteResponse> {
+    return this.#koniState.swapService.handleSwapRequest(request);
+  }
+
+  private async getLatestSwapQuote (swapQuote: SwapQuote): Promise<SwapQuote> {
+    return this.#koniState.swapService.getLatestSwapQuote(swapQuote);
   }
   /* Swap service */
 
@@ -4805,8 +4809,10 @@ export default class KoniExtension {
 
       case 'pri(swapService.subscribePairs)':
         return this.subscribeSwapPairs(id, port);
-      case 'pri(swapService.getQuote)':
-        return this.getSwapQuote(request as SwapRequest);
+      case 'pri(swapService.handleSwapRequest)':
+        return this.handleSwapRequest(request as SwapRequest);
+      case 'pri(swapService.getLatestQuote)':
+        return this.getLatestSwapQuote(request as SwapQuote);
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

@@ -2515,8 +2515,9 @@ export interface KoniRequestSignatures {
 
   /* Swap */
   'pri(swapService.subscribePairs)': [null, SwapPair[], SwapPair[]];
-  'pri(swapService.getQuote)': [SwapRequest, SwapQuoteResponse];
+  'pri(swapService.handleSwapRequest)': [SwapRequest, SwapQuoteResponse];
   'pri(swapService.submitTransaction)': [SwapSubmitTransaction, SWTransactionResponse];
+  'pri(swapService.getLatestQuote)': [SwapQuote, SwapQuote];
   /* Swap */
 }
 

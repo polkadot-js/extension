@@ -33,6 +33,7 @@ interface Props extends ThemeProps {
   assetRegistry: Record<string, _ChainAsset>;
   address?: string;
   bypassEarlyValidate?: boolean;
+  customButtonTitle?: string;
 }
 
 export interface BoxProps {
@@ -46,7 +47,7 @@ export interface BoxProps {
 const modalId = EARNING_INSTRUCTION_MODAL;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { address, assetRegistry, bypassEarlyValidate, className, closeAlert, isShowStakeMoreButton = true, onCancel, onStakeMore, openAlert, poolInfo } = props;
+  const { address, assetRegistry, bypassEarlyValidate, className, closeAlert, customButtonTitle, isShowStakeMoreButton = true, onCancel, onStakeMore, openAlert, poolInfo } = props;
   const checkRef = useRef<number>(Date.now());
   const scrollRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
@@ -502,6 +503,10 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [isScrollEnd]);
 
+  if (!poolInfo) {
+    return null;
+  }
+
   const footerNode = (
     <>
       <div className='__footer-more-information-text-wrapper'>
@@ -562,16 +567,12 @@ const Component: React.FC<Props> = (props: Props) => {
             loading={loading}
             onClick={onClickButton}
           >
-            {buttonTitle}
+            {customButtonTitle || buttonTitle}
           </Button>
         )}
       </div>
     </>
   );
-
-  if (!poolInfo) {
-    return null;
-  }
 
   return (
     <BaseModal

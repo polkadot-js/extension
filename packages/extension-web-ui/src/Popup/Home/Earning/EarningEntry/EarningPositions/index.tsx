@@ -195,11 +195,11 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         ...DEFAULT_EARN_PARAMS,
         slug,
         chain,
-        from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
+        from: transactionFromValue
       });
       navigate('/transaction/earn');
     },
-    [currentAccount?.address, navigate, setEarnStorage]
+    [navigate, setEarnStorage, transactionFromValue]
   );
 
   const onClickUnStakeButton = useCallback((item: ExtraYieldPositionInfo) => {
@@ -593,12 +593,14 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         </Transaction>
       </BaseModal>
       {
-        selectedPositionInfo && selectedPositionInfo.slug &&
+        !!(selectedPositionInfo && poolInfoMap[selectedPositionInfo.slug]) &&
         (
           <EarningInstructionModal
             address={currentAccount?.address}
             assetRegistry={assetRegistry}
+            bypassEarlyValidate={true}
             closeAlert={closeAlert}
+            customButtonTitle={selectedPositionInfo.type === YieldPoolType.LENDING ? t('Supply more') : t('Stake more')}
             isShowStakeMoreButton={true}
             onStakeMore={navigateToEarnTransaction}
             openAlert={openAlert}

@@ -241,24 +241,22 @@ export default class NominationPoolHandler extends BasePoolHandler {
     let unstakingBalance = BN_ZERO;
 
     Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
-      // Calculate the remaining time for current era ending
       const activeEra = _activeEra.toPrimitive() as unknown as PalletStakingActiveEraInfo;
-      const isClaimable = parseInt(unlockingEra) - parseInt(activeEra.index) <= 0;
-      const remainingEra = parseInt(unlockingEra) - parseInt(activeEra.index) - 1;
-      const expectedBlockTime = _EXPECTED_BLOCK_TIME[this.chain];
-      const eraLength = _deriveSessionProgress.eraLength.toNumber();
-      const eraProgress = _deriveSessionProgress.eraProgress.toNumber();
-      const remainingSlots = eraLength - eraProgress;
-      const remainingHours = expectedBlockTime * remainingSlots / 60 / 60;
+      const era = parseInt(activeEra.index);
+      const startTimestampMs = parseInt(activeEra.start);
+
+      const remainingEra = parseInt(unlockingEra) - era;
       const eraTime = _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // in hours
-      const waitingTime = remainingEra * eraTime + remainingHours;
+      const remaningTimestampMs = remainingEra * eraTime * 60 * 60 * 1000;
+      const targetTimestampMs = startTimestampMs + remaningTimestampMs;
+      const isClaimable = targetTimestampMs - Date.now() <= 0;
 
       unstakingBalance = unstakingBalance.add(new BN(amount));
       unstakings.push({
         chain: chainInfo.slug,
         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
         claimable: amount.toString(),
-        waitingTime: waitingTime
+        targetTimestampMs: targetTimestampMs
       } as UnstakingInfo);
     });
 

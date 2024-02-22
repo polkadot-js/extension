@@ -452,8 +452,8 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       'white-space': 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      marginTop: 6,
-      marginBottom: 10
+      alignSelf: 'flex-start',
+      marginTop: token.marginXS
     },
 
     '.__item-description': {

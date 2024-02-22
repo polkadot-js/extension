@@ -182,7 +182,8 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
               validatorAddress: delegation.owner,
               claimable: claimable.toString(),
-              waitingTime
+              waitingTime,
+              // targetTimestampMs
             } as UnstakingInfo;
 
             hasUnstaking = true;

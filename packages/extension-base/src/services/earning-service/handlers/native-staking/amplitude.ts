@@ -208,6 +208,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
             status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
             claimable: unstakingAmount.toString(),
             waitingTime,
+            // targetTimestampMs
             validatorAddress: undefined
           });
         }

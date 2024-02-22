@@ -184,7 +184,8 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
               chain: this.chain,
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
               claimable: amount.toString(),
-              waitingTime: waitingTime
+              waitingTime: waitingTime,
+              // targetTimestampMs
             } as UnstakingInfo);
           }
         }

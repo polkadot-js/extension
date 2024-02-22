@@ -27,8 +27,7 @@ export function getAstarWithdrawable (yieldPosition: YieldPositionInfo): Unstaki
   const unstakingInfo: UnstakingInfo = {
     chain: yieldPosition.chain,
     status: UnstakingStatus.CLAIMABLE,
-    claimable: '0',
-    waitingTime: 0
+    claimable: '0'
   };
 
   let bnWithdrawable = BN_ZERO;

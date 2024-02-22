@@ -66,7 +66,7 @@ const TableRow = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProps
     '&.__tr': {
       transition: 'background-color 0.2s ease-in-out',
       padding: token.paddingSM,
-      paddingRight: token.paddingSM,
+      paddingRight: token.paddingXXS,
       paddingBottom: token.paddingSM,
       paddingLeft: token.paddingXXS
     },

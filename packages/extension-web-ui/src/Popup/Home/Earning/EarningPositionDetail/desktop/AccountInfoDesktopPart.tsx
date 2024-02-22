@@ -316,10 +316,7 @@ const Component: React.FC<Props> = ({ className, compound,
 const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.__table-nomination-col.__table-nomination-col': {
-      maxWidth: 48
-    },
-    '.__table-nomination-col.__table-nomination-col .ant-btn': {
-      marginRight: -token.marginXS
+      maxWidth: 56
     },
     '.__earning-status-col, .__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col, .__table-nomination-col, .__table-pool-col': {
       display: 'flex',

@@ -172,7 +172,7 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
       className: '__table-detail_action-col',
       render: () => {
         return (
-          <div>
+          <div className={'__row-stake-button-wrapper'}>
             <Button
               className={'__row-stake-button'}
               icon={(
@@ -312,9 +312,6 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
     },
     '.__table-staking-type-col .__td-inner': {
       alignItems: 'center'
-    },
-    '.__td:last-of-type .__td-inner': {
-      paddingRight: 0
     },
 
     '.__row-token-info-wrapper': {

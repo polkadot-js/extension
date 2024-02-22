@@ -426,6 +426,14 @@ const EarningPools = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
     height: '100%'
   },
 
+  '.earning-pools-table-container .__row-stake-button-wrapper': {
+    paddingRight: token.paddingXXS
+  },
+
+  '.earning-pools-table-container .__row-token-info-wrapper': {
+    paddingLeft: token.paddingXXS
+  },
+
   '.earning-pools-table': {
     height: '100%'
   },

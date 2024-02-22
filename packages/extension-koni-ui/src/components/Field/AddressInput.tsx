@@ -98,7 +98,8 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         }
       }
     }
-  }, [onChange, saveAddress, chain, addressPrefix]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saveAddress, chain, addressPrefix]);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     parseAndChangeValue(event.target.value);
@@ -172,6 +173,28 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       setDomainName(undefined);
     }
   }, [allowDomain, chain, inputRef, parseAndChangeValue, value]);
+
+  useEffect(() => {
+    if (value) {
+      const account = findContactByAddress(_contacts, value);
+
+      if (account) {
+        if (!isEthereumAddress(account.address) && !!account.isHardware) {
+          const availableGens: string[] = (account.availableGenesisHashes as string[]) || [];
+
+          if (!availableGens.includes(networkGenesisHash || '')) {
+            return;
+          }
+        }
+
+        const address = reformatAddress(account.address, addressPrefix);
+
+        parseAndChangeValue(address);
+        inputRef?.current?.focus();
+        inputRef?.current?.blur();
+      }
+    }
+  }, [_contacts, addressPrefix, value, parseAndChangeValue, inputRef, networkGenesisHash]);
 
   // todo: Will work with "Manage address book" feature later
   return (

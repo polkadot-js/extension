@@ -156,7 +156,7 @@ const Component: React.FC<Props> = (props: Props) => {
       switch (item) {
         case YieldAction.STAKE:
         case YieldAction.START_EARNING:
-          text = poolInfo.type === YieldPoolType.LENDING ? t('Supply more') : t('Stake now');
+          text = poolInfo.type === YieldPoolType.LENDING ? t('Supply more') : t('Stake more');
 
           temp.icon = PlusCircle;
           temp.label = !compact ? text : undefined;
@@ -207,8 +207,10 @@ const Component: React.FC<Props> = (props: Props) => {
     >
       <Logo
         className='__item-logo'
-        network={poolInfo.metadata.logo || poolInfo.chain}
+        isShowSubLogo={true}
+        subNetwork={poolInfo.metadata.logo || poolInfo.chain}
         size={64}
+        token={positionInfo.balanceToken.toLowerCase()}
       />
 
       <div className='__item-lines-container'>
@@ -221,19 +223,20 @@ const Component: React.FC<Props> = (props: Props) => {
                 <span className={'__name'}>{poolInfo.metadata.shortName}</span>
               )
               </span>
-              <Button
-                icon={(
-                  <Icon
-                    customSize={'28px'}
-                    phosphorIcon={Question}
-                  />
-                )}
-                onClick={onClickButton(onClickInstructionButton)}
-                size='xs'
-                type='ghost'
-              >
-              </Button>
             </div>
+            <Button
+              icon={(
+                <Icon
+                  customSize={'28px'}
+                  phosphorIcon={Question}
+                  weight='fill'
+                />
+              )}
+              onClick={onClickButton(onClickInstructionButton)}
+              size='xs'
+              type='ghost'
+            >
+            </Button>
           </div>
 
           <MetaInfo>
@@ -387,7 +390,8 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
     },
 
     '.__item-logo': {
-      marginRight: token.size
+      marginRight: token.size,
+      alignSelf: 'flex-start'
     },
     '.__item-token-name': {
       color: token.colorTextTertiary,
@@ -421,7 +425,6 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
     '.__item-name-wrapper': {
       display: 'flex',
       alignItems: 'center',
-      gap: token.paddingSM,
       overflow: 'hidden'
     },
 
@@ -439,12 +442,18 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       overflow: 'hidden',
       textOverflow: 'ellipsis'
     },
+    '.__item-name-wrapper .ant-btn': {
+      width: token.sizeMD,
+      height: token.sizeMD
+    },
 
     '.__item-tag': {
       marginRight: 0,
       'white-space': 'nowrap',
       overflow: 'hidden',
-      textOverflow: 'ellipsis'
+      textOverflow: 'ellipsis',
+      marginTop: 6,
+      marginBottom: 10
     },
 
     '.__item-description': {

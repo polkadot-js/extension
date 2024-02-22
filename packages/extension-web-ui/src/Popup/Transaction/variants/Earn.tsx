@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol, _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
@@ -161,7 +162,7 @@ const Component = () => {
     [checkMintLoading, stepLoading, connectionError, amountValue, isBalanceReady, isFormInvalid, submitLoading, targetLoading, mustChooseTarget, poolTargetValue]
   );
 
-  const inputAsset = useMemo(
+  const inputAsset = useMemo<_ChainAsset | undefined>(
     () => chainAsset[poolInfo?.metadata?.inputAsset || ''],
     [chainAsset, poolInfo?.metadata?.inputAsset]
   );
@@ -169,7 +170,7 @@ const Component = () => {
   const nativeAsset = useMemo(() => chainAsset[nativeTokenSlug], [chainAsset, nativeTokenSlug]);
 
   const assetDecimals = inputAsset ? _getAssetDecimals(inputAsset) : 0;
-  const priceValue = priceMap[inputAsset.priceId || ''] || 0;
+  const priceValue = priceMap[inputAsset?.priceId || ''] || 0;
   const convertValue = amountValue ? parseFloat(amountValue) / 10 ** assetDecimals : 0;
   const transformAmount = convertValue * priceValue;
 
@@ -519,7 +520,7 @@ const Component = () => {
   }, [currentStep, onError, onSuccess, poolInfo, poolTargets, processState.feeStructure, processState.steps]);
 
   const renderMetaInfo = useCallback(() => {
-    if (!poolInfo) {
+    if (!poolInfo || !inputAsset) {
       return null;
     }
 
@@ -599,7 +600,7 @@ const Component = () => {
         )}
       </MetaInfo>
     );
-  }, [poolInfo, amountValue, assetDecimals, inputAsset.symbol, t, chainValue, estimatedFee, poolTargets, chainAsset]);
+  }, [poolInfo, inputAsset, amountValue, assetDecimals, t, chainValue, estimatedFee, poolTargets, chainAsset]);
 
   const onPreCheck = usePreCheckAction(fromValue);
 
@@ -744,8 +745,8 @@ const Component = () => {
   }, [altChain, poolChain, checkChainConnected, closeAlert, isConnectingChainSuccess, isLoadingChainConnection, openAlert, t, poolChainName, altChainName]);
 
   useEffect(() => {
-    form.setFieldValue('asset', inputAsset.slug || '');
-  }, [form, inputAsset.slug]);
+    form.setFieldValue('asset', inputAsset?.slug || '');
+  }, [form, inputAsset?.slug]);
 
   useEffect(() => {
     if (!fromValue && accountSelectorList.length === 1) {
@@ -974,7 +975,7 @@ const Component = () => {
                       hidden={[YieldStepType.XCM].includes(submitStepType)}
                       isSubscribe={true}
                       label={`${t('Available balance')}:`}
-                      tokenSlug={inputAsset.slug}
+                      tokenSlug={inputAsset?.slug}
                     />
                   </div>
 

@@ -85,7 +85,7 @@ function Component ({ className, inputAsset, modalId, onCancelWithDraw, poolInfo
   return (
     <BaseModal
       className={CN(className, '__withdrawal-detail-modal')}
-      footer={
+      footer={canCancelWithdraw && (
         <Button
           block={true}
           className={'__cancel-unstake-button'}
@@ -100,7 +100,7 @@ function Component ({ className, inputAsset, modalId, onCancelWithDraw, poolInfo
           schema={'secondary'}
         >
           {t('Cancel unstake')}
-        </Button>
+        </Button>)
       }
       id={modalId}
       onCancel={closeModal}
@@ -174,9 +174,7 @@ export const EarningWithdrawalDetailModal = styled(Component)<Props>(({ theme: {
     gap: 4,
     'white-space': 'nowrap'
   },
-  '.__withdraw-time-item .__value-col': {
-    flex: '0 1 auto'
-  },
+
   '.__withdraw-time-item .__withdraw-time-label': {
     textOverflow: 'ellipsis',
     overflow: 'hidden'

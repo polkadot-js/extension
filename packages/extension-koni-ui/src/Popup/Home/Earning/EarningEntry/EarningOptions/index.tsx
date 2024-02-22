@@ -12,7 +12,7 @@ import { EarningEntryView, EarningPoolsParam, ThemeProps, YieldGroupInfo } from 
 import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Database, FadersHorizontal } from 'phosphor-react';
+import { FadersHorizontal, Vault } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -254,7 +254,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
       <EmptyList
         emptyMessage={t('No earning option found')}
         emptyTitle={t('Change your search and try again')}
-        phosphorIcon={Database}
+        phosphorIcon={Vault}
       />
     );
   }, [t]);

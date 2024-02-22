@@ -6,7 +6,7 @@ import { _ChainStatus } from '@subwallet/chain-list/types';
 
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
-import { evmHandleConnectChain, substrateHandleConnectChain, timeoutMessage } from './base';
+import { evmHandleConnectChain, substrateHandleConnectChain, timeoutMessage } from './utils';
 
 jest.setTimeout(3 * 60 * 60 * 1000);
 
@@ -58,9 +58,9 @@ describe('test chain provider', () => {
                   errorProvider[chain] = errorProvider[chain] ? [...errorProvider[chain], value] : [value];
                 }
 
-                await api?.disconnect();
-
                 clearTimeout(timeout);
+
+                await api?.disconnect();
               } else {
                 if (!provider.startsWith('light://')) {
                   const value: [string, string] = [key, provider];
@@ -128,9 +128,9 @@ describe('test chain provider', () => {
                   errorProvider[chain] = errorProvider[chain] ? [...errorProvider[chain], value] : [value];
                 }
 
-                await api?.destroy();
-
                 clearTimeout(timeout);
+
+                await api?.destroy();
               }
             }
           } else {

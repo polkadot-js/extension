@@ -59,7 +59,7 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
     };
 
     const stakingTypeCol = {
-      title: t('Staking type'),
+      title: t('Earning type'),
       key: 'staking_type',
       className: '__table-staking-type-col',
       sortable: true,
@@ -185,7 +185,7 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
               shape='circle'
               size='xs'
             >
-              {'Stake'}
+              {'Stake to earn'}
             </Button>
           </div>
         );
@@ -361,8 +361,9 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
     },
 
     '.__table-detail_action-col.__table-detail_action-col': {
-      flexGrow: 0,
+      flex: 1,
       minWidth: 140,
+      maxWidth: 180,
       display: 'flex',
       justifyContent: 'flex-end'
     },

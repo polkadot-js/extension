@@ -423,7 +423,8 @@ const EarningPools = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
   },
 
   '.earning-pools-table-container': {
-    height: '100%'
+    height: '100%',
+    overflow: 'auto'
   },
 
   '.earning-pools-table-container .__row-stake-button-wrapper': {

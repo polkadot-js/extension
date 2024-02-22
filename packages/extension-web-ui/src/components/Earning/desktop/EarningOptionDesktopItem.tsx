@@ -99,7 +99,7 @@ const Component: React.FC<Props> = (props: Props) => {
             shape='circle'
             size='xs'
           >
-            {'Stake now'}
+            {'Stake to earn'}
           </Button>
         </div>
       </div>

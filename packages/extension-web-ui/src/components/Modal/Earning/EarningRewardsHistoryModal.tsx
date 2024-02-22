@@ -54,7 +54,7 @@ function Component ({ address, className, inputAsset, modalId, rewardHistories, 
       }
       id={modalId}
       onCancel={closeModal}
-      title={'History rewards'}
+      title={'Reward history'}
     >
       <MetaInfo
         labelColorScheme='gray'

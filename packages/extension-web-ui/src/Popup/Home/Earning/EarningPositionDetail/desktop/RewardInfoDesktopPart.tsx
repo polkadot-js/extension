@@ -174,7 +174,7 @@ function Component ({ className, closeAlert, compound,
           disabled={!rewardHistories?.length}
           onClick={onOpenRewardsHistoryModal}
           type={'ghost'}
-        >{t('Rewards history')}</Button>
+        >{t('Reward history')}</Button>
       </div>
       <EarningRewardsHistoryModal
         address={currentAccount?.address}

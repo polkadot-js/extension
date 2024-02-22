@@ -106,7 +106,7 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
 
       <div className={CN('__block-item', '__estimate-block')}>
         <div className='__block-title-wrapper'>
-          <div className={'__block-title'}>{t('Estimate earning')}</div>
+          <div className={'__block-title'}>{t('Estimated earnings')}</div>
         </div>
 
         <div className={'__block-content'}>
@@ -137,7 +137,7 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
 
       <div className={CN('__block-item', '__minimun-stake-block')}>
         <div className='__block-title-wrapper'>
-          <div className={'__block-title'}>{t('Minimum staked')}</div>
+          <div className={'__block-title'}>{t('Minimum active stake')}</div>
         </div>
 
         <div className={'__block-content'}>

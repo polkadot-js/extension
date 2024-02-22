@@ -170,7 +170,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
           className={'rewards-history'}
           onClick={onOpenDetailModal}
           type={'ghost'}
-        >{t('View detail')}</Button>
+        >{t('View details')}</Button>
       </div>
 
       <EarningWithdrawalDetailModal

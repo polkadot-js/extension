@@ -43,11 +43,6 @@ function Component ({ className,
         icon: Wallet
       },
       {
-        label: t('Crowdloans'),
-        value: '/home/crowdloans',
-        icon: Rocket
-      },
-      {
         label: t('Earning'),
         value: '/home/earning',
         icon: Vault
@@ -61,6 +56,11 @@ function Component ({ className,
         label: t('Mission Pools'),
         value: '/home/mission-pools',
         icon: Parachute
+      },
+      {
+        label: t('Crowdloans'),
+        value: '/home/crowdloans',
+        icon: Rocket
       },
       {
         label: t('History'),

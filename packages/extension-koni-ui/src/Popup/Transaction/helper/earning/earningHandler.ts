@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SpecialYieldPoolInfo, SubmitYieldStepData, UnstakingStatus, YieldPoolInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { SpecialYieldPoolInfo, SubmitYieldStepData, YieldPoolInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 // @ts-ignore
 import humanizeDuration from 'humanize-duration';
 import { TFunction } from 'react-i18next';
@@ -20,8 +20,7 @@ export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
   return '';
 }
 
-export function getWaitingTime (targetTimestampMs: number, status: UnstakingStatus, t: TFunction) {
-  const currentTimestampMs = Date.now();
+export function getWaitingTime (targetTimestampMs: number, currentTimestampMs: number, t: TFunction) {
   const remainingTimestampMs = targetTimestampMs - currentTimestampMs;
 
   if (remainingTimestampMs <= 0) {

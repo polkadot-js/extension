@@ -13,7 +13,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, ProhibitInset } from 'phosphor-react';
-import React, { Context, useCallback, useContext, useMemo } from 'react';
+import React, { Context, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { ThemeContext } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -26,7 +26,7 @@ type Props = ThemeProps & {
   transactionChainValue: string;
 };
 
-function Component ({ className, inputAsset, poolInfo, transactionChainValue, transactionFromValue, unstakings }: Props){
+function Component ({ className, inputAsset, poolInfo, transactionChainValue, transactionFromValue, unstakings }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { slug } = poolInfo;
@@ -35,6 +35,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
 
   const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
   const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
+  const [currentTimestampMs, setCurrentTimestampMs] = useState(Date.now());
 
   const items = useMemo(() => {
     return [...unstakings].sort((a, b) => {
@@ -54,14 +55,17 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
     });
   }, [unstakings]);
 
-  let totalWithdrawable = BN_ZERO;
-  const currentTimestampMs = Date.now()
-  unstakings.forEach((value) => {
-    // @ts-ignore
-    if (value.targetTimestampMs <= currentTimestampMs) {
-      totalWithdrawable = totalWithdrawable.plus(value.claimable);
-    }
-  });
+  const totalWithdrawable = useMemo(() => {
+    let result = BN_ZERO;
+
+    unstakings.forEach((value) => {
+      if (value.targetTimestampMs <= currentTimestampMs) {
+        result = result.plus(value.claimable);
+      }
+    });
+
+    return result;
+  }, [currentTimestampMs, unstakings]);
 
   const haveUnlocking = useMemo(() => unstakings.some((i) => i.status === UnstakingStatus.UNLOCKING), [unstakings]);
 
@@ -113,7 +117,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
       } else {
         return (
           <>
-            <div className={'__withdraw-time-label'}>{getWaitingTime(item.targetTimestampMs, item.status, t)}</div>
+            <div className={'__withdraw-time-label'}>{getWaitingTime(item.targetTimestampMs, currentTimestampMs, t)}</div>
             {item.status === UnstakingStatus.CLAIMABLE && (
               <Icon
                 iconColor={token.colorSecondary}
@@ -126,8 +130,18 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
         );
       }
     },
-    [t, token.colorSecondary]
+    [currentTimestampMs, t, token.colorSecondary]
   );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTimestampMs(Date.now());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
 
   if (!unstakings.length) {
     return null;

@@ -283,7 +283,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
               chain: this.chain,
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
               claimable: unlocking.balance,
-              waitingTime: waitingTime,
+              waitingTime: waitingTime
               // targetTimestampMs:
             } as UnstakingInfo);
           });

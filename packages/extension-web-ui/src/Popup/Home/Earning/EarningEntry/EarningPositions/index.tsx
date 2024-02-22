@@ -5,8 +5,8 @@ import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningRewardItem, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { AlertModal, BaseModal, EarningPositionDesktopItem, EarningPositionItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
-import { ASTAR_PORTAL_URL, BN_TEN, CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, EARN_TRANSACTION, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-web-ui/constants';
+import { AlertModal, BaseModal, EarningInstructionModal, EarningPositionDesktopItem, EarningPositionItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
+import { ASTAR_PORTAL_URL, BN_TEN, CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useAlert, useFilterModal, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { reloadCron } from '@subwallet/extension-web-ui/messaging';
@@ -36,6 +36,7 @@ type Props = ThemeProps & {
 let cacheData: Record<string, boolean> = {};
 const FILTER_MODAL_ID = 'earning-positions-filter-modal';
 const alertModalId = 'earning-positions-alert-modal';
+const instructionModalId = EARNING_INSTRUCTION_MODAL;
 
 function Component ({ className, earningPositions, setEntryView, setLoading }: Props) {
   const { t } = useTranslation();
@@ -53,6 +54,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
   const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
   const earningRewards = useSelector((state) => state.earning.earningRewards);
+  const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
   const [, setUnStakeStorage] = useLocalStorage(UN_STAKE_TRANSACTION, DEFAULT_UN_STAKE_PARAMS);
@@ -64,7 +66,6 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
   const [searchInput, setSearchInput] = useState<string>('');
   const [selectedPositionInfo, setSelectedPositionInfo] = useState<ExtraYieldPositionInfo | undefined>(undefined);
-
   const items: ExtraYieldPositionInfo[] = useMemo(() => {
     if (!earningPositions.length) {
       return [];
@@ -188,6 +189,19 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
     };
   }, [navigate, setEarnStorage, transactionFromValue]);
 
+  const navigateToEarnTransaction = useCallback(
+    (slug: string, chain: string) => {
+      setEarnStorage({
+        ...DEFAULT_EARN_PARAMS,
+        slug,
+        chain,
+        from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
+      });
+      navigate('/transaction/earn');
+    },
+    [currentAccount?.address, navigate, setEarnStorage]
+  );
+
   const onClickUnStakeButton = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
       setSelectedPositionInfo(item);
@@ -201,6 +215,13 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
       activeModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
     };
   }, [activeModal, setUnStakeStorage, transactionFromValue]);
+
+  const onClickInstructionButton = useCallback((item: ExtraYieldPositionInfo) => {
+    return () => {
+      setSelectedPositionInfo(item);
+      activeModal(instructionModalId);
+    };
+  }, [activeModal]);
 
   const onClickWithdrawButton = useCallback((item: ExtraYieldPositionInfo) => {
     return () => {
@@ -299,6 +320,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         key={key}
         onClickCancelUnStakeButton={onClickCancelUnStakeButton(item)}
         onClickClaimButton={onClickClaimButton(item)}
+        onClickInstructionButton={onClickInstructionButton(item)}
         onClickItem={onClickItem(item)}
         onClickStakeButton={onClickStakeButton(item)}
         onClickUnStakeButton={onClickUnStakeButton(item)}
@@ -308,7 +330,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         unclaimedReward={nominationPoolReward?.unclaimedReward}
       />
     );
-  }, [isWebUI, poolInfoMap, currentAccount?.address, isShowBalance, onClickCancelUnStakeButton, onClickClaimButton, onClickItem, onClickStakeButton, onClickUnStakeButton, onClickWithdrawButton, earningRewards]);
+  }, [isWebUI, poolInfoMap, currentAccount?.address, isShowBalance, onClickCancelUnStakeButton, onClickClaimButton, onClickItem, onClickStakeButton, onClickUnStakeButton, onClickWithdrawButton, onClickInstructionButton, earningRewards]);
 
   const emptyList = useCallback(() => {
     return (
@@ -570,6 +592,20 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
           <Withdraw />
         </Transaction>
       </BaseModal>
+      {
+        selectedPositionInfo && selectedPositionInfo.slug &&
+        (
+          <EarningInstructionModal
+            address={currentAccount?.address}
+            assetRegistry={assetRegistry}
+            closeAlert={closeAlert}
+            isShowStakeMoreButton={true}
+            onStakeMore={navigateToEarnTransaction}
+            openAlert={openAlert}
+            poolInfo={poolInfoMap[selectedPositionInfo.slug]}
+          />
+        )
+      }
 
       {
         !!alertProps && (

@@ -13,7 +13,7 @@ import { getEarnExtrinsicType, getUnstakeExtrinsicType, getWithdrawExtrinsicType
 import { Button, ButtonProps, Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { MinusCircle, PlusCircle, StopCircle, Wallet } from 'phosphor-react';
+import { MinusCircle, PlusCircle, Question, StopCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
 
@@ -24,6 +24,7 @@ interface Props extends ThemeProps {
   onClickStakeButton: () => void;
   onClickUnStakeButton: () => void;
   onClickWithdrawButton: () => void;
+  onClickInstructionButton: () => void;
   poolInfo: YieldPoolInfo;
   positionInfo: ExtraYieldPositionInfo;
   isShowBalance?: boolean;
@@ -43,8 +44,8 @@ interface ButtonOptionProps {
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, isShowBalance, onClickCancelUnStakeButton,
-    onClickClaimButton, onClickItem, onClickStakeButton, onClickUnStakeButton,
-    onClickWithdrawButton, poolInfo, positionInfo, unclaimedReward } = props;
+    onClickClaimButton, onClickInstructionButton, onClickItem, onClickStakeButton,
+    onClickUnStakeButton, onClickWithdrawButton, poolInfo, positionInfo, unclaimedReward } = props;
 
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
 
@@ -213,12 +214,26 @@ const Component: React.FC<Props> = (props: Props) => {
       <div className='__item-lines-container'>
         <div className='__item-line-1 __item-line-common'>
           <div className={'__item-name-wrapper'}>
-            <div className={'__item-name'}>{poolInfo.metadata.shortName}</div>
-            <EarningTypeTag
-              chain={poolInfo.chain}
-              className={'__item-tag'}
-              type={poolInfo.type}
-            />
+            <div className={'__item-token-info'}>
+              <span>{positionInfo.asset.symbol}</span>
+              <span className={'__item-token-name'}>
+              &nbsp;(
+                <span className={'__name'}>{poolInfo.metadata.shortName}</span>
+              )
+              </span>
+              <Button
+                icon={(
+                  <Icon
+                    customSize={'28px'}
+                    phosphorIcon={Question}
+                  />
+                )}
+                onClick={onClickButton(onClickInstructionButton)}
+                size='xs'
+                type='ghost'
+              >
+              </Button>
+            </div>
           </div>
 
           <MetaInfo>
@@ -232,7 +247,11 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
 
         <div className='__item-line-2 __item-line-common'>
-          <div className={'__item-description'}>{poolInfo.metadata.description}</div>
+          <EarningTypeTag
+            chain={poolInfo.chain}
+            className={'__item-tag'}
+            type={poolInfo.type}
+          />
 
           <div className='__item-total-balance-value'>
             <Number
@@ -370,6 +389,18 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
     '.__item-logo': {
       marginRight: token.size
     },
+    '.__item-token-name': {
+      color: token.colorTextTertiary,
+      display: 'flex',
+      flexDirection: 'row',
+      overflow: 'hidden',
+
+      '._name': {
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap'
+      }
+    },
 
     '.__item-lines-container': {
       overflow: 'hidden',
@@ -398,7 +429,8 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       'white-space': 'nowrap'
     },
 
-    '.__item-name': {
+    '.__item-token-info': {
+      display: 'flex',
       fontSize: token.fontSizeHeading4,
       lineHeight: token.lineHeightHeading4,
       fontWeight: 600,

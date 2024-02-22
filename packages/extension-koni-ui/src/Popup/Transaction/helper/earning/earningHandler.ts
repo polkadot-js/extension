@@ -24,7 +24,7 @@ export function getWaitingTime (targetTimestampMs: number, status: UnstakingStat
   const currentTimestampMs = Date.now();
   const remainingTimestampMs = targetTimestampMs - currentTimestampMs;
 
-  if (status === UnstakingStatus.CLAIMABLE || remainingTimestampMs <= 0) {
+  if (remainingTimestampMs <= 0) {
     return t('Available for withdrawal');
   } else {
     const remainingTimeHr = remainingTimestampMs / 1000 / 60 / 60;

@@ -26,8 +26,7 @@ type Props = ThemeProps & {
   transactionChainValue: string;
 };
 
-function Component ({ className, inputAsset, poolInfo, transactionChainValue, transactionFromValue,
-  unstakings }: Props) {
+function Component ({ className, inputAsset, poolInfo, transactionChainValue, transactionFromValue, unstakings }: Props){
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { slug } = poolInfo;
@@ -55,17 +54,14 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
     });
   }, [unstakings]);
 
-  const totalWithdrawable = useMemo(() => {
-    let result = BN_ZERO;
-
-    unstakings.forEach((value) => {
-      if (value.status === UnstakingStatus.CLAIMABLE) {
-        result = result.plus(value.claimable);
-      }
-    });
-
-    return result;
-  }, [unstakings]);
+  let totalWithdrawable = BN_ZERO;
+  const currentTimestampMs = Date.now()
+  unstakings.forEach((value) => {
+    // @ts-ignore
+    if (value.targetTimestampMs <= currentTimestampMs) {
+      totalWithdrawable = totalWithdrawable.plus(value.claimable);
+    }
+  });
 
   const haveUnlocking = useMemo(() => unstakings.some((i) => i.status === UnstakingStatus.UNLOCKING), [unstakings]);
 

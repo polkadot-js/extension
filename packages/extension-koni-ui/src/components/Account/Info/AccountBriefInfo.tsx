@@ -58,7 +58,8 @@ const AccountBriefInfo = styled(Component)<Props>(({ theme: { token } }: Props) 
     '.account-address': {
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
-      color: token.colorTextDescription
+      color: token.colorTextDescription,
+      'white-space': 'nowrap'
     }
   };
 });

@@ -13,7 +13,6 @@ export * from './number';
 export * from './qr';
 export * from './router';
 export * from './signing';
-export * from './stakingStatusUi';
 export * from './strings';
 export * from './transaction';
 export * from './earning';

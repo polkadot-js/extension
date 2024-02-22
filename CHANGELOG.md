@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.1.38
+Build date: Feb 17, 2024.
+
+Features & Update:
+- Update estimating EVM transaction fee for Energy Web Chain (#2606)
+- Update chain-list (#2570)
+  - Add support more tokens: PINK (Statemint), xcPINK (Moonbeam), INTR (HydraDX)
+  - Update explorer for Subspace Gemini 3g & 3h
+  - Update price_id for Energy Web X
+  - Update hasValue info for some tokens
+
+Bugs fixed:
+- Fixed some UI bug (#2509)
+
 ## 1.1.37
 Build date: Feb 07, 2024.
 

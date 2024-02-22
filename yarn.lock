@@ -6156,6 +6156,7 @@ __metadata:
     "@types/react-copy-to-clipboard": ^5.0.4
     "@types/react-dom": ^18.0.9
     "@types/react-lazy-load-image-component": ^1.5.3
+    "@types/react-slick": ^0.23.11
     "@types/redux-persist": ^4.3.1
     "@types/sinon-chrome": ^2.2.11
     "@types/store": ^2.0.2
@@ -6192,6 +6193,7 @@ __metadata:
     react-router: ^6.8.2
     react-router-dom: ^6.8.2
     react-select: ^5.7.0
+    react-slick: ^0.29.0
     react-tabs: ^6.0.0
     react-tooltip: 4.5.1
     react-transition-group: ^4.4.5

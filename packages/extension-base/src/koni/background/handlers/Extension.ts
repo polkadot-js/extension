@@ -1765,7 +1765,7 @@ export default class KoniExtension {
       if (new BigN(receiverBalance).plus(transferAmount.value).lt(minAmount)) {
         const atLeast = new BigN(minAmount).minus(receiverBalance).plus((tokenInfo.decimals || 0) === 0 ? 0 : 1);
 
-        const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter);
+        const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter, { maxNumberFormat: tokenInfo.decimals || 6 });
 
         inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}} {{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: tokenInfo.symbol } })));
       }
@@ -1838,7 +1838,7 @@ export default class KoniExtension {
 
         // Check ed for receiver
         if (new BigN(value).lt(atLeast)) {
-          const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
+          const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter, { maxNumberFormat: destinationTokenInfo.decimals || 6 });
 
           inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}} {{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: originTokenInfo.symbol } })));
         }

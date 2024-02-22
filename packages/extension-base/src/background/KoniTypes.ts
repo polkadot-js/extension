@@ -1607,7 +1607,7 @@ export interface UnstakingInfo {
   status: UnstakingStatus;
   claimable: string; // amount to be withdrawn
   waitingTime: number;
-  targetTimestampMs?: number;
+  targetTimestampMs: number;
   validatorAddress?: string; // might unstake from a validator or not
 }
 

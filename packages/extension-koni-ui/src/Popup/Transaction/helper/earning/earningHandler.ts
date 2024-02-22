@@ -20,16 +20,19 @@ export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
   return '';
 }
 
-export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t: TFunction) {
-  if (status === UnstakingStatus.CLAIMABLE || waitingTime === 0) {
+export function getWaitingTime (targetTimestampMs: number, status: UnstakingStatus, t: TFunction) {
+  const currentTimestampMs = Date.now();
+  const remainingTimestampMs = targetTimestampMs - currentTimestampMs;
+
+  if (status === UnstakingStatus.CLAIMABLE || remainingTimestampMs <= 0) {
     return t('Available for withdrawal');
   } else {
-    const waitingTimeInMs = waitingTime * 60 * 60 * 1000;
+    const remainingTimeHr = remainingTimestampMs / 1000 / 60 / 60;
 
     // Formatted waitting time without round up
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-    const _formattedWaitingTime = humanizeDuration(waitingTimeInMs, {
-      units: waitingTime >= 24 ? ['d', 'h'] : ['h', 'm'],
+    const _formattedWaitingTime = humanizeDuration(remainingTimestampMs, {
+      units: remainingTimeHr >= 24 ? ['d', 'h'] : ['h', 'm'],
       round: false,
       delimiter: ' ',
       language: 'shortEn',

@@ -232,23 +232,21 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     }
 
     ledger.unlocking.forEach((unlockingChunk) => {
-      // Calculate the remaining time for current era ending
       const activeEra = _activeEra.toPrimitive() as unknown as PalletStakingActiveEraInfo;
-      const isClaimable = unlockingChunk.era - parseInt(activeEra.index) <= 0;
-      const remainingEra = unlockingChunk.era - parseInt(activeEra.index) - 1;
-      const expectedBlockTime = _EXPECTED_BLOCK_TIME[chain];
-      const eraLength = _deriveSessionProgress.eraLength.toNumber();
-      const eraProgress = _deriveSessionProgress.eraProgress.toNumber();
-      const remainingSlots = eraLength - eraProgress;
-      const remainingHours = expectedBlockTime * remainingSlots / 60 / 60;
+      const era = parseInt(activeEra.index);
+      const startTimestampMs = parseInt(activeEra.start);
+
+      const remainingEra = unlockingChunk.era - era;
       const eraTime = _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // in hours
-      const waitingTime = remainingEra * eraTime + remainingHours;
+      const remaningTimestampMs = remainingEra * eraTime * 60 * 60 * 1000;
+      const targetTimestampMs = startTimestampMs + remaningTimestampMs;
+      const isClaimable = targetTimestampMs - Date.now() <= 0;
 
       unstakingList.push({
         chain,
         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
         claimable: unlockingChunk.value.toString(),
-        waitingTime: waitingTime
+        targetTimestampMs: targetTimestampMs
       } as UnstakingInfo);
     });
 

@@ -194,6 +194,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const onClickItem = useCallback((item: YieldPoolInfo) => {
     return () => {
       setSelectedPool(item);
+      setCurrentAltChain(undefined);
 
       const altChain = getAltChain(item);
 
@@ -207,6 +208,12 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         return;
       }
 
+      if (altChain && !checkChainConnected(altChain)) {
+        onConnectChain(altChain);
+
+        return;
+      }
+
       if (isNeedToShowInstruction(item)) {
         activeModal(instructionModalId);
 
@@ -215,7 +222,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
       navigateToEarnTransaction(item.slug, item.chain);
     };
-  }, [activeModal, checkChainConnected, getAltChain, isNeedToShowInstruction, navigateToEarnTransaction, openConnectChainModal]);
+  }, [activeModal, checkChainConnected, getAltChain, isNeedToShowInstruction, navigateToEarnTransaction, onConnectChain, openConnectChainModal]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {

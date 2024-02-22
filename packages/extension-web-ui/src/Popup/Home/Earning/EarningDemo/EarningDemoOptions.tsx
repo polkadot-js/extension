@@ -146,7 +146,7 @@ function Component ({ className }: Props) {
     closeConnectChainModal,
     connectingChain,
     onConnectChain, openAlert,
-    openConnectChainModal, setExtraSuccessFlag, turnOnChain } = useHandleChainConnection({
+    setExtraSuccessFlag, turnOnChain } = useHandleChainConnection({
     alertModalId,
     chainConnectionLoadingModalId,
     connectChainModalId
@@ -166,6 +166,8 @@ function Component ({ className }: Props) {
 
   const onClickItem = useCallback((item: YieldGroupInfo) => {
     return () => {
+      setCurrentAltChain(undefined);
+
       if (isRelatedToAstar(item.group)) {
         openAlert({
           title: t('Enter Astar portal'),
@@ -210,7 +212,13 @@ function Component ({ className }: Props) {
             setCurrentAltChain(altChain);
           }
 
-          openConnectChainModal(item.chain);
+          onConnectChain(item.chain);
+
+          return;
+        }
+
+        if (altChain && !checkChainConnected(altChain)) {
+          onConnectChain(altChain);
 
           return;
         }
@@ -218,7 +226,7 @@ function Component ({ className }: Props) {
         activeModal(instructionModalId);
       }
     };
-  }, [activeModal, checkChainConnected, closeAlert, getAltChain, navigate, openAlert, openConnectChainModal, poolInfoMap, t]);
+  }, [activeModal, checkChainConnected, closeAlert, getAltChain, navigate, onConnectChain, openAlert, poolInfoMap, t]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {

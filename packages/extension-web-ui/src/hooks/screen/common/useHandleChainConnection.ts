@@ -16,7 +16,8 @@ export default function useHandleChainConnection (
   { alertModalId,
     chainConnectionLoadingModalId,
     connectChainModalId }: ModalIds,
-  onConnectSuccess?: VoidFunction
+  onConnectSuccess?: VoidFunction,
+  timeoutDuration = 9000
 ) {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -46,6 +47,7 @@ export default function useHandleChainConnection (
   }, [chainConnectionLoadingModalId, inactiveModal]);
 
   const onConnectChain = useCallback((chain: string) => {
+    setConnectingChain(chain);
     turnOnChain(chain);
     setIsLoadingChainConnection(true);
     closeConnectChainModal();
@@ -88,14 +90,14 @@ export default function useHandleChainConnection (
             }
           });
         }
-      }, 3000);
+      }, timeoutDuration);
     }
 
     return () => {
       clearInterval(timer);
       clearTimeout(timeout);
     };
-  }, [checkChainConnected, closeAlert, closeLoadingModal, connectingChain, extraSuccessFlag, isConnectingChainSuccess, isLoadingChainConnection, onConnectSuccess, openAlert, t]);
+  }, [checkChainConnected, closeAlert, closeLoadingModal, connectingChain, extraSuccessFlag, isConnectingChainSuccess, isLoadingChainConnection, onConnectSuccess, openAlert, t, timeoutDuration]);
 
   return {
     alertProps,

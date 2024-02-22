@@ -177,6 +177,8 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
 
   const onClickItem = useCallback((item: YieldGroupInfo) => {
     return () => {
+      setCurrentAltChain(undefined);
+
       if (isRelatedToAstar(item.group)) {
         openAlert({
           title: t('Enter Astar portal'),
@@ -226,6 +228,12 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
           return;
         }
 
+        if (altChain && !checkChainConnected(altChain)) {
+          onConnectChain(altChain);
+
+          return;
+        }
+
         if (positionSlugs.includes(item.poolSlugs[0])) {
           navigateToEarnTransaction(item.poolSlugs[0], item.chain);
         } else {
@@ -233,7 +241,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
         }
       }
     };
-  }, [activeModal, checkChainConnected, closeAlert, getAltChain, navigate, navigateToEarnTransaction, openAlert, openConnectChainModal, poolInfoMap, positionSlugs, t]);
+  }, [activeModal, checkChainConnected, closeAlert, getAltChain, navigate, navigateToEarnTransaction, onConnectChain, openAlert, openConnectChainModal, poolInfoMap, positionSlugs, t]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {

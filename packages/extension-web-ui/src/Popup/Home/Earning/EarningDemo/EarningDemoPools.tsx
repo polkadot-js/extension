@@ -149,7 +149,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     connectingChain,
     onConnectChain,
     openAlert,
-    openConnectChainModal, setExtraSuccessFlag, turnOnChain } = useHandleChainConnection({
+    setExtraSuccessFlag, turnOnChain } = useHandleChainConnection({
     alertModalId,
     chainConnectionLoadingModalId,
     connectChainModalId
@@ -170,6 +170,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const onClickItem = useCallback((item: YieldPoolInfo) => {
     return () => {
       setSelectedPool(item);
+      setCurrentAltChain(undefined);
 
       const altChain = getAltChain(item);
 
@@ -178,14 +179,20 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
           setCurrentAltChain(altChain);
         }
 
-        openConnectChainModal(item.chain);
+        onConnectChain(item.chain);
+
+        return;
+      }
+
+      if (altChain && !checkChainConnected(altChain)) {
+        onConnectChain(altChain);
 
         return;
       }
 
       activeModal(instructionModalId);
     };
-  }, [activeModal, checkChainConnected, getAltChain, openConnectChainModal]);
+  }, [activeModal, checkChainConnected, getAltChain, onConnectChain]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {

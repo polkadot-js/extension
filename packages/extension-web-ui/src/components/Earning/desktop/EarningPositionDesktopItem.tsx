@@ -1,15 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SpecialYieldPoolInfo, SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { MetaInfo } from '@subwallet/extension-web-ui/components';
 import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
 import { EarningStatusUi } from '@subwallet/extension-web-ui/constants';
-import { usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ExtraYieldPositionInfo, PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { getEarnExtrinsicType, getUnstakeExtrinsicType, getWithdrawExtrinsicType } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -55,10 +53,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const line3Ref = useRef<HTMLDivElement | null>(null);
   const line3LeftPartRef = useRef<HTMLDivElement | null>(null);
   const line3RightPartRef = useRef<HTMLDivElement | null>(null);
-
-  const { address } = positionInfo;
-
-  const preCheckAction = usePreCheckAction(address, false);
 
   const [isCompactButtons, setCompactButtons] = useState<boolean>(false);
 
@@ -129,22 +123,23 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
-  const onClickButton = useCallback((callback: VoidFunction, extrinsicType?: ExtrinsicType): React.MouseEventHandler => {
+  const onClickButton = useCallback((callback: VoidFunction): React.MouseEventHandler => {
     return (event) => {
       event.stopPropagation();
 
-      if (extrinsicType) {
-        preCheckAction(callback, extrinsicType)();
-      } else {
-        callback();
-      }
+      callback();
     };
-  }, [preCheckAction]);
+  }, []);
 
   const getButtons = useCallback((compact?: boolean): ButtonOptionProps[] => {
     const result: ButtonOptionProps[] = [];
 
     actionListByChain.forEach((item) => {
+      // todo: will update withdraw action later
+      if ([YieldAction.WITHDRAW, YieldAction.WITHDRAW_EARNING].includes(item) && poolInfo.type !== YieldPoolType.LENDING) {
+        return;
+      }
+
       const temp: ButtonOptionProps = {
         disable: !availableActionsByMetadata.includes(item),
         key: item,
@@ -161,33 +156,33 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.icon = PlusCircle;
           temp.label = !compact ? text : undefined;
           temp.tooltip = compact ? text : undefined;
-          temp.onClick = onClickButton(onClickStakeButton, getEarnExtrinsicType(poolInfo));
+          temp.onClick = onClickButton(onClickStakeButton);
           break;
 
         case YieldAction.CLAIM_REWARD:
           temp.icon = Wallet;
-          temp.onClick = onClickButton(onClickClaimButton, ExtrinsicType.STAKING_CLAIM_REWARD);
+          temp.onClick = onClickButton(onClickClaimButton);
           temp.label = !compact ? t('Claim rewards') : undefined;
           temp.tooltip = compact ? t('Claim rewards') : undefined;
           break;
         case YieldAction.WITHDRAW:
         case YieldAction.WITHDRAW_EARNING:
           temp.icon = StopCircle;
-          temp.onClick = onClickButton(onClickWithdrawButton, getWithdrawExtrinsicType(poolInfo));
+          temp.onClick = onClickButton(onClickWithdrawButton);
           temp.label = !compact ? t('Withdraw') : undefined;
           temp.tooltip = compact ? t('Withdraw') : undefined;
           temp.schema = 'secondary';
           break;
         case YieldAction.UNSTAKE:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickUnStakeButton, getUnstakeExtrinsicType(poolInfo));
+          temp.onClick = onClickButton(onClickUnStakeButton);
           temp.label = !compact ? t('Unstake') : undefined;
           temp.tooltip = compact ? t('Unstake') : undefined;
           temp.schema = 'secondary';
           break;
         case YieldAction.CANCEL_UNSTAKE:
           temp.icon = MinusCircle;
-          temp.onClick = onClickButton(onClickCancelUnStakeButton, ExtrinsicType.STAKING_CANCEL_UNSTAKE);
+          temp.onClick = onClickButton(onClickCancelUnStakeButton);
           temp.label = !compact ? t('Cancel unstake') : undefined;
           temp.tooltip = compact ? t('Cancel unstake') : undefined;
           temp.schema = 'secondary';
@@ -208,8 +203,8 @@ const Component: React.FC<Props> = (props: Props) => {
       <Logo
         className='__item-logo'
         isShowSubLogo={true}
-        subNetwork={poolInfo.metadata.logo || poolInfo.chain}
         size={64}
+        subNetwork={poolInfo.metadata.logo || poolInfo.chain}
         token={positionInfo.balanceToken.toLowerCase()}
       />
 

@@ -195,15 +195,13 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         parseAndChangeValue(address);
         inputRef?.current?.focus();
         inputRef?.current?.blur();
+      } else {
+        if (isAddress(value)) {
+          parseAndChangeValue(value);
+        }
       }
     }
   }, [_contacts, addressPrefix, value, parseAndChangeValue, inputRef, networkGenesisHash]);
-
-  useEffect(() => {
-    if (isAddress(value)) {
-      parseAndChangeValue(value);
-    }
-  }, [value, parseAndChangeValue]);
 
   // todo: Will work with "Manage address book" feature later
   return (

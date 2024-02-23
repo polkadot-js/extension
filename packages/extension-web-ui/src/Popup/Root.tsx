@@ -45,8 +45,8 @@ const securityUrl = '/settings/security';
 const createDoneUrl = '/create-done';
 
 // Campaign
-const earningOptionsDemoUrl = '/earning-demo';
-const earningPoolsDemoUrl = '/earning-demo/pools';
+const earningOptionsPreviewUrl = '/earning-preview';
+const earningPoolsPreviewUrl = '/earning-preview/pools';
 const checkCrowdloanUrl = '/crowdloan-unlock-campaign/check-contributions';
 const crowdloanResultUrl = '/crowdloan-unlock-campaign/contributions-result';
 
@@ -55,7 +55,7 @@ const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'impor
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
 const allowPreventWelcomeUrls = [...allowImportAccountUrls, welcomeUrl, createPasswordUrl, securityUrl,
-  earningOptionsDemoUrl, earningPoolsDemoUrl, checkCrowdloanUrl, crowdloanResultUrl];
+  earningOptionsPreviewUrl, earningPoolsPreviewUrl, checkCrowdloanUrl, crowdloanResultUrl];
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
   display: 'flex',

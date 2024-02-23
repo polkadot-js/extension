@@ -47,8 +47,8 @@ function Component ({ className }: Props) {
   );
 }
 
-const EarningDemoOutlet = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+const EarningPreviewOutlet = styled(Component)<Props>(({ theme: { token } }: Props) => ({
 
 }));
 
-export default EarningDemoOutlet;
+export default EarningPreviewOutlet;

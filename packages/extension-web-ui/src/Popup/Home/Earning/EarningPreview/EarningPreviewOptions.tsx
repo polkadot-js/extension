@@ -4,7 +4,7 @@
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo } from '@subwallet/extension-base/types';
 import { EarningInstructionModal, EarningOptionDesktopItem, EarningOptionItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
-import { ASTAR_PORTAL_URL, DEFAULT_EARN_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
+import { ASTAR_PORTAL_URL, CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, usePreviewYieldGroupInfo, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
@@ -71,10 +71,12 @@ function Component ({ className }: Props) {
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
+  const isNoAccount = useSelector((state) => state.accountState.isNoAccount);
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
+  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
 
   const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
   const [searchInput, setSearchInput] = useState<string>('');
@@ -125,15 +127,26 @@ function Component ({ className }: Props) {
 
   const navigateToEarnTransaction = useCallback(
     (slug: string, chain: string) => {
-      setEarnStorage({
-        ...DEFAULT_EARN_PARAMS,
-        slug,
-        chain,
-        from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
-      });
-      navigate('/transaction/earn');
+      if (isNoAccount) {
+        setEarnStorage({
+          ...DEFAULT_EARN_PARAMS,
+          slug,
+          chain,
+          from: ''
+        });
+        setReturnStorage('/transaction/earn');
+        navigate(DEFAULT_ROUTER_PATH);
+      } else {
+        setEarnStorage({
+          ...DEFAULT_EARN_PARAMS,
+          slug,
+          chain,
+          from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
+        });
+        navigate('/transaction/earn');
+      }
     },
-    [currentAccount?.address, navigate, setEarnStorage]
+    [currentAccount?.address, isNoAccount, navigate, setEarnStorage, setReturnStorage]
   );
 
   const onConnectChainSuccess = useCallback(() => {
@@ -192,7 +205,7 @@ function Component ({ className }: Props) {
       setSelectedPoolGroup(item);
 
       if (item.poolListLength > 1) {
-        navigate('/earning-demo/pools', { state: {
+        navigate('/earning-preview/pools', { state: {
           poolGroup: item.group,
           symbol: item.symbol
         } as EarningPoolsParam });
@@ -393,7 +406,7 @@ function Component ({ className }: Props) {
   );
 }
 
-const EarningDemoOptions = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+const EarningPreviewOptions = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   '.__body-area': {
     overflow: 'auto',
     flex: 1,
@@ -461,4 +474,4 @@ const EarningDemoOptions = styled(Component)<Props>(({ theme: { token } }: Props
   }
 }));
 
-export default EarningDemoOptions;
+export default EarningPreviewOptions;

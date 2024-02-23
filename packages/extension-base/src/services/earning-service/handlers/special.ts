@@ -51,7 +51,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     };
   }
 
-  protected updateExchangeRate (rate: number) {
+  public updateExchangeRate (rate: number) {
     this.rate = rate;
     this.exchangeRatePromise.resolve(true);
   }

@@ -176,14 +176,16 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
             const remainingEra = scheduledRequest.whenExecutable - currentRound;
             const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
             const claimable = Object.values(scheduledRequest.action)[0];
+            const currentTimestampMs = Date.now();
+            const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
 
             unstakingMap[delegation.owner] = {
               chain: chainInfo.slug,
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
               validatorAddress: delegation.owner,
               claimable: claimable.toString(),
-              waitingTime
-              // targetTimestampMs
+              waitingTime,
+              targetTimestampMs: targetTimestampMs
             } as UnstakingInfo;
 
             hasUnstaking = true;

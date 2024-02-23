@@ -59,7 +59,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
     let result = BN_ZERO;
 
     unstakings.forEach((value) => {
-      if (value?.targetTimestampMs && value?.targetTimestampMs <= currentTimestampMs) {
+      if (value.targetTimestampMs && value.targetTimestampMs <= currentTimestampMs) {
         result = result.plus(value.claimable);
       }
     });

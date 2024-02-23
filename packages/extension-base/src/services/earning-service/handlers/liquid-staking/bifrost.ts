@@ -277,14 +277,16 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
             const isClaimable = unlocking.era - currentRelayEra < 0;
             const remainingEra = unlocking.era - currentRelayEra;
             const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[this.chain];
+            const currentTimestampMs = Date.now();
+            const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
 
             unlockBalance = unlockBalance.add(new BN(unlocking.balance));
             unstakingList.push({
               chain: this.chain,
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
               claimable: unlocking.balance,
-              waitingTime: waitingTime
-              // targetTimestampMs:
+              waitingTime: waitingTime,
+              targetTimestampMs: targetTimestampMs
             } as UnstakingInfo);
           });
         }

@@ -36,6 +36,7 @@ import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/servi
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
+import { SwapPair, SwapQuote, SwapQuoteResponse, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { calculateGasFeeParams, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -4215,6 +4216,41 @@ export default class KoniExtension {
 
   /* Buy service */
 
+  /* Swap service */
+  private async subscribeSwapPairs (id: string, port: chrome.runtime.Port): Promise<SwapPair[]> {
+    const cb = createSubscription<'pri(swapService.subscribePairs)'>(id, port);
+    let ready = false;
+
+    await this.#koniState.swapService.waitForStarted();
+
+    const callback = (rs: SwapPair[]) => {
+      if (ready) {
+        cb(rs);
+      }
+    };
+
+    const subscription = this.#koniState.swapService.subscribeSwapPairs().subscribe(callback);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    ready = true;
+
+    return this.#koniState.swapService.getSwapPairs();
+  }
+
+  private async handleSwapRequest (request: SwapRequest): Promise<SwapQuoteResponse> {
+    return this.#koniState.swapService.handleSwapRequest(request);
+  }
+
+  private async getLatestSwapQuote (swapQuote: SwapQuote): Promise<SwapQuote> {
+    return this.#koniState.swapService.getLatestSwapQuote(swapQuote);
+  }
+  /* Swap service */
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -4770,6 +4806,13 @@ export default class KoniExtension {
       case 'pri(database.exportJson)':
         return this.#koniState.dbService.getExportJson();
         /* Database */
+
+      case 'pri(swapService.subscribePairs)':
+        return this.subscribeSwapPairs(id, port);
+      case 'pri(swapService.handleSwapRequest)':
+        return this.handleSwapRequest(request as SwapRequest);
+      case 'pri(swapService.getLatestQuote)':
+        return this.getLatestSwapQuote(request as SwapQuote);
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

@@ -14,6 +14,7 @@ import { MissionInfo } from '@subwallet/extension-web-ui/types/missionPool';
 import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
+import {SwapPair} from "@subwallet/extension-base/types/swap";
 
 // todo: move this file to extension-web-ui/src/types/
 
@@ -197,4 +198,8 @@ export interface DAppStore extends BaseReduxStore {
 
 export interface MissionPoolStore extends BaseReduxStore {
   missions: MissionInfo[];
+}
+
+export interface SwapStore extends BaseReduxStore {
+  swapPairs: SwapPair[];
 }

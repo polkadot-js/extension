@@ -10,7 +10,7 @@ import { useFilterModal, useHandleChainConnection, usePreviewYieldPoolInfoByGrou
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { EarningPoolsTable } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/EarningPoolsTable';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
-import { EarningPoolsParam, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { EarningPoolsParam, EarnParams, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { isAccountAll } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -129,22 +129,21 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
   const navigateToEarnTransaction = useCallback(
     (slug: string, chain: string) => {
+      const earnParams: EarnParams = {
+        ...DEFAULT_EARN_PARAMS,
+        slug,
+        chain,
+        from: ''
+      };
+
       if (isNoAccount) {
-        setEarnStorage({
-          ...DEFAULT_EARN_PARAMS,
-          slug,
-          chain,
-          from: ''
-        });
+        setEarnStorage(earnParams);
         setReturnStorage('/transaction/earn');
         navigate(DEFAULT_ROUTER_PATH);
       } else {
-        setEarnStorage({
-          ...DEFAULT_EARN_PARAMS,
-          slug,
-          chain,
-          from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
-        });
+        earnParams.from = currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+        setEarnStorage(earnParams);
         navigate('/transaction/earn');
       }
     },

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
-import { YieldPoolInfo } from '@subwallet/extension-base/types';
-import { EarningInstructionModal, EarningOptionDesktopItem, EarningOptionItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { EarningInstructionModal, EarningOptionDesktopItem, EarningOptionItem, EmptyList, FilterModal, Layout, LoadingScreen } from '@subwallet/extension-web-ui/components';
 import { ASTAR_PORTAL_URL, CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, usePreviewYieldGroupInfo, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
@@ -14,8 +14,8 @@ import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extensi
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, Vault } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -45,6 +45,10 @@ const apyOrdinal = (group: YieldGroupInfo): number => {
   return !group.maxApy ? -1 : group.maxApy;
 };
 
+const getPoolInfoByChainAndType = (poolInfoMap: Record<string, YieldPoolInfo>, chain: string, type: YieldPoolType): YieldPoolInfo | undefined => {
+  return Object.values(poolInfoMap).find((item) => item.chain === chain && item.type === type);
+};
+
 const connectChainModalId = 'earning-options-connect-chain-modal';
 const chainConnectionLoadingModalId = 'earning-options-chain-connection-loading-modalId';
 const alertModalId = 'earning-options-alert-modal';
@@ -59,6 +63,11 @@ enum FilterOptionType {
 const instructionModalId = EARNING_INSTRUCTION_MODAL;
 
 function Component ({ className }: Props) {
+  const [searchParams] = useSearchParams();
+  const [chainParam] = useState(searchParams.get('chain') || '');
+  const [earningTypeParam] = useState<YieldPoolType | undefined>(searchParams.get('type') as YieldPoolType || undefined);
+  const [targetParam] = useState(searchParams.get('target') || '');
+
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
@@ -78,12 +87,15 @@ function Component ({ className }: Props) {
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
 
-  const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
+  const [selectedPoolInfoSlug, setSelectedPoolInfoSlug] = React.useState<string | undefined>(undefined);
   const [searchInput, setSearchInput] = useState<string>('');
+
+  const isAutoOpenIntructionViaParamsRef = useRef(true);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID, [FilterOptionType.MAIN_NETWORK]);
 
   const { activeModal } = useContext(ModalContext);
+  const [initLoading, setInitLoading] = useState<boolean>(true);
 
   const items = useMemo(() => {
     return [...data].sort((a, b) => {
@@ -126,27 +138,15 @@ function Component ({ className }: Props) {
   }, [filterOptions.length, selectedFilters]);
 
   const navigateToEarnTransaction = useCallback(
-    (slug: string, chain: string) => {
+    () => {
       if (isNoAccount) {
-        setEarnStorage({
-          ...DEFAULT_EARN_PARAMS,
-          slug,
-          chain,
-          from: ''
-        });
         setReturnStorage('/transaction/earn');
         navigate(DEFAULT_ROUTER_PATH);
       } else {
-        setEarnStorage({
-          ...DEFAULT_EARN_PARAMS,
-          slug,
-          chain,
-          from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
-        });
         navigate('/transaction/earn');
       }
     },
-    [currentAccount?.address, isNoAccount, navigate, setEarnStorage, setReturnStorage]
+    [isNoAccount, navigate, setReturnStorage]
   );
 
   const onConnectChainSuccess = useCallback(() => {
@@ -177,6 +177,14 @@ function Component ({ className }: Props) {
     return '';
   }, [assetRegistry]);
 
+  const transactionFromValue = useMemo(() => {
+    if (isNoAccount) {
+      return '';
+    }
+
+    return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+  }, [currentAccount?.address, isNoAccount]);
+
   const onClickItem = useCallback((item: YieldGroupInfo) => {
     return () => {
       setCurrentAltChain(undefined);
@@ -202,8 +210,6 @@ function Component ({ className }: Props) {
         return;
       }
 
-      setSelectedPoolGroup(item);
-
       if (item.poolListLength > 1) {
         navigate('/earning-preview/pools', { state: {
           poolGroup: item.group,
@@ -217,6 +223,15 @@ function Component ({ className }: Props) {
 
           return;
         }
+
+        setEarnStorage({
+          ...DEFAULT_EARN_PARAMS,
+          slug: poolInfo.slug,
+          chain: poolInfo.chain,
+          from: transactionFromValue
+        });
+
+        setSelectedPoolInfoSlug(poolInfo.slug);
 
         const altChain = getAltChain(poolInfo);
 
@@ -239,7 +254,7 @@ function Component ({ className }: Props) {
         activeModal(instructionModalId);
       }
     };
-  }, [activeModal, checkChainConnected, closeAlert, getAltChain, navigate, onConnectChain, openAlert, poolInfoMap, t]);
+  }, [activeModal, checkChainConnected, closeAlert, getAltChain, navigate, onConnectChain, openAlert, poolInfoMap, setEarnStorage, t, transactionFromValue]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {
@@ -312,6 +327,32 @@ function Component ({ className }: Props) {
     [activeModal]
   );
 
+  useEffect(() => {
+    if (chainParam && earningTypeParam) {
+      const poolInfo = getPoolInfoByChainAndType(poolInfoMap, chainParam, earningTypeParam);
+
+      if (poolInfo && isAutoOpenIntructionViaParamsRef.current) {
+        setSelectedPoolInfoSlug(poolInfo.slug);
+        setEarnStorage({
+          ...DEFAULT_EARN_PARAMS,
+          slug: poolInfo.slug,
+          chain: poolInfo.chain,
+          from: transactionFromValue,
+          redirectFromPreview: true,
+          target: '1zugcag7cJVBtVRnFxv5Qftn7xKAnR6YJ9x4x3XLgGgmNnS___Zug Capital/19'
+        });
+        activeModal(instructionModalId);
+        isAutoOpenIntructionViaParamsRef.current = false;
+      }
+    }
+  }, [activeModal, chainParam, earningTypeParam, poolInfoMap, setEarnStorage, targetParam, transactionFromValue]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setInitLoading(false);
+    }, 1500);
+  }, []);
+
   return (
     <ChainConnectionWrapper
       alertModalId={alertModalId}
@@ -331,51 +372,60 @@ function Component ({ className }: Props) {
         subHeaderPaddingVertical={true}
         title={t<string>('Earning options')}
       >
-        <div className={'__body-area'}>
-          {
-            isWebUI
-              ? (
-                <>
-                  <Toolbar
-                    className={'__desktop-toolbar'}
-                    inputPlaceholder={t<string>('Search token')}
-                    onClickFilter={onClickFilterButton}
-                    onSearch={setSearchInput}
-                    searchValue={searchInput}
-                  />
-                  <SwList
-                    className={'__desktop-list-container'}
-                    displayGrid={true}
-                    filterBy={filterFunction}
-                    gridGap={'16px'}
-                    list={items}
-                    minColumnWidth={'360px'}
-                    renderItem={renderItem}
-                    renderWhenEmpty={emptyList}
-                    searchBy={searchFunction}
-                    searchMinCharactersCount={1}
-                    searchTerm={searchInput}
-                  />
-                </>
-              )
-              : (
-                <SwList.Section
-                  actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-                  className={'__section-list-container'}
-                  enableSearchInput
-                  filterBy={filterFunction}
-                  list={items}
-                  onClickActionBtn={onClickFilterButton}
-                  renderItem={renderItem}
-                  renderWhenEmpty={emptyList}
-                  searchFunction={searchFunction}
-                  searchMinCharactersCount={1}
-                  searchPlaceholder={t<string>('Search token')}
-                  showActionBtn
-                />
-              )
-          }
-        </div>
+        {
+          initLoading && (
+            <LoadingScreen />
+          )
+        }
+        {
+          !initLoading && (
+            <div className={'__body-area'}>
+              {
+                isWebUI
+                  ? (
+                    <>
+                      <Toolbar
+                        className={'__desktop-toolbar'}
+                        inputPlaceholder={t<string>('Search token')}
+                        onClickFilter={onClickFilterButton}
+                        onSearch={setSearchInput}
+                        searchValue={searchInput}
+                      />
+                      <SwList
+                        className={'__desktop-list-container'}
+                        displayGrid={true}
+                        filterBy={filterFunction}
+                        gridGap={'16px'}
+                        list={items}
+                        minColumnWidth={'360px'}
+                        renderItem={renderItem}
+                        renderWhenEmpty={emptyList}
+                        searchBy={searchFunction}
+                        searchMinCharactersCount={1}
+                        searchTerm={searchInput}
+                      />
+                    </>
+                  )
+                  : (
+                    <SwList.Section
+                      actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+                      className={'__section-list-container'}
+                      enableSearchInput
+                      filterBy={filterFunction}
+                      list={items}
+                      onClickActionBtn={onClickFilterButton}
+                      renderItem={renderItem}
+                      renderWhenEmpty={emptyList}
+                      searchFunction={searchFunction}
+                      searchMinCharactersCount={1}
+                      searchPlaceholder={t<string>('Search token')}
+                      showActionBtn
+                    />
+                  )
+              }
+            </div>
+          )
+        }
 
         <FilterModal
           applyFilterButtonTitle={t('Apply filter')}
@@ -390,7 +440,7 @@ function Component ({ className }: Props) {
       </Layout.Base>
 
       {
-        selectedPoolGroup && selectedPoolGroup.poolSlugs.length && (
+        selectedPoolInfoSlug && (
           <EarningInstructionModal
             assetRegistry={assetRegistry}
             bypassEarlyValidate={true}
@@ -398,7 +448,7 @@ function Component ({ className }: Props) {
             isShowStakeMoreButton={true}
             onStakeMore={navigateToEarnTransaction}
             openAlert={openAlert}
-            poolInfo={poolInfoMap[selectedPoolGroup.poolSlugs[0]]}
+            poolInfo={poolInfoMap[selectedPoolInfoSlug]}
           />
         )
       }

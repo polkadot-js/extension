@@ -522,12 +522,19 @@ export default class KoniExtension {
 
   private subscribeAddresses (id: string, port: chrome.runtime.Port): AddressBookInfo {
     const _cb = createSubscription<'pri(accounts.subscribeAddresses)'>(id, port);
+    let old = '';
+
     const subscription = this.#koniState.keyringService.addressesSubject.subscribe((subjectInfo: SubjectInfo): void => {
       const addresses = convertSubjectInfoToAddresses(subjectInfo);
+      const _new = JSON.stringify(addresses);
 
-      _cb({
-        addresses: addresses
-      });
+      if (old !== _new) {
+        _cb({
+          addresses: addresses
+        });
+
+        old = _new;
+      }
     });
 
     this.createUnsubscriptionHandle(id, subscription.unsubscribe);

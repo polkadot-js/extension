@@ -705,7 +705,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               allowDomain={true}
-              chain={chain}
+              chain={destChain}
               fitNetwork={true}
               label={t('Send to')}
               networkGenesisHash={destChainGenesisHash}

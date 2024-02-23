@@ -40,7 +40,19 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
   const items = useMemo(() => {
     return [...unstakings].sort((a, b) => {
       if (a.targetTimestampMs === undefined && b.targetTimestampMs === undefined) {
-        return 0;
+        if (a.waitingTime === undefined && b.waitingTime === undefined) {
+          return 0;
+        }
+
+        if (a.waitingTime === undefined) {
+          return -1;
+        }
+
+        if (b.waitingTime === undefined) {
+          return 1;
+        }
+
+        return a.waitingTime - b.waitingTime;
       }
 
       if (a.targetTimestampMs === undefined) {
@@ -100,7 +112,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
 
   const renderWithdrawTime = useCallback(
     (item: UnstakingInfo) => {
-      if (item.targetTimestampMs === undefined) {
+      if (item.targetTimestampMs === undefined && item.waitingTime === undefined) {
         return (
           <>
             <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
@@ -117,7 +129,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
       } else {
         return (
           <>
-            <div className={'__withdraw-time-label'}>{getWaitingTime(item.targetTimestampMs, currentTimestampMs, t)}</div>
+            <div className={'__withdraw-time-label'}>{getWaitingTime(t, currentTimestampMs, item.targetTimestampMs, item.waitingTime)}</div>
             {item.status === UnstakingStatus.CLAIMABLE && (
               <Icon
                 iconColor={token.colorSecondary}

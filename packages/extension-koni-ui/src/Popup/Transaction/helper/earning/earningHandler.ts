@@ -20,8 +20,18 @@ export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
   return '';
 }
 
-export function getWaitingTime (targetTimestampMs: number, currentTimestampMs: number, t: TFunction) {
-  const remainingTimestampMs = targetTimestampMs - currentTimestampMs;
+export function getWaitingTime (t: TFunction, currentTimestampMs: number, targetTimestampMs?: number, waitingTime?: number) {
+  let remainingTimestampMs: number;
+
+  if (targetTimestampMs !== undefined) {
+    remainingTimestampMs = targetTimestampMs - currentTimestampMs;
+  } else {
+    if (waitingTime) {
+      remainingTimestampMs = waitingTime * 60 * 60 * 1000;
+    } else {
+      remainingTimestampMs = 0;
+    }
+  }
 
   if (remainingTimestampMs <= 0) {
     return t('Available for withdrawal');

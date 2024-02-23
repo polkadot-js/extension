@@ -203,7 +203,8 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
       const exchangeRate = new BigNumber(rate);
 
       const currentRelayEraObj = _currentRelayEra.toPrimitive() as Record<string, number>;
-      const currentRelayEra = currentRelayEraObj.Era;
+
+      const currentRelayEra = currentRelayEraObj.era;
 
       const unlockLedgerList: BifrostUnlockLedger[] = [];
 
@@ -277,16 +278,16 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
             const isClaimable = unlocking.era - currentRelayEra < 0;
             const remainingEra = unlocking.era - currentRelayEra;
             const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[this.chain];
-            const currentTimestampMs = Date.now();
-            const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
+            // const currentTimestampMs = Date.now();
+            // const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
 
             unlockBalance = unlockBalance.add(new BN(unlocking.balance));
             unstakingList.push({
               chain: this.chain,
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
               claimable: unlocking.balance,
-              waitingTime: waitingTime,
-              targetTimestampMs: targetTimestampMs
+              waitingTime: waitingTime
+              // targetTimestampMs: targetTimestampMs
             } as UnstakingInfo);
           });
         }

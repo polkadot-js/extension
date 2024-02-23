@@ -74,6 +74,7 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   shibuya: 24,
   bifrost_testnet: 0.5,
   bifrost: 2,
+  bifrost_dot: 24,
   ternoa: 24,
   calamari: 6,
   calamari_test: 6,

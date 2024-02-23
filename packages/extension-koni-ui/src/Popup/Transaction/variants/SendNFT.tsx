@@ -255,6 +255,7 @@ const Component: React.FC = () => {
               addressPrefix={addressPrefix}
               allowDomain={true}
               chain={chain}
+              fitNetwork={true}
               label={t('Send to')}
               networkGenesisHash={chainGenesisHash}
               placeholder={t('Account address')}

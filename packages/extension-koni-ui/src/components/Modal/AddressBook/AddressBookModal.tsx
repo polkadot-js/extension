@@ -5,7 +5,7 @@ import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/back
 import { BackIcon } from '@subwallet/extension-koni-ui/components';
 import { useFilterModal, useFormatAddress, useGetChainInfoByGenesisHash, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { funcSortByName, isAccountAll, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
+import { funcSortByName, isAccountAll, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { Badge, Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
@@ -169,9 +169,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return (
       <AccountItemWithName
-        accountName={item.name || toShort(item.address, 4, 4)}
+        accountName={item.name}
         address={address}
         avatarSize={24}
+        fallbackName={false}
         isSelected={selected}
         key={`${item.address}_${item.group}`}
         onClick={onSelectItem(item)}

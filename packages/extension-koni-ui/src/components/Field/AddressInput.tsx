@@ -30,14 +30,15 @@ interface Props extends BasicInputWrapper, ThemeProps {
   networkGenesisHash?: string;
   chain?: string;
   allowDomain?: boolean;
+  fitNetwork?: boolean;
 }
 
 const defaultScannerModalId = 'input-account-address-scanner-modal';
 const defaultAddressBookModalId = 'input-account-address-book-modal';
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { addressPrefix,
-    allowDomain, chain, className = '', disabled, id, label, networkGenesisHash, onBlur,
+  const { addressPrefix, allowDomain,
+    chain, className = '', disabled, fitNetwork, id, label, networkGenesisHash, onBlur,
     onChange, onFocus, placeholder, readOnly, saveAddress, showAddressBook, showScanner, status,
     statusHelp, value } = props;
   const { t } = useTranslation();
@@ -93,9 +94,11 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       if (isEthereumAddress(val)) {
         saveRecentAccount(val, chain).catch(console.error);
       } else {
-        if (decodeAddress(val, false, addressPrefix)) {
-          saveRecentAccount(val, chain).catch(console.error);
-        }
+        try {
+          if (decodeAddress(val, true, addressPrefix)) {
+            saveRecentAccount(val, chain).catch(console.error);
+          }
+        } catch (e) {}
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -218,7 +221,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
                   <div className={CN('__name common-text', { 'limit-width': !!accountName })}>
                     {accountName || toShort(value, 9, 9)}
                   </div>
-                  {(accountName || addressPrefix !== undefined) &&
+                  {(fitNetwork ? accountName : (accountName || addressPrefix !== undefined)) &&
                     (
                       <div className={'__address common-text'}>
                         ({toShort(formattedAddress, 4, 4)})

@@ -548,21 +548,22 @@ export default class KoniExtension {
       const address = reformatAddress(accountId);
       const account = keyring.getAccount(address);
       const contact = keyring.getAddress(address, 'address');
-      const recent = keyring.getAddress(address, 'address');
 
       if (account) {
         return account;
-      } else if (contact) {
-        return contact;
       } else {
         let metadata: KeyringJson$Meta;
 
-        if (recent) {
-          metadata = recent.meta;
+        if (contact) {
+          metadata = contact.meta;
         } else {
           const _new = keyring.saveRecent(address);
 
           metadata = _new.json.meta;
+        }
+
+        if (contact && !metadata.isRecent) {
+          return contact;
         }
 
         const recentChainSlugs: string[] = (metadata.recentChainSlugs as string[]) || [];

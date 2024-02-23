@@ -18,6 +18,7 @@ export interface NumberInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
   decimalOpacity?: number
   size?: number
   subFloatNumber?: boolean
+  suffixNode?: React.ReactNode
 }
 
 const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
@@ -29,6 +30,7 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
     size = 30,
     subFloatNumber = false,
     suffix,
+    suffixNode,
     value,
     valueColorSchema = 'default' } = props;
 
@@ -56,6 +58,7 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
           unitOpacity={1}
           value={value}
         />
+        {suffixNode}
       </div>
     </div>
   );

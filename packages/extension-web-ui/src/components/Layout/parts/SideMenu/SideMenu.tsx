@@ -9,7 +9,7 @@ import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, Image } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowCircleLeft, ArrowCircleRight, ArrowSquareUpRight, Clock, Gear, Globe, Info, MessengerLogo, Parachute, Rocket, Vault, Wallet } from 'phosphor-react';
+import { ArrowCircleLeft, ArrowCircleRight, ArrowsLeftRight, ArrowSquareUpRight, Clock, Gear, Globe, Info, MessengerLogo, Parachute, Rocket, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -46,6 +46,16 @@ function Component ({ className,
         label: t('Earning'),
         value: '/home/earning',
         icon: Vault
+      },
+      // {
+      //   label: t('Swap'),
+      //   value: '/home/swap',
+      //   icon: ArrowsLeftRight
+      // },
+      {
+        label: t('Swap'),
+        value: '/home/swap-test',
+        icon: ArrowsLeftRight
       },
       {
         label: t('DApps'),

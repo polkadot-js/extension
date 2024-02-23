@@ -90,3 +90,6 @@ export const TERM_AND_CONDITION_SEED_PHRASE_MODAL = 'term-and-condition-seed-phr
 
 export const EARNING_INSTRUCTION_MODAL = 'earning-instruction-modal';
 export const EARNING_NOMINATION_MODAL = 'earning-nomination-modal';
+export const SWAP_SLIPPAGE_MODAL = 'swap-slippage-modal';
+export const SWAP_ALL_QUOTES_MODAL = 'swap-all-quotes-modal';
+export const SWAP_MORE_BALANCE_MODAL = 'swap-more-balance-modal';

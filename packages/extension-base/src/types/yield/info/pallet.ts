@@ -143,6 +143,11 @@ export interface PalletStakingNominations {
   suppressed: boolean
 }
 
+export interface PalletStakingValidatorPrefs {
+  commission: string;
+  blocked: boolean;
+}
+
 export interface UnlockingChunk {
   value: number,
   era: number

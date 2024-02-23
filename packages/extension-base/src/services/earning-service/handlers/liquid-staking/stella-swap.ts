@@ -174,7 +174,8 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
             unstakings.push({
               chain: this.chain,
               claimable: unbondedObject.unbonded,
-              status: UnstakingStatus.CLAIMABLE
+              status: UnstakingStatus.CLAIMABLE,
+              waitingTime: 0
             });
           }
 

@@ -151,8 +151,7 @@ export default class TransactionService {
               const priority = await calculateGasFeeParams(web3, chainInfo.slug);
 
               if (priority.baseGasFee) {
-                const priorityFee = priority.baseGasFee.plus(priority.maxPriorityFeePerGas);
-                const maxFee = priority.maxFeePerGas.lte(priorityFee) ? priority.maxFeePerGas : priorityFee;
+                const maxFee = priority.maxFeePerGas; // TODO: Need review
 
                 estimateFee.value = maxFee.multipliedBy(gasLimit).toFixed(0);
               } else {
@@ -897,7 +896,8 @@ export default class TransactionService {
         to: transaction.to !== undefined ? transaction.to : '',
         value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
         data: transaction.data,
-        chainId: _getEvmChainId(chainInfo)
+        chainId: _getEvmChainId(chainInfo),
+        type: 2
       };
     } else {
       txObject = {
@@ -907,7 +907,8 @@ export default class TransactionService {
         to: transaction.to !== undefined ? transaction.to : '',
         value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
         data: transaction.data,
-        chainId: _getEvmChainId(chainInfo)
+        chainId: _getEvmChainId(chainInfo),
+        type: 0
       };
     }
 

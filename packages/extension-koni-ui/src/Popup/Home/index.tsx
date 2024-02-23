@@ -5,11 +5,11 @@ import { CampaignBanner } from '@subwallet/extension-base/background/KoniTypes';
 import { CampaignBannerModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
 import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/GeneralTermModal';
-import { CLAIM_DAPP_STAKING_REWARDS, CLAIM_DAPP_STAKING_REWARDS_MODAL, CONFIRM_GENERAL_TERM, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_STATE, EARNING_MIGRATION_ANNOUNCEMENT, EARNING_MIGRATION_MODAL, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRM_GENERAL_TERM, EARNING_MIGRATION_ANNOUNCEMENT, EARNING_MIGRATION_MODAL, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ClaimDAppStakingRewardsState, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
@@ -28,9 +28,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
-  const [claimDAppStakingRewardsState] = useLocalStorage<ClaimDAppStakingRewardsState>(CLAIM_DAPP_STAKING_REWARDS, DEFAULT_CLAIM_DAPP_STAKING_REWARDS_STATE);
-  const claimDAppStakingRewardsStateRef = useRef(claimDAppStakingRewardsState);
-
   const [isReadEarningMigrationAnnouncement] = useLocalStorage<boolean>(EARNING_MIGRATION_ANNOUNCEMENT, false);
   const isReadEarningMigrationAnnouncementRef = useRef(isReadEarningMigrationAnnouncement);
 
@@ -62,9 +59,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     const canShowBanner =
-      firstBanner &&
-      claimDAppStakingRewardsStateRef.current !== ClaimDAppStakingRewardsState.NONE &&
-      isReadEarningMigrationAnnouncementRef.current;
+      firstBanner && isReadEarningMigrationAnnouncementRef.current;
 
     if (canShowBanner) {
       activeModal(HOME_CAMPAIGN_BANNER_MODAL);
@@ -78,19 +73,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal, isConfirmedTermGeneral, setIsConfirmedTermGeneral]);
 
   useEffect(() => {
-    if (claimDAppStakingRewardsState === ClaimDAppStakingRewardsState.NONE) {
-      activeModal(CLAIM_DAPP_STAKING_REWARDS_MODAL);
-    }
-  }, [activeModal, claimDAppStakingRewardsState]);
-
-  useEffect(() => {
-    const canShow = claimDAppStakingRewardsStateRef.current !== ClaimDAppStakingRewardsState.NONE &&
-    !isReadEarningMigrationAnnouncementRef.current;
+    const canShow = !isReadEarningMigrationAnnouncementRef.current;
 
     if (canShow) {
       activeModal(EARNING_MIGRATION_MODAL);
     }
-  }, [activeModal, claimDAppStakingRewardsState]);
+  }, [activeModal]);
 
   return (
     <>

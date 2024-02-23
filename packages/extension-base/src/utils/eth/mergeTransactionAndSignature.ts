@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
+import { BN_ZERO } from '@subwallet/extension-base/utils';
+import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { addHexPrefix } from 'ethereumjs-util';
 import { ethers, SignatureLike, TransactionLike } from 'ethers';
 
@@ -16,7 +18,9 @@ export const mergeTransactionAndSignature = (tx: Web3Transaction, _rawSignature:
 
   let transaction: TransactionLike;
 
-  if (tx.maxFeePerGas) {
+  const max = anyNumberToBN(tx.maxFeePerGas);
+
+  if (max.gt(BN_ZERO)) {
     transaction = {
       nonce: tx.nonce,
       maxFeePerGas: addHexPrefix(tx.maxFeePerGas.toString(16)),
@@ -26,7 +30,8 @@ export const mergeTransactionAndSignature = (tx: Web3Transaction, _rawSignature:
       value: addHexPrefix(tx.value.toString(16)),
       data: tx.data,
       chainId: tx.chainId,
-      signature: signature
+      signature: signature,
+      type: 2
     };
   } else {
     transaction = {
@@ -37,7 +42,8 @@ export const mergeTransactionAndSignature = (tx: Web3Transaction, _rawSignature:
       value: addHexPrefix(tx.value.toString(16)),
       data: tx.data,
       chainId: tx.chainId,
-      signature: signature
+      signature: signature,
+      type: 0
     };
   }
 

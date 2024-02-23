@@ -2,18 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { AbstractYieldPositionInfo } from '@subwallet/extension-base/types';
+import { PalletNominationPoolsBondedPoolInner, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { NominationPoolInfo, ValidatorInfo } from '@subwallet/extension-base/types/yield/info/chain/target';
+import { InfoItemBase } from '@subwallet/extension-koni-ui/components';
 import { BalanceValueInfo } from '@subwallet/extension-koni-ui/types/balance';
 import { PhosphorIcon } from '@subwallet/extension-koni-ui/types/index';
 import { SwIconProps } from '@subwallet/react-ui';
+
+export type NominationPoolState = Pick<PalletNominationPoolsBondedPoolInner, 'state'>;
+export interface EarningStatusUiProps {
+  schema: InfoItemBase['valueColorSchema'];
+  icon: PhosphorIcon;
+  name: string;
+}
 
 export enum EarningEntryView {
   OPTIONS= 'options',
   POSITIONS= 'positions',
 }
 
-export interface ExtraYieldPositionInfo extends AbstractYieldPositionInfo {
+export type ExtraYieldPositionInfo = YieldPositionInfo & {
   asset: _ChainAsset;
   price: number;
   // exchangeRate: number;

@@ -36,6 +36,8 @@ interface Props extends BasicInputWrapper, ThemeProps {
 const defaultScannerModalId = 'input-account-address-scanner-modal';
 const defaultAddressBookModalId = 'input-account-address-book-modal';
 
+const addressLength = 9;
+
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { addressPrefix, allowDomain,
     chain, className = '', disabled, fitNetwork, id, label, networkGenesisHash, onBlur,
@@ -223,7 +225,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
               value && isAddress(value) && (
                 <div className={'__overlay'}>
                   <div className={CN('__name common-text', { 'limit-width': !!accountName })}>
-                    {accountName || toShort(value, 9, 9)}
+                    {accountName || toShort(value, addressLength, addressLength)}
                   </div>
                   {(fitNetwork ? accountName : (accountName || addressPrefix !== undefined)) &&
                     (

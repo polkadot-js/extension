@@ -159,6 +159,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const renderItem = useCallback((item: AccountItem) => {
     const address = formatAddress(item);
+    const isRecent = item.group === AccountGroup.RECENT;
     let selected: boolean;
 
     if (isEthereumAddress(value)) {
@@ -171,6 +172,8 @@ const Component: React.FC<Props> = (props: Props) => {
       <AccountItemWithName
         accountName={item.name}
         address={address}
+        addressPreLength={isRecent ? 9 : 4}
+        addressSufLength={isRecent ? 9 : 4}
         avatarSize={24}
         fallbackName={false}
         isSelected={selected}

@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
+import { ChainInfoMap } from '@subwallet/chain-list';
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-var-requires
 export const buyServiceInfos: Record<string, unknown>[] = require('./buyServiceInfos.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const buyTokenConfigs: Record<string, unknown>[] = require('./buyTokenConfigs.json');
-// eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
-export const chains: Record<string, unknown>[] = require('./chains.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const crowdloanFunds: Record<string, unknown>[] = require('./crowdloanFunds.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
@@ -24,7 +25,7 @@ export enum StaticKey {
 }
 
 export const staticData = {
-  [StaticKey.CHAINS]: chains,
+  [StaticKey.CHAINS]: Object.values(ChainInfoMap),
   [StaticKey.BUY_SERVICE_INFOS]: buyServiceInfos,
   [StaticKey.CROWDLOAN_FUNDS]: crowdloanFunds,
   [StaticKey.MARKETING_CAMPAINGS]: marketingCampaigns,

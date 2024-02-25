@@ -11,11 +11,12 @@ import styled from 'styled-components';
 import { InfoItemBase } from './types';
 
 export interface ChainInfoItem extends InfoItemBase {
-  chain: string
+  chain: string,
+  suffixNode?: React.ReactNode
 }
 
 const Component: React.FC<ChainInfoItem> = (props: ChainInfoItem) => {
-  const { chain, className, label, valueColorSchema = 'default' } = props;
+  const { chain, className, label, suffixNode, valueColorSchema = 'default' } = props;
   const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
   const chainInfo = useMemo(() => (chainInfoMap[chain]), [chain, chainInfoMap]);
 
@@ -41,6 +42,7 @@ const Component: React.FC<ChainInfoItem> = (props: ChainInfoItem) => {
           <div className={'__chain-name ml-xs'}>
             {chainInfo?.name}
           </div>
+          {suffixNode}
         </div>
       </div>
     </div>

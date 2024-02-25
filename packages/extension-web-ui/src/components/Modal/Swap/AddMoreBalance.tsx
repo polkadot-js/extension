@@ -25,7 +25,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <>
       <BaseModal
-        className={CN(className)}
+        className={CN(className, 'add-more-balance-container')}
         closable={true}
         destroyOnClose={true}
         footer={
@@ -65,7 +65,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onCancel={onCancel}
         title={'Add More Balance'}
       >
-        <div>Slippage setting modal</div>
+        <div>content...</div>
       </BaseModal>
     </>
   );
@@ -73,6 +73,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AddMoreBalance = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '&.add-more-balance-container .ant-sw-modal-footer': {
+      display: 'flex'
+    }
 
   };
 });

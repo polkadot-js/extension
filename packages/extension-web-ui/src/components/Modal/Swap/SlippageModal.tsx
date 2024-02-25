@@ -25,7 +25,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <>
       <BaseModal
-        className={CN(className)}
+        className={CN(className, 'slippage-modal-container')}
         closable={true}
         destroyOnClose={true}
         footer={
@@ -65,7 +65,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onCancel={onCancel}
         title={'Slippage setting'}
       >
-        <div>Slippage setting modal</div>
+        <div>content....</div>
       </BaseModal>
     </>
   );
@@ -73,6 +73,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const SlippageModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '&.slippage-modal-container .ant-sw-modal-footer': {
+      display: 'flex'
+    }
 
   };
 });

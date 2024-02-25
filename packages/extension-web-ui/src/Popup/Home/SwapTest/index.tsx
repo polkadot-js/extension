@@ -5,7 +5,7 @@ import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset } from '@subwallet/extension-base/services/chain-service/utils';
-import { AccountSelector, TokenItemType, TokenSelector } from '@subwallet/extension-web-ui/components';
+import { AccountSelector, AmountInput, TokenItemType, TokenSelector } from '@subwallet/extension-web-ui/components';
 import { AllSwapQuotes } from '@subwallet/extension-web-ui/components/Modal/Swap';
 import { TransactionFeeQuotes } from '@subwallet/extension-web-ui/components/Swap/TransactionFeeQuote';
 import { SWAP_ALL_QUOTES_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL } from '@subwallet/extension-web-ui/constants';
@@ -18,7 +18,7 @@ import { ThemeProps, TransferParams } from '@subwallet/extension-web-ui/types';
 import { findAccountByAddress, findNetworkJsonByGenesisHash } from '@subwallet/extension-web-ui/utils';
 import { Button, Form, Icon, ModalContext, Number, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Book, CaretRight, Info, PencilSimpleLine } from 'phosphor-react';
+import { ArrowsDownUp, Book, CaretRight, Info, PencilSimpleLine } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -31,6 +31,41 @@ import AddMoreBalance from '../../../components/Modal/Swap/AddMoreBalance';
 import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
 
 type Props = ThemeProps;
+
+const fakeTokenItems: TokenItemType[] = [
+  {
+    name: 'Polkadot',
+    slug: 'polkadot-NATIVE-DOT',
+    symbol: 'DOT',
+    originChain: 'polkadot'
+  },
+  {
+    name: 'Kusama',
+    slug: 'kusama-NATIVE-KSM',
+    symbol: 'KSM',
+    originChain: 'kusama'
+  },
+  {
+    name: 'Aleph Zero',
+    slug: 'aleph-NATIVE-AZERO',
+    symbol: 'AZERO',
+    originChain: 'aleph'
+  }
+];
+const fakeTokenDest: TokenItemType[] = [
+  {
+    name: 'Ethereum',
+    slug: 'ethereum-NATIVE-ETH',
+    symbol: 'ETH',
+    originChain: 'ethereum'
+  },
+  {
+    name: 'Moonbeam',
+    slug: 'moonbeam-NATIVE-GLMR',
+    symbol: 'GLMR',
+    originChain: 'moonbeam'
+  }
+];
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
@@ -185,6 +220,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     alert('Swap button Clicked!');
   }, []);
 
+  const onClickSwapIcon = useCallback(() => {
+    alert('Swap Icon Clicked');
+  }, []);
+
   return (
     <div className={className}>
       {
@@ -205,7 +244,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               initialValues={formDefault}
             >
               <Form.Item
-                className={'swap-form-container'}
+                className={'from'}
               >
                 <AccountSelector
                   disabled={false}
@@ -213,13 +252,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 />
               </Form.Item>
               <Form.Item name={'asset'}>
-                <TokenSelector
+                {/* <TokenSelector
                 // disabled={!tokenItems.length}
                   items={tokenItems}
                   placeholder={t('Select token')}
                   showChainInSelected
                   tooltip={isWebUI ? t('Select token') : undefined}
-                />
+                /> */}
               </Form.Item>
               <FreeBalance
                 address={'5CMe6ie6hYEXbL35egagvkdR3Jq9MdSzKeKLhMz5hcByN6do'}
@@ -227,6 +266,78 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 className={'free-balance'}
                 label={t('Available balance:')}
               />
+              <div className='__token-from'>
+                <Form.Item
+                  className='__form-item-token-from'
+                  key={'token-from'}
+                  name={'token-from'}
+                >
+                  <TokenSelector
+                    // disabled={!tokenItems.length}
+                    className='__token-from'
+                    items={fakeTokenItems}
+                    key={'token-from'}
+                    label='From'
+                    placeholder={t('Select token')}
+                    showChainInSelected
+                    tooltip={isWebUI ? t('Select token') : undefined}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name={'__amount-input-fro'}
+                >
+                  <AmountInput
+                    decimals={1}
+                    key={'__amount-input-from'}
+                    maxValue={'1234'}
+                    placeholder='0'
+                    showMaxButton={true}
+                  />
+                </Form.Item>
+                <div className='__arrow-down-up-button'>
+                  <Button
+                    color=''
+                    icon={(
+                      <Icon
+                        customSize={'20px'}
+                        phosphorIcon={ArrowsDownUp}
+                        weight='fill'
+                      />
+                    )}
+                    onClick={onClickSwapIcon}
+                    shape='circle'
+                    size='xs'
+                  >
+                  </Button>
+                </div>
+              </div>
+              <div className='__form-to'>
+                <Form.Item
+                  className='__form-item-token-to'
+                  key={'token-to'}
+                  name={'token-to'}
+                >
+                  <TokenSelector
+                    // disabled={!tokenItems.length}
+                    className='__token-to'
+                    items={fakeTokenDest}
+                    key={'token-to'}
+                    label='To'
+                    placeholder={t('Select token')}
+                    showChainInSelected
+                    tooltip={isWebUI ? t('Select token') : undefined}
+                  />
+                </Form.Item>
+                <Form.Item name={'__amount-input-too'}>
+                  <AmountInput
+                    decimals={1}
+                    key={'__amount-input-to'}
+                    maxValue={'1234'}
+                    placeholder='0'
+                    showMaxButton={false}
+                  />
+                </Form.Item>
+              </div>
             </Form>
             <Button
               block={true}
@@ -361,21 +472,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           </div>
         </div>
       </TransactionContent>
-      <Button
-        onClick={onOpenSlippageModal}
-      >
-        {'SlippageModal'}
-      </Button>
-      <Button
-        onClick={openAddMoreBalanceModal}
-      >
-        {'AddMoreBalance'}
-      </Button>
-      <Button
-        onClick={openAllquotesModal}
-      >
-        {'SlippageModal'}
-      </Button>
       <SlippageModal
         modalId={SWAP_SLIPPAGE_MODAL}
       />
@@ -390,6 +486,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 };
 
 const Swap = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  console.log(token);
+
   return {
     '.__swap-container': {
       display: 'flex',
@@ -453,7 +551,7 @@ const Swap = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
     '.__item-max-slippage .ant-btn': {
       minWidth: 20,
-      maxWidth: 20,
+      maxHeight: 20,
       paddingLeft: 4
     },
     '.__item-recipient .-to-right': {
@@ -464,8 +562,93 @@ const Swap = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
     '.__item-recipient .ant-btn': {
       minWidth: 20,
-      maxWidth: 20,
+      maxHeight: 20,
       paddingLeft: 4
+    },
+    '.__token-from': {
+      display: 'flex',
+      marginBottom: 4,
+      position: 'relative'
+    },
+    '.__form-to': {
+      display: 'flex'
+    },
+    '.__token-from .ant-input-container': {
+      minHeight: 72,
+      display: 'flex',
+      alignItems: 'end',
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0
+    },
+    '.__token-from .ant-input-wrapper': {
+      flex: 1
+    },
+    '.__form-to .ant-input-container': {
+      minHeight: 72,
+      display: 'flex',
+      alignItems: 'end',
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0
+    },
+    '.__form-to .ant-form-item-row': {
+      display: 'flex',
+      flex: 1
+    },
+    '.__form-to .ant-form-item': {
+      flex: 1
+    },
+    '.__form-to .ant-input-wrapper': {
+      flex: 1
+    },
+    '.__form-to .__form-item-token-to': {
+      flex: '0 1 auto'
+    },
+    '.__token-from .ant-form-item': {
+      marginBottom: 0,
+      flex: 1
+    },
+    '.__token-from .ant-form-item-row': {
+      flex: 1
+    },
+    '.__token-from .__form-item-token-from': {
+      flex: '0 1 auto'
+    },
+    '.__form-item-token-from .ant-form-item-control-input-content': {
+      display: 'flex'
+    },
+    '.__form-item-token-to .ant-form-item-control-input-content': {
+      display: 'flex'
+    },
+    '.__form-item-token-from .ant-select-modal-input-border-default': {
+      borderTopRightRadius: 0,
+      borderBottomRightRadius: 0
+    },
+    '.__form-item-token-from .ant-input-container': {
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
+      display: 'flex',
+      alignItems: 'end'
+    },
+    '.__form-item-token-to .ant-select-modal-input-border-default': {
+      borderTopRightRadius: 0,
+      borderBottomRightRadius: 0
+    },
+    '.__form-item-token-to .ant-input-container': {
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
+      display: 'flex',
+      alignItems: 'end'
+    },
+    '.__arrow-down-up-button': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'absolute',
+      top: 0,
+      bottom: -72,
+      opacity: 1,
+      zIndex: 2,
+      left: 173
     }
   };
 });

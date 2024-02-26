@@ -30,8 +30,13 @@ export enum _ChainConnectionStatus {
 export interface _ChainState {
   slug: string,
   active: boolean,
-  currentProvider: string,
-  connectionStatus: _ChainConnectionStatus
+  currentProvider: string
+}
+
+export interface _ChainApiStatus {
+  slug: string,
+  connectionStatus: _ChainConnectionStatus,
+  lastUpdated: number,
 }
 
 export interface _SubstrateDefaultFormatBalance {

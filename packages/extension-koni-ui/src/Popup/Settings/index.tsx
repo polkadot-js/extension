@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
-import { EXTENSION_VERSION, SUPPORT_MAIL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+import { EXTENSION_VERSION, SUPPORT_MAIL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
@@ -11,9 +12,9 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, Button, ButtonProps, Icon, ModalContext, SettingItem, SwHeader, SwIconProps, SwModal } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, ButtonProps, Icon, Image, ModalContext, SettingItem, SwHeader, SwIconProps, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, CornersOut, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Layout as LayoutIcon, Lock, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Layout as LayoutIcon, Lock, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -240,7 +241,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         },
         {
           key: 'about-subwallet',
-          leftIcon: ChatTeardropText,
+          leftIcon: (
+            <Image
+              className='__subwallet-logo'
+              height={24}
+              shape='squircle'
+              src={DefaultLogosMap.subwallet}
+              width={24}
+            />
+          ),
           leftIconBgColor: token['magenta-7'],
           rightIcon: CaretRight,
           title: t('About SubWallet'),
@@ -261,7 +270,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         rightIcon: ArrowSquareOut,
         leftIconBgColor: token['purple-7'],
         title: t('Website'),
-        onClick: openInNewTab(WIKI_URL)
+        onClick: openInNewTab(WEBSITE_URL)
       },
       {
         key: 'terms-of-use',
@@ -269,15 +278,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         rightIcon: ArrowSquareOut,
         leftIconBgColor: token['volcano-6'],
         title: t('Terms of use'),
-        onClick: openInNewTab(WIKI_URL)
+        onClick: openInNewTab(TERMS_OF_SERVICE_URL)
       },
       {
         key: 'x',
-        leftIcon: CornersOut,
+        leftIcon: (
+          <Image
+            height={24}
+            shape='squircle'
+            src={DefaultLogosMap.xtwitter}
+            width={24}
+          />
+        ),
         rightIcon: ArrowSquareOut,
-        leftIconBgColor: token['volcano-6'],
+        leftIconBgColor: token.colorBgSecondary,
         title: t('X (Twitter)'),
-        onClick: openInNewTab(WIKI_URL)
+        onClick: openInNewTab(TWITTER_URL)
       }
     ];
   }, [t, token]);
@@ -459,11 +475,20 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
         color: token.colorTextLight3,
         fontSize: token.size,
         lineHeight: token.lineHeight
+      },
+      '.__subwallet-logo': {
+        borderRadius: '50%'
       }
     },
     '&.about-subwallet-modal': {
       '.__setting-about-item': {
         marginBottom: 8
+      },
+      '.ant-web3-block-right-item': {
+        display: 'flex',
+        minWidth: 40,
+        justifyContent: 'center',
+        alignContent: 'center'
       }
     }
   });

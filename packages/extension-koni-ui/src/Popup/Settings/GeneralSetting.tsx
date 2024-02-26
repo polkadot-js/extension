@@ -134,16 +134,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const browserConfirmationItems = useMemo<SelectionItemType[]>(() => {
     return [
       {
-        key: 'extension',
-        leftIcon: LayoutIcon,
-        leftIconBgColor: token['volcano-6'],
-        title: t('Extension')
-      },
-      {
         key: 'popup',
         leftIcon: ArrowSquareUpRight,
         leftIconBgColor: token['volcano-6'],
         title: t('Popup')
+      },
+      {
+        key: 'extension',
+        leftIcon: LayoutIcon,
+        leftIconBgColor: token['volcano-6'],
+        title: t('Extension')
       },
       {
         key: 'window',
@@ -189,6 +189,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     saveTheme(value as ThemeNames).finally(noop);
   }, []);
 
+  const isShowWalletTheme = useMemo(() => {
+    return themeItems.find((item) => item.key === ThemeNames.LIGHT)?.disabled;
+  }, [themeItems]);
+
   return (
     <PageWrapper className={`general-setting ${className}`}>
       <Layout.WithSubHeaderOnly
@@ -196,25 +200,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t('General settings')}
       >
         <div className={'__scroll-container'}>
-          <SelectModal
-            background={'default'}
-            className={`__modal ${className}`}
-            customInput={renderModalTrigger({
-              key: 'wallet-theme-trigger',
-              leftIcon: Image,
-              leftIconBgColor: token.colorPrimary,
-              title: t('Wallet theme')
-            })}
-            id='wallet-theme-select-modal'
-            inputWidth={'100%'}
-            itemKey='key'
-            items={themeItems}
-            onSelect={onSelectTheme}
-            renderItem={renderSelectionItem}
-            selected={theme}
-            shape='round'
-            title={t('Wallet theme')}
-          />
+          {!isShowWalletTheme &&
+            <SelectModal
+              background={'default'}
+              className={`__modal ${className}`}
+              customInput={renderModalTrigger({
+                key: 'wallet-theme-trigger',
+                leftIcon: Image,
+                leftIconBgColor: token.colorPrimary,
+                title: t('Wallet theme')
+              })}
+              id='wallet-theme-select-modal'
+              inputWidth={'100%'}
+              itemKey='key'
+              items={themeItems}
+              onSelect={onSelectTheme}
+              renderItem={renderSelectionItem}
+              selected={theme}
+              shape='round'
+              title={t('Wallet theme')}
+            />}
 
           <SelectModal
             background={'default'}
@@ -245,7 +250,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               key: 'browser-confirmation-type-trigger',
               leftIcon: BellSimpleRinging,
               leftIconBgColor: token['volcano-6'],
-              title: t('Browser notification type')
+              title: t('Notifications')
             })}
             disabled={loadingMap.browserConfirmationType}
             id='browser-confirmation-type-select-modal'
@@ -257,7 +262,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             selected={_browserConfirmationType}
             shape='round'
             size='small'
-            title={t('Browser notification type')}
+            title={t('Notifications')}
           />
         </div>
       </Layout.WithSubHeaderOnly>

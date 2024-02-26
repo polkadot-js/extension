@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NetworkEmptyList } from '@subwallet/extension-web-ui/components';
 import ChainItemFooter from '@subwallet/extension-web-ui/components/ChainItemFooter';
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-web-ui/constants';
-import useChainInfoWithStateAndStatus, { ChainInfoWithStateAndStatus } from '@subwallet/extension-web-ui/hooks/chain/useChainInfoWithStateAndStatus';
+import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-web-ui/hooks/chain/useChainInfoWithState';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { NetworkItem, SwList } from '@subwallet/react-ui';
@@ -20,9 +20,9 @@ const renderEmpty = () => <NetworkEmptyList modalId={CUSTOMIZE_MODAL} />;
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { t } = useTranslation();
-  const chainInfoList = useChainInfoWithStateAndStatus();
+  const chainInfoList = useChainInfoWithState();
 
-  const renderChainItem = useCallback((chainInfo: ChainInfoWithStateAndStatus) => {
+  const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
     const connectSymbol = `__${chainInfo.connectionStatus}__`;
 
     return (

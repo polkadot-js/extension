@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
-import { ChainInfoWithStateAndStatus } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithStateAndStatus';
+import { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NetworkItem } from '@subwallet/react-ui';
 import React from 'react';
@@ -10,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  chainInfo: ChainInfoWithStateAndStatus;
+  chainInfo: ChainInfoWithState;
   isShowSubLogo?: boolean;
 }
 

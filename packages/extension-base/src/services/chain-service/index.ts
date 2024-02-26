@@ -9,7 +9,7 @@ import { EvmChainHandler } from '@subwallet/extension-base/services/chain-servic
 import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey, randomizeProvider, updateLatestChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
@@ -48,7 +48,6 @@ export class ChainService {
   // TODO: consider BehaviorSubject
   private chainInfoMapSubject = new Subject<Record<string, _ChainInfo>>();
   private chainStateMapSubject = new Subject<Record<string, _ChainState>>();
-  private chainStatusMapSubject = new BehaviorSubject<Record<string, _ChainApiStatus>>({});
   private assetRegistrySubject = new Subject<Record<string, _ChainAsset>>();
   private multiChainAssetMapSubject = new Subject<Record<string, _MultiChainAsset>>();
   private xcmRefMapSubject = new Subject<Record<string, _AssetRef>>();
@@ -138,10 +137,6 @@ export class ChainService {
 
   public subscribeChainStateMap () {
     return this.chainStateMapSubject;
-  }
-
-  public subscribeChainStatusMap () {
-    return this.chainStatusMapSubject;
   }
 
   public getAssetRegistry () {
@@ -240,14 +235,6 @@ export class ChainService {
 
   public getChainStateByKey (key: string) {
     return this.dataMap.chainStateMap[key];
-  }
-
-  public getChainStatusMap () {
-    return this.chainStatusMapSubject.getValue();
-  }
-
-  public getChainStatusByKey (key: string) {
-    return this.getChainStatusMap()[key];
   }
 
   public getActiveChains () {
@@ -466,35 +453,10 @@ export class ChainService {
     return true;
   }
 
-  private connectionStatusQueueMap = {} as Record<string, _ChainConnectionStatus>;
+  public setChainConnectionStatus (slug: string, connectionStatus: _ChainConnectionStatus) {
+    const chainStateMap = this.getChainStateMap();
 
-  public updateChainConnectionStatus (slug: string, connectionStatus: _ChainConnectionStatus) {
-    this.connectionStatusQueueMap[slug] = connectionStatus;
-
-    addLazy('updateChainConnectionStatus', () => {
-      const chainStatusMap = this.getChainStatusMap();
-      let update = false;
-
-      Object.entries(this.connectionStatusQueueMap).forEach(([slug, status]) => {
-        if (chainStatusMap[slug]) {
-          if (chainStatusMap[slug].connectionStatus !== status) {
-            chainStatusMap[slug].connectionStatus = status;
-            chainStatusMap[slug].lastUpdated = Date.now();
-            update = true;
-          }
-        } else {
-          chainStatusMap[slug] = {
-            slug,
-            connectionStatus: status,
-            lastUpdated: Date.now()
-          };
-          update = true;
-        }
-      });
-
-      this.connectionStatusQueueMap = {};
-      update && this.chainStatusMapSubject.next(chainStatusMap);
-    });
+    chainStateMap[slug].connectionStatus = connectionStatus;
   }
 
   public upsertCustomToken (token: _ChainAsset) {
@@ -698,9 +660,13 @@ export class ChainService {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
     const onUpdateStatus = (status: _ChainConnectionStatus) => {
-      const slug = chainInfo.slug;
+      const currentStatus = this.getChainStateByKey(chainInfo.slug).connectionStatus;
 
-      this.updateChainConnectionStatus(slug, status);
+      // Avoid unnecessary update in case disable chain
+      if (currentStatus !== status) {
+        this.setChainConnectionStatus(chainInfo.slug, status);
+        this.updateChainStateMapSubscription();
+      }
     };
 
     if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
@@ -817,7 +783,7 @@ export class ChainService {
     this.lockChainInfoMap = true;
     chainStateMap[chainSlug].active = false;
     // Set disconnect state for inactive chain
-    this.updateChainConnectionStatus(chainSlug, _ChainConnectionStatus.DISCONNECTED);
+    chainStateMap[chainSlug].connectionStatus = _ChainConnectionStatus.DISCONNECTED;
     this.destroyApiForChain(chainInfo);
 
     this.dbService.updateChainStore({
@@ -922,10 +888,9 @@ export class ChainService {
         this.dataMap.chainStateMap[chainInfo.slug] = {
           currentProvider: providerKey,
           slug: chainInfo.slug,
+          connectionStatus: _ChainConnectionStatus.DISCONNECTED,
           active: _DEFAULT_ACTIVE_CHAINS.includes(chainInfo.slug)
         };
-
-        this.updateChainConnectionStatus(chainInfo.slug, _ChainConnectionStatus.DISCONNECTED);
 
         // create data for storage
         newStorageData.push({
@@ -980,10 +945,9 @@ export class ChainService {
           this.dataMap.chainStateMap[storedSlug] = {
             currentProvider: selectedProvider,
             slug: storedSlug,
+            connectionStatus: _ChainConnectionStatus.DISCONNECTED,
             active: canActive && storedChainInfo.active
           };
-
-          this.updateChainConnectionStatus(storedSlug, _ChainConnectionStatus.DISCONNECTED);
 
           newStorageData.push({
             ...mergedChainInfoMap[storedSlug],
@@ -1000,10 +964,9 @@ export class ChainService {
             this.dataMap.chainStateMap[duplicatedDefaultSlug] = {
               currentProvider: storedChainInfo.currentProvider,
               slug: duplicatedDefaultSlug,
+              connectionStatus: _ChainConnectionStatus.DISCONNECTED,
               active: storedChainInfo.active
             };
-
-            this.updateChainConnectionStatus(duplicatedDefaultSlug, _ChainConnectionStatus.DISCONNECTED);
 
             newStorageData.push({
               ...mergedChainInfoMap[duplicatedDefaultSlug],
@@ -1029,10 +992,9 @@ export class ChainService {
             this.dataMap.chainStateMap[storedSlug] = {
               currentProvider: storedChainInfo.currentProvider, // TODO: review
               slug: storedSlug,
+              connectionStatus: _ChainConnectionStatus.DISCONNECTED,
               active: storedChainInfo.active
             };
-
-            this.updateChainConnectionStatus(storedSlug, _ChainConnectionStatus.DISCONNECTED);
 
             newStorageData.push({
               ...mergedChainInfoMap[storedSlug],
@@ -1051,9 +1013,9 @@ export class ChainService {
           this.dataMap.chainStateMap[slug] = {
             currentProvider: Object.keys(chainInfo.providers)[0],
             slug,
+            connectionStatus: _ChainConnectionStatus.DISCONNECTED,
             active: _DEFAULT_ACTIVE_CHAINS.includes(slug)
           };
-          this.updateChainConnectionStatus(slug, _ChainConnectionStatus.DISCONNECTED);
 
           newStorageData.push({
             ...mergedChainInfoMap[slug],
@@ -1143,7 +1105,9 @@ export class ChainService {
   }
 
   private updateChainStateMapSubscription () {
-    this.chainStateMapSubject.next(this.getChainStateMap());
+    addLazy('updateChainStateMapSubscription', () => {
+      this.chainStateMapSubject.next(this.getChainStateMap());
+    }, 300, 900);
   }
 
   private updateChainInfoMapSubscription () {
@@ -1265,16 +1229,10 @@ export class ChainService {
 
     chainStateMap[newChainSlug] = {
       active: true,
+      connectionStatus: _ChainConnectionStatus.DISCONNECTED,
       currentProvider: params.chainEditInfo.currentProvider,
       slug: newChainSlug
     };
-
-    // const chainStatusMap = this.getChainStatusMap();
-    // const chainStatusMap[newChainSlug] = {
-    //   slug: newChainSlug,
-    //   connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-    //   lastUpdated: Date.now()
-    // };
 
     await this.initApiForChain(chainInfo);
 
@@ -1591,6 +1549,34 @@ export class ChainService {
     ]);
 
     this.checkLatestData();
+  }
+
+  public checkAndUpdateStatusMapForChain (chainSlug: string) {
+    const substrateApiMap = this.getSubstrateApiMap();
+    const evmApiMap = this.getEvmApiMap();
+    const chainState = this.getChainStateByKey(chainSlug);
+    let update = false;
+
+    function updateState (current: _ChainState, status: _ChainConnectionStatus) {
+      if (current.connectionStatus !== status) {
+        current.connectionStatus = status;
+        update = true;
+      }
+    }
+
+    if (chainState.active) {
+      const api = substrateApiMap[chainSlug] || evmApiMap[chainSlug];
+
+      if (api) {
+        updateState(chainState, api.isApiConnected ? _ChainConnectionStatus.CONNECTED : _ChainConnectionStatus.DISCONNECTED);
+      }
+    } else {
+      updateState(chainState, _ChainConnectionStatus.DISCONNECTED);
+    }
+
+    if (update) {
+      this.dataMap.chainStateMap[chainSlug] = chainState;
+    }
   }
 
   public async initAssetSettings () {

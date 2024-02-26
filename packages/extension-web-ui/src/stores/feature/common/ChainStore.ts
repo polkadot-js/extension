@@ -3,13 +3,12 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { ChainStore, ReduxStatus } from '@subwallet/extension-web-ui/stores/types';
 
 const initialState: ChainStore = {
   chainInfoMap: {},
   chainStateMap: {},
-  chainStatusMap: {},
   reduxStatus: ReduxStatus.INIT
 };
 
@@ -32,15 +31,6 @@ const chainStoreSlice = createSlice({
       return {
         ...state,
         chainStateMap: payload,
-        reduxStatus: ReduxStatus.READY
-      };
-    },
-    updateChainStatusMap (state, action: PayloadAction<Record<string, _ChainApiStatus>>) {
-      const { payload } = action;
-
-      return {
-        ...state,
-        chainStatusMap: payload,
         reduxStatus: ReduxStatus.READY
       };
     }

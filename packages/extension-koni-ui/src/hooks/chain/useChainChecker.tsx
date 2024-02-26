@@ -13,23 +13,22 @@ import { useSelector } from 'react-redux';
 
 export default function useChainChecker () {
   const { t } = useTranslation();
-  const { chainInfoMap, chainStateMap, chainStatusMap } = useSelector((root: RootState) => root.chainStore);
+  const { chainInfoMap, chainStateMap } = useSelector((root: RootState) => root.chainStore);
   const notify = useNotification();
   const [connectingChain, setConnectingChain] = useState<string | null>(null);
 
   useEffect(() => {
-    if (connectingChain && chainStatusMap[connectingChain]?.connectionStatus === _ChainConnectionStatus.CONNECTED) {
+    if (connectingChain && chainStateMap[connectingChain]?.connectionStatus === _ChainConnectionStatus.CONNECTED) {
       const chainInfo = chainInfoMap[connectingChain];
 
       notify({ message: t('Chain {{name}} is connected', { replace: { name: chainInfo?.name } }), type: NotificationType.SUCCESS, duration: 3 });
       setConnectingChain(null);
     }
-  }, [connectingChain, chainInfoMap, chainStateMap, notify, t, chainStatusMap]);
+  }, [connectingChain, chainInfoMap, chainStateMap, notify, t]);
 
   const ensureChainEnable = useCallback((chain: string) => {
     const chainState = chainStateMap[chain];
     const chainInfo = chainInfoMap[chain];
-    const chainStatus = chainStatusMap[chain];
 
     if (chainState) {
       if (!chainState.active) {
@@ -59,7 +58,7 @@ export default function useChainChecker () {
           duration: 3,
           btn
         });
-      } else if (chainStatus.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
+      } else if (chainState.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
         const message = t('Chain {{name}} is disconnected', { replace: { name: chainInfo?.name } });
 
         notify({
@@ -69,7 +68,7 @@ export default function useChainChecker () {
         });
       }
     }
-  }, [chainInfoMap, chainStateMap, chainStatusMap, notify, t]);
+  }, [chainInfoMap, chainStateMap, notify, t]);
 
   return ensureChainEnable;
 }

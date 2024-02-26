@@ -3,7 +3,7 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { _ChainApiStatus, _ChainState, _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
 import { sendMessage } from '@subwallet/extension-web-ui/messaging';
 
 export async function subscribeChainInfoMap (callback: (data: Record<string, _ChainInfo>) => void): Promise<Record<string, _ChainInfo>> {
@@ -12,10 +12,6 @@ export async function subscribeChainInfoMap (callback: (data: Record<string, _Ch
 
 export async function subscribeChainStateMap (callback: (data: Record<string, _ChainState>) => void): Promise<Record<string, _ChainState>> {
   return sendMessage('pri(chainService.subscribeChainStateMap)', null, callback);
-}
-
-export async function subscribeChainStatusMap (callback: (data: Record<string, _ChainApiStatus>) => void): Promise<Record<string, _ChainApiStatus>> {
-  return sendMessage('pri(chainService.subscribeChainStatusMap)', null, callback);
 }
 
 export async function removeChain (networkKey: string): Promise<boolean> {

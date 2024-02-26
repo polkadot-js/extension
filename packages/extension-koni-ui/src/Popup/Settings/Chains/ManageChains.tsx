@@ -4,8 +4,7 @@
 import { _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { FilterModal, Layout, NetworkEmptyList, NetworkToggleItem, OptionType, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ChainInfoWithState, useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import useChainInfoWithStateAndStatus, { ChainInfoWithStateAndStatus } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithStateAndStatus';
+import { ChainInfoWithState, useChainInfoWithState, useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ManageChainsParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
@@ -38,7 +37,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { activeModal } = useContext(ModalContext);
-  const chainInfoList = useChainInfoWithStateAndStatus();
+  const chainInfoList = useChainInfoWithState();
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const FILTER_OPTIONS = useMemo((): OptionType[] => ([
@@ -89,7 +88,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return chainInfo.name.toLowerCase().includes(searchTextLowerCase);
   }, []);
 
-  const renderChainItem = useCallback((chainInfo: ChainInfoWithStateAndStatus) => {
+  const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
     return (
       <NetworkToggleItem
         chainInfo={chainInfo}

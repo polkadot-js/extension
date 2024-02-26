@@ -49,6 +49,15 @@ const instructionModalId = EARNING_INSTRUCTION_MODAL;
 // Not enough balance to xcm;
 export const insufficientXCMMessages = ['You can only enter a maximum'];
 
+const earningTypeLabelMap = {
+  [YieldPoolType.NATIVE_STAKING]: 'direct nomination',
+  [YieldPoolType.NOMINATION_POOL]: 'nomination pool',
+  [YieldPoolType.LENDING]: 'lending',
+  [YieldPoolType.LIQUID_STAKING]: 'liquid staking',
+  [YieldPoolType.PARACHAIN_STAKING]: 'direct nomination',
+  [YieldPoolType.SINGLE_FARMING]: 'single farming'
+};
+
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
@@ -116,8 +125,6 @@ const Component = () => {
     () => !!poolType && [YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolType as YieldPoolType),
     [poolType]
   );
-
-  const currentPoolInfo = useMemo(() => poolInfoMap[slug], [slug, poolInfoMap]);
 
   const balanceTokens = useMemo(() => {
     const result: Array<{ chain: string; token: string }> = [];
@@ -648,6 +655,17 @@ const Component = () => {
     }
   }, [closeAlert, firstStep, goBack, openAlert, t]);
 
+  const processText = (() => {
+    if (!poolInfo) {
+      return '';
+    }
+
+    const _shortName = poolInfo.metadata.shortName;
+    const _type = t(earningTypeLabelMap[poolInfo.type]);
+
+    return t('{{shortName}} {{type}} process:', { replace: { shortName: _shortName, type: _type } });
+  })();
+
   const onCancelInstructionModal = useCallback(() => {
     if (!isClickInfoButtonRef.current) {
       goBack();
@@ -1072,7 +1090,7 @@ const Component = () => {
               <div className={'__transaction-process'}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
 
-                  <Typography.Text className={'earning-calculator-message'}>{t(`${currentPoolInfo.metadata.name} process:`)}</Typography.Text>
+                  <Typography.Text className={'earning-calculator-message'}>{processText}</Typography.Text>
 
                   {!stepLoading && processState.steps.map((item, index) => {
                     return (

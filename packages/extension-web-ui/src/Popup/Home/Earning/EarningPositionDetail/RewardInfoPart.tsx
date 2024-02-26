@@ -87,6 +87,7 @@ function Component ({ className, closeAlert, compound, inputAsset, isShowBalance
         content: t("You don't have any rewards to claim at the moment. Try again later."),
         okButton: {
           text: t('I understand'),
+          schema: 'danger',
           onClick: closeAlert,
           icon: CheckCircle
         }

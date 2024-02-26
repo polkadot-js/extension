@@ -22,7 +22,6 @@ export interface FeeOption {
 
 export interface MultiFee {
   feeOptions: FeeOption[];
-  selectedFeeOption?: FeeOption;
   totalFeeValue?: number; // in $
 }
 

@@ -71,7 +71,7 @@ export const isWalletConnectRequest = (id?: string): boolean => {
 };
 
 export const isProposalExpired = (params: ProposalTypes.Struct): boolean => {
-  return params.expiryTimestamp < Date.now();
+  return params.expiryTimestamp * 1000 < Date.now();
 };
 
 export const isSupportWalletConnectNamespace = (namespace: string): boolean => {

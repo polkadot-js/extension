@@ -404,6 +404,7 @@ export default class TransactionService {
     const transaction = this.getTransaction(id);
     const extrinsicType = transaction.extrinsicType;
 
+    const chainInfo = this.state.chainService.getChainInfoByKey(transaction.chain);
     const formattedTransactionAddress = reformatAddress(transaction.address);
 
     const historyItem: TransactionHistoryItem = {
@@ -411,7 +412,7 @@ export default class TransactionService {
       chain: transaction.chain,
       direction: TransactionDirection.SEND,
       type: transaction.extrinsicType,
-      from: formattedTransactionAddress,
+      from: transaction.address,
       to: '',
       chainType: transaction.chainType,
       address: formattedTransactionAddress,
@@ -426,7 +427,6 @@ export default class TransactionService {
       startBlock: startBlock || 0
     };
 
-    const chainInfo = this.state.chainService.getChainInfoByKey(transaction.chain);
     const nativeAsset = _getChainNativeTokenBasicInfo(chainInfo);
     const baseNativeAmount = { value: '0', decimals: nativeAsset.decimals, symbol: nativeAsset.symbol };
 
@@ -896,7 +896,8 @@ export default class TransactionService {
         to: transaction.to !== undefined ? transaction.to : '',
         value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
         data: transaction.data,
-        chainId: _getEvmChainId(chainInfo)
+        chainId: _getEvmChainId(chainInfo),
+        type: 2
       };
     } else {
       txObject = {
@@ -906,7 +907,8 @@ export default class TransactionService {
         to: transaction.to !== undefined ? transaction.to : '',
         value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
         data: transaction.data,
-        chainId: _getEvmChainId(chainInfo)
+        chainId: _getEvmChainId(chainInfo),
+        type: 0
       };
     }
 

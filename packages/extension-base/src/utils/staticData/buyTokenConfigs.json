@@ -679,20 +679,5 @@
     "slug": "arbitrum_one-ERC20-USDC-0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
     "symbol": "USDC",
     "support": "ETHEREUM"
-  },
-  {
-    "serviceInfo": {
-      "transak": {
-        "network": "polygon",
-        "symbol": "USDC",
-        "isSuspended": false
-      }
-    },
-    "network": "polygon",
-    "slug": "polygon-ERC20-USDC-0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
-    "symbol": "USDC",
-    "support": "ETHEREUM"
   }
 ]
-
-

@@ -114,6 +114,7 @@ function Component ({ className }: Props) {
     disabled: boolean,
     onClick: null | VoidFunction
   }>({ disabled: false, onClick: null });
+  const [customScreenTitle, setCustomScreenTitle] = useState<string | undefined>();
 
   const chainChecker = useChainChecker();
 
@@ -156,6 +157,7 @@ function Component ({ className }: Props) {
           persistData: setStorage,
           onDone,
           setSubHeaderRightButtons,
+          setCustomScreenTitle,
           goBack,
           setBackProps,
           closeAlert,
@@ -174,7 +176,7 @@ function Component ({ className }: Props) {
                 onBack={onClickBack || goBack}
                 rightButtons={subHeaderRightButtons}
                 showBackButton
-                title={titleMap[transactionType]}
+                title={customScreenTitle || titleMap[transactionType]}
               />
               <Outlet />
             </div>

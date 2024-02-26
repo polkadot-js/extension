@@ -1,16 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
-import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { fetchStaticCache } from '@subwallet/extension-base/utils/fetchStaticCache';
 import { EarningInstructionModal, EarningOptionDesktopItem, EarningOptionItem, EmptyList, FilterModal, Layout, LoadingScreen } from '@subwallet/extension-web-ui/components';
 import { ASTAR_PORTAL_URL, CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, usePreviewYieldGroupInfo, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
-import { EarningPoolsParam, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
-import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
+import { EarningPoolsParam, EarnParams, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
+import { autoSelectValidatorOptimally, isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, Vault } from 'phosphor-react';
@@ -90,7 +92,7 @@ function Component ({ className }: Props) {
   const [selectedPoolInfoSlug, setSelectedPoolInfoSlug] = React.useState<string | undefined>(undefined);
   const [searchInput, setSearchInput] = useState<string>('');
 
-  const isAutoOpenIntructionViaParamsRef = useRef(true);
+  const isAutoOpenInstructionViaParamsRef = useRef(true);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID, [FilterOptionType.MAIN_NETWORK]);
 
@@ -279,6 +281,7 @@ function Component ({ className }: Props) {
           <EarningOptionDesktopItem
             chain={chainInfoMap[item.chain]}
             className={'earning-option-desktop-item'}
+            displayBalanceInfo={false}
             isShowBalance={isShowBalance}
             key={item.group}
             onClick={onClickItem(item)}
@@ -291,6 +294,7 @@ function Component ({ className }: Props) {
         <EarningOptionItem
           chain={chainInfoMap[item.chain]}
           className={'earning-option-item'}
+          displayBalanceInfo={false}
           isShowBalance={isShowBalance}
           key={item.group}
           onClick={onClickItem(item)}
@@ -328,30 +332,59 @@ function Component ({ className }: Props) {
   );
 
   useEffect(() => {
-    if (chainParam && earningTypeParam) {
+    let isSync = true;
+
+    if (chainParam && earningTypeParam && isAutoOpenInstructionViaParamsRef.current) {
       const poolInfo = getPoolInfoByChainAndType(poolInfoMap, chainParam, earningTypeParam);
 
-      if (poolInfo && isAutoOpenIntructionViaParamsRef.current) {
-        setSelectedPoolInfoSlug(poolInfo.slug);
-        setEarnStorage({
-          ...DEFAULT_EARN_PARAMS,
-          slug: poolInfo.slug,
-          chain: poolInfo.chain,
-          from: transactionFromValue,
-          redirectFromPreview: true,
-          target: '1zugcag7cJVBtVRnFxv5Qftn7xKAnR6YJ9x4x3XLgGgmNnS___Zug Capital/19'
+      if (poolInfo) {
+        fetchStaticCache<ValidatorInfo[]>(`earning/targets/${poolInfo.slug}.json`, []).then((rs) => {
+          if (isSync) {
+            const defaultEarnParams: EarnParams = {
+              ...DEFAULT_EARN_PARAMS,
+              slug: poolInfo.slug,
+              chain: poolInfo.chain,
+              from: transactionFromValue,
+              redirectFromPreview: true
+            };
+
+            if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+              const validators = autoSelectValidatorOptimally(rs, poolInfo?.statistic?.maxCandidatePerFarmer, targetParam);
+
+              defaultEarnParams.target = validators.length ? validators.map((v) => `${v.address}___${v.identity || ''}`).join(',') : '';
+            }
+
+            setSelectedPoolInfoSlug(poolInfo.slug);
+            setEarnStorage(defaultEarnParams);
+            activeModal(instructionModalId);
+            setInitLoading(false);
+            isAutoOpenInstructionViaParamsRef.current = false;
+          }
+        }).catch((e) => {
+          console.log('Error when fetching poolInfo.slug file', e);
+
+          if (isSync) {
+            setInitLoading(false);
+            isAutoOpenInstructionViaParamsRef.current = false;
+          }
         });
-        activeModal(instructionModalId);
-        isAutoOpenIntructionViaParamsRef.current = false;
+      } else {
+        if (isSync) {
+          setInitLoading(false);
+          isAutoOpenInstructionViaParamsRef.current = false;
+        }
+      }
+    } else {
+      if (isSync) {
+        setInitLoading(false);
+        isAutoOpenInstructionViaParamsRef.current = false;
       }
     }
-  }, [activeModal, chainParam, earningTypeParam, poolInfoMap, setEarnStorage, targetParam, transactionFromValue]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setInitLoading(false);
-    }, 1500);
-  }, []);
+    return () => {
+      isSync = false;
+    };
+  }, [activeModal, chainParam, earningTypeParam, poolInfoMap, setEarnStorage, targetParam, transactionFromValue]);
 
   return (
     <ChainConnectionWrapper

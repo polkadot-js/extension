@@ -14,10 +14,11 @@ interface Props extends ThemeProps {
   onClick?: () => void;
   isShowBalance?: boolean;
   chain: _ChainInfo;
+  displayBalanceInfo?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chain, className, isShowBalance, onClick, poolGroup } = props;
+  const { chain, className, displayBalanceInfo = true, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
 
   const { balance, maxApy, symbol, token, totalValueStaked } = poolGroup;
@@ -43,18 +44,23 @@ const Component: React.FC<Props> = (props: Props) => {
               </span>
             )}
           </div>
-          <div className='__item-available-balance-wrapper'>
-            <div className='__item-available-balance-label'>
-              {t('Available')}:
-            </div>
-            <Number
-              className={'__item-available-balance-value'}
-              decimal={0}
-              hide={!isShowBalance}
-              suffix={symbol}
-              value={balance.value}
-            />
-          </div>
+
+          {
+            displayBalanceInfo && (
+              <div className='__item-available-balance-wrapper'>
+                <div className='__item-available-balance-label'>
+                  {t('Available')}:
+                </div>
+                <Number
+                  className={'__item-available-balance-value'}
+                  decimal={0}
+                  hide={!isShowBalance}
+                  suffix={symbol}
+                  value={balance.value}
+                />
+              </div>
+            )
+          }
         </div>
 
         <div className={'__item-apy'}>
@@ -75,7 +81,7 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
 
         <div className={'__item-total-stake-wrapper'}>
-          <div className='__item-total-stake-label'>{'Total value staked'}:</div>
+          <div className='__item-total-stake-label'>{t('Total value staked')}:</div>
 
           <Number
             className={'__item-total-stake-value'}

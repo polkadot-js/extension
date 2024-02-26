@@ -1048,6 +1048,7 @@ const Component = () => {
                     >
                       <EarningValidatorSelector
                         chain={chainValue}
+                        defaultValue={defaultData.target}
                         disabled={submitLoading}
                         from={fromValue}
                         loading={targetLoading}

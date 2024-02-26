@@ -3,7 +3,7 @@
 
 import { YieldPoolInfo } from '@subwallet/extension-base/types';
 import { fetchStaticCache } from '@subwallet/extension-base/utils/fetchStaticCache';
-import { PageWrapper } from '@subwallet/extension-web-ui/components';
+import { LoadingScreen } from '@subwallet/extension-web-ui/components';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import React, { useContext, useEffect, useState } from 'react';
@@ -16,7 +16,8 @@ type Props = ThemeProps & {
 
 function Component ({ className }: Props) {
   const dataContext = useContext(DataContext);
-  const [poolInfoMap, setPoolInfoMap] = useState<Record<string, YieldPoolInfo>>({});
+  const [poolInfoMap, setPoolInfoMap] = useState<Record<string, YieldPoolInfo> | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     let isSync = true;
@@ -34,21 +35,39 @@ function Component ({ className }: Props) {
     };
   }, []);
 
+  useEffect(() => {
+    let isSync = true;
+
+    if (!isReady) {
+      dataContext.awaitStores(['price']).then((rs) => {
+        if (rs && !!poolInfoMap && isSync) {
+          setIsReady(true);
+        }
+      }).catch(console.log);
+    }
+
+    return () => {
+      isSync = false;
+    };
+  }, [dataContext, isReady, poolInfoMap]);
+
+  if (!isReady) {
+    return <LoadingScreen className={className} />;
+  }
+
   return (
-    <PageWrapper
-      resolve={dataContext.awaitStores(['price'])}
-    >
+    <div className={className}>
       <Outlet
         context={{
           poolInfoMap
         }}
       />
-    </PageWrapper>
+    </div>
   );
 }
 
 const EarningPreviewOutlet = styled(Component)<Props>(({ theme: { token } }: Props) => ({
-
+  height: '100%'
 }));
 
 export default EarningPreviewOutlet;

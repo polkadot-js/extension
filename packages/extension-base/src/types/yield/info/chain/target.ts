@@ -33,6 +33,7 @@ export interface ValidatorInfo {
   isVerified: boolean;
   icon?: string;
   isCrowded: boolean;
+  topQuartile?: boolean;
 }
 
 export type YieldPoolTarget = NominationPoolInfo | ValidatorInfo;

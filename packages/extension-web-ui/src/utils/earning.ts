@@ -3,8 +3,9 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningTagType } from '@subwallet/extension-web-ui/types';
+import { shuffle } from '@subwallet/extension-web-ui/utils/common';
 import { Database, HandsClapping, Leaf, User, Users } from 'phosphor-react';
 
 // todo: after supporting Astar v3, remove this
@@ -122,3 +123,35 @@ export const getUnstakeExtrinsicType = (pool: YieldPoolInfo): ExtrinsicType => {
 
   return ExtrinsicType.STAKING_UNBOND;
 };
+
+export function autoSelectValidatorOptimally (validators: ValidatorInfo[], maxCount = 1, preSelectValidators?: string): ValidatorInfo[] {
+  if (!validators.length) {
+    return [];
+  }
+
+  const preSelectValidatorAddresses = preSelectValidators ? preSelectValidators.split(',') : [];
+
+  const shuffleValidators = [...validators];
+
+  shuffle<ValidatorInfo>(shuffleValidators);
+
+  const result: ValidatorInfo[] = [];
+
+  for (const v of shuffleValidators) {
+    if (result.length === maxCount) {
+      break;
+    }
+
+    if (preSelectValidatorAddresses.includes(v.address)) {
+      result.push(v);
+
+      continue;
+    }
+
+    if (v.commission !== 100 && !v.blocked && v.identity && v.topQuartile) {
+      result.push(v);
+    }
+  }
+
+  return result;
+}

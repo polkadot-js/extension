@@ -9,7 +9,6 @@ import { PersistDataServiceInterface, ServiceStatus, StoppableServiceInterface }
 import { _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import BaseLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/base';
-import BaseSpecialStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/special';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { EarningRewardHistoryItem, EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
@@ -314,9 +313,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
     const unsubList: Array<VoidFunction> = [];
 
     for (const handler of Object.values(this.handlers)) {
-      const item = onlineData[handler.slug];
+      // Force subscribe onchain data
+      const forceSubscribe = handler.type === YieldPoolType.LIQUID_STAKING || handler.type === YieldPoolType.LENDING;
 
-      if (!this.useOnlineCacheOnly || !onlineData[handler.slug]) {
+      if (!this.useOnlineCacheOnly || forceSubscribe) {
         handler.subscribePoolInfo(callback)
           .then((unsub) => {
             if (!cancel) {
@@ -326,9 +326,6 @@ export default class EarningService implements StoppableServiceInterface, Persis
             }
           })
           .catch(console.error);
-      } else {
-        // Update exchange rate for special staking pool to ensure ability fetching pool position
-        (handler as BaseSpecialStakingPoolHandler)?.updateExchangeRate?.(item.statistic?.assetEarning[0].exchangeRate || 1);
       }
     }
 

@@ -68,7 +68,8 @@ const TableRow = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProps
       padding: token.paddingSM,
       paddingRight: token.paddingXXS,
       paddingBottom: token.paddingSM,
-      paddingLeft: token.paddingXXS
+      paddingLeft: token.paddingXXS,
+      gap: token.sizeXS
     },
     '&.__tr:hover': {
       backgroundColor: token.colorBgInput

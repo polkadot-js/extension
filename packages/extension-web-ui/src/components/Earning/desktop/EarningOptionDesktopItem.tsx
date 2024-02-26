@@ -20,7 +20,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
 
-  const { balance, description, maxApy, symbol, token, totalValueStaked } = poolGroup;
+  const { balance, maxApy, symbol, token, totalValueStaked } = poolGroup;
 
   return (
     <div
@@ -43,7 +43,6 @@ const Component: React.FC<Props> = (props: Props) => {
               </span>
             )}
           </div>
-          <div className={'__item-description'}>{description}</div>
           <div className='__item-available-balance-wrapper'>
             <div className='__item-available-balance-label'>
               {t('Available')}:
@@ -137,14 +136,6 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
       lineHeight: token.lineHeightHeading4,
       fontWeight: 600,
       color: token.colorTextLight1,
-      textAlign: 'center'
-    },
-
-    '.__item-description': {
-      fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightSM,
-      fontWeight: 500,
-      color: token.colorTextLight3,
       textAlign: 'center'
     },
 

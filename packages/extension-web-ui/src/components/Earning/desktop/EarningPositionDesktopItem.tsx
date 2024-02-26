@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { getYieldAvailableActionsByPosition, getYieldAvailableActionsByType, YieldAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { SpecialYieldPoolInfo, SpecialYieldPositionInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { BN_TEN } from '@subwallet/extension-base/utils';
 import { MetaInfo } from '@subwallet/extension-web-ui/components';
 import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
 import { EarningStatusUi } from '@subwallet/extension-web-ui/constants';
-import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ExtraYieldPositionInfo, PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, ButtonProps, Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -44,8 +45,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, isShowBalance, onClickCancelUnStakeButton,
     onClickClaimButton, onClickInstructionButton, onClickItem, onClickStakeButton,
     onClickUnStakeButton, onClickWithdrawButton, poolInfo, positionInfo, unclaimedReward } = props;
-
-  const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
+  const { asset, price, totalStake } = positionInfo;
 
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
@@ -56,39 +56,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [isCompactButtons, setCompactButtons] = useState<boolean>(false);
 
-  const isSpecial = useMemo(() => [YieldPoolType.LENDING, YieldPoolType.LIQUID_STAKING].includes(positionInfo.type), [positionInfo.type]);
+  const balanceValue = useMemo(() => {
+    return new BigN(totalStake);
+  }, [totalStake]);
 
-  const deriveAsset = useMemo(() => {
-    if ('derivativeToken' in positionInfo) {
-      const position = positionInfo as SpecialYieldPositionInfo;
-
-      return assetRegistry[position.derivativeToken];
-    } else {
-      return undefined;
-    }
-  }, [assetRegistry, positionInfo]);
-
-  const exchangeRate = useMemo(() => {
-    let rate = 1;
-
-    if ('derivativeToken' in positionInfo) {
-      const _item = positionInfo as SpecialYieldPositionInfo;
-      const _poolInfo = poolInfo as SpecialYieldPoolInfo;
-      const balanceToken = _item.balanceToken;
-
-      if (_poolInfo) {
-        const asset = _poolInfo.statistic?.assetEarning.find((i) => i.slug === balanceToken);
-
-        rate = asset?.exchangeRate || 1;
-      }
-    }
-
-    return rate;
-  }, [positionInfo, poolInfo]);
-
-  const activeStake = useMemo(() => {
-    return new BigN(positionInfo.activeStake).multipliedBy(exchangeRate);
-  }, [positionInfo.activeStake, exchangeRate]);
+  const convertedBalanceValue = useMemo(() => {
+    return new BigN(balanceValue).div(BN_TEN.pow(asset.decimals || 0)).multipliedBy(price);
+  }, [asset.decimals, balanceValue, price]);
 
   const availableActionsByMetadata = useMemo(() => {
     return getYieldAvailableActionsByPosition(positionInfo, poolInfo, unclaimedReward);
@@ -256,7 +230,7 @@ const Component: React.FC<Props> = (props: Props) => {
               decimal={positionInfo.asset.decimals || 0}
               hide={!isShowBalance}
               suffix={positionInfo.asset.symbol}
-              value={activeStake}
+              value={positionInfo.totalStake}
             />
           </div>
         </div>
@@ -330,42 +304,22 @@ const Component: React.FC<Props> = (props: Props) => {
             className={'__item-label-and-value'}
             ref={line3RightPartRef}
           >
-            {isSpecial && (
-              <div className={'__item-equivalent'}>
-                <div className={'__item-equivalent-label'}>
-                  {t('Equivalent to')}:
-                </div>
-
-                <div className={'__item-equivalent-value'}>
-                  <Number
-                    decimal={deriveAsset?.decimals || 0}
-                    decimalColor={token.colorSuccess}
-                    intColor={token.colorSuccess}
-                    suffix={deriveAsset?.symbol}
-                    unitColor={token.colorSuccess}
-                    value={positionInfo.activeStake}
-                  />
-                </div>
+            <div className={'__item-equivalent'}>
+              <div className={'__item-equivalent-label'}>
+                {t('Balance')}:
               </div>
-            )}
 
-            {positionInfo.type === YieldPoolType.NOMINATION_POOL &&
-              <div className={'__item-unclaimed-rewards'}>
-                <div className={'__item-unclaimed-rewards-label'}>
-                  {t('Unclaimed rewards')}:
-                </div>
-                <div className={'__item-unclaimed-rewards-value'}>
-                  <Number
-                    decimal={positionInfo.asset.decimals || 0}
-                    decimalColor={token.colorSuccess}
-                    intColor={token.colorSuccess}
-                    suffix={positionInfo.asset.symbol}
-                    unitColor={token.colorSuccess}
-                    value={unclaimedReward || '0'}
-                  />
-                </div>
+              <div className={'__item-equivalent-value'}>
+                <Number
+                  decimal={0}
+                  decimalColor={token.colorSuccess}
+                  intColor={token.colorSuccess}
+                  prefix={'$'}
+                  unitColor={token.colorSuccess}
+                  value={convertedBalanceValue}
+                />
               </div>
-            }
+            </div>
           </div>
         </div>
       </div>

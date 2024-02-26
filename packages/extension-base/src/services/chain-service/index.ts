@@ -670,16 +670,16 @@ export class ChainService {
     };
 
     if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
-      if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && MODULE_SUPPORT.MANTA_ZK && this.mantaChainHandler) {
-        const apiPromise = await this.mantaChainHandler?.initMantaPay(endpoint, chainInfo.slug);
-        const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, externalApiPromise: apiPromise, onUpdateStatus });
+      // if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && MODULE_SUPPORT.MANTA_ZK && this.mantaChainHandler) {
+      //   const apiPromise = await this.mantaChainHandler?.initMantaPay(endpoint, chainInfo.slug);
+      //   const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, externalApiPromise: apiPromise, onUpdateStatus });
+      //
+      //   this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
+      // } else {
+      const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
 
-        this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
-      } else {
-        const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
-
-        this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
-      }
+      this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
+      // }
     }
 
     if (chainInfo.evmInfo !== null && chainInfo.evmInfo !== undefined) {

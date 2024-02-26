@@ -1040,17 +1040,10 @@ export class ChainService {
       .filter((info) => (info.chainStatus === _ChainStatus.ACTIVE))
       .map((chainInfo) => chainInfo.slug);
 
-    // Fill out zk assets from latestAssetRegistry if not supported
-    if (!MODULE_SUPPORT.MANTA_ZK) {
-      Object.keys(latestAssetRegistry).forEach((slug) => {
-        if (_isMantaZkAsset(latestAssetRegistry[slug])) {
-          delete latestAssetRegistry[slug];
-        }
-      });
-    }
+    let finalAssetRegistry: Record<string, _ChainAsset> = {};
 
     if (storedAssetRegistry.length === 0) {
-      this.dataMap.assetRegistry = latestAssetRegistry;
+      finalAssetRegistry = latestAssetRegistry;
     } else {
       const mergedAssetRegistry: Record<string, _ChainAsset> = latestAssetRegistry;
 
@@ -1098,10 +1091,21 @@ export class ChainService {
         }
       }
 
-      this.dataMap.assetRegistry = mergedAssetRegistry;
+      finalAssetRegistry = mergedAssetRegistry;
 
       await this.dbService.removeFromAssetStore(deprecatedAssets);
     }
+
+    // Fill out zk assets from latestAssetRegistry if not supported
+    if (!MODULE_SUPPORT.MANTA_ZK) {
+      Object.entries(finalAssetRegistry).forEach(([slug, assets]) => {
+        if (_isMantaZkAsset(assets)) {
+          delete finalAssetRegistry[slug];
+        }
+      });
+    }
+
+    this.dataMap.assetRegistry = finalAssetRegistry;
   }
 
   private updateChainStateMapSubscription () {

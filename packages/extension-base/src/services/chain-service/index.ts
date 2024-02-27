@@ -635,8 +635,6 @@ export class ChainService {
     }).catch(console.error);
 
     this.fetchLatestPriceIdsData().then((latestPriceIds) => {
-      console.log('number of priceIds', Object.keys(latestPriceIds).length);
-      console.log('latestPriceIds', latestPriceIds);
       this.handleLatestPriceId(latestPriceIds);
     }).catch(console.error);
   }

@@ -634,9 +634,11 @@ export class ChainService {
       this.handleLatestBlockedAssetRef(latestAssetRef);
     }).catch(console.error);
 
-    // this.fetchLatestPriceIdsData().then((latestPriceIds) => {
-    //   this.handleLatestPriceId(latestPriceIds);
-    // }).catch(console.error);
+    this.fetchLatestPriceIdsData().then((latestPriceIds) => {
+      console.log('number of priceIds', Object.keys(latestPriceIds).length);
+      console.log('latestPriceIds', latestPriceIds);
+      this.handleLatestPriceId(latestPriceIds);
+    }).catch(console.error);
   }
 
   private async initApis () {

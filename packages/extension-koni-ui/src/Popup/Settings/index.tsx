@@ -14,7 +14,7 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, Image, ModalContext, SettingItem, SwHeader, SwIconProps, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Layout as LayoutIcon, Lock, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -274,9 +274,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       },
       {
         key: 'terms-of-use',
-        leftIcon: LayoutIcon,
+        leftIcon: BookBookmark,
         rightIcon: ArrowSquareOut,
-        leftIconBgColor: token['volcano-6'],
+        leftIconBgColor: token['volcano-7'],
         title: t('Terms of use'),
         onClick: openInNewTab(TERMS_OF_SERVICE_URL)
       },
@@ -346,7 +346,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       ? null
                       : (
                         <SettingItem
-                          className={'__setting-item'}
+                          className={'__setting-item setting-item'}
                           key={item.key}
                           leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
                           name={item.title}
@@ -385,7 +385,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           className={CN(className, 'about-subwallet-modal')}
           id={modalId}
           onCancel={closeModal}
-          title={t('About subwallet')}
+          title={t('About SubWallet')}
         >
           {aboutSubwalletType.map((item) => (
             <div
@@ -394,7 +394,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             >
               <div className=''>
                 <SettingItem
-                  className='__setting-about-item'
+                  className='__setting-about-item setting-item'
                   key={item.key}
                   leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
                   name={item.title}
@@ -424,6 +424,11 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
         paddingBottom: token.padding,
         backgroundColor: token.colorBgDefault
       },
+      '.__setting-item': {
+        height: 52,
+        display: 'flex',
+        alignItems: 'center'
+      },
 
       '.ant-sw-header-center-part': {
         color: token.colorTextLight1,
@@ -444,12 +449,12 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
         color: token.colorTextLight3,
         fontSize: token.fontSizeSM,
         lineHeight: token.lineHeightSM,
-        marginBottom: token.margin,
+        marginBottom: token.marginXS,
         textTransform: 'uppercase'
       },
 
       '.__group-container': {
-        paddingBottom: token.paddingLG
+        paddingBottom: token.padding
       },
 
       '.__setting-item + .__setting-item': {
@@ -461,7 +466,6 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: -token.marginXS,
         color: token['gray-4']
       },
 

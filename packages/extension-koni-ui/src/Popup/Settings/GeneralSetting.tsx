@@ -60,7 +60,7 @@ function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
 function renderModalTrigger (item: SelectionItemType) {
   return (
     <SettingItem
-      className={'__trigger-item'}
+      className={'__trigger-item setting-item'}
       key={item.key}
       leftItemIcon={
         <BackgroundIcon
@@ -88,6 +88,8 @@ type LoadingMap = {
   language: boolean;
   browserConfirmationType: boolean;
 };
+// "TODO: Will be shown when support for the LIGHT theme is implemented."
+const isShowWalletTheme = false;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -189,10 +191,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     saveTheme(value as ThemeNames).finally(noop);
   }, []);
 
-  const isShowWalletTheme = useMemo(() => {
-    return themeItems.find((item) => item.key === ThemeNames.LIGHT)?.disabled;
-  }, [themeItems]);
-
   return (
     <PageWrapper className={`general-setting ${className}`}>
       <Layout.WithSubHeaderOnly
@@ -200,7 +198,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t('General settings')}
       >
         <div className={'__scroll-container'}>
-          {!isShowWalletTheme &&
+          {isShowWalletTheme &&
             <SelectModal
               background={'default'}
               className={`__modal ${className}`}
@@ -278,6 +276,11 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: -token.marginXS
+    },
+    '.__trigger-item': {
+      height: 52,
+      alignItems: 'center',
+      display: 'flex'
     },
 
     '.item-disabled': {

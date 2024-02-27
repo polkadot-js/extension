@@ -214,7 +214,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return (
       <SettingItem
         className={CN(
-          'security-item',
+          'security-item', 'setting-item',
           `security-type-${item.key}`,
           {
             disabled: item.disabled
@@ -465,7 +465,7 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.security-item': {
       '.ant-web3-block-right-item': {
-        marginRight: token.sizeXXS,
+        marginRight: 0,
         color: token['gray-4']
       },
 

@@ -377,7 +377,7 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       marginBottom: 0
     },
 
-    '.__tr-list, .__loading-area, .empty-list': {
+    '.__loading-area, .empty-list': {
       minHeight: 376
     },
 

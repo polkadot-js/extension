@@ -13,10 +13,10 @@ import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transacti
 import ClaimReward from '@subwallet/extension-web-ui/Popup/Transaction/variants/ClaimReward';
 import { AlertDialogProps, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { openInNewTab } from '@subwallet/extension-web-ui/utils';
-import { ActivityIndicator, Button, ModalContext, Number } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { CheckCircle } from 'phosphor-react';
+import { CheckCircle, Clock } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -173,8 +173,14 @@ function Component ({ className, closeAlert, compound,
 
         <Button
           block={true}
-          className={'__rewards-history-button'}
+          className={'__rewards-history-button -ghost-type-3'}
           disabled={!rewardHistories?.length}
+          icon={
+            <Icon
+              customSize={'28px'}
+              phosphorIcon={Clock}
+            />
+          }
           onClick={onOpenRewardsHistoryModal}
           type={'ghost'}
         >{t('Reward history')}</Button>

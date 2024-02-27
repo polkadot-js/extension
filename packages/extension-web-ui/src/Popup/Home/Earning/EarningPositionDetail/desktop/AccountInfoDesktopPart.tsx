@@ -529,7 +529,7 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       marginBottom: 0
     },
 
-    '.__tr-list, .__loading-area, .empty-list': {
+    '.__loading-area, .empty-list': {
       minHeight: 376
     },
 

@@ -208,7 +208,9 @@ const Component: React.FC<Props> = (props: Props) => {
             </Button>
           </div>
 
-          <MetaInfo>
+          <MetaInfo
+            className={'__item-status-wrapper'}
+          >
             <MetaInfo.Status
               className={'__item-status'}
               statusIcon={EarningStatusUi[positionInfo.status].icon}
@@ -359,6 +361,10 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
       overflow: 'hidden',
       flex: 1
     },
+    '.__item-status-wrapper': {
+      display: 'flex',
+      alignItems: 'flex-end'
+    },
 
     '.__item-line-common': {
       display: 'flex',
@@ -368,7 +374,7 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
     },
 
     '.__item-line-1': {
-      marginBottom: 2
+      marginBottom: token.marginXS
     },
 
     '.__item-name-wrapper': {
@@ -438,7 +444,7 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
     },
 
     '.__item-line-2': {
-      marginBottom: token.marginXXS
+      marginBottom: token.marginXS
     },
 
     '.__item-label-and-value': {

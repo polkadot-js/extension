@@ -1,13 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  OptimalSwapPath,
-  OptimalSwapPathParams,
-  SwapProvider, SwapProviderId,
-  SwapQuote,
-  SwapRequest
-} from '@subwallet/extension-base/types/swap';
+import { OptimalSwapPath, OptimalSwapPathParams, SwapProvider, SwapProviderId, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 
 export abstract class SwapBaseHandler {
   protected providerSlug: string;

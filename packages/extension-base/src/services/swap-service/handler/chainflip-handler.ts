@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { Asset, Chain, SwapSDK } from '@chainflip/sdk/swap';
-import { _ChainAsset } from '@subwallet/chain-list/types';
+import { Asset, SwapSDK } from '@chainflip/sdk/swap';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { chainFlipConvertChainId } from '@subwallet/extension-base/services/swap-service/utils';
+import { CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, chainFlipConvertChainId } from '@subwallet/extension-base/services/swap-service/utils';
 import { OptimalSwapPath, OptimalSwapPathParams, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
+import BigN from 'bignumber.js';
 
 export class ChainflipSwapHandler extends SwapBaseHandler {
   private swapSdk: SwapSDK;
@@ -22,26 +22,67 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
   }
 
   protected async validateSwapRequest (request: SwapRequest): Promise<boolean> {
-    let isChainSupported = false;
-    const isAssetSupported = false;
+    try {
+      let isRouteToDestChainSupported = true;
+      let isAssetSupported = true;
+      let isAmountValid = true;
 
-    const fromAsset = this.chainService.getAssetBySlug(request.pair.from);
-    const toAsset = this.chainService.getAssetBySlug(request.pair.to);
+      // todo: risk of matching wrong chain, asset can lead to loss of funds
 
-    const srcChain = fromAsset.originChain;
-    const destChain = toAsset.originChain;
+      const fromAsset = this.chainService.getAssetBySlug(request.pair.from);
+      const toAsset = this.chainService.getAssetBySlug(request.pair.to);
+      const srcChain = fromAsset.originChain;
+      const destChain = toAsset.originChain;
 
-    const srcChainId = srcChain[0].toUpperCase() + srcChain.slice(1);
-    const destChainId = destChain[0].toUpperCase() + destChain.slice(1);
+      const bnAmount = new BigN(request.fromAmount);
 
-    const chain = await this.swapSdk.getChains(srcChainId as Chain);
-    const supportedChainId = chain.map((c) => c.chain);
+      const srcChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[srcChain];
+      const destChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[destChain];
 
-    if (supportedChainId.includes(destChainId as Chain)) {
-      isChainSupported = true;
+      const fromAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[fromAsset.slug];
+      const toAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[toAsset.slug];
+
+      if (!srcChainId || !destChainId || !fromAssetId || !toAssetId) {
+        return false;
+      }
+
+      const [supportedDestChains, srcAssets, destAssets] = await Promise.all([
+        this.swapSdk.getChains(srcChainId),
+        this.swapSdk.getAssets(srcChainId),
+        this.swapSdk.getAssets(destChainId)
+      ]);
+
+      const supportedDestChainId = supportedDestChains.find((c) => c.chain === destChainId);
+      const srcAssetData = srcAssets.find((a) => a.asset === fromAssetId);
+      const destAssetData = destAssets.find((a) => a.asset === toAssetId);
+
+      isRouteToDestChainSupported = !!supportedDestChainId;
+      isAssetSupported = !!srcAssetData && !!destAssetData;
+
+      if (!srcAssetData) {
+        return false;
+      }
+
+      const bnMinSwap = new BigN(srcAssetData.minimumSwapAmount);
+
+      if (bnAmount.lt(bnMinSwap)) {
+        isAmountValid = false;
+      }
+
+      if (srcAssetData.maximumSwapAmount) {
+        const bnMaxSwap = new BigN(srcAssetData.maximumSwapAmount);
+
+        if (bnAmount.gt(bnMaxSwap)) {
+          isAmountValid = false;
+        }
+      }
+
+      return isRouteToDestChainSupported && isAssetSupported && isAmountValid;
+    } catch (e) {
+      console.log('Error validating swap request', e);
+
+      return false;
     }
-
-    return isChainSupported && isAssetSupported;
   }
 
   public async getSwapQuote (request: SwapRequest): Promise<SwapQuote | undefined> {
@@ -52,10 +93,14 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       return undefined;
     }
 
+    const validated = await this.validateSwapRequest(request);
+
+    console.log('validated', validated);
+
     try {
       const quoteResponse = await this.swapSdk.getQuote({
         srcChain: chainFlipConvertChainId(fromAsset.originChain),
-        amount: request.fromAmount,
+        amount: request.fromAmount, // TODO: if amount < minSwap || amount > maxSwap, setup mock amount as min and max swap amount
         destChain: chainFlipConvertChainId(toAsset.originChain),
         srcAsset: fromAsset.symbol as Asset,
         destAsset: toAsset.symbol as Asset

@@ -4,7 +4,6 @@
 import useAccountAvatarInfo from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarInfo';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
-import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
@@ -13,7 +12,7 @@ import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { Button, Icon, Logo } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
-import { CheckCircle, CopySimple, Eye, PencilSimpleLine, PuzzlePiece, QrCode, ShieldCheck, Swatches } from 'phosphor-react';
+import { CheckCircle, CopySimple, Eye, PencilSimpleLine, PuzzlePiece, QrCode, Swatches } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled, { ThemeContext } from 'styled-components';
@@ -68,7 +67,7 @@ function Component (props: _AccountCardItem): React.ReactElement<_AccountCardIte
   const avatarTheme = useAccountAvatarTheme(address || '');
 
   const signMode = useGetAccountSignModeByAddress(address);
-  const isMantaPayEnabled = useIsMantaPayEnabled(address);
+  // const isMantaPayEnabled = useIsMantaPayEnabled(address);
 
   const iconProps: IconProps | undefined = useMemo((): IconProps | undefined => {
     switch (signMode) {
@@ -108,15 +107,8 @@ function Component (props: _AccountCardItem): React.ReactElement<_AccountCardIte
         };
     }
 
-    if (isMantaPayEnabled) {
-      return {
-        type: 'icon',
-        value: ShieldCheck
-      };
-    }
-
     return undefined;
-  }, [isMantaPayEnabled, signMode]);
+  }, [signMode]);
 
   const _onClickMore: React.MouseEventHandler<HTMLAnchorElement | HTMLButtonElement> = React.useCallback((event) => {
     event.stopPropagation();

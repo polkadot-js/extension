@@ -58,3 +58,10 @@ export interface ClaimRewardParams extends TransactionFormBaseProps {
   slug: string;
   bondReward: boolean;
 }
+
+export interface SwapParams extends TransactionFormBaseProps {
+  fromAmount: string,
+  fromTokenSlug: string;
+  toTokenSlug: string;
+  recipient?: string;
+}

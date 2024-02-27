@@ -35,8 +35,9 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionE
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { AccountsStore } from '@subwallet/extension-base/stores';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
-import { SwapPair, SwapQuote, SwapQuoteResponse, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { SwapPair, SwapQuote, SwapRequest, SwapRequestResult } from '@subwallet/extension-base/types/swap';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { calculateGasFeeParams, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -46,7 +47,7 @@ import { createPair } from '@subwallet/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
 import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
-import { KeyringAddress } from '@subwallet/ui-keyring/types';
+import { KeyringAddress, KeyringJson$Meta } from '@subwallet/ui-keyring/types';
 import { ProposalTypes } from '@walletconnect/types/dist/types/sign-client/proposal';
 import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/session';
 import { getSdkError } from '@walletconnect/utils';
@@ -522,12 +523,19 @@ export default class KoniExtension {
 
   private subscribeAddresses (id: string, port: chrome.runtime.Port): AddressBookInfo {
     const _cb = createSubscription<'pri(accounts.subscribeAddresses)'>(id, port);
+    let old = '';
+
     const subscription = this.#koniState.keyringService.addressesSubject.subscribe((subjectInfo: SubjectInfo): void => {
       const addresses = convertSubjectInfoToAddresses(subjectInfo);
+      const _new = JSON.stringify(addresses);
 
-      _cb({
-        addresses: addresses
-      });
+      if (old !== _new) {
+        _cb({
+          addresses: addresses
+        });
+
+        old = _new;
+      }
     });
 
     this.createUnsubscriptionHandle(id, subscription.unsubscribe);
@@ -543,13 +551,43 @@ export default class KoniExtension {
     };
   }
 
-  private saveRecentAccount ({ accountId }: RequestSaveRecentAccount): KeyringAddress {
+  private saveRecentAccount ({ accountId, chain }: RequestSaveRecentAccount): KeyringAddress {
     if (isAddress((accountId))) {
       const address = reformatAddress(accountId);
       const account = keyring.getAccount(address);
-      const contact = keyring.getAddress(address);
+      const contact = keyring.getAddress(address, 'address');
 
-      return account || contact || { ...keyring.saveRecent(address).json, publicKey: decodeAddress(address) };
+      if (account) {
+        return account;
+      } else {
+        let metadata: KeyringJson$Meta;
+
+        if (contact) {
+          metadata = contact.meta;
+        } else {
+          const _new = keyring.saveRecent(address);
+
+          metadata = _new.json.meta;
+        }
+
+        if (contact && !metadata.isRecent) {
+          return contact;
+        }
+
+        const recentChainSlugs: string[] = (metadata.recentChainSlugs as string[]) || [];
+
+        if (chain) {
+          if (!recentChainSlugs.includes(chain)) {
+            recentChainSlugs.push(chain);
+          }
+        }
+
+        metadata.recentChainSlugs = recentChainSlugs;
+
+        const result = keyring.addresses.add(new AccountsStore(), address, { address: address, meta: metadata });
+
+        return { ...result.json, publicKey: decodeAddress(address) };
+      }
     } else {
       throw Error(t('This is not an address'));
     }
@@ -1736,7 +1774,7 @@ export default class KoniExtension {
       if (new BigN(receiverBalance).plus(transferAmount.value).lt(minAmount)) {
         const atLeast = new BigN(minAmount).minus(receiverBalance).plus((tokenInfo.decimals || 0) === 0 ? 0 : 1);
 
-        const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter);
+        const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter, { maxNumberFormat: tokenInfo.decimals || 6 });
 
         inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}} {{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: tokenInfo.symbol } })));
       }
@@ -1809,7 +1847,7 @@ export default class KoniExtension {
 
         // Check ed for receiver
         if (new BigN(value).lt(atLeast)) {
-          const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
+          const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter, { maxNumberFormat: destinationTokenInfo.decimals || 6 });
 
           inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}} {{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: originTokenInfo.symbol } })));
         }
@@ -4242,7 +4280,7 @@ export default class KoniExtension {
     return this.#koniState.swapService.getSwapPairs();
   }
 
-  private async handleSwapRequest (request: SwapRequest): Promise<SwapQuoteResponse> {
+  private async handleSwapRequest (request: SwapRequest): Promise<SwapRequestResult> {
     return this.#koniState.swapService.handleSwapRequest(request);
   }
 

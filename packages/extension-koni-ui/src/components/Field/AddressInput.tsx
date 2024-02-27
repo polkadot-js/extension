@@ -16,7 +16,7 @@ import { Book, Scan } from 'phosphor-react';
 import React, { ChangeEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
+import { decodeAddress, isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { Avatar } from '../Avatar';
 import { QrScannerErrorNotice } from '../Qr';
@@ -30,14 +30,17 @@ interface Props extends BasicInputWrapper, ThemeProps {
   networkGenesisHash?: string;
   chain?: string;
   allowDomain?: boolean;
+  fitNetwork?: boolean;
 }
 
 const defaultScannerModalId = 'input-account-address-scanner-modal';
 const defaultAddressBookModalId = 'input-account-address-book-modal';
 
+const addressLength = 9;
+
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { addressPrefix,
-    allowDomain, chain, className = '', disabled, id, label, networkGenesisHash, onBlur,
+  const { addressPrefix, allowDomain,
+    chain, className = '', disabled, fitNetwork, id, label, networkGenesisHash, onBlur,
     onChange, onFocus, placeholder, readOnly, saveAddress, showAddressBook, showScanner, status,
     statusHelp, value } = props;
   const { t } = useTranslation();
@@ -90,9 +93,18 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     !skipClearDomainName && setDomainName(undefined);
 
     if (isAddress(val) && saveAddress) {
-      saveRecentAccount(val).catch(console.error);
+      if (isEthereumAddress(val)) {
+        saveRecentAccount(val, chain).catch(console.error);
+      } else {
+        try {
+          if (decodeAddress(val, true, addressPrefix)) {
+            saveRecentAccount(val, chain).catch(console.error);
+          }
+        } catch (e) {}
+      }
     }
-  }, [onChange, saveAddress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saveAddress, chain, addressPrefix]);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     parseAndChangeValue(event.target.value);
@@ -167,6 +179,32 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     }
   }, [allowDomain, chain, inputRef, parseAndChangeValue, value]);
 
+  useEffect(() => {
+    if (value) {
+      const account = findContactByAddress(_contacts, value);
+
+      if (account) {
+        if (!isEthereumAddress(account.address) && !!account.isHardware) {
+          const availableGens: string[] = (account.availableGenesisHashes as string[]) || [];
+
+          if (!availableGens.includes(networkGenesisHash || '')) {
+            return;
+          }
+        }
+
+        const address = reformatAddress(account.address, addressPrefix);
+
+        parseAndChangeValue(address);
+        inputRef?.current?.focus();
+        inputRef?.current?.blur();
+      } else {
+        if (isAddress(value)) {
+          parseAndChangeValue(value);
+        }
+      }
+    }
+  }, [_contacts, addressPrefix, value, parseAndChangeValue, inputRef, networkGenesisHash]);
+
   // todo: Will work with "Manage address book" feature later
   return (
     <>
@@ -187,9 +225,9 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
               value && isAddress(value) && (
                 <div className={'__overlay'}>
                   <div className={CN('__name common-text', { 'limit-width': !!accountName })}>
-                    {accountName || toShort(value, 9, 9)}
+                    {accountName || toShort(value, addressLength, addressLength)}
                   </div>
-                  {(accountName || addressPrefix !== undefined) &&
+                  {(fitNetwork ? accountName : (accountName || addressPrefix !== undefined)) &&
                     (
                       <div className={'__address common-text'}>
                         ({toShort(formattedAddress, 4, 4)})

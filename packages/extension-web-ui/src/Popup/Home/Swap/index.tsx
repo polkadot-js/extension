@@ -16,12 +16,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const dataContext = useContext(DataContext);
   const swapPairs = useSelector((state) => state.swap.swapPairs);
 
-  console.log('swapPairs', swapPairs);
-
   useEffect(() => {
     handleSwapRequest({
+      address: '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',
       pair: swapPairs[0],
-      fromAmount: '100000000',
+      fromAmount: '40000000000',
       slippage: 0.05
     }).then((result) => {
       console.log('swap result', result);

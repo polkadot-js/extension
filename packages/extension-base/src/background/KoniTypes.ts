@@ -30,7 +30,7 @@ import {
   SwapPair,
   SwapQuote,
   SwapQuoteResponse,
-  SwapRequest,
+  SwapRequest, SwapRequestResult,
   SwapSubmitTransaction
 } from '@subwallet/extension-base/types/swap';
 
@@ -1202,6 +1202,7 @@ export interface RequestTransferExistentialDeposit {
 
 export interface RequestSaveRecentAccount {
   accountId: string;
+  chain?: string;
 }
 
 export interface SubstrateNftTransaction {
@@ -2515,7 +2516,7 @@ export interface KoniRequestSignatures {
 
   /* Swap */
   'pri(swapService.subscribePairs)': [null, SwapPair[], SwapPair[]];
-  'pri(swapService.handleSwapRequest)': [SwapRequest, SwapQuoteResponse];
+  'pri(swapService.handleSwapRequest)': [SwapRequest, SwapRequestResult];
   'pri(swapService.submitTransaction)': [SwapSubmitTransaction, SWTransactionResponse];
   'pri(swapService.getLatestQuote)': [SwapQuote, SwapQuote];
   /* Swap */

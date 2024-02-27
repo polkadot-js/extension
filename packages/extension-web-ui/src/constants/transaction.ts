@@ -103,7 +103,8 @@ export const DEFAULT_EARN_PARAMS: EarnParams = {
   ...DEFAULT_TRANSACTION_PARAMS,
   slug: '',
   target: '',
-  value: ''
+  value: '',
+  redirectFromPreview: false
 };
 
 export const DEFAULT_UN_STAKE_PARAMS: UnStakeParams = {

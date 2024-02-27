@@ -128,9 +128,9 @@ const DApps = new LazyLoader('DApps', () => import('@subwallet/extension-web-ui/
 const EarningEntry = new LazyLoader('EarningEntry', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningEntry'));
 const EarningPools = new LazyLoader('EarningPools', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPools'));
 const EarningPositionDetail = new LazyLoader('EarningPositionDetail', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPositionDetail'));
-const EarningDemoOptions = new LazyLoader('EarningDemoOptions', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningDemo/EarningDemoOptions'));
-const EarningDemoPools = new LazyLoader('EarningDemoPools', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningDemo/EarningDemoPools'));
-const EarningDemoOutlet = new LazyLoader('EarningDemoOutlet', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningDemo/EarningDemoOutlet'));
+const EarningPreviewOptions = new LazyLoader('EarningPreviewOptions', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPreview/EarningPreviewOptions'));
+const EarningPreviewPools = new LazyLoader('EarningPreviewPools', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPreview/EarningPreviewPools'));
+const EarningPreviewOutlet = new LazyLoader('EarningPreviewOutlet', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPreview/EarningPreviewOutlet'));
 
 // const EarningDoneOutlet = new LazyLoader('EarningDoneOutlet', () => import('@subwallet/extension-web-ui/Popup/EarningDone/Outlet'));
 // const EarningDoneContent = new LazyLoader('EarningDoneContent', () => import('@subwallet/extension-web-ui/Popup/EarningDone/Content'));
@@ -239,10 +239,10 @@ export const router = createBrowserRouter([
         ...TransactionDone.generateRouterObject('transaction-done/:address/:chain/:transactionId')
       },
       {
-        ...EarningDemoOutlet.generateRouterObject('/earning-demo'),
+        ...EarningPreviewOutlet.generateRouterObject('/earning-preview'),
         children: [
-          EarningDemoOptions.generateRouterObject(''),
-          EarningDemoPools.generateRouterObject('pools')
+          EarningPreviewOptions.generateRouterObject(''),
+          EarningPreviewPools.generateRouterObject('pools')
         ]
       },
       {

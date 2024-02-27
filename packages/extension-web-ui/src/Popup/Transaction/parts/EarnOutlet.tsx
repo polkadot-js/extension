@@ -4,7 +4,7 @@
 import { LoadingScreen, PageWrapper } from '@subwallet/extension-web-ui/components';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useSelector, useSetCurrentPage, useTransactionContext } from '@subwallet/extension-web-ui/hooks';
+import { useChainConnection, useSetCurrentPage, useTransactionContext } from '@subwallet/extension-web-ui/hooks';
 import { StoreName } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
@@ -17,10 +17,11 @@ interface Props extends ThemeProps {
   children: React.ReactNode | React.ReactNode[];
   path: string;
   stores: StoreName[];
+  autoEnableChain?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { children, className, path, stores } = props;
+  const { autoEnableChain, children, className, path, stores } = props;
   const { isWebUI } = useContext(ScreenContext);
 
   useSetCurrentPage(path);
@@ -30,16 +31,21 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { defaultData } = useTransactionContext();
   const navigate = useNavigate();
+  const { checkChainConnected, turnOnChain } = useChainConnection();
 
-  const { chainStateMap } = useSelector((state) => state.chainStore);
-
-  const isChainActive = !!chainStateMap[defaultData.chain]?.active;
+  const isChainActive = checkChainConnected(defaultData.chain);
 
   useEffect(() => {
-    if (!isChainActive) {
+    if (!isChainActive && autoEnableChain && defaultData.chain) {
+      turnOnChain(defaultData.chain);
+    }
+  }, [autoEnableChain, defaultData.chain, isChainActive, turnOnChain]);
+
+  useEffect(() => {
+    if (!isChainActive && !autoEnableChain) {
       navigate('/home/earning');
     }
-  }, [inactiveModal, isChainActive, navigate]);
+  }, [autoEnableChain, inactiveModal, isChainActive, navigate]);
 
   if (!isChainActive) {
     return <LoadingScreen />;

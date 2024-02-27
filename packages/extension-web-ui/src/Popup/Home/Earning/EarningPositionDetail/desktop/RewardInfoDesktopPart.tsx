@@ -16,6 +16,7 @@ import { openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { ActivityIndicator, Button, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
+import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -99,7 +100,9 @@ function Component ({ className, closeAlert, compound,
         content: t("You don't have any rewards to claim at the moment. Try again later."),
         okButton: {
           text: t('I understand'),
-          onClick: closeAlert
+          schema: 'danger',
+          onClick: closeAlert,
+          icon: CheckCircle
         }
       });
     }

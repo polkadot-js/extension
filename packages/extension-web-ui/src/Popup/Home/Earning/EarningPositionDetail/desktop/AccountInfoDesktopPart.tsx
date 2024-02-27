@@ -318,9 +318,17 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
     '.__table-nomination-col.__table-nomination-col': {
       maxWidth: 56
     },
-    '.__earning-status-col, .__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col, .__table-nomination-col, .__table-pool-col': {
+    '.__table-pool-col .__row-pool-wrapper': {
+      maxWidth: 220
+    },
+    '.__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col, .__table-nomination-col, .__table-pool-col': {
       display: 'flex',
       justifyContent: 'flex-end'
+    },
+    '.__earning-status-col': {
+      display: 'flex',
+      justifyContent: 'flex-start',
+      flex: 0.8
     },
 
     ['.__earning-status-col, .__table-active-stake-col, ' +
@@ -482,8 +490,7 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       alignItems: 'center',
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
-      color: token.colorTextLight4,
-      paddingRight: token.paddingXXS
+      color: token.colorTextLight4
     },
 
     '.__earning-status-col .__td-inner': {

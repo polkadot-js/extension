@@ -49,6 +49,15 @@ const instructionModalId = EARNING_INSTRUCTION_MODAL;
 // Not enough balance to xcm;
 export const insufficientXCMMessages = ['You can only enter a maximum'];
 
+const earningTypeLabelMap = {
+  [YieldPoolType.NATIVE_STAKING]: 'direct nomination',
+  [YieldPoolType.NOMINATION_POOL]: 'nomination pool',
+  [YieldPoolType.LENDING]: 'lending',
+  [YieldPoolType.LIQUID_STAKING]: 'liquid staking',
+  [YieldPoolType.PARACHAIN_STAKING]: 'direct nomination',
+  [YieldPoolType.SINGLE_FARMING]: 'single farming'
+};
+
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
@@ -61,7 +70,7 @@ const Component = () => {
     openAlert, persistData,
     setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
 
-  const { slug } = defaultData;
+  const { redirectFromPreview, slug } = defaultData;
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
@@ -116,8 +125,6 @@ const Component = () => {
     () => !!poolType && [YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolType as YieldPoolType),
     [poolType]
   );
-
-  const currentPoolInfo = useMemo(() => poolInfoMap[slug], [slug, poolInfoMap]);
 
   const balanceTokens = useMemo(() => {
     const result: Array<{ chain: string; token: string }> = [];
@@ -648,6 +655,17 @@ const Component = () => {
     }
   }, [closeAlert, firstStep, goBack, openAlert, t]);
 
+  const processText = (() => {
+    if (!poolInfo) {
+      return '';
+    }
+
+    const _shortName = poolInfo.metadata.shortName;
+    const _type = t(earningTypeLabelMap[poolInfo.type]);
+
+    return t('{{shortName}} {{type}} process:', { replace: { shortName: _shortName, type: _type } });
+  })();
+
   const onCancelInstructionModal = useCallback(() => {
     if (!isClickInfoButtonRef.current) {
       goBack();
@@ -715,8 +733,6 @@ const Component = () => {
 
       // Check network connection every 0.5 second
       timer = setInterval(checkConnection, 500);
-
-      // Set timeout for 3 seconds
       timeout = setTimeout(() => {
         clearInterval(timer);
 
@@ -735,7 +751,7 @@ const Component = () => {
             }
           });
         }
-      }, 3000);
+      }, 9000);
     }
 
     return () => {
@@ -749,10 +765,12 @@ const Component = () => {
   }, [form, inputAsset?.slug]);
 
   useEffect(() => {
-    if (!fromValue && accountSelectorList.length === 1) {
-      form.setFieldValue('from', accountSelectorList[0].address);
+    if (!fromValue) {
+      if ((redirectFromPreview && accountSelectorList.length >= 1) || accountSelectorList.length === 1) {
+        form.setFieldValue('from', accountSelectorList[0].address);
+      }
     }
-  }, [accountSelectorList, form, fromValue]);
+  }, [accountSelectorList, form, fromValue, redirectFromPreview]);
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -855,11 +873,11 @@ const Component = () => {
   }, [chainState?.active, forceFetchValidator, slug, chainValue, fromValue]);
 
   useEffect(() => {
-    if (!isWebUI && !compound && !screenLoading) {
+    if (!redirectFromPreview && !isWebUI && !compound && !screenLoading) {
       isClickInfoButtonRef.current = false;
       activeModal(instructionModalId);
     }
-  }, [activeModal, compound, isWebUI, screenLoading]);
+  }, [activeModal, compound, isWebUI, redirectFromPreview, screenLoading]);
 
   const subHeaderButtons: ButtonProps[] = useMemo(() => {
     return [
@@ -907,6 +925,16 @@ const Component = () => {
       setOnBack(undefined);
     };
   }, [onBack, setOnBack]);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const amountInputRef = form.getFieldInstance('value');
+
+  useEffect(() => {
+    if (redirectFromPreview) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      amountInputRef?.focus?.();
+    }
+  }, [amountInputRef, redirectFromPreview]);
 
   return (
     <>
@@ -1062,7 +1090,7 @@ const Component = () => {
               <div className={'__transaction-process'}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: token.paddingSM, paddingTop: token.paddingXS }}>
 
-                  <Typography.Text className={'earning-calculator-message'}>{t(`${currentPoolInfo.metadata.name} process:`)}</Typography.Text>
+                  <Typography.Text className={'earning-calculator-message'}>{processText}</Typography.Text>
 
                   {!stepLoading && processState.steps.map((item, index) => {
                     return (
@@ -1113,10 +1141,13 @@ const Component = () => {
 };
 
 const Wrapper: React.FC<Props> = (props: Props) => {
+  const { defaultData } = useTransactionContext<EarnParams>();
+
   const { className } = props;
 
   return (
     <EarnOutlet
+      autoEnableChain={defaultData.redirectFromPreview}
       className={CN(className)}
       path={'/transaction/earn'}
       stores={['price', 'chainStore', 'assetRegistry', 'earning']}

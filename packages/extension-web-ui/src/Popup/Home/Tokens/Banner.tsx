@@ -76,7 +76,7 @@ const Banner = styled(Component)<Props>(({ theme: { token } }: Props) => {
     zIndex: 10,
     '.__note-box': {
       maxWidth: 684,
-      flex: '1 0 300px'
+      flex: '1 1 300px'
     },
     '.__title-wrapper': {
       display: 'flex',

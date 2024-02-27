@@ -47,8 +47,9 @@ const TableHead = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProp
     color: token.colorTextLight3,
     fontFamily: token.fontFamily,
     paddingBottom: token.padding,
-    paddingLeft: token.paddingSM,
-    paddingRight: token.paddingSM,
+    paddingLeft: token.paddingXXS,
+    paddingRight: token.paddingXXS,
+    gap: token.sizeXS,
 
     '.__th': {
       flex: 1

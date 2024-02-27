@@ -184,7 +184,7 @@ function Component ({ compound,
         subHeaderCenter={false}
         subHeaderIcons={subHeaderButtons}
         subHeaderPaddingVertical={true}
-        title={t<string>('Earning position detail')}
+        title={t<string>('Earning position details')}
       >
         {
           isWebUI && (

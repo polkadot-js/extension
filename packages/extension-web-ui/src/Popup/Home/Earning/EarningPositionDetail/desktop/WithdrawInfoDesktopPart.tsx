@@ -14,6 +14,7 @@ import CancelUnstake from '@subwallet/extension-web-ui/Popup/Transaction/variant
 import Withdraw from '@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, ModalContext, Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -81,7 +82,13 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
       return totalWithdrawable;
     }
 
-    return unstakingItems[0]?.claimable || '0';
+    let unstakingItemValue = new BigN('0');
+
+    unstakingItems.forEach((i) => {
+      unstakingItemValue = unstakingItemValue.plus(i.claimable);
+    });
+
+    return unstakingItemValue;
   }, [canWithdraw, totalWithdrawable, unstakingItems]);
 
   const onWithDraw = useCallback(() => {
@@ -174,9 +181,11 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
       </div>
 
       <EarningWithdrawalDetailModal
+        canWithdraw={true}
         inputAsset={inputAsset}
         modalId={withdrawalDetailModalId}
         onCancelWithDraw={onCancelWithDraw}
+        onWithdraw={onWithDraw}
         poolInfo={poolInfo}
         unstakingItems={unstakingItems}
       />

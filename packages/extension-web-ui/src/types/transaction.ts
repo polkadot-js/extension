@@ -35,6 +35,7 @@ export interface EarnParams extends TransactionFormBaseProps {
   slug: string;
   target: string;
   value: string;
+  redirectFromPreview: boolean;
 }
 
 export interface UnStakeParams extends TransactionFormBaseProps {

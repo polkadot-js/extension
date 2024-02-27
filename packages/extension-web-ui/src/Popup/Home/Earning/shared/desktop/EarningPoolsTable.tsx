@@ -232,6 +232,10 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
     '.__table-staking-type-col.__table-staking-type-col': {
       flex: 0.8
     },
+    '.__table-staking-type-col': {
+      display: 'flex',
+      justifyContent: 'flex-start'
+    },
 
     ['.__table-staking-type-col, .__table-total-value-stake-col, ' +
         '.__table-rewards-col']: {

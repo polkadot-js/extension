@@ -4,13 +4,13 @@
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningInstructionModal, EarningPoolItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
-import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
+import { CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, usePreviewYieldPoolInfoByGroup, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { EarningPoolsTable } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/EarningPoolsTable';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
-import { EarningPoolsParam, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { EarningPoolsParam, EarnParams, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { isAccountAll } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -47,8 +47,10 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
+  const isNoAccount = useSelector((state) => state.accountState.isNoAccount);
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
+  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
 
   const [selectedPool, setSelectedPool] = React.useState<YieldPoolInfo | undefined>(undefined);
   const [searchInput, setSearchInput] = useState<string>('');
@@ -127,15 +129,25 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
   const navigateToEarnTransaction = useCallback(
     (slug: string, chain: string) => {
-      setEarnStorage({
+      const earnParams: EarnParams = {
         ...DEFAULT_EARN_PARAMS,
         slug,
         chain,
-        from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
-      });
-      navigate('/transaction/earn');
+        from: ''
+      };
+
+      if (isNoAccount) {
+        setEarnStorage(earnParams);
+        setReturnStorage('/transaction/earn');
+        navigate(DEFAULT_ROUTER_PATH);
+      } else {
+        earnParams.from = currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+
+        setEarnStorage(earnParams);
+        navigate('/transaction/earn');
+      }
     },
-    [currentAccount?.address, navigate, setEarnStorage]
+    [currentAccount?.address, isNoAccount, navigate, setEarnStorage, setReturnStorage]
   );
 
   const onConnectChainSuccess = useCallback(() => {
@@ -260,7 +272,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   );
 
   const onBack = useCallback(() => {
-    navigate('/earning-demo');
+    navigate('/earning-preview');
   }, [navigate]);
 
   return (
@@ -342,6 +354,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
           <EarningInstructionModal
             address={currentAccount?.address}
             assetRegistry={assetRegistry}
+            bypassEarlyValidate={true}
             closeAlert={closeAlert}
             isShowStakeMoreButton={true}
             onStakeMore={navigateToEarnTransaction}
@@ -360,7 +373,7 @@ const ComponentGate = ({ className }: Props) => {
 
   useEffect(() => {
     if (!locationState?.poolGroup || !locationState?.symbol) {
-      navigate('/earning-demo');
+      navigate('/earning-preview');
     }
   }, [locationState?.poolGroup, locationState?.symbol, navigate]);
 
@@ -378,7 +391,7 @@ const ComponentGate = ({ className }: Props) => {
   );
 };
 
-const EarningDemoPools = styled(ComponentGate)<Props>(({ theme: { token } }: Props) => ({
+const EarningPreviewPools = styled(ComponentGate)<Props>(({ theme: { token } }: Props) => ({
   height: '100%',
 
   '.__body-area': {
@@ -460,4 +473,4 @@ const EarningDemoPools = styled(ComponentGate)<Props>(({ theme: { token } }: Pro
   }
 }));
 
-export default EarningDemoPools;
+export default EarningPreviewPools;

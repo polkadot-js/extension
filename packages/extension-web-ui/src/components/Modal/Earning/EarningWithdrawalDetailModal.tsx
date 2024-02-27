@@ -10,7 +10,7 @@ import { Theme } from '@subwallet/extension-web-ui/themes';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, ProhibitInset } from 'phosphor-react';
+import { CheckCircle, ProhibitInset, StopCircle } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -20,9 +20,11 @@ type Props = ThemeProps & {
   unstakingItems: UnstakingInfo[];
   poolInfo: YieldPoolInfo;
   onCancelWithDraw: VoidFunction;
+  canWithdraw: boolean;
+  onWithdraw: VoidFunction;
 };
 
-function Component ({ className, inputAsset, modalId, onCancelWithDraw, poolInfo, unstakingItems }: Props) {
+function Component ({ canWithdraw, className, inputAsset, modalId, onCancelWithDraw, onWithdraw, poolInfo, unstakingItems }: Props) {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
 
@@ -85,23 +87,45 @@ function Component ({ className, inputAsset, modalId, onCancelWithDraw, poolInfo
   return (
     <BaseModal
       className={CN(className, '__withdrawal-detail-modal')}
-      footer={canCancelWithdraw && (
-        <Button
-          block={true}
-          className={'__cancel-unstake-button'}
-          disabled={!canCancelWithdraw}
-          icon={(
-            <Icon
-              phosphorIcon={ProhibitInset}
-              weight={'fill'}
-            />
-          )}
-          onClick={onClickCancelUnstaking}
-          schema={'secondary'}
-        >
-          {t('Cancel unstake')}
-        </Button>)
-      }
+      footer={canCancelWithdraw || canWithdraw
+        ? (
+          <>
+            {
+              canCancelWithdraw && (
+                <Button
+                  block={true}
+                  className={'__cancel-unstake-button'}
+                  icon={(
+                    <Icon
+                      phosphorIcon={ProhibitInset}
+                      weight={'fill'}
+                    />
+                  )}
+                  onClick={onClickCancelUnstaking}
+                  schema={'secondary'}
+                >
+                  {t('Cancel unstake')}
+                </Button>)
+            }
+            {
+              canWithdraw && (
+                <Button
+                  block={true}
+                  className={'__withdraw-button'}
+                  icon={(
+                    <Icon
+                      phosphorIcon={StopCircle}
+                      weight={'fill'}
+                    />
+                  )}
+                  onClick={onWithdraw}
+                >
+                  {t('Withdraw')}
+                </Button>)
+            }
+          </>
+        )
+        : undefined}
       id={modalId}
       onCancel={closeModal}
       title={'Withdraw info'}
@@ -133,6 +157,10 @@ export const EarningWithdrawalDetailModal = styled(Component)<Props>(({ theme: {
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
   minHeight: 54,
+
+  '.ant-sw-modal-footer': {
+    display: 'flex'
+  },
 
   '&.__withdrawal-detail-modal .ant-sw-modal-footer': {
     borderTop: 0,

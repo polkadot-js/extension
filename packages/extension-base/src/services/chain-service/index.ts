@@ -4,7 +4,7 @@
 import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { _DEFAULT_ACTIVE_CHAINS, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX, LATEST_CHAIN_DATA_FETCHING_INTERVAL } from '@subwallet/extension-base/services/chain-service/constants';
+import { _DEFAULT_ACTIVE_CHAINS, _ZK_ASSET_PREFIX, LATEST_CHAIN_DATA_FETCHING_INTERVAL } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
@@ -1096,13 +1096,18 @@ export class ChainService {
       await this.dbService.removeFromAssetStore(deprecatedAssets);
     }
 
-    // Fill out zk assets from latestAssetRegistry if not supported
+    // Fill out zk assets from finalAssetRegistry if not supported
     if (!MODULE_SUPPORT.MANTA_ZK) {
+      const zkAssets: string[] = [];
+
       Object.entries(finalAssetRegistry).forEach(([slug, assets]) => {
         if (_isMantaZkAsset(assets)) {
+          zkAssets.push(slug);
           delete finalAssetRegistry[slug];
         }
       });
+
+      await this.dbService.removeFromAssetStore(zkAssets);
     }
 
     this.dataMap.assetRegistry = finalAssetRegistry;

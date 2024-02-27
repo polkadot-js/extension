@@ -91,6 +91,22 @@ function Component ({ canWithdraw, className, inputAsset, modalId, onCancelWithD
         ? (
           <>
             {
+              canWithdraw && (
+                <Button
+                  block={true}
+                  className={'__withdraw-button'}
+                  icon={(
+                    <Icon
+                      phosphorIcon={StopCircle}
+                      weight={'fill'}
+                    />
+                  )}
+                  onClick={onWithdraw}
+                >
+                  {t('Withdraw')}
+                </Button>)
+            }
+            {
               canCancelWithdraw && (
                 <Button
                   block={true}
@@ -105,22 +121,6 @@ function Component ({ canWithdraw, className, inputAsset, modalId, onCancelWithD
                   schema={'secondary'}
                 >
                   {t('Cancel unstake')}
-                </Button>)
-            }
-            {
-              canWithdraw && (
-                <Button
-                  block={true}
-                  className={'__withdraw-button'}
-                  icon={(
-                    <Icon
-                      phosphorIcon={StopCircle}
-                      weight={'fill'}
-                    />
-                  )}
-                  onClick={onWithdraw}
-                >
-                  {t('Withdraw')}
                 </Button>)
             }
           </>
@@ -159,15 +159,17 @@ export const EarningWithdrawalDetailModal = styled(Component)<Props>(({ theme: {
   minHeight: 54,
 
   '.ant-sw-modal-footer': {
-    display: 'flex'
-  },
-
-  '&.__withdrawal-detail-modal .ant-sw-modal-footer': {
     borderTop: 0,
     paddingTop: 0,
-    paddingBottom: 0
-
+    paddingBottom: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: token.sizeSM
   },
+  '.ant-sw-modal-footer .ant-btn+.ant-btn:not(.ant-dropdown-trigger)': {
+    marginLeft: 0
+  },
+
   '.__part-title': {
     paddingTop: token.padding,
     paddingLeft: token.padding,

@@ -178,16 +178,21 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
 
         if (redeemRequest) {
           const [redeemAmount, withdrawable] = redeemRequest;
-          const amount = new BN(redeemAmount);
 
-          totalBalance = totalBalance.add(amount);
-          unlockingBalance = unlockingBalance.add(amount);
+          // If withdrawable = false, redeem request is claimed
+          if (withdrawable) {
+            // Redeem amount in derivative token
+            const amount = new BN(redeemAmount).mul(new BN(exchangeRate)).div(decimals);
 
-          unstakings.push({
-            chain: this.chain,
-            status: withdrawable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
-            claimable: redeemAmount.toString()
-          });
+            totalBalance = totalBalance.add(amount);
+            unlockingBalance = unlockingBalance.add(amount);
+
+            unstakings.push({
+              chain: this.chain,
+              status: UnstakingStatus.CLAIMABLE,
+              claimable: redeemAmount.toString()
+            });
+          }
         }
 
         const result: YieldPositionInfo = {
@@ -267,6 +272,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
   async handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const substrateApi = await this.substrateApi.isReady;
     const weightedMinAmount = await this.createParamToRedeem(amount, address);
+    // const extrinsic = substrateApi.api.tx.stableAsset.swap(0, 1, 0, amount, weightedMinAmount);
     const extrinsic = substrateApi.api.tx.aggregatedDex.swapWithExactSupply(
       // Swap path
       [

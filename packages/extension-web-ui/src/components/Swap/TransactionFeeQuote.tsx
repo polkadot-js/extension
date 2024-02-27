@@ -2,27 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CollapsiblePanel, MetaInfo } from '@subwallet/extension-web-ui/components';
-import { SWAP_CHOOSE_FEE_TOKEN_MODAL } from '@subwallet/extension-web-ui/constants';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { PencilSimpleLine } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
-
-import ChooseFeeToken from '../Modal/Swap/ChooseFeeToken';
 
 type Props = ThemeProps
 
 function Component ({ className }: Props) {
   const { t } = useTranslation();
   const isAllAccount = true;
-  const { activeModal, inactiveModal } = useContext(ModalContext);
-  const openChooFeeToken = useCallback(() => {
-    console.log('chooFeeToken');
-    activeModal(SWAP_CHOOSE_FEE_TOKEN_MODAL);
-  }, [activeModal]);
   const accountInfoItemsNode = useMemo(() => {
     return (
       <MetaInfo
@@ -56,31 +46,9 @@ function Component ({ className }: Props) {
           value={2}
           valueColorSchema='even-odd'
         />
-        <MetaInfo.Chain
-          chain={'kusama'}
-          label={t('Fee paid in')}
-          className='__item-fee-paid'
-          suffixNode={
-            <Button
-              icon={(
-                <Icon
-                  customSize={'20px'}
-                  phosphorIcon={PencilSimpleLine}
-                />
-              )}
-              onClick={openChooFeeToken}
-              size='xs'
-              type='ghost'
-            >
-            </Button>
-          }
-        />
-        <ChooseFeeToken
-          modalId={SWAP_CHOOSE_FEE_TOKEN_MODAL}
-        />
       </MetaInfo>
     );
-  }, [isAllAccount, openChooFeeToken, t]);
+  }, [isAllAccount, t]);
 
   return (
     <>

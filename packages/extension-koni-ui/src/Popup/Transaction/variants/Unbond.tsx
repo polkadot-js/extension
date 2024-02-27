@@ -51,7 +51,7 @@ const validateFields: Array<keyof UnStakeParams> = ['value'];
 const Component: React.FC = () => {
   const { t } = useTranslation();
 
-  const { defaultData, persistData } = useTransactionContext<UnStakeParams>();
+  const { defaultData, persistData, setCustomScreenTitle } = useTransactionContext<UnStakeParams>();
   const { slug } = defaultData;
 
   const { accounts, isAllAccount } = useSelector((state) => state.accountState);
@@ -313,12 +313,22 @@ const Component: React.FC = () => {
     }
   }, [accountList, form, fromValue]);
 
+  useEffect(() => {
+    if (poolType === YieldPoolType.LENDING) {
+      setCustomScreenTitle(t('Withdraw'));
+    }
+
+    return () => {
+      setCustomScreenTitle(undefined);
+    };
+  }, [poolType, setCustomScreenTitle, t]);
+
   const exType = useMemo(() => {
     if (poolType === YieldPoolType.NOMINATION_POOL || poolType === YieldPoolType.NATIVE_STAKING) {
       return ExtrinsicType.STAKING_UNBOND;
     }
 
-    if (YieldPoolType.LIQUID_STAKING) {
+    if (poolType === YieldPoolType.LIQUID_STAKING) {
       if (chainValue === 'moonbeam') {
         return ExtrinsicType.UNSTAKE_STDOT;
       }
@@ -326,7 +336,7 @@ const Component: React.FC = () => {
       return ExtrinsicType.UNSTAKE_LDOT;
     }
 
-    if (YieldPoolType.LENDING) {
+    if (poolType === YieldPoolType.LENDING) {
       return ExtrinsicType.UNSTAKE_LDOT;
     }
 
@@ -353,7 +363,7 @@ const Component: React.FC = () => {
               disabled={!isAllAccount}
               doFilter={false}
               externalAccounts={accountList}
-              label={t('Unstake from account')}
+              label={poolInfo.type === YieldPoolType.LENDING ? t('Withdraw from account') : t('Unstake from account')}
             />
           </Form.Item>
           <FreeBalance

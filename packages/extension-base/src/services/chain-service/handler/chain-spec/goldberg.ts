@@ -26,10 +26,21 @@ const chainSpec = {
       appLookup: 'DataLookup',
       commitment: 'KateCommitment'
     },
+    V3HeaderExtension: {
+      appLookup: 'DataLookup',
+      commitment: 'KateCommitment'
+    },
+    VTHeaderExtension: {
+      newField: 'Vec<u8>',
+      commitment: 'KateCommitment',
+      appLookup: 'DataLookup'
+    },
     HeaderExtension: {
       _enum: {
         V1: 'V1HeaderExtension',
-        V2: 'V2HeaderExtension'
+        V2: 'V2HeaderExtension',
+        V3: 'V3HeaderExtension',
+        VTest: 'VTHeaderExtension'
       }
     },
     DaHeader: {
@@ -66,7 +77,7 @@ const chainSpec = {
       root: 'H256',
       proof: 'Vec<H256>',
       numberOfLeaves: 'Compact<u32>',
-      leaf_index: 'Compact<u32>',
+      leafIndex: 'Compact<u32>',
       leaf: 'H256'
     },
     DataProofV2: {
@@ -92,11 +103,14 @@ const chainSpec = {
       id: 'u64'
     },
     MessageType: {
-      _enum: ['ArbitraryMessage', 'FungibleToken']
+      _enum: [
+        'ArbitraryMessage',
+        'FungibleToken'
+      ]
     },
     Cell: {
-      row: 'u32',
-      col: 'u32'
+      row: 'BlockLengthRows',
+      col: 'BlockLengthColumns'
     }
   },
   rpc: {
@@ -127,6 +141,22 @@ const chainSpec = {
         ],
         type: 'Vec<u8>'
       },
+      queryAppData: {
+        description: 'Fetches app data rows for the given app',
+        params: [
+          {
+            name: 'app_id',
+            type: 'AppId'
+          },
+          {
+            name: 'at',
+            type: 'Hash',
+            isOptional: true
+          }
+        ],
+        type: 'Vec<Option<Vec<u8>>>'
+      },
+
       queryDataProof: {
         description: 'Generate the data proof for the given `transaction_index`',
         params: [
@@ -156,36 +186,6 @@ const chainSpec = {
           }
         ],
         type: 'ProofResponse'
-      },
-      queryAppData: {
-        description: 'Fetches app data rows for the given app',
-        params: [
-          {
-            name: 'app_id',
-            type: 'AppId'
-          },
-          {
-            name: 'at',
-            type: 'Hash',
-            isOptional: true
-          }
-        ],
-        type: 'Vec<Option<Vec<u8>>>'
-      },
-      queryRows: {
-        description: 'Query rows based on their indices',
-        params: [
-          {
-            name: 'rows',
-            type: 'Vec<u32>'
-          },
-          {
-            name: 'at',
-            type: 'Hash',
-            isOptional: true
-          }
-        ],
-        type: 'Vec<Vec<u8>>'
       }
     }
   },

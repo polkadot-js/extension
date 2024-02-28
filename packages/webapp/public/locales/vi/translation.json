@@ -1174,5 +1174,7 @@
   "Bonded": "",
   "Dismiss": "",
   "Introducing Earning feature": "",
-  "SubWallet's <highlight>Staking</highlight> feature has been updated to become <highlight>Earning</highlight> feature. Now, you can earn yield with native staking, liquid staking, lending, and staking dApp on SubWallet.": ""
+  "SubWallet's <highlight>Staking</highlight> feature has been updated to become <highlight>Earning</highlight> feature. Now, you can earn yield with native staking, liquid staking, lending, and staking dApp on SubWallet.": "",
+  "Recipient should be a valid {{networkName}} address": "",
+  "Withdraw from account": ""
 }
